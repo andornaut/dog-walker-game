@@ -34,6 +34,8 @@ import random
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
+import drops  # noqa: E402
+from minis import Mini  # noqa: E402
 from pixel import HEART, K, Grid, bitmap, contrast, icon_edge, main  # noqa: E402
 from road import SQUIRREL_FUR  # noqa: E402
 
@@ -153,14 +155,14 @@ def _(g):
 
 @icon("pack-leader")
 def _(g):
-    """One leash handle, three leashes fanning out to three collars."""
+    """One red leash handle splitting into three leashes, each ending in an lgrey clip."""
     g.ell(16, 8.5, 4.5, 3, "red", "dred")
     g.ell(16, 8.5, 2.5, 1.2, None)
-    for (x, y), col in (((9, 20), "green"), ((16, 21), "sky"), ((23, 20), "amber")):
-        line(g, (16, 11), (x, y - 3), "dred")
-        g.ell(x, y, 3, 3, col)
-        g.ell(x, y, 1.5, 1.5, None)
-        g.p(x, y + 3, "yellow")
+    g.rect(15, 11, 2, 4, "red")
+    for x1 in (9, 16, 23):
+        line(g, (15.5 if x1 < 16 else 16.5 if x1 > 16 else 16, 14), (x1, 20), "red")
+        g.ell(x1 + 0.5, 22.5, 2, 2.5, "lgrey", "grey")
+        g.ell(x1 + 0.5, 22.5, 0.9, 1.3, None)
 
 
 @icon("clean-paws")
@@ -214,18 +216,15 @@ def _(g):
 
 @icon("everybody-home")
 def _(g):
-    """Three leashes reaching a front door."""
-    g.rect(15, 7, 10, 18, "dbrown")
-    g.rect(16, 8, 8, 17, "blue")
-    g.rect(16, 8, 1, 17, "sky")
-    g.rect(18, 10, 4, 3, "cyan")
-    g.rect(18, 15, 4, 7, "teal")
-    g.rect(19, 16, 2, 5, "blue")
-    g.rect(13, 25, 13, 1, "lgrey")
-    g.p(17, 18, "yellow")
-    for (x, y), col in (((7, 10), "dred"), ((6, 16), "dgreen"), ((7, 22), "purple")):
-        line(g, (x, y), (16, 18), col)
-        g.rect(x - 1, y - 1, 2, 2, col)
+    """The front door in its dbrown frame, its transom lit gold, a white paw on its blue panel and an amber
+    knob."""
+    g.rect(10, 6, 12, 20, "dbrown")
+    g.rect(11, 7, 10, 3, "gold")
+    g.rect(11, 10, 10, 1, "dbrown")
+    g.rect(11, 11, 10, 15, "blue")
+    g.rect(11, 11, 1, 15, "sky")
+    bitmap(g, 12, 14, SIGN_PAW, {"P": "white", "T": "white"})
+    g.rect(18, 19, 2, 2, "amber")
 
 
 @icon("close-shave")
@@ -264,23 +263,13 @@ def _(g):
 
 @icon("kitted-out")
 def _(g):
-    """Three of the gear items: the fanny pack, the lucky collar and a running shoe."""
-    g.rect(5, 10, 13, 1, "dslate")
-    g.rect(5, 9, 2, 3, "dslate")
-    g.p(5, 10, "lgrey")
-    g.rect(8, 9, 8, 4, "dgreen")
-    g.ell(12, 13, 4, 2.5, "dgreen", "forest")
-    g.rect(8, 9, 8, 1, "green")
-    g.rect(9, 11, 6, 1, "ink")
-    g.rect(14, 12, 1, 1, "ink")
-    g.rect(9, 13, 2, 1, "white")
-    g.ell(21, 10, 5, 4, "red", "dred")
-    g.ell(21, 9.5, 3, 2, None)
-    g.ell(21, 15, 1.8, 1.8, "green", "dgreen")
-    g.ell(15, 20, 7, 3.5, "sky", "blue", "cyan")
-    g.rect(9, 20, 15, 2, "sky")
-    g.rect(8, 22, 16, 2, "white")
-    g.rect(18, 19, 3, 1, "orange")
+    """The fanny pack alone, drops.fanny_pack at 1.4x: a pocket for everything."""
+    m = Mini(1.4, 16, 16)
+    drops.fanny_pack(m)
+    for y, row in enumerate(m.px):
+        for x, c in enumerate(row):
+            if c:
+                g.px[y + 9][x + 5] = c
 
 
 @icon("local-favourite")
@@ -452,7 +441,7 @@ def _(g):
     g.rect(11, 14, 1, 3, "lgrey")
 
 
-# A paw print for a street sign's blade: P pad, T toe.
+# A paw print for a street sign's blade and the front door: P pad, T toe.
 SIGN_PAW = [".T.T.T.", ".......", "..PPP..", ".PPPPP.", ".PPPPP."]
 
 
@@ -552,26 +541,19 @@ def _(g):
 
 @icon("burned-bridges")
 def _(g):
-    """A thick wooden arch bridge over sky-blue water, plank seams and a railing of posts along it, its
-    middle charred black with an ember edge and grey smoke rising from the burn."""
-    g.ell(16, 23, 9, 2.6, "sky")
-    g.rect(9, 22, 14, 1, "cyan")
+    """A thick wooden arch bridge, lit tan along its top, a small flame burning on its crown."""
     for x in range(6, 27):
         u = (x + 0.5 - 16) / 10.5
-        top = round(21 - 8 * math.sqrt(max(0.0, 1 - u * u)))
-        burnt = 14 <= x <= 18
-        g.rect(x, top, 1, 4, "ink" if burnt else "brown")
-        g.p(x, top + 3, "plum" if burnt else "dbrown")
-        if not burnt and x % 3 == 0:
-            g.rect(x, top, 1, 4, "dbrown")
-        if burnt and x in (14, 18):
-            g.rect(x, top, 1, 4, "orange")
-        if not burnt and x % 4 == 2:
-            g.rect(x, top - 3, 1, 3, "brown")
-        if not burnt:
-            g.p(x, top - 3, "tan")
-    for cx, cy, r in ((16, 9, 2.2), (14, 5.5, 2.0), (18.5, 4.5, 1.6)):
-        g.ell(cx, cy, r, r, "grey", "slate", "lgrey")
+        top = round(23 - 7 * math.sqrt(max(0.0, 1 - u * u)))
+        g.rect(x, top, 1, 5, "brown")
+        g.p(x, top, "tan")
+        g.p(x, top + 4, "dbrown")
+    for x in (6, 7, 25, 26):
+        g.rect(x, 23, 1, 3, "dbrown")
+    g.ell(16, 13.5, 3.2, 3, "orange")
+    g.tri((16, 7), (13, 13), (19, 13), "orange")
+    g.ell(16, 14, 1.8, 1.8, "yellow")
+    g.tri((16, 10), (14.5, 14), (17.5, 14), "yellow")
 
 
 @icon("finders-keepers")
@@ -599,30 +581,24 @@ def _(g):
 
 # ---------- the card choices and the Spotlight ----------
 
-# A camera flash popping: a white four-point star round a yellow core.
-FLASH = ["...w...", "...w...", "..wyw..", "wwyyyww", "..wyw..", "...w...", "...w..."]
 # The stage lamp at the Spotlight's upper left, aimed down and right: d its dslate can, s slate light on it,
 # g its grey rim and yoke, w the white lens.
-LAMP = ["..g......", ".gsdd....", "gssddd...", ".sddddd..", ".ddddddg.", "..ddddgww", "...dgwww.", "....gww.."]
+LAMP = ["...g.......", "..gsdd.....", ".gssddd....", "gssdddddd..", ".sddddddd..", "..dddddgw..", "...ddddgww.",
+        "....dgwww..", ".....gww..."]
 # A $ for a price tag, 3x7.
 DOLLAR = [".1.", "111", "1..", "111", "..1", "111", ".1."]
-# A smaller flash, 5x5.
+# A camera flash, 5x5.
 SPARK = ["..w..", ".wyw.", "wyyyw", ".wyw.", "..w.."]
 
 
 @icon("paparazzi")
 def _(g):
-    """The Spotlight debuff's stage lamp at the upper left throwing a yellow beam onto an amber pool, three
-    camera flashes popping round it."""
-    g.ell(17, 22.5, 7, 2.2, "amber", "orange")
-    g.ell(17, 22.3, 4.5, 1.2, "yellow")
-    g.tri((10, 14), (14, 11), (23, 21.5), "yellow")
-    g.tri((10, 14), (23, 21.5), (11, 22), "yellow")
-    for k in range(6):
-        g.p(13.5 + k * 1.2, 15 + k, "white")
-    bitmap(g, 7, 7, LAMP, {"d": "dslate", "s": "slate", "g": "grey", "w": "white"})
-    for x0, y0 in ((17, 6), (20, 13), (6, 16)):
-        bitmap(g, x0, y0, FLASH, {"w": "white", "y": "yellow"})
+    """The Spotlight debuff's stage lamp at the upper left, throwing one wide yellow beam down and right,
+    gold along its middle."""
+    g.tri((12, 15), (15, 12), (27, 18), "yellow")
+    g.tri((12, 15), (27, 18), (18, 27), "yellow")
+    g.tri((13, 15), (15, 13), (24, 22), "gold")
+    bitmap(g, 6, 6, LAMP, {"d": "dslate", "s": "slate", "g": "grey", "w": "white"})
 
 
 @icon("zookeeper")
@@ -668,20 +644,17 @@ def _(g):
 
 @icon("sugar-rush")
 def _(g):
-    """A dropped cone tipped on its side, its waffle an ochre cone crossed by rust lines 4px apart, its pink
-    scoop rolled out onto a melting splat, speed lines streaking over it where the pack zoomed off."""
-    g.ell(20, 22, 6.5, 1.6, "mauve")
-    for x, h in ((16, 2), (24, 1)):
-        g.rect(x, 23, 1, h, "mauve")
+    """An upright ice cream cone, its waffle an ochre cone crossed by rust lines 4px apart, its pink scoop
+    lit white with one drip down the waffle."""
     cone = Grid(32, 32)
-    cone.tri((6, 17), (15, 11.5), (15, 21.5), "ochre")
+    cone.tri((11, 15), (21, 15), (16, 27), "ochre")
     for y in range(32):
         for x in range(32):
             if cone.px[y][x]:
                 g.p(x, y, "rust" if (x + y) % 4 == 0 or (x - y) % 4 == 0 else "ochre")
-    g.ell(19.5, 16, 4.5, 4.5, "pink", "mauve", "white")
-    for y, x0, w in ((8, 8, 7), (10, 6, 5)):
-        g.rect(x0, y, w, 1, "sky")
+    g.ell(16, 11.5, 6, 5, "pink", "mauve", "white")
+    g.rect(11, 15, 10, 1, "pink")
+    g.rect(13, 16, 2, 3, "pink")
 
 
 # A fish side on, facing left: B its sky body, D the blue back, W the white belly, F the blue fins and tail,

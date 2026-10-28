@@ -245,7 +245,7 @@ After zones 1 to 3, over the road view dimmed as under a card: the walker cheers
 
 ## Badges
 
-`badge-<achievement>` medals are 32×32: a ring in the tier colour around a cream face with the goal's emblem (`art/tools/badges.py`). No two badges share a motif, so all 40 read apart at 1× on the badge wall's cream panel. An emblem shows only what is in the game.
+`badge-<achievement>` medals are 32×32: a ring in the tier colour around a cream face with the goal's emblem (`art/tools/badges.py`). No two badges share a motif, so all 40 read apart at 1× on the badge wall's cream panel. Each emblem is one object, with no scene or filler round it, and shows only what is in the game.
 
 - Tiers: firsts bronze, mastery silver, collection gold, legend purple with gold studs, silly pink. Legend is the one hardest badge, Legend of the Leash. Silly is the joke tier, earned by mishaps and running gags; pink marks a joke, never a rank.
 - Every ring is a base, a shade on its lower right, a light on its upper left and twelve rivets in the shade. The face is flat cream with a 1px tan crescent along its lower right, so the emblem stands on one quiet colour.
