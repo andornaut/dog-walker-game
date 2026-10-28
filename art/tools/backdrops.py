@@ -647,8 +647,8 @@ def crescent_bend(px):
 
 # ---------- the six neighbourhoods ----------
 # The six Toronto neighbourhoods, sharing the cross street. Their
-# darkness ranges from the open sand of The Beaches and Kensington Market's Pedestrian Sunday to Yonge
-# Street's evening and High Park's canopy, and each has its own sky.
+# darkness ranges from the open sand of The Beaches to Yonge Street's evening and Kensington
+# Market's Pedestrian Sunday at twilight, and each has its own sky.
 
 # The game's verge beside each road, keyed by art id, with colours
 # by K name (shared/verges.json):
