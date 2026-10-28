@@ -159,6 +159,17 @@ carriage            112x72  Distillery District, 2 lanes; a horse-drawn tour car
                             the rest pose, the head dipping with an ear turned back, the tail swishing
                             out past the right flank; cue (3 frames, 120ms): the driver lifting and
                             flicking the reins, the horse's head coming up
+granny-cart-shopper 48x72   Kensington Market; an older market shopper, a stepper facing the player as
+                            the mail carrier is, pulling a two-wheeled shopping cart beside her (screen
+                            right): a mauve headscarf with white dots tied under the chin, a grey fringe,
+                            wire glasses, a long camel coat, dark tights and plum shoes, a cream cloth
+                            tote with a green band in the other hand; the cart a red and green tartan
+                            bag on a grey frame, its tires edge-on either side, a baguette, two leeks
+                            and a head of kale out of the top; walk (4 frames, 100ms): road.PERSON_WALK,
+                            the cart tipped back onto its wheels, the tread falling down the tires 1px a
+                            frame, the greens dipping 1px on the passing frames; idle (2 frames, 400ms):
+                            road.BREATH, the cart stood upright; cue (3 frames, 150ms): tipping the cart
+                            back before a step, braced, halfway and over
 
 Each has depth variants at every step in minis.STEPS (@94 to @50), redrawn at the
 step on a Mini at road.SCALE x the step, with the original's tags, frame counts
@@ -2003,6 +2014,143 @@ def carriage(lf=0, rf=0, bob=0, nod=0, roll=0, ear=0, tail=0, hands=0, slack=0):
     return rim(g, CARRIAGE_RIM)
 
 
+# ---------- granny-cart-shopper: facing the player, pulling a tartan shopping cart ----------
+
+# Walking: road.PERSON_WALK, as the mail carrier wanders, the cart tipped back onto its wheels and rolling
+# beside her, the tread falling down its tires a drawn pixel a frame and the greens nodding on the passing
+# frames. Idle: road.BREATH with the cart stood upright. Cue, before each step: tipping the cart back, braced,
+# halfway and over, 3 frames at 150ms.
+GRANNY_WALK = tuple(dict({k: v for k, v in q.items() if k != "arms"}, tip=1, roll=str(n), nod=-q.get("bob", 0))
+                    for n, q in enumerate(road.PERSON_WALK))
+GRANNY_IDLE = tuple(dict(bob=b) for b in road.BREATH)
+GRANNY_CUE = (dict(bob=1), dict(tip=1, bob=1), dict(tip=2))
+GRANNY_CUE_MS = 150
+GRANNY_RIM = {**LIT, "forest": ("green", None), "dgreen": ("green", None)}
+# The cart's tartan: red, crossed by dgreen bands (forest where they cross), as (start, width) in layout
+# columns from the bag's left edge and rows from its top, and a thin cream line down column TARTAN_LINE.
+TARTAN_COLUMNS, TARTAN_ROWS = ((2, 2), (6, 1)), ((2, 2), (6, 1))
+TARTAN_LINE = 5
+# The bag: its left column, width, top row and bottom row, and the row its frame leans about.
+BAG_X, BAG_W, BAG_TOP, BAG_BOTTOM = 22.5, 8.5, 30.5, 40.5
+CART_FOOT = 41
+# The wheels' centre columns, edge-on either side of the bag's foot.
+WHEELS = (21.6, 30.4)
+
+
+def granny_cart_shopper(lf=0, rf=0, bob=0, tip=0, roll="0", nod=0):
+    """The market shopper facing the player, pulling her tartan shopping cart beside her (screen right) with
+    a cloth tote in her other hand. tip leans the cart's top that many layout pixels toward her, about its
+    wheels; roll moves the tires' tread down a pixel; nod drops the greens that many rows."""
+    g = edged(Grid(32, 48))
+    b, r = bob, int(roll)
+
+    def sx(y):
+        """How far the cart's row y leans toward her: tip at the handle, nothing at the foot."""
+        return tip * (CART_FOOT - y) / (CART_FOOT - 26)
+
+    def quad(x, w, y0, y1, c):
+        """The cart's columns x to x + w from row y0 to y1, leant by sx."""
+        a, d = (x - sx(y0), y0), (x - sx(y1), y1)
+        g.tri(a, (a[0] + w, y0), (d[0] + w, y1), c)
+        g.tri(a, (d[0] + w, y1), d, c)
+
+    # the wheels at the bag's foot, black tires edge-on either side, their tread rolling
+    for cx in WHEELS:
+        g.blob(cx, 41.5, 1.8, 3.5, "ink")
+    px, s = raster(g), scale_of(g)
+    top, bottom = math.floor(38 * s + 0.5), math.floor(45 * s + 0.5)
+    for cx in WHEELS:
+        mid = math.floor(cx * s)
+        for y in range(top + 1, bottom - 1):
+            if (y - top - r) % 4 == 0 and px.px[y][mid]:
+                px.p(mid, y, "slate")
+    # the frame behind the bag: two grey uprights up to the handle across their tops
+    for x in (BAG_X + 0.5, BAG_X + BAG_W - 1.5):
+        quad(x, 1, 26, BAG_TOP + 1, "lgrey")
+    quad(BAG_X, BAG_W, 26, 27.5, "grey")
+    quad(BAG_X, BAG_W, 26, 26.7, "lgrey")
+    # the shopping poking out of the top: a baguette, two leeks with fanned dark leaves, a head of kale
+    n = nod
+    bx = BAG_X + 5.5 - sx(22)
+    g.rect(bx, 20 + n, 2.5, 11, "tan")
+    g.rect(bx + 1.5, 20 + n, 1, 11, "ochre")
+    g.rect(bx + 0.5, 19 + n, 1.5, 1, "tan")
+    for y in (22, 25, 28):
+        g.p(bx + 0.5, y + n, "cream")
+    for x0, top_y in ((BAG_X + 1, 22), (BAG_X + 3.3, 24)):
+        lx = x0 - sx(top_y)
+        g.rect(lx, top_y + 5 + n, 2, 26 - top_y, "white")
+        g.rect(lx, top_y + 2 + n, 2, 3, "lime")
+        g.rect(lx + 1.5, top_y + 2 + n, 0.5, 6, "green")
+        g.tri((lx - 2, top_y - 3 + n), (lx + 1, top_y + 3 + n), (lx + 0.5, top_y - 0.5 + n), "green")
+        g.tri((lx + 4, top_y - 2.5 + n), (lx + 1, top_y + 3 + n), (lx + 1.5, top_y + n), "dgreen")
+    kx = BAG_X + 4.5 - sx(28)
+    g.cel(kx, 29.5 + n, 2.6, 2.2, "green", "dgreen", "lime")
+    # the tartan bag, its drawstring top cinched in dred
+    quad(BAG_X, BAG_W, BAG_TOP, BAG_BOTTOM, "red")
+    for (c0, cw), (r0, rw) in zip(TARTAN_COLUMNS, TARTAN_ROWS):
+        quad(BAG_X + c0, cw, BAG_TOP, BAG_BOTTOM, "dgreen")
+        quad(BAG_X, BAG_W, BAG_TOP + r0, BAG_TOP + r0 + rw, "dgreen")
+    for c0, cw in TARTAN_COLUMNS:
+        for r0, rw in TARTAN_ROWS:
+            quad(BAG_X + c0, cw, BAG_TOP + r0, BAG_TOP + r0 + rw, "forest")
+    quad(BAG_X + TARTAN_LINE, 0.7, BAG_TOP, BAG_BOTTOM, "cream")
+    quad(BAG_X + BAG_W - 1, 1, BAG_TOP, BAG_BOTTOM, "dred")
+    quad(BAG_X - 0.3, BAG_W + 0.6, BAG_TOP - 0.5, BAG_TOP + 1, "dred")
+    # the frame's toe plate under the bag
+    g.rect(BAG_X, BAG_BOTTOM, BAG_W, 1.5, "grey")
+    g.rect(BAG_X, BAG_BOTTOM, BAG_W, 0.7, "lgrey")
+    # her legs under the long coat: dark tights and plum shoes
+    for x, f in ((6, lf), (12, rf)):
+        g.rect(x, 37 + b, 4, 6 + f - b, "slate")
+        g.rect(x + 3, 37 + b, 1, 6 + f - b, "dslate")
+        g.rect(x, 43 + f, 4, 2, "plum")
+    # the long camel coat, flared to the hem, lit down its left side, three buttons down the front
+    g.tri((4, 21 + b), (2.5, 38.5 + b), (11, 21 + b), "tan")
+    g.rect(4, 21 + b, 11, 17.5, "tan")
+    g.tri((15, 21 + b), (18, 21 + b), (19.5, 38.5 + b), "brown")
+    g.tri((15, 21 + b), (19.5, 38.5 + b), (15, 38.5 + b), "brown")
+    g.rect(4, 22 + b, 1, 10, "cream")
+    g.rect(10.5, 22 + b, 1, 16.5, "brown")
+    for y in (25, 29, 33):
+        g.p(9.5, y + b, "dbrown")
+    # the tote arm (screen left), hanging, the cloth tote in the hand: cream canvas with a green band
+    g.rect(1, 22 + b, 4, 9, "tan")
+    g.rect(4, 22 + b, 1, 9, "brown")
+    g.rect(1, 22 + b, 1, 8, "cream")
+    g.rect(1, 31 + b, 1, 4, "tan")
+    g.rect(4.5, 31 + b, 1, 4, "tan")
+    g.rect(1.5, 30.5 + b, 3.5, 2, "skin1")
+    g.rect(0, 34.5 + b, 6.5, 6.5, "cream")
+    g.rect(5.5, 34.5 + b, 1, 6.5, "tan")
+    g.rect(0, 40 + b, 6.5, 1, "tan")
+    g.rect(0, 36.5 + b, 6.5, 1.5, "green")
+    # the cart arm (screen right) out to the handle's grip
+    gx, gy = BAG_X + 0.5 - sx(26.5), 27
+    limb(g, 18.5, 22.5 + b, gx, gy, 3, ((0.7, "tan"), (1, "skin1")))
+    g.rect(gx - 1, gy - 0.5, 2.5, 1.5, "skin2")
+    # head: the face, a grey fringe, a mauve headscarf with white dots, tied under the chin
+    g.cel(11, 12 + b, 8.5, 8.5, "mauve", "purple", "pink")
+    g.tri((7.5, 18 + b), (14.5, 18 + b), (11, 23 + b), "mauve")
+    face_disc(g, 11, 14 + b, 6, 6, "skin1", "skin2")
+    g.rect(5, 8.5 + b, 12, 2.5, "lgrey")
+    g.rect(5, 8.5 + b, 12, 1, "white")
+    g.cel(11, 7 + b, 7.5, 3.5, "mauve", "purple", "pink")
+    for x, y in ((6, 6), (10, 4), (14, 6), (4, 12), (17, 14), (11, 21)):
+        g.p(x, y + b, "white")
+    road.face_front(g, 11, 13.5 + b, spread=3, mouth=4)
+    # wire glasses over the eyes, a bridge between them
+    for x in (6.5, 12.5):
+        g.rect(x, 12.5 + b, 4, 1, "lgrey")
+        g.rect(x, 15.5 + b, 4, 1, "lgrey")
+        g.rect(x, 13.5 + b, 1, 2, "lgrey")
+        g.rect(x + 3, 13.5 + b, 1, 2, "lgrey")
+    g.rect(10.5, 13 + b, 2, 1, "lgrey")
+    g.p(6.5, 16.5 + b, "pink")
+    g.p(15, 16.5 + b, "pink")
+    return rim(g, GRANNY_RIM)
+
+
 # ---------- every sprite at a depth step ----------
 
 def posed(q, p):
@@ -2087,6 +2235,15 @@ def steps(suffix, s):
                                 for tag, poses, ms in (("push", CARRIAGE_PUSH, CARRIAGE_PUSH_MS),
                                                        ("idle", CARRIAGE_IDLE, CARRIAGE_IDLE_MS),
                                                        ("cue", CARRIAGE_CUE, CARRIAGE_CUE_MS))]
+
+    def shopper(q):
+        """The shopper in pose q, the tread frame a choice, not an offset to snap."""
+        pose = {k: v for k, v in q.items() if k != "roll"}
+        return minis.small(here, p, granny_cart_shopper, roll=q.get("roll", "0"), **posed(pose, p)).outlined()
+
+    yield f"granny-cart-shopper{suffix}", [("walk", [shopper(q) for q in GRANNY_WALK], road.PERSON_WALK_MS),
+                                           ("idle", [shopper(q) for q in GRANNY_IDLE], road.BREATH_MS),
+                                           ("cue", [shopper(q) for q in GRANNY_CUE], GRANNY_CUE_MS)]
 
 
 def sprites():

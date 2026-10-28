@@ -5416,6 +5416,87 @@
       }
     },
     {
+      "key": "granny-cart-shopper",
+      "png": "sprites/granny-cart-shopper.png",
+      "json": "sprites/granny-cart-shopper.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 48
+      }
+    },
+    {
+      "key": "granny-cart-shopper@50",
+      "png": "sprites/granny-cart-shopper@50.png",
+      "json": "sprites/granny-cart-shopper@50.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "granny-cart-shopper@56",
+      "png": "sprites/granny-cart-shopper@56.png",
+      "json": "sprites/granny-cart-shopper@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "granny-cart-shopper@62",
+      "png": "sprites/granny-cart-shopper@62.png",
+      "json": "sprites/granny-cart-shopper@62.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "granny-cart-shopper@69",
+      "png": "sprites/granny-cart-shopper@69.png",
+      "json": "sprites/granny-cart-shopper@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "granny-cart-shopper@75",
+      "png": "sprites/granny-cart-shopper@75.png",
+      "json": "sprites/granny-cart-shopper@75.json",
+      "anchor": {
+        "feetY": 51,
+        "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "granny-cart-shopper@81",
+      "png": "sprites/granny-cart-shopper@81.png",
+      "json": "sprites/granny-cart-shopper@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "granny-cart-shopper@88",
+      "png": "sprites/granny-cart-shopper@88.png",
+      "json": "sprites/granny-cart-shopper@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "granny-cart-shopper@94",
+      "png": "sprites/granny-cart-shopper@94.png",
+      "json": "sprites/granny-cart-shopper@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 45
+      }
+    },
+    {
       "key": "hedge",
       "png": "sprites/hedge.png",
       "json": "sprites/hedge.json",
