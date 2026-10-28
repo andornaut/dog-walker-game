@@ -20,7 +20,16 @@ export const MINOR_OBSTACLES = {
   },
   bench: { name: "Bench", shape: { lanes: 2, rows: 1 } },
   breweryDray: {
-    movement: { kind: "stopAndGoAcross", speed: 0.5, stopSeconds: 1.3, stops: [[1, 3]] },
+    movement: {
+      kind: "stopAndGoAcross",
+      speed: 0.5,
+      stopSeconds: 1.3,
+      stops: [
+        [0, 2],
+        [1, 3],
+        [2, 4],
+      ],
+    },
     name: "Brewery dray",
     shape: { lanes: 3, rows: 1 },
     zones: ["street"],
@@ -393,7 +402,16 @@ export const MINOR_OBSTACLES = {
     zones: ["homeStretch"],
   },
   ttcBusCrossing: {
-    movement: { kind: "stopAndGoAcross", speed: 0.65, stopSeconds: 1, stops: [[1, 3]] },
+    movement: {
+      kind: "stopAndGoAcross",
+      speed: 0.65,
+      stopSeconds: 1,
+      stops: [
+        [0, 2],
+        [1, 3],
+        [2, 4],
+      ],
+    },
     name: "Crosstown bus",
     shape: { lanes: 3, rows: 1 },
     zones: ["homeStretch"],
