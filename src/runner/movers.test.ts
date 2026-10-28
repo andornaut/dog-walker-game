@@ -1126,8 +1126,8 @@ describe("moverPlacements", () => {
   // Tilted 0.4 and drawn to set off as low as the pack's half second of reaction allows, 70px
   // ahead at 100px/s, its travel 330 of the 400px road, a dart lifted sets off that share of the
   // way up to the highest start that shows its 1s cue and a cell, travel 150, keeping its tilt,
-  // either way it enters.
-  it.each([0, ...DART_LIFTS].map((lift) => ({ lift, travel: 330 - lift * (330 - 150) })))(
+  // either way it enters. Unlifted, halfway and all the way, the start a straight line between.
+  it.each([0, 0.5, 1].map((lift) => ({ lift, travel: 330 - lift * (330 - 150) })))(
     "lifts a dart's start $lift of the way up to its cue's limit",
     ({ lift, travel }) => {
       const draws = drawMover({ movers: () => 0, spawns: () => 0 });
