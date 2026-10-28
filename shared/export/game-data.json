@@ -1711,6 +1711,29 @@
       "spriteKey": "bench"
     },
     {
+      "id": "breweryDray",
+      "movement": {
+        "kind": "stopAndGoAcross",
+        "speed": 0.6,
+        "stopSeconds": 1.3,
+        "stops": [
+          [
+            1,
+            3
+          ]
+        ]
+      },
+      "name": "Brewery dray",
+      "shape": {
+        "lanes": 3,
+        "rows": 1
+      },
+      "zones": [
+        "street"
+      ],
+      "spriteKey": "brewery-dray"
+    },
+    {
       "id": "bunny",
       "movement": {
         "kind": "hop",
@@ -2359,6 +2382,33 @@
         "street"
       ],
       "spriteKey": "patio-rail"
+    },
+    {
+      "id": "patrolBuggy",
+      "movement": {
+        "kind": "stopAndGoAcross",
+        "speed": 0.7,
+        "stopSeconds": 1.3,
+        "stops": [
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            3
+          ]
+        ]
+      },
+      "name": "Patrol buggy",
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "zones": [
+        "pawsPromenade"
+      ],
+      "spriteKey": "patrol-buggy"
     },
     {
       "id": "pedicab",
@@ -3252,6 +3302,7 @@
           "barrelStack": 0,
           "beachUmbrella": 0,
           "bench": 0,
+          "breweryDray": 0,
           "bunny": 2,
           "busker": 0,
           "car": 1.5,
@@ -3294,6 +3345,7 @@
           "newspaperBox": 0,
           "parkedCar": 2,
           "patioRail": 0,
+          "patrolBuggy": 0,
           "pedicab": 0,
           "picnicBlanket": 0,
           "pigeons": 0,
@@ -3374,6 +3426,7 @@
           "barrelStack": 0,
           "beachUmbrella": 0,
           "bench": 9,
+          "breweryDray": 0,
           "bunny": 3,
           "busker": 0,
           "car": 0,
@@ -3416,6 +3469,7 @@
           "newspaperBox": 0,
           "parkedCar": 0,
           "patioRail": 0,
+          "patrolBuggy": 0,
           "pedicab": 0,
           "picnicBlanket": 4,
           "pigeons": 0,
@@ -3496,6 +3550,7 @@
           "barrelStack": 4,
           "beachUmbrella": 0,
           "bench": 0,
+          "breweryDray": 2,
           "bunny": 0,
           "busker": 0,
           "car": 0,
@@ -3538,6 +3593,7 @@
           "newspaperBox": 0,
           "parkedCar": 0,
           "patioRail": 6,
+          "patrolBuggy": 0,
           "pedicab": 5,
           "picnicBlanket": 0,
           "pigeons": 3,
@@ -3559,7 +3615,7 @@
           "stroller": 0,
           "strollingBusker": 0,
           "taxi": 0,
-          "tourGroup": 5,
+          "tourGroup": 3,
           "tourist": 6,
           "touristTrain": 0,
           "trashCan": 0,
@@ -3618,6 +3674,7 @@
           "barrelStack": 0,
           "beachUmbrella": 0,
           "bench": 7.5,
+          "breweryDray": 0,
           "bunny": 0,
           "busker": 0,
           "car": 0,
@@ -3660,6 +3717,7 @@
           "newspaperBox": 0,
           "parkedCar": 0,
           "patioRail": 0,
+          "patrolBuggy": 0,
           "pedicab": 0,
           "picnicBlanket": 0,
           "pigeons": 2.25,
@@ -3740,6 +3798,7 @@
           "barrelStack": 0,
           "beachUmbrella": 3.75,
           "bench": 3.75,
+          "breweryDray": 0,
           "bunny": 0,
           "busker": 0,
           "car": 0,
@@ -3782,6 +3841,7 @@
           "newspaperBox": 0,
           "parkedCar": 0,
           "patioRail": 0,
+          "patrolBuggy": 2,
           "pedicab": 0,
           "picnicBlanket": 0,
           "pigeons": 0,
@@ -3800,7 +3860,7 @@
           "stiltWalker": 0,
           "streetcar": 0,
           "streetcarPlatform": 0,
-          "stroller": 4,
+          "stroller": 2,
           "strollingBusker": 0,
           "taxi": 0,
           "tourGroup": 0,
@@ -3862,6 +3922,7 @@
           "barrelStack": 0,
           "beachUmbrella": 0,
           "bench": 0,
+          "breweryDray": 0,
           "bunny": 0,
           "busker": 2,
           "car": 17.5,
@@ -3904,6 +3965,7 @@
           "newspaperBox": 10,
           "parkedCar": 4,
           "patioRail": 0,
+          "patrolBuggy": 0,
           "pedicab": 5,
           "picnicBlanket": 0,
           "pigeons": 2,

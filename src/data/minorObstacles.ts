@@ -19,6 +19,12 @@ export const MINOR_OBSTACLES = {
     zones: ["pawsPromenade"],
   },
   bench: { name: "Bench", shape: { lanes: 2, rows: 1 } },
+  breweryDray: {
+    movement: { kind: "stopAndGoAcross", speed: 0.6, stopSeconds: 1.3, stops: [[1, 3]] },
+    name: "Brewery dray",
+    shape: { lanes: 3, rows: 1 },
+    zones: ["street"],
+  },
   bunny: {
     movement: { kind: "hop", most: 2, shy: true, times: { max: 5, min: 2 } },
     name: "Bunny",
@@ -228,6 +234,20 @@ export const MINOR_OBSTACLES = {
   newspaperBox: { name: "Newspaper box", shape: { lanes: 1, rows: 1 }, zones: ["homeStretch"] },
   parkedCar: { name: "Parked car", shape: { lanes: 1, rows: 3 } },
   patioRail: { name: "Patio rail", shape: { lanes: 3, rows: 1 }, zones: ["street"] },
+  patrolBuggy: {
+    movement: {
+      kind: "stopAndGoAcross",
+      speed: 0.7,
+      stopSeconds: 1.3,
+      stops: [
+        [1, 2],
+        [2, 3],
+      ],
+    },
+    name: "Patrol buggy",
+    shape: { lanes: 2, rows: 1 },
+    zones: ["pawsPromenade"],
+  },
   pedicab: {
     movement: { factor: 1.2, kind: "inLane" },
     name: "Pedicab",

@@ -295,6 +295,7 @@ export const ACHIEVEMENTS = [
         count: 20,
         kind: "bumps",
         kinds: [
+          "breweryDray",
           "car",
           "cargoBike",
           "cyclist",
@@ -305,6 +306,7 @@ export const ACHIEVEMENTS = [
           "iceCreamTruck",
           "kidOnBike",
           "parkedCar",
+          "patrolBuggy",
           "pedicab",
           "rangerCart",
           "rollerblader",
