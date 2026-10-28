@@ -7,6 +7,7 @@ import { currentZone } from "../rules/route";
 import { zoneStats } from "../rules/zones";
 import { plannerStreams } from "../testing/movers";
 import { GAME_ROAD, inZone, LUCKY_IDS, REAL, type Real, realRun } from "../testing/planner";
+import { mapZones } from "../testing/world";
 import { itemCategory, planZone, spawnQuotas, startRoad, zoneLength } from "./walk";
 
 // The seeds the quota draws sample, and the fewer the planner's placements do, each zone's plan
@@ -52,13 +53,7 @@ const tunedWith = (counts: Readonly<Record<string, number>>): Real => ({
       luckyFindsPerZone: { ...REAL.tuning.counts.luckyFindsPerZone, ...counts },
     },
   },
-  world: {
-    ...REAL.world,
-    zones: REAL.world.zones.map((zone) => ({
-      ...zone,
-      density: { ...zone.density, luckyFinds: 1 },
-    })) as unknown as Real["world"]["zones"],
-  },
+  world: mapZones((zone) => ({ ...zone, density: { ...zone.density, luckyFinds: 1 } }), REAL.world),
 });
 
 // Each zone at the first walk position it can be walked at, for the slower sweeps.

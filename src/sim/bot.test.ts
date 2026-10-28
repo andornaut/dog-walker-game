@@ -42,6 +42,7 @@ import type { PackDogs } from "../state/runState";
 import { hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
 import { testState } from "../testing/runState";
 import { IDEAL_SKILL, simConfig } from "../testing/sim";
+import { mapZones } from "../testing/world";
 import { actBot, type BotRoad, moverHazards, moverPrizes, newBot } from "./bot";
 import { type BotSight, moverShows, sightPaths } from "./sight";
 import { type RunResult, type SimData, simulateRun } from "./simulate";
@@ -72,13 +73,15 @@ function shortZones(data: GameData, share: number): GameData {
 
 // No squirrels on the road, so no dog pulls and every hit is the bot's own doing.
 function withoutPulls(data: GameData): GameData {
-  const zones = data.world.zones.map((zone) => ({
-    ...zone,
-    weights: { ...zone.weights, obstacles: { ...zone.weights.obstacles, squirrel: 0 } },
-  }));
   return {
     ...data,
-    world: { ...data.world, zones: zones as unknown as GameData["world"]["zones"] },
+    world: mapZones(
+      (zone) => ({
+        ...zone,
+        weights: { ...zone.weights, obstacles: { ...zone.weights.obstacles, squirrel: 0 } },
+      }),
+      data.world,
+    ),
   };
 }
 
