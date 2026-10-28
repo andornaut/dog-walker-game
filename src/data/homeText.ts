@@ -52,7 +52,7 @@ export const HOME_TEXT = {
       freeCards: "free cards each neighbourhood",
       maxHearts: "max ♥ for every owner",
       obstacleSpawns: "obstacles",
-      spareTreats: "spare treat held",
+      spareTreats: "spare treat",
       squirrelPulls: "pulls toward squirrels",
       tipReach: "tip reach",
       tipSpawns: "tips",
