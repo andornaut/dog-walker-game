@@ -271,21 +271,31 @@ function touchesPackIn(
   );
 }
 
+// The scroll over which a mover on path touches the pack in each lane (sampleContacts), worked
+// out once per geometry, path and size.
 function scrollContacts(
   road: Pick<BotRoad, "data">,
   geometry: ContactGeometry,
   item: WalkItem,
   path: NonNullable<WalkItem["mover"]>["path"],
 ): readonly ScrollContact[] {
-  const { laneCount, packBand, roadTop } = geometry;
   const { height, kind, laneSpan } = item;
   const key = `${kind} ${height} ${laneSpan}`;
   const byPath = getOrInsert(SCROLL_CONTACTS, geometry, () => new WeakMap());
   const bySize = getOrInsert(byPath, path, () => new Map());
-  const known = bySize.get(key);
-  if (known !== undefined) {
-    return known;
-  }
+  return getOrInsert(bySize, key, () => sampleContacts(road, geometry, item, path));
+}
+
+// The contacts scrollContacts holds for a mover on path, sampled every MOVER_SAMPLE_SCROLL of
+// scroll until it leaves the road or passes the pack's band.
+function sampleContacts(
+  road: Pick<BotRoad, "data">,
+  geometry: ContactGeometry,
+  item: WalkItem,
+  path: NonNullable<WalkItem["mover"]>["path"],
+): ScrollContact[] {
+  const { laneCount, packBand, roadTop } = geometry;
+  const { height } = item;
   const contacts: ScrollContact[] = [];
   // The contact under way in each lane, by lane. Between lanes, a mover's box can touch the
   // pack standing in either lane it straddles.
@@ -325,7 +335,6 @@ function scrollContacts(
       }
     }
   }
-  bySize.set(key, contacts);
   return contacts;
 }
 
