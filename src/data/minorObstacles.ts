@@ -355,6 +355,12 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 3 },
     zones: ["homeStretch"],
   },
+  ttcBusCrossing: {
+    movement: { kind: "stopAndGoAcross", speed: 0.65, stopSeconds: 1 },
+    name: "Crosstown bus",
+    shape: { lanes: 3, rows: 1 },
+    zones: ["homeStretch"],
+  },
   velvetRope: { name: "Velvet rope", shape: { lanes: 2, rows: 1 }, zones: ["street"] },
   volleyballNet2: {
     name: "Volleyball net",

@@ -133,6 +133,7 @@ const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>> = {
   touristTrain: "red",
   trashCan: "green",
   ttcBus: "red",
+  ttcBusCrossing: "red",
   velvetRope: "yellow",
   volleyballNet2: "white",
   volleyballNet3: "white",

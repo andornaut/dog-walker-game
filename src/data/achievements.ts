@@ -314,6 +314,7 @@ export const ACHIEVEMENTS = [
           "taxi",
           "touristTrain",
           "ttcBus",
+          "ttcBusCrossing",
         ],
       },
     ],

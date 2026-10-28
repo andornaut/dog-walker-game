@@ -2713,6 +2713,23 @@
       "spriteKey": "ttc-bus"
     },
     {
+      "id": "ttcBusCrossing",
+      "movement": {
+        "kind": "stopAndGoAcross",
+        "speed": 0.65,
+        "stopSeconds": 1
+      },
+      "name": "Crosstown bus",
+      "shape": {
+        "lanes": 3,
+        "rows": 1
+      },
+      "zones": [
+        "homeStretch"
+      ],
+      "spriteKey": "ttc-bus-crossing"
+    },
+    {
       "id": "velvetRope",
       "name": "Velvet rope",
       "shape": {
@@ -3201,6 +3218,7 @@
           "touristTrain": 0,
           "trashCan": 3.5,
           "ttcBus": 0,
+          "ttcBusCrossing": 0,
           "velvetRope": 0,
           "volleyballNet2": 0,
           "volleyballNet3": 0,
@@ -3317,6 +3335,7 @@
           "touristTrain": 2,
           "trashCan": 8,
           "ttcBus": 0,
+          "ttcBusCrossing": 0,
           "velvetRope": 0,
           "volleyballNet2": 0,
           "volleyballNet3": 0,
@@ -3433,6 +3452,7 @@
           "touristTrain": 0,
           "trashCan": 0,
           "ttcBus": 0,
+          "ttcBusCrossing": 0,
           "velvetRope": 4,
           "volleyballNet2": 0,
           "volleyballNet3": 0,
@@ -3549,6 +3569,7 @@
           "touristTrain": 0,
           "trashCan": 0,
           "ttcBus": 0,
+          "ttcBusCrossing": 0,
           "velvetRope": 0,
           "volleyballNet2": 0,
           "volleyballNet3": 0,
@@ -3665,6 +3686,7 @@
           "touristTrain": 0,
           "trashCan": 0,
           "ttcBus": 0,
+          "ttcBusCrossing": 0,
           "velvetRope": 0,
           "volleyballNet2": 3.75,
           "volleyballNet3": 3.75,
@@ -3781,6 +3803,7 @@
           "touristTrain": 0,
           "trashCan": 6,
           "ttcBus": 2,
+          "ttcBusCrossing": 0,
           "velvetRope": 0,
           "volleyballNet2": 0,
           "volleyballNet3": 0,
