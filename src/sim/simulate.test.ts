@@ -177,12 +177,23 @@ describe("badgeCounters", { timeout: 30_000 }, () => {
     expect(Object.values(counters().meanTallies).some((count) => count > 0)).toBe(true);
   });
 
-  it.each(TALLY_IDS)("gives the mean %s per walk", (tally) => {
-    expect(counters().meanTallies[tally]).toBe(sessionMean((run) => run.tallies[tally] ?? 0));
+  it("gives the mean of every tally per walk", () => {
+    expect(counters().meanTallies).toEqual(
+      Object.fromEntries(
+        TALLY_IDS.map((tally) => [tally, sessionMean((run) => run.tallies[tally] ?? 0)]),
+      ),
+    );
   });
 
-  it.each(keysOf(gameData.minorObstacles))("gives the mean landed bumps by %s per walk", (kind) => {
-    expect(counters().meanBumpsByKind[kind]).toBe(sessionMean((run) => run.bumpsByKind[kind] ?? 0));
+  it("gives the mean landed bumps by every minor obstacle per walk", () => {
+    expect(counters().meanBumpsByKind).toEqual(
+      Object.fromEntries(
+        keysOf(gameData.minorObstacles).map((kind) => [
+          kind,
+          sessionMean((run) => run.bumpsByKind[kind] ?? 0),
+        ]),
+      ),
+    );
   });
 
   // Of 2 walks, the 90th percentile is the higher.
