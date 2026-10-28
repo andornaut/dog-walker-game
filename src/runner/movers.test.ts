@@ -11,7 +11,6 @@ import {
   DART_LIFTS,
   DART_VERGE_LANES,
   dartOutcome,
-  dartRetries,
   drawMover,
   drawnCount,
   HOP_SEQUENCES_MOST,
@@ -21,6 +20,7 @@ import {
   type MoverDraws,
   type MoverGeometry,
   moverPlacements,
+  moverRetries,
   type MoverSpec,
   type MoverStand,
   type OnScreen,
@@ -1792,7 +1792,7 @@ describe("placeMovers", () => {
     const placements = (moverDraws: MoverDraws) =>
       [0, ...DART_LIFTS].flatMap((lift) => moverPlacements(geometry, retried, moverDraws, lift));
     expect(placements(drawn).every(({ lanes }) => lanes.count > most)).toBe(true);
-    const landing = dartRetries(retried, drawn).find((retry) =>
+    const landing = moverRetries(retried, drawn).find((retry) =>
       placements(retry).some(({ lanes }) => lanes.count <= most),
     );
     expect(landing !== undefined).toBe(lands);

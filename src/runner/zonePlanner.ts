@@ -76,6 +76,31 @@ function moverQuotas<Kind extends string>(
   );
 }
 
+// How many kinds of cell a mover may share (moverMayTake): a stepper, hopper or stalker none, a
+// rider those only darts hold, and a dart any but those darts hold.
+function sharing(spec: MoverSpec): number {
+  const { kind } = spec.motion;
+  return kind === "cross" ? 2 : kind === "ride" ? 1 : 0;
+}
+
+// How many lanes a mover holds across at once: its footprint's, and a merging rider's lane beside.
+function heldAcross(spec: MoverSpec): number {
+  const { motion } = spec;
+  return spec.footprint.lanes + (motion.kind === "ride" && motion.merge !== undefined ? 1 : 0);
+}
+
+// The lane-blocking movers in the order they are placed: those that may share the fewest cells
+// first, and of those the widest first, so each placed later, freer to share, fits around those
+// placed before. Sorting copies leaves the quotas alone; sort is stable, so equal ones keep their
+// order.
+function placingOrder<Quota extends { readonly spec: MoverSpec }>(
+  quotas: readonly Quota[],
+): Quota[] {
+  return [...quotas].sort(
+    (a, b) => sharing(a.spec) - sharing(b.spec) || heldAcross(b.spec) - heldAcross(a.spec),
+  );
+}
+
 // The road as placeMovers measures it.
 function moverRoadOf(plan: SpawnPlan<string>, spacing: number) {
   return {
@@ -422,7 +447,9 @@ class ZonePlanner<Kind extends string> {
   // in its footprint, among the first spawns that stand.
   private placeMoving(first: boolean): SpawnQuota<Kind>[] {
     const { plan, rows } = this;
-    const quotas = moverQuotas(true, plan.quotas).filter((quota) => quota.first === first);
+    const quotas = placingOrder(
+      moverQuotas(true, plan.quotas).filter((quota) => quota.first === first),
+    );
     const { dropped, spawns } = placeMovers(
       this.streams,
       moverRoadOf(plan, this.spacing),
@@ -768,42 +795,45 @@ class ZonePlanner<Kind extends string> {
 // WIDE_LANES wide or wider have a row between the rows their hit boxes are on. The quotas marked
 // first are placed first, their movers then the rest; then the other lane-blocking movers; then the
 // other lane-blocking spawns; then the moving prizes; then the other spawns. Movers are placed by
-// placeMovers. A dart may set off over cells the spawns placed before it hold, crossing over or
-// past them, and a rider may pass over cells only darts hold (moverMayTake). A stop-and-go across,
-// a vehicle crossing side-on, is placed as a dart but has a body, which keeps clear of the
-// lane-blocking standing spawns placed before it. Nothing else placed after a mover takes its
-// cells, another dart included, but a lane-blocking standing spawn: one where a dart passes, which
-// the dart then crosses over or past the same way, and one whose hit box shares no road with any
-// other mover's body, the road that mover's hit box covers at some moment on screen, so the two
-// never meet; a mover other than a dart holds every row its blocking and its path touch, which is
-// more road than its body. A kind marked moversPassOver also takes a mover's
-// cells, but not one where a mover may end a move and stand unless it is also marked moversRestOn.
-// A mover with no room in its stretch, such as one over a cap on screen, waits for the next row
-// with room; only one marked first stands still in its footprint when no row has room for it to
-// move. A moving prize, such as a walking lucky find or a darting squirrel, is placed as a mover
-// that blocks nothing: the cells it passes through are kept clear of other spawns placed after it,
-// so it never walks into one, but no lane is blocked, it stands nowhere for the pack-fit gap and it
-// counts toward no cap on screen beside the lane-blocking movers, since the pack never has to steer
-// around it. A darting one may set off over the lane-blocking spawns' cells, as any dart may. It
-// keeps a free cell for every moving prize, its own included, and with no room to move it stands
-// still in one cell among the other spawns, so a prize is never skipped for want of room to move. A
-// spawn that blocks no lane, such as a treat, also keeps off every spot where a mover placed may
-// end a move and stand (moverRests), so no mover ever stops on one; a kind marked moversRestOn,
-// such as a tip, may lie there. A lane-blocking mover, or an obstacle bigger than one cell, that
-// the earlier draws left no room for is skipped, which uses no random draw; so is one that would
-// leave fewer free cells than there are one-cell spawns. A free cell can still be one no
-// lane-blocking spawn may take, where the path or the pack-fit gap along it rules it out, so a
-// one-cell spawn with no room left is skipped too, the same way: a zone never fails to plan for
-// want of room. A standing spawn of one of the zone's fixedKinds that finds no room in its stretch
-// or anywhere else in the zone is first swapped for a narrower fixed kind, a lane narrower at a
-// time, drawn by the kinds' weights among those that fit, and is skipped only when none of any
-// narrower width fits. Once the lane-blocking spawns are placed, and before the moving prizes and
-// the other spawns, a run of more than maxEmptyRows rows that come on screen with no lane-blocking
-// spawn in view, half that, rounded down, from the zone's first row or to its last (none at all
-// from the first row of a zone whose rows start on the road in view), gets one of the zone's own
-// plain standing spawns: one skipped for want of room, or else one moved from the busiest stretch,
-// placed under every rule above, so long as each move leaves fewer such rows in all. A run no spawn
-// can take under them, such as one held clear for the path, stays.
+// placeMovers, those that may share the fewest cells first, a stepper's, hopper's or stalker's
+// none, a rider's only those darts hold and a dart's any but those, and of those the widest first
+// (placingOrder), so each placed later, freer to share, fits around those placed before. A dart may
+// set off over cells the spawns placed before it hold, crossing over or past them, and a rider may
+// pass over cells only darts hold (moverMayTake). A stop-and-go across, a vehicle crossing side-on,
+// is placed as a dart but has a body, which keeps clear of the lane-blocking standing spawns placed
+// before it. Nothing else placed after a mover takes its cells, another dart included, but a
+// lane-blocking standing spawn: one where a dart passes, which the dart then crosses over or past
+// the same way, and one whose hit box shares no road with any other mover's body, the road that
+// mover's hit box covers at some moment on screen, so the two never meet; a mover other than a dart
+// holds every row its blocking and its path touch, which is more road than its body. A kind marked
+// moversPassOver also takes a mover's cells, but not one where a mover may end a move and stand
+// unless it is also marked moversRestOn. A mover with no room in its stretch, such as one over a
+// cap on screen, waits for the next row with room; only one marked first stands still in its
+// footprint when no row has room for it to move. A moving prize, such as a walking lucky find or a
+// darting squirrel, is placed as a mover that blocks nothing: the cells it passes through are kept
+// clear of other spawns placed after it, so it never walks into one, but no lane is blocked, it
+// stands nowhere for the pack-fit gap and it counts toward no cap on screen beside the
+// lane-blocking movers, since the pack never has to steer around it. A darting one may set off over
+// the lane-blocking spawns' cells, as any dart may. It keeps a free cell for every moving prize,
+// its own included, and with no room to move it stands still in one cell among the other spawns, so
+// a prize is never skipped for want of room to move. A spawn that blocks no lane, such as a treat,
+// also keeps off every spot where a mover placed may end a move and stand (moverRests), so no mover
+// ever stops on one; a kind marked moversRestOn, such as a tip, may lie there. A lane-blocking
+// mover, or an obstacle bigger than one cell, that the earlier draws left no room for is skipped,
+// which uses no random draw; so is one that would leave fewer free cells than there are one-cell
+// spawns. A free cell can still be one no lane-blocking spawn may take, where the path or the
+// pack-fit gap along it rules it out, so a one-cell spawn with no room left is skipped too, the
+// same way: a zone never fails to plan for want of room. A standing spawn of one of the zone's
+// fixedKinds that finds no room in its stretch or anywhere else in the zone is first swapped for a
+// narrower fixed kind, a lane narrower at a time, drawn by the kinds' weights among those that fit,
+// and is skipped only when none of any narrower width fits. Once the lane-blocking spawns are
+// placed, and before the moving prizes and the other spawns, a run of more than maxEmptyRows rows
+// that come on screen with no lane-blocking spawn in view, half that, rounded down, from the zone's
+// first row or to its last (none at all from the first row of a zone whose rows start on the road
+// in view), gets one of the zone's own plain standing spawns: one skipped for want of room, or else
+// one moved from the busiest stretch, placed under every rule above, so long as each move leaves
+// fewer such rows in all. A run no spawn can take under them, such as one held clear for the path,
+// stays.
 export function planSpawns<Kind extends string>(
   streams: PlannerStreams,
   plan: SpawnPlan<Kind>,

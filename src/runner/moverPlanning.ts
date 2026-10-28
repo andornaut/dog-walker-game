@@ -839,11 +839,20 @@ function drawnStepCount(
   motion: Pick<Extract<MoverMotion, { kind: "steps" }>, "count" | "sequences">,
   draw: number,
 ): number {
+  const lengths = stepCounts(motion);
+  return (
+    lengths[Math.min(lengths.length - 1, Math.floor(draw * lengths.length))] ?? motion.count.min
+  );
+}
+
+// The lengths of a stepping mover's sequences within its motion's count, fewest first.
+function stepCounts(
+  motion: Pick<Extract<MoverMotion, { kind: "steps" }>, "count" | "sequences">,
+): number[] {
   const { max, min } = motion.count;
-  const lengths = [...new Set(motion.sequences.map((sequence) => sequence.length))]
+  return [...new Set(motion.sequences.map((sequence) => sequence.length))]
     .filter((length) => length >= min && length <= max)
     .sort((a, b) => a - b);
-  return lengths[Math.min(lengths.length - 1, Math.floor(draw * lengths.length))] ?? min;
 }
 
 // A stepping mover takes each step of a sequence as long as its drawn count in turn, each step
@@ -1058,28 +1067,51 @@ function shyPlacements(
 // its cue, lowest first, when the planner retries it.
 export const DART_LIFTS = [0.25, 0.5, 0.75, 1] as const;
 
-// The even draws from 0 to 1 a dart with no room at its own draws retries its tilt and speed at.
-const DART_RETRY_DRAWS = [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1] as const;
+// The even draws from 0 to 1 a mover with no room at its own draws retries its tilt and speed at.
+const RETRY_DRAWS = [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1] as const;
 
-// The draws a dart with no room at its own retries at, each its own draws with one changed: its
-// tilt at each of DART_RETRY_DRAWS, then its speed at each, nearest its own draw first, the lower
-// first between two as near. A draw its kind does not vary by, a tilt with no range or a speed with
-// no jitter, is not retried, nor is a mover that is not a dart.
-export function dartRetries(spec: MoverSpec, draws: MoverDraws): MoverDraws[] {
+// The draws from 0 up to 1 that pick each of counts counts other than the one own picks, as
+// drawnCount and drawnStepCount read a draw: nearest the one own picks first, the fewer first
+// between two as near.
+function otherCountDraws(counts: number, own: number): number[] {
+  const picked = Math.min(counts - 1, Math.floor(own * counts));
+  return Array.from({ length: counts }, (_, index) => index)
+    .filter((index) => index !== picked)
+    .sort((a, b) => Math.abs(a - picked) - Math.abs(b - picked) || a - b)
+    .map((index) => (index + 0.5) / counts);
+}
+
+// The draws a mover with no room at its own retries at, each its own draws with one changed. A
+// dart retries its tilt at each of RETRY_DRAWS, then its speed at each; a rider its speed at each;
+// a stepper, hopper or stalker each other count of moves it may draw (drawnStepCount, drawnCount).
+// Each is tried nearest its own draw first, the lower first between two as near. A draw its kind
+// does not vary by, a tilt with no range, a speed with no jitter or a single count, is not retried.
+export function moverRetries(spec: MoverSpec, draws: MoverDraws): MoverDraws[] {
   const { motion, variation } = spec;
-  if (motion.kind !== "cross") {
-    return [];
-  }
   const nearest = (own: number) =>
-    DART_RETRY_DRAWS.filter((draw) => Math.abs(draw - own) > 1e-9).sort(
+    RETRY_DRAWS.filter((draw) => Math.abs(draw - own) > 1e-9).sort(
       (a, b) => Math.abs(a - own) - Math.abs(b - own) || a - b,
     );
-  const tilts = motion.tilt[0] < motion.tilt[1] ? nearest(draws.tilt) : [];
   const speeds = variation.speedShare > 0 ? nearest(draws.speed) : [];
-  return [
-    ...tilts.map((tilt) => ({ ...draws, tilt })),
-    ...speeds.map((speed) => ({ ...draws, speed })),
-  ];
+  switch (motion.kind) {
+    case "approach": {
+      const counts = motion.steps.max - motion.steps.min + 1;
+      return otherCountDraws(counts, draws.count).map((count) => ({ ...draws, count }));
+    }
+    case "cross": {
+      const tilts = motion.tilt[0] < motion.tilt[1] ? nearest(draws.tilt) : [];
+      return [
+        ...tilts.map((tilt) => ({ ...draws, tilt })),
+        ...speeds.map((speed) => ({ ...draws, speed })),
+      ];
+    }
+    case "ride":
+      return speeds.map((speed) => ({ ...draws, speed }));
+    default: {
+      const counts = stepCounts(motion).length;
+      return otherCountDraws(counts, draws.count).map((count) => ({ ...draws, count }));
+    }
+  }
 }
 
 // One mover's placements, at its draws. A dart's start is lifted that share of the way from its
@@ -1228,26 +1260,29 @@ function standsOf(spot: Spot): MoverStand[] {
 }
 
 // Places every mover on rows at the distances given, each quota spread one per equal stretch of the
-// zone, or of the share of it the quota's within holds it to, as the planner spreads other
-// spawns, each mover wholly on screen within the zone, within the caps on screen, its body, where
-// it has one, clear of the lane-blocking standing spawns placed before it. A mover with no
-// room in its stretch, such as one over a cap there, waits: it comes on at the next row with
-// room, within its share of the zone. A dart with no room at its drawn start retries the same rows
-// from higher up the road, its start lifted by each of DART_LIFTS in turn, lowest first, before it
-// waits; on each later row it tries its drawn start and then each lift. A dart with no room on any
-// later row tries again the same way at each of its retries (dartRetries), another tilt of its
-// kind's range and then another speed, until one has room, so a dart whose drawn path sweeps too
-// many lanes in the pack's window still comes on, crossing at another tilt or speed. A mover with
-// no room at any is dropped, which uses no random draw past its own draws, as the planner drops an
-// obstacle it has no room for. A dart may take cells other spawns hold, and a rider cells only
-// darts hold (MoverGrid.isFree); no other mover takes a cell a dart holds. A mover never stands
-// still in place of moving. Each mover makes its own draws (drawMover) before it is placed, and is
-// placed as they have it move, so the path rule holds for the speed and moments it was drawn. Of
-// the places that fit, it takes a start lane from the movers stream, drawn toward the lanes left
-// unblocked longest (laneBalanceWeight), so an edge lane that fits fewer of its ways comes up as
-// often as a middle one; then, from the spawns stream, a place in that lane of the highest rank in
-// its row, so each row gives the lane the widest reach that fits there. onScreen holds the movers
-// already on screen, from an earlier call, and gains each mover placed.
+// zone, or of the share of it the quota's within holds it to, as the planner spreads other spawns,
+// each mover wholly on screen within the zone, within the caps on screen, its body, where it has
+// one, clear of the lane-blocking standing spawns placed before it. A mover with no room in its
+// stretch, such as one over a cap there, waits: it comes on at the next row with room, within its
+// share of the zone. A dart with no room at its drawn start retries the same rows from higher up
+// the road, its start lifted by each of DART_LIFTS in turn, lowest first, before it waits; on each
+// later row it tries its drawn start and then each lift. A mover with no room on any later row
+// tries again the same way at each of its retries (moverRetries): a dart at another tilt of its
+// kind's range and then another speed, a rider at another speed, and a stepper, hopper or stalker
+// at another count of moves, until one has room, so a dart whose drawn path sweeps too many lanes
+// in the pack's window still comes on, crossing at another tilt or speed, a merging rider too fast
+// to merge before it reaches the pack comes on slower, and a stepper with no room for its drawn
+// steps takes fewer or more. A mover with no room at any is dropped, which uses no random draw past
+// its own draws, as the planner drops an obstacle it has no room for. A dart may take cells other
+// spawns hold, and a rider cells only darts hold (MoverGrid.isFree); no other mover takes a cell a
+// dart holds. A mover never stands still in place of moving. Each mover makes its own draws
+// (drawMover) before it is placed, and is placed as they have it move, so the path rule holds for
+// the speed and moments it was drawn. Of the places that fit, it takes a start lane from the movers
+// stream, drawn toward the lanes left unblocked longest (laneBalanceWeight), so an edge lane that
+// fits fewer of its ways comes up as often as a middle one; then, from the spawns stream, a place
+// in that lane of the highest rank in its row, so each row gives the lane the widest reach that
+// fits there. onScreen holds the movers already on screen, from an earlier call, and gains each
+// mover placed.
 export function placeMovers<Kind extends string>(
   streams: PlannerStreams,
   geometry: MoverGeometry & { readonly zoneLength: number },
@@ -1330,7 +1365,7 @@ export function placeMovers<Kind extends string>(
         return stretch.length > 0 ? stretch : nearestLater(starts, end, to);
       };
       let fitting: Spot[] = [];
-      for (const tried of [draws, ...dartRetries(spec, draws)]) {
+      for (const tried of [draws, ...moverRetries(spec, draws)]) {
         fitting = fittingAt(tried);
         if (fitting.length > 0) {
           break;
