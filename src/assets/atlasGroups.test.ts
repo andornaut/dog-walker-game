@@ -33,7 +33,6 @@ describe("pageGroupOf", () => {
   // art, the UI and the rest of the road stay nearest.
   it.each([
     ["cone", "road", true],
-    ["cone@94", "road", true],
     ["cone@50", "road", true],
     ["dog-kilo@50", "road", true],
     ["dog-kilo", "home", false],

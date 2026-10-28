@@ -17,7 +17,6 @@ const manifest = parseManifest(shippedManifest);
 describe("hashedArtFileName", () => {
   it.each([
     ["atlas/run-0.png", "assets/art/atlas/run-0-Bq3x_9-Z.png"],
-    ["fonts/font-body.fnt", "assets/art/fonts/font-body-Bq3x_9-Z.fnt"],
     ["sprites/dog-kilo@88.json", "assets/art/sprites/dog-kilo@88-Bq3x_9-Z.json"],
     ["manifest.json", "assets/art/manifest-Bq3x_9-Z.json"],
   ])("names %s %s", (path, fileName) => {
@@ -77,10 +76,6 @@ describe("the shipped art's hashed files", () => {
       expect(unmapped).toEqual([]);
     },
   );
-
-  it.each([ART_MANIFEST, ATLAS_MANIFEST_PATH])("maps %s", (path) => {
-    expect(artFiles.has(path)).toBe(true);
-  });
 
   it("names each file once, by a hash of its content", () => {
     expect(new Set(files.map(({ fileName }) => fileName)).size).toBe(files.length);

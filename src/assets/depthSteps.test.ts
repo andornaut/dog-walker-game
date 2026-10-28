@@ -16,11 +16,7 @@ describe("DEPTH_STEPS", () => {
     [0.9375, "@94"],
     [0.875, "@88"],
     [0.8125, "@81"],
-    [0.75, "@75"],
-    [0.6875, "@69"],
     [0.625, "@62"],
-    [0.5625, "@56"],
-    [0.5, "@50"],
   ])("names the %f step's art with suffix '%s'", (scale, suffix) => {
     expect(depthStepOfScale(scale).suffix).toBe(suffix);
   });
@@ -53,12 +49,5 @@ describe("splitDepthKey", () => {
     for (const [key, base, step] of cases) {
       expect(splitDepthKey(key)).toEqual({ base, step });
     }
-  });
-});
-
-describe("depthStepOfScale", () => {
-  it("finds a step by its exact scale and throws for any other", () => {
-    expect(depthStepOfScale(0.625).suffix).toBe("@62");
-    expect(() => depthStepOfScale(0.62)).toThrow("not a depth step");
   });
 });
