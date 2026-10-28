@@ -40,8 +40,9 @@ ttc-bus-crossing    176x64  a TTC bus crossing Yonge Street side on, facing righ
                             its one long dark window band, glints across it, a roof pod at the back, the
                             amber destination sign over the front door and windshield, the mirror on its
                             arm off the roof's front, the ttc red lower body with a white stripe, two
-                            glass doors split down the middle, a white headlamp and an amber indicator,
-                            two black tires with grey hubs in dark arches, no pantograph; told apart
+                            glass doors split down the middle, a lit headlamp (road.headlamp, a white
+                            core in a cream ring) and an amber indicator, two black tires with grey hubs
+                            in dark arches, no pantograph; told apart
                             from ttc-bus, the same bus from behind, and from the streetcar. push (4
                             frames, 100ms): a spoke across each hub turning an eighth a frame, the body
                             dipping 1px onto the wheels on frames 1 and 2; idle (4 frames, 400ms): at its
@@ -624,11 +625,12 @@ def bus_body(g, doors=0, blink=0):
     g.rect(x1 - 1, belt + 1, 1, sill - belt - 1, "dred")
     for x in BUS_DOORS:
         bus_door(g, x, doors)
-    # the indicator and headlamp at the front, the bumpers at each end
+    # the indicator and the lit headlamp at the front (road.headlamp, which the game's light layer shines its
+    # headlight cone from), the bumpers at each end
     g.rect(x1 - 7, belt + 5.5, 3, 2, "yellow" if blink else "amber")
     if blink:
         row(g, x1 - 7, x1 - 4, belt + 5.5, "white")
-    g.rect(x1 - 2.5, sill - 6.5, 2.5, 2.5, "white")
+    headlamp(g, x1 - 1.25, sill - 5.25)
     for x in (x0 - 0.5, x1 - 2):
         g.rect(x, sill - 3.5, 2.5, 3.5, "dslate")
         row(g, x, x + 2.5, sill - 3.5, "slate")

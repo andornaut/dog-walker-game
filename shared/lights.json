@@ -234,9 +234,44 @@
         "light": "tail-red",
         "zones": ["homeStretch", "shops"]
       }
+    ],
+    "ttc-bus-crossing": [
+      {
+        "angle": 0,
+        "dx": 77.5,
+        "dy": -15.5,
+        "light": "bus-headlamp",
+        "zones": ["homeStretch"]
+      },
+      {
+        "dx": -83.5,
+        "dy": -11,
+        "light": "tail-red",
+        "zones": ["homeStretch"]
+      }
     ]
   },
   "defs": {
+    "bus-headlamp": {
+      "colour": "amber",
+      "height": 84,
+      "rings": [
+        {
+          "scale": 1,
+          "strength": 0.03
+        },
+        {
+          "scale": 0.66,
+          "strength": 0.07
+        },
+        {
+          "scale": 0.33,
+          "strength": 0.16
+        }
+      ],
+      "shape": "cone",
+      "width": 52
+    },
     "gas-lamp-cone": {
       "colour": "amber",
       "height": 170,
