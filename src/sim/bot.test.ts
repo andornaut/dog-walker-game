@@ -354,7 +354,10 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
           [", lifted all the way", 1],
         ]
       : [["", 0]];
-  const cases = [0, gameData.world.walkLength - 1].flatMap((zoneIndex) =>
+  // The first zone and the last: the slowest pace and the fastest, as the pace rises with each
+  // zone walked.
+  const ZONE_ENDS = [0, gameData.world.walkLength - 1];
+  const cases = ZONE_ENDS.flatMap((zoneIndex) =>
     [LOW, HIGH].flatMap((draws) =>
       [...movements.values()].flatMap((entry) =>
         tiltEnds(entry.movement).flatMap(([tiltName, tilt]) =>
@@ -579,13 +582,13 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
     );
   });
 
-  // At the top of its tilt range, in every zone, a dart tilted toward the pack sets off no
-  // higher than shows its cue wholly on the road and no lower than leaves the pack its reaction
-  // margin, at both ends of its start draw and at each lift the planner retries it at. It keeps
-  // its range's top tilt unless it sets off at that highest start, where the zone's pace leaves
-  // no start for a steeper one.
+  // At the top of its tilt range, at the slowest pace and the fastest, a dart tilted toward the
+  // pack sets off no higher than shows its cue wholly on the road and no lower than leaves the
+  // pack its reaction margin, at both ends of its start draw and at each lift the planner retries
+  // it at. It keeps its range's top tilt unless it sets off at that highest start, where the
+  // zone's pace leaves no start for a steeper one.
   it.each(
-    Array.from({ length: gameData.world.walkLength }, (_, zoneIndex) => zoneIndex).flatMap(
+    ZONE_ENDS.flatMap(
       (zoneIndex) =>
         [...movements.values()].flatMap((entry) =>
           entry.movement.kind === "dart" && entry.movement.tilt.max > 0
@@ -622,11 +625,12 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
     }
   });
 
-  // In every zone, a dart at either end of its speed draw crosses at its kind's speed times
-  // 1 -/+ the dart speed jitter, and set off as low and steep as it may be, still leaves the pack
-  // its reaction margin between its cue ending and its reaching the pack's rows.
+  // At the slowest pace and the fastest, a dart at either end of its speed draw crosses at its
+  // kind's speed times 1 -/+ the dart speed jitter, and set off as low and steep as it may be,
+  // still leaves the pack its reaction margin between its cue ending and its reaching the pack's
+  // rows.
   it.each(
-    Array.from({ length: gameData.world.walkLength }, (_, zoneIndex) => zoneIndex).flatMap(
+    ZONE_ENDS.flatMap(
       (zoneIndex) =>
         [...movements.values()].flatMap((entry) =>
           entry.movement.kind === "dart"
