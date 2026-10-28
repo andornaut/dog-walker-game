@@ -399,7 +399,7 @@ describe("the shop's message", () => {
   // rows read only the style, and a narrower message in the same style fits where the widest does.
   const { room, styles } = SHOP_MESSAGE_FIT;
   const fit = (text: string) => fitInFont("font-body", styles, room, plainMarks(text));
-  const unique = [...new Set(messages)];
+  const unique = [...new Set(messages)].flatMap((text) => (text === null ? [] : [text]));
   const widestOfStyle = unique.filter((text) =>
     fit(text).lines.length !== 1 ||
     unique.every(
@@ -411,7 +411,7 @@ describe("the shop's message", () => {
   );
 
   it.each(widestOfStyle)("sets %j on one line inside its plate's frame", (text) => {
-    const fitted = fitInFont("font-body", styles, room, plainMarks(text ?? ""));
+    const fitted = fitInFont("font-body", styles, room, plainMarks(text));
     expect(fitted.lines).toHaveLength(1);
     expect(fitted.widest).toBeLessThanOrEqual(plate.width - 2 * textDx);
     const capTop = shopMessageCapTop(body, fitted.style.scale);
