@@ -10,7 +10,7 @@ import {
   lineLeadSlot,
   linePlace,
   MESSAGE_STRIP,
-  MESSAGE_TIMING,
+  messageTiming,
   messageIconKey,
   type MessageLine,
   messageRows,
@@ -78,7 +78,7 @@ export class MessageStrip {
   // ahead: the line waits ahead of the waiting lines with its icon.
   say(line: MessageLine, ahead = false): void {
     const add = ahead ? sayLineAhead : sayLine;
-    this.state = add(MESSAGE_TIMING, line, this.state);
+    this.state = add(messageTiming(gameData), line, this.state);
   }
 
   update(dtMs: number, scene: Scene, depth: number, bars: number): void {
@@ -105,13 +105,14 @@ export class MessageStrip {
 
   // The walk's shown line, aged dtMs.
   private current(dtMs: number): (StripLine & { alpha: number }) | undefined {
-    this.state = stepMessageStrip(MESSAGE_TIMING, dtMs, this.state);
+    const timing = messageTiming(gameData);
+    this.state = stepMessageStrip(timing, dtMs, this.state);
     const { shown } = this.state;
     if (shown === null) {
       return undefined;
     }
     return {
-      alpha: lineAlpha(MESSAGE_TIMING, shown),
+      alpha: lineAlpha(timing, shown),
       id: shown.id,
       lead: isOwnerLead(shown.icon) ? shown.icon : messageIconKey(shown.icon),
       ...(shown.marks === undefined ? {} : { marks: shown.marks }),

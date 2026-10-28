@@ -158,8 +158,13 @@ export function spareTreatUsedLine(data: StripData, change: HeartChange): Messag
   };
 }
 
+// An owner who fired you, which waits its turn on the strip however long it takes.
 export function firedLine(data: StripData, dog: DogId): MessageLine {
-  return { icon: "fired", ...ownerLine(data, "fired", dog, { dog: data.dogs[dog].name }) };
+  return {
+    icon: "fired",
+    keepsWaiting: true,
+    ...ownerLine(data, "fired", dog, { dog: data.dogs[dog].name }),
+  };
 }
 
 // A dog that started straining toward a squirrel. A pull the player steers away from is quiet.

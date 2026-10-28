@@ -1101,11 +1101,12 @@ export class HudScene extends Scene {
     }
   }
 
-  // A first-time hint on the message strip, marked shown as it is said. The low-hearts hint
-  // jumps the hints waiting their turn.
+  // A first-time hint on the message strip, marked shown as it is said, which waits its turn
+  // however long it takes. The low-hearts hint jumps the hints waiting their turn.
   private sayHint(hint: RaisedHint): void {
     markHintShown(this, hint.id);
-    this.messages.say({ icon: "hint", text: hint.text }, hintJumpsQueue(gameData, hint.id));
+    const line = { icon: "hint", keepsWaiting: true, text: hint.text } as const;
+    this.messages.say(line, hintJumpsQueue(gameData, hint.id));
   }
 
   // Each badge earned on the way, on the message strip.

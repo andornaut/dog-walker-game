@@ -1,7 +1,8 @@
 import { SCREEN_LAYOUT } from "../data/screen";
-import type { DogId } from "../data/types";
+import type { DogId, GameData } from "../data/types";
 import { clamp01 } from "../lib/numbers";
 import type { Point, Rect } from "../lib/rect";
+import { read } from "../rules/units";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { effectIconKey, type EffectItem } from "./effectIcons";
 import type { NameMark } from "./effectNames";
@@ -15,8 +16,8 @@ import { DEBUFF_BAR } from "./walkHud";
 // face inline before their name (faceText.ts); the panel is as tall as the rows it
 // holds, and as the owner's lead. While debuff bars are up it moves under them and shows
 // the line on one row (messageLinePanel), on the strip's one-row panel where the line shows a
-// face. A line waits its turn, shows, and fades out at the end of its life. The strip shows
-// while it has a line.
+// face. A line waits its turn, shows, and fades out at the end of its life; one that waits too
+// long is dropped unseen, but for a hint or a firing. The strip shows while it has a line.
 
 // What a line is about, and the icon that leads it; or a walk effect, such as a gear, a perk or
 // an upgrade, led by its 16x16 icon.
@@ -287,9 +288,11 @@ export function messageRows(
 // icon: what leads the line, an icon or an owner's face and name. Each owner its text names
 // (marks) is drawn led by their face, but for an owner whose face and name lead the line. names:
 // effects' names the line sets apart in their colours, beyond the "Name:" leads every line's
-// names get (effectNameMarks), as a debuff's start line marks its lead.
+// names get (effectNameMarks), as a debuff's start line marks its lead. keepsWaiting: the line
+// waits its turn however long it takes, as a hint or a firing does.
 export interface MessageLine extends FaceText {
   readonly icon: MessageLead;
+  readonly keepsWaiting?: true;
   readonly names?: readonly NameMark[];
 }
 
@@ -300,35 +303,49 @@ interface ShownLine extends MessageLine {
   readonly id: number;
 }
 
+// A line said but not yet shown, and how long it has waited.
+interface WaitingLine extends MessageLine {
+  readonly waitedMs: number;
+}
+
 // shown: the line on the strip, if any. waiting: lines said but not yet shown, oldest first.
 export interface MessageStripState {
   readonly nextId: number;
   readonly shown: ShownLine | null;
-  readonly waiting: readonly MessageLine[];
+  readonly waiting: readonly WaitingLine[];
 }
 
 export const EMPTY_MESSAGE_STRIP: MessageStripState = { nextId: 0, shown: null, waiting: [] };
 
 // dwellMs: the least a line shows before a waiting line takes its place. lifeMs: how long a
 // line lives from when it showed, its last fadeMs fading out. maxWaiting: lines said faster
-// than they can show beyond this many drop the oldest waiting one.
+// than they can show beyond this many drop the oldest waiting one. maxWaitMs: a line that has
+// waited this long is dropped, unless it keeps waiting.
 interface MessageTiming {
   readonly dwellMs: number;
   readonly fadeMs: number;
   readonly lifeMs: number;
+  readonly maxWaitMs: number;
   readonly maxWaiting: number;
 }
 
-export const MESSAGE_TIMING: MessageTiming = {
+export const MESSAGE_TIMING: Omit<MessageTiming, "maxWaitMs"> = {
   dwellMs: 1500,
   fadeMs: 400,
   lifeMs: 6000,
   maxWaiting: 6,
 };
 
+// The strip's timing, its longest wait read live from the tuning's
+// seconds.stripLineWaitSeconds.
+export function messageTiming(data: Pick<GameData, "tuning">): MessageTiming {
+  const seconds = read(data.tuning, "seconds", "stripLineWaitSeconds");
+  return { ...MESSAGE_TIMING, maxWaitMs: 1000 * seconds };
+}
+
 // Adds a line to wait its turn, unless the same text is already shown or waiting.
 export function sayLine(
-  timing: MessageTiming,
+  timing: Pick<MessageTiming, "maxWaiting">,
   line: MessageLine,
   state: MessageStripState,
 ): MessageStripState {
@@ -337,14 +354,15 @@ export function sayLine(
   if (repeated) {
     return state;
   }
-  return { ...state, waiting: [...state.waiting, line].slice(-timing.maxWaiting) };
+  const waiting = [...state.waiting, { ...line, waitedMs: 0 }];
+  return { ...state, waiting: waiting.slice(-timing.maxWaiting) };
 }
 
 // Adds a line ahead of every waiting line with its icon, as an urgent hint jumps the hints
 // waiting their turn, unless the same text is already shown or waiting. Past maxWaiting it
 // drops the oldest other waiting line.
 export function sayLineAhead(
-  timing: MessageTiming,
+  timing: Pick<MessageTiming, "maxWaiting">,
   line: MessageLine,
   state: MessageStripState,
 ): MessageStripState {
@@ -353,17 +371,20 @@ export function sayLineAhead(
     return state;
   }
   const others = state.waiting;
+  const added = { ...line, waitedMs: 0 };
   const at = others.findIndex(({ icon }) => icon === line.icon);
-  const waiting = at < 0 ? [...others, line] : [...others.slice(0, at), line, ...others.slice(at)];
+  const waiting =
+    at < 0 ? [...others, added] : [...others.slice(0, at), added, ...others.slice(at)];
   if (waiting.length <= timing.maxWaiting) {
     return { ...state, waiting };
   }
-  const oldest = waiting[0] === line ? 1 : 0;
+  const oldest = waiting[0] === added ? 1 : 0;
   return { ...state, waiting: waiting.filter((_, i) => i !== oldest) };
 }
 
-// Ages the shown line dtMs, drops it past its life, and shows the next waiting line once the
-// shown one has dwelt.
+// Ages the shown line and the waiting ones dtMs, drops the shown one past its life and each
+// waiting one past maxWaitMs that does not keep waiting, and shows the next waiting line once
+// the shown one has dwelt.
 export function stepMessageStrip(
   timing: MessageTiming,
   dtMs: number,
@@ -371,15 +392,18 @@ export function stepMessageStrip(
 ): MessageStripState {
   const aged = state.shown === null ? null : { ...state.shown, ageMs: state.shown.ageMs + dtMs };
   const shown = aged !== null && aged.ageMs < timing.lifeMs ? aged : null;
-  const [next, ...waiting] = state.waiting;
+  const stillWaiting = state.waiting
+    .map((line) => ({ ...line, waitedMs: line.waitedMs + dtMs }))
+    .filter((line) => line.keepsWaiting === true || line.waitedMs < timing.maxWaitMs);
+  const [next, ...waiting] = stillWaiting;
   if (next === undefined || (shown !== null && shown.ageMs < timing.dwellMs)) {
-    return { ...state, shown };
+    return { ...state, shown, waiting: stillWaiting };
   }
   return { nextId: state.nextId + 1, shown: { ...next, ageMs: 0, id: state.nextId }, waiting };
 }
 
 // How opaque the shown line is: whole, fading out over the last fadeMs of its life.
-export function lineAlpha(timing: MessageTiming, line: ShownLine): number {
+export function lineAlpha(timing: Pick<MessageTiming, "fadeMs" | "lifeMs">, line: ShownLine): number {
   const left = (timing.lifeMs - line.ageMs) / timing.fadeMs;
   return clamp01(left);
 }

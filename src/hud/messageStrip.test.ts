@@ -34,7 +34,7 @@ import {
   MESSAGE_ICONS,
   MESSAGE_LINE,
   MESSAGE_STRIP,
-  MESSAGE_TIMING,
+  messageTiming,
   type MessageIcon,
   messageIconKey,
   type MessageLine,
@@ -55,14 +55,15 @@ import { STRIP_LINE_FIELDS } from "./runText";
 import { debuffLines } from "./stripLines";
 import { debuffBarRects } from "./walkHud";
 
-const { dwellMs, fadeMs, lifeMs, maxWaiting } = MESSAGE_TIMING;
+const TIMING = messageTiming(gameData);
+const { dwellMs, fadeMs, lifeMs, maxWaitMs, maxWaiting } = TIMING;
 const line = (text: string, icon: MessageIcon = "hint"): MessageLine => ({ icon, text });
 
 // A strip after saying each text and stepping dtMs after each.
 function after(steps: readonly (readonly [string | null, number])[]): MessageStripState {
   return steps.reduce<MessageStripState>((state, [text, dtMs]) => {
-    const said = text === null ? state : sayLine(MESSAGE_TIMING, line(text), state);
-    return stepMessageStrip(MESSAGE_TIMING, dtMs, said);
+    const said = text === null ? state : sayLine(TIMING, line(text), state);
+    return stepMessageStrip(TIMING, dtMs, said);
   }, EMPTY_MESSAGE_STRIP);
 }
 const waitingTexts = (state: MessageStripState) => state.waiting.map(({ text }) => text);
@@ -72,16 +73,16 @@ const BODY = fontFileMetrics("font-body");
 describe("sayLine", () => {
   it("waits a new line and drops a repeat of the shown or a waiting line", () => {
     const showing = after([["a", 0]]);
-    const waitingB = sayLine(MESSAGE_TIMING, line("b"), showing);
+    const waitingB = sayLine(TIMING, line("b"), showing);
     expect(waitingTexts(waitingB)).toEqual(["b"]);
-    expect(waitingTexts(sayLine(MESSAGE_TIMING, line("a"), showing))).toEqual([]);
-    expect(waitingTexts(sayLine(MESSAGE_TIMING, line("b"), waitingB))).toEqual(["b"]);
+    expect(waitingTexts(sayLine(TIMING, line("a"), showing))).toEqual([]);
+    expect(waitingTexts(sayLine(TIMING, line("b"), waitingB))).toEqual(["b"]);
   });
 
   it("keeps the newest waiting lines, dropping the oldest", () => {
     const said = Array.from({ length: maxWaiting + 2 }, (_, i) => String(i));
     const state = said.reduce(
-      (strip, text) => sayLine(MESSAGE_TIMING, line(text), strip),
+      (strip, text) => sayLine(TIMING, line(text), strip),
       EMPTY_MESSAGE_STRIP,
     );
     expect(waitingTexts(state)).toEqual(said.slice(-maxWaiting));
@@ -93,9 +94,9 @@ describe("sayLineAhead", () => {
     const ahead = (waiting: readonly MessageLine[]) =>
       waitingTexts(
         sayLineAhead(
-          MESSAGE_TIMING,
+          TIMING,
           line("x"),
-          waiting.reduce((strip, said) => sayLine(MESSAGE_TIMING, said, strip), after([["s", 0]])),
+          waiting.reduce((strip, said) => sayLine(TIMING, said, strip), after([["s", 0]])),
         ),
       );
     expect(ahead([line("a"), line("b", "bump"), line("c")])).toEqual(["x", "a", "b", "c"]);
@@ -152,11 +153,26 @@ describe("stepMessageStrip", () => {
     expect(again.shown?.text).toBe("a");
     expect(again.shown?.id).not.toBe(first.shown?.id);
   });
+
+  // The lines still waiting after said waits waitedMs behind "a", which stays up all the while.
+  const waited = (said: MessageLine, waitedMs: number) => {
+    const showing = after([["a", 0]]);
+    const staying = { ...TIMING, dwellMs: Infinity, lifeMs: Infinity };
+    return stepMessageStrip(staying, waitedMs, sayLine(TIMING, said, showing)).waiting;
+  };
+  it.each([
+    ["a line", line("b"), maxWaitMs - 1, ["b"]],
+    ["a line", line("b"), maxWaitMs, []],
+    ["a hint", { ...line("b"), keepsWaiting: true as const }, maxWaitMs, ["b"]],
+    ["a firing", { ...line("b", "fired"), keepsWaiting: true as const }, 10 * maxWaitMs, ["b"]],
+  ])("keeps %s waiting %i ms as %j", (_name, said, waitedMs, waiting) => {
+    expect(waited(said, waitedMs).map(({ text }) => text)).toEqual(waiting);
+  });
 });
 
 describe("lineAlpha", () => {
   it("fades a line out over the end of its life", () => {
-    const alpha = (ageMs: number) => lineAlpha(MESSAGE_TIMING, { ...line("a"), ageMs, id: 0 });
+    const alpha = (ageMs: number) => lineAlpha(TIMING, { ...line("a"), ageMs, id: 0 });
     expect(alpha(0)).toBe(1);
     expect(alpha(lifeMs - fadeMs / 2)).toBeCloseTo(0.5);
     expect(alpha(lifeMs)).toBeCloseTo(0);
