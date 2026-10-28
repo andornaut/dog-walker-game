@@ -82,7 +82,18 @@ describe("labelPills", () => {
 });
 
 describe("addPixelText", () => {
-  it.each(FIRSTS.flatMap((first) => [1, 2].map((scale) => ({ scale, text: `${first}ow` }))))(
+  // Every first glyph at 1x, and at 2x, where the shift scales with the label, one whose title
+  // ink starts right of its origin and one whose ink starts at it.
+  const titleLeft = (first: string) =>
+    fontInk(FONTS.title, { letterSpacing: 0, scale: 1 }, `${first}OW`).left;
+  const twoX = [
+    FIRSTS.find((first) => titleLeft(first) > 0),
+    FIRSTS.find((first) => titleLeft(first) === 0),
+  ].flatMap((first) => (first === undefined ? [] : [first]));
+  it.each([
+    ...FIRSTS.map((first) => ({ scale: 1, text: `${first}ow` })),
+    ...twoX.map((first) => ({ scale: 2, text: `${first}ow` })),
+  ])(
     "starts left-aligned title and body $text's ink in one column at scale $scale",
     ({ scale, text }) => {
       const { drawn, scene } = fakeScene();
