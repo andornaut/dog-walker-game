@@ -159,7 +159,8 @@ describe("moneyFlightPath", () => {
 
 // Every money label, at the largest amounts a change makes, fits the label's room.
 describe("a money change's label", () => {
-  it.each([999, -999, 0])("fits %i dollars", (dollars) => {
+  // The widest amounts gained and lost.
+  it.each([999, -999])("fits %i dollars", (dollars) => {
     const { room } = MONEY_LABEL;
     const text = amountText("money", dollars * 100);
     const fitted = fitInFont("font-body", CHANGE_LABEL_STYLES, room, plainMarks(text));
