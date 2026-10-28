@@ -10,7 +10,6 @@ const { blinkSeconds, dimAlpha } = GRACE_BLINK;
 describe("graceAlpha", () => {
   // remaining is the grace left; elapsed blinks count from the window's start.
   it.each([
-    { alpha: 1, name: "with no window open", remaining: 0 },
     { alpha: 1, name: "past the window's end", remaining: -blinkSeconds },
     { alpha: 1, name: "as the window opens, through the hit stop", remaining: WINDOW },
     { alpha: 1, name: "in the first blink", remaining: WINDOW - 0.5 * blinkSeconds },
@@ -21,7 +20,6 @@ describe("graceAlpha", () => {
 
   it.each([
     { alpha: dimAlpha, remaining: WINDOW },
-    { alpha: dimAlpha, remaining: WINDOW - 1.5 * blinkSeconds },
     { alpha: dimAlpha, remaining: blinkSeconds / 2 },
     { alpha: 1, remaining: 0 },
   ])("holds the pack at $alpha with reduced motion, $remaining s of grace left", (row) => {

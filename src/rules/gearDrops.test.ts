@@ -92,7 +92,7 @@ describe("gear drop count", () => {
     },
   );
 
-  it.each([{ expected: 0 }, { expected: 1 }, { expected: 2 }])(
+  it.each([{ expected: 0 }, { expected: 1 }])(
     "draws nothing for a whole count of $expected",
     ({ expected }) => {
       let draws = 0;

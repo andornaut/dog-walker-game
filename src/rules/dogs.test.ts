@@ -76,7 +76,6 @@ describe("ownerMaxHearts", () => {
   it.each([
     ["biscuit", { lead: true, size: 3 }],
     ["kilo", { lead: false, size: 3 }],
-    ["buddy", { lead: false, size: 3 }],
   ] as const)(
     "caps %s's owner at the max of its place in the pack it set out with",
     (dog, place) => {

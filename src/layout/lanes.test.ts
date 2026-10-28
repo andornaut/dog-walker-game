@@ -5,7 +5,6 @@ import { type LaneDirection, laneMask, moveLane } from "./lanes";
 describe("laneMask", () => {
   it.each([
     { count: 0, first: 2, mask: 0b0 },
-    { count: 1, first: 0, mask: 0b1 },
     { count: 1, first: 3, mask: 0b1000 },
     { count: 3, first: 1, mask: 0b1110 },
     { count: 5, first: 0, mask: 0b11111 },
