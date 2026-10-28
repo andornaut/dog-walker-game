@@ -38,6 +38,7 @@ import {
   cardBand,
   detailCardLayout,
   detailOwner,
+  detailOwnerHeight,
   type DetailRow,
   DOG_TILE_TEXT_ROOM,
   dogTileNameY,
@@ -431,9 +432,9 @@ describe("a detail card", () => {
     ...walkers.map((walker) => ["walker", walkerDetail(gameData, owned, walker)] as const),
   ]);
   const { besideX, pad, well, width } = HOME_LAYOUT.card;
-  // An owner's role's lines at 1x as the card wraps them on the body font, within the name's room.
+  // An owner's role's lines at 2x as the card wraps them on the body font, within the name's room.
   const roleLines = (role: string) => {
-    const lineWidth = (line: string) => bodyTextWidth(1, plainMarks(line));
+    const lineWidth = (line: string) => bodyTextWidth(2, plainMarks(line));
     const lines = wrapWords(lineWidth, CARD_TEXT_ROOM.ownerName, role);
     expect(Math.max(...lines.map(lineWidth))).toBeLessThanOrEqual(CARD_TEXT_ROOM.ownerName);
     return lines;
@@ -493,8 +494,8 @@ describe("a detail card", () => {
         y: spot.name.y,
       };
       const roleRects = lines.map((line, i) => ({
-        height: inkRowsFromCapTop(BODY),
-        width: inkRight(1, line),
+        height: inkRowsFromCapTop(BODY) * 2,
+        width: inkRight(2, line),
         x: spot.role.x,
         y: spot.role.y + i * spot.role.pitch,
       }));
@@ -547,15 +548,28 @@ describe("a detail card", () => {
     expect(spot.photo).toEqual(ownerPhotoRect(face, spot.face));
   });
 
-  it.each([1, 2])("centres the name and a role on %i lines down the photo, inside it", (lines) => {
-    const spot = detailOwner(BODY, { x: besideX, y: 40 }, lines);
-    const above = spot.name.y - spot.photo.y;
-    const below = spot.photo.y + spot.photo.height - (spot.role.y + inkRowsOfLines(BODY, lines));
-    expect(above).toBeGreaterThanOrEqual(0);
-    expect(below - above).toBeGreaterThanOrEqual(0);
-    expect(below - above).toBeLessThanOrEqual(1);
-    expect(spot.role.y).toBeGreaterThan(spot.name.y + inkRowsFromCapTop(BODY) * 2);
+  // The rows a part leaves above and below it inside its row.
+  const margins = (row: { height: number; y: number }, top: number, bottom: number) => ({
+    above: top - row.y,
+    below: row.y + row.height - bottom,
   });
+  it.each([1, 2, 3])(
+    "centres the photo and the name over a role on %i lines down the row, the taller filling it",
+    (lines) => {
+      const row = { height: detailOwnerHeight(BODY, lines), y: 40 };
+      const spot = detailOwner(BODY, { x: besideX, y: row.y }, lines);
+      const textBottom = spot.role.y + inkRowsOfLines(BODY, lines) * 2;
+      const parts = [
+        margins(row, spot.photo.y, spot.photo.y + spot.photo.height),
+        margins(row, spot.name.y, textBottom),
+      ];
+      expect(
+        parts.filter(({ above, below }) => above < 0 || below - above < 0 || below - above > 1),
+      ).toEqual([]);
+      expect(Math.min(...parts.map(({ above }) => above))).toBe(0);
+      expect(spot.role.y).toBeGreaterThan(spot.name.y + inkRowsFromCapTop(BODY) * 2);
+    },
+  );
 });
 
 // Start walk's loading label fits the pressed face's room on one line in the title font, at

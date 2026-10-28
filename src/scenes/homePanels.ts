@@ -147,8 +147,8 @@ export function addDetailWell(scene: Scene, parent: GameObjects.Container, rect:
 
 type Owner = NonNullable<DetailCard["owner"]>;
 
-// The role's 1x body text, in the card's role colour.
-const ROLE_STYLE = { colour: PALETTE[CARD.owner.roleColour], scale: 1 } as const;
+// The role's 2x body text, in the card's role colour.
+const ROLE_STYLE = { colour: PALETTE[CARD.owner.roleColour], scale: TEXT_SCALE } as const;
 
 // The owner's role, wrapped within the name's room.
 function roleLines(scene: Scene, role: string): string[] {
