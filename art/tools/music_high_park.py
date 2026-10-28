@@ -2,9 +2,9 @@
 
 24 bars at about 94 dotted-quarter beats a minute. A breathy triangle flute sings the tune (A), a
 narrow-pulse oboe takes a contrasting phrase (B), and the flute returns over an oboe counter-line (A'),
-closing on C so the loop turns back to the top. Under them a triangle harp rolls open and sus voicings in
-eighths, an open-fifth pad holds the chord, a gentle triangle bass moves on the dotted quarters, and a soft
-wooden tick keeps time. A few short birdsong trills and calls fill the held notes.
+closing on C so the loop turns back to the top. Under them a triangle harp rolls up open and sus voicings
+and lets the top note ring, a gentle triangle bass moves on the dotted quarters, and a soft wooden tick keeps
+time. A few short birdsong trills and calls fill the held notes.
 
 Notes are "name:sixteenths"; "-" is a rest, "Bb" spells a flat, and "G5>A5" plays a quick G5 grace into A5.
 """
@@ -116,25 +116,20 @@ def bass(path, length, note):
 
 
 def harp(path, length, note):
-    """A plucked triangle that rings down within its eighth."""
+    """A plucked triangle that rings down within its note."""
     tone(path, length, "triangle", note, low=2500, attack=0.004, release=0.92, shape="q")
 
 
-def pad(path, length, chord):
-    """The chord's open fifth, held with a slow swell."""
-    root, fifth = VOICINGS[chord].replace("Bb", "A#").split()[:2]
-    tone(f"{path}-r.wav", length, "triangle", root, attack=0.18, release=0.5, shape="h")
-    tone(f"{path}-f.wav", length, "square", fifth, duty=30, low=900, attack=0.22, release=0.5, shape="h")
-    sox_mix([(f"{path}-r.wav", 1), (f"{path}-f.wav", 0.35)], path)
-
-
 def harp_score():
-    """Roll each chord in eighths: up and back over a whole bar, up over a half bar."""
+    """Roll each chord up in eighths: over a whole bar, three eighths and then the top note ringing for the
+    second dotted quarter; over a half bar, root, fifth and top."""
     notes = []
     for chord, steps in parse(CHORDS):
         v = VOICINGS[chord].replace("Bb", "A#").split()
-        order = (0, 1, 2, 3, 2, 1) if steps == 12 else (0, 1, 3)
-        notes += [(v[i], 2) for i in order]
+        if steps == 12:
+            notes += [(v[0], 2), (v[1], 2), (v[2], 2), (v[3], 6)]
+        else:
+            notes += [(v[i], 2) for i in (0, 1, 3)]
     return notes
 
 
@@ -188,8 +183,7 @@ def music(tmp, out):
         (voice(tmp, "hp-oboe", score(OBOE), oboe, step=STEP), 0.75),
         (voice(tmp, "hp-counter", score(COUNTER), oboe, step=STEP), 0.27),
         (voice(tmp, "hp-bass", score(BASS), bass, step=STEP), 0.42),
-        (voice(tmp, "hp-harp", harp_score(), harp, step=STEP), 0.21),
-        (voice(tmp, "hp-pad", parse(CHORDS), pad, step=STEP), 0.11),
+        (voice(tmp, "hp-harp", harp_score(), harp, step=STEP), 0.24),
         (voice(tmp, "hp-birds", bird_score(), bird, step=STEP), 0.18),
         (voice(tmp, "hp-drums", DRUMS * BARS, drum, step=STEP), 0.18),
     ]
