@@ -258,15 +258,17 @@ describe("chooseOption", () => {
   const groom = optionWith("skunk", "money");
   const lost = heartsOf("skunk");
 
-  // An option of every card in the data, by its encounter, index and id: a pick counts the same
-  // way whichever option it is, so the cards take their options' places in turn.
-  const picked = keysOf(ENCOUNTERS).flatMap((id, card) => {
-    const { resolution } = ENCOUNTERS[id];
-    const options: readonly CardOption[] = resolution.kind === "card" ? resolution.options : [];
-    const index = card % Math.max(1, options.length);
-    const option = options[index];
-    return option === undefined ? [] : [{ id, index, option: option.id }];
-  });
+  // A pick counts the same way whichever card and option it is, so the cards take their options'
+  // places in turn, and one card stands for each option place.
+  const picked = keysOf(ENCOUNTERS)
+    .flatMap((id, card) => {
+      const { resolution } = ENCOUNTERS[id];
+      const options: readonly CardOption[] = resolution.kind === "card" ? resolution.options : [];
+      const index = card % Math.max(1, options.length);
+      const option = options[index];
+      return option === undefined ? [] : [{ id, index, option: option.id }];
+    })
+    .filter((row, i, rows) => rows.findIndex(({ index }) => index === row.index) === i);
 
   it.each(picked)(
     "counts a pick of $id's $option by encounter and option id, as no tally",
