@@ -92,7 +92,7 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   stroller: { above: 60, left: -23, right: 24 },
   "strolling-busker": { above: 67, left: -23, right: 24 },
   taxi: { above: 41, left: -27, right: 28 },
-  thief: { above: 67, left: -17, right: 23 },
+  thief: { above: 67, left: -17, right: 21 },
   "tour-group": { above: 68, left: -50, right: 48 },
   tourist: { above: 67, left: -24, right: 19 },
   "tourist-train": { above: 61, left: -87, right: 87 },
