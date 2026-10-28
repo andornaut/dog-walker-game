@@ -178,12 +178,10 @@ describe("the roadside table", () => {
     expect(JSON.parse(tool.stdout)).toEqual(ROADSIDE);
   });
 
-  it.each(ZONE_ARTS)("places %s's props for a zone of the world", (art) => {
-    expect(gameData.world.zones.map((zone) => zone.art)).toContain(art);
-  });
-
-  it.each(ZONES)("gives %s a positive slot", (_, zone) => {
-    expect(zone.slot).toBeGreaterThan(0);
+  it("places each table's props for a zone of the world, a positive slot apart", () => {
+    const arts: readonly string[] = gameData.world.zones.map((zone) => zone.art);
+    expect(ZONE_ARTS.filter((art) => !arts.includes(art))).toEqual([]);
+    expect(ZONES.filter(([, zone]) => !(zone.slot > 0)).map(([art]) => art)).toEqual([]);
   });
 
   it("has every prop at every depth step in the manifest", () => {
@@ -196,16 +194,19 @@ describe("the roadside table", () => {
   });
 
   // On a lawn, past the sidewalk; on paving out to the screen's edges, past the curb and strips.
-  it.each(PROPS)("stands $key at across $across beyond $art's sidewalk", (prop) => {
-    const zone = gameData.world.zones.find(({ art }) => art === prop.art);
-    const verge = zone === undefined ? undefined : VERGES[zone.id as keyof typeof VERGES];
-    const clear =
-      verge === undefined
-        ? Infinity
-        : Number.isFinite(verge.walkTo)
-          ? verge.walkTo
-          : walkFrom(verge);
-    expect(prop.across - frameWidth(prop.key) / 2).toBeGreaterThan(clear);
+  it("stands every lot and gap prop wholly beyond its zone's sidewalk", () => {
+    const misfits = PROPS.filter((prop) => {
+      const zone = gameData.world.zones.find(({ art }) => art === prop.art);
+      const verge = zone === undefined ? undefined : VERGES[zone.id as keyof typeof VERGES];
+      const clear =
+        verge === undefined
+          ? Infinity
+          : Number.isFinite(verge.walkTo)
+            ? verge.walkTo
+            : walkFrom(verge);
+      return !(prop.across - frameWidth(prop.key) / 2 > clear);
+    });
+    expect(misfits).toEqual([]);
   });
 
   // Inside the curb band: off the road and the curb, and clear of the verge movers' stops.
