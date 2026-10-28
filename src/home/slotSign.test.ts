@@ -52,15 +52,18 @@ const cheapestRow = (rows: readonly ShopRow[]): ShopRow | undefined => {
   )?.row;
 };
 
+// With every slot owned there is nothing to afford, so the bank is checked once.
 const cases = tunings.flatMap(([prices, tuning]) =>
   slotSets.flatMap((dogSlots) =>
-    [true, false].map((affordable) => ({
-      affordable,
-      dogSlots,
-      owned: dogSlots.join(" and "),
-      prices,
-      tuning,
-    })),
+    (forSale.every((slot) => dogSlots.includes(slot)) ? [true] : [true, false]).map(
+      (affordable) => ({
+        affordable,
+        dogSlots,
+        owned: dogSlots.join(" and "),
+        prices,
+        tuning,
+      }),
+    ),
   ),
 );
 
