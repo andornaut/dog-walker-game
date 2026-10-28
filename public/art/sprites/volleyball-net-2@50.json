@@ -1,34 +1,34 @@
 { "frames": {
    "volleyball-net-2@50 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 56, "h": 18 },
+    "frame": { "x": 0, "y": 0, "w": 56, "h": 21 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 18 },
-    "sourceSize": { "w": 56, "h": 18 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 21 },
+    "sourceSize": { "w": 56, "h": 21 },
     "duration": 450
    },
    "volleyball-net-2@50 1.aseprite": {
-    "frame": { "x": 56, "y": 0, "w": 56, "h": 18 },
+    "frame": { "x": 56, "y": 0, "w": 56, "h": 21 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 18 },
-    "sourceSize": { "w": 56, "h": 18 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 21 },
+    "sourceSize": { "w": 56, "h": 21 },
     "duration": 450
    },
    "volleyball-net-2@50 2.aseprite": {
-    "frame": { "x": 112, "y": 0, "w": 56, "h": 18 },
+    "frame": { "x": 112, "y": 0, "w": 56, "h": 21 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 18 },
-    "sourceSize": { "w": 56, "h": 18 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 21 },
+    "sourceSize": { "w": 56, "h": 21 },
     "duration": 450
    },
    "volleyball-net-2@50 3.aseprite": {
-    "frame": { "x": 168, "y": 0, "w": 56, "h": 18 },
+    "frame": { "x": 168, "y": 0, "w": 56, "h": 21 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 18 },
-    "sourceSize": { "w": 56, "h": 18 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 21 },
+    "sourceSize": { "w": 56, "h": 21 },
     "duration": 450
    }
  },
@@ -37,7 +37,7 @@
   "version": "1.2.30-x64",
   "image": "volleyball-net-2@50.png",
   "format": "RGBA8888",
-  "size": { "w": 224, "h": 18 },
+  "size": { "w": 224, "h": 21 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 3, "direction": "forward" }

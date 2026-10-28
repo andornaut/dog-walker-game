@@ -27,15 +27,15 @@ rollerblader        48x72   minor rider, 1 lane, coming down its lane at the pac
                             hair, on white inline skates with yellow wheels. ride (4 frames, 100ms): a
                             skating stride, each foot pushing out to its side in turn, lifted 1px, the
                             body swaying 1px toward the gliding foot, the wheels' tread rolling 1px a frame
-volleyball-net-2    112x36  minor, 2 lanes: a beach volleyball net in front
-                            elevation, strung between white posts held by guy ropes, a white top band edged
-                            azure over coal mesh with clear holes, white bands down its ends and along its
-                            foot, a red and white striped antenna over each end, a rippled drift of sand
-                            under it heaped round the posts and a volleyball half sunk in it (left out at
-                            @69 and smaller, where it would be a square chip). idle (4 frames, 450ms): on
-                            frame 2 a breeze lifts the net's foot 1px in the middle and bends the antenna
-                            tips out 1px
-volleyball-net-3    176x36  minor, 3 lanes: the same net, a lane wider
+volleyball-net-2    112x42  minor, 2 lanes, drawn 42 rows tall: a beach volleyball net in front
+                            elevation, strung between white posts out by the frame's edges, a white top band
+                            edged azure over coal mesh with clear holes 3px across, white bands down its ends
+                            and along its foot, a red and white striped antenna over each end, a rippled
+                            drift of sand under it heaped against the posts and a volleyball half sunk in it
+                            (left out at @69 and smaller, where it would be a square chip). idle (4 frames,
+                            450ms): on frame 2 a breeze lifts the net's foot 1px in the middle and bends the
+                            antenna tips out 1px
+volleyball-net-3    176x42  minor, 3 lanes, drawn 42 rows tall: the same net, a lane wider
 
 Yonge Street:
 promo-team          48x72   card obstacle (Big screen promo): a street team promoter in a turquoise
@@ -663,6 +663,12 @@ NET_IDLE = (0, 0, 1, 0), 450
 BALL_MIN = 0.85
 # The mesh's holes while it is drawn and outlined, so the outline does not fill them; net() clears them after.
 HOLE = "000001"
+# The nets' layout rows: taller than obstacles.ROW so the net reads at @50, a multiple of 5 so every depth step
+# is a whole number of rows at obstacles.SCALE.
+NET_ROWS = 35
+# The net's top and bottom rows in layout pixels, and its mesh pitch in drawn pixels: a 1px coal line every
+# NET_PITCH pixels round holes NET_PITCH - 1 across.
+NET_TOP, NET_BOTTOM, NET_PITCH = 5, 24, 4
 
 
 def net_edge(c):
@@ -672,14 +678,14 @@ def net_edge(c):
 
 def volleyball_net(lanes, breeze=0):
     """Front elevation across lanes lanes, laid out in obstacles.py's pixels (obstacles.span(lanes) by
-    obstacles.ROW): a white post at each end held by a guy rope to a stake outside it, and strung between their
-    tops the net: a white top band edged azure along its foot, coal mesh in a 1px grid every 3 drawn pixels
-    with clear holes, a white band down each end and along the bottom, and a red and white striped antenna
-    rising well over each end. A rippled drift of sand runs under it all, heaped round each post, with a
+    NET_ROWS): a white post at each end, out by the frame's edges, and strung between their tops the net: a
+    white top band edged azure along its foot, coal mesh in a 1px grid every NET_PITCH drawn pixels with clear
+    holes, a white band down each end and along the bottom, and a red and white striped antenna rising over
+    each end. A rippled drift of sand runs under it all, heaped against each post's inner side, with a
     volleyball (hood_people.volley_ball) half sunk in it by the right post, left out below BALL_MIN. breeze
     lifts the bottom band's middle half and bends each antenna's tip outward 1px."""
-    w = obstacles.span(lanes)
-    g = edged(Grid(w, obstacles.ROW), net_edge)
+    w, h = obstacles.span(lanes), NET_ROWS
+    g = edged(Grid(w, h), net_edge)
     px, s = raster(g), scale_of(g)
     sy = getattr(g, "sy", s)
 
@@ -689,27 +695,24 @@ def volleyball_net(lanes, breeze=0):
     def Y(v):
         return math.floor(v * sy + 0.5)
 
-    posts = (7, w - 11)
-    # the guy ropes, from each post's top out to a stake in the sand
-    for top_x, stake_x in ((posts[0], 1), (posts[1] + 4, w - 1.5)):
-        x0, y0, x1, y1 = X(top_x), Y(4), X(stake_x), Y(26)
-        for y in range(y0, y1 + 1):
-            px.p(round(x0 + (x1 - x0) * (y - y0) / (y1 - y0)), y, "driftwood")
+    posts = (2, w - 6)
+    crest = h - 3.5
     # the posts, white lit down their left and shaded lgrey down their right, an lgrey cap on each
     for x in posts:
-        g.rect(x, 4, 4, 23, "white")
-        g.rect(x + 3, 4, 1, 23, "lgrey")
+        g.rect(x, 4, 4, crest + 1 - 4, "white")
+        g.rect(x + 3, 4, 1, crest + 1 - 4, "lgrey")
         g.rect(x - 0.5, 3, 5, 1.5, "lgrey")
     # the net between the posts, on the drawn grid so every line stays 1px
     x0, x1 = X(posts[0] + 4), X(posts[1])
-    top, foot, bottom = Y(6), Y(9), Y(19)
+    top, foot, bottom = Y(NET_TOP), Y(NET_TOP + 4), Y(NET_BOTTOM)
     px.rect(x0, top, x1 - x0, foot - top, "white")
     px.rect(x0, foot - 1, x1 - x0, 1, "azure")
     lift = x0 + (x1 - x0) // 4, x1 - (x1 - x0) // 4
     for x in range(x0, x1):
         low = bottom - (1 if breeze and lift[0] <= x < lift[1] else 0)
         for y in range(foot, low):
-            px.p(x, y, "coal" if (x - x0) % 3 == 0 or (y - foot) % 3 == 2 else HOLE)
+            line = (x - x0) % NET_PITCH == 0 or (y - foot) % NET_PITCH == NET_PITCH - 1
+            px.p(x, y, "coal" if line else HOLE)
         px.p(x, low, "white")
     for x in (x0, x1 - 1):
         px.rect(x, foot, 1, bottom - foot, "white")
@@ -720,17 +723,16 @@ def volleyball_net(lanes, breeze=0):
             c = "red" if (y - Y(0)) // 2 % 2 == 0 else "white"
             px.p(x + (out if breeze and y == Y(0) else 0), y, c)
     # the sand: a drift the width of the net, its top rippling a pixel, heaped into a mound round each post
-    for x in range(X(2), X(w - 2)):
-        crest = Y(26.5) - (1 if (x // max(2, X(5))) % 2 else 0)
-        px.rect(x, crest, 1, Y(obstacles.ROW) - crest, "tan")
-        px.p(x, crest, "cream")
-        px.p(x, Y(obstacles.ROW) - 1, "brown")
-    for x in posts:
-        g.cel(x + 2, 27, 6, 3.5, "tan", "brown", "cream")
+    for x in range(X(1.5), X(w - 1.5)):
+        top_y = Y(crest) - (1 if (x // max(2, X(5))) % 2 else 0)
+        px.rect(x, top_y, 1, Y(h) - top_y, "tan")
+        px.p(x, top_y, "cream")
+        px.p(x, Y(h) - 1, "brown")
+    for x in (posts[0] + 4.5, posts[1] - 0.5):
+        g.cel(x, h - 3, 5, 3.5, "tan", "brown", "cream")
     if s >= BALL_MIN:
-        hood_people.volley_ball(g, posts[1] - 11, 26)
+        hood_people.volley_ball(g, posts[1] - 11, h - 4)
     return lit(g)
-
 
 def net(s, lanes, breeze):
     """volleyball_net at s, outlined, its holes cleared."""

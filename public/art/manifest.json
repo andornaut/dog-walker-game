@@ -13323,8 +13323,8 @@
       "png": "sprites/volleyball-net-2.png",
       "json": "sprites/volleyball-net-2.json",
       "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 112
+        "feetY": 41,
+        "opaqueWidth": 110
       }
     },
     {
@@ -13332,8 +13332,8 @@
       "png": "sprites/volleyball-net-2@50.png",
       "json": "sprites/volleyball-net-2@50.json",
       "anchor": {
-        "feetY": 17,
-        "opaqueWidth": 56
+        "feetY": 20,
+        "opaqueWidth": 55
       }
     },
     {
@@ -13341,8 +13341,8 @@
       "png": "sprites/volleyball-net-2@56.png",
       "json": "sprites/volleyball-net-2@56.json",
       "anchor": {
-        "feetY": 19,
-        "opaqueWidth": 63
+        "feetY": 23,
+        "opaqueWidth": 62
       }
     },
     {
@@ -13350,8 +13350,8 @@
       "png": "sprites/volleyball-net-2@62.png",
       "json": "sprites/volleyball-net-2@62.json",
       "anchor": {
-        "feetY": 22,
-        "opaqueWidth": 70
+        "feetY": 25,
+        "opaqueWidth": 69
       }
     },
     {
@@ -13359,8 +13359,8 @@
       "png": "sprites/volleyball-net-2@69.png",
       "json": "sprites/volleyball-net-2@69.json",
       "anchor": {
-        "feetY": 24,
-        "opaqueWidth": 77
+        "feetY": 28,
+        "opaqueWidth": 76
       }
     },
     {
@@ -13368,8 +13368,8 @@
       "png": "sprites/volleyball-net-2@75.png",
       "json": "sprites/volleyball-net-2@75.json",
       "anchor": {
-        "feetY": 26,
-        "opaqueWidth": 84
+        "feetY": 31,
+        "opaqueWidth": 83
       }
     },
     {
@@ -13377,8 +13377,8 @@
       "png": "sprites/volleyball-net-2@81.png",
       "json": "sprites/volleyball-net-2@81.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 91
+        "feetY": 33,
+        "opaqueWidth": 89
       }
     },
     {
@@ -13386,8 +13386,8 @@
       "png": "sprites/volleyball-net-2@88.png",
       "json": "sprites/volleyball-net-2@88.json",
       "anchor": {
-        "feetY": 31,
-        "opaqueWidth": 98
+        "feetY": 36,
+        "opaqueWidth": 96
       }
     },
     {
@@ -13395,8 +13395,8 @@
       "png": "sprites/volleyball-net-2@94.png",
       "json": "sprites/volleyball-net-2@94.json",
       "anchor": {
-        "feetY": 33,
-        "opaqueWidth": 105
+        "feetY": 38,
+        "opaqueWidth": 103
       }
     },
     {
@@ -13404,8 +13404,8 @@
       "png": "sprites/volleyball-net-3.png",
       "json": "sprites/volleyball-net-3.json",
       "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 176
+        "feetY": 41,
+        "opaqueWidth": 174
       }
     },
     {
@@ -13413,8 +13413,8 @@
       "png": "sprites/volleyball-net-3@50.png",
       "json": "sprites/volleyball-net-3@50.json",
       "anchor": {
-        "feetY": 17,
-        "opaqueWidth": 88
+        "feetY": 20,
+        "opaqueWidth": 87
       }
     },
     {
@@ -13422,8 +13422,8 @@
       "png": "sprites/volleyball-net-3@56.png",
       "json": "sprites/volleyball-net-3@56.json",
       "anchor": {
-        "feetY": 19,
-        "opaqueWidth": 99
+        "feetY": 23,
+        "opaqueWidth": 98
       }
     },
     {
@@ -13431,8 +13431,8 @@
       "png": "sprites/volleyball-net-3@62.png",
       "json": "sprites/volleyball-net-3@62.json",
       "anchor": {
-        "feetY": 22,
-        "opaqueWidth": 110
+        "feetY": 25,
+        "opaqueWidth": 109
       }
     },
     {
@@ -13440,8 +13440,8 @@
       "png": "sprites/volleyball-net-3@69.png",
       "json": "sprites/volleyball-net-3@69.json",
       "anchor": {
-        "feetY": 24,
-        "opaqueWidth": 121
+        "feetY": 28,
+        "opaqueWidth": 120
       }
     },
     {
@@ -13449,8 +13449,8 @@
       "png": "sprites/volleyball-net-3@75.png",
       "json": "sprites/volleyball-net-3@75.json",
       "anchor": {
-        "feetY": 26,
-        "opaqueWidth": 132
+        "feetY": 31,
+        "opaqueWidth": 131
       }
     },
     {
@@ -13458,8 +13458,8 @@
       "png": "sprites/volleyball-net-3@81.png",
       "json": "sprites/volleyball-net-3@81.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 143
+        "feetY": 33,
+        "opaqueWidth": 141
       }
     },
     {
@@ -13467,8 +13467,8 @@
       "png": "sprites/volleyball-net-3@88.png",
       "json": "sprites/volleyball-net-3@88.json",
       "anchor": {
-        "feetY": 31,
-        "opaqueWidth": 154
+        "feetY": 36,
+        "opaqueWidth": 152
       }
     },
     {
@@ -13476,8 +13476,8 @@
       "png": "sprites/volleyball-net-3@94.png",
       "json": "sprites/volleyball-net-3@94.json",
       "anchor": {
-        "feetY": 33,
-        "opaqueWidth": 165
+        "feetY": 38,
+        "opaqueWidth": 163
       }
     },
     {
