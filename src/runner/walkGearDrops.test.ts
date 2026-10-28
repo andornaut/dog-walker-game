@@ -95,9 +95,12 @@ describe("gear drop planning", () => {
     },
   );
 
-  it.each(POSITIONS.slice(0, 1))("plans the same drops from the same seed at walk position %i", (position) => {
-    expect(dropsOf(position, 1)).toEqual(dropsOf(position, 1));
-  });
+  it.each(POSITIONS.slice(0, 1))(
+    "plans the same drops from the same seed at walk position %i",
+    (position) => {
+      expect(dropsOf(position, 1)).toEqual(dropsOf(position, 1));
+    },
+  );
 
   // The planner places each quota it draws, so the Pocket's item is checked among the quotas. It
   // leaves out whichever item the Pocket holds the same way, so one item stands for all.

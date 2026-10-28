@@ -162,11 +162,14 @@ describe("gear drop pick", () => {
     }
   });
 
-  it.each(POSITIONS.slice(0, 1))("draws the same drops from the same seed at position %i", (position) => {
-    const run = walkWith(null, { zoneIndex: position - 1 });
-    const draws = [1, 2].map(() => drawGearDrops(data, seededRandom(position * 31), run));
-    expect(draws[0]).toEqual(draws[1]);
-  });
+  it.each(POSITIONS.slice(0, 1))(
+    "draws the same drops from the same seed at position %i",
+    (position) => {
+      const run = walkWith(null, { zoneIndex: position - 1 });
+      const draws = [1, 2].map(() => drawGearDrops(data, seededRandom(position * 31), run));
+      expect(draws[0]).toEqual(draws[1]);
+    },
+  );
 });
 
 describe("grabbing a gear drop", () => {

@@ -91,9 +91,12 @@ describe("lucky finds", () => {
   );
 
   // The planner draws every zone's finds from the same streams, so one zone shows it repeats.
-  it.each(FIRST_PLACES.slice(0, 1))("places the same finds from the same seed in $zone", (place) => {
-    expect(findsOf(REAL, place, 1)).toEqual(findsOf(REAL, place, 1));
-  });
+  it.each(FIRST_PLACES.slice(0, 1))(
+    "places the same finds from the same seed in $zone",
+    (place) => {
+      expect(findsOf(REAL, place, 1)).toEqual(findsOf(REAL, place, 1));
+    },
+  );
 
   // Two or three finds, a walking neighbour among them where the zone's mover share has one walk,
   // each in its own spaced stretch of the zone.

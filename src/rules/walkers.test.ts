@@ -50,8 +50,7 @@ describe("packAgility", () => {
     (pack) => ownOf(pack) === Math.max(...owns) || ownOf(pack) === Math.min(...owns),
   );
   const ends = extremes.filter(
-    (pack) =>
-      extremes.find((other) => ownOf(other) === ownOf(pack))?.walker === pack.walker,
+    (pack) => extremes.find((other) => ownOf(other) === ownOf(pack))?.walker === pack.walker,
   );
   it.each(ends)(
     "slows $walker by largeDogAgility for each of $count large dogs, never below minPackAgility",

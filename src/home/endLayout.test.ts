@@ -72,9 +72,7 @@ const cases = BREAKDOWN_LINES.flatMap((lines) =>
   ).flat(),
 );
 // The panel stacks its rows the same way at every count, so the fewest and the most rows.
-const panelCases = cases.filter(
-  ([, rows]) => rows === 1 || rows === SCREEN_CONFIG.dogSlotCount,
-);
+const panelCases = cases.filter(([, rows]) => rows === 1 || rows === SCREEN_CONFIG.dogSlotCount);
 const quipRows = (count: number, fired: boolean, lines: readonly number[]): QuipRow[] =>
   Array.from({ length: count }, (_, i) => ({ fired, lines: lines[i] ?? 1 }));
 

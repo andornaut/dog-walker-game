@@ -1361,7 +1361,8 @@ describe("moverPlacements", () => {
   // cue shows from as soon as its row comes on screen, for at least its warning.
   it.each(
     SPECS.filter(({ spec: moving }) => ["cross", "ride"].includes(moving.motion.kind)).flatMap(
-      ({ name, spec: moving }) => endsOf(moving).map(({ draws, end }) => ({ draws, end, moving, name })),
+      ({ name, spec: moving }) =>
+        endsOf(moving).map(({ draws, end }) => ({ draws, end, moving, name })),
     ),
   )(
     "shows $name by the time its row comes on screen, at $end of its draws",

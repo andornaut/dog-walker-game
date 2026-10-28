@@ -400,14 +400,15 @@ describe("the shop's message", () => {
   const { room, styles } = SHOP_MESSAGE_FIT;
   const fit = (text: string) => fitInFont("font-body", styles, room, plainMarks(text));
   const unique = [...new Set(messages)].flatMap((text) => (text === null ? [] : [text]));
-  const widestOfStyle = unique.filter((text) =>
-    fit(text).lines.length !== 1 ||
-    unique.every(
-      (other) =>
-        JSON.stringify(fit(other).style) !== JSON.stringify(fit(text).style) ||
-        fit(other).widest < fit(text).widest ||
-        (fit(other).widest === fit(text).widest && unique.indexOf(other) >= unique.indexOf(text)),
-    ),
+  const widestOfStyle = unique.filter(
+    (text) =>
+      fit(text).lines.length !== 1 ||
+      unique.every(
+        (other) =>
+          JSON.stringify(fit(other).style) !== JSON.stringify(fit(text).style) ||
+          fit(other).widest < fit(text).widest ||
+          (fit(other).widest === fit(text).widest && unique.indexOf(other) >= unique.indexOf(text)),
+      ),
   );
 
   it.each(widestOfStyle)("sets %j on one line inside its plate's frame", (text) => {
