@@ -10053,6 +10053,87 @@
       }
     },
     {
+      "key": "taxi",
+      "png": "sprites/taxi.png",
+      "json": "sprites/taxi.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 52
+      }
+    },
+    {
+      "key": "taxi@50",
+      "png": "sprites/taxi@50.png",
+      "json": "sprites/taxi@50.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "taxi@56",
+      "png": "sprites/taxi@56.png",
+      "json": "sprites/taxi@56.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "taxi@62",
+      "png": "sprites/taxi@62.png",
+      "json": "sprites/taxi@62.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "taxi@69",
+      "png": "sprites/taxi@69.png",
+      "json": "sprites/taxi@69.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "taxi@75",
+      "png": "sprites/taxi@75.png",
+      "json": "sprites/taxi@75.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "taxi@81",
+      "png": "sprites/taxi@81.png",
+      "json": "sprites/taxi@81.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "taxi@88",
+      "png": "sprites/taxi@88.png",
+      "json": "sprites/taxi@88.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 45
+      }
+    },
+    {
+      "key": "taxi@94",
+      "png": "sprites/taxi@94.png",
+      "json": "sprites/taxi@94.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 49
+      }
+    },
+    {
       "key": "thief",
       "png": "sprites/thief.png",
       "json": "sprites/thief.json",
