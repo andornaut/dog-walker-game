@@ -213,9 +213,10 @@ type PopAt =
   | { readonly kind: "walker" };
 
 // One buff's pop over the road at at (index-th of the step's pops there): its charm, and a chip
-// of the value it made, if any. Each pop glints the buff's walk bar well. forgiven is a bump the walker's perk forgave, whole or in part,
-// whose heart pop turns from loss to gain as the charm shows; reach is a pickup grabbed by
-// Long reach, with a dotted line from its dog (the pack's lead when null) to the item.
+// of the value it made, if any. Each pop glints the buff's walk bar well. forgiven is a bump the
+// walker's perk forgave, whole or in part, whose heart pop turns from loss to gain as the charm
+// shows; reach is a pickup grabbed by Long reach, with a dotted line from its dog (the pack's
+// lead when null) to the item.
 export interface BuffPop {
   readonly at: PopAt;
   readonly chip: string | null;

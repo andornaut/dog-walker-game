@@ -355,7 +355,7 @@ export class RunMoments {
       const at = this.itemPoint(item, pack);
       this.addChanges(at, changes);
       showInstantPopup(this.scene, encounter, at, this.deps.still());
-      this.say(luckyLine(gameData, encounter, changes));
+      this.say(luckyLine(gameData, encounter));
       this.afterOutcome(outcome);
       this.hint({ kind: "luckyFind" });
     }

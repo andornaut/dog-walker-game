@@ -24,13 +24,7 @@ import {
 } from "./faceText";
 import { MESSAGE_LINE, MESSAGE_STRIP, messageStripLayout } from "./messageStrip";
 import { lowHeartsText } from "./moments";
-import {
-  bumpLines,
-  firedLine,
-  forgivenLines,
-  spareTreatUsedLine,
-  treatLine,
-} from "./stripLines";
+import { bumpLines, firedLine, forgivenLines, spareTreatUsedLine, treatLine } from "./stripLines";
 
 const BODY = fontFileMetrics("font-body");
 const AT_2X = { letterSpacing: 0, scale: MESSAGE_STRIP.scale };

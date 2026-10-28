@@ -403,7 +403,10 @@ export function stepMessageStrip(
 }
 
 // How opaque the shown line is: whole, fading out over the last fadeMs of its life.
-export function lineAlpha(timing: Pick<MessageTiming, "fadeMs" | "lifeMs">, line: ShownLine): number {
+export function lineAlpha(
+  timing: Pick<MessageTiming, "fadeMs" | "lifeMs">,
+  line: ShownLine,
+): number {
   const left = (timing.lifeMs - line.ageMs) / timing.fadeMs;
   return clamp01(left);
 }

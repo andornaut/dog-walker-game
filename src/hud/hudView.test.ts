@@ -146,7 +146,11 @@ describe("totalLabel", () => {
     ({ amount: cents(amount), causes: [{ amount, kind }], dog: null, kind: "money" }) as const;
 
   it.each([
-    ["the fees and the Walk bonus", [paid(2000, "pay"), paid(2000, "pay"), paid(5000, "bonus")], "+$90"],
+    [
+      "the fees and the Walk bonus",
+      [paid(2000, "pay"), paid(2000, "pay"), paid(5000, "bonus")],
+      "+$90",
+    ],
     ["one fee", [paid(2000, "pay")], "+$20"],
   ] as const)("labels %s by the cash as one total", (_name, changes, text) => {
     expect(totalLabel(changes)).toEqual({

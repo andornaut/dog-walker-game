@@ -188,13 +188,9 @@ function sharedTotal(
 }
 
 // A lucky find's line: the hearts the friendly neighbour shares, whose owners' gains their heart
-// pops show, or the money a wallet held, from the changes it made. A find with no line of its
-// own says nothing.
-export function luckyLine(
-  data: LuckyData,
-  encounter: EncounterId,
-  changes: readonly Change[],
-): MessageLine | null {
+// pops show, or the wallet found, whose money its label shows. A find with no line of its own
+// says nothing.
+export function luckyLine(data: LuckyData, encounter: EncounterId): MessageLine | null {
   if (encounter === "pettingNeighbour") {
     const hearts = String(sharedTotal(data, encounter));
     return { icon: "lucky", text: stripLine(data, "luckyNeighbour", { hearts }) };

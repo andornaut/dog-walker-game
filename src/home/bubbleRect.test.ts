@@ -70,7 +70,9 @@ describe("the walker's speech", () => {
     parts: parts.map((part) => withNamePills(gameData, part)),
   });
   const messages = [
-    ...keysOf(text.bubble).flatMap((line) => walkers.map((walker) => walkerSays(gameData, line, walker))),
+    ...keysOf(text.bubble).flatMap((line) =>
+      walkers.map((walker) => walkerSays(gameData, line, walker)),
+    ),
     text.noticePackFull,
     text.noticeSoundOff,
     text.noticeSoundOn,
@@ -143,9 +145,7 @@ describe("the walker's speech", () => {
     "centres %s's owner's face over their name, the text centred down the bubble",
     (dog) => {
       const column = ownerColumn(nameInk(dog));
-      const lines = bubbleLines(width, column, [
-        gameData.quips[dog].parting[0] ?? "",
-      ]);
+      const lines = bubbleLines(width, column, [gameData.quips[dog].parting[0] ?? ""]);
       const size = bubbleSize(body, lines.lines.length, 100, column);
       const rect = { ...size, x: 0, y: 0 };
       const { face, name } = ownerPlace(rect, column);
@@ -160,10 +160,19 @@ describe("the walker's speech", () => {
 describe("speechLines", () => {
   const chars = (line: string) => line.length;
   it.each([
-    [["ab", "cd"], ["ab", "cd"]],
+    [
+      ["ab", "cd"],
+      ["ab", "cd"],
+    ],
     [["ab cd ef"], ["ab", "cd", "ef"]],
-    [["ab cd", "ef gh", "ij kl"], ["ab", "cd", "ef", "gh", "ij", "kl"]],
-  ])("starts each paragraph of %j on a new line and wraps at spaces, leaving none out", (paragraphs, lines) => {
-    expect(speechLines(chars, 3, paragraphs)).toEqual(lines);
-  });
+    [
+      ["ab cd", "ef gh", "ij kl"],
+      ["ab", "cd", "ef", "gh", "ij", "kl"],
+    ],
+  ])(
+    "starts each paragraph of %j on a new line and wraps at spaces, leaving none out",
+    (paragraphs, lines) => {
+      expect(speechLines(chars, 3, paragraphs)).toEqual(lines);
+    },
+  );
 });

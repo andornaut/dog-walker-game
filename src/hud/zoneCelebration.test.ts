@@ -96,7 +96,11 @@ describe("celebrationText", () => {
     earnings[key].replace("{amount}", amount);
 
   it.each([
-    ["every earning", zoneDone(5000, 24000, 3800), [part("fees", "+$240"), part("tips", "+$38"), part("bonus", "+$50")]],
+    [
+      "every earning",
+      zoneDone(5000, 24000, 3800),
+      [part("fees", "+$240"), part("tips", "+$38"), part("bonus", "+$50")],
+    ],
     ["no $0 tips or bonus", zoneDone(0, 24000, 0), [part("fees", "+$240")]],
     ["the fees alone when nothing paid", zoneDone(0, 0, 0), [part("fees", "+$0")]],
   ] as const)("writes %s as gains in dollars", (_name, celebration, parts) => {

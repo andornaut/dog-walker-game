@@ -190,7 +190,11 @@ describe("bubbleSpeech", () => {
         name: "lets a just-bought dog's owner speak though the dog is not picked",
       },
       {
-        action: { kind: "bought", name: "Lucky collar", purchase: { gear: "luckyCollar", kind: "gear" } },
+        action: {
+          kind: "bought",
+          name: "Lucky collar",
+          purchase: { gear: "luckyCollar", kind: "gear" },
+        },
         dogs: [],
         expected: { owner: null, paragraphs: [text.bubble.afterWalk] },
         line: "afterWalk",

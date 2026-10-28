@@ -107,13 +107,7 @@ describe("the strip's other lines", () => {
         fillNames(strip.fired, { dog: kilo.name, owner }),
       ],
       ["a pull", pullLine(gameData, "kilo").text, fillNames(strip.pull, { dog: kilo.name })],
-      [
-        "the lost wallet's money",
-        luckyLine(gameData, "lostWallet", [
-          { amount: cents(1000), causes: [], dog: null, kind: "money" },
-        ])?.text,
-        strip.luckyWallet,
-      ],
+      ["the lost wallet's money", luckyLine(gameData, "lostWallet")?.text, strip.luckyWallet],
       [
         "the Walk bonus",
         fullPackLine(gameData, [
@@ -153,17 +147,12 @@ describe("the strip's other lines", () => {
 });
 
 describe("luckyLine: the friendly neighbour", () => {
-  const total = String(read(gameData.tuning, "hearts", "neighbourHearts"));
-  const reggieGain: HeartChange = { ...hearts(1, 2), dog: "reggie" };
-  const found: MoneyChange = { amount: cents(500), causes: [], dog: null, kind: "money" };
-
-  it.each<[string, (HeartChange | MoneyChange)[]]>([
-    ["owners' gains", [hearts(1, 3), reggieGain]],
-    ["every owner already at their max", []],
-    ["money", [found]],
-  ])("says the hearts shared, whatever %s", (_name, changes) => {
-    const said = luckyLine(gameData, "pettingNeighbour", changes);
-    expect(said).toEqual({ icon: "lucky", text: fillNames(strip.luckyNeighbour, { hearts: total }) });
+  it("says the hearts the neighbour shares", () => {
+    const hearts = String(read(gameData.tuning, "hearts", "neighbourHearts"));
+    expect(luckyLine(gameData, "pettingNeighbour")).toEqual({
+      icon: "lucky",
+      text: fillNames(strip.luckyNeighbour, { hearts }),
+    });
   });
 });
 
