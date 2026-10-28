@@ -619,7 +619,8 @@ function patternMotion(
 // its most, the first min from the spawns stream and any more from the movers stream; it may take
 // the first steps of them, or of their mirror image, as many as its drawn count. A bounce, a
 // follower, a stop-and-go and a sway draw nothing here (patternMotion). A dive is a dart that
-// always stops in a lane, never on the verge, sliding its last lane. A hopper may make
+// always stops in a lane, never on the verge, sliding its last lane. A merge is a rider that
+// changes lane once. A hopper may make
 // any hops it can, as many as its drawn count, of up to HOP_SEQUENCES_MOST ways for each count,
 // drawn here from the movers stream where there are more. The planner takes whichever way keeps
 // the road passable, drawing among those from the zone's seed.
@@ -664,6 +665,12 @@ export function moverSpec(
     motion = patternMotion(data, movement);
   } else if (movement.kind === "inLane") {
     motion = { kind: "ride", speedMultiplier: movement.factor };
+  } else if (movement.kind === "merge") {
+    motion = {
+      kind: "ride",
+      merge: { at: movement.mergeAt, seconds: movement.mergeSeconds },
+      speedMultiplier: movement.factor,
+    };
   } else if (movement.kind === "approach") {
     motion = {
       firstDelaySeconds: [

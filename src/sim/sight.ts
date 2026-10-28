@@ -69,7 +69,11 @@ export function moverShows(path: MoverPath, since: number): string {
     return hasStopped(path, since) ? "stopped" : "crossing";
   }
   if (path.motion === "ride") {
-    return since < path.warning ? "cue" : "riding";
+    if (since < path.warning) {
+      return "cue";
+    }
+    const { merge } = path;
+    return merge !== undefined && since >= merge.at - merge.cue ? "merge" : "riding";
   }
   const { cued, started } = stepsSeen(path, since);
   return `${started.length} ${cued === undefined ? "" : "cued"}`;
@@ -98,7 +102,8 @@ function lengthsSeen(lengths: readonly number[], started: number, nominal: numbe
 //   crossing once, and while it waits at its edge, as waiting there until it has left the road;
 //   then at its own speed and tilt, crossing once until it turns back, stops or lands and slides,
 //   then as it does.
-// - a rider at its kind's speed until it enters, then at its own.
+// - a rider at its kind's speed until it enters, then at its own, in its lane until the cue of
+//   its merge, if it has one, shows the way it will merge.
 // - a stepper, stalker or shy hopper with the steps it has started; with its wander mark showing,
 //   also the next step, at its start, as each shape it may take (nextShapes), its kind's length
 //   long. An uncued step is unknown until it starts.
@@ -151,9 +156,11 @@ export function sightPaths(road: SightRoad, since: number, item: WalkItem): read
     }));
   }
   if (path.motion === "ride") {
-    return since >= path.warning || movement?.kind !== "inLane"
-      ? [path]
-      : [{ ...path, speedMultiplier: movement.factor }];
+    const { merge, ...lane } = path;
+    const seen = merge !== undefined && since < merge.at - merge.cue ? lane : path;
+    return since >= path.warning || (movement?.kind !== "inLane" && movement?.kind !== "merge")
+      ? [seen]
+      : [{ ...seen, speedMultiplier: movement.factor }];
   }
   const { cued, started } = stepsSeen(path, since);
   const { cell, laneCount } = road.geometry;

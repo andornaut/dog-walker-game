@@ -114,6 +114,7 @@ export const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>
   streetcar: "red",
   stroller: "green",
   strollingBusker: "green",
+  taxi: "yellow",
   tourGroup: "yellow",
   tourist: "cream",
   trashCan: "green",

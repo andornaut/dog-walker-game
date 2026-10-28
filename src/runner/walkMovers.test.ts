@@ -352,7 +352,8 @@ describe("movers", { timeout: 120_000 }, () => {
       .map(({ id }) => id as ZoneId);
   };
 
-  // Each kind some zone draws whose movement is a pattern (bounce, dive, follow, stopAndGo, sway),
+  // Each kind some zone draws whose movement is a pattern (bounce, dive, follow, merge, stopAndGo,
+  // sway),
   // planned across seeds at the first zone's pace and the last's with every mover moving, as the
   // passability sweep plans it: its most moves, whether it cues each move, and its lanes.
   const patternOf = (movement: Movement | null) => {
@@ -372,7 +373,9 @@ describe("movers", { timeout: 120_000 }, () => {
   const patterned = OBSTACLE_KINDS.filter(
     (kind) =>
       zonesOf(kind).length > 0 &&
-      (patternOf(movementOf(kind)) !== null || movementOf(kind)?.kind === "dive"),
+      (patternOf(movementOf(kind)) !== null ||
+        movementOf(kind)?.kind === "dive" ||
+        movementOf(kind)?.kind === "merge"),
   );
   // A kind's movers planned in the zones that draw it, on more seeds than the sweep's, so a kind
   // weighed low still comes up.
@@ -388,7 +391,8 @@ describe("movers", { timeout: 120_000 }, () => {
   // A stepping pattern moves at least once and at most its most, each step a lane to one side
   // (back the way it came, for a bounce or a sway, so it rocks between two lanes), or in its lane
   // only for a stop-and-go, at its kind's speed; it stays on the road. A dive always lands and
-  // slides into a lane, never turning back or stopping on the verge.
+  // slides into a lane, never turning back or stopping on the verge. A merge rides its lane and
+  // merges a lane to one side on the road, wholly before it reaches the pack's rows.
   it.each(patterned)("moves each %s in its pattern, within its lanes", (kind) => {
     const movement = movementOf(kind);
     const pattern = patternOf(movement);
@@ -400,6 +404,19 @@ describe("movers", { timeout: 120_000 }, () => {
         expect(mover.turnAfter).toBeNull();
         expect(mover.stopAfter).not.toBeNull();
         expect(mover.stopAfter ?? Infinity).toBeLessThanOrEqual(LANE_COUNT);
+        continue;
+      }
+      if (mover.motion === "ride") {
+        expect(movement?.kind).toBe("merge");
+        const { merge } = mover;
+        expect(Math.abs(merge?.lanes ?? 0)).toBe(1);
+        const merged = mover.lane + (merge?.lanes ?? 0);
+        expect(merged).toBeGreaterThanOrEqual(0);
+        expect(merged + span).toBeLessThanOrEqual(LANE_COUNT);
+        const done = (merge?.at ?? Infinity) + (merge?.length ?? 0);
+        expect(moverPlace(LANE_COUNT, mover, done).travel).toBeLessThanOrEqual(
+          GAME_ROAD.sightLength,
+        );
         continue;
       }
       expect(mover.motion).toBe("steps");
@@ -425,13 +442,19 @@ describe("movers", { timeout: 120_000 }, () => {
     }
   });
 
-  // Its first move is cued: a dive's arrow before it sets off, a stepping pattern's wander mark
+  // Its first move is cued: a dive's arrow before it sets off, a merge's arrow down its lane
+  // before it enters and its wander mark before it merges, and a stepping pattern's wander mark
   // before its first step and, where its kind cues each, before every step.
   it.each(patterned)("cues each %s's first move, and each later one its kind cues", (kind) => {
     const pattern = patternOf(movementOf(kind));
     for (const mover of pathsOf(kind)) {
       if (mover.motion === "cross") {
         expect(moverTell(mover, mover.warning - 1e-6)?.kind).toBe("across");
+        continue;
+      }
+      if (mover.motion === "ride") {
+        expect(moverTell(mover, mover.warning - 1e-6)?.kind).toBe("down");
+        expect(moverTell(mover, (mover.merge?.at ?? 0) - 1e-6)?.kind).toBe("wander");
         continue;
       }
       const steps = mover.motion === "steps" ? mover.steps : [];

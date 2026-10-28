@@ -79,7 +79,7 @@ export function deliveryGroup(
   if (movement === "dart" || movement === "dive") {
     return "minorDart";
   }
-  return movement === "inLane" ? "minorRider" : "minorOther";
+  return movement === "inLane" || movement === "merge" ? "minorRider" : "minorOther";
 }
 
 function noGroups(): Record<DeliveryGroup, Delivered> {

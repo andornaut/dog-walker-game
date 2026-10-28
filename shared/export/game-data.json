@@ -2271,6 +2271,24 @@
       "spriteKey": "strolling-busker"
     },
     {
+      "id": "taxi",
+      "movement": {
+        "factor": 1.6,
+        "kind": "merge",
+        "mergeAt": 0.4,
+        "mergeSeconds": 0.5
+      },
+      "name": "Taxi",
+      "shape": {
+        "lanes": 1,
+        "rows": 2
+      },
+      "zones": [
+        "homeStretch"
+      ],
+      "spriteKey": "taxi"
+    },
+    {
       "id": "tourGroup",
       "movement": {
         "kind": "follow",
@@ -2770,6 +2788,7 @@
           "streetcar": 0,
           "stroller": 2,
           "strollingBusker": 0,
+          "taxi": 0,
           "tourGroup": 0,
           "tourist": 0,
           "trashCan": 3.5,
@@ -2868,6 +2887,7 @@
           "streetcar": 0,
           "stroller": 3,
           "strollingBusker": 0,
+          "taxi": 0,
           "tourGroup": 0,
           "tourist": 0,
           "trashCan": 8,
@@ -2966,6 +2986,7 @@
           "streetcar": 0,
           "stroller": 10,
           "strollingBusker": 0,
+          "taxi": 0,
           "tourGroup": 2,
           "tourist": 2,
           "trashCan": 3,
@@ -3064,6 +3085,7 @@
           "streetcar": 2,
           "stroller": 7,
           "strollingBusker": 5,
+          "taxi": 0,
           "tourGroup": 0,
           "tourist": 0,
           "trashCan": 3.75,
@@ -3162,6 +3184,7 @@
           "streetcar": 0,
           "stroller": 4,
           "strollingBusker": 0,
+          "taxi": 0,
           "tourGroup": 0,
           "tourist": 0,
           "trashCan": 3.75,
@@ -3260,6 +3283,7 @@
           "streetcar": 3,
           "stroller": 3,
           "strollingBusker": 0,
+          "taxi": 3,
           "tourGroup": 0,
           "tourist": 7.12,
           "trashCan": 6,

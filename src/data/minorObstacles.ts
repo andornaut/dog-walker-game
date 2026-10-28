@@ -266,6 +266,12 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
     zones: ["shops"],
   },
+  taxi: {
+    movement: { factor: 1.6, kind: "merge", mergeAt: 0.4, mergeSeconds: 0.5 },
+    name: "Taxi",
+    shape: { lanes: 1, rows: 2 },
+    zones: ["homeStretch"],
+  },
   tourGroup: {
     movement: { kind: "follow", pauseSeconds: 0.6, steps: { max: 2, min: 1 } },
     name: "Tour group",

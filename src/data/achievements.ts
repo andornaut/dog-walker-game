@@ -309,6 +309,7 @@ export const ACHIEVEMENTS = [
           "rollerblader",
           "scooter",
           "streetcar",
+          "taxi",
           "ttcBus",
         ],
       },

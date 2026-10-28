@@ -30,8 +30,9 @@ export interface MoverStep {
 // lanes it stops, with no cue, and stands there, coming down the road with it. With both null it
 // crosses once. With slide (a dive), it crosses its last lane before its stop at slide of its
 // speed, sliding to its stop.
-// ride (inLane): its cue is at the top of its lanes, where it enters once the cue ends, coming
-// down them at speedMultiplier of the road's speed.
+// ride (inLane, merge): its cue is at the top of its lanes, where it enters once the cue ends,
+// coming down them at speedMultiplier of the road's speed. With merge, it moves lanes across over
+// length of scroll from at, its cue showing for cue before that.
 // steps (step, hop): it stands on the road from its spawn and takes each step in turn.
 // approach: it stands on the road from its spawn and takes the steps it has chosen, each
 // toward the pack as the pack stood when its cue began (approach.ts), and has pending steps
@@ -62,6 +63,7 @@ export type MoverPath = {
   | {
       readonly lane: number;
       readonly lanes: number;
+      readonly merge?: RideMerge;
       readonly motion: "ride";
       readonly speedMultiplier: number;
     }
@@ -90,6 +92,34 @@ export type MoverPath = {
       readonly stopTravel: number;
     }
 );
+
+// A merging rider's lane change: lanes across, over length of scroll from at, a scroll since its
+// cue appeared, after its own cue, cue long.
+export interface RideMerge {
+  readonly at: number;
+  readonly cue: number;
+  readonly lanes: LaneDirection;
+  readonly length: number;
+}
+
+// How far across a rider has merged since scroll after its cue appeared: none before its merge,
+// and all of it after.
+function mergedLanes(path: Extract<MoverPath, { motion: "ride" }>, since: number): number {
+  const { merge } = path;
+  return merge === undefined
+    ? 0
+    : merge.lanes * Math.min(1, Math.max(0, (since - merge.at) / merge.length));
+}
+
+// Whether a rider is moving across into its merge lane, since scroll after its cue appeared.
+export function isMerging(path: MoverPath, since: number): boolean {
+  return (
+    path.motion === "ride" &&
+    path.merge !== undefined &&
+    since >= path.merge.at &&
+    since < path.merge.at + path.merge.length
+  );
+}
 
 // When a stalker's pending step starts: after, at a scroll since it spawned, after its cue;
 // near, with no cue of its own, once its travel reaches travel and the step before has ended.
@@ -229,7 +259,7 @@ export function moverPlace(laneCount: number, path: MoverPath, since: number): M
   const moved = since - path.warning;
   if (path.motion === "ride") {
     return {
-      lanePosition: path.lane,
+      lanePosition: path.lane + mergedLanes(path, since),
       solid: moved >= 0,
       travel: Math.max(0, moved) * path.speedMultiplier,
     };
@@ -256,7 +286,7 @@ export function moverPlace(laneCount: number, path: MoverPath, since: number): M
 
 // The cue a mover shows, about a second before each move: an arrow across the road for a dart,
 // down or up its lane for an in-lane move faster or slower than the road, or the wander mark
-// before a step.
+// before a step or a rider's merge.
 export type MoverTell =
   | { readonly direction: LaneDirection; readonly kind: "across" }
   | { readonly kind: "down" }
@@ -270,10 +300,13 @@ export function moverTell(path: MoverPath, since: number): MoverTell | null {
       : null;
   }
   if (path.motion === "ride") {
-    if (since >= path.warning) {
-      return null;
+    if (since < path.warning) {
+      return { kind: path.speedMultiplier > 1 ? "down" : "up" };
     }
-    return { kind: path.speedMultiplier > 1 ? "down" : "up" };
+    const { merge } = path;
+    return merge !== undefined && since >= merge.at - merge.cue && since < merge.at
+      ? { kind: "wander" }
+      : null;
   }
   return cuedStep(path, since) === undefined ? null : { kind: "wander" };
 }
@@ -307,14 +340,15 @@ export function inMotion(path: MoverPath, since: number): boolean {
 
 // Whether a mover faces left. Side-view art faces right, so it is mirrored while this holds: a
 // crosser running left, the way it set off or back after turning, and a stepper or hopper from the
-// start of a step to the left until a step to the right. A rider and a stepper yet to move sideways
-// face right.
+// start of a step to the left until a step to the right. A rider merging left faces left from its
+// merge's cue on; any other rider and a stepper yet to move sideways face right.
 export function facesLeft(path: MoverPath, since: number): boolean {
   if (path.motion === "cross") {
     return (turnedBack(path, since) ? -path.direction : path.direction) === -1;
   }
   if (path.motion === "ride") {
-    return false;
+    const { merge } = path;
+    return merge !== undefined && merge.lanes < 0 && since >= merge.at - merge.cue;
   }
   const sideways = path.steps.filter((step) => step.lanes !== 0 && since >= step.at);
   return (sideways.at(-1)?.lanes ?? 0) < 0;
@@ -484,7 +518,11 @@ export function sweptLanes(
   inset = 0,
 ): LaneSpan {
   if (path.motion === "ride") {
-    return { count: path.lanes, first: path.lane };
+    const merged = path.lane + (path.merge?.lanes ?? 0);
+    return {
+      count: path.lanes + Math.abs(merged - path.lane),
+      first: Math.min(path.lane, merged),
+    };
   }
   if (path.motion === "steps" || path.motion === "approach" || path.motion === "shy") {
     return { count: 1, first: path.lane };
@@ -607,14 +645,15 @@ interface ShyHops {
 // enters from, drawn per mover, standing there. With slide (a dive), it crosses its last lane
 // before that stop at slide of its speed.
 // ride: down its lane at speedMultiplier of the road's speed, above 1 toward the pack, below 1
-// away. steps: one of the sequences as long as its count, drawn per mover from count, each step
-// stepSeconds long however many spots it covers; the planner picks whichever keeps the road
-// passable. The count is drawn from the lengths of the sequences within count, each as likely. Each
-// step after the first comes pauseSeconds after the one before ends, none without it; with cueEach,
-// each step has a cue of its own, and the pause is at least the cue. With drift, each step also
-// travels drift of its length down the road, up when below 0: a push at a speed. With shy, a share
-// of them hop shy instead, as many times as their count. approach:
-// steps steps toward the pack, drawn per mover, each stepSeconds long, the first's cue
+// away. With merge, once its travel down the road is at of the way to the pack's rows it moves a
+// lane to one side over seconds, after a cue. steps: one of the sequences as long as its count,
+// drawn per mover from count, each step stepSeconds long however many spots it covers; the
+// planner picks whichever keeps the road passable. The count is drawn from the lengths of the
+// sequences within count, each as likely. Each step after the first comes pauseSeconds after the
+// one before ends, none without it; with cueEach, each step has a cue of its own, and the pause
+// is at least the cue. With drift, each step also travels drift of its length down the road, up
+// when below 0: a push at a speed. With shy, a share of them hop shy instead, as many times as
+// their count. approach: steps steps toward the pack, drawn per mover, each stepSeconds long, the first's cue
 // firstDelaySeconds after the mover is wholly on the road and each later one, with no cue, once
 // the step before has ended and the road between it and the pack is secondRoadShare of the road's
 // length, each range drawn from per mover.
@@ -639,7 +678,11 @@ export type MoverMotion =
       readonly turnBackShare: number;
       readonly vergeShare: number;
     }
-  | { readonly kind: "ride"; readonly speedMultiplier: number }
+  | {
+      readonly kind: "ride";
+      readonly merge?: { readonly at: number; readonly seconds: number };
+      readonly speedMultiplier: number;
+    }
   | {
       readonly count: MoveCount;
       readonly cueEach?: true;
@@ -997,15 +1040,19 @@ function crossPlacements(
 // from the rows above its own to those below the pack; slower, those rows overtake it, and it
 // overlaps the pack for longer, which its rows cover. Its speed is its kind's at its drawn
 // factor; every factor keeps it coming down the road. Its cue shows from as soon as its row comes
-// on screen, and for at least warningSeconds.
+// on screen, and for at least warningSeconds. One that merges moves a lane to either side that
+// stays on the road, one placement each, starting once its travel is its merge's share of the way
+// to the pack's rows, but no sooner than its merge's cue, warningSeconds long, can show once it has
+// entered, nor so late that it is still moving across as it reaches them; with no such moment it
+// has no placement. It is placed as a rider over both its lanes, blocking and standing in each.
 function ridePlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
-  kindMultiplier: number,
+  motion: Extract<MoverMotion, { kind: "ride" }>,
   draws: MoverDraws,
 ): MoverPlacement[] {
   const { cellLength, laneCount, roadLength, rowSpacing, scrollSpeed, sightLength } = geometry;
-  const speedMultiplier = kindMultiplier * speedFactor(spec.variation, draws);
+  const speedMultiplier = motion.speedMultiplier * speedFactor(spec.variation, draws);
   if (speedMultiplier <= 0 || speedMultiplier === 1) {
     throw new Error("A rider must move faster or slower than the road");
   }
@@ -1027,37 +1074,66 @@ function ridePlacements(
   const length = bodyLength(geometry, rows);
   const gone = enters + (roadLength + Math.max(length, rows * cellLength)) / speedMultiplier;
   const [nearest, farthest] = [level(enters), level(gone)].sort((a, b) => a - b);
-  return Array.from({ length: laneCount - across + 1 }, (_, lane) => ({
-    appears: enters - shown,
-    body: {
-      from: nearest ?? 0,
-      lanes: { count: across, first: lane },
-      to: (farthest ?? 0) + length,
-    },
-    cells: blockCells(firstRow, lastRow - firstRow + 1, lane, across),
-    lane,
-    lanes: { count: across, first: lane },
-    path: {
-      lane,
-      lanes: across,
-      motion: "ride",
-      movement: spec.movement,
-      speedMultiplier,
-      warning: shown,
-    },
-    rows: blockRows,
-    screen: [enters - shown, leaves],
-    stands: [
-      {
-        distance: 0,
-        lane,
-        lanes: across,
-        length:
-          (drawnHitLength(geometry, spec) + geometry.packHitLength) / speedMultiplier -
-          geometry.packHitLength,
-      },
-    ],
-  }));
+  // A merge's start, as travel down the road from the road's top, and its length in scroll.
+  const mergeLength = (motion.merge?.seconds ?? 0) * scrollSpeed;
+  const mergeFrom = Math.max(
+    warning * speedMultiplier,
+    Math.min((motion.merge?.at ?? 0) * sightLength, sightLength - mergeLength * speedMultiplier),
+  );
+  if (motion.merge !== undefined && mergeFrom + mergeLength * speedMultiplier > sightLength) {
+    return [];
+  }
+  const directions = motion.merge === undefined ? [0] : [-1, 1];
+  return Array.from({ length: laneCount - across + 1 }, (_, lane) => lane).flatMap((lane) =>
+    directions.flatMap((direction): MoverPlacement[] => {
+      const merged = lane + direction;
+      if (merged < 0 || merged + across > laneCount) {
+        return [];
+      }
+      const lanes = { count: across + Math.abs(direction), first: Math.min(lane, merged) };
+      const merge =
+        direction === 0
+          ? {}
+          : {
+              merge: {
+                at: shown + mergeFrom / speedMultiplier,
+                cue: warning,
+                lanes: direction as LaneDirection,
+                length: mergeLength,
+              },
+            };
+      return [
+        {
+          appears: enters - shown,
+          body: { from: nearest ?? 0, lanes, to: (farthest ?? 0) + length },
+          cells: blockCells(firstRow, lastRow - firstRow + 1, lanes.first, lanes.count),
+          lane,
+          lanes,
+          path: {
+            lane,
+            lanes: across,
+            ...merge,
+            motion: "ride",
+            movement: spec.movement,
+            speedMultiplier,
+            warning: shown,
+          },
+          rows: blockRows,
+          screen: [enters - shown, leaves],
+          stands: [
+            {
+              distance: 0,
+              lane: lanes.first,
+              lanes: lanes.count,
+              length:
+                (drawnHitLength(geometry, spec) + geometry.packHitLength) / speedMultiplier -
+                geometry.packHitLength,
+            },
+          ],
+        },
+      ];
+    }),
+  );
 }
 
 // Where a mover that stands on the road may be, by lane offset and travel from where it spawns.
@@ -1381,7 +1457,7 @@ export function moverPlacements(
     case "cross":
       return crossPlacements(geometry, spec, motion, draws, lift);
     case "ride":
-      return ridePlacements(geometry, spec, motion.speedMultiplier, draws);
+      return ridePlacements(geometry, spec, motion, draws);
     default:
       return stepsPlacements(geometry, spec, motion, draws);
   }

@@ -379,10 +379,14 @@ export interface Tilt {
 // pauseSeconds long (the leader's signal). stopAndGo: stops + 1 pushes down its lane at factor of
 // the road's speed, goSeconds each, standing still on the road for stopSeconds between them, each
 // push after a cue. sway: times times a step a lane to one side and back, rocking between two
-// lanes, seconds.moverStepSeconds each, pausing pauseSeconds after every step. A cue at least
+// lanes, seconds.moverStepSeconds each, pausing pauseSeconds after every step. merge: down its
+// lane at factor of the road's speed, as an in-lane mover, then once its travel down the road is
+// mergeAt of the way to the pack's rows, after a cue, a lane to one side with room over
+// mergeSeconds, and on down that lane; it merges once, and never once it has reached the pack's
+// rows. A cue at least
 // seconds.moverWarningSeconds long precedes each move that has one.
 // The archetypes: dash and swoop are dart (a swoop has a tilt or a turn back), wander is step,
-// stalk is approach, cruise is inLane, and hop, bounce, dive, follow (follow the leader),
+// stalk is approach, cruise is inLane, and hop, bounce, dive, follow (follow the leader), merge,
 // stopAndGo and sway are their own names.
 // Each in-lane mover's speed varies by up to multipliers.moverSpeedJitter either way and each
 // dart's and dive's by up to multipliers.dartSpeedJitter, each step and hop comes up to
@@ -407,6 +411,12 @@ export type Movement =
       readonly times: MoveCount;
     }
   | { readonly kind: "inLane"; readonly factor: number }
+  | {
+      readonly factor: number;
+      readonly kind: "merge";
+      readonly mergeAt: number;
+      readonly mergeSeconds: number;
+    }
   | { readonly kind: "step"; readonly steps: MoveCount }
   | {
       readonly factor: number;

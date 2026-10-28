@@ -143,7 +143,8 @@ describe("a sight reading", () => {
 
 // What a player who knows a pattern mover's kind reads of its cued step: a bounce's or a sway's
 // way back once it has stepped aside, either way before; a follower's either way; a stop-and-go's
-// push down its lane at its speed. A dive's stop shows once it lands and slides, not before.
+// push down its lane at its speed. A dive's stop shows once it lands and slides, and a merge's
+// way once its cue shows, not before.
 describe("a pattern mover's sight reading", () => {
   const BOUNCE = kindMoving((movement) => movement.kind === "bounce");
   const DIVE = kindMoving((movement) => movement.kind === "dive");
@@ -194,6 +195,22 @@ describe("a pattern mover's sight reading", () => {
     read.forEach(({ travel }, i) => {
       expect(travel).toBeCloseTo(reads[i]?.travel ?? NaN);
     });
+  });
+
+  // A merge to the left at 300 px of scroll, its cue 60 px long.
+  const MERGE = kindMoving((movement) => movement.kind === "merge");
+  const merging: MoverPath = {
+    ...rider,
+    lane: 2,
+    merge: { at: 300, cue: 60, lanes: -1, length: 40 },
+    movement: "merge",
+  };
+  it.each([
+    { name: "before its cue", shows: false, since: 239 },
+    { name: "as its cue shows", shows: true, since: 241 },
+  ])("reads a merge $name: $shows", ({ shows, since }) => {
+    const read = sightPaths(road, since, item(MERGE, merging, since));
+    expect(read.map((path) => path.motion === "ride" && path.merge !== undefined)).toEqual([shows]);
   });
 
   // A dive 2.5 lanes to its stop at 0.01 lanes a pixel, landing 1.5 lanes in.

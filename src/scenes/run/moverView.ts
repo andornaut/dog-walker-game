@@ -23,6 +23,7 @@ import {
   facesLeft,
   hasStopped,
   inMotion,
+  isMerging,
   isSliding,
   type MoverOnRoad,
   moverPlace,
@@ -76,9 +77,9 @@ export function moverBodyKey(scene: Scene, kind: EncounterId | MinorObstacleId):
 // the juncture; a cue shows only once wholly below it. A mover stands on the road through the
 // projection, across the middle of the lanes it is drawn over (drawnLanes), while it is solid,
 // sized by showAtDepth on its body part's feet, mirrored while it faces left (facesLeft), playing
-// the tag moverBodyTag picks, in its cue or dive pose while it holds one (played once through,
-// not looped), or prizeMoverTag for a lucky find. Before a dart or in-lane move
-// only its cue shows, at 1x, each part only while its art is loaded:
+// the tag moverBodyTag picks, in its cue, dive or merge pose while it holds one (the cue and the
+// dive played once through, not looped), or prizeMoverTag for a lucky find. Before a dart or
+// in-lane move only its cue shows, at 1x, each part only while its art is loaded:
 // a sign at the road's edge on its row with the arrow pointing across, or a sign at the top of
 // its lanes with the arrow pointing down or up. A crosser with an idle tag also stands at the
 // edge, playing it, while it waits there before its cue and during its cue. A crosser that has
@@ -123,7 +124,13 @@ export function drawMover(
       const placed = project(PROJECTION, { distance, x: laneX });
       const drawn = showAtDepth(body.sprite, body.key, placed.scale, body.feet);
       const has = (candidate: string) => scene.anims.exists(animationKey(drawn.key, candidate));
-      const pose = isSliding(path, since) ? "dive" : tell === null ? null : CUE_POSE;
+      const pose = isSliding(path, since)
+        ? "dive"
+        : isMerging(path, since)
+          ? "merge"
+          : tell === null
+            ? null
+            : CUE_POSE;
       const tag = lucky
         ? prizeMoverTag(has, path.movement, moving && !halted, halted)
         : moverBodyTag(has, path.movement, moving && !halted, pose);
