@@ -339,15 +339,14 @@ function steeredAway(
   );
 }
 
-// One step of the pull clock. pressed is the lane presses applied this step, in order. With
-// no dog straining, the dog nearest the nearest squirrel starts its tell toward it, which
-// draws squirrelPulls pulls. A strain whose target has gone, passed or been reached ends, and
-// steering away from the target cancels it. Once the tell has run, and the squirrel is off the
-// pack's lane (a darting one once it moves), the dog pulls one lane toward it, unless
-// the fairness rule blocks the pull: then it strains on until the lane clears or the strain
-// ends. A strain toward a target leaving past the road's edge beside the pack fails. A target
-// with pulls left starts the tell again. Nothing moves unless the walk is
-// walking with no hit stop.
+// One step of the pull clock. pressed is the lane presses applied this step, in order. With no dog
+// straining, the dog nearest the nearest squirrel starts its tell toward it, which draws
+// squirrelPulls pulls. A strain whose target has gone, passed or been reached ends, and steering
+// away from the target cancels it. Once the tell has run, and the squirrel is off the pack's lane
+// (a darting one once it moves), the dog pulls one lane toward it, unless the fairness rule blocks
+// the pull: then it strains on until the lane clears or the strain ends. A strain toward a target
+// leaving past the road's edge beside the pack fails. A target with pulls left starts the tell
+// again. Nothing moves unless the walk is walking with no hit stop.
 export function stepPulls(
   data: PullData,
   geometry: PullGeometry,
@@ -363,6 +362,14 @@ export function stepPulls(
   let spent = stillOnRoad(walk.road.items, pulls.spent);
   const tell = read(data.tuning, "seconds", "pullTell");
   const lane = destinationLane(walk.road.control.motion);
+
+  // The pulls once a strain toward the item with itemId ends, that target's pulls spent.
+  const spentOn = (itemId: number): Pulls => ({
+    ...pulls,
+    clock,
+    spent: [...spent, itemId],
+    strain: null,
+  });
 
   let strain = pulls.strain;
   let target = strain === null ? null : currentTarget(geometry, strain, walk);
@@ -382,8 +389,7 @@ export function stepPulls(
     }
     const pullsLeft = squirrelPulls(data, walk);
     if (pullsLeft < 1) {
-      const next = { ...pulls, clock, spent: [...spent, target.itemId], strain: null };
-      return { ...NOTHING, failed, leashed: [dog], pulls: next, walk };
+      return { ...NOTHING, failed, leashed: [dog], pulls: spentOn(target.itemId), walk };
     }
     strain = {
       blocked: false,
@@ -403,8 +409,7 @@ export function stepPulls(
   // Steering away from the target during the strain cancels the pull, and the target's pulls
   // with it.
   if (steeredAway(geometry.laneCount, lane, pressed, strain)) {
-    const next = { ...pulls, clock, spent: [...spent, strain.itemId], strain: null };
-    return { ...NOTHING, failed: [strain.dog], pulls: next, walk };
+    return { ...NOTHING, failed: [strain.dog], pulls: spentOn(strain.itemId), walk };
   }
   const leaned: Strain = {
     ...strain,
@@ -416,8 +421,7 @@ export function stepPulls(
   }
   // A target leaving past the road's edge from beside the pack's edge lane draws no pull.
   if (clampIndex(geometry.laneCount, lane + leaned.direction) === lane) {
-    const next = { ...pulls, clock, spent: [...spent, leaned.itemId], strain: null };
-    return { ...NOTHING, failed: [leaned.dog], pulls: next, walk };
+    return { ...NOTHING, failed: [leaned.dog], pulls: spentOn(leaned.itemId), walk };
   }
   if (pullBlocked(data, geometry, leaned, walk)) {
     return {
