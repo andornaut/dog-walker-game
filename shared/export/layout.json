@@ -2743,9 +2743,9 @@
     ],
     "zoneWell": {
       "height": 12,
-      "width": 132,
-      "y": 5,
-      "x": 87
+      "width": 140,
+      "x": 83,
+      "y": 5
     },
     "debuffBar": {
       "fill": {
@@ -2847,9 +2847,9 @@
         "textGap": 4,
         "well": {
           "height": 12,
-          "width": 132,
-          "y": 5,
-          "x": 87
+          "width": 140,
+          "x": 83,
+          "y": 5
         }
       }
     }

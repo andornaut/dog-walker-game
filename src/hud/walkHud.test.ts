@@ -179,6 +179,15 @@ describe("the walk bar", () => {
     expect(right - left).toBeLessThanOrEqual(1);
   });
 
+  it("insets the effect wells as far from either end of the neighbourhood well", () => {
+    const first = BAR.effectWells[0] ?? BAR.zoneWell;
+    const last = BAR.effectWells.at(-1) ?? BAR.zoneWell;
+    const left = first.x - BAR.zoneWell.x;
+    const right = BAR.zoneWell.x + BAR.zoneWell.width - (last.x + last.width);
+    expect(left).toBeGreaterThan(0);
+    expect(right).toBe(left);
+  });
+
   it.each(WALK_BAR_BUTTONS)("gives %s a hit area the bar's full height, a tap tall", (id) => {
     const { hit } = BAR.buttons[id];
     expect(hit.height).toBe(topBar.height);
