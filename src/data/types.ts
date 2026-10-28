@@ -646,6 +646,8 @@ export interface HomeText {
     readonly gearEquipped: string;
     readonly gearOwned: string;
     readonly gearSubtitle: string;
+    // A dog's owner's {role}, under their name beside their photo.
+    readonly ownerRole: string;
     readonly priceBuy: string;
     readonly priceLocked: string;
     // A walker's detail card's agility, as agilityPercent says it, left out for a walker at the

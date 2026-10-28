@@ -43,7 +43,6 @@ import {
   dogTileNameY,
   dogTilePlateY,
   HOME_LAYOUT,
-  OWNER_ROW,
   pocketLining,
   sectionFill,
   slotSignText,
@@ -432,6 +431,13 @@ describe("a detail card", () => {
     ...walkers.map((walker) => ["walker", walkerDetail(gameData, owned, walker)] as const),
   ]);
   const { besideX, pad, well, width } = HOME_LAYOUT.card;
+  // An owner's role's lines at 1x as the card wraps them on the body font, within the name's room.
+  const roleLines = (role: string) => {
+    const lineWidth = (line: string) => bodyTextWidth(1, plainMarks(line));
+    const lines = wrapWords(lineWidth, CARD_TEXT_ROOM.ownerName, role);
+    expect(Math.max(...lines.map(lineWidth))).toBeLessThanOrEqual(CARD_TEXT_ROOM.ownerName);
+    return lines;
+  };
   // The card's rows as the panel lays them out: each row of text's line count, the owner's row
   // on a dog's card.
   const rowsOf = (kind: "dog" | "gear" | "walker", card: DetailCard) => {
@@ -441,7 +447,7 @@ describe("a detail card", () => {
         ? [...card.lines, card.status].map(text(CARD_TEXT_ROOM.beside))
         : [
             text(CARD_TEXT_ROOM.beside)(card.subtitle),
-            ...(card.owner === undefined ? [] : [OWNER_ROW]),
+            ...(card.owner === undefined ? [] : [{ roleLines: roleLines(card.owner.role).length }]),
             text(CARD_TEXT_ROOM.beside)(card.status),
           ];
     const below = kind === "gear" ? [] : card.lines.map(text(CARD_TEXT_ROOM.full));
@@ -462,28 +468,36 @@ describe("a detail card", () => {
     },
   );
 
-  // The columns a line inks in 2x body text.
-  const nameInk = (line: string) =>
-    fontInk("font-body", { letterSpacing: 0, scale: 2 }, plainMarks(line));
+  // The columns a line inks in the body font at scale.
+  const inkRight = (scale: number, line: string) =>
+    fontInk("font-body", { letterSpacing: 0, scale }, plainMarks(line)).right;
   const dogCards = cards.flatMap(([kind, card]) =>
     kind === "dog" && card.owner !== undefined
-      ? [[card.title, gameData.dogs[card.owner].owner.name, card] as const]
+      ? [[card.title, card.owner.name, card.owner.role, card] as const]
       : [],
   );
 
   it.each(dogCards)(
-    "sets the photo and name of %s's owner, %s, inside the card on one line, clear of its other parts",
-    (_title, name, card) => {
+    "sets the photo, name and role of %s's owner, %s, %s, inside the card, clear of its other parts",
+    (_title, name, role, card) => {
       const rows = rowsOf("dog", card);
       const layout = detailCardLayout(BODY, rows);
-      const ownerIndex = rows.beside.indexOf(OWNER_ROW);
-      const owner = detailOwner(BODY, { x: besideX, y: layout.beside[ownerIndex] ?? 0 });
+      const ownerIndex = rows.beside.findIndex((row) => typeof row !== "number");
+      const lines = roleLines(role);
+      const at = { x: besideX, y: layout.beside[ownerIndex] ?? 0 };
+      const spot = detailOwner(BODY, at, lines.length);
       const nameRect = {
         height: inkRowsFromCapTop(BODY) * 2,
-        width: nameInk(name).right,
-        x: owner.name.x,
-        y: owner.name.y,
+        width: inkRight(2, name),
+        x: spot.name.x,
+        y: spot.name.y,
       };
+      const roleRects = lines.map((line, i) => ({
+        height: inkRowsFromCapTop(BODY),
+        width: inkRight(1, line),
+        x: spot.role.x,
+        y: spot.role.y + i * spot.role.pitch,
+      }));
       const band = cardBand({ height: layout.height, width, x: 0, y: 0 });
       const room = {
         height: layout.height - pad - (band.y + band.height),
@@ -494,9 +508,9 @@ describe("a detail card", () => {
       // Each row of text's ink, across its room.
       const textRows = (x: number, roomWidth: number, counts: DetailRow[], tops: number[]) =>
         counts.flatMap((row, i) =>
-          row === OWNER_ROW
-            ? []
-            : [{ height: inkRowsOfLines(BODY, row) * 2, width: roomWidth, x, y: tops[i] ?? 0 }],
+          typeof row === "number"
+            ? [{ height: inkRowsOfLines(BODY, row) * 2, width: roomWidth, x, y: tops[i] ?? 0 }]
+            : [],
         );
       const others: Rect[] = [
         band,
@@ -504,11 +518,15 @@ describe("a detail card", () => {
         ...textRows(besideX, CARD_TEXT_ROOM.beside, rows.beside, layout.beside),
         ...textRows(pad, CARD_TEXT_ROOM.full, rows.below, layout.below),
       ];
-      const parts = [owner.photo, nameRect];
+      const texts = [nameRect, ...roleRects];
+      const parts = [spot.photo, ...texts];
       expect(nameRect.width).toBeLessThanOrEqual(CARD_TEXT_ROOM.ownerName);
       expect(parts.filter((part) => !inside(part, room))).toEqual([]);
       expect(parts.filter((part) => others.some((other) => rectsOverlap(part, other)))).toEqual([]);
-      expect(rectsOverlap(nameRect, owner.photo)).toBe(false);
+      expect(texts.filter((part) => rectsOverlap(part, spot.photo))).toEqual([]);
+      expect(texts.flatMap((a, i) => texts.slice(i + 1).filter((b) => rectsOverlap(a, b)))).toEqual(
+        [],
+      );
     },
   );
 
@@ -524,12 +542,19 @@ describe("a detail card", () => {
     expect(size).toEqual({ h: face, w: face });
   });
 
-  it("frames the face as the walk's dog card does, with the name's capitals centred down the photo", () => {
-    const owner = detailOwner(BODY, { x: besideX, y: 40 });
-    expect(owner.photo).toEqual(ownerPhotoRect(face, owner.face));
-    const capsTop = owner.name.y - owner.photo.y;
-    const capsBottom = owner.photo.height - capsTop - BODY.capHeight * 2;
-    expect(Math.abs(capsTop - capsBottom)).toBeLessThanOrEqual(1);
+  it("frames the face as the walk's dog card does", () => {
+    const spot = detailOwner(BODY, { x: besideX, y: 40 }, 1);
+    expect(spot.photo).toEqual(ownerPhotoRect(face, spot.face));
+  });
+
+  it.each([1, 2])("centres the name and a role on %i lines down the photo, inside it", (lines) => {
+    const spot = detailOwner(BODY, { x: besideX, y: 40 }, lines);
+    const above = spot.name.y - spot.photo.y;
+    const below = spot.photo.y + spot.photo.height - (spot.role.y + inkRowsOfLines(BODY, lines));
+    expect(above).toBeGreaterThanOrEqual(0);
+    expect(below - above).toBeGreaterThanOrEqual(0);
+    expect(below - above).toBeLessThanOrEqual(1);
+    expect(spot.role.y).toBeGreaterThan(spot.name.y + inkRowsFromCapTop(BODY) * 2);
   });
 });
 

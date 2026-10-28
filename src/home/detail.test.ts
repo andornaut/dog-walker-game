@@ -53,7 +53,7 @@ describe("dogDetail", () => {
       row: [fillNames(text.dogSmall, { dodgeIn: dodgeInText(data.tuning, "smallDodgeChance") })],
     },
   ])(
-    "gives $id's breed, size and hearts, its size row, and its owner for their photo",
+    "gives $id's breed, size and hearts, its size row, and its owner's name and role",
     ({ id, row }) => {
       const card = dogDetail(data, { ...owned, dogs: [id] }, dollars(0), id);
       const dog = data.dogs[id];
@@ -66,7 +66,11 @@ describe("dogDetail", () => {
         }),
         ...row,
       ]);
-      expect(card.owner).toBe(id);
+      expect(card.owner).toEqual({
+        dog: id,
+        name: dog.owner.name,
+        role: fillNames(text.ownerRole, { role: dog.owner.role }),
+      });
       expect(card.status).toBe(text.dogStatus);
     },
   );

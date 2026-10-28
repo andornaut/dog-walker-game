@@ -1665,7 +1665,9 @@
         "owner": {
           "face": 32,
           "gap": 6,
-          "nameColour": "plum"
+          "nameColour": "plum",
+          "roleColour": "darkBrown",
+          "roleGap": 2
         },
         "pad": 12,
         "rowGap": 8,

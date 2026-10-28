@@ -3,7 +3,6 @@ import type { GameObjects, Scene } from "phaser";
 import { ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
-import type { DogId } from "../data/types";
 import type { DetailCard, DetailPicture } from "../home/detail";
 import {
   CARD_TEXT_ROOM,
@@ -12,7 +11,6 @@ import {
   detailOwner,
   type DetailRow,
   HOME_LAYOUT,
-  OWNER_ROW,
 } from "../home/homeLayout";
 import { withNamePills } from "../hud/effectNames";
 import { insetRect, type Point, type Rect } from "../lib/rect";
@@ -152,22 +150,41 @@ export function addDetailWell(scene: Scene, parent: GameObjects.Container, rect:
   parent.add(g);
 }
 
-// The photo and name of dog's owner, the photo's top-left at at: the neutral face-owner-<art>
-// face in the walk card's white mat and ink frame, and the name beside it.
-function addDetailOwner(scene: Scene, parent: GameObjects.Container, at: Point, dog: DogId): void {
-  const owner = detailOwner(pixelFontMetrics(scene, "body"), at);
+type Owner = NonNullable<DetailCard["owner"]>;
+
+// The role's 1x body text, in the card's role colour.
+const ROLE_STYLE = { colour: PALETTE[CARD.owner.roleColour], scale: 1 } as const;
+
+// The owner's role, wrapped within the name's room.
+function roleLines(scene: Scene, role: string): string[] {
+  return wrapPixelText(scene, ROLE_STYLE, CARD_TEXT_ROOM.ownerName, role);
+}
+
+// The owner's photo, name and role, the photo's top-left at at: their neutral face-owner-<art>
+// face in the walk card's white mat and ink frame, and beside it their name over their role.
+function addDetailOwner(
+  scene: Scene,
+  parent: GameObjects.Container,
+  at: Point,
+  owner: Owner,
+): void {
+  const role = roleLines(scene, owner.role);
+  const spot = detailOwner(pixelFontMetrics(scene, "body"), at, role.length);
   const g = scene.add.graphics();
-  drawFramedRect(g, { border: PALETTE.ink, fill: PALETTE.white }, owner.photo);
+  drawFramedRect(g, { border: PALETTE.ink, fill: PALETTE.white }, spot.photo);
   parent.add(g);
-  const key = ownerFaceKey(gameData, dog);
+  const key = ownerFaceKey(gameData, owner.dog);
   if (scene.textures.exists(key)) {
-    const face = scene.add.sprite(owner.face.x, owner.face.y, key).setOrigin(0);
+    const face = scene.add.sprite(spot.face.x, spot.face.y, key).setOrigin(0);
     playFirstTag(face, key, ["neutral"]);
     parent.add(face);
   }
-  text(scene, parent, owner.name, gameData.dogs[dog].owner.name, {
-    colour: PALETTE[CARD.owner.nameColour],
-  });
+  text(scene, parent, spot.name, owner.name, { colour: PALETTE[CARD.owner.nameColour] });
+  role.forEach((line, i) =>
+    parent.add(
+      addPixelText(scene, spot.role.x, spot.role.y + i * spot.role.pitch, line, ROLE_STYLE),
+    ),
+  );
 }
 
 // A held dog's, walker's or gear item's detail card over a dim layer, as tall as what it
@@ -243,22 +260,24 @@ export function drawDetailCard(
     value: withNamePills(gameData, value),
   }));
   const subtitle: Row = { colour: PALETTE.darkBrown, value: card.subtitle };
-  const owner = card.owner === undefined ? [] : [OWNER_ROW];
-  const besideRows: (Row | typeof OWNER_ROW)[] =
+  const owner = card.owner === undefined ? [] : [card.owner];
+  const besideRows: (Row | Owner)[] =
     kind === "gear" ? [...plum, status] : [subtitle, ...owner, status];
   const belowRows = kind === "gear" ? [] : plum;
-  const counts = (rows: readonly (Row | typeof OWNER_ROW)[], room: number): DetailRow[] =>
-    rows.map((row) => (row === OWNER_ROW ? row : lineCount(row, room)));
+  const counts = (rows: readonly (Row | Owner)[], room: number): DetailRow[] =>
+    rows.map((row) =>
+      "dog" in row ? { roleLines: roleLines(scene, row.role).length } : lineCount(row, room),
+    );
   const layout = detailCardLayout(pixelFontMetrics(scene, "body"), {
     below: counts(belowRows, CARD_TEXT_ROOM.full),
     beside: counts(besideRows, CARD_TEXT_ROOM.beside),
   });
   besideRows.forEach((row, i) => {
     const y = layout.beside[i] ?? 0;
-    if (row !== OWNER_ROW) {
+    if ("dog" in row) {
+      addDetailOwner(scene, content, { x: CARD.besideX, y }, row);
+    } else {
       draw([row], CARD.besideX, CARD_TEXT_ROOM.beside, [y]);
-    } else if (card.owner !== undefined) {
-      addDetailOwner(scene, content, { x: CARD.besideX, y }, card.owner);
     }
   });
   draw(belowRows, CARD.pad, CARD_TEXT_ROOM.full, layout.below);
