@@ -5825,7 +5825,7 @@
       "png": "sprites/hedge.png",
       "json": "sprites/hedge.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 41,
         "opaqueWidth": 176
       }
     },
@@ -5834,7 +5834,7 @@
       "png": "sprites/hedge@50.png",
       "json": "sprites/hedge@50.json",
       "anchor": {
-        "feetY": 17,
+        "feetY": 20,
         "opaqueWidth": 88
       }
     },
@@ -5843,7 +5843,7 @@
       "png": "sprites/hedge@56.png",
       "json": "sprites/hedge@56.json",
       "anchor": {
-        "feetY": 19,
+        "feetY": 23,
         "opaqueWidth": 99
       }
     },
@@ -5852,7 +5852,7 @@
       "png": "sprites/hedge@62.png",
       "json": "sprites/hedge@62.json",
       "anchor": {
-        "feetY": 22,
+        "feetY": 25,
         "opaqueWidth": 110
       }
     },
@@ -5861,7 +5861,7 @@
       "png": "sprites/hedge@69.png",
       "json": "sprites/hedge@69.json",
       "anchor": {
-        "feetY": 24,
+        "feetY": 28,
         "opaqueWidth": 121
       }
     },
@@ -5870,7 +5870,7 @@
       "png": "sprites/hedge@75.png",
       "json": "sprites/hedge@75.json",
       "anchor": {
-        "feetY": 26,
+        "feetY": 31,
         "opaqueWidth": 132
       }
     },
@@ -5879,7 +5879,7 @@
       "png": "sprites/hedge@81.png",
       "json": "sprites/hedge@81.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 33,
         "opaqueWidth": 143
       }
     },
@@ -5888,7 +5888,7 @@
       "png": "sprites/hedge@88.png",
       "json": "sprites/hedge@88.json",
       "anchor": {
-        "feetY": 31,
+        "feetY": 36,
         "opaqueWidth": 154
       }
     },
@@ -5897,7 +5897,7 @@
       "png": "sprites/hedge@94.png",
       "json": "sprites/hedge@94.json",
       "anchor": {
-        "feetY": 33,
+        "feetY": 38,
         "opaqueWidth": 165
       }
     },

@@ -11,8 +11,8 @@ by distance with its base on the road line.
 cone                48x48   1 lane, a glint runs down its highlight
 trash-can           48x48   1 lane, the lid's handle rattles up 1px
 bench               112x36  2 lanes, backrest and seat edge on short legs; a leaf on the seat stirs
-hedge               176x36  3 lanes, a low hedge with a rounded, clumped top; leaves rustle 1px at three
-                            spots in turn
+hedge               176x42  3 lanes, a hedge with a rounded, clumped top, its clumps larger and alternately
+                            2px higher; leaves rustle 1px at three spots in turn
 parked-car          56x42   1 lane by 3 rows of footprint, a minivan from straight behind, drawn at the
                             footprint's near edge; hazards blink. 56 wide, so it centres on its lane
                             with 4px to spare each side. pull-out (4 frames, 100ms): drawn pulling
@@ -181,30 +181,35 @@ def bench(leaf=(0, 0), w=span(2)):
 TEXTURE_MIN = 0.7
 
 
+# The hedge's layout height, 5 rows over a lane spanner's ROW: drawn at SCALE it is 42 rows, and every depth step a
+# whole number of rows.
+HEDGE_ROWS = 35
+
+
 def hedge(w=span(3), rustle=()):
-    """Low and wide, seen side on: a rounded top edge of leaf clumps, no top surface, lit green on its
-    top-left edges. rustle lists the top clumps, by index, that lift 1px and shift 1px right, drawn pixels
-    at any scale. Below TEXTURE_MIN the lower leaf texture is left off: its clumps shrink to single pixels
-    there and read as noise."""
-    g = edged(Grid(w, ROW))
+    """Wide, seen side on: a rounded top edge of leaf clumps about 13px apart,
+    alternately 2px higher, no top surface, lit green on their top-left edges; the rounded ends as tall as
+    the body; a teal band at its foot. rustle lists the top clumps, by index, that lift 1px and shift 1px
+    right, drawn pixels at any scale. Below TEXTURE_MIN the lower leaf texture is left off: its clumps
+    shrink to single pixels there and read as noise."""
+    g = edged(Grid(w, HEDGE_ROWS))
     u = unit(g)[0]
-    g.rect(4, 11, w - 8, 18, "forest")
-    g.rect(1, 14, w - 2, 10, "forest")
-    g.rect(4, 25, w - 8, 4, "teal")
-    # the rounded top: clumps about 10px apart, alternately higher, lit green on the upper left, spaced evenly
-    # from 9px in at each end so both ends round off the same
-    n = round((w - 18) / 10) + 1
+    g.rect(4, 12, w - 8, 22, "forest")
+    g.rect(1, 15, w - 2, 14, "forest")
+    g.rect(4, 30, w - 8, 4, "teal")
+    # the rounded top: clumps spaced evenly from 10px in at each end, so both ends round off the same
+    n = round((w - 20) / 13) + 1
     for i in range(n):
-        x = 9 + i * (w - 18) / (n - 1)
+        x = 10 + i * (w - 20) / (n - 1)
         r = u if i in rustle else 0
-        y = 10 - (i % 2) - r
-        g.ell(x + r, y + 1, 6, 5.5, "dgreen", "forest", "green")
+        y = 10 - 2 * (i % 2) - r
+        g.ell(x + r, y + 1, 7, 6.5, "dgreen", "forest", "green")
     # the rounded ends
     for x in (6, w - 6):
-        g.ell(x, 18, 5, 9, "forest")
+        g.ell(x, 21, 5, 12, "forest")
     # leaf texture lower down: dgreen clumps, spaced irregularly
-    for i, x in enumerate(range(7, int(w) - 7, 9) if scale_of(g) >= TEXTURE_MIN else ()):
-        g.ell(x + 2, 16 + (i * 3) % 4, 2.5, 2, "dgreen")
+    for i, x in enumerate(range(8, int(w) - 8, 11) if scale_of(g) >= TEXTURE_MIN else ()):
+        g.ell(x + 2, 20 + (i * 5) % 6, 3, 2.5, "dgreen")
     return lit(g)
 
 
