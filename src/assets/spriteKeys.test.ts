@@ -5,7 +5,6 @@ import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { SHOP_GEAR } from "../data/shop";
 import { WORLD } from "../data/world";
 import { keysOf } from "../lib/records";
-import { undrawn } from "../testing/undrawnArt";
 import { animationKey, animationSpecs } from "./asepriteAnimations";
 import {
   backdropKey,
@@ -99,7 +98,7 @@ describe("the art manifest", () => {
         ...keysOf(MINOR_OBSTACLES).map((id) => minorObstacleSpriteKey(id)),
         SKUNK_CLOUD_KEY,
         CARD_FRAME_KEY,
-      ].filter((key) => !spriteKeys.has(key) && !undrawn((art) => spriteKeys.has(art), key)),
+      ].filter((key) => !spriteKeys.has(key)),
       ...WORLD.zones
         .flatMap((zone) => [
           backdropKey(zone),
