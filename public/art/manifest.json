@@ -5267,7 +5267,7 @@
       "json": "sprites/fallen-log@94.json",
       "anchor": {
         "feetY": 33,
-        "opaqueWidth": 102
+        "opaqueWidth": 101
       }
     },
     {
@@ -8200,7 +8200,7 @@
       "json": "sprites/ranger-cart.json",
       "anchor": {
         "feetY": 70,
-        "opaqueWidth": 48
+        "opaqueWidth": 47
       }
     },
     {
@@ -8218,7 +8218,7 @@
       "json": "sprites/ranger-cart@56.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 27
+        "opaqueWidth": 26
       }
     },
     {
@@ -8227,7 +8227,7 @@
       "json": "sprites/ranger-cart@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 30
+        "opaqueWidth": 29
       }
     },
     {
@@ -8236,7 +8236,7 @@
       "json": "sprites/ranger-cart@69.json",
       "anchor": {
         "feetY": 49,
-        "opaqueWidth": 33
+        "opaqueWidth": 32
       }
     },
     {
@@ -8245,7 +8245,7 @@
       "json": "sprites/ranger-cart@75.json",
       "anchor": {
         "feetY": 53,
-        "opaqueWidth": 36
+        "opaqueWidth": 35
       }
     },
     {
@@ -8254,7 +8254,7 @@
       "json": "sprites/ranger-cart@81.json",
       "anchor": {
         "feetY": 58,
-        "opaqueWidth": 39
+        "opaqueWidth": 38
       }
     },
     {
@@ -8263,7 +8263,7 @@
       "json": "sprites/ranger-cart@88.json",
       "anchor": {
         "feetY": 62,
-        "opaqueWidth": 42
+        "opaqueWidth": 41
       }
     },
     {
@@ -8272,7 +8272,7 @@
       "json": "sprites/ranger-cart@94.json",
       "anchor": {
         "feetY": 67,
-        "opaqueWidth": 45
+        "opaqueWidth": 44
       }
     },
     {
