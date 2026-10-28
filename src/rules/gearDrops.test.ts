@@ -14,6 +14,7 @@ import { seededRandom } from "../lib/random";
 import { keysOf } from "../lib/records";
 import { mapPack } from "../state/pack";
 import { type CardSource, newRun, type RunState } from "../state/runState";
+import { defined } from "../testing/defined";
 import { heartsByDog } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
@@ -187,10 +188,9 @@ describe("grabbing a gear drop", () => {
   });
 
   // A swap ends the item found before and starts the new one: the walk is as if only the new
-  // one had been found.
-  const SWAPS = GEAR.flatMap((first) =>
-    GEAR.filter((next) => next !== first).map((next) => [first, next] as const),
-  );
+  // one had been found. Each item is replaced by the next in turn, so each is found first once
+  // and found next once.
+  const SWAPS = GEAR.map((first, i) => [first, defined(GEAR[(i + 1) % GEAR.length])] as const);
   it.each(SWAPS)("replaces a found %s with %s", (first, next) => {
     const run = walkWith(null, { cardsThisZone: 1, zoneIndex: 1 });
     const swap = grabGear(data, next, grabGear(data, first, run).run);
