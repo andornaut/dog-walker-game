@@ -36,7 +36,7 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 - **Cards:** about 10 cards a walk at novice skill, more than one a minute; good dodgers meet fewer
 - **Mild bonuses:** a gear item or upgrade card shifts earnings or the finish rate by about 10% at most. The Lucky collar and the Whistle, the two highest priced, are the exceptions: they may shift the finish rate more
 - **Play-style window:** for a given player, every pack of a given size, gear item and card policy lands within 10 points of the median finish rate and 15% of the median earnings. Picking the "wrong" dogs or gear makes a walk a little harder or easier, never a lot
-- **Progression:** each extra dog raises a walk's earnings; about 50 walks buy every dog, slot and gear item; every gear item pays for itself over a reasonable number of walks
+- **Progression:** each extra dog raises a walk's earnings; about 50 to 60 walks buy every dog, slot and gear item (fewer for an expert); every gear item pays for itself over a reasonable number of walks
 - **Trade-offs:** a strong downside always comes with a matching upside (Rush hour's extra tips come with more obstacles), and the net stays in the window
 - **Walker spread:** every walker lands within the play-style window, and each, in unlock order (Casey, Mr. B, Ada, Trista), is slightly stronger than the one before: agility and perk make a walker feel different, never a lot easier or harder. The skill targets are for the median walker
 
@@ -44,4 +44,4 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 
 **Done when:** a walk lasts about 8 minutes, we want to play "one more", and it works by touch on a phone browser.
 
-The tuning pass is done: a buyout of the Pet shop takes about 50 walks, Big Payday sits within reach of a great walk, and the cozy curve stays. What's left is a phone playtest of the tuned build, which calls version 1. The game is called Archie's Dog Walks.
+The tuning pass is done: a buyout of the Pet shop takes about 58 walks for a typical player and 47 for an expert, Big Payday sits within reach of a great walk, and the cozy curve stays. What's left is a phone playtest of the tuned build, which calls version 1. The game is called Archie's Dog Walks.
