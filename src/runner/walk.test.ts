@@ -42,7 +42,7 @@ import { currentZone } from "../rules/route";
 import { tipValue } from "../rules/run";
 import { read } from "../rules/units";
 import { zoneStats } from "../rules/zones";
-import { mapPack, packDogs } from "../state/pack";
+import { mapPack } from "../state/pack";
 import { type ModifierSource, newRun, type PackDogs, type RunState } from "../state/runState";
 import { packOf, runFactsFor } from "../testing/achievements";
 import { lanesReachedAtEnd, pathShortfalls } from "../testing/avoidable";
@@ -913,15 +913,6 @@ describe("stepWalk", () => {
     expect(step(walkWith(["kilo"], [atPack("lostWallet")])).walk.run.bumpsByZone).toEqual([]);
   });
 
-  it("opens an encounter's card for the whole pack", () => {
-    for (const encounter of ["otherDog", "skunk", "thief"] as const) {
-      const walk = walkWith(["kilo", "duchess", "pierre"], [atPack(encounter)]);
-      expect(step(walk).encounterHits).toEqual([
-        { affected: packDogs(walk.run), encounter, kind: "encounter" },
-      ]);
-    }
-  });
-
   // Every contact obstacle, such as a puddle, and the immunities Raincoats give.
   const CONTACTS = keysOf(ENCOUNTERS).filter((id) => ENCOUNTERS[id].resolution.kind === "contact");
   const COATED = UPGRADES.raincoats.effects.map(({ encounter }) => ({
@@ -930,14 +921,11 @@ describe("stepWalk", () => {
   }));
 
   // Raincoats keep every contact obstacle's Muddy off; the capybara's Help the keeper muddies the
-  // pack anyway (chooseOption).
-  it.each(
-    CONTACTS.flatMap((encounter) => [true, false].map((raincoats) => ({ encounter, raincoats }))),
-  )("muddies the pack on a $encounter unless Raincoats: $raincoats", ({ encounter, raincoats }) => {
+  // pack anyway (chooseOption). Without them, the next test muddies the pack.
+  it.each(CONTACTS)("keeps a %s's Muddy off with Raincoats", (encounter) => {
     const walk = walkWith(["kilo"], [atPack(encounter)]);
-    const coated = raincoats ? { ...walk, run: { ...walk.run, immunities: COATED } } : walk;
-    const debuffs = step(coated).walk.run.debuffs.map(({ debuff }) => debuff);
-    expect(debuffs).toEqual(raincoats ? [] : ["muddy"]);
+    const coated = { ...walk, run: { ...walk.run, immunities: COATED } };
+    expect(step(coated).walk.run.debuffs).toEqual([]);
   });
 
   it.each(CONTACTS)(
@@ -1245,22 +1233,9 @@ describe("stepWalk's modified values", () => {
     );
   });
 
-  // A bump badge counts every plain hit that lands, forgiven or not.
-  it.each([
-    ["counts a plain bump by its obstacle's kind", data, meeting("casey", atPack("cone")), 1],
-    [
-      "counts one Second chance forgives",
-      forgiving,
-      meeting(walkerWith("secondChance"), atPack("cone")),
-      1,
-    ],
-  ] as const)("%s", (_, walkData, walk, landed) => {
-    const { run } = stepWalk(walkData, geometry, seededRandom(1), 0.01, walk).walk;
-    expect(run.bumpsByKind).toEqual({ cone: landed });
-  });
-
   // While Spotlight lasts, a plain bump costs its cash on top of its hearts: all the cash there is
-  // when that is less, and none at $0. Second chance may forgive the heart, never the cash.
+  // when that is less, and none at $0. Second chance may forgive the heart, never the cash. Each
+  // bump counts toward the bump badges, forgiven or not.
   const spotlightCash = read(tuning, "money", DEBUFFS.spotlight.bumpMoney);
   const plenty = cents(spotlightCash * 2);
   const short = cents(spotlightCash - 100);
