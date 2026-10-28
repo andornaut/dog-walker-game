@@ -13886,6 +13886,10 @@
       "png": "images/icon-settings.png"
     },
     {
+      "key": "icon-share",
+      "png": "images/icon-share.png"
+    },
+    {
       "key": "icon-spotlight",
       "png": "images/icon-spotlight.png"
     },

@@ -2,9 +2,10 @@
 """Draw the UI kit: icons, nine-slice panels and buttons, the hint bubble and badges.
 
 Images (16x16 icons unless noted): icon-pause, icon-play, icon-home, icon-help, icon-close,
-icon-logbook, icon-settings, icon-lock, icon-bill (a green dollar bill with a white $, on an item for
-sale the bank covers), icon-treat (the treat pickup, its bone and heart as road.treat lays
-them out at 16x16, for the message strip), icon-stinky; icon-dog-slot (32x32, a pack slot for sale in the
+icon-logbook, icon-settings, icon-share (Safari's Share button, on the iOS install steps card),
+icon-lock, icon-bill (a green dollar bill with a white $, on an item for sale the bank covers),
+icon-treat (the treat pickup, its bone and heart as road.treat lays them out at 16x16, for the
+message strip), icon-stinky; icon-dog-slot (32x32, a pack slot for sale in the
 shop: a doghouse with a green plus badge, as the shop's item-<gear> art, outlined with icon_edge);
 ui-panel (24x24 nine-slice, 4px corners), ui-hint (24x24 nine-slice, 8px corners), ui-hint-tail
 (8x6), ui-new-best (72x20 ribbon, text baked in with font-title); the start screen's ui-detail-card
@@ -129,8 +130,8 @@ def plate(face, lit, shade, w=24, h=24):
 # ---------- icons ----------
 # icon-pause, icon-play, icon-home, icon-help, icon-close, icon-logbook, icon-settings and icon-sound
 # sit on ui-icon-button's navy face, so they have no outline: cream holds 9.6:1 there, tan 6.6:1,
-# amber 7.5:1, orange 5.0:1 and pink 5.1:1. The -panel icons sit on the Settings panel's cream: dbrown holds
-# 5.85:1 there, plum 9.42:1 and dred 5.07:1.
+# amber 7.5:1, orange 5.0:1 and pink 5.1:1. The -panel icons sit on the Settings panel's cream, and icon-share
+# on the install steps card's: dbrown holds 5.85:1 there, plum 9.42:1 and dred 5.07:1.
 
 # The speaker, note and effects inks: face, shade on the lower-right edges, and the mute X.
 NAVY_FACE = ("cream", "tan", "pink")
@@ -343,6 +344,21 @@ def install(ink, on):
     if not on:
         g.rect(4, 4, 8, 7, None)
         mute_x(g, 5, 5, x_col)
+    return g
+
+
+def share_icon():
+    """Safari's Share button, for the iOS install steps card: a box open at the top with an
+    arrow rising out of it, its chevron head and box in 2px strokes, in the -panel icons' inks."""
+    face, shade, _ = CREAM_PANEL
+    g = Grid(16, 16)
+    for y, row in enumerate([".......fs.......", "......ffss......", ".....fffsss.....", "....ff.fs.ss....",
+                             ".......fs.......", ".......fs.......", "..fff..fs..ffs..", "..ff...fs...fs..",
+                             "..ff...fs...fs..", "..ff...fs...fs..", "..ff...fs...fs..", "..ff........fs..",
+                             "..ff........fs..", "..ff........fs..", "..fffffffffffs..", "...ssssssssss..."]):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                g.p(x, y, face if ch == "f" else shade)
     return g
 
 
@@ -1486,6 +1502,7 @@ IMAGES = {
     "icon-close": lambda: to_image(close().outlined(False)),
     "icon-logbook": lambda: to_image(logbook_icon().outlined(False)),
     "icon-settings": lambda: to_image(settings_icon().outlined(False)),
+    "icon-share": lambda: to_image(share_icon().outlined(False)),
     "icon-lock": lambda: to_image(lock().outlined()),
     "icon-bill": lambda: to_image(bill().outlined()),
     "icon-treat": lambda: to_image(treat_icon().outlined()),
