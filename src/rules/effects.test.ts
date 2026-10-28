@@ -5,6 +5,7 @@ import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { TUNING } from "../data/tuning";
 import type { DogId, Effect } from "../data/types";
+import { cents } from "../lib/units";
 import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
 import { LONE } from "../testing/packPlaces";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
@@ -18,7 +19,7 @@ import {
   shareHearts,
   targetDogs,
 } from "./effects";
-import { cents, read } from "./units";
+import { read } from "./units";
 
 const data = { debuffs: DEBUFFS, dogs: DOGS, encounters: ENCOUNTERS, tuning: TEST_TUNING };
 const SKUNK_IGNORE: EffectSource = { encounter: "skunk", kind: "encounter", option: 2 };

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { CardSource } from "../state/runState";
+import type { CardSource } from "../data/types";
 import { STEP_SECONDS } from "./fixedStep";
 import { type HitStop, hitStopLength, startHitStop, tickHitStop } from "./hitStop";
 

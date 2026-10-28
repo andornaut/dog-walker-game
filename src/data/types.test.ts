@@ -1,6 +1,7 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 
-import { type Cents, type Hearts, read, type Seconds } from "../rules/units";
+import { type Cents, type Hearts, type Seconds } from "../lib/units";
+import { read } from "../rules/units";
 import type { Pack } from "../state/runState";
 import { TUNING } from "./tuning";
 import type {

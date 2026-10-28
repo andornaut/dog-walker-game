@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, WalkerId, ZoneId } from "../data/types";
-import { cents } from "../rules/units";
+import { cents } from "../lib/units";
 import type { EndReason } from "../state/runState";
 import { packOf, runFactsFor } from "../testing/achievements";
 import { newPlayerSave, quietCounters, testAwards, veteranSave } from "../testing/saves";

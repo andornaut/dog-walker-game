@@ -1,5 +1,6 @@
 import type {
   AchievementId,
+  CardSource,
   DogId,
   EncounterId,
   GameData,
@@ -10,7 +11,6 @@ import type {
   WalkerId,
   Zone,
 } from "../data/types";
-import type { CardSource } from "../state/runState";
 import { depthStepOfScale } from "./depthSteps";
 
 export const CARD_FRAME_KEY = "card-frame";

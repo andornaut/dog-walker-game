@@ -1,4 +1,4 @@
-import type { Cents } from "../rules/units";
+import type { Cents } from "../lib/units";
 import type { PlateKind } from "./selection";
 
 // Every tappable item and button shows one of these. disabled cannot be chosen; normal can;

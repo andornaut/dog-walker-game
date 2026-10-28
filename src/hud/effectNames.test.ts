@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { keysOf } from "../lib/records";
+import { cents } from "../lib/units";
 import { cardEffectText, type CardTextContext } from "../rules/effectText";
-import { cents } from "../rules/units";
 import { PILL_CLOSE, PILL_SPACE, pillIndex } from "../ui/namePills";
 import {
   debuffNameMarks,

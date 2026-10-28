@@ -5,10 +5,10 @@ import type { DogId, LiveTuning } from "../data/types";
 import { scrollMax } from "../input/listScroll";
 import { fillNames } from "../lib/lines";
 import { keysOf } from "../lib/records";
+import { cents } from "../lib/units";
 import { sizeHearts } from "../rules/dogs";
 import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { startingDogSlots, unlockPrice } from "../rules/shop";
-import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import {
   fitInFont,

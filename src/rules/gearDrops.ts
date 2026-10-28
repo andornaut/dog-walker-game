@@ -1,13 +1,14 @@
 import type { GameData, GearId, LiveTuning } from "../data/types";
 import { chanceRound, type Random, weightedPick } from "../lib/random";
 import { keysOf } from "../lib/records";
+import { clampHearts } from "../lib/units";
 import { mapPack } from "../state/pack";
 import type { EffectSource, ModifierSource, RunState } from "../state/runState";
 import { ownerMaxHearts } from "./dogs";
 import { resolveEffects } from "./effects";
 import type { ModifiedValue } from "./modified";
 import { price } from "./shop";
-import { clampHearts, readTable } from "./units";
+import { readTable } from "./units";
 
 // Gear drops: a gear item found on the road, which a neighbourhood places at random. Grabbing
 // one puts the item in effect, on top of the Pocket's gear, until the walk ends or another drop

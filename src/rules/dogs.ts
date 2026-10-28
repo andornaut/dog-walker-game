@@ -1,7 +1,8 @@
 import type { Dog, DogId, GameData, LiveTuning, Modifier, PackSize } from "../data/types";
+import { clampHearts, type Hearts } from "../lib/units";
 import type { RunState } from "../state/runState";
 import { modifiedStat } from "./modifiers";
-import { clampHearts, type Hearts, read, readTable } from "./units";
+import { read, readTable } from "./units";
 
 // A dog's place in the pack a walk set out with, for the pack-size bonus: how many dogs the
 // pack has, and whether the dog leads it.

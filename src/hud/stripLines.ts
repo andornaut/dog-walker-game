@@ -1,9 +1,10 @@
 import type { DebuffId, DogId, EncounterId, GameData, GearId } from "../data/types";
 import { fillLine, fillNames } from "../lib/lines";
+import { cents } from "../lib/units";
 import { type Change, type HeartChange, heartsForgiven, type MoneyChange } from "../rules/causes";
 import { debuffFields, formatDollars } from "../rules/effectText";
 import type { FaceMood } from "../rules/treats";
-import { cents, read } from "../rules/units";
+import { read } from "../rules/units";
 import type { ActiveDebuff, RunState } from "../state/runState";
 import { debuffNameMarks } from "./effectNames";
 import { faceSentenceList, type FaceText, fillFaceLine, ownerFaceText } from "./faceText";

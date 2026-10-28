@@ -4,6 +4,7 @@ import { gameData } from "../data";
 import type { DogId, Size, WalkerId } from "../data/types";
 import { fillNames } from "../lib/lines";
 import { keysOf } from "../lib/records";
+import { cents } from "../lib/units";
 import { sizeHearts } from "../rules/dogs";
 import {
   capitalize,
@@ -12,7 +13,6 @@ import {
   largeSpeedText,
   SIZE_NAMES,
 } from "../rules/effectText";
-import { cents } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
 import type { Owned } from "../save/schema";
 import { STARTER_DOGS } from "../testing/saves";

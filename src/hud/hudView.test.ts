@@ -3,11 +3,12 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { Effect } from "../data/types";
 import { dollarAmountText } from "../home/home";
+import { type Cents, cents, clampHearts } from "../lib/units";
 import type { Change } from "../rules/causes";
 import { resolveEffects } from "../rules/effects";
 import { formatDollars } from "../rules/effectText";
 import { bumpCash, tipValue } from "../rules/run";
-import { type Cents, cents, clampHearts, read } from "../rules/units";
+import { read } from "../rules/units";
 import { activeModifier, testState } from "../testing/runState";
 import { changeLabels, heartRows } from "./hudView";
 

@@ -1,5 +1,6 @@
 import type { DogId, GameData, GearId, WalkerId } from "../data/types";
 import { fillLine } from "../lib/lines";
+import type { Cents } from "../lib/units";
 import { sizeHearts } from "../rules/dogs";
 import {
   capitalize,
@@ -8,7 +9,6 @@ import {
   largeSpeedText,
   SIZE_NAMES,
 } from "../rules/effectText";
-import type { Cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { dollarText, type HomeLoadout, isAffordable, type Purchase, purchasePrice } from "./home";
 import { HOME_TEXT_FIELDS } from "./homeText";

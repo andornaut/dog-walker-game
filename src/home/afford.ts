@@ -1,6 +1,6 @@
 import type { GameData } from "../data/types";
 import { keysOf } from "../lib/records";
-import { type Cents, cents } from "../rules/units";
+import { type Cents, cents } from "../lib/units";
 import type { LastWalk, Owned } from "../save/schema";
 import { isAffordable, type Purchase } from "./home";
 

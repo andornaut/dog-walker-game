@@ -1,6 +1,7 @@
 import { cardZoneKey } from "../assets/spriteKeys";
 import type {
   CardOption,
+  CardSource,
   Difficulty,
   DogId,
   Effect,
@@ -14,8 +15,9 @@ import type {
 import { fillNames } from "../lib/lines";
 import { type Random, randomInt, randomPick } from "../lib/random";
 import { keysOf } from "../lib/records";
+import { type Cents, cents, type Hearts } from "../lib/units";
 import { packDogs, walkingAmong } from "../state/pack";
-import type { CardSource, EffectSource, RunState } from "../state/runState";
+import type { EffectSource, RunState } from "../state/runState";
 import { countOptionPick } from "./achievements";
 import {
   amountText,
@@ -41,7 +43,6 @@ import { cardEffectText, type CardTextContext, sentenceList } from "./effectText
 import { type ModifiedValue, modifierCause } from "./modified";
 import { forkPaths, type PathSide, pathSide, zoneById } from "./route";
 import { fireOwnersAtZero } from "./run";
-import { type Cents, cents, type Hearts } from "./units";
 
 export type ChoiceData = CauseData & Pick<GameData, "dogs" | "homeText" | "tuning" | "world">;
 

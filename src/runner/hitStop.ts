@@ -1,4 +1,4 @@
-import type { CardSource } from "../state/runState";
+import type { CardSource } from "../data/types";
 import { SECONDS_EPSILON } from "./fixedStep";
 
 // What a hit stop holds back until it ends: the cards met on the step of the hit, and

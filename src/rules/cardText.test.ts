@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { DogId, EncounterId } from "../data/types";
+import type { CardSource, DogId, EncounterId } from "../data/types";
 import { largeBodyText } from "../hud/cardText";
 import { boxStyles, CARD_LAYOUT } from "../layout/cardLayout";
 import { fillNames } from "../lib/lines";
 import { keysOf } from "../lib/records";
-import type { CardSource } from "../state/runState";
+import { cents, dollarsToCents } from "../lib/units";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { activeModifier, testState } from "../testing/runState";
 import { plainMarks } from "../ui/pixelFont";
 import { cardFor } from "./choices";
-import { cents, dollarsToCents, read } from "./units";
+import { read } from "./units";
 
 const PACK: readonly DogId[] = ["kilo", "duchess", "reggie"];
 const state = testState({ duchess: 5, kilo: 5, reggie: 5 }, { money: cents(10_000) });

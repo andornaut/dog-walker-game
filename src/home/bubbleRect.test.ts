@@ -6,7 +6,7 @@ import { withNamePills } from "../hud/effectNames";
 import { wrapWords } from "../lib/lines";
 import { keysOf } from "../lib/records";
 import { insetRect, rectsOverlap } from "../lib/rect";
-import { cents } from "../rules/units";
+import { cents } from "../lib/units";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";

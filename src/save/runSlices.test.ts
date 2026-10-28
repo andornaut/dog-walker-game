@@ -5,7 +5,7 @@ import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { SHOP_GEAR } from "../data/shop";
 import { WORLD } from "../data/world";
-import { cents, clampHearts } from "../rules/units";
+import { cents, clampHearts } from "../lib/units";
 import { newRun, type RunState } from "../state/runState";
 import { defined } from "../testing/defined";
 import { quietCounters } from "../testing/saves";

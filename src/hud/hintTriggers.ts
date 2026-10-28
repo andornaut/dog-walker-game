@@ -1,7 +1,7 @@
-import type { HintTrigger, LiveTuning } from "../data/types";
+import type { CardSource, HintTrigger, LiveTuning } from "../data/types";
 import { packSizeBonus, placeInPack } from "../rules/dogs";
 import type { MoverTell } from "../runner/movers";
-import type { CardSource, RunState } from "../state/runState";
+import type { RunState } from "../state/runState";
 import { lowHeartDogs } from "./moments";
 
 // The hint triggers a card raises as it opens: a fork its own, an obstacle's its encounter's,

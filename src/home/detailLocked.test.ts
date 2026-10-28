@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { cents } from "../rules/units";
+import { cents } from "../lib/units";
 import type { Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
 import { dogDetail, gearDetail } from "./detail";

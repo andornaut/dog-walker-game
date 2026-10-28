@@ -1,6 +1,6 @@
 import type { GameData } from "../data/types";
+import type { Cents } from "../lib/units";
 import { cheapestDogSlot } from "../rules/shop";
-import type { Cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { dollarText, isAffordable, type Purchase, purchasePrice } from "./home";
 

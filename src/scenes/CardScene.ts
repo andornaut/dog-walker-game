@@ -9,6 +9,7 @@ import {
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
+import type { CardSource } from "../data/types";
 import { type OptionMarks, optionMarks } from "../hud/buffMarks";
 import { largeBodyText, type PlaqueSize, plaqueTexts, smallCardText } from "../hud/cardText";
 import { type HoldPress, holdRule, startHold, tickHold } from "../input/hold";
@@ -36,7 +37,6 @@ import {
   MAX_CARD_OPTIONS,
   type OptionView,
 } from "../rules/choices";
-import type { CardSource } from "../state/runState";
 import { cardHeader } from "../ui/cardRow";
 import { inkRowsOfLines } from "../ui/fontMetrics";
 import { rectIndexAt } from "../ui/grid";

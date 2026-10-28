@@ -19,6 +19,7 @@ import {
 } from "../assets/spriteKeys";
 import type {
   CardOption,
+  CardSource,
   DogId,
   EncounterId,
   GameData,
@@ -30,7 +31,6 @@ import type {
 import { sizeHearts } from "../rules/dogs";
 import { effectText } from "../rules/effectText";
 import { faceMood } from "../rules/treats";
-import type { CardSource } from "../state/runState";
 
 // The game data art's tools read, as shared/export/game-data.json. Every entry spreads its
 // data module's fields as they are, so a field added to the data shows up here unchanged,

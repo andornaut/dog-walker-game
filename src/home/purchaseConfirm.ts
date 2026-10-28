@@ -1,7 +1,7 @@
 import type { GameData } from "../data/types";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
 import { fillLine } from "../lib/lines";
-import { type Cents, cents } from "../rules/units";
+import { type Cents, cents } from "../lib/units";
 import type { SaveDocument } from "../save/schema";
 import {
   buy,

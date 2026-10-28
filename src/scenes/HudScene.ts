@@ -70,12 +70,13 @@ import {
   zoneShare,
 } from "../hud/walkHud";
 import type { Point, Rect } from "../lib/rect";
+import { type Cents, cents } from "../lib/units";
 import { ownerMaxHearts } from "../rules/dogs";
 import { debuffLasting } from "../rules/durations";
 import { hintFor, hintJumpsQueue } from "../rules/hints";
 import { currentZone } from "../rules/route";
 import { faceMood } from "../rules/treats";
-import { type Cents, cents, read } from "../rules/units";
+import { read } from "../rules/units";
 import { heartsOf, slotIndexOf } from "../state/pack";
 import type { PackSlot, RunState } from "../state/runState";
 import {

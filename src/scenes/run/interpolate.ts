@@ -1,6 +1,6 @@
 import type { GameData } from "../../data/types";
 import { clamp01 } from "../../lib/numbers";
-import { pixels } from "../../rules/units";
+import { pixels } from "../../lib/units";
 import { advanceLaneControl } from "../../runner/laneControl";
 import type { SessionInput } from "../../runner/session";
 import { laneMotionConfig, steerWalk, type Walk } from "../../runner/walk";

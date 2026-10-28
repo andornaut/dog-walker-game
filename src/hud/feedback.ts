@@ -1,6 +1,6 @@
 import { signedText } from "../lib/lines";
 import { type Point, type Rect, rectsOverlap } from "../lib/rect";
-import { type Cents, cents } from "../rules/units";
+import { type Cents, cents } from "../lib/units";
 
 // The dodge label shows for ms: fully opaque for holdMs, so it can be read, then rising rise
 // pixels and fading out over the rest.

@@ -9,7 +9,7 @@ import { dollarText, isAffordable, type Purchase, purchasePrice } from "../home/
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { walkerTile } from "../home/walkers";
 import { keysOf } from "../lib/records";
-import { cents } from "../rules/units";
+import { cents } from "../lib/units";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, fontInk } from "../testing/fontInk";

@@ -41,7 +41,7 @@ import {
 import { playerPaused, type RunPause, walkPaused } from "../hud/topBar";
 import { DOG_CARD } from "../hud/walkHud";
 import type { Point, Rect } from "../lib/rect";
-import { type Cents, cents } from "../rules/units";
+import { type Cents, cents } from "../lib/units";
 import { slotIndexOf } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { addDisplayText } from "../ui/phaser/displayText";

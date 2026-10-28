@@ -1,6 +1,6 @@
 import type { DogId, GearId, WalkerId, ZoneId } from "../data/types";
+import { cents } from "../lib/units";
 import { defaultRoute, type RouteData } from "../rules/route";
-import { cents } from "../rules/units";
 import { packDogsOf } from "../state/pack";
 import type { Loadout, RunState } from "../state/runState";
 import type { RunSetup } from "./runSetup";

@@ -6,7 +6,7 @@ import type { AchievementCondition, ZoneId } from "../data/types";
 import { assertNever } from "../lib/assertNever";
 import { fillNames, wrapWords } from "../lib/lines";
 import { keysOf } from "../lib/records";
-import { cents, dollarsToCents } from "../rules/units";
+import { cents, dollarsToCents } from "../lib/units";
 import type { SaveDocument } from "../save/schema";
 import { inkWidth } from "../testing/fontInk";
 import { newPlayerSave } from "../testing/saves";

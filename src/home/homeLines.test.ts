@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId, LiveTuning, WalkerId } from "../data/types";
 import { fillNames } from "../lib/lines";
-import { cents } from "../rules/units";
+import { cents } from "../lib/units";
 import type { StorageState } from "../save/profile";
 import type { LastWalk } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";

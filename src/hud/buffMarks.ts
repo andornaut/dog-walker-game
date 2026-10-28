@@ -1,12 +1,12 @@
 import type { DogId, GameData } from "../data/types";
 import { fillLine, fillNames } from "../lib/lines";
+import { cents } from "../lib/units";
 import { amountText } from "../rules/causes";
 import type { CardView, OptionView } from "../rules/choices";
 import { isLarge, packSizeRaise, placeInPack } from "../rules/dogs";
 import { formatDollars, largeSpeedText } from "../rules/effectText";
 import type { ModifiedValue } from "../rules/modified";
 import { standingModified, type StandingRun } from "../rules/standing";
-import { cents } from "../rules/units";
 import type { WalkStep } from "../runner/walk";
 import type { WalkItem } from "../runner/walkItems";
 import { packDogs } from "../state/pack";

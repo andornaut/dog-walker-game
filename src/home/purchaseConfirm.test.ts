@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { fillNames } from "../lib/lines";
-import { cents } from "../rules/units";
+import { cents } from "../lib/units";
 import type { SaveDocument } from "../save/schema";
 import { defined } from "../testing/defined";
 import { newPlayerSave } from "../testing/saves";

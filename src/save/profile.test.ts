@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { gameData } from "../data";
 import { keysOf } from "../lib/records";
-import { cents } from "../rules/units";
+import { cents } from "../lib/units";
 import { packOf, runFactsFor, saveFor } from "../testing/achievements";
 import {
   memoryStorage,

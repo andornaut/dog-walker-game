@@ -1,11 +1,12 @@
 import type { DogId, GameData, GearId, Size } from "../data/types";
 import { fillLine, signedText } from "../lib/lines";
 import { keysOf } from "../lib/records";
+import { type Cents, cents } from "../lib/units";
 import { quipLine } from "../rules/choices";
 import { sizeHearts } from "../rules/dogs";
 import { effectClause, SIZE_NAMES } from "../rules/effectText";
 import { price, unlockPrice } from "../rules/shop";
-import { type Cents, cents, read } from "../rules/units";
+import { read } from "../rules/units";
 import type { Owned, SaveDocument } from "../save/schema";
 import { HOME_TEXT_FIELDS } from "./homeText";
 

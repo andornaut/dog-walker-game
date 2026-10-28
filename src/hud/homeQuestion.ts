@@ -1,9 +1,9 @@
 import type { GameData } from "../data/types";
 import { dollarText } from "../home/home";
 import { fillLine } from "../lib/lines";
+import { cents } from "../lib/units";
 import { currentZone, walkLength } from "../rules/route";
 import { payZone } from "../rules/run";
-import { cents } from "../rules/units";
 import type { RunState } from "../state/runState";
 import { RUN_TEXT_FIELDS } from "./runText";
 

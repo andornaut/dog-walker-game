@@ -12,8 +12,8 @@ import type {
   ZoneId,
 } from "../data/types";
 import { keysOf } from "../lib/records";
+import { type Cents, cents as toCents } from "../lib/units";
 import type { RunCounters } from "../rules/achievements";
-import { type Cents, cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
 export const SAVE_VERSION = 19;

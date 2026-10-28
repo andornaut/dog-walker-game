@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { AchievementCondition, DogId, TallyId, ZoneId } from "../data/types";
 import { keysOf } from "../lib/records";
+import { cents, dollarsToCents } from "../lib/units";
 import { type SaveDocument } from "../save/schema";
 import { runFactsFor, saveFor } from "../testing/achievements";
 import { defined } from "../testing/defined";
@@ -21,7 +22,6 @@ import {
   type RunFacts,
 } from "./achievements";
 import { applyEffects } from "./effects";
-import { cents, dollarsToCents } from "./units";
 
 const facts = (changes: Partial<RunFacts> = {}): RunFacts => ({
   bumpsByKind: {},

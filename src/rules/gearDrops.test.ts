@@ -7,13 +7,14 @@ import { HOME_TEXT } from "../data/homeText";
 import { QUIPS } from "../data/quips";
 import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
-import type { GearId } from "../data/types";
+import type { CardSource, GearId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import { fillNames } from "../lib/lines";
 import { seededRandom } from "../lib/random";
 import { keysOf } from "../lib/records";
+import { cents, clampHearts, roundDollars } from "../lib/units";
 import { mapPack } from "../state/pack";
-import { type CardSource, newRun, type RunState } from "../state/runState";
+import { newRun, type RunState } from "../state/runState";
 import { defined } from "../testing/defined";
 import { heartsByDog } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
@@ -31,7 +32,7 @@ import {
   grabGear,
 } from "./gearDrops";
 import { price } from "./shop";
-import { cents, clampHearts, read, roundDollars } from "./units";
+import { read } from "./units";
 import { packAgility } from "./walkers";
 
 const data = {

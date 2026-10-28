@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import { cents } from "../rules/units";
+import { cents } from "../lib/units";
 import { readBitmapFont } from "../tools/fontFile";
 import { plainMarks } from "../ui/pixelFont";
 import {

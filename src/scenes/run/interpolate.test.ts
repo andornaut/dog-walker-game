@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../../data";
 import { LANE_COUNT } from "../../data/screen";
-import { pixels } from "../../rules/units";
+import { pixels } from "../../lib/units";
 import { STEP_SECONDS } from "../../runner/fixedStep";
 import type { LaneMotion } from "../../runner/laneMotion";
 import { screenRoadGeometry } from "../../runner/screenGeometry";

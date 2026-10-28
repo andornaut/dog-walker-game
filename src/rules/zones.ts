@@ -1,5 +1,6 @@
 import type { LiveTuning, LuckyEncounterId, Zone } from "../data/types";
-import { type Pixels, pixels, read, type Seconds, seconds } from "./units";
+import { type Pixels, pixels, type Seconds, seconds } from "../lib/units";
+import { read } from "./units";
 
 interface ZoneStats {
   // At base speed and before upgrades.

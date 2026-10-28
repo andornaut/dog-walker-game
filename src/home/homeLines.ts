@@ -1,7 +1,7 @@
 import type { DogId, GameData, HomeText, WalkerId } from "../data/types";
+import type { Cents } from "../lib/units";
 import { packPlace, packSizeRaise } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
-import type { Cents } from "../rules/units";
 import type { StorageState } from "../save/profile";
 import { type LastWalk, MAX_RUN_DOGS, type Owned } from "../save/schema";
 import { packOrder } from "../state/pack";

@@ -1,9 +1,9 @@
 import type { GameData } from "../data/types";
 import { fillLine } from "../lib/lines";
 import { keysOf } from "../lib/records";
+import type { Cents } from "../lib/units";
 import { capitalize, gearShort } from "../rules/effectText";
 import { unlockPrice } from "../rules/shop";
-import type { Cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import type { ItemLook } from "../ui/interaction";
 import { purchases } from "./afford";

@@ -11,11 +11,11 @@ import type {
   Threshold,
 } from "../data/types";
 import { assertNever } from "../lib/assertNever";
+import { type Cents, dollarsToCents } from "../lib/units";
 import type { SaveDocument, SaveStats } from "../save/schema";
 import { lifetimeEarnedNet, walksFinished, walksPlayed } from "../save/stats";
 import type { RunState } from "../state/runState";
 import { walkLength } from "./route";
-import { type Cents, dollarsToCents } from "./units";
 
 export type AchievementData = Pick<
   GameData,

@@ -4,9 +4,9 @@ import { gameData } from "../data";
 import type { WalkerId, ZoneId } from "../data/types";
 import { fillNames } from "../lib/lines";
 import { keysOf } from "../lib/records";
+import { cents, type Hearts } from "../lib/units";
 import type { Change, MoneyChange } from "../rules/causes";
 import { agilityPercent } from "../rules/effectText";
-import { cents, type Hearts } from "../rules/units";
 import { perkIconKey } from "./effectIcons";
 import { celebrationText, zoneBannerHeading, zoneCelebration } from "./zoneCelebration";
 

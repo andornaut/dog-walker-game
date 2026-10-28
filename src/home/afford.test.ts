@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import { cents } from "../lib/units";
 import { unlockPrice } from "../rules/shop";
-import { cents } from "../rules/units";
 import type { LastWalk, Owned } from "../save/schema";
 import { STARTER_DOGS } from "../testing/saves";
 import { TEST_TUNING } from "../testing/tuning";

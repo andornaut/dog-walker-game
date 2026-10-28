@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { QUIPS } from "../data/quips";
+import { cents, type Hearts } from "../lib/units";
 import type { Cause, Change, MoneyChange } from "../rules/causes";
-import { cents, type Hearts } from "../rules/units";
 import { closingLines, earningsBreakdown, zonePips } from "./endView";
 
 const money = (amount: number, base: Cause): MoneyChange => ({

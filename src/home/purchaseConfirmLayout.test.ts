@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
-import { cents } from "../rules/units";
+import { cents } from "../lib/units";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { inside } from "../testing/rects";
 import { newPlayerSave } from "../testing/saves";

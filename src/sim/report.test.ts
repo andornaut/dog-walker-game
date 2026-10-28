@@ -27,7 +27,7 @@ import { SKILL_PRESET_IDS } from "./skills";
 // replaces it: like the real one, it draws only from its seed, so a seed fixes its result.
 vi.mock("./simulate", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./simulate")>();
-  const { cents } = await import("../rules/units");
+  const { cents } = await import("../lib/units");
   const { newRun } = await import("../state/runState");
   const { runCountersOf } = await import("../rules/achievements");
   const { seededRandom } = await import("../lib/random");

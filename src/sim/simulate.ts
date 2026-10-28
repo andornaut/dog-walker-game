@@ -11,10 +11,10 @@ import type {
 import type { InputEvent } from "../dev/inputLog";
 import { type Random, randomStream } from "../lib/random";
 import { keysOf } from "../lib/records";
+import { addCents, type Cents, cents } from "../lib/units";
 import { earnedByRun, runCountersOf, type RunFacts } from "../rules/achievements";
 import { type CardView, type Choice, type ChoiceData } from "../rules/choices";
 import { currentZoneId } from "../rules/route";
-import { addCents, type Cents, cents } from "../rules/units";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { advanceLaneControl, pullLane } from "../runner/laneControl";
 import { destinationLane } from "../runner/laneMotion";

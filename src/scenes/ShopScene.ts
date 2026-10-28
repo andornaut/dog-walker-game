@@ -62,7 +62,7 @@ import {
 } from "../input/listScroll";
 import { clampIndex } from "../lib/arrays";
 import { containsPoint, type Rect } from "../lib/rect";
-import { cents } from "../rules/units";
+import { cents } from "../lib/units";
 import type { SaveDocument } from "../save/schema";
 import type { ArtLook } from "../ui/interaction";
 import { fillRect } from "../ui/phaser/draw";

@@ -1,7 +1,7 @@
 import type { DogId, GameData } from "../data/types";
+import { type Cents, cents } from "../lib/units";
 import type { Change, MoneyChange } from "../rules/causes";
 import { quipLine } from "../rules/choices";
-import { type Cents, cents } from "../rules/units";
 import type { LastWalk } from "../save/schema";
 
 type EarningsKind = "cardCosts" | "fees" | "fullPack" | "luckyFinds" | "start" | "tips";

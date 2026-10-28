@@ -38,7 +38,7 @@ const BOUNDARIES = [
 // by moving the module into a context or the importer out of one. The boundaries above govern
 // src/testing/.
 const CONTEXTS = {
-  assets: ["data", "lib", "state/runState", "tools/artManifest", "tools/files"],
+  assets: ["data", "lib", "tools/artManifest", "tools/files"],
   lib: [],
   road: [
     "assets",
@@ -51,7 +51,7 @@ const CONTEXTS = {
     "runner/walkGeometry",
     "runner/walkItems",
   ],
-  ui: ["assets", "lib", "rules/units"],
+  ui: ["assets", "lib"],
 };
 
 const SRC_FOLDERS = folders("src").filter((folder) => folder !== "testing");

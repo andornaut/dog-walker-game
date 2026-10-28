@@ -1,6 +1,6 @@
 import type { DogId, EncounterId, OptionPicks, WalkerId, ZoneId } from "../data/types";
+import { addCents, type Cents, cents } from "../lib/units";
 import { type RunCounters, type RunFacts, walkedFromTheStart } from "../rules/achievements";
-import { addCents, type Cents, cents } from "../rules/units";
 import { newWalkers } from "../rules/walkers";
 import type { EndReason } from "../state/runState";
 import { awardAchievements, type AwardContext } from "./achievements";

@@ -2,8 +2,8 @@
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
 import { keysOf } from "../lib/records";
+import { cents } from "../lib/units";
 import type { RunCounters } from "../rules/achievements";
-import { cents } from "../rules/units";
 import type { AwardContext } from "../save/achievements";
 import type { SaveContext } from "../save/load";
 import { createDefaultSave, SAVE_VERSION, type SaveDocument } from "../save/schema";

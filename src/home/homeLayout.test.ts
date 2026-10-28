@@ -10,8 +10,8 @@ import { cashLeft, ownerPhotoRect, WALK_BAR, WALK_BAR_BUTTONS } from "../hud/wal
 import { wrapWords } from "../lib/lines";
 import { keysOf } from "../lib/records";
 import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
+import { cents } from "../lib/units";
 import { unlockPrice } from "../rules/shop";
-import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
 import {

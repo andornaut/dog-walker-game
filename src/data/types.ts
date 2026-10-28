@@ -47,6 +47,20 @@ export type WalkerId = keyof typeof WALKERS;
 export type WalkerPerkId = keyof typeof WALKER_PERKS;
 export type ZoneId = (typeof WORLD)["zones"][number]["id"];
 
+// What opened a card: an obstacle the pack hit, with the dogs it affected, or a fork, whose
+// paths are the zones it leads to, left to right, each carrying the upgrade at its index.
+export type CardSource =
+  | {
+      readonly affected: readonly DogId[];
+      readonly encounter: EncounterId;
+      readonly kind: "encounter";
+    }
+  | {
+      readonly kind: "fork";
+      readonly paths: readonly ZoneId[];
+      readonly upgrades: readonly UpgradeId[];
+    };
+
 type EncounterOfKind<Kind extends Encounter["kind"]> = {
   [Id in EncounterId]: (typeof ENCOUNTERS)[Id]["kind"] extends Kind ? Id : never;
 }[EncounterId];

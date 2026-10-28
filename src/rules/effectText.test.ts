@@ -9,6 +9,7 @@ import type { Effect, GearId, MoneyKey, MultiplierKey, WalkerPerk } from "../dat
 import { UPGRADES } from "../data/upgrades";
 import { fillNames, placeholders } from "../lib/lines";
 import { keysOf } from "../lib/records";
+import { cents } from "../lib/units";
 import { TEST_TUNING } from "../testing/tuning";
 import {
   agilityPercent,
@@ -22,7 +23,7 @@ import {
   SIZE_NAMES,
 } from "./effectText";
 import { modifiersOf, modifierValue } from "./modifiers";
-import { cents, read } from "./units";
+import { read } from "./units";
 
 // The game's chances, which the test tuning pins to 0, so a dodge reads as one in so many.
 const data = {

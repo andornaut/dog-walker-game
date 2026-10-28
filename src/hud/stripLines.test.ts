@@ -4,9 +4,10 @@ import { gameData } from "../data";
 import type { Debuff, DebuffId, GearId } from "../data/types";
 import { fillNames } from "../lib/lines";
 import { keysOf } from "../lib/records";
+import { cents, clampHearts } from "../lib/units";
 import type { HeartChange, MoneyChange } from "../rules/causes";
 import { formatDollars, sentenceList } from "../rules/effectText";
-import { cents, clampHearts, read } from "../rules/units";
+import { read } from "../rules/units";
 import { defined } from "../testing/defined";
 import {
   bumpLines,

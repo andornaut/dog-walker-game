@@ -22,9 +22,10 @@ import type {
 import { HOME_TEXT_FIELDS, homeLine } from "../home/homeText";
 import { assertNever } from "../lib/assertNever";
 import { fillLine, fillNames, signedText } from "../lib/lines";
+import { type Cents, cents } from "../lib/units";
 import type { ModifiedValue } from "./modified";
 import { modifiersOf, modifierValue } from "./modifiers";
-import { type Cents, cents, read } from "./units";
+import { read } from "./units";
 
 type TextData = Pick<GameData, "debuffs" | "encounters" | "homeText" | "tuning">;
 type WordsData = Pick<GameData, "homeText" | "tuning">;

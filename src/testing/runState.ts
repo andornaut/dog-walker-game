@@ -1,5 +1,5 @@
 import type { DogId, Modifier } from "../data/types";
-import { clampHearts } from "../rules/units";
+import { clampHearts } from "../lib/units";
 import {
   type ActiveModifier,
   blankRun,

@@ -9,9 +9,9 @@ import {
   walkerDetail,
 } from "../home/detail";
 import { fillLine, fillNames } from "../lib/lines";
+import type { Cents } from "../lib/units";
 import { ownerMaxHearts } from "../rules/dogs";
 import { capitalize, debuffFields } from "../rules/effectText";
-import type { Cents } from "../rules/units";
 import type { Owned, SaveStats } from "../save/schema";
 import { heartsOf } from "../state/pack";
 import type { RunState } from "../state/runState";

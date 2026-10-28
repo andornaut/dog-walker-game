@@ -1,8 +1,8 @@
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, GameData } from "../data/types";
 import type { Point, Rect } from "../lib/rect";
+import type { Cents } from "../lib/units";
 import { type FaceMood, faceMood } from "../rules/treats";
-import type { Cents } from "../rules/units";
 import { slotIndexOf } from "../state/pack";
 import type { Pack, PackSlot } from "../state/runState";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";

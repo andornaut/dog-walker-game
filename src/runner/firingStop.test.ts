@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { DogId } from "../data/types";
-import type { CardSource } from "../state/runState";
+import type { CardSource, DogId } from "../data/types";
 import { type FiringHold, holdForFiring } from "./firingStop";
 import type { HitStop } from "./hitStop";
 

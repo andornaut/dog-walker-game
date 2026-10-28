@@ -1,4 +1,5 @@
 import type {
+  CardSource,
   DebuffId,
   DodgeEffect,
   DogId,
@@ -14,11 +15,12 @@ import type {
   WalkerId,
   ZoneId,
 } from "../data/types";
+import { type Cents, cents, type Hearts, type Pixels, pixels } from "../lib/units";
 import { packPlace, startHearts } from "../rules/dogs";
 import type { Lasting } from "../rules/durations";
 import { applyEffects } from "../rules/effects";
 import { firstZoneId } from "../rules/route";
-import { type Cents, cents, type Hearts, type Pixels, pixels, read } from "../rules/units";
+import { read } from "../rules/units";
 import { walkerEffects } from "../rules/walkers";
 import { packFor, packOrder } from "./pack";
 
@@ -72,20 +74,6 @@ type ActiveImmunity = Lasting & {
   readonly encounter: EncounterId;
   readonly source: EffectSource;
 };
-
-// What opened a card: an obstacle the pack hit, with the dogs it affected, or a fork, whose
-// paths are the zones it leads to, left to right, each carrying the upgrade at its index.
-export type CardSource =
-  | {
-      readonly affected: readonly DogId[];
-      readonly encounter: EncounterId;
-      readonly kind: "encounter";
-    }
-  | {
-      readonly kind: "fork";
-      readonly paths: readonly ZoneId[];
-      readonly upgrades: readonly UpgradeId[];
-    };
 
 export type EndReason = "finished" | "noDogs" | "wentHome";
 

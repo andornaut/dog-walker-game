@@ -4,8 +4,9 @@ import { gameData } from "../data";
 import type { DogId } from "../data/types";
 import { dollarText } from "../home/home";
 import { fillNames } from "../lib/lines";
+import { cents } from "../lib/units";
 import { currentZone, defaultRoute, walkLength } from "../rules/route";
-import { cents, read } from "../rules/units";
+import { read } from "../rules/units";
 import { testState } from "../testing/runState";
 import { homeQuestionNote } from "./homeQuestion";
 

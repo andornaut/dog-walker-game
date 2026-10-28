@@ -1,10 +1,10 @@
 import type { DogId, GameData, GearId } from "../data/types";
 import { assertNever } from "../lib/assertNever";
 import { fillNames, signedText } from "../lib/lines";
+import { type Cents, type Hearts, roundDollars } from "../lib/units";
 import type { ActiveModifier, EffectSource, ModifierSource } from "../state/runState";
 import { heartsChangeText } from "./effectText";
 import type { Contribution } from "./modifiers";
-import { type Cents, type Hearts, roundDollars } from "./units";
 
 // One reason behind a change, with how much of the change it accounts for, in the change's
 // unit: hearts, or cents for money. A change's causes sum to the change. The first is the
