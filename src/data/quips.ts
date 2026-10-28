@@ -23,10 +23,10 @@ export const QUIPS = {
     upset: ["That's a patchy job.", "Weeds everywhere. Ugh."],
   },
   duchess: {
-    fired: ["You're unfollowed. And fired!", "Blocked! Worst day ever."],
-    happier: ["That's going on the feed!", "Duchess is trending!"],
-    parting: ["Get her good side!", "Tag me in everything."],
-    upset: ["Not the content I wanted!", "I can't post this!"],
+    fired: ["Unsubscribed. And fired!", "Thumbs down. You're fired!"],
+    happier: ["That's going in the vlog!", "Duchess just went viral!"],
+    parting: ["Film her good side!", "Like, subscribe, walk!"],
+    upset: ["That's not making the video!", "I can't upload this!"],
   },
   kilo: {
     fired: ["Flight's grounded. Go home.", "Mayday. We're done."],

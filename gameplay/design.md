@@ -30,7 +30,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 - **Walkers:** Ada calm and precise, Casey warm and encouraging, Mr. B easygoing, Trista sporty and quick
 - **Owners** (each with 2 lines for each of happier, upset, fired and parting):
   - **Clare** (Biscuit): psychology student, quiet and friendly, gentle observations, a little shy
-  - **Eve** (Duchess): social media influencer, everything is content (feed, trending, followers)
+  - **Eve** (Duchess): YouTuber, everything is a video (vlog, views, subscribers)
   - **Gadget** (Penny): nervous but kind, double-checks everything, apologizes even when firing you
   - **Jason** (Buddy): lawn care pro, laid-back, yard talk (mowing, edging, weeds)
   - **Aunt Judy** (Sequoia): tennis star, older and athletic, tennis talk (aces, faults, match point)

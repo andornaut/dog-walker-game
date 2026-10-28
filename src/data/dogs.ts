@@ -47,7 +47,7 @@ export const DOGS = {
     name: "Duchess",
     owner: {
       name: "Eve",
-      role: "social media influencer",
+      role: "YouTuber",
     },
     price: "duchess",
     size: "small",
