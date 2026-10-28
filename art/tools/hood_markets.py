@@ -6,7 +6,7 @@ Distillery District:
 
 cheese-crates       48x48   card obstacle, 1 lane, in Kensington Market too: a cheesemonger's slatted
                             crate set out at the shop door, two golden wheels stacked at the back left,
-                            a cut wheel stood on its edge at the right showing its pale paste, a blue
+                            a cut wheel stood on its edge at the right showing its yellow paste, a blue
                             cheese wedge in front and a chalk price tag hung on the crate. idle (4
                             frames, 350ms): three stink wisps rise a quarter wave a frame
 wedding-shoot       112x72  card obstacle, 2 lanes: a bride posing in a white gown and veil with a
@@ -555,12 +555,15 @@ FISH_IDLE = (0, 0, 1, 2), 350
 
 # ---------- the cheese crate ----------
 
+# The cut wheel's missing wedge in degrees: narrow enough that the wheel reads as cheese, not a mouth.
+WHEEL_CUT = 30
+
 def cheese_wheel(g, cx, cy, r, turn=0.0, cut=True):
     """A cheese wheel stood on its edge, seen face on round design point cx, cy, r design units across the
-    middle: a gold rind ring shaded amber on its lower right and lit yellow on its upper left round pale cream
-    paste with three tan holes, and with cut a wedge cut out of it to the centre, turned turn degrees
-    clockwise from straight up. Drawn pixel for pixel at the grid's scale, so it keeps its shape at any
-    angle."""
+    middle: an amber rind ring shaded orange on its lower right and lit gold on its upper left round yellow
+    paste with three tan holes, and with cut a WHEEL_CUT degree wedge cut out of it to the centre, turned
+    turn degrees clockwise from straight up. Drawn pixel for pixel at the grid's scale, so it keeps its
+    shape at any angle."""
     px, s = raster(g), scale_of(g)
     ox, oy, rr = cx * s, cy * s, r * s
     a0 = math.radians(turn - 90)
@@ -574,13 +577,13 @@ def cheese_wheel(g, cx, cy, r, turn=0.0, cut=True):
             if d > rr:
                 continue
             ang = (math.degrees(math.atan2(dy, dx)) - turn + 90) % 360
-            if cut and d > 0.5 and ang < 50:
+            if cut and d > 0.5 and ang < WHEEL_CUT:
                 continue
             light = (dx + dy) / max(d, 1e-9)
             if d > rr - rind:
-                c = "yellow" if light < -0.7 else "amber" if light > 0.5 else "gold"
+                c = "gold" if light < -0.7 else "orange" if light > 0.5 else "amber"
             else:
-                c = "cream"
+                c = "yellow"
                 for hx, hy in holes:
                     if math.hypot(x + 0.5 - hx, y + 0.5 - hy) < max(0.8, 0.12 * rr):
                         c = "tan"
@@ -617,7 +620,7 @@ def stink_wisps(g, phase, xs=(9, 17, 25), top=1, bottom=9):
 def cheese_crates(phase=0):
     """A cheesemonger's slatted wooden crate set out at the shop door, on the 32-unit grid: a stack of two
     whole golden wheels (gold tops lit yellow, amber rinds) at the back left, a cut wheel stood on its edge at
-    the right showing its pale paste, and a wedge of blue cheese lying in front; a small chalk price tag hung on
+    the right showing its yellow paste, and a wedge of blue cheese lying in front; a small chalk price tag hung on
     the crate's front, and stink wisps rising off the cheese. phase (0 to 3) moves the wisps up."""
     g = edged(Grid(32, 32))
     stink_wisps(g, phase)
@@ -977,7 +980,7 @@ def hit_cheese_crates(step):
     for i, (vx, vy) in enumerate(((-9, -8), (9, -7), (-12, -3), (12, -4), (-5, -10), (6, -10))):
         x, y = cx + vx * t * 0.8, cy - 4 + vy * t * 0.8 + 1.3 * t * t
         if 3 <= x < 60 and 3 <= y < 60:
-            hits.piece(g, lambda p: p.rect(x, y, 2, 2, "cream" if i % 2 else "gold"))
+            hits.piece(g, lambda p: p.rect(x, y, 2, 2, "yellow" if i % 2 else "amber"))
     wx = (0, 30, 33, 37, 41, 45, 48, 51)[step]
     wy = (0, 32, 22, 17, 18, 24, 32, 28)[step]
     hits.piece(g, lambda p: cheese_wheel(p, wx, wy, 8, turn=step * 90))
