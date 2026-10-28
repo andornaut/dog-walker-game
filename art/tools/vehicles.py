@@ -309,7 +309,7 @@ TRAIN_TAGS = (
     ("idle", (dict(), dict(wave=1), dict(wave=2), dict(wave=1)), 400),
     ("cue", (dict(toot=1), dict(toot=2), dict(toot=3)), 120),
 )
-# Each car's passengers, back to front: (top, hair).
+# Each car's left column and its passengers, back to front: (top, hair).
 TRAIN_CARS = ((2, (("teal", "ink"), ("amber", "dbrown"), ("lilac", "brown"))),
               (40, (("orange", "gold"), ("sky", "rust"), ("green", "ink"))))
 
@@ -399,14 +399,14 @@ def train_car(g, x0, heads, wave=0):
         g.rect(hx - 0.5, 11.3, 2.5, 2.5, "skin1")
 
 
-def train_engine(g, look=0, toot=0):
+def train_engine(g, toot=0):
     """The engine, its cab at the back (left) and the boiler in front."""
     # the open cab: the driver in a hickory-striped cap and blue overalls with a red neckerchief
     g.rect(81, 10, 10, 13, "navy")
     g.cel(86, 21.5, 4, 2.5, "blue", "navy", "sky", power=3)
     g.rect(85, 19, 2.5, 1.2, "red")
     face_disc(g, 86, 16.5, 3.2, 3.2, "skin1", "skin2")
-    eyes(g, 86 + look, 16.5)
+    eyes(g, 86, 16.5)
     g.cel(86.5, 13.2, 3.8, 2, "white", "lgrey", power=3)
     for x in (84.5, 86.5, 88.5):
         g.rect(x, 11.8, 0.75, 2.5, "sky")
@@ -456,11 +456,11 @@ def train_engine(g, look=0, toot=0):
         g.rect(111 + k * 1.6, 33 + k * 2.5, 1, 1, "dslate")
 
 
-def tourist_train(roll=None, wave=0, toot=0, look=0):
+def tourist_train(roll=None, wave=0, toot=0):
     """High Park's tourist train side on, facing right: the engine pulling two open cars (see the docstring).
     roll (0 to 3) is a push frame: the spokes turn, the engine dips onto its wheels on frames 1 and 2 and the
     cars bob in turn; wave raises the waving passenger's hand (2 swings it out), toot (1 to 3) is the
-    whistle's puff, look turns the driver's eyes."""
+    whistle's puff."""
     g = edged(Grid(TRAIN_W, TRAIN_H))
     px = raster(g)
     moving = roll is not None
@@ -493,7 +493,7 @@ def tourist_train(roll=None, wave=0, toot=0, look=0):
     layer(lambda: train_car(g, back_x, back), alt if moving else 0)
     layer(lambda: train_car(g, front_x, front, wave), (1 - alt) if moving else 0)
     layer(wheels, 0)
-    layer(lambda: train_engine(g, look, toot), dip)
+    layer(lambda: train_engine(g, toot), dip)
     px.px = out
     return lit(g)
 
