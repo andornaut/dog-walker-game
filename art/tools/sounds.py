@@ -11,6 +11,8 @@ sfx-card           0.44s  paper swish, then a triangle chime G5 D6
 sfx-fired          1.80s  sad "wah wah wah waaah" down G4 F#4 F4 E4, muted square
 sfx-hit-skunk      0.50s  spray hiss: pink noise stepping down three bands over a falling "pfff"
 sfx-hit-puddle     0.50s  splash: a pink noise burst and low plop, then rising triangle bubbles
+sfx-hit-pothole    0.36s  clunk and splash: a wheel dropping into the hole, a dull falling square thud
+                          and a knock, then a short pink noise splash and two rising triangle bubbles
 sfx-hit-thief      0.60s  coin scatter: seven fading triangle pings between F#6 and E7
 sfx-hit-squirrel   0.40s  chitter: seven quick falling square chirps near 2kHz, three then four
 sfx-hit-other-dog  0.40s  friendly woof: a soft low "boof", then a rising yip
@@ -199,6 +201,15 @@ EFFECTS = {
         ("triangle", 0.05, (360, 780), 0.26, dict(vol=0.6, attack=0.003, release=0.6)),
         ("triangle", 0.05, (640, 1350), 0.34, dict(vol=0.5, attack=0.003, release=0.6)),
         ("triangle", 0.06, (480, 1000), 0.44, dict(vol=0.4, attack=0.003, release=0.6)),
+    ],
+    # The wheel drops in with a dull thud kept above 300 Hz, then the water splashes up round it.
+    "sfx-hit-pothole": [
+        ("square", 0.11, (600, 360), 0, dict(vol=0.7, low=1400, attack=0.004, release=0.7, shape="h")),
+        ("triangle", 0.12, (520, 340), 0, dict(vol=0.45, attack=0.004, release=0.7, shape="h")),
+        ("pinknoise", 0.04, None, 0, dict(vol=0.5, low=1600, high=350, attack=0.002, release=0.8, shape="h")),
+        ("pinknoise", 0.22, None, 0.08, dict(vol=0.8, low=3000, high=500, attack=0.01, release=0.8)),
+        ("triangle", 0.05, (480, 1000), 0.2, dict(vol=0.6, attack=0.003, release=0.6)),
+        ("triangle", 0.06, (400, 860), 0.3, dict(vol=0.45, attack=0.003, release=0.6)),
     ],
     # Coins bounce apart: uneven gaps and pitches, each ping quieter than the last.
     "sfx-hit-thief": [

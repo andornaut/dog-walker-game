@@ -1,0 +1,78 @@
+{ "frames": {
+   "fx-splunk 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 64, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 48 },
+    "sourceSize": { "w": 64, "h": 48 },
+    "duration": 60
+   },
+   "fx-splunk 1.aseprite": {
+    "frame": { "x": 64, "y": 0, "w": 64, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 48 },
+    "sourceSize": { "w": 64, "h": 48 },
+    "duration": 60
+   },
+   "fx-splunk 2.aseprite": {
+    "frame": { "x": 128, "y": 0, "w": 64, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 48 },
+    "sourceSize": { "w": 64, "h": 48 },
+    "duration": 60
+   },
+   "fx-splunk 3.aseprite": {
+    "frame": { "x": 192, "y": 0, "w": 64, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 48 },
+    "sourceSize": { "w": 64, "h": 48 },
+    "duration": 60
+   },
+   "fx-splunk 4.aseprite": {
+    "frame": { "x": 256, "y": 0, "w": 64, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 48 },
+    "sourceSize": { "w": 64, "h": 48 },
+    "duration": 60
+   },
+   "fx-splunk 5.aseprite": {
+    "frame": { "x": 320, "y": 0, "w": 64, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 48 },
+    "sourceSize": { "w": 64, "h": 48 },
+    "duration": 60
+   },
+   "fx-splunk 6.aseprite": {
+    "frame": { "x": 384, "y": 0, "w": 64, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 48 },
+    "sourceSize": { "w": 64, "h": 48 },
+    "duration": 60
+   },
+   "fx-splunk 7.aseprite": {
+    "frame": { "x": 448, "y": 0, "w": 64, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 48 },
+    "sourceSize": { "w": 64, "h": 48 },
+    "duration": 60
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "fx-splunk.png",
+  "format": "RGBA8888",
+  "size": { "w": 512, "h": 48 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "play", "from": 0, "to": 7, "direction": "forward" }
+  ]
+ }
+}

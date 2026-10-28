@@ -5487,6 +5487,11 @@
       "json": "sprites/fx-splash.json"
     },
     {
+      "key": "fx-splunk",
+      "png": "sprites/fx-splunk.png",
+      "json": "sprites/fx-splunk.json"
+    },
+    {
       "key": "fx-tap",
       "png": "sprites/fx-tap.png",
       "json": "sprites/fx-tap.json"
@@ -8030,6 +8035,87 @@
       "anchor": {
         "feetY": 44,
         "opaqueWidth": 45
+      }
+    },
+    {
+      "key": "pothole",
+      "png": "sprites/pothole.png",
+      "json": "sprites/pothole.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 108
+      }
+    },
+    {
+      "key": "pothole@50",
+      "png": "sprites/pothole@50.png",
+      "json": "sprites/pothole@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "pothole@56",
+      "png": "sprites/pothole@56.png",
+      "json": "sprites/pothole@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 61
+      }
+    },
+    {
+      "key": "pothole@62",
+      "png": "sprites/pothole@62.png",
+      "json": "sprites/pothole@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 68
+      }
+    },
+    {
+      "key": "pothole@69",
+      "png": "sprites/pothole@69.png",
+      "json": "sprites/pothole@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 74
+      }
+    },
+    {
+      "key": "pothole@75",
+      "png": "sprites/pothole@75.png",
+      "json": "sprites/pothole@75.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 80
+      }
+    },
+    {
+      "key": "pothole@81",
+      "png": "sprites/pothole@81.png",
+      "json": "sprites/pothole@81.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 87
+      }
+    },
+    {
+      "key": "pothole@88",
+      "png": "sprites/pothole@88.png",
+      "json": "sprites/pothole@88.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 94
+      }
+    },
+    {
+      "key": "pothole@94",
+      "png": "sprites/pothole@94.png",
+      "json": "sprites/pothole@94.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 101
       }
     },
     {
@@ -13755,6 +13841,11 @@
       "key": "sfx-hit-porch-cat",
       "ogg": "sounds/sfx-hit-porch-cat.ogg",
       "m4a": "sounds/sfx-hit-porch-cat.m4a"
+    },
+    {
+      "key": "sfx-hit-pothole",
+      "ogg": "sounds/sfx-hit-pothole.ogg",
+      "m4a": "sounds/sfx-hit-pothole.m4a"
     },
     {
       "key": "sfx-hit-promo-team",

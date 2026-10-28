@@ -9,7 +9,9 @@ The bark pop is 16x16. The ice cream truck (56x60, one lane, like
 obstacles.delivery_truck; tags idle, 2 frames at 400ms, and drive, 4 at 100ms) is drawn in
 its own pixels at 56x50 on a grid that keeps its columns and draws its rows ROW_SCALE (1.2)
 times; the puddle (112x48) is drawn in its own
-pixels; the skunk's stink haze (112x60) is a ground decal laid out on an 88x40 design
+pixels, and so is the pothole (112x48, idle: 2 frames at 500ms, the glint and sheen moving
+a pixel on frame 1), a ground decal like the puddle in the Toronto coal and ash asphalt,
+with no outline; the skunk's stink haze (112x60) is a ground decal laid out on an 88x40 design
 and stretched to its frame on the drawn grid. All are chibi and in Endesga 32 with
 coloured outlines. The walker is seen from behind, like the
 dogs, except in wave and cheer; everything coming down the road faces the player:
@@ -951,6 +953,80 @@ def puddle(f, w=112, h=48):
     return g
 
 
+# The pothole's outline: corners at (angle in degrees clockwise from the right on screen, radius as a share of a
+# rounded oval's), joined straight, so its edge is broken and uneven.
+POTHOLE_EDGE = ((0, 0.98), (24, 1.0), (46, 0.92), (72, 0.99), (100, 0.94), (128, 1.0), (158, 0.98), (184, 0.98),
+                (208, 0.94), (232, 1.0), (256, 0.95), (282, 1.0), (308, 0.93), (336, 1.0))
+# The broken rim's chunks as (from, to) in degrees, with how far each end reaches into the hole in pixels
+# across (rows are POTHOLE_SQUASH of it), so their inner edges break at angles. Between them are cracks. A
+# chunk centred between 140 and 300 degrees faces the top-left light.
+POTHOLE_CHUNKS = ((-30, 8, 5, 8), (14, 50, 9, 5), (56, 100, 6, 9), (106, 140, 8, 5), (146, 180, 6, 10),
+                  (186, 222, 9, 6), (228, 262, 6, 10), (268, 300, 10, 7), (306, 324, 6, 8))
+POTHOLE_SQUASH = 0.6
+# The loose chips on the road as (x, y, width), each lgrey on a coal crack.
+POTHOLE_CHIPS = ((6, 40, 5), (100, 41, 4), (98, 4, 4))
+
+
+def pothole(f, w=112, h=48):
+    """The road's 2-lane pothole, 112x48 like the puddle, a ground decal with no outline: a coal crack ring round
+    a broken rim of asphalt chunks (lgrey facing the top-left light, grey away from it, coal cracks between),
+    the far chunks' broken faces in ash, dark navy water with a dlake sheen and a white glint over a foam
+    streak at its top left, and three loose chips on the road. The glint and sheen move a pixel on frame 1."""
+    g = Grid(w, h)
+    cx, cy, rx, ry = w / 2, h / 2, w / 2 - 1, h / 2 - 1.5
+    corners = POTHOLE_EDGE + ((360 + POTHOLE_EDGE[0][0], POTHOLE_EDGE[0][1]),)
+
+    def oval(a, m, inset):
+        t = math.radians(a)
+        c, s = math.cos(t), math.sin(t)
+        r = m / (abs(c) ** 2.4 + abs(s) ** 2.4) ** (1 / 2.4)
+        return cx + (rx * r - inset) * c, cy + (ry * r - inset * POTHOLE_SQUASH) * s
+
+    def at(a, inset=0.0):
+        a %= 360
+        for (a0, m0), (a1, m1) in zip(corners, corners[1:]):
+            if a0 <= a <= a1:
+                (x0, y0), (x1, y1) = oval(a0, m0, inset), oval(a1, m1, inset)
+                k = (a - a0) / (a1 - a0)
+                return x0 + (x1 - x0) * k, y0 + (y1 - y0) * k
+
+    def band(a0, a1, i0, i1, j0, j1, col):
+        """Fill between insets i (outer) and j (inner) from a0 to a1, each running from its first value to its
+        second."""
+        steps = max(2, round((a1 - a0) / 5))
+        for k in range(steps):
+            b0, b1 = a0 + (a1 - a0) * k / steps, a0 + (a1 - a0) * (k + 1) / steps
+            u0, u1 = k / steps, (k + 1) / steps
+            o0, o1 = at(b0, i0 + (i1 - i0) * u0), at(b1, i0 + (i1 - i0) * u1)
+            n0, n1 = at(b0, j0 + (j1 - j0) * u0), at(b1, j0 + (j1 - j0) * u1)
+            g.tri(o0, o1, n1, col)
+            g.tri(o0, n1, n0, col)
+
+    def disc(inset, col):
+        pts = [at(a, inset) for a in range(0, 360, 4)]
+        for i in range(len(pts)):
+            g.tri((cx, cy), pts[i], pts[(i + 1) % len(pts)], col)
+
+    # the crack ring, then the water inside it; each chunk sits 2px in from the ring's edge, and a far chunk
+    # (on the top half) shows its broken face in ash below it
+    disc(0, "coal")
+    disc(4, "navy")
+    for a0, a1, d0, d1 in POTHOLE_CHUNKS:
+        mid = (a0 + a1) / 2 % 360
+        if mid > 180:
+            band(a0, a1, d0, d1, d0 + 6, d1 + 6, "ash")
+        band(a0, a1, 2, 2, d0, d1, "lgrey" if 140 <= mid <= 300 else "grey")
+    s = 1 if f else 0
+    g.rect(round(w * 0.27) + s, round(h * 0.42), round(w * 0.09), 2, "white")
+    g.rect(round(w * 0.25) + s, round(h * 0.42) + 2, round(w * 0.13), 1, "foam")
+    for fx, fy, fw in ((0.52, 0.52, 0.12), (0.62, 0.66, 0.1), (0.38, 0.64, 0.07)):
+        g.rect(round(fx * w) - s, round(fy * h), max(2, round(fw * w)), 1, "dlake")
+    for x, y, cw in POTHOLE_CHIPS:
+        g.rect(x, y, cw, 2, "lgrey")
+        g.rect(x + 1, y + 2, cw, 1, "coal")
+    return g
+
+
 # The stink haze's puffs as (centre x, centre y, radius across), laid out on an 88x40 design that the sprite
 # stretches to CLOUD_SIZE (2 lanes, 64n-16 wide, by 1.5 x 40 rows). The haze hugs the road: each puff is
 # CLOUD_SQUASH as tall as it is wide, so together they make a low, wide bank with a lumpy top, its base on the
@@ -1771,6 +1847,7 @@ def sprites():
     yield "squirrel", [("idle", frames([big(squirrel, tail=0), big(squirrel, tail=1)]), 300),
                        ("run", frames(big(squirrel_run, k) for k in range(4)), 60)]
     yield "puddle", [("idle", frames([puddle(0), puddle(1)], outline=False), 500)]
+    yield "pothole", [("idle", frames([pothole(0), pothole(1)], outline=False), 500)]
     yield "skunk-cloud", [("loop", frames((skunk_cloud(i) for i in range(4)), outline=False), 220)]
     yield "other-dog", [("walk", frames(big(corgi, **q) for q in CORGI_WALK), 100),
                         ("idle", frames(big(corgi, **q) for q in CORGI_IDLE), 300)]

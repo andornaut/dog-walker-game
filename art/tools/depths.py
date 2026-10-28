@@ -8,7 +8,7 @@ minis.Mini, so it follows any redraw of the full-size sprite and gets its own
 full outline at the small size (see minis.py).
 
 At every step here: other-dog-owner, thief, petting-neighbour, mail-carrier,
-stroller, jogger, kid-on-bike, ice-cream-truck, puddle (no
+stroller, jogger, kid-on-bike, ice-cream-truck, puddle and pothole (no
 outline), hedge, hot-dog-cart, barrier-2, barrier-3, parked-car, delivery-truck,
 streetcar and taxi. Walkers
 are the pack, always drawn at 1x, and have none.
@@ -113,6 +113,7 @@ def own(s):
                               ("drive", [small(road, truck, road.ice_cream_truck, roll=r).outlined() for r in drive],
                                drive_ms)]
     yield "puddle", [("idle", [small(road, s, road.puddle, f).outlined(False) for f in (0, 1)], 500)]
+    yield "pothole", [("idle", [small(road, s, road.pothole, f).outlined(False) for f in (0, 1)], 500)]
     b = obstacles.SCALE * s
     yield "hedge", obstacle(b, lambda r: obstacles.hedge(rustle=r), obstacles.HEDGE_IDLE)
     yield "hot-dog-cart", obstacle(b, lambda f: obstacles.hot_dog_cart(steam=f), obstacles.HOT_DOG_CART_IDLE)
