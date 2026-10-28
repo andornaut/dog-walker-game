@@ -7444,7 +7444,7 @@
       "json": "sprites/owner-pierre.json",
       "anchor": {
         "feetY": 45,
-        "opaqueWidth": 25
+        "opaqueWidth": 24
       }
     },
     {

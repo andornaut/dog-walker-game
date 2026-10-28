@@ -252,7 +252,7 @@ def ralph_top(wave):
 
 def tara_top(wave):
     """Ms. Tara, dog-show judge, fussy: tall blonde updo, amber earrings, red lips, a purple blazer over
-    a white blouse and pearls, a pencil skirt, and a blue first-prize rosette in her left hand."""
+    a white blouse and pearls, a pencil skirt, her hands empty."""
     def top(g, b):
         g.rect(10, 33 + b, 12, 6, "purple")
         g.rect(19, 33 + b, 3, 6, "plum")
@@ -264,12 +264,6 @@ def tara_top(wave):
         # the far earring first, so a raised arm passes in front of it
         g.p(24, 17 + b, "amber")
         arms(g, b, wave, "purple", "plum", "skin1")
-        # the rosette: blue petals round an amber button, two ribbon tails below the fist
-        g.cel(6.5, 27 + b, 3, 3, "blue", "navy", "sky")
-        g.rect(6, 26 + b, 2, 2, "amber")
-        g.rect(4, 31 + b, 2, 5, "blue")
-        g.rect(8, 31 + b, 2, 4, "sky")
-        g.rect(5, 31 + b, 4, 3, "skin1")
         head(g, b, "skin1", "skin2")
         # blonde: yellow shaded amber, as on her face
         g.cel(16, 7.5 + b, 9, 4.5, "yellow", "amber")
