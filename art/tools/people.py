@@ -287,7 +287,7 @@ def tara_top(wave):
 
 def clare_top(wave):
     """Clare, psychology student, laid-back: brown hair to the shoulders with a side-swept fringe and a pink
-    clip, a cosy green knit sweater over a white collar, a navy skirt, and her psychology textbook in
+    clip, a cosy green knit sweater with a ribbed hem over a white collar, a navy skirt, and her psychology textbook in
     her left hand."""
     def top(g, b):
         g.rect(10, 33 + b, 12, 5, "navy")
@@ -296,12 +296,8 @@ def clare_top(wave):
         g.rect(7, 9 + b, 18, 12, "dbrown")
         g.rect(21, 9 + b, 4, 12, "plum")
         torso(g, b, "green", "dgreen")
-        # the knit: a ribbed hem, two cables twisting down the front, and the collar's white points at the neck
+        # the knit: a ribbed hem and the collar's white points at the neck, the sweater otherwise flat
         g.rect(9, 32 + b, 14, 1, "dgreen")
-        for x in (11, 18):
-            for y in range(24, 31, 2):
-                g.p(x, y + b, "dgreen")
-                g.p(x + 1, y + 1 + b, "dgreen")
         g.tri((13, 21 + b), (16, 21 + b), (15, 23 + b), "white")
         g.tri((16, 21 + b), (19, 21 + b), (17, 23 + b), "white")
         arms(g, b, wave, "green", "dgreen", "brown")

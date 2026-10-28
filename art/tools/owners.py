@@ -294,12 +294,8 @@ def clare(mood):
     g.rect(6, 14, 20, 10, "dbrown")
     g.rect(22, 14, 4, 10, "plum")
     base(g, "brown", "dbrown", "green", "dgreen")
-    # the knit: a ribbed crew neck and two cables down the front, either side of a white collar
+    # the knit: a ribbed crew neck round a white collar
     g.rect(11, 27, 10, 1, "dgreen")
-    for x in (11, 20):
-        for y in (28, 30):
-            g.p(x, y, "dgreen")
-        g.p(x + 1, 29, "dgreen")
     g.tri((13, 26), (16, 26), (15, 28), "white")
     g.tri((16, 26), (19, 26), (17, 28), "white")
     # the crown, and the fringe swept across the forehead to the left
