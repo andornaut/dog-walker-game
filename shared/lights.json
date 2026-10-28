@@ -6,7 +6,14 @@
         "dx": 0.5,
         "dy": -10.5,
         "light": "rider-headlamp",
-        "zones": ["homeStretch", "shops"]
+        "zones": ["homeStretch"]
+      },
+      {
+        "angle": 90,
+        "dx": 0.5,
+        "dy": -10.5,
+        "light": "rider-headlamp-stone",
+        "zones": ["shops"]
       }
     ],
     "cyclist": [
@@ -15,7 +22,14 @@
         "dx": 0.5,
         "dy": -18.5,
         "light": "rider-headlamp",
-        "zones": ["homeStretch", "shops"]
+        "zones": ["homeStretch"]
+      },
+      {
+        "angle": 90,
+        "dx": 0.5,
+        "dy": -18.5,
+        "light": "rider-headlamp-stone",
+        "zones": ["shops"]
       }
     ],
     "delivery-cyclist": [
@@ -56,7 +70,46 @@
           }
         ],
         "light": "rider-headlamp",
-        "zones": ["homeStretch", "shops"]
+        "zones": ["homeStretch"]
+      },
+      {
+        "angle": 90,
+        "frames": [
+          {
+            "dx": -0.5,
+            "dy": -23.5
+          },
+          {
+            "dx": 0.5,
+            "dy": -23.5
+          },
+          {
+            "dx": 1.5,
+            "dy": -23.5
+          },
+          {
+            "dx": 0.5,
+            "dy": -23.5
+          },
+          {
+            "dx": -1.5,
+            "dy": -23.5
+          },
+          {
+            "dx": -1.5,
+            "dy": -23.5
+          },
+          {
+            "dx": -1.5,
+            "dy": -23.5
+          },
+          {
+            "dx": -1.5,
+            "dy": -23.5
+          }
+        ],
+        "light": "rider-headlamp-stone",
+        "zones": ["shops"]
       }
     ],
     "delivery-truck": [
@@ -81,7 +134,14 @@
         "dx": 0.5,
         "dy": -14.5,
         "light": "rider-headlamp",
-        "zones": ["homeStretch", "shops"]
+        "zones": ["homeStretch"]
+      },
+      {
+        "angle": 90,
+        "dx": 0.5,
+        "dy": -14.5,
+        "light": "rider-headlamp-stone",
+        "zones": ["shops"]
       }
     ],
     "minor-scooter": [
@@ -112,7 +172,36 @@
           }
         ],
         "light": "rider-headlamp",
-        "zones": ["homeStretch", "shops"]
+        "zones": ["homeStretch"]
+      },
+      {
+        "angle": 90,
+        "frames": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          {
+            "dx": 0.5,
+            "dy": -38.5
+          },
+          {
+            "dx": 0.5,
+            "dy": -37.5
+          },
+          {
+            "dx": 0.5,
+            "dy": -37.5
+          },
+          {
+            "dx": 0.5,
+            "dy": -38.5
+          }
+        ],
+        "light": "rider-headlamp-stone",
+        "zones": ["shops"]
       }
     ],
     "parked-car": [
@@ -129,7 +218,14 @@
         "dx": 0.5,
         "dy": -15.5,
         "light": "rider-headlamp",
-        "zones": ["homeStretch", "shops"]
+        "zones": ["homeStretch"]
+      },
+      {
+        "angle": 90,
+        "dx": 0.5,
+        "dy": -15.5,
+        "light": "rider-headlamp-stone",
+        "zones": ["shops"]
       }
     ],
     "roadside-gas-lamp": [
@@ -367,6 +463,26 @@
         {
           "scale": 0.33,
           "strength": 0.16
+        }
+      ],
+      "shape": "cone",
+      "width": 40
+    },
+    "rider-headlamp-stone": {
+      "colour": "amber",
+      "height": 60,
+      "rings": [
+        {
+          "scale": 1,
+          "strength": 0.05
+        },
+        {
+          "scale": 0.66,
+          "strength": 0.1
+        },
+        {
+          "scale": 0.33,
+          "strength": 0.2
         }
       ],
       "shape": "cone",
