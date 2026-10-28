@@ -190,25 +190,14 @@ describe("effectText", () => {
 const unsignedPercent = (fraction: number) => `${Math.abs(Math.round(fraction * 100))}%`;
 
 describe("agilityPercent", () => {
-  const shoes = read(gameData.tuning, "multipliers", "runningShoesAgility");
-  const large = read(gameData.tuning, "multipliers", "largeDogAgility");
-  const floor = read(gameData.tuning, "multipliers", "minPackAgility");
-  // Each walker's own agility, with Running shoes, and with one large dog down to the floor.
-  const cases = Object.values(gameData.walkers).flatMap(({ agility, name }) => [
-    [`${name}'s own`, agility],
-    [`${name} with Running shoes`, agility + shoes],
-    [`${name} with a large dog`, Math.max(Math.min(agility, floor), agility + large)],
-  ]) as [string, number][];
-
-  it.each(cases)(
-    "gives %s agility as a signed percent against the base, or none at the base",
-    (_, agility) => {
-      const whole = Math.round((agility - 1) * 100);
-      expect(agilityPercent(agility)).toBe(
-        whole === 0 ? null : `${whole < 0 ? "−" : "+"}${Math.abs(whole)}%`,
-      );
-    },
-  );
+  it.each<[number, string | null]>([
+    [1, null],
+    [1.004, null],
+    [1.15, "+15%"],
+    [0.85, "−15%"],
+  ])("gives an agility of %d as %s against the base", (agility, text) => {
+    expect(agilityPercent(agility)).toBe(text);
+  });
 });
 
 describe("largeSpeedText", () => {
