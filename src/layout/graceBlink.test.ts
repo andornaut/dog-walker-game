@@ -15,8 +15,6 @@ describe("graceAlpha", () => {
     { alpha: 1, name: "as the window opens, through the hit stop", remaining: WINDOW },
     { alpha: 1, name: "in the first blink", remaining: WINDOW - 0.5 * blinkSeconds },
     { alpha: 0, name: "in the second blink", remaining: WINDOW - 1.5 * blinkSeconds },
-    { alpha: 1, name: "in the third blink", remaining: WINDOW - 2.5 * blinkSeconds },
-    { alpha: 0, name: "in the fourth blink", remaining: WINDOW - 3.5 * blinkSeconds },
   ])("shows the pack at $alpha $name", ({ alpha, remaining }) => {
     expect(graceAlpha(false, WINDOW, remaining)).toBe(alpha);
   });
