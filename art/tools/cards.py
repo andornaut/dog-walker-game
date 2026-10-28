@@ -919,27 +919,29 @@ def distillery_view():
 def kensington_view():
     verge = bd.VERGES["kensington-market"]
     paving = bd.verge_paving("kensington-market")
-    a = ZoneView("kensington-market", flecked("dbrick", "brick", 41), paving, "gold", (3, 6),
+    a = ZoneView("kensington-market", lambda px, py: bd.KENSINGTON_ROAD, paving, "plum", (3, 6),
                  curb=verge["curbColour"], walk=verge["walkColour"], lawn=paving, walk_fleck=verge["seamColour"],
-                 edge="dred")
+                 edge=bd.KENSINGTON_GUTTER)
     bd.sunburst(a, AW / 2, FAR_Y + 2, 5, "purple", "violet", FAR_Y, w=AW)
-    for x, w, wall_c, roof, awn in ((-14, 28, "dturq", "navy", "dred"), (14, 26, "violet", "plum", "ochre"),
-                                    (40, 26, "ochre", "dbrick", "dturq"), (66, 26, "olive", "dolive", "red")):
+    # the worn Victorian row in its backdrop's paint: a sash upstairs either side, a faded awning, the shop window
+    for x, w, wall, roof, awn in ((-14, 28, "dturq", "navy", "dred"), (14, 26, "violet", "plum", "ochre"),
+                                  (40, 26, "ochre", "dbrick", "dturq"), (66, 26, "olive", "dolive", "red")):
+        wall_c, roof_c = bd.WORN_WALL[wall], bd.WORN_ROOF[roof]
         for k in range(w // 2 + 2):
-            a.fill(x - 1 + k, 7 - k // 2, w + 2 - 2 * k, 1, roof)
+            a.fill(x - 1 + k, 7 - k // 2, w + 2 - 2 * k, 1, roof_c)
         a.fill(x, 7, w, FAR_Y - 7, wall_c)
         a.fill(x + w - 2, 7, 2, FAR_Y - 7, dk(wall_c))
-        a.fill(x + 3, 9, 4, 3, "lake")
-        a.fill(x + w - 8, 9, 4, 3, "lake")
+        a.fill(x + 3, 8, 4, 4, "ochre")
+        a.fill(x + w - 8, 8, 4, 4, "dlake")
         for i in range(0, w - 2, 4):
-            a.fill(x + 1 + i, 14, 2, 2, awn)
-            a.fill(x + 3 + i, 14, 2, 2, "cream")
-        a.fill(x + 3, 17, w - 10, 4, "lake")
+            a.fill(x + 1 + i, 14, 2, 2, bd.FADED.get(awn, awn))
+            a.fill(x + 3 + i, 14, 2, 2, "stone")
+        a.fill(x + 3, 17, w - 10, 4, "dlake")
     for x0 in (0, AW - 5):
         for py in range(FAR_Y):
-            a.fill(x0, py, 5, 1, bd.MURAL[(py // 4) % len(bd.MURAL)])
-    bd.bunting(a, 5, 38, 4, 2, ("red", "gold", "dturq", "lilac", "lime", "orange"))
-    bd.bunting(a, 38, 70, 5, 2, ("lime", "orange", "red", "gold", "dturq", "lilac"))
+            a.fill(x0, py, 5, 1, dk(bd.MURAL[(py // 4) % len(bd.MURAL)]))
+    # a hydro wire sagging across in place of the bunting
+    bd.wire(a, (0, 3), (AW, 3), 2)
     a.street()
     return a
 
