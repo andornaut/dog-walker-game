@@ -61,7 +61,6 @@ import {
   leadSlot,
   ownerNameLines,
   slotShown,
-  SPARE_TREAT_PIP,
   spareTreatPipAt,
   WALK_BAR,
   WALK_BAR_BUTTONS,
@@ -142,6 +141,8 @@ import {
 
 const LAYOUT = SCREEN_LAYOUT;
 const BAR = walkBarLayout(LAYOUT.topBar);
+// The spare treat pip's art, which spareTreatPipAt places: the road's smallest treat.
+const SPARE_TREAT_PIP_KEY = "treat@50";
 
 const LABEL = { ms: 1100 };
 
@@ -590,11 +591,11 @@ export class HudScene extends Scene {
     this.spareTreatPip?.destroy();
     this.spareTreatPip = undefined;
     const well = BAR.effectWells[index];
-    if (well === undefined || !this.textures.exists(SPARE_TREAT_PIP.key)) {
+    if (well === undefined || !this.textures.exists(SPARE_TREAT_PIP_KEY)) {
       return;
     }
     const at = spareTreatPipAt(well);
-    this.spareTreatPip = this.add.sprite(at.x, at.y, SPARE_TREAT_PIP.key).setOrigin(0);
+    this.spareTreatPip = this.add.sprite(at.x, at.y, SPARE_TREAT_PIP_KEY).setOrigin(0);
   }
 
   // A bar per debuff under the walk bar, in the order they began, rebuilt as they come and go;

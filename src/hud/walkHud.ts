@@ -101,9 +101,9 @@ export const WALK_BAR = {
   },
 } as const;
 
-// A spare treat held shows as the road's smallest treat (key, size square) in the bottom-right
+// A spare treat held shows as the road's smallest treat, size square, in the bottom-right
 // corner of its gear's effect well, inset pixels in from the well's edges.
-export const SPARE_TREAT_PIP = { inset: 1, key: "treat@50", size: 12 } as const;
+export const SPARE_TREAT_PIP = { inset: 1, size: 12 } as const;
 
 // The top-left of the spare treat pip in well.
 export function spareTreatPipAt(well: Rect): Point {
