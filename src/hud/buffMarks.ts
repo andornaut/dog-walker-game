@@ -5,7 +5,7 @@ import type { CardView, OptionView } from "../rules/choices";
 import { isLarge, packSizeRaise, placeInPack } from "../rules/dogs";
 import { formatDollars, largeSpeedText } from "../rules/effectText";
 import type { ModifiedValue } from "../rules/modified";
-import { standingModified } from "../rules/standing";
+import { standingModified, type StandingRun } from "../rules/standing";
 import { cents } from "../rules/units";
 import type { WalkItem, WalkStep } from "../runner/walk";
 import { packDogs } from "../state/pack";
@@ -171,6 +171,11 @@ export interface PoppedValue {
 
 type UnplacedPop = Omit<BuffPop, "index">;
 
+// A pop of a charm over a place, with no chip, forgiven bump or reach line.
+function charmPop(at: PopAt, item: EffectItem): UnplacedPop {
+  return { at, charm: true, chip: null, forgiven: null, item, reach: null };
+}
+
 function placeKey(at: PopAt): string {
   return JSON.stringify(at);
 }
@@ -208,13 +213,13 @@ export function popsOf(
         return charm === null ? [] : [{ cause, charm }];
       });
       return charmed.flatMap(({ cause, charm }, i): UnplacedPop[] => {
-        const plain = { charm: true, chip: null, forgiven: null, item: charm, reach: null };
+        const plain = charmPop(place, charm);
         const chip = i === 0 ? chipText(data, value) : null;
         switch (value.subject.kind) {
           case "hearts":
             return bump && dog !== null && cause.amount > 0
               ? [{ ...plain, at: { kind: "walker" }, forgiven: { dog, whole: value.after === 0 } }]
-              : [{ ...plain, at: place }];
+              : [plain];
           case "reach":
             return item === null
               ? []
@@ -222,11 +227,11 @@ export function popsOf(
           case "immune":
             return [{ ...plain, at: item === null ? place : { item: item.id, kind: "item" } }];
           case "money":
-            return [{ ...plain, at: place, charm: false, chip }];
+            return [{ ...plain, charm: false, chip }];
           case "debuffSeconds":
-            return [{ ...plain, at: place, chip }];
+            return [{ ...plain, chip }];
           default:
-            return [{ ...plain, at: place }];
+            return [plain];
         }
       });
     }),
@@ -261,7 +266,7 @@ export const NO_SPAWNS: SpawnCounts = { tips: 0, treats: 0 };
 // collected pops each scaling buff's charm over it. Returns the pops and the counts after.
 export function spawnPops(
   data: MarkData,
-  run: Parameters<typeof standingModified>[1],
+  run: StandingRun,
   collected: readonly WalkItem[],
   counts: SpawnCounts,
 ): { counts: SpawnCounts; pops: BuffPop[] } {
@@ -283,38 +288,20 @@ export function spawnPops(
     if (next[spawn] % 2 !== 0) {
       return [];
     }
-    return charmsOf(data, value).map((charm) => ({
-      at: { item: item.id, kind: "item" },
-      charm: true,
-      chip: null,
-      forgiven: null,
-      item: charm,
-      reach: null,
-    }));
+    return charmsOf(data, value).map((charm) => charmPop({ item: item.id, kind: "item" }, charm));
   });
   return { counts: next, pops: stacked(pops) };
 }
 
 // Good leash's pop over a dog that would have strained toward a squirrel: one per squirrel.
-export function leashPops(
-  data: MarkData,
-  run: Parameters<typeof standingModified>[1],
-  dogs: readonly DogId[],
-): BuffPop[] {
+export function leashPops(data: MarkData, run: StandingRun, dogs: readonly DogId[]): BuffPop[] {
   const value = standingModified(data, run).find(({ subject }) => subject.kind === "squirrelPulls");
   if (value === undefined) {
     return [];
   }
   return stacked(
     dogs.flatMap((dog) =>
-      charmsOf(data, value).map((charm): UnplacedPop => ({
-        at: { dog, kind: "dog" },
-        charm: true,
-        chip: null,
-        forgiven: null,
-        item: charm,
-        reach: null,
-      })),
+      charmsOf(data, value).map((charm) => charmPop({ dog, kind: "dog" }, charm)),
     ),
   );
 }
@@ -324,7 +311,7 @@ export function leashPops(
 // a line for each large dog.
 export function walkStartMarks(
   data: MarkData,
-  run: Parameters<typeof standingModified>[1],
+  run: StandingRun,
 ): { glints: EffectItem[]; lines: MessageLine[] } {
   const strip = data.runText.strip;
   const values = standingModified(data, run).filter(({ subject }) => subject.kind === "agility");
@@ -358,11 +345,7 @@ export function walkStartMarks(
 
 // Each source of a dog's extra max hearts as a row of its held card's detail: the lead dog's
 // small-pack bonus, and each buff's, such as Lucky collar's.
-export function extraHearts(
-  data: MarkData,
-  run: Parameters<typeof standingModified>[1],
-  dog: DogId,
-): string[] {
+export function extraHearts(data: MarkData, run: StandingRun, dog: DogId): string[] {
   const owner = data.dogs[dog].owner.name;
   const line = (name: string, hearts: number) =>
     fillLine(RUN_TEXT_FIELDS.explain, data.runText.explain, "extraHearts", {
