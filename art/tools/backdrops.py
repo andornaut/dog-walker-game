@@ -1733,43 +1733,54 @@ def beaches():
     return cv
 
 
-# The CN Tower's main pod, close up: each row's half-width from its top, a cap over a wide skirt of window
-# rings, then its underside narrowing into the shaft.
-CN_POD = (12, 18, 22, 25, 27, 28, 28, 28, 28, 28, 27, 25, 22, 18, 14, 11, 9, 8)
+# The CN Tower close up, each row's half-width from the top: the SkyPod, then the main pod, a cap over a skirt
+# of window rings, its underside narrowing into the shaft.
+CN_SKY_POD = (3, 5, 6, 6, 5, 4)
+CN_POD = (9, 14, 17, 19, 20, 21, 21, 21, 21, 20, 18, 15, 12, 9, 7, 5)
 
 
-def cn_tower(cv, cx, base, pod):
-    """The CN Tower at night, huge and close, the largest structure in the city, centred on column cx, in
-    an ink outline, lgrey lit white on its left and grey in shade on its right. Its main pod (CN_POD), 57
-    wide, has its top on row pod, near the band's top, its upper shaft running off the band's top above
-    it; a white cap, a ring of lit 2x2 windows gold and amber at its widest, a ring of cream ones under a
-    grey band, its underside in shade; then the shaft tapers out from 15 columns to 23 down to row base."""
-    rows = {y: 4 for y in range(0, pod)}
+def cn_tower(cv, cx, base, sky_pod, pod):
+    """The CN Tower at night, huge and close, the tallest structure in the city, centred on column cx, in an
+    ink outline, lgrey lit white on its left and grey in shade on its right: its antenna, 2 columns wide, runs
+    off the band's top down to the SkyPod (CN_SKY_POD) on row sky_pod, with its ring of lit 2x2 windows; a
+    7-column shaft on to the main pod (CN_POD), 43 wide, on row pod, a white cap, a ring of lit 2x2 windows
+    gold and amber at its widest, a ring of cream ones under a grey band, its underside in shade; then the
+    shaft flares from 9 columns under the pod to 29 at the street, widening faster toward its foot as the real
+    tower's three legs do, down to row base."""
+    rows = {y: 0 for y in range(0, sky_pod)}
+    for k, half in enumerate(CN_SKY_POD):
+        rows[sky_pod + k] = half
+    for y in range(sky_pod + len(CN_SKY_POD), pod):
+        rows[y] = 3
     for k, half in enumerate(CN_POD):
         rows[pod + k] = half
     low = pod + len(CN_POD)
     for y in range(low, base):
-        rows[y] = 7 + (y - low) * 4 // max(1, base - low)
-    inside = {(x, y) for y, half in rows.items() for x in range(cx - half, cx + half + 1)}
+        rows[y] = 4 + round(10 * ((y - low) / max(1, base - 1 - low)) ** 1.6)
+    inside = {(x, y) for y, half in rows.items() for x in range(cx - half, cx + max(half, 1) + 1)}
     for x, y in inside:
         for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
             if (x + dx, y + dy) not in inside and y + dy >= 0:
                 cv.fill(x + dx, y + dy, 1, 1, "ink")
     for y, half in rows.items():
-        cv.fill(cx - half, y, 2 * half + 1, 1, "lgrey")
-        cv.fill(cx - half, y, 2, 1, "white")
-        shade = min(4, half)
-        cv.fill(cx + half - shade + 1, y, shade, 1, "grey")
+        right = max(half, 1)
+        cv.fill(cx - half, y, half + right + 1, 1, "lgrey")
+        cv.fill(cx - half, y, 1 + (half > 2), 1, "white")
+        shade = max(1, min(right, right // 3 + 1))
+        cv.fill(cx + right - shade + 1, y, shade, 1, "grey")
+    # the SkyPod's window ring
+    for k, x in enumerate(range(cx - 4, cx + 5, 3)):
+        cv.fill(x, sky_pod + 2, 2, 2, ("cream", "gold")[k % 2])
     # the pod: a white cap, a ring of gold and amber windows at its widest, a grey band, a ring of cream
     # windows, the underside in shade
-    cv.fill(cx - 20, pod + 2, 41, 2, "white")
-    for k, x in enumerate(range(cx - 26, cx + 26, 3)):
+    cv.fill(cx - 14, pod + 2, 29, 2, "white")
+    for k, x in enumerate(range(cx - 19, cx + 19, 3)):
         cv.fill(x, pod + 5, 2, 2, ("gold", "amber")[k % 2])
-    cv.fill(cx - 28, pod + 8, 57, 1, "grey")
-    for x in range(cx - 25, cx + 25, 3):
+    cv.fill(cx - 21, pod + 8, 43, 1, "grey")
+    for x in range(cx - 18, cx + 18, 3):
         cv.fill(x, pod + 10, 2, 2, "cream")
-    for k, half in enumerate(CN_POD[13:]):
-        cv.fill(cx - half, pod + 13 + k, 2 * half + 1, 1, "grey")
+    for k, half in enumerate(CN_POD[12:]):
+        cv.fill(cx - half, pod + 12 + k, 2 * half + 1, 1, "grey")
 
 
 def mast(cv, cx, top, h):
@@ -2177,8 +2188,8 @@ def yonge():
         cv.fill(x, y, 1, 1, "white")
     full_moon(cv, 304, 14, 5)
     # downtown seen from far off, its towers stepping up toward the top third, the CN Tower huge and close
-    # over them all: its main pod near the band's top, the antenna and SkyPod cut off above, the shaft
-    # tapering down to the street. The message strip covers the band's top rows while a message shows, so
+    # over them all: its antenna running off the band's top over the SkyPod and the main pod, the shaft
+    # flaring down to the street. The message strip covers the band's top rows while a message shows, so
     # the screens and signs stay below row 57. Far back, dark towers in navy and dslate with runs of windows
     # lit, those either side of the tower's shaft kept low
     skyline(cv, ((-2, 16, 30, "navy"), (40, 14, 62, "dslate"), (78, 16, 52, "navy"), (114, 22, 26, "navy"),
@@ -2194,7 +2205,7 @@ def yonge():
     scotia(cv, 96, 24, 30)
     dominion(cv, 120, 22, 40, 5)
     glass_tower(cv, -4, 16, 22, 4)
-    cn_tower(cv, 56, BASE, 3)
+    cn_tower(cv, 56, BASE, 8, 26)
     # the nearer towers: dark glass on the left and up to the SkyDome's lower half; then, down to
     # the street, the Yonge-Dundas screens, the Royal Bank Plaza's gold pair, First Canadian Place, a TD
     # Centre tower and glass under a turquoise crown, the street's glow on their feet and most with neon
