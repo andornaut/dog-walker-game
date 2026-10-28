@@ -33,32 +33,15 @@ export function hitCue(kind: Encounter["kind"], encounter: EncounterId): HitCue 
   return kind === "lucky" ? `${LUCKY_HIT_PREFIX}${encounter}` : `${HIT_PREFIX}${encounter}`;
 }
 
-// CLEANUP (added 2026-10-28): an obstacle whose own hit sound is not made yet plays this
-// encounter's in its place. Remove an entry once its sfx-hit-<encounter> is in the manifest, and
-// this table once it is empty.
-export const HIT_SOUND_STAND_INS: Readonly<Partial<Record<EncounterId, EncounterId>>> = {
-  pothole: "puddle",
-};
-
-const hitSoundKey = (encounter: string): string => `sfx-hit-${kebabCase(encounter)}`;
-
-// The keys a cue may play, in preference order: an obstacle hit's own sfx-hit-<encounter>, then
-// its stand-in's (HIT_SOUND_STAND_INS), then the bump; a lucky hit's own sfx-<encounter>, with
-// nothing in its place.
+// The keys a cue may play, in preference order: an obstacle hit's own sfx-hit-<encounter>,
+// then the bump; a lucky hit's own sfx-<encounter>, with nothing in its place.
 export function soundKeysOf(cue: SoundCue): readonly string[] {
   if (isBaseCue(cue)) {
     return [SOUND_KEYS[cue]];
   }
-  if (!cue.startsWith(HIT_PREFIX)) {
-    return [`sfx-${kebabCase(cue.slice(LUCKY_HIT_PREFIX.length))}`];
-  }
-  const encounter = cue.slice(HIT_PREFIX.length) as EncounterId;
-  const standIn = HIT_SOUND_STAND_INS[encounter];
-  return [
-    hitSoundKey(encounter),
-    ...(standIn === undefined ? [] : [hitSoundKey(standIn)]),
-    SOUND_KEYS.bump,
-  ];
+  return cue.startsWith(HIT_PREFIX)
+    ? [`sfx-hit-${kebabCase(cue.slice(HIT_PREFIX.length))}`, SOUND_KEYS.bump]
+    : [`sfx-${kebabCase(cue.slice(LUCKY_HIT_PREFIX.length))}`];
 }
 
 function isBaseCue(cue: SoundCue): cue is BaseCue {

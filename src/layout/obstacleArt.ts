@@ -71,6 +71,7 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   "picnic-blanket": { above: 30, left: -55, right: 55 },
   "porch-cat": { above: 32, left: -24, right: 20 },
   "porch-steps": { above: 38, left: -24, right: 24 },
+  pothole: { above: 43, left: -54, right: 54 },
   "produce-crates": { above: 33, left: -21, right: 21 },
   "promo-team": { above: 66, left: -23, right: 20 },
   puddle: { above: 43, left: -54, right: 54 },

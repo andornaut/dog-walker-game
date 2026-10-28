@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { EncounterId, MinorObstacleId } from "../data/types";
-import { undrawn } from "../testing/undrawnArt";
 import { decodePng } from "../tools/atlas/atlasBuild";
 import { spriteSource } from "../tools/atlas/atlasLayout";
 import { OBSTACLE_SILHOUETTES, obstacleParts, POSE_SILHOUETTES } from "./obstacleArt";
@@ -80,9 +79,7 @@ describe("OBSTACLE_SILHOUETTES", () => {
     const drawn = new Set(
       KINDS.flatMap((kind) =>
         [false, true].flatMap((moving) =>
-          obstacleParts(gameData, inManifest, kind, moving)
-            .map(({ key }) => key)
-            .filter((key) => !undrawn(inManifest, key)),
+          obstacleParts(gameData, inManifest, kind, moving).map(({ key }) => key),
         ),
       ),
     );

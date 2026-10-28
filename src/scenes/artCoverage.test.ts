@@ -52,7 +52,6 @@ import { hitLabel } from "../rules/encounters";
 import { faceMood } from "../rules/treats";
 import type { PullPose } from "../runner/pulls";
 import { testState } from "../testing/runState";
-import { undrawn } from "../testing/undrawnArt";
 import { FEEDBACK_ART } from "./feedbackArt";
 import { hitBurstKey, hitLook } from "./hitMoment";
 import { DETAIL_WELL_KEY } from "./homePanels";
@@ -409,7 +408,7 @@ describe("plain and moving hit art", () => {
 
 describe("road object art", () => {
   it("names a road sprite for every encounter, at every depth step", () => {
-    const keys = ENCOUNTERS.map(encounterSpriteKey).filter((key) => !undrawn(hasSprite, key));
+    const keys = ENCOUNTERS.map(encounterSpriteKey);
     const missing = keys.flatMap((key) =>
       SCALE_STEPS.map((step) => depthVariantKey(key, step) ?? key).filter(
         (key) => !sprites.has(key),
