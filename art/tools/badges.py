@@ -265,7 +265,8 @@ def _(g):
 def _(g):
     """Three of the gear items: the fanny pack, the lucky collar and a running shoe."""
     g.rect(5, 10, 13, 1, "dslate")
-    g.rect(5, 9, 2, 3, "ink")
+    g.rect(5, 9, 2, 3, "dslate")
+    g.p(5, 10, "lgrey")
     g.rect(8, 9, 8, 4, "dgreen")
     g.ell(12, 13, 4, 2.5, "dgreen", "forest")
     g.rect(8, 9, 8, 1, "green")

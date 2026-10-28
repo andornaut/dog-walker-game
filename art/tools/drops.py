@@ -85,17 +85,18 @@ def paw(g, cx, cy, c="dred"):
 # ---------- the gear ----------
 
 def fanny_pack(g):
-    """A forest-green waist pack: a pouch flat along the top and round below, its black webbing belt out of
-    each side, dipping at the ends as it would round a waist, a black side-release buckle on the left strap,
-    a black zip across the top with its pull hanging at the right end, and a white logo patch low on the
-    left. icons.py's item-fanny-pack and glyphs.py's icon-gear-fanny-pack draw this same design."""
+    """A forest-green waist pack: a pouch flat along the top and round below, its dslate webbing belt out of
+    each side, dipping at the ends as it would round a waist, a dslate side-release buckle with an lgrey
+    catch on the left strap, so it holds on the walk bar's ink well, a black zip across the top with its
+    pull hanging at the right end, and a white logo patch low on the left. icons.py's item-fanny-pack,
+    glyphs.py's icon-gear-fanny-pack and badges.py's kitted-out draw this same design."""
     g.rect(0.6, 5.8, 14.8, 1.8, "dslate")
     g.rect(0.6, 5.8, 14.8, 0.6, "slate")
     g.rect(0, 6.6, 1.2, 1.8, "dslate")
     g.rect(14.8, 6.6, 1.2, 1.8, "dslate")
-    # the buckle: a black clip with a slate catch
-    g.rect(0.4, 5, 2.2, 3.6, "ink")
-    g.rect(1, 5.8, 1, 2, "slate")
+    # the buckle: a dslate clip with an lgrey catch
+    g.rect(0.4, 5, 2.2, 3.6, "dslate")
+    g.rect(1, 5.8, 1, 2, "lgrey")
     # the pouch, lit along its top
     g.blob(8, 9, 5.4, 4.4, "dgreen", "forest", "green", power=3)
     g.rect(2.8, 4.6, 10.4, 3, "dgreen")
