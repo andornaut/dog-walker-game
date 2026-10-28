@@ -75,7 +75,7 @@ const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>> = {
   car: "cyan",
   cargoBike: "tan",
   cat: "white",
-  cherryTrees: "green",
+  cherryTrees: "pink",
   clothingRack: "mauve",
   cone: "orange",
   couple: "mauve",
