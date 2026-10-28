@@ -107,7 +107,7 @@ export class DistractionView {
       .setFlipX(place.flip)
       .setAlpha(place.alpha)
       .setDepth(DEPTH.roadside + (Math.round(placed.y) + 0.5) * ROW_DEPTH);
-    clipToRoad(sprite);
+    clipToRoad(Math.round(placed.y), sprite);
     this.animate(sprite, drawn.key, place.moving, halted);
   }
 

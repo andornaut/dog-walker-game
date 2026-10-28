@@ -4,7 +4,7 @@ import { gameData } from "../../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../../data/screen";
 import { laneCentreXs } from "../../layout/lanes";
 import { screenLayout, walkerFootY } from "../../layout/screenLayout";
-import { rowsAboveJuncture } from "../../road/roadClip";
+import { rowsHidden } from "../../road/roadClip";
 import { read } from "../../rules/units";
 import { laneMotionX } from "../../runner/laneMotion";
 import type { Walk } from "../../runner/walk";
@@ -18,8 +18,8 @@ export const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
 export const LANE_XS = laneCentreXs(LANE_COUNT, LAYOUT.road);
 
 // The backdrop band, the road's approach drawn over it and the band's movers lie under the
-// road and its sprites, which clipToRoad cuts off at the juncture: an item at the far edge of the
-// road stands over the approach, in view, and nothing of it shows past the cross street.
+// road and its sprites: an item standing on the road draws whole over them, and clipToRoad cuts
+// one standing past the juncture off at it, so nothing of it shows past the cross street.
 export const DEPTH = {
   approach: -2,
   backdrop: -3,
@@ -44,12 +44,13 @@ export const DEPTH = {
 // The row where the road's junction meets the band's cross street.
 export const JUNCTURE_Y = LAYOUT.junction.y;
 
-// Hides the part of a road sprite, placed and sized, that lies above the juncture.
-export function clipToRoad(sprite: GameObjects.Sprite): void {
+// Hides the part of a road sprite, placed and sized, with its ground on screen row groundY,
+// that lies above the juncture, unless it stands on the road below it.
+export function clipToRoad(groundY: number, sprite: GameObjects.Sprite): void {
   const { height } = sprite;
   const scale = Math.abs(sprite.scaleY);
   const top = sprite.y - sprite.originY * height * scale;
-  const hidden = rowsAboveJuncture(JUNCTURE_Y, { height, scale, top });
+  const hidden = rowsHidden(JUNCTURE_Y, groundY, { height, scale, top });
   if (hidden > 0) {
     sprite.setCrop(0, hidden, sprite.width, height - hidden);
   } else if (sprite.isCropped) {

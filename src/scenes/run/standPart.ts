@@ -27,7 +27,7 @@ export function standPart(
   const x = Math.round(placed.x);
   const y = Math.round(placed.y);
   part.sprite.setPosition(x, y - Math.round(part.lift * drawn.depth));
-  clipToRoad(part.sprite);
+  clipToRoad(y, part.sprite);
   playFirstTag(part.sprite, drawn.key, tags, still);
   if (part.lift > 0) {
     part.sprite.setDepth(DEPTH.sprite + placed.y + 1);

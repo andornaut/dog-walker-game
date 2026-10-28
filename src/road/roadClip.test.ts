@@ -2,31 +2,44 @@ import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "../layout/screenLayout";
-import { rowsAboveJuncture } from "./roadClip";
+import { rowsAboveJuncture, rowsHidden } from "./roadClip";
 
-const { approach, road } = screenLayout(SCREEN_CONFIG);
-const JUNCTURE = approach.y;
+const { approach, junction, road } = screenLayout(SCREEN_CONFIG);
+const JUNCTURE = junction.y;
 
 describe("rowsAboveJuncture", () => {
-  it("hides the rows of a sprite above the juncture, at its scale", () => {
-    for (const { hidden, scale, top } of [
-      { hidden: 0, name: "wholly below", scale: 1, top: JUNCTURE + 5 },
-      { hidden: 10, name: "partly above", scale: 1, top: JUNCTURE - 10 },
-      { hidden: 20, name: "partly above, at half scale", scale: 0.5, top: JUNCTURE - 10 },
-      { hidden: 1, name: "straddling by a part of a row", scale: 1, top: JUNCTURE - 0.5 },
-      { hidden: 30, name: "wholly above", scale: 1, top: JUNCTURE - 40 },
-    ]) {
-      expect(rowsAboveJuncture(JUNCTURE, { height: 30, scale, top })).toBe(hidden);
-    }
+  it.each([
+    { hidden: 0, name: "wholly below", scale: 1, top: JUNCTURE + 5 },
+    { hidden: 10, name: "partly above", scale: 1, top: JUNCTURE - 10 },
+    { hidden: 20, name: "partly above, at half scale", scale: 0.5, top: JUNCTURE - 10 },
+    { hidden: 1, name: "straddling by a part of a row", scale: 1, top: JUNCTURE - 0.5 },
+    { hidden: 30, name: "wholly above", scale: 1, top: JUNCTURE - 40 },
+  ])("hides the rows of a sprite $name the juncture, at its scale", ({ hidden, scale, top }) => {
+    expect(rowsAboveJuncture(JUNCTURE, { height: 30, scale, top })).toBe(hidden);
+  });
+});
+
+describe("rowsHidden", () => {
+  // A tall prop or item standing on the road near the cross street, its top over the band.
+  it.each([
+    { ground: JUNCTURE, height: 64, name: "on the juncture's row" },
+    { ground: approach.y + 3, height: 120, name: "on the approach" },
+    { ground: road.y, height: 40, name: "on the road's far edge" },
+    { ground: road.y + 60, height: 8, name: "nearer" },
+  ])("draws a sprite standing $name whole", ({ ground, height }) => {
+    expect(rowsHidden(JUNCTURE, ground, { height, scale: 0.5, top: ground - height / 2 })).toBe(0);
   });
 
-  // An item comes into view with its feet on the road's far edge, at the smallest depth step,
-  // which draws its own art at scale 1.
-  it("shows an item of any height the moment its feet reach the far edge", () => {
-    for (const height of [8, approach.height, 40, 64]) {
-      const hidden = rowsAboveJuncture(JUNCTURE, { height, scale: 1, top: road.y - height });
-      expect(hidden).toBeLessThan(height);
-      expect(hidden).toBe(Math.max(0, height - (road.y - JUNCTURE)));
-    }
-  });
+  // Its frame may run a few rows below its ground, which still show.
+  it.each([
+    { below: 0, ground: JUNCTURE - 1, height: 64, hidden: 64 },
+    { below: 0, ground: JUNCTURE - 4, height: 30, hidden: 30 },
+    { below: 3, ground: JUNCTURE - 1, height: 30, hidden: 28 },
+  ])(
+    "hides a sprite standing on row $ground, past the juncture, above the juncture",
+    ({ below, ground, height, hidden }) => {
+      const drawn = { height, scale: 1, top: ground + below - height };
+      expect(rowsHidden(JUNCTURE, ground, drawn)).toBe(hidden);
+    },
+  );
 });

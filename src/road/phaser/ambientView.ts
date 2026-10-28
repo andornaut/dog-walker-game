@@ -90,7 +90,7 @@ export class AmbientView {
           place.band ? DEPTH.bandMover + place.y * BAND_ROW_DEPTH : DEPTH.sprite + place.y + 1,
         );
       if (!place.band) {
-        clipToRoad(sprite);
+        clipToRoad(Math.round(place.y), sprite);
       } else if (sprite.isCropped) {
         sprite.setCrop();
       }

@@ -72,7 +72,7 @@ export class RoadsideView {
       const x = Math.round(place.x);
       const y = Math.round(place.y);
       sprite.setPosition(x, y).setDepth(DEPTH.roadside + y * ROW_DEPTH);
-      clipToRoad(sprite);
+      clipToRoad(y, sprite);
       if (place.shadow !== null) {
         shadow(place.shadow, place.key, drawn.depth, x, y);
       }

@@ -1,7 +1,8 @@
-// A road sprite draws over the backdrop band wherever it stands on the road below the
-// juncture, the row where the road's approach meets the band's cross street, and nothing of it
-// shows above that row. So an item is seen from the moment any of it stands below the
-// juncture: as it comes into view at the far edge, rather than once it clears the band.
+// A road sprite stands on the road, which runs up to the juncture, the row where the road's
+// junction meets the band's cross street. One whose ground row lies on the road below the
+// juncture draws whole, its top over the band (a tree's canopy, a lamp's head), so it is seen
+// from the moment it stands on the road. One whose ground row lies past the juncture shows
+// nothing above that row.
 
 // A drawn sprite: its frame's top row on screen, its frame height in its own pixels and its
 // scale.
@@ -15,4 +16,10 @@ interface DrawnRows {
 export function rowsAboveJuncture(juncture: number, drawn: DrawnRows): number {
   const hidden = Math.ceil((juncture - drawn.top) / drawn.scale - 1e-9);
   return Math.min(drawn.height, Math.max(0, hidden));
+}
+
+// How many of the frame's rows, from its top, to hide for a sprite whose ground is on screen
+// row groundY: none once it stands on the road, else those above the juncture.
+export function rowsHidden(juncture: number, groundY: number, drawn: DrawnRows): number {
+  return groundY >= juncture ? 0 : rowsAboveJuncture(juncture, drawn);
 }

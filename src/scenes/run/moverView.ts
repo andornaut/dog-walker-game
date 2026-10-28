@@ -140,7 +140,7 @@ export function drawMover(
         .setPosition(x, y)
         .setDepth(DEPTH.sprite + placed.y)
         .setFlipX(leftward);
-      clipToRoad(body.sprite);
+      clipToRoad(y, body.sprite);
       if (tag !== undefined) {
         const standing = hasStopped(path, since) && !has(IDLE_TAG);
         playTag(body.sprite, drawn.key, tag, still || standing, ONCE_POSES.has(tag));
