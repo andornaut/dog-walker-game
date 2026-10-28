@@ -1,15 +1,13 @@
-import type { GameData, Stat } from "../data/types";
+import type { GameData } from "../data/types";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { baseMaxHearts, placeInPack } from "./dogs";
-import { type ModifiedSubject, type ModifiedValue, statModified } from "./modified";
-import { currentZone } from "./route";
+import { type ModifiedValue, statModified } from "./modified";
 import { read } from "./units";
-import { zoneStats } from "./zones";
 
-type StandingData = Pick<GameData, "dogs" | "tuning" | "walkers" | "world">;
+type StandingData = Pick<GameData, "dogs" | "tuning" | "walkers">;
 
-export type StandingRun = Pick<RunState, "modifiers" | "pack" | "route" | "walker" | "zoneIndex">;
+export type StandingRun = Pick<RunState, "modifiers" | "pack" | "walker">;
 
 // How many lanes beside the pack's a tip or a treat is grabbed from, as the walk rounds it,
 // when tipReach or treatReach modifiers, such as Long reach's, change it.
@@ -40,31 +38,11 @@ function maxHeartsModified(data: StandingData, run: StandingRun): ModifiedValue[
   });
 }
 
-// The current zone's spawn counts, as the walk plans them, when obstacleSpawns, tipSpawns or
-// treatSpawns modifiers, such as Rush hour's or Keen eye's, change them. None between a
-// zone's end and the fork after it.
-function spawnsModified(data: StandingData, run: StandingRun): ModifiedValue[] {
-  if (run.route[run.zoneIndex] === undefined) {
-    return [];
-  }
-  const stats = zoneStats(data.tuning, currentZone(data, run), run.zoneIndex);
-  const counts: readonly [Extract<ModifiedSubject, { kind: "spawns" }>["spawn"], Stat, number][] = [
-    ["minorObstacles", "obstacleSpawns", stats.minorObstacles],
-    ["obstacles", "obstacleSpawns", stats.obstacles],
-    ["tips", "tipSpawns", stats.tips],
-    ["treats", "treatSpawns", stats.treats],
-  ];
-  return counts.flatMap(([spawn, stat, base]) => {
-    const subject = { kind: "spawns", spawn } as const;
-    return statModified(data.tuning, run.modifiers, stat, subject, base, Math.round) ?? [];
-  });
-}
-
 // Every value modifiers change for as long as they last, rather than at a moment of the walk:
-// each owner's max hearts, the walker's agility, how far tips and treats are grabbed from, how
-// many pulls a squirrel draws, and the current zone's spawn counts. Each is left out unless a
-// modifier changes it. A moment a modifier changes, such as a bump, a tip or a card's cost, is
-// reported where it happens instead.
+// each owner's max hearts, the walker's agility, how far tips and treats are grabbed from and
+// how many pulls a squirrel draws. Each is left out unless a modifier changes it. A moment a
+// modifier changes, such as a bump, a tip or a card's cost, is reported where it happens
+// instead.
 export function standingModified(data: StandingData, run: StandingRun): ModifiedValue[] {
   const agility = data.walkers[run.walker].agility;
   const values = [
@@ -80,7 +58,6 @@ export function standingModified(data: StandingData, run: StandingRun): Modified
       1,
       Math.round,
     ),
-    ...spawnsModified(data, run),
   ];
   return values.flatMap((value) => value ?? []);
 }

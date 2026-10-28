@@ -21,15 +21,7 @@ import { stripLine } from "./stripLines";
 
 type MarkData = Pick<
   GameData,
-  | "debuffs"
-  | "dogs"
-  | "runText"
-  | "shopGear"
-  | "tuning"
-  | "upgrades"
-  | "walkerPerks"
-  | "walkers"
-  | "world"
+  "debuffs" | "dogs" | "runText" | "shopGear" | "tuning" | "upgrades" | "walkerPerks" | "walkers"
 >;
 
 // The charm a modifier's source shows: its gear (found for a gear drop), its upgrade or the

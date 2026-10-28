@@ -21,11 +21,6 @@ export type ModifiedSubject =
   | { readonly kind: "reach"; readonly pickup: "tip" | "treat" }
   // How many Skip options a card offers.
   | { readonly kind: "skip" }
-  // How many of a kind the current zone spawns.
-  | {
-      readonly kind: "spawns";
-      readonly spawn: "minorObstacles" | "obstacles" | "tips" | "treats";
-    }
   // How many pulls a squirrel draws.
   | { readonly kind: "squirrelPulls" };
 
