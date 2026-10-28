@@ -26,6 +26,16 @@ busker              48x72   Kensington Market and Yonge Street; a fixed busker f
                             with a note on it (no coins: coins read as pickups); idle (4 frames,
                             150ms): the strumming hand down and up over the sound hole, his head
                             nodding 1px on the beat
+strolling-busker    48x72   Kensington Market; a guitarist walking, a stepper facing the player as the
+                            tourist is: a violet felt hat with a pink band and a red feather, shaggy
+                            dark brown hair to the jaw, a lime shirt with violet paisley drops, brown
+                            trousers, a cherry-red guitar with a cream rosette slung on a leather
+                            strap, played as he walks (no case, unlike the busker); walk (4 frames,
+                            100ms): road.PERSON_WALK, the strumming hand down on each lifted foot and
+                            up as he passes over it; idle (4 frames, 150ms): a bar between steps, the
+                            hand down and up, his head nodding 1px on the second beat; cue (4 frames,
+                            120ms): a strum flourish, the hand thrown up, swept down past the sound
+                            hole and flung out low, a note rising beside the hat
 delivery-cyclist    48x72   Kensington Market and Yonge Street; a fast rider coming down a lane at the
                             player, facing it as cyclist does: a big turquoise insulated delivery box
                             on the back, wider than the shoulders and over the head, with a reflective
@@ -341,6 +351,111 @@ def busker(strum=0, nod=0, bob=0):
     return rim(edged(road.person(busker_top(strum, nod), bob=bob, **BUSKER)), BUSKER_RIM)
 
 
+# ---------- strolling-busker: facing the player, playing as he walks ----------
+
+# Walking: road.PERSON_WALK at road.PERSON_WALK_MS, both hands on the guitar, the strumming hand down on each
+# lifted foot and up as he passes over it. Idle: a bar between steps, the hand down and up with his head
+# nodding 1px on the second beat, 4 frames at 150ms as the busker's. Cue: a strum flourish, the hand thrown
+# up, swept down past the sound hole and flung out low, a note rising beside his hat, 4 frames at 120ms.
+STROLLING_WALK = road.PERSON_WALK
+STROLLING_IDLE = (dict(strum=0), dict(strum=1), dict(strum=0, nod=1), dict(strum=1, nod=1))
+STROLLING_IDLE_MS = 150
+STROLLING_CUE = (dict(flourish="up"), dict(flourish="down", strum=2), dict(flourish="out", note=(3, 13)),
+                 dict(flourish="out", note=(2, 9)))
+STROLLING_CUE_MS = 120
+STROLLING = dict(legs="brown", shoes="dbrown")
+STROLLING_RIM = {**LIT, "violet": ("lilac", None), "green": ("lime", None)}
+
+
+def strolling_top(strum=0, nod=0, flourish=None, note_at=None):
+    """The strolling busker's top for road.person: shaggy dark brown hair to the jaw under a violet felt hat with a pink band and
+    a red feather, a lime shirt with violet paisley drops, a cherry-red guitar slung on a leather strap, the
+    fretting hand on its neck (screen right) and the strumming hand over the sound hole (strum lowers it),
+    or thrown up, down or out in the flourish. In a walk frame the swing of the free arms becomes the strum."""
+    def top(g, b, arms=0):
+        h = b + nod
+        down = strum + abs(arms)
+        # shaggy dark brown hair falling to the jaw behind the face, the neck under it
+        g.rect(7, 10 + h, 4, 9, "dbrown")
+        g.rect(21, 10 + h, 4, 9, "dbrown")
+        g.rect(8, 19 + h, 2, 1, "dbrown")
+        g.rect(22, 19 + h, 2, 1, "dbrown")
+        g.rect(12, 18 + h, 8, 4, "skin1")
+        # the lime shirt, lit down its left side, a few violet paisley drops, an open neck
+        g.rect(9, 21 + b, 14, 12, "lime")
+        g.rect(20, 21 + b, 3, 12, "green")
+        g.rect(9, 22 + b, 1, 10, "yellow")
+        for x, y in ((11, 22), (19, 23), (10, 31), (21, 31)):
+            g.rect(x, y + b, 2, 2, "violet")
+            g.p(x + 1, y + 1 + b, "lilac")
+        g.rect(14, 21 + b, 4, 1, "skin1")
+        g.rect(15, 22 + b, 2, 1, "skin1")
+        # the fretting arm (screen right): the sleeve out to the elbow, the hand up on the neck
+        g.rect(23, 22 + b, 4, 5, "lime")
+        g.rect(26, 22 + b, 1, 5, "green")
+        g.rect(24, 26 + b, 4, 3, "lime")
+        g.rect(27, 26 + b, 1, 3, "green")
+        # the leather strap from his left shoulder (screen right) down across his chest behind the guitar
+        for k in range(7):
+            g.rect(21 - k * 1.5, 21 + k + b, 2, 1, "dbrown")
+        # the guitar: the cherry lower bout at his hip, the upper bout, the cream rosette round the sound hole,
+        # then the dark neck up to screen right and its headstock
+        g.cel(12.5, 31 + b, 6.5, 4.5, "red", "dred", "pink")
+        g.cel(18, 27 + b, 4.5, 3.5, "red", "dred", "pink")
+        g.cel(16.5, 28.5 + b, 2.2, 2.2, "cream")
+        g.cel(16.5, 28.5 + b, 1.5, 1.5, "ink")
+        for k in range(6):
+            g.rect(21 + k * 1.5, 25 - k + b, 2, 2, "dbrown")
+        g.rect(29, 17 + b, 2, 4, "dbrown")
+        g.p(28, 17 + b, "lgrey")
+        g.p(28, 19 + b, "lgrey")
+        g.rect(25, 22 + b, 3, 3, "skin1")
+        g.rect(27, 22 + b, 1, 3, "skin2")
+        # the strumming arm (screen left), the sleeve from the shoulder
+        if flourish == "up":
+            # thrown up: the arm raised beside the hat, the open hand high
+            road.raised_arm(g, 4, 4, 13 + b, 23 + b, -1, ((3, "skin1", "skin2"), (8, "lime", "green")))
+        elif flourish == "out":
+            # flung out low after the chord, the open hand past his hip
+            g.rect(5, 22 + b, 4, 6, "lime")
+            g.rect(8, 22 + b, 1, 6, "green")
+            g.rect(3, 27 + b, 4, 4, "lime")
+            g.rect(6, 27 + b, 1, 4, "green")
+            g.rect(1, 31 + b, 4, 3, "skin1")
+            g.rect(1, 33 + b, 4, 1, "skin2")
+        else:
+            g.rect(5, 22 + b, 4, 6, "lime")
+            g.rect(8, 22 + b, 1, 6, "green")
+            g.rect(6, 28 + b, 5, 3, "lime")
+            g.rect(9, 27 + b + down, 4, 3, "lime")
+            g.rect(9, 29 + b + down, 4, 1, "green")
+            g.rect(12, 26 + b + 2 * down, 3, 3, "skin1")
+            g.rect(12, 28 + b + 2 * down, 3, 1, "skin2")
+        if note_at:
+            note(g, note_at[0], note_at[1] + b, "white")
+        # head: the face framed by the hair, then the violet felt hat, its crown pinched, a pink band, a red
+        # feather tucked in it and a brim turned up at the edges
+        face_disc(g, 16, 13 + h, 7.5, 7.5, "skin1", "skin2")
+        g.rect(8, 9 + h, 3, 6, "dbrown")
+        g.rect(21, 9 + h, 3, 6, "dbrown")
+        road.face_front(g, 16, 13.5 + h, lips="plum")
+        g.cel(16, 6 + h, 6.5, 4, "violet", "purple", "lilac", power=3)
+        g.rect(14, 2 + h, 4, 1, "purple")
+        g.rect(9.5, 7.5 + h, 13, 1.5, "pink")
+        g.rect(5, 9 + h, 22, 1.5, "violet")
+        g.rect(5, 10.5 + h, 22, 1, "purple")
+        g.rect(4, 8 + h, 2, 2, "violet")
+        g.rect(26, 8 + h, 2, 2, "purple")
+        for k in range(4):
+            g.p(21 + k * 0.75, 7 - k * 1.25 + h, "red")
+    return top
+
+
+def strolling_busker(strum=0, nod=0, flourish=None, note=None, **q):
+    """The strolling busker facing the player, with the road outline and the lit rim."""
+    return rim(edged(road.person(strolling_top(strum, nod, flourish, note), **STROLLING, **q)), STROLLING_RIM)
+
+
 # ---------- delivery-cyclist: facing the player, riding down a lane at it ----------
 
 DELIVERY_RIDE = CYCLIST_RIDE
@@ -551,6 +666,10 @@ def steps(suffix, s):
     yield f"couple{suffix}", [("walk", [own(couple, q) for q in COUPLE_WALK], COUPLE_WALK_MS),
                               ("idle", [own(couple, q) for q in breath], road.BREATH_MS)]
     yield f"busker{suffix}", [("idle", [person(busker, q) for q in BUSKER_IDLE], BUSKER_IDLE_MS)]
+    yield f"strolling-busker{suffix}", [
+        ("walk", [person(strolling_busker, q) for q in STROLLING_WALK], road.PERSON_WALK_MS),
+        ("idle", [person(strolling_busker, q) for q in STROLLING_IDLE], STROLLING_IDLE_MS),
+        ("cue", [person(strolling_busker, q) for q in STROLLING_CUE], STROLLING_CUE_MS)]
     yield f"delivery-cyclist{suffix}", [("ride", [delivery_at(s, **q).outlined() for q in DELIVERY_RIDE],
                                          DELIVERY_RIDE_MS)]
     yield f"gardener{suffix}", [("push", [own(gardener, q) for q in GARDENER_PUSH], GARDENER_PUSH_MS),
