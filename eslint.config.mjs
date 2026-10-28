@@ -38,14 +38,7 @@ const BOUNDARIES = [
 // by moving the module into a context or the importer out of one. The boundaries above govern
 // src/testing/.
 const CONTEXTS = {
-  assets: [
-    "data",
-    "layout/loadingScreen",
-    "lib",
-    "state/runState",
-    "tools/artManifest",
-    "tools/files",
-  ],
+  assets: ["data", "lib", "state/runState", "tools/artManifest", "tools/files"],
   lib: [],
   road: [
     "assets",

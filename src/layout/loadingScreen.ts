@@ -1,13 +1,8 @@
 import { clamp01 } from "../lib/numbers";
 import type { Point, Rect } from "../lib/rect";
 
-// The loading screen's art, placed as art/tools/screens.py draws it, in screen pixels.
-export const LOADING_ART = {
-  screen: "screen-loading",
-  track: "ui-loading-track",
-  walker: "ui-loading",
-} as const;
-
+// The loading screen's art (LOADING_ART) is placed as art/tools/screens.py draws it, in screen
+// pixels.
 export const LOADING_TRACK: Rect = { height: 8, width: 316, x: 16, y: 456 };
 
 // ui-loading's frame size, 98x84, with its feet on screen row 460.

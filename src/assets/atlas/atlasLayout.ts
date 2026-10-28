@@ -1,11 +1,11 @@
 import * as v from "valibot";
 
-import { LOADING_ART } from "../../layout/loadingScreen";
 import { itemAt } from "../../lib/arrays";
 import { getOrInsertComputed } from "../../lib/maps";
 import type { Point, Rect } from "../../lib/rect";
 import { splitDepthKey } from "../depthSteps";
 import { isPlainObject, parseOrThrow, record } from "../jsonSchema";
+import { LOADING_ART } from "../spriteKeys";
 import {
   ATLAS_DIR,
   type AtlasFrame,

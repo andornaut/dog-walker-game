@@ -17,6 +17,7 @@ import {
   dogFaceKey,
   dogSpriteKey,
   encounterSpriteKey,
+  LOADING_ART,
   ownerCardFaceKey,
   ownerFaceKey,
   ROAD_SPRITE_SIZE,
@@ -28,7 +29,6 @@ import { devRunLoadout, namesRunSetup } from "../dev/devStart";
 import { pageRunSetup } from "../dev/pageRunSetup";
 import {
   bootProgress,
-  LOADING_ART,
   LOADING_TRACK,
   loadingBarWidth,
   loadingWalkerAt,

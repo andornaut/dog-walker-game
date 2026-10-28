@@ -1,5 +1,5 @@
 import { DEPTH_STEPS } from "../assets/depthSteps";
-import { ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
+import { LOADING_ART, ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import {
   LANE_COUNT,
   ROAD_CAMERA,
@@ -46,7 +46,7 @@ import {
 import { CARD_LAYOUT, cardRows, largeCardRect } from "../layout/cardLayout";
 import { COMIC_WORDS } from "../layout/comicWords";
 import { laneCentreXs, laneDividerXs } from "../layout/lanes";
-import { LOADING_ART, LOADING_TRACK, LOADING_WALKER } from "../layout/loadingScreen";
+import { LOADING_TRACK, LOADING_WALKER } from "../layout/loadingScreen";
 import {
   COLLAR_HEIGHTS,
   DOG_SILHOUETTES,

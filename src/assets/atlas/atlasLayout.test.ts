@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { LOADING_ART } from "../../layout/loadingScreen";
+import { LOADING_ART } from "../spriteKeys";
 import {
   ATLAS_MAX_SIZE,
   atlasGroupOf,
