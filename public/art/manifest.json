@@ -5213,7 +5213,7 @@
       "json": "sprites/ferrets@56.json",
       "anchor": {
         "feetY": 25,
-        "opaqueWidth": 49
+        "opaqueWidth": 50
       }
     },
     {

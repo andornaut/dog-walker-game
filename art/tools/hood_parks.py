@@ -20,14 +20,16 @@ them for a crossing to the left, as it does hazards.py's squirrel-dash. The hen 
 squirrel-dash's tags, frame counts and durations, and the ferrets keep animals.py's chase-cat's,
 the cat's dart:
 ferrets             96x48, 2 lanes: two ferrets bounding across together nose to tail, a cream
-                    champagne behind and a little up the road, a sable ahead and nearer: long low
-                    bodies arched along the spine, short dark legs, tapering dark tails, a mask
-                    band across each face round a dark eye patch and a pink nose. idle (2 frames,
-                    300ms): standing at the road's edge on all four paws under a gentle arch, then
-                    the sable's head lifting to sniff the air and the champagne's tail flicking up.
-                    run (4 frames, 80ms): the bound, the back arched high with the paws gathered,
-                    the hind paws pushing off, stretched long in flight, the front paws landing,
-                    the champagne a frame behind the sable
+                    champagne behind and 4px up the road, a sable ahead and nearer: long low
+                    bodies arched along the spine, short dark legs, tapering dark tails, a pale
+                    face crossed by a dark mask band round a glinting eye, and a pink nose.
+                    idle (2 frames, 300ms): standing at the road's edge on all four paws under a
+                    gentle arch, then the sable's head lifting to sniff the air and the
+                    champagne's tail flicking up. run (4 frames, 80ms): the bound, its planted
+                    paws stepping back as far as the dart crosses in a frame: the front paws
+                    land, the hind paws land where the front ones were under the back arched
+                    high, the hind paws push off, and the body flies stretched long; the
+                    champagne two frames behind the sable, so one arches as the other stretches
 hen                a Riverdale Farm hen got loose, a Rhode Island Red: a plump rust body lit
                     ochre, a short plum tail cocked up, dbrown wings with a brick band, a red
                     comb and wattle, an amber beak and yellow legs, a little taller than
@@ -355,26 +357,29 @@ def hen(bob=0, wing="fold", near=(16, 27 + 1 / 3), far=(13 + 1 / 3, 27 + 1 / 3),
 
 # ---------- ferrets ----------
 
-# The pair's coats: a sable, dbrown shaded plum with plum legs and tail and a cream mask band, and a champagne,
-# cream shaded tan with clay legs and tail and a white mask band. Each mask's eye patch is its legs' colour.
+# The pair's coats: a sable, dbrown shaded plum with plum legs and tail and a cream face, and a champagne, cream
+# shaded tan with clay legs and tail and a white face. Each mask band is its legs' colour.
 SABLE = dict(coat="dbrown", shade="plum", leg="plum", far="walnut", band="cream", patch="plum")
 CHAMPAGNE = dict(coat="cream", shade="tan", leg="clay", far="tan", band="white", patch="clay")
 # The frame, in design units: two ferrets nose to tail across 2 lanes, 96x48 at full size.
 FERRETS_W = 64
 # Each ferret's bound, one tuple per frame, in design units from its rump column and its ground row: hip and
 # shoulder (x, y), the back's arch above the line between them, the front and hind paws (x, y of the paw's
-# bottom) and the tail's lift. A design unit is 1.5px at full size, so thirds land on whole pixels.
+# bottom) and the tail's lift. A design unit is 1.5px at full size, so thirds land on whole pixels. The dart
+# crosses about 10 units a frame (3 lanes a second at 80ms), so a planted paw steps back 10 units a frame: the
+# front paws land at 23, the hind paws land at 12 where the front ones were, then push off from 2.
 FERRET_BOUND = (
-    ((7, -6), (16, -6), 6, (17, 0), (13, 0), 0),                                 # gathered, the back arched
-    ((6, -6 - 1 / 3), (19, -7), 3 + 1 / 3, (23, -1 / 3), (6, 0), -1 / 3),          # hind push off
-    ((5, -7 - 2 / 3), (20, -8), 1 + 1 / 3, (25, -2), (1, -2), 2 / 3),               # flight, stretched long
-    ((6, -7), (18, -6 - 2 / 3), 3 + 1 / 3, (21, 0), (10, -1 - 1 / 3), 0),          # front lands
+    ((5, -7 - 1 / 3), (19, -6 - 1 / 3), 2 + 2 / 3, (23, 0), (3, -2 - 2 / 3), 0),        # front paws land
+    ((8, -6), (16, -6), 5 + 1 / 3, (13, -2 / 3), (12, 0), -1),                         # hind land, arched
+    ((6, -6 - 2 / 3), (19, -7 - 1 / 3), 3 + 2 / 3, (24, -2), (2, 0), -2 / 3),           # hind push off
+    ((5, -8), (20, -8 - 1 / 3), 1 + 1 / 3, (26, -2 - 2 / 3), (0, -2 - 2 / 3), 1 / 3),   # flight, stretched
 )
 # Waiting at the road's edge: standing on all four paws under a gentle arch, the near ferret's head lifting to
 # sniff the air and the far one's tail flicking up.
 FERRET_STAND = ((7, -6), (17, -6 - 1 / 3), 3 + 1 / 3, (18, 0), (7, 0), 0)
-# The pair: (rump column, ground row) of the far ferret, behind and a little up the road, then the near one.
-FERRET_SPOTS = ((4, 28), (33, 29 + 1 / 3))
+# The pair: (rump column, ground row) of the far ferret, behind and 4px up the road, its head clear of the near
+# one's tail, then the near one.
+FERRET_SPOTS = ((4, 26 + 2 / 3), (33, 29 + 1 / 3))
 
 
 def ferret(g, x0, gy, c, bound, sniff=0, flick=0):
@@ -414,15 +419,17 @@ def ferret(g, x0, gy, c, bound, sniff=0, flick=0):
     # near legs
     leg((sx + 1 / 3, sy + 1), (fx, fy), c["leg"])
     leg((hx + 1, hy + 1), (bx, by), c["leg"])
-    # the head: a wedge reaching forward from the shoulder, a round ear behind the eye, the mask band over
-    # the brow and muzzle and the dark patch round the eye, the pink nose at the tip
-    ex, ey = sx + 4 + 1 / 3, sy - 1 - sniff
-    g.ell(ex - 2 - 1 / 3, ey - 1 - 2 / 3, 1 + 2 / 3, 1 + 2 / 3, c["shade"])
-    g.ell(ex, ey, 3, 2 + 1 / 3, c["coat"])
-    g.tri((ex + 1, ey - 2), (ex + 5 + 1 / 3, ey + 1), (ex + 1, ey + 2 + 1 / 3), c["coat"])
-    g.tri((ex - 2, ey - 2), (ex + 5 + 1 / 3, ey + 1), (ex - 2, ey + 2), c["band"])
-    g.rect(ex - 1 / 3, ey - 1, 2 + 2 / 3, 2, c["patch"])
-    g.rect(ex + 1 / 3, ey - 1, 4 / 3, 4 / 3, "walnut")
+    # the head, bobbing half as far as the shoulder so it stays level through the bound: a wedge reaching
+    # forward, a round ear behind, a pale face crossed by the dark mask band round a glinting eye, the pink
+    # nose at the tip
+    ex, ey = sx + 4 + 1 / 3, (sy + gy - 7 - 1 / 3) / 2 - 1 - sniff
+    g.ell(ex - 2 - 1 / 3, ey - 2, 1 + 2 / 3, 1 + 2 / 3, c["shade"])
+    g.ell(ex, ey, 3, 2 + 2 / 3, c["coat"])
+    g.tri((ex + 1, ey - 2 - 1 / 3), (ex + 5 + 1 / 3, ey + 1), (ex + 1, ey + 2 + 1 / 3), c["coat"])
+    g.tri((ex - 2, ey - 2 - 1 / 3), (ex + 5 + 1 / 3, ey + 1), (ex - 2, ey + 2 + 1 / 3), c["band"])
+    g.ell(ex + 1 / 3, ey, 2 + 1 / 3, 1, c["patch"])
+    g.rect(ex + 1 / 3, ey - 2 / 3, 4 / 3, 4 / 3, "ink")
+    g.p(ex + 1 / 3, ey - 2 / 3, "white")
     g.rect(ex + 4, ey + 1 / 3, 4 / 3, 4 / 3, "pink")
 
 
@@ -434,11 +441,13 @@ def ferrets(near=FERRET_STAND, far=FERRET_STAND, sniff=0):
     (fx, fy), (nx, ny) = FERRET_SPOTS
     ferret(g, fx, fy, CHAMPAGNE, far, flick=-sniff)
     ferret(g, nx, ny, SABLE, near, sniff=sniff)
-    return lit(g)
+    # the eyes keep no rim, so a 1px eye at the small steps stays dark
+    return lit(g, dict(ink=(None, None)))
 
 
-# The run, 4 frames, the far ferret a frame behind the near one; and the stand at the road's edge, 2 frames.
-FERRETS_RUN = tuple(dict(near=FERRET_BOUND[k], far=FERRET_BOUND[k - 1]) for k in range(4))
+# The run, 4 frames, the far ferret two frames behind the near one, so one arches while the other stretches;
+# and the stand at the road's edge, 2 frames.
+FERRETS_RUN = tuple(dict(near=FERRET_BOUND[k], far=FERRET_BOUND[k - 2]) for k in range(4))
 FERRETS_IDLE = (dict(), dict(sniff=1 + 1 / 3))
 
 
