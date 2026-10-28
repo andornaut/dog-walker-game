@@ -43,6 +43,25 @@ interface VergeStrip {
   readonly to: number;
 }
 
+// The sides of the road, as a pool's offset names them.
+export type VergeSide = "left" | "right";
+
+// Pools of light repeating along the verge, each a hard-edged ellipse or band of its core
+// colour inside an edgeWidth ring of its edge colour, drawn over the verge's ground and dots
+// and under its seams. Each side's pools start offset along the road and repeat every road px,
+// each length long, lying from to to across, like a strip's to.
+export interface VergePool {
+  readonly coreColour: number;
+  readonly edgeColour: number;
+  readonly edgeWidth: number;
+  readonly every: number;
+  readonly from: number;
+  readonly length: number;
+  readonly offset: Readonly<Record<VergeSide, number>>;
+  readonly shape: "band" | "ellipse";
+  readonly to: number;
+}
+
 // Outward from the road: the curb, the strips, the sidewalk or paving, then the lawn.
 export interface Verge {
   // A curb that would match the road's grey is darker, so the road's edge still reads.
@@ -56,6 +75,8 @@ export interface Verge {
   readonly lawn: "mown" | "rough" | "none";
   // The lawn's base, its mown stripes or rough patches, and its tufts; null with no lawn.
   readonly lawnColours: LawnColours | null;
+  // The pools of light on the curb, strips and sidewalk or paving; none for most verges.
+  readonly pools: readonly VergePool[];
   // The line across the sidewalk or paving, every seamEvery along the road.
   readonly seamColour: number;
   readonly seamEvery: number;
@@ -71,10 +92,22 @@ type LawnColours = readonly [base: number, marks: number, tufts: number];
 
 // A verge as art writes it in shared/verges.json (art/tools/backdrops.py verges --write): the
 // same fields with colours by palette name, a null walkTo for paving out to the screen's edges,
-// and lawnColours null with no lawn.
+// lawnColours null with no lawn, and pools left out with none.
 interface VergeDotsEntry {
   readonly colours: readonly string[];
   readonly share: number;
+}
+
+interface VergePoolEntry {
+  readonly coreColour: string;
+  readonly edgeColour: string;
+  readonly edgeWidth: number;
+  readonly every: number;
+  readonly from: number;
+  readonly length: number;
+  readonly offset: Readonly<Record<VergeSide, number>>;
+  readonly shape: string;
+  readonly to: number;
 }
 
 interface VergeEntry {
@@ -83,6 +116,7 @@ interface VergeEntry {
   readonly lawn: string;
   readonly lawnColours: readonly string[] | null;
   readonly leaves: boolean;
+  readonly pools?: readonly VergePoolEntry[];
   readonly seamColour: string;
   readonly seamEvery: number;
   readonly strips: readonly {
@@ -96,12 +130,59 @@ interface VergeEntry {
 }
 
 const LAWNS: readonly Verge["lawn"][] = ["mown", "rough", "none"];
+const POOL_SHAPES: readonly VergePool["shape"][] = ["band", "ellipse"];
+// A pool's outline steps POOL_STEP road px at a time, along and across, so its lengths and
+// places across are whole steps. Pools repeat every whole number of the road's 32 px joints.
+export const POOL_STEP = 2;
+const POOL_EVERY = 32;
 
 function dotsOf(entries: readonly VergeDotsEntry[]): VergeDots[] {
   return entries.map(({ colours, share }) => ({ colours: colours.map(paletteColour), share }));
 }
 
-// A verge from its entry in shared/verges.json; a lawn kind or colour it does not know throws.
+// A pool from its entry, which must lie on the verge inside the walk's outer edge, walkTo,
+// repeat every whole number of joints, fit its period, and keep a core inside its edge.
+function poolFrom(walkTo: number, entry: VergePoolEntry): VergePool {
+  const shape = POOL_SHAPES.find((kind) => kind === entry.shape);
+  if (shape === undefined) {
+    throw new Error(`No verge pool shape ${entry.shape}`);
+  }
+  const { edgeWidth, every, from, length, offset, to } = entry;
+  const steps = [edgeWidth, from, length, offset.left, offset.right, to];
+  if (!steps.every((value) => Number.isInteger(value / POOL_STEP))) {
+    throw new Error(`A verge pool's sizes and places are whole steps of ${POOL_STEP}`);
+  }
+  if (!Number.isInteger(every / POOL_EVERY) || every <= 0) {
+    throw new Error(`A verge pool repeats every whole number of ${POOL_EVERY}, not ${every}`);
+  }
+  if (
+    length <= 0 ||
+    length > every ||
+    [offset.left, offset.right].some((o) => o < 0 || o >= every)
+  ) {
+    throw new Error("A verge pool's length and offsets lie within its period");
+  }
+  if (from < ROAD_HALF || to <= from || to > walkTo) {
+    throw new Error(`A verge pool from ${from} to ${to} lies off the verge's curb and walk`);
+  }
+  if (edgeWidth <= 0 || 2 * edgeWidth >= Math.min(length, to - from)) {
+    throw new Error("A verge pool's edge leaves room for its core");
+  }
+  return {
+    coreColour: paletteColour(entry.coreColour),
+    edgeColour: paletteColour(entry.edgeColour),
+    edgeWidth,
+    every,
+    from,
+    length,
+    offset: { left: offset.left, right: offset.right },
+    shape,
+    to,
+  };
+}
+
+// A verge from its entry in shared/verges.json; a lawn kind, pool or colour it does not know or
+// that does not fit throws.
 export function vergeFrom(entry: VergeEntry): Verge {
   const lawn = LAWNS.find((kind) => kind === entry.lawn);
   if (lawn === undefined) {
@@ -112,12 +193,14 @@ export function vergeFrom(entry: VergeEntry): Verge {
   if (hasLawn !== (base !== undefined && marks !== undefined && tufts !== undefined)) {
     throw new Error("A verge has lawn colours exactly when it has a lawn");
   }
+  const walkTo = entry.walkTo ?? Number.POSITIVE_INFINITY;
   return {
     curbColour: paletteColour(entry.curbColour),
     curbTo: entry.curbTo,
     lawn,
     lawnColours: hasLawn ? [base ?? 0, marks ?? 0, tufts ?? 0] : null,
     leaves: entry.leaves,
+    pools: (entry.pools ?? []).map((pool) => poolFrom(walkTo, pool)),
     seamColour: paletteColour(entry.seamColour),
     seamEvery: entry.seamEvery,
     strips: entry.strips.map(({ colour, dots, to }) => ({
@@ -127,7 +210,7 @@ export function vergeFrom(entry: VergeEntry): Verge {
     })),
     walkColour: paletteColour(entry.walkColour),
     walkDots: dotsOf(entry.walkDots),
-    walkTo: entry.walkTo ?? Number.POSITIVE_INFINITY,
+    walkTo,
   };
 }
 
@@ -230,6 +313,30 @@ export function crossesLine(period: number, z: number, span: number): boolean {
 // Whether this row of the verge's sidewalk or paving is a seam.
 export function seamRow(verge: Verge, z: number, span: number): boolean {
   return span < SEAM_MAX_SPAN && crossesLine(verge.seamEvery, z, span);
+}
+
+// How far into the pool on this side the road at z lies, along from the pool's near end, or -1
+// between pools.
+export function poolAlong(pool: VergePool, side: VergeSide, z: number): number {
+  const into = z - pool.offset[side];
+  const along = into - Math.floor(into / pool.every) * pool.every;
+  return along < pool.length ? along : -1;
+}
+
+// Half the width across of a pool's outline at along, drawn inset road px inside its edge (0
+// for the edge's outline, edgeWidth for the core's), or 0 where the outline does not reach.
+// The outline steps POOL_STEP at a time: each step along takes the width at its middle, and
+// the width goes to the nearest step without passing the pool's own.
+export function poolHalfWidth(pool: VergePool, along: number, inset: number): number {
+  const halfLength = pool.length / 2 - inset;
+  const halfWidth = (pool.to - pool.from) / 2 - inset;
+  const step = (Math.floor(along / POOL_STEP) + 0.5) * POOL_STEP;
+  const t = (step - pool.length / 2) / halfLength;
+  if (halfLength <= 0 || halfWidth <= 0 || Math.abs(t) >= 1) {
+    return 0;
+  }
+  const half = pool.shape === "band" ? halfWidth : halfWidth * Math.sqrt(1 - t * t);
+  return Math.min(halfWidth, Math.round(half / POOL_STEP) * POOL_STEP);
 }
 
 // Whether the front lawn at across falls in a dark mown stripe, on a row of this scale; the

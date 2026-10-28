@@ -1,36 +1,32 @@
 import { describe, expect, it } from "vitest";
 
+import { paletteColour } from "../assets/housePalette";
 import { SCREEN_CONFIG } from "../data/screen";
 import { WORLD } from "../data/world";
+import { itemAt } from "../lib/arrays";
+import { PAVED_VERGE } from "../testing/verges";
 import {
   curbBand,
   curbFits,
   isLawn,
+  POOL_STEP,
+  poolAlong,
+  poolHalfWidth,
   sidewalkTo,
   vergeBase,
   vergeFrom,
   VERGES,
   VERGES_BY_ART,
+  type VergeSide,
   walkFrom,
 } from "./roadside";
 
 const ROAD_HALF = SCREEN_CONFIG.roadWidth / 2;
 const VERGE_ARTS = Object.entries(VERGES_BY_ART);
 
-// A paved verge as art writes it, with colours by palette name.
-const PAVED = {
-  curbColour: "stone",
-  curbTo: 164,
-  lawn: "none",
-  lawnColours: null,
-  leaves: false,
-  seamColour: "grey",
-  seamEvery: 32,
-  strips: [],
-  walkColour: "lgrey",
-  walkDots: [{ colours: ["grey"], share: 0.1 }],
-  walkTo: null,
-};
+const PAVED = PAVED_VERGE;
+const POOL = itemAt(PAVED.pools, 0);
+const poolEntry = (change: Partial<typeof POOL>) => ({ ...PAVED, pools: [{ ...POOL, ...change }] });
 
 describe("vergeFrom", () => {
   it("reads colours by palette name and a null walkTo as paving out to the screen's edges", () => {
@@ -39,13 +35,91 @@ describe("vergeFrom", () => {
     expect(verge.walkDots[0]?.colours).toEqual([verge.seamColour]);
   });
 
+  it("reads a verge's pools with their colours by palette name, and none where it lists none", () => {
+    const { pools, ...plain } = PAVED;
+    expect(vergeFrom(PAVED).pools).toEqual(
+      pools.map((pool) => ({
+        ...pool,
+        coreColour: paletteColour(pool.coreColour),
+        edgeColour: paletteColour(pool.edgeColour),
+      })),
+    );
+    expect(vergeFrom(plain).pools).toEqual([]);
+  });
+
   it.each([
     ["a colour name not on the palette", { ...PAVED, curbColour: "no-such-colour" }],
     ["a lawn kind it does not know", { ...PAVED, lawn: "meadow" }],
     ["a lawn with no colours", { ...PAVED, lawn: "mown", walkTo: 208 }],
     ["lawn colours with no lawn", { ...PAVED, lawnColours: ["grey", "grey", "grey"] }],
+    ["a pool colour not on the palette", poolEntry({ coreColour: "no-such-colour" })],
+    ["a pool shape it does not know", poolEntry({ shape: "star" })],
+    ["a pool period not a multiple of 32", poolEntry({ every: 112 })],
+    ["a pool longer than its period", poolEntry({ every: 32, offset: { left: 0, right: 0 } })],
+    ["a pool offset past its period", poolEntry({ offset: { left: 0, right: 128 } })],
+    ["a pool size off the 2 px steps", poolEntry({ length: 47 })],
+    ["a pool reaching onto the road", poolEntry({ from: 158 })],
+    ["a pool ending where it starts", poolEntry({ from: 200 })],
+    ["a pool reaching past the sidewalk", { ...poolEntry({ to: 220 }), walkTo: 208 }],
+    ["a pool whose edge leaves no core", poolEntry({ edgeWidth: 16 })],
   ])("throws on %s", (_, entry) => {
     expect(() => vergeFrom(entry)).toThrow();
+  });
+});
+
+describe("pools", () => {
+  const pool = itemAt(vergeFrom(PAVED).pools, 0);
+  const band = { ...pool, shape: "band" as const };
+
+  // The left side's pools start at 0 and the right's at 64, each 48 long, every 128.
+  it.each<[VergeSide, number, number]>([
+    ["left", 0, 0],
+    ["left", 47.5, 47.5],
+    ["left", 48, -1],
+    ["left", 127, -1],
+    ["left", 130, 2],
+    ["left", -10, -1],
+    ["right", 0, -1],
+    ["right", 64, 0],
+    ["right", 100, 36],
+    ["right", 112, -1],
+    ["right", 200, 8],
+  ])("lies %s at z %d, %d along its pool", (side, z, along) => {
+    expect(poolAlong(pool, side, z)).toBe(along);
+  });
+
+  // The outline at each along, as half its width: the ellipse's widest in the middle and
+  // narrowing to its ends, the band's the same all along; the core the same inset by the edge.
+  it.each([
+    ["ellipse", pool, 0, 0, 4],
+    ["ellipse", pool, 23, 0, 16],
+    ["ellipse", pool, 24, 0, 16],
+    ["ellipse", pool, 47, 0, 4],
+    ["ellipse", pool, 48, 0, 0],
+    ["ellipse", pool, 3, 4, 0],
+    ["ellipse", pool, 4, 4, 4],
+    ["ellipse", pool, 24, 4, 12],
+    ["ellipse", pool, 44, 4, 0],
+    ["band", band, 0, 0, 16],
+    ["band", band, 47, 0, 16],
+    ["band", band, 3, 4, 0],
+    ["band", band, 4, 4, 12],
+    ["band", band, 44, 4, 0],
+  ])("gives the %s %d along, inset %d, a half width of %d", (_, shape, along, inset, half) => {
+    expect(poolHalfWidth(shape, along, inset)).toBe(half);
+  });
+
+  it.each([
+    ["edge", 0],
+    ["core", pool.edgeWidth],
+  ])("steps the ellipse's %s 2 px at a time, along and across", (_, inset) => {
+    const halves = Array.from({ length: pool.length * 4 }, (__, i) =>
+      poolHalfWidth(pool, i / 4, inset),
+    );
+    halves.forEach((half, i) => {
+      expect(half % POOL_STEP).toBe(0);
+      expect(half).toBe(halves[Math.floor(i / (4 * POOL_STEP)) * 4 * POOL_STEP]);
+    });
   });
 });
 

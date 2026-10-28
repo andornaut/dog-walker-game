@@ -10,6 +10,8 @@ import {
   markLimit,
   marksOnRow,
   noise,
+  poolAlong,
+  poolHalfWidth,
   ROUGH_PATCH_BLOCK,
   ROUGH_PATCH_REACH,
   type RoughPatch,
@@ -18,6 +20,7 @@ import {
   seamRow,
   type Verge,
   vergeBase,
+  type VergePool,
   VERGES,
   walkFrom,
 } from "../road/roadside";
@@ -413,7 +416,7 @@ const LEAF_WORDS = LEAF_PIXELS.map((rows) =>
 const NO_LEAF: readonly { dx: number; word: number }[] = [];
 
 // The colour words the verge draws over its base from across from to to (excluded): seams,
-// dots, a rough lawn's patches, tufts and leaves.
+// dots, pools, a rough lawn's patches, tufts and leaves.
 interface VergeDetail {
   readonly from: number;
   readonly to: number;
@@ -421,8 +424,8 @@ interface VergeDetail {
 }
 
 // What each zone's verge draws per frame, looked up once a row: where its sidewalk or paving
-// starts, its seam word, and its dotted bands, each with the colour word every noise byte
-// picks (0 for none).
+// starts, its seam word, its dotted bands, each with the colour word every noise byte picks (0
+// for none), and its pools with their edge and core words.
 interface VergePlan {
   readonly details: readonly VergeDetail[];
   readonly dots: readonly {
@@ -434,10 +437,17 @@ interface VergePlan {
   readonly leafFrom: number;
   // The lawn's patch word, and its tuft word by each lawn word it falls on; none with no lawn.
   readonly patchWord: number;
+  readonly pools: readonly PoolPlan[];
   readonly seamWord: number;
   readonly tuftFrom: number;
   readonly tuftWords: ReadonlyMap<number, number>;
   readonly walkFrom: number;
+}
+
+interface PoolPlan {
+  readonly coreWord: number;
+  readonly edgeWord: number;
+  readonly pool: VergePool;
 }
 
 const NOISE_STEPS = 256;
@@ -460,9 +470,19 @@ function vergePlan(verge: Verge): VergePlan {
     lawn === null ? [] : [lawn[0], lawn[1]].map((rgb) => [wordOf(rgb), wordOf(lawn[2])]),
   );
   const from = walkFrom(verge);
+  const pools = verge.pools.map((pool) => ({
+    coreWord: wordOf(pool.coreColour),
+    edgeWord: wordOf(pool.edgeColour),
+    pool,
+  }));
   const details: VergeDetail[] = [
     { from, to: verge.walkTo, words: new Set([seamWord]) },
     ...dots.map((band) => ({ ...band, words: new Set([...band.words].filter((w) => w !== 0)) })),
+    ...pools.map(({ coreWord, edgeWord, pool }) => ({
+      from: pool.from,
+      to: pool.to,
+      words: new Set([coreWord, edgeWord]),
+    })),
     { from: tuftFrom, to: Infinity, words: new Set([...tuftWords.values()]) },
     { from: leafFrom, to: Infinity, words: new Set(LEAF_WORDS.flat(2).map(({ word }) => word)) },
   ];
@@ -474,6 +494,7 @@ function vergePlan(verge: Verge): VergePlan {
     dots,
     leafFrom,
     patchWord,
+    pools,
     seamWord,
     tuftFrom,
     tuftWords,
@@ -622,8 +643,8 @@ function markPixel(
 
 // Draws one frame of the road into out, view.width by view.height, row by row: the strip's
 // columns copied from the row's strip row with its lines kept, the verge copied from the
-// zone's, then the seams, rough patches and 2-row marks that scroll with the road. On the
-// approach rows the verge shows only where the backdrop's own pixel is the verge's.
+// zone's, then the dots, pools, seams, rough patches and 2-row marks that scroll with the road.
+// On the approach rows the verge shows only where the backdrop's own pixel is the verge's.
 export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array): void {
   const { centreX, rows, view } = raster;
   const stripLeft = centreX - STRIP.width / 2;
@@ -722,6 +743,13 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
         const to = splitAt(row, band.to);
         drawDots(out, offset, roadX, seed, band.words, to[0], from[0]);
         drawDots(out, offset, roadX, seed, band.words, from[1], to[1]);
+      }
+    }
+
+    for (let p = 0; p < plan.pools.length; p++) {
+      const pool = plan.pools[p];
+      if (pool !== undefined) {
+        drawPool(out, offset, row, pool, z);
       }
     }
 
@@ -943,6 +971,58 @@ function drawDots(
     if (word !== 0) {
       out[offset + i] = word;
     }
+  }
+}
+
+// A pool's chords across this row on each side, at the road's z: its edge, then its core over
+// the edge's middle.
+function drawPool(
+  out: Uint32Array,
+  offset: number,
+  row: RasterRow,
+  plan: PoolPlan,
+  z: number,
+): void {
+  const { pool } = plan;
+  const middle = (pool.from + pool.to) / 2;
+  for (let side = 0; side < 2; side++) {
+    const along = poolAlong(pool, side === 0 ? "left" : "right", z);
+    if (along < 0) {
+      continue;
+    }
+    drawChord(out, offset, row, side, middle, poolHalfWidth(pool, along, 0), plan.edgeWord);
+    drawChord(
+      out,
+      offset,
+      row,
+      side,
+      middle,
+      poolHalfWidth(pool, along, pool.edgeWidth),
+      plan.coreWord,
+    );
+  }
+}
+
+// Fills the verge's columns on one side of a row (0 left, 1 right) whose across lies within
+// half of middle.
+function drawChord(
+  out: Uint32Array,
+  offset: number,
+  row: RasterRow,
+  side: number,
+  middle: number,
+  half: number,
+  word: number,
+): void {
+  if (half <= 0) {
+    return;
+  }
+  const inner = splitAt(row, middle - half);
+  const outer = splitAt(row, middle + half);
+  if (side === 0) {
+    out.fill(word, offset + outer[0], offset + inner[0]);
+  } else {
+    out.fill(word, offset + inner[1], offset + outer[1]);
   }
 }
 
