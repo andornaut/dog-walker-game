@@ -350,9 +350,9 @@ export function blocksLane(
   return isObstacle(data, kind) && !isPullObstacle(data, kind);
 }
 
-// The last lane move time, scroll speed and zone length worked out, with the data groups and
-// run fields they were worked out from. A walk asks for the same ones every step until its
-// pack, zone, modifiers or debuffs or the data change; data and run states are never changed in place.
+// The last lane move time, scroll speed and zone length worked out, with the data groups and run
+// fields they were worked out from. A walk asks for the same ones every step until its pack, zone,
+// modifiers or debuffs or the data change; data and run states are never changed in place.
 let lastLaneMove:
   | (Pick<GameData, "debuffs" | "dogs" | "tuning" | "walkers"> &
       Pick<RunState, "pack" | "walker"> & {

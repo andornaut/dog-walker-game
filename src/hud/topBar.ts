@@ -33,10 +33,10 @@ export function topBarButtonForKey(repeat: boolean, key: string): WalkBarButtonI
   return isPauseKey(key) ? "pause" : undefined;
 }
 
-// What holds the walk still. card: a card or the zone celebration, which can sit under the
-// pause menu or the Home question, as the hit stop can. hold: a press held on the HUD
-// opened the detail card that explains it. Help and settings cover the whole screen, walk bar included. page:
-// the tab is hidden or the window has lost focus.
+// What holds the walk still. card: a card or the zone celebration, which can sit under the pause
+// menu or the Home question, as the hit stop can. hold: a press held on the HUD opened the detail
+// card that explains it. Help and settings cover the whole screen, walk bar included. page: the tab
+// is hidden or the window has lost focus.
 export interface RunPause {
   card: boolean;
   hitStop: boolean;

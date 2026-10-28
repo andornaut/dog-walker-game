@@ -1495,11 +1495,10 @@ export class StartScene extends Scene {
     }
   }
 
-  // The dog slot sign hung across the Pet shop's front while a dog slot is for sale:
-  // ui-slot-sign, its board and text dropping while pressed, with its call to buy over the
-  // cheapest slot's price, and the gold outline while the bank covers that slot. It bobs with the shop.
-  // A cream board in an ink frame stands in while the art is missing, when the whole sign dips
-  // instead.
+  // The dog slot sign hung across the Pet shop's front while a dog slot is for sale: ui-slot-sign,
+  // its board and text dropping while pressed, with its call to buy over the cheapest slot's price,
+  // and the gold outline while the bank covers that slot. It bobs with the shop. A cream board in
+  // an ink frame stands in while the art is missing, when the whole sign dips instead.
   private drawSlotSign(root: GameObjects.Container, save: SaveDocument): void {
     const sign = slotSign(gameData, save.owned, save.bankCents);
     if (sign === null) {
@@ -1645,7 +1644,8 @@ export class StartScene extends Scene {
         names.push({ label, room: DOG_TILE_TEXT_ROOM, x: x + textX, y: top });
       };
       if (badge === null) {
-        // Every dog earns the same pay, so an owned tile names the dog alone; its card says the pay.
+        // Every dog earns the same pay, so an owned tile names the dog alone; its card says the
+        // pay.
         fitText(dog.name, y + dogTileNameY(body));
         return;
       }

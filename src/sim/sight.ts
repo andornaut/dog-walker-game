@@ -50,9 +50,9 @@ function stepsSeen(
 }
 
 // What a mover shows since scroll after its cue appeared, or it spawned for a stepping mover: a
-// dart its wait at its edge, its cue, then its crossing, its turn back or its stop; a rider its cue, then its ride; a
-// stepper the steps it has started and the wander mark of the next. Two moments that show the
-// same read the same.
+// dart its wait at its edge, its cue, then its crossing, its turn back or its stop; a rider its
+// cue, then its ride; a stepper the steps it has started and the wander mark of the next. Two
+// moments that show the same read the same.
 export function moverShows(path: MoverPath, since: number): string {
   if (path.motion === "cross") {
     if (since < path.idle) {

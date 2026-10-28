@@ -432,9 +432,9 @@ export class StatsScene extends Scene {
     return dogsBottom(dogs.length);
   }
 
-  // The heading and the earned count, then a badge per row: earned ones in colour with a
-  // green name on a gold band, ticked, locked ones greyed; each with its goal, or its short goal where the full one
-  // does not fit, and a locked one that counts across walks with its progress.
+  // The heading and the earned count, then a badge per row: earned ones in colour with a green name
+  // on a gold band, ticked, locked ones greyed; each with its goal, or its short goal where the
+  // full one does not fit, and a locked one that counts across walks with its progress.
   private drawBadges(): number {
     const save = profileSave(this);
     const badges = this.badges();

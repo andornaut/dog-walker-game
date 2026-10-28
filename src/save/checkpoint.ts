@@ -85,11 +85,11 @@ type BankedRun = Pick<
   walker: WalkerId | null;
 };
 
-// Banks the earnings, counts the outcome and updates every stat and the logbook. A run a dev
-// start began past zone 1 banks no money, adds no starting cash and sets no best walk, and its
-// zone counts leave out the zones it skipped. Unlocks the walkers whose goal zone the run finished, skipped zones
-// left out. Clears the checkpoint, since the run it belonged to is now banked. Then awards what
-// the run earned.
+// Banks the earnings, counts the outcome and updates every stat and the logbook. A run a dev start
+// began past zone 1 banks no money, adds no starting cash and sets no best walk, and its zone
+// counts leave out the zones it skipped. Unlocks the walkers whose goal zone the run finished,
+// skipped zones left out. Clears the checkpoint, since the run it belonged to is now banked. Then
+// awards what the run earned.
 function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): SaveDocument {
   const { stats } = save;
   const walked = walkedFromTheStart(run.counters);

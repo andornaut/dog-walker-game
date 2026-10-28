@@ -119,13 +119,13 @@ function movableAfter(moveSeconds: number, pull: LanePull, moves: boolean): numb
   return pull.at + Math.max(moves ? moveSeconds : 0, pull.reactSeconds) + WAIT_MARGIN;
 }
 
-// The cheapest way through the hazards, collecting what prizes it safely can: a hit costs
-// HIT_COST, so a plan only takes a hit it cannot avoid; clearing a hazard's lanes less than
-// slackSeconds before it costs TIGHT_COST, so a plan does that only to avoid a hit; and each
-// lane change costs a little, so the plan does not weave for nothing. Each lane change takes
-// moveSeconds, during which the pack occupies both lanes. A pull moves the pack whatever the plan, so the plan works
-// around it: none of its own lane changes is under way when a pull comes, and none starts
-// until the pull's move ends and the plan has reacted to it. Returns the plan's own lane changes in time order.
+// The cheapest way through the hazards, collecting what prizes it safely can: a hit costs HIT_COST,
+// so a plan only takes a hit it cannot avoid; clearing a hazard's lanes less than slackSeconds
+// before it costs TIGHT_COST, so a plan does that only to avoid a hit; and each lane change costs a
+// little, so the plan does not weave for nothing. Each lane change takes moveSeconds, during which
+// the pack occupies both lanes. A pull moves the pack whatever the plan, so the plan works around
+// it: none of its own lane changes is under way when a pull comes, and none starts until the pull's
+// move ends and the plan has reacted to it. Returns the plan's own lane changes in time order.
 export function planLanes(
   config: LanePlanConfig,
   start: PlanStart,

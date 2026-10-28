@@ -75,7 +75,8 @@ export function shopAffordable(data: ShopData, owned: Owned, bank: Cents): boole
   return purchases(data).some((purchase) => isAffordable(data, owned, bank, purchase));
 }
 
-// Every gear item, cheapest first (gearByPrice), owned ones in place, each with its effect in a few words.
+// Every gear item, cheapest first (gearByPrice), owned ones in place, each with its effect in a few
+// words.
 export function gearRows(data: ShopData, owned: Owned): ShopRow[] {
   return gearByPrice(data).map((gear) => {
     const purchase: Purchase = { gear, kind: "gear" };

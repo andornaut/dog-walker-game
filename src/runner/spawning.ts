@@ -29,20 +29,20 @@ export interface Footprint {
 
 export const SINGLE_CELL: Footprint = { lanes: 1, rows: 1 };
 
-// blocksLane marks kinds the pack must steer around, such as obstacles. first marks kinds
-// placed before every other, such as the obstacles that open a card, so they are the last
-// skipped. Spawns without a footprint take one cell. A lane-blocking mover's spawns block the
-// lanes it sweeps instead; one with no room to move waits for the next row with room, or is
-// dropped, unless it is marked first, when it stands still in its footprint instead. A mover
-// that blocks no lane, a moving prize, only keeps clear the cells it passes through, and stands
-// still in its footprint when it has no room to move. moversPassOver marks standing kinds that
-// block no lane and that a mover may pass over, such as tips: they keep off the cells standing
-// spawns and moving prizes hold and every spot a mover may stand on, not off every cell a mover
-// passes through. moversRestOn marks such kinds that may also lie where a mover may end a move
-// and stand, such as tips. hitLength is a lane-blocking kind's drawn hit length, which the pack-fit gap
-// measures it by; without it, its planned hit length. within is the share of the zone's rows a
-// standing kind's spawns are spread over, from and to, each 0 to 1, such as a gear drop held to
-// a third of the zone; without it, the whole zone.
+// blocksLane marks kinds the pack must steer around, such as obstacles. first marks kinds placed
+// before every other, such as the obstacles that open a card, so they are the last skipped. Spawns
+// without a footprint take one cell. A lane-blocking mover's spawns block the lanes it sweeps
+// instead; one with no room to move waits for the next row with room, or is dropped, unless it is
+// marked first, when it stands still in its footprint instead. A mover that blocks no lane, a
+// moving prize, only keeps clear the cells it passes through, and stands still in its footprint
+// when it has no room to move. moversPassOver marks standing kinds that block no lane and that a
+// mover may pass over, such as tips: they keep off the cells standing spawns and moving prizes hold
+// and every spot a mover may stand on, not off every cell a mover passes through. moversRestOn
+// marks such kinds that may also lie where a mover may end a move and stand, such as tips.
+// hitLength is a lane-blocking kind's drawn hit length, which the pack-fit gap measures it by;
+// without it, its planned hit length. within is the share of the zone's rows a standing kind's
+// spawns are spread over, from and to, each 0 to 1, such as a gear drop held to a third of the
+// zone; without it, the whole zone.
 export interface SpawnQuota<Kind extends string> {
   blocksLane: boolean;
   count: number;
@@ -60,19 +60,19 @@ export interface SpawnQuota<Kind extends string> {
 // cellLength per row, and its hit box is planned as the footprint less cellInset at each end, which
 // is negative where obstacles are drawn longer than a row; it overlaps the pack over its hit box's
 // length plus packLength. A lane is cellLength wide, and a mover's hit box is laneInset inside its
-// lane at each side. scrollSpeed (pixels per second), laneMoveSeconds and stepSeconds, the
-// walk's step, set how far the pack can steer between rows; pathLaneMoveSeconds, the slowest lane
-// move the pack may make in the zone, such as a Muddy pack's, spaces the path's lane changes
-// (packGap). sightLength is the road in view above
-// the pack, so the next row shows before the pack has to steer for it, and roadLength the whole
-// road in view. reactionSeconds is the time the pack is given to react on top of the lane moves it
-// makes between two spawns. maxEmptyRows is the most rows in a row that may come on screen with no
-// lane-blocking spawn in view in them. packHitLength is the length of the pack's hit boxes, which
-// the pack-fit gap keeps clear. With firstContactSeconds, the rows reach back up the road, on the
-// same grid, to the last that meets the pack no sooner than that long after the zone starts: rows
-// at negative distances are on the road in view as the zone starts. pathStart is the lane the
-// zone's guaranteed path starts in (planSpawns). fixedKinds are the zone's fixed obstacles, which
-// a lane-blocking standing spawn of one of them with no room is swapped among (planSpawns).
+// lane at each side. scrollSpeed (pixels per second), laneMoveSeconds and stepSeconds, the walk's
+// step, set how far the pack can steer between rows; pathLaneMoveSeconds, the slowest lane move the
+// pack may make in the zone, such as a Muddy pack's, spaces the path's lane changes (packGap).
+// sightLength is the road in view above the pack, so the next row shows before the pack has to
+// steer for it, and roadLength the whole road in view. reactionSeconds is the time the pack is
+// given to react on top of the lane moves it makes between two spawns. maxEmptyRows is the most
+// rows in a row that may come on screen with no lane-blocking spawn in view in them. packHitLength
+// is the length of the pack's hit boxes, which the pack-fit gap keeps clear. With
+// firstContactSeconds, the rows reach back up the road, on the same grid, to the last that meets
+// the pack no sooner than that long after the zone starts: rows at negative distances are on the
+// road in view as the zone starts. pathStart is the lane the zone's guaranteed path starts in
+// (planSpawns). fixedKinds are the zone's fixed obstacles, which a lane-blocking standing spawn of
+// one of them with no room is swapped among (planSpawns).
 export interface SpawnPlan<Kind extends string> {
   cellInset: number;
   cellLength: number;
@@ -474,61 +474,59 @@ function drawPath(streams: PlannerStreams, plan: SpawnPlan<string>, rowCount: nu
 }
 
 // Every spawn takes free cells of a lane-by-row grid, its rows rowSpacing apart (zoneRows). Each
-// kind's spawns are spread over equal stretches of the zone, or of the share of it a quota's
-// within holds them to, one per stretch, so no kind bunches up. A lane-blocking spawn, standing
-// or moving, is drawn among the places that fit toward the lanes left unblocked longest
-// (laneBalanceWeight), so no lane stays clear for long. The standing kinds take turns along the
-// zone, the widest first in each turn, so each keeps its share of what is placed. Before anything
-// is placed, the zone draws its guaranteed path (drawPath), the lanes a pack can follow through
-// it from pathStart. Lane-blocking spawns only take cells that keep that path clear: the path's
-// lane stays open in every row's window and the gap after it, and on the row before the path
-// changes lane every lane the change crosses does too. Each row's window and the gap after it
-// also keep minOpenLanes open. In each row's window, no dart sweeps every lane of a stretch of
-// road that the other lane-blocking spawns there wall off (openStretches), so a pack anywhere on
-// the road has a lane to dodge a dart in without crossing another obstacle. A spawn more than one
-// row long blocks every window and gap it overlaps, and must end within the zone's last row. Where
-// the path changes lanes between two lane-blocking spawns, packFitsOnPath holds, for a mover
-// wherever it stands, each spawn measured at its kind's drawn hit length (hitLength) and the pack
-// at the tallest pack's hit boxes (packHitLength). Off the path, nothing else checks a way between
-// spawns. Two lane-blocking
-// spawns WIDE_LANES wide or wider have a row between the rows their hit boxes are on. The quotas
-// marked first are placed first, their movers then the rest; then the other lane-blocking movers;
-// then the other lane-blocking spawns; then the moving prizes; then the other spawns. Movers are
-// placed by placeMovers. A dart may set off over cells the spawns placed before it hold, crossing
-// over or past them, and a rider may pass over cells only darts hold (moverMayTake). Nothing else
-// placed after a mover takes its cells, another dart included, but a lane-blocking standing spawn:
-// one where a dart passes, which the dart then crosses over or past the same way, and one whose
-// hit box shares no road with any other mover's body, the road that mover's hit box covers at some
-// moment on screen, so the two never meet; a mover other than a dart holds every row its blocking
-// and its path touch, which is more road than its body. A kind marked moversPassOver also takes a
-// mover's cells, but not one where a mover may end a move and stand unless it is also marked
-// moversRestOn. A mover with no room in its stretch, such as one over a cap on screen, waits for
-// the next row with room; only one marked first stands still in its footprint when no row has room
-// for it to move. A moving prize, such as a walking lucky find or a darting squirrel, is placed as
-// a mover that blocks nothing: the cells it passes through are kept clear of other spawns placed
-// after it, so it never walks into one, but no lane is blocked, it stands nowhere for the pack-fit
-// gap and it counts toward no cap on screen beside the lane-blocking movers, since the pack never
-// has to steer around it. A darting one may set off over the lane-blocking spawns' cells, as any
-// dart may. It keeps a free cell for every moving prize, its own included, and with no room to
-// move it stands still in one cell among the other spawns, so a prize is never skipped for want of
-// room to move. A spawn that blocks no lane, such as a treat, also keeps off every spot where a
-// mover placed may end a move and stand (moverRests), so no mover ever stops on one; a kind marked
-// moversRestOn, such as a tip, may lie there. A lane-blocking mover, or an obstacle bigger than
-// one cell, that the earlier draws left no room for is skipped, which uses no random draw; so is
-// one that would leave fewer free cells than there are one-cell spawns. A free cell can still be
-// one no lane-blocking spawn may take, where the path or the pack-fit gap along it rules it out,
-// so a one-cell spawn with no room left is skipped too, the same way: a zone never fails to plan
-// for want of room. A standing spawn of one of the zone's fixedKinds that finds no room in its
-// stretch or anywhere else in the zone is first swapped for a narrower fixed kind, a lane
-// narrower at a time, drawn by the kinds' weights among those that fit, and is skipped only when
-// none of any narrower width fits. Once the lane-blocking spawns are placed, and before the moving prizes and the
-// other spawns, a run of more than maxEmptyRows rows that come on screen with no lane-blocking
-// spawn in view, half that, rounded down, from the zone's first row or to its last (none at all from
-// the first row of a zone whose rows start on the road in view), gets one of the zone's own plain
-// standing spawns: one
-// skipped for want of room, or else one moved from the busiest stretch, placed under every rule
-// above, so long as each move leaves fewer such rows in all. A run no spawn can take under them,
-// such as one held clear for the path, stays.
+// kind's spawns are spread over equal stretches of the zone, or of the share of it a quota's within
+// holds them to, one per stretch, so no kind bunches up. A lane-blocking spawn, standing or moving,
+// is drawn among the places that fit toward the lanes left unblocked longest (laneBalanceWeight),
+// so no lane stays clear for long. The standing kinds take turns along the zone, the widest first
+// in each turn, so each keeps its share of what is placed. Before anything is placed, the zone
+// draws its guaranteed path (drawPath), the lanes a pack can follow through it from pathStart.
+// Lane-blocking spawns only take cells that keep that path clear: the path's lane stays open in
+// every row's window and the gap after it, and on the row before the path changes lane every lane
+// the change crosses does too. Each row's window and the gap after it also keep minOpenLanes open.
+// In each row's window, no dart sweeps every lane of a stretch of road that the other lane-blocking
+// spawns there wall off (openStretches), so a pack anywhere on the road has a lane to dodge a dart
+// in without crossing another obstacle. A spawn more than one row long blocks every window and gap
+// it overlaps, and must end within the zone's last row. Where the path changes lanes between two
+// lane-blocking spawns, packFitsOnPath holds, for a mover wherever it stands, each spawn measured
+// at its kind's drawn hit length (hitLength) and the pack at the tallest pack's hit boxes
+// (packHitLength). Off the path, nothing else checks a way between spawns. Two lane-blocking spawns
+// WIDE_LANES wide or wider have a row between the rows their hit boxes are on. The quotas marked
+// first are placed first, their movers then the rest; then the other lane-blocking movers; then the
+// other lane-blocking spawns; then the moving prizes; then the other spawns. Movers are placed by
+// placeMovers. A dart may set off over cells the spawns placed before it hold, crossing over or
+// past them, and a rider may pass over cells only darts hold (moverMayTake). Nothing else placed
+// after a mover takes its cells, another dart included, but a lane-blocking standing spawn: one
+// where a dart passes, which the dart then crosses over or past the same way, and one whose hit box
+// shares no road with any other mover's body, the road that mover's hit box covers at some moment
+// on screen, so the two never meet; a mover other than a dart holds every row its blocking and its
+// path touch, which is more road than its body. A kind marked moversPassOver also takes a mover's
+// cells, but not one where a mover may end a move and stand unless it is also marked moversRestOn.
+// A mover with no room in its stretch, such as one over a cap on screen, waits for the next row
+// with room; only one marked first stands still in its footprint when no row has room for it to
+// move. A moving prize, such as a walking lucky find or a darting squirrel, is placed as a mover
+// that blocks nothing: the cells it passes through are kept clear of other spawns placed after it,
+// so it never walks into one, but no lane is blocked, it stands nowhere for the pack-fit gap and it
+// counts toward no cap on screen beside the lane-blocking movers, since the pack never has to steer
+// around it. A darting one may set off over the lane-blocking spawns' cells, as any dart may. It
+// keeps a free cell for every moving prize, its own included, and with no room to move it stands
+// still in one cell among the other spawns, so a prize is never skipped for want of room to move. A
+// spawn that blocks no lane, such as a treat, also keeps off every spot where a mover placed may
+// end a move and stand (moverRests), so no mover ever stops on one; a kind marked moversRestOn,
+// such as a tip, may lie there. A lane-blocking mover, or an obstacle bigger than one cell, that
+// the earlier draws left no room for is skipped, which uses no random draw; so is one that would
+// leave fewer free cells than there are one-cell spawns. A free cell can still be one no
+// lane-blocking spawn may take, where the path or the pack-fit gap along it rules it out, so a
+// one-cell spawn with no room left is skipped too, the same way: a zone never fails to plan for
+// want of room. A standing spawn of one of the zone's fixedKinds that finds no room in its stretch
+// or anywhere else in the zone is first swapped for a narrower fixed kind, a lane narrower at a
+// time, drawn by the kinds' weights among those that fit, and is skipped only when none of any
+// narrower width fits. Once the lane-blocking spawns are placed, and before the moving prizes and
+// the other spawns, a run of more than maxEmptyRows rows that come on screen with no lane-blocking
+// spawn in view, half that, rounded down, from the zone's first row or to its last (none at all
+// from the first row of a zone whose rows start on the road in view), gets one of the zone's own
+// plain standing spawns: one skipped for want of room, or else one moved from the busiest stretch,
+// placed under every rule above, so long as each move leaves fewer such rows in all. A run no spawn
+// can take under them, such as one held clear for the path, stays.
 export function planSpawns<Kind extends string>(
   streams: PlannerStreams,
   plan: SpawnPlan<Kind>,
@@ -917,9 +915,9 @@ export function planSpawns<Kind extends string>(
     return first ? stilledQuotas(true, quotas, dropped) : [];
   };
   // A moving prize keeps its cells clear of other spawns, and nothing else: it blocks no lane,
-  // stands nowhere for the pack-fit gap, and counts toward no cap on screen
-  // beside the lane-blocking movers. One with no room to move stands still instead, in its
-  // footprint, among the other spawns that block no lane.
+  // stands nowhere for the pack-fit gap, and counts toward no cap on screen beside the
+  // lane-blocking movers. One with no room to move stands still instead, in its footprint, among
+  // the other spawns that block no lane.
   const prizeGrid = {
     ...moverGrid,
     block: () => true,
@@ -1125,12 +1123,12 @@ export function planSpawns<Kind extends string>(
   }
   const standing: Standing[] = [];
   const unplaced: SpawnQuota<Kind>[] = [];
-  // The rows that come on screen with a lane-blocking mover in view: of the rows whose windows
-  // the mover meets the pack in, on its path or any its stalking may take, those that come on
-  // screen once its body shows, at or below the road's top and not off its side: a cue, or a dart
-  // waiting at the road's edge, blocks nothing yet. A row
-  // comes on screen at its distance, as a standing spawn on it does, and a mover meets the pack
-  // at its distance from its cue less sightLength, as the pixel of scroll it first overlaps it.
+  // The rows that come on screen with a lane-blocking mover in view: of the rows whose windows the
+  // mover meets the pack in, on its path or any its stalking may take, those that come on screen
+  // once its body shows, at or below the road's top and not off its side: a cue, or a dart waiting
+  // at the road's edge, blocks nothing yet. A row comes on screen at its distance, as a standing
+  // spawn on it does, and a mover meets the pack at its distance from its cue less sightLength, as
+  // the pixel of scroll it first overlaps it.
   const moverInView = new Uint8Array(rows.length);
   const window = blockingLength(plan, 1);
   const markInView = (cue: number, path: MoverPath, footprint: Footprint) => {

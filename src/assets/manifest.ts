@@ -116,7 +116,8 @@ const manifestSchema = v.pipe(
   }),
 );
 
-// Throws naming the offending entry, so a bad export fails at boot rather than as a missing texture.
+// Throws naming the offending entry, so a bad export fails at boot rather than as a missing
+// texture.
 export function parseManifest(value: unknown): AssetManifest {
   return parseOrThrow("manifest", manifestSchema, value);
 }

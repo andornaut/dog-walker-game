@@ -5,11 +5,11 @@ import { project, type RoadProjection, scaleAt, scaleAtY } from "../layout/proje
 import type { Random } from "../lib/random";
 import { noise, sidewalkTo, type Verge, VERGES, walkFrom } from "./roadside";
 
-// The ambient movers: cars, bikes, people, animals and planes moving across the backdrop's
-// cross street and sky and beside the road, from each zone's table in the data. They are scenery only:
-// nothing in the walk reads them, and they draw from a random stream of their own, so a seed
-// plays the same walk with or without them. Their time is the walk's, so they stand still
-// while it is held.
+// The ambient movers: cars, bikes, people, animals and planes moving across the backdrop's cross
+// street and sky and beside the road, from each zone's table in the data. They are scenery only:
+// nothing in the walk reads them, and they draw from a random stream of their own, so a seed plays
+// the same walk with or without them. Their time is the walk's, so they stand still while it is
+// held.
 //
 // The state is a fixed pool of slots, reused in place, so a frame allocates nothing.
 
@@ -54,11 +54,11 @@ export interface AmbientStage {
 }
 
 // One mover. direction is the way a mover on the cross street or in the sky goes (1 right,
-// -1 left), and the side of the road for one beside it (1 right, -1 left). row is a cross
-// street or sky mover's feet row, in band pixels. Beside the road, across is where it walks or stops and outer
-// where it starts or leaves, in road pixels from the road's centre line, and z the road
-// distance from the walk's start where it set out. look, in [0, 1), picks among its art's
-// variants, such as a car's body.
+// -1 left), and the side of the road for one beside it (1 right, -1 left). row is a cross street
+// or sky mover's feet row, in band pixels. Beside the road, across is where it walks or stops and
+// outer where it starts or leaves, in road pixels from the road's centre line, and z the road
+// distance from the walk's start where it set out. look, in [0, 1), picks among its art's variants,
+// such as a car's body.
 interface AmbientSlot {
   across: number;
   active: boolean;

@@ -7,8 +7,8 @@ import type { Point } from "../lib/rect";
 // A plain hit is on a standing obstacle; a moving hit is on a mover.
 export type HitKind = "moving" | "plain";
 type Debris = "leaves" | "litter";
-// How a struck obstacle moves: a cone rocks and tips over, a trash can rocks back upright, and a wide
-// obstacle shakes sideways.
+// How a struck obstacle moves: a cone rocks and tips over, a trash can rocks back upright, and a
+// wide obstacle shakes sideways.
 type ObstacleMotion = "rock" | "shake" | "tip";
 
 // Every effect plays its art's play tag once. peak is the frame reduced motion holds for the

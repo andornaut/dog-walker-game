@@ -24,15 +24,15 @@ export interface MoverStep {
 // A planned mover. warning is the scroll each cue shows for before its move.
 // cross (dart): it waits idle at the edge it enters from, at its row, for idle of its warning, then
 // shows its cue there for the rest, and it sets off when its row has travelled enterTravel down
-// the road, coming down the road at 1 + tilt of the road's speed
-// as it crosses. With turnAfter, once it has crossed that many lanes it turns back, with no cue,
-// and crosses the whole road back the other way. With stopAfter, once it has crossed that many
-// lanes it stops, with no cue, and stands there, coming down the road with it. With both null it
-// crosses once. With slide (a dive), it crosses its last lane before its stop at slide of its
-// speed, sliding to its stop. With span, it is that many lanes wide, its lane position its
-// leftmost lane's. With pause (a stop-and-go across), once it has crossed after lanes it stands
-// for length of scroll, coming down the road with it, its cue showing again for cue before it sets
-// off once more; a paused crosser keeps a tilt of 0.
+// the road, coming down the road at 1 + tilt of the road's speed as it crosses. With turnAfter,
+// once it has crossed that many lanes it turns back, with no cue, and crosses the whole road back
+// the other way. With stopAfter, once it has crossed that many lanes it stops, with no cue, and
+// stands there, coming down the road with it. With both null it crosses once. With slide (a dive),
+// it crosses its last lane before its stop at slide of its speed, sliding to its stop. With span,
+// it is that many lanes wide, its lane position its leftmost lane's. With pause (a stop-and-go
+// across), once it has crossed after lanes it stands for length of scroll, coming down the road
+// with it, its cue showing again for cue before it sets off once more; a paused crosser keeps a
+// tilt of 0.
 // ride (inLane, merge): its cue is at the top of its lanes, where it enters once the cue ends,
 // coming down them at speedMultiplier of the road's speed. With merge, it moves lanes across over
 // length of scroll from at, its cue showing for cue before that.
@@ -500,16 +500,7 @@ export interface MoverStand {
   readonly length: number;
 }
 
-// One way a mover can meet a row. Distances are relative to the row's distance; appears is
-// its spawn. lanes and rows are what it blocks from its row on, as a standing obstacle that
-// size would: every lane it touches while it overlaps the pack, for as long as it can. cells
-// are the row offsets and lanes kept clear of other spawns, but a lane-blocking standing spawn
-// clear of its body: those it passes through on the road. stands are each place it stands as an
-// obstacle, by distance from its row. screen is from its cue
-// appearing until it is out of sight. body is the road its hit box covers at any moment while it
-// is on the road, by distance from its row; a dart has none, as a standing spawn may stand where
-// a dart passes. Of the placements that fit in a start lane and row, the planner takes one of
-// the highest rank, 0 when unset.
+// A cell a mover keeps clear: a row offset from its own row, and a lane.
 interface BlockCell {
   readonly lane: number;
   readonly row: number;
@@ -537,6 +528,15 @@ function blockCells(
   ).flat();
 }
 
+// One way a mover can meet a row. Distances are relative to the row's distance; appears is
+// its spawn. lanes and rows are what it blocks from its row on, as a standing obstacle that
+// size would: every lane it touches while it overlaps the pack, for as long as it can. cells
+// are the row offsets and lanes kept clear of other spawns, but a lane-blocking standing spawn
+// clear of its body: those it passes through on the road. stands are each place it stands as an
+// obstacle, by distance from its row. screen is from its cue appearing until it is out of sight.
+// body is the road its hit box covers at any moment while it is on the road, by distance from its
+// row; a dart has none, as a standing spawn may stand where a dart passes. Of the placements that
+// fit in a start lane and row, the planner takes one of the highest rank, 0 when unset.
 interface MoverPlacement {
   readonly appears: number;
   readonly body?: MoverBody;
@@ -708,10 +708,10 @@ interface ShyHops {
 // one before ends, none without it; with cueEach, each step has a cue of its own, and the pause
 // is at least the cue. With drift, each step also travels drift of its length down the road, up
 // when below 0: a push at a speed. With shy, a share of them hop shy instead, as many times as
-// their count. approach: steps steps toward the pack, drawn per mover, each stepSeconds long, the first's cue
-// firstDelaySeconds after the mover is wholly on the road and each later one, with no cue, once
-// the step before has ended and the road between it and the pack is secondRoadShare of the road's
-// length, each range drawn from per mover.
+// their count. approach: steps steps toward the pack, drawn per mover, each stepSeconds long, the
+// first's cue firstDelaySeconds after the mover is wholly on the road and each later one, with no
+// cue, once the step before has ended and the road between it and the pack is secondRoadShare of
+// the road's length, each range drawn from per mover.
 export type MoverMotion =
   | {
       readonly firstDelaySeconds: readonly [number, number];
@@ -948,15 +948,14 @@ function crossTilts(
 // crosses. One that stops on the verge is planned as one that crosses: off the road it is out of
 // play, so it holds its rows only while it crosses and stands nowhere past the road. Its contact
 // lasts as long as its travel takes to cross the window, window / (1 + tilt) while it crosses,
-// which its rows cover. It blocks every lane a box a lane wide would touch, but
-// stands only in the lanes its drawn hit box touches over its drawn contact with the pack's hit
-// boxes, until its hit box leaves the road if that comes before its contact's end: a stand wider
-// or longer than its hit box would hide the road beside or behind it that the pack can step into.
-// One that has crossed the road by the time it reaches the pack's rows is harmless: it blocks no
-// lanes and stands nowhere. It keeps clear every row it is level with as it crosses or stands. It
-// appears as its row comes
-// on screen, or at the road's top where its start is farther up the road than its row, and waits
-// idle at its edge until its cue, warningSeconds before it sets off.
+// which its rows cover. It blocks every lane a box a lane wide would touch, but stands only in the
+// lanes its drawn hit box touches over its drawn contact with the pack's hit boxes, until its hit
+// box leaves the road if that comes before its contact's end: a stand wider or longer than its hit
+// box would hide the road beside or behind it that the pack can step into. One that has crossed
+// the road by the time it reaches the pack's rows is harmless: it blocks no lanes and stands
+// nowhere. It keeps clear every row it is level with as it crosses or stands. It appears as its
+// row comes on screen, or at the road's top where its start is farther up the road than its row,
+// and waits idle at its edge until its cue, warningSeconds before it sets off.
 function crossPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -1282,12 +1281,11 @@ export function drawnStepCount(
 // comes up to its drawn delay later, so later moves pause a random gap between them. A step with
 // drift travels drift of its length along the road, and stands at a spot each cell of it. A step
 // that would start once the mover has reached the pack's rows, at sightLength, never comes, nor
-// any after it; a sequence with no
-// step left has no placement, since a mover always moves. It stands at every spot a step of
-// several spots passes over, as it does at each step's ends, and at both corners of each diagonal
-// spot: moving a lane across and a row along at once, its hit box is in the lane it leaves while
-// it comes level with the row it reaches, and in the lane it reaches while still level with the
-// row it leaves.
+// any after it; a sequence with no step left has no placement, since a mover always moves. It
+// stands at every spot a step of several spots passes over, as it does at each step's ends, and at
+// both corners of each diagonal spot: moving a lane across and a row along at once, its hit box is
+// in the lane it leaves while it comes level with the row it reaches, and in the lane it reaches
+// while still level with the row it leaves.
 function stepsPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,

@@ -189,10 +189,10 @@ interface DebuffBarView {
 export type HudSceneData = { picture: { source: HudWalk; view: ScenePicture } } | { run: HudRun };
 
 // The walk bar, the debuff bars, the dog cards and the neighbourhood's progress line, drawn over
-// the road for the whole walk and kept in view while cards are up. It reads the run every frame
-// and redraws what changed, and shows the run's change labels, first-time hints, owners'
-// pop-ins and what a held press explains. It keeps running while the walk is paused, so the bar's buttons and their
-// keys work in every state; its animations run on too, being the bar's and not the walk's,
+// the road for the whole walk and kept in view while cards are up. It reads the run every frame and
+// redraws what changed, and shows the run's change labels, first-time hints, owners' pop-ins and
+// what a held press explains. It keeps running while the walk is paused, so the bar's buttons and
+// their keys work in every state; its animations run on too, being the bar's and not the walk's,
 // except the walk's moments: while the player has paused, heart pops, change labels, owners'
 // pop-ins and the message strip's ageing hold.
 export class HudScene extends Scene {

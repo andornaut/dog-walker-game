@@ -12,9 +12,9 @@ import { walkerFootY } from "../layout/screenLayout";
 import type { Rect } from "../lib/rect";
 import type { RoadGeometry } from "./walk";
 
-// A pickup's, lucky find's or gear drop's hit box is its lanes less the inset at each side, a cell's spare
-// width beside ROAD_HIT_SIZE, so one lane hits 40px wide on 64px lanes, whatever size it is
-// drawn.
+// A pickup's, lucky find's or gear drop's hit box is its lanes less the inset at each side, a
+// cell's spare width beside ROAD_HIT_SIZE, so one lane hits 40px wide on 64px lanes, whatever size
+// it is drawn.
 function footprintInset(cellLength: number): number {
   return (cellLength - ROAD_HIT_SIZE) / 2;
 }
