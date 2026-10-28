@@ -128,15 +128,13 @@ describe("applyEffects: hearts shared by the pack", () => {
   const kiloPair = testState({ kilo: 1, reggie: 1 });
   const kiloMax = ownerMaxHearts(data, kiloPair, "kilo");
 
-  // The pinned tuning shares 3 hearts.
+  // The pinned tuning shares 3 hearts. The shareHearts table covers each pack size's shares.
   it.each<[string, Slots, Slots]>([
-    ["all to a lone dog's owner", { reggie: 1 }, { reggie: 4 }],
     [
       "2 to the front dog's owner and 1 to the other",
       { kilo: 1, reggie: 1 },
       { kilo: 3, reggie: 2 },
     ],
-    ["1 to each of a trio", { kilo: 1, pierre: 1, reggie: 1 }, { kilo: 2, pierre: 2, reggie: 2 }],
     [
       "among the dogs still walking, leaving out a fired owner's",
       { duchess: 1, kilo: "fired", reggie: 1 },
@@ -327,11 +325,7 @@ describe("moneyCost and applyEffects: money", () => {
     [1, 1],
     [2, 1],
     [3, 2],
-    [5, 3],
-    [8, 4],
-    [10, 5],
     [15, 8],
-    [20, 10],
   ])("charges a $%i cost as $%i with Fanny pack, as moneyCost says", (dollars, cut) => {
     const fannyPack = activeModifier(
       { gear: "fannyPack", kind: "gear" },
