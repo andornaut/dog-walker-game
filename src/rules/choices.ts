@@ -188,14 +188,9 @@ function outcomeOf(
   context: EffectContext,
   effects: CardOption["effects"],
   state: RunState,
-  picked?: UpgradeId,
 ): ChoiceOutcome {
   const applied = resolveEffects(data, context, effects, state);
-  const withPick =
-    picked === undefined
-      ? applied.state
-      : { ...applied.state, upgradesPicked: [...applied.state.upgradesPicked, picked] };
-  const firing = fireOwnersAtZero(withPick);
+  const firing = fireOwnersAtZero(applied.state);
   const next: RunState = {
     ...firing.state,
     phase:
@@ -451,8 +446,8 @@ export function offerFork(
 // walked.
 function takePath(
   data: CardData,
-  source: ForkSource,
   state: RunState,
+  source: ForkSource,
   choice: Choice,
 ): ChoiceOutcome {
   const zone = choice === "skip" ? undefined : source.paths[choice];
@@ -465,9 +460,16 @@ function takePath(
     { affected: [], source: { kind: "upgrade", upgrade } },
     data.upgrades[upgrade].effects,
     state,
-    upgrade,
   );
-  return { ...outcome, state: { ...outcome.state, route: [...outcome.state.route, zone] } };
+  const { route, upgradesPicked } = outcome.state;
+  return {
+    ...outcome,
+    state: {
+      ...outcome.state,
+      route: [...route, zone],
+      upgradesPicked: [...upgradesPicked, upgrade],
+    },
+  };
 }
 
 // Applies the chosen option. Owners at 0 hearts fire you; with no dogs left the run ends. The
@@ -483,7 +485,7 @@ export function chooseOption(
     throw new Error("The run has ended");
   }
   if (card.source.kind === "fork") {
-    return takePath(data, card.source, state, choice);
+    return takePath(data, state, card.source, choice);
   }
   const view = effectCard(data, state, card.source);
   if (choice === "skip") {
