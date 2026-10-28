@@ -266,9 +266,13 @@ describe("ownedCountNote", () => {
   ]);
   const style = { letterSpacing: 0, scale: 2 };
 
-  it.each(cases)("%s: counts the owned ones out of all of them", (list, have, count, max) => {
-    expect(ownedCountNote(data, have, list)).toBe(note(count, max));
-  });
+  // slotRows checks the slots' count with every set of slots owned.
+  it.each(cases.filter(([list]) => list !== "slots"))(
+    "%s: counts the owned ones out of all of them",
+    (list, have, count, max) => {
+      expect(ownedCountNote(data, have, list)).toBe(note(count, max));
+    },
+  );
 
   it.each(cases)("%s: keeps the note clear of the heading", (list, have) => {
     const text = ownedCountNote(data, have, list);
