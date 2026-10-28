@@ -14,7 +14,13 @@ import {
   tileState,
 } from "../ui/interaction";
 import { MARK_OFFSET } from "../ui/mark";
-import { CREAM_PANEL_COLOURS, drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
+import {
+  CREAM_PANEL_COLOURS,
+  drawFramedRect,
+  drawPixelRows,
+  drawRing,
+  fillRect,
+} from "../ui/phaser/draw";
 import { disabledTextureKey } from "../ui/phaser/greyTextures";
 import { PALETTE } from "../ui/phaser/palette";
 import {
@@ -400,14 +406,7 @@ const COG_ROWS = [
 
 function cogIcon(scene: Scene, x: number, y: number): Placed[] {
   const g = scene.add.graphics({ x, y });
-  g.fillStyle(PALETTE.amber);
-  COG_ROWS.forEach((row, dy) => {
-    [...row].forEach((cell, dx) => {
-      if (cell === "#") {
-        g.fillRect(dx * 2, dy * 2, 2, 2);
-      }
-    });
-  });
+  drawPixelRows(g, PALETTE.amber, COG_ROWS, { x: 0, y: 0 }, 2);
   return [g];
 }
 

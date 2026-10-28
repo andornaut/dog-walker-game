@@ -1,6 +1,6 @@
 import type { GameObjects, Scene } from "phaser";
 
-import { insetRect, type Rect, ringRects } from "../../lib/rect";
+import { insetRect, type Point, type Rect, ringRects } from "../../lib/rect";
 import { pixelEllipseSpans, pixelLinePoints, shadowRadiusX } from "../pixelShapes";
 import { PALETTE } from "./palette";
 
@@ -96,7 +96,25 @@ export function drawPixelLine(
   }
 }
 
-const HEART_ROWS = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."];
+// A picture drawn from rows of text, each "#" a square pixel wide from at, row by row.
+export function drawPixelRows(
+  graphics: GameObjects.Graphics,
+  colour: number,
+  rows: readonly string[],
+  at: Point,
+  pixel: number,
+): void {
+  graphics.fillStyle(colour);
+  rows.forEach((row, dy) => {
+    [...row].forEach((cell, dx) => {
+      if (cell === "#") {
+        graphics.fillRect(at.x + dx * pixel, at.y + dy * pixel, pixel, pixel);
+      }
+    });
+  });
+}
+
+const HEART_ROWS = [".##.##.", "#######", "#######", ".#####.", "..###..", "...#..."];
 
 // A 7x6 heart.
 export function drawHeart(
@@ -105,14 +123,7 @@ export function drawHeart(
   y: number,
   colour: number,
 ): void {
-  graphics.fillStyle(colour);
-  HEART_ROWS.forEach((row, dy) => {
-    [...row].forEach((cell, dx) => {
-      if (cell === "1") {
-        graphics.fillRect(x + dx, y + dy, 1, 1);
-      }
-    });
-  });
+  drawPixelRows(graphics, colour, HEART_ROWS, { x, y }, 1);
 }
 
 // A 1px border of 2-on, 2-off dashes, for an empty slot, the last dash on a side cut at its end.
