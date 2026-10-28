@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Draw the neighbourhood road people: the movers and the busker that only some
 neighbourhoods have, drawn like road.py's road people (laid out on a 32x48
-design grid, the couple on 112/1.5 x 48, and drawn road.SCALE (1.5) times
-bigger on a minis.Mini), with the road outline (pixel.road_edge) and road.LIT's
-lit rim, cel shaded.
+design grid, the couple and the tour group on 112/1.5 x 48, and drawn
+road.SCALE (1.5) times bigger on a minis.Mini), with the road outline
+(pixel.road_edge) and road.LIT's lit rim, cel shaded.
 
 tourist             48x72   Distillery District and Yonge Street; a stepper facing the player, as the
                             mail carrier is: a straw sun hat with a red band, a turquoise holiday shirt
@@ -97,6 +97,17 @@ sign-spinner        48x72   Yonge Street; a hopping stepper facing the player, a
                             degrees a frame anticlockwise, level, angled, upright and round; cue (4
                             frames, 60ms): the fast spin before each hop, 90 degrees a frame, the knees
                             bent 1px
+tour-group          112x72  Distillery District, 2 lanes; a guided tour, a stepper facing the player as the
+                            couple is: in front the guide in a green tee and cap with a yellow flag logo
+                            and a red lanyard to a white badge, stone shorts, the left arm (screen right)
+                            raised holding a closed red umbrella with a yellow pennant tied at its tip;
+                            behind and beside, 2 rows up, a tourist in a wide pink sun hat and a peach tee
+                            with a compact camera on a wrist strap, and one in a white bucket hat,
+                            sunglasses and an azure tee with a big black camera on a neck strap; walk
+                            (4 frames, 160ms): road.PERSON_WALK, the tourists 2 frames behind the guide,
+                            shuffling out of step; idle (2 frames, 400ms): road.BREATH, the flag up; cue
+                            (3 frames, 200ms): the flag dips toward the player, half down, all the way
+                            (the pennant hanging), half down
 
 Each has depth variants at every step in minis.STEPS (@94 to @50), redrawn at the
 step on a Mini at road.SCALE x the step, with the original's tags, frame counts
@@ -1176,6 +1187,165 @@ def spinner_top(turn=0):
 def sign_spinner(turn=0, bob=0, lf=0, rf=0):
     """The sign spinner facing the player, with the road outline and the lit rim."""
     return rim(edged(road.person(spinner_top(turn), bob=bob, lf=lf, rf=rf, **SPINNER)), SPINNER_RIM)
+# ---------- tour-group: a guide with a flag and two tourists, facing the player, two lanes ----------
+
+# The tour group's design grid: 112 px wide at road.SCALE, 48 rows, as the couple's. The left edge of each
+# person's 32-column cell: the guide in front, the tourists behind (their feet BEHIND rows higher) and beside.
+TOUR_W = 112 / SCALE
+GUIDE = TOUR_W / 2 - 20
+TOUR_LEFT, TOUR_RIGHT = GUIDE - 16, GUIDE + 24
+BEHIND = -2
+
+
+def tour_poses(frame, lag=2):
+    """Walk frame frame for the group: the guide on COUPLE_WALK's frame, each tourist lag frames behind, so
+    the group shuffles out of step."""
+    walk = COUPLE_WALK
+    out = {}
+    for who, k in (("g", 0), ("l", lag), ("r", lag)):
+        q = walk[(frame - k) % len(walk)]
+        out.update({f"{who}{n}": q.get(n, 0) for n in ("lf", "rf", "bob", "arms")})
+    return out
+
+
+TOUR_WALK = tuple(tour_poses(f) for f in range(4))
+TOUR_WALK_MS = COUPLE_WALK_MS
+# The flag dipping before a step: half down, all the way, half down; 3 frames at 200ms, the mover's cue.
+TOUR_CUE = (dict(dip=2), dict(dip=5), dict(dip=2))
+TOUR_CUE_MS = 200
+TOUR_RIM = {**LIT, "dstone": ("stone", None), "cobalt": ("azure", None), "orange": ("peach", None)}
+
+
+def tour_left(g, x, b, lf, rf, arms):
+    """The tourist behind the guide's right (screen left): a wide pink sun hat with a white band over long
+    dark brown hair, a peach tee, denim shorts and white trainers, a compact camera on a wrist strap in the
+    swinging outer hand."""
+    y = b + BEHIND
+    for hx in (7, 22):
+        g.rect(x + hx, 10 + y, 3, 12, "dbrown")
+    front_legs(g, x, y, lf + BEHIND, rf + BEHIND, ("skin1", "skin2"), "white")
+    g.rect(x + 10, 33 + y, 12, 3, "blue")
+    g.rect(x + 19, 33 + y, 3, 3, "navy")
+    n = swung(arms, -1)
+    road.back_arm(g, x + 5, 4, 22 + y, ((3, "peach", "orange"), (8, "skin1", "skin2")), lift=n)
+    g.rect(x + 3, 31 + y - n, 5, 4, "ink")
+    g.rect(x + 4, 32 + y - n, 2, 2, "grey")
+    g.p(x + 4, 32 + y - n, "white")
+    g.rect(x + 6, 29 + y - n, 1, 2, "ink")
+    g.rect(x + 9, 21 + y, 14, 12, "peach")
+    g.rect(x + 20, 21 + y, 3, 12, "orange")
+    g.rect(x + 9, 22 + y, 1, 10, "cream")
+    g.rect(x + 14, 21 + y, 4, 1, "skin1")
+    face_disc(g, x + 16, 12.5 + y, 8, 8, "skin1", "skin2")
+    g.cel(x + 16, 6.5 + y, 6.5, 4.5, "pink", "mauve", "white")
+    g.rect(x + 9.5, 8 + y, 13, 1.5, "white")
+    g.rect(x + 3, 9.5 + y, 26, 2, "pink")
+    g.rect(x + 3, 11 + y, 26, 1, "mauve")
+    road.face_front(g, x + 16, 14 + y, lips="dred")
+
+
+def tour_right(g, x, b, lf, rf, arms):
+    """The tourist behind the guide's left (screen right): a white bucket hat, sunglasses, an azure tee,
+    tan shorts and sandals, a big black camera on a neck strap, its lens to the player."""
+    y = b + BEHIND
+    front_legs(g, x, y, lf + BEHIND, rf + BEHIND, ("skin1", "skin2"), "dbrown")
+    g.rect(x + 10, 33 + y, 12, 4, "tan")
+    g.rect(x + 19, 33 + y, 3, 4, "brown")
+    n = swung(arms, 1)
+    road.back_arm(g, x + 23, 4, 22 + y, ((3, "azure", "cobalt"), (8, "skin1", "skin2")), lift=n)
+    road.back_arm(g, x + 5, 4, 22 + y, ((3, "azure", "cobalt"), (8, "skin1", "skin2")))
+    g.rect(x + 9, 21 + y, 14, 12, "azure")
+    g.rect(x + 20, 21 + y, 3, 12, "cobalt")
+    g.rect(x + 9, 22 + y, 1, 10, "sky")
+    g.rect(x + 14, 21 + y, 4, 1, "skin1")
+    # the camera on its strap: a black body, a grey hump on top and a big lens
+    g.rect(x + 12, 21 + y, 1, 4, "ink")
+    g.rect(x + 19, 21 + y, 1, 4, "ink")
+    g.rect(x + 11, 25 + y, 10, 6, "ink")
+    g.rect(x + 14, 24 + y, 4, 1, "slate")
+    g.cel(x + 16, 28 + y, 2.6, 2.6, "grey", "slate")
+    g.rect(x + 15.5, 27.5 + y, 1, 1, "ink")
+    g.p(x + 15, 27 + y, "white")
+    face_disc(g, x + 16, 12.5 + y, 8, 8, "skin1", "skin2")
+    g.rect(x + 8, 9 + y, 2, 5, "brown")
+    g.rect(x + 22, 9 + y, 2, 5, "brown")
+    road.face_front(g, x + 16, 13 + y)
+    g.rect(x + 10, 13 + y, 12, 2, "ink")
+    g.p(x + 11, 13 + y, "lgrey")
+    g.p(x + 17, 13 + y, "lgrey")
+    g.rect(x + 10, 4 + y, 12, 6, "white")
+    g.rect(x + 19, 4 + y, 3, 6, "lgrey")
+    g.rect(x + 7, 9 + y, 18, 2, "white")
+    g.rect(x + 7, 10 + y, 18, 1, "lgrey")
+    g.p(x + 10, 4 + y, None)
+    g.p(x + 21, 4 + y, None)
+
+
+def tour_guide(g, x, b, lf, rf, arms, dip):
+    """The guide in front: a green tee and cap with the yellow flag logo, a red lanyard to a white badge,
+    stone shorts, the left arm (screen right) up holding a closed red umbrella with a yellow pennant tied at
+    its tip. dip lowers the tip that many rows, the umbrella seen tipping toward the player, the pennant
+    hanging lower as it comes down."""
+    front_legs(g, x, b, lf, rf, ("skin2", "brown"), "ink")
+    g.rect(x + 10, 33 + b, 12, 4, "stone")
+    g.rect(x + 19, 33 + b, 3, 4, "dstone")
+    n = swung(arms, -1)
+    road.back_arm(g, x + 5, 4, 22 + b, ((4, "green", "dgreen"), (7, "skin2", "brown")), lift=n)
+    road.raised_arm(g, x + 23, 4, 8 + b, 25 + b, 3, ((3, "skin2", "brown"), (7, "skin2", "brown"),
+                                                      (4, "green", "dgreen")))
+    # the tee, lit down its left side, the flag logo on the chest, the lanyard and its badge
+    g.rect(x + 9, 21 + b, 14, 12, "green")
+    g.rect(x + 20, 21 + b, 3, 12, "dgreen")
+    g.rect(x + 9, 22 + b, 1, 10, "lime")
+    g.rect(x + 14, 21 + b, 4, 1, "skin2")
+    g.rect(x + 13, 21 + b, 1, 5, "red")
+    g.rect(x + 18, 21 + b, 1, 5, "red")
+    g.rect(x + 13, 26 + b, 6, 4, "white")
+    g.rect(x + 13, 26 + b, 6, 1, "red")
+    g.rect(x + 14, 28 + b, 4, 1, "lgrey")
+    g.rect(x + 19, 23 + b, 1, 3, "dgreen")
+    g.rect(x + 20, 23 + b, 2, 2, "yellow")
+    # head: the face, short dark hair at the sides, the green cap with its yellow logo and brim
+    face_disc(g, x + 16, 12.5 + b, 8, 8, "skin2", "brown")
+    g.rect(x + 8, 9 + b, 2, 4, "dbrown")
+    g.rect(x + 22, 9 + b, 2, 4, "dbrown")
+    g.cel(x + 16, 7 + b, 8.5, 3.5, "green", "dgreen", "lime")
+    g.rect(x + 8, 9 + b, 17, 2, "dgreen")
+    g.rect(x + 15, 5 + b, 2, 2, "yellow")
+    road.face_front(g, x + 16, 13 + b, lips="plum")
+    # the closed umbrella in the raised fist: the rolled red canopy, narrowing to the grey tip
+    px = x + 27
+    tip = dip + b
+    g.rect(px - 1, tip + 3, 3, 8 + b - tip - 3, "red")
+    g.rect(px + 1, tip + 3, 1, 8 + b - tip - 3, "dred")
+    g.rect(px, tip + 2, 1, 1, "red")
+    g.rect(px, tip, 1, 2, "lgrey")
+    g.rect(px - 1, 8 + b, 4, 3, "skin2")
+    g.rect(px + 2, 8 + b, 1, 3, "brown")
+    # the pennant tied under the tip: flying out to screen right, then angled down, then hanging along the
+    # canopy
+    t = tip
+    if dip >= 3:
+        g.rect(px + 2, t, 3, 5, "yellow")
+        g.tri((px + 2, t + 5), (px + 5, t + 5), (px + 3.5, t + 8), "yellow")
+        g.rect(px + 4, t, 1, 6, "amber")
+    elif dip > 0:
+        g.tri((px + 2, t), (px + 2, t + 6), (px + 7, t + 7), "yellow")
+        g.rect(px + 2, t + 5, 3, 1, "amber")
+    else:
+        g.tri((px + 2, t), (px + 2, t + 6), (px + 10, t + 3), "yellow")
+        g.rect(px + 2, t + 5, 3, 1, "amber")
+
+
+def tour_group(glf=0, grf=0, gbob=0, garms=0, llf=0, lrf=0, lbob=0, larms=0, rlf=0, rrf=0, rbob=0, rarms=0,
+               dip=0):
+    """The tour group facing the player: the tourists behind, then the guide in front, with the road
+    outline and the lit rim."""
+    g = edged(Grid(TOUR_W, 48))
+    tour_left(g, TOUR_LEFT, lbob, llf, lrf, larms)
+    tour_right(g, TOUR_RIGHT, rbob, rlf, rrf, rarms)
+    tour_guide(g, GUIDE, gbob, glf, grf, garms, dip)
+    return rim(g, TOUR_RIM)
 
 
 # ---------- every sprite at a depth step ----------
@@ -1238,6 +1408,10 @@ def steps(suffix, s):
     yield f"sign-spinner{suffix}", [("hop", [spinner(q) for q in SPINNER_HOP], SPINNER_HOP_MS),
                                     ("idle", [spinner(q) for q in SPINNER_IDLE], SPINNER_IDLE_MS),
                                     ("cue", [spinner(q) for q in SPINNER_CUE], SPINNER_CUE_MS)]
+    yield f"tour-group{suffix}", [("walk", [own(tour_group, q) for q in TOUR_WALK], TOUR_WALK_MS),
+                                  ("idle", [own(tour_group, dict(gbob=b, lbob=b, rbob=b)) for b in road.BREATH],
+                                   road.BREATH_MS),
+                                  ("cue", [own(tour_group, q) for q in TOUR_CUE], TOUR_CUE_MS)]
 
 
 def sprites():

@@ -9648,6 +9648,87 @@
       }
     },
     {
+      "key": "tour-group",
+      "png": "sprites/tour-group.png",
+      "json": "sprites/tour-group.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 98
+      }
+    },
+    {
+      "key": "tour-group@50",
+      "png": "sprites/tour-group@50.png",
+      "json": "sprites/tour-group@50.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 49
+      }
+    },
+    {
+      "key": "tour-group@56",
+      "png": "sprites/tour-group@56.png",
+      "json": "sprites/tour-group@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 55
+      }
+    },
+    {
+      "key": "tour-group@62",
+      "png": "sprites/tour-group@62.png",
+      "json": "sprites/tour-group@62.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 61
+      }
+    },
+    {
+      "key": "tour-group@69",
+      "png": "sprites/tour-group@69.png",
+      "json": "sprites/tour-group@69.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 67
+      }
+    },
+    {
+      "key": "tour-group@75",
+      "png": "sprites/tour-group@75.png",
+      "json": "sprites/tour-group@75.json",
+      "anchor": {
+        "feetY": 51,
+        "opaqueWidth": 74
+      }
+    },
+    {
+      "key": "tour-group@81",
+      "png": "sprites/tour-group@81.png",
+      "json": "sprites/tour-group@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 80
+      }
+    },
+    {
+      "key": "tour-group@88",
+      "png": "sprites/tour-group@88.png",
+      "json": "sprites/tour-group@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "tour-group@94",
+      "png": "sprites/tour-group@94.png",
+      "json": "sprites/tour-group@94.json",
+      "anchor": {
+        "feetY": 64,
+        "opaqueWidth": 92
+      }
+    },
+    {
       "key": "tourist",
       "png": "sprites/tourist.png",
       "json": "sprites/tourist.json",

@@ -1,0 +1,88 @@
+{ "frames": {
+   "tour-group@88 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "sourceSize": { "w": 98, "h": 63 },
+    "duration": 160
+   },
+   "tour-group@88 1.aseprite": {
+    "frame": { "x": 98, "y": 0, "w": 98, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "sourceSize": { "w": 98, "h": 63 },
+    "duration": 160
+   },
+   "tour-group@88 2.aseprite": {
+    "frame": { "x": 196, "y": 0, "w": 98, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "sourceSize": { "w": 98, "h": 63 },
+    "duration": 160
+   },
+   "tour-group@88 3.aseprite": {
+    "frame": { "x": 294, "y": 0, "w": 98, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "sourceSize": { "w": 98, "h": 63 },
+    "duration": 160
+   },
+   "tour-group@88 4.aseprite": {
+    "frame": { "x": 392, "y": 0, "w": 98, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "sourceSize": { "w": 98, "h": 63 },
+    "duration": 400
+   },
+   "tour-group@88 5.aseprite": {
+    "frame": { "x": 490, "y": 0, "w": 98, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "sourceSize": { "w": 98, "h": 63 },
+    "duration": 400
+   },
+   "tour-group@88 6.aseprite": {
+    "frame": { "x": 588, "y": 0, "w": 98, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "sourceSize": { "w": 98, "h": 63 },
+    "duration": 200
+   },
+   "tour-group@88 7.aseprite": {
+    "frame": { "x": 686, "y": 0, "w": 98, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "sourceSize": { "w": 98, "h": 63 },
+    "duration": 200
+   },
+   "tour-group@88 8.aseprite": {
+    "frame": { "x": 784, "y": 0, "w": 98, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 98, "h": 63 },
+    "sourceSize": { "w": 98, "h": 63 },
+    "duration": 200
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "tour-group@88.png",
+  "format": "RGBA8888",
+  "size": { "w": 882, "h": 63 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "idle", "from": 4, "to": 5, "direction": "forward" },
+   { "name": "cue", "from": 6, "to": 8, "direction": "forward" }
+  ]
+ }
+}
