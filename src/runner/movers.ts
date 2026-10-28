@@ -327,12 +327,6 @@ export function takeMove<
   return { ...path, pending: path.pending.slice(1), steps: [...path.steps, step] };
 }
 
-// A point on the road, in road pixels: x across from the road's left edge, y down the screen.
-export interface RoadPoint {
-  readonly x: number;
-  readonly y: number;
-}
-
 // How far through a step a mover is, from 0 before it to 1 after it.
 function stepDone(step: MoverStep, since: number): number {
   return clamp01((since - step.at) / step.length);

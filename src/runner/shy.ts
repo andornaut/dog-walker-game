@@ -1,7 +1,7 @@
+import type { RoadPoint } from "./collision";
 import {
   laneAt,
   type MoverPath,
-  type RoadPoint,
   staysInReach,
   type StepShape,
   stepsTaken,

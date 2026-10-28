@@ -9,6 +9,12 @@ export interface Box {
   readonly top: number;
 }
 
+// A point in road pixels, as a box's corners are.
+export interface RoadPoint {
+  readonly x: number;
+  readonly y: number;
+}
+
 // A box drawn on a row of the road at scale: its columns are road pixels on that row, so it is
 // drawn from centreX + (left - centreX) * scale to centreX + (right - centreX) * scale across the
 // screen, centreX being the road's centre, which the projection leaves in place.

@@ -1,6 +1,6 @@
+import type { RoadPoint } from "./collision";
 import {
   type MoverPath,
-  type RoadPoint,
   SIDESTEPS,
   staysInReach,
   type StepShape,

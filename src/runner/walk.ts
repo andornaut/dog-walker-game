@@ -74,6 +74,7 @@ import {
   overlaps,
   type PackBoxes,
   pickupDog,
+  type RoadPoint,
   type ScaledBox,
   tickInvulnerability,
 } from "./collision";
@@ -99,7 +100,6 @@ import {
   type MoverSpec,
   moverY,
   type PlannerStreams,
-  type RoadPoint,
   SIDESTEPS,
   type StepShape,
 } from "./movers";
