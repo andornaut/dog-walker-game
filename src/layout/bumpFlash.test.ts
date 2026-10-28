@@ -4,13 +4,7 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { keysOf } from "../lib/records";
 import type { Rect } from "../lib/rect";
-import {
-  BUMP_FLASH,
-  bumpBorder,
-  bumpFlash,
-  type BumpSource,
-  FLASH_COLOURS,
-} from "./bumpFlash";
+import { BUMP_FLASH, bumpBorder, bumpFlash, type BumpSource, FLASH_COLOURS } from "./bumpFlash";
 
 const MINOR_OBSTACLES = keysOf(gameData.minorObstacles);
 // Every encounter a pack bumps into: an obstacle that opens a card or applies on contact, not a
@@ -23,9 +17,10 @@ const BUMPED_ENCOUNTERS = keysOf(gameData.encounters).filter((id) => {
 // kind of each.
 const SOURCES: readonly BumpSource[] = [
   ...MINOR_OBSTACLES.slice(0, 1).map((obstacle): BumpSource => ({ kind: "minor", obstacle })),
-  ...BUMPED_ENCOUNTERS.slice(0, 1).map(
-    (encounter): BumpSource => ({ encounter, kind: "encounter" }),
-  ),
+  ...BUMPED_ENCOUNTERS.slice(0, 1).map((encounter): BumpSource => ({
+    encounter,
+    kind: "encounter",
+  })),
 ];
 const SCREEN: Rect = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 };
 

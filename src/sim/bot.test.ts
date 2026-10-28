@@ -588,21 +588,20 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
   // it at. It keeps its range's top tilt unless it sets off at that highest start, where the
   // zone's pace leaves no start for a steeper one.
   it.each(
-    ZONE_ENDS.flatMap(
-      (zoneIndex) =>
-        [...movements.values()].flatMap((entry) =>
-          entry.movement.kind === "dart" && entry.movement.tilt.max > 0
-            ? [LOW, HIGH].flatMap((draws) =>
-                [0, ...DART_LIFTS].map((lift) => ({
-                  ...entry,
-                  draws: { ...draws, tilt: 0.999999 },
-                  lift,
-                  name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, start ${endName(draws)}, lift ${lift}`,
-                  zoneIndex,
-                })),
-              )
-            : [],
-        ),
+    ZONE_ENDS.flatMap((zoneIndex) =>
+      [...movements.values()].flatMap((entry) =>
+        entry.movement.kind === "dart" && entry.movement.tilt.max > 0
+          ? [LOW, HIGH].flatMap((draws) =>
+              [0, ...DART_LIFTS].map((lift) => ({
+                ...entry,
+                draws: { ...draws, tilt: 0.999999 },
+                lift,
+                name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, start ${endName(draws)}, lift ${lift}`,
+                zoneIndex,
+              })),
+            )
+          : [],
+      ),
     ),
   )("starts a dart at its top tilt within its cue and the pack's reaction: $name", (mover) => {
     const { geometry, placements, speed } = placedCase(mover);
@@ -630,22 +629,21 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
   // still leaves the pack its reaction margin between its cue ending and its reaching the pack's
   // rows.
   it.each(
-    ZONE_ENDS.flatMap(
-      (zoneIndex) =>
-        [...movements.values()].flatMap((entry) =>
-          entry.movement.kind === "dart"
-            ? [
-                { end: -1, speed: 0 },
-                { end: 1, speed: 0.999999 },
-              ].map(({ end, speed }) => ({
-                ...entry,
-                draws: { ...LOW, speed, tilt: 0.999999 },
-                end,
-                name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, speed ${end < 0 ? "low" : "high"}`,
-                zoneIndex,
-              }))
-            : [],
-        ),
+    ZONE_ENDS.flatMap((zoneIndex) =>
+      [...movements.values()].flatMap((entry) =>
+        entry.movement.kind === "dart"
+          ? [
+              { end: -1, speed: 0 },
+              { end: 1, speed: 0.999999 },
+            ].map(({ end, speed }) => ({
+              ...entry,
+              draws: { ...LOW, speed, tilt: 0.999999 },
+              end,
+              name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, speed ${end < 0 ? "low" : "high"}`,
+              zoneIndex,
+            }))
+          : [],
+      ),
     ),
   )("keeps the reaction margin for a dart at either end of its speed: $name", (mover) => {
     const { geometry, placements, speed } = placedCase(mover);

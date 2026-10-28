@@ -272,15 +272,14 @@ describe("cardOwnerMood", () => {
   );
 
   // Full on the last heart, full just above it, and full at the most an owner can have.
-  it.each([
-    MOMENTS.lowHearts,
-    MOMENTS.lowHearts + 1,
-    gameData.tuning.hearts.maxOwnerHearts,
-  ])("shows a full owner (max %i) happy, or worried when full is the last heart", (max) => {
-    expect(cardOwnerMood(gameData, max, walking("kilo", max))).toBe(
-      max === MOMENTS.lowHearts ? "worried" : "happy",
-    );
-  });
+  it.each([MOMENTS.lowHearts, MOMENTS.lowHearts + 1, gameData.tuning.hearts.maxOwnerHearts])(
+    "shows a full owner (max %i) happy, or worried when full is the last heart",
+    (max) => {
+      expect(cardOwnerMood(gameData, max, walking("kilo", max))).toBe(
+        max === MOMENTS.lowHearts ? "worried" : "happy",
+      );
+    },
+  );
 
   it("shows a fired dog's owner fired", () => {
     expect(cardOwnerMood(gameData, most, { dog: "kilo", status: "fired", zoneIndex: 0 })).toBe(
