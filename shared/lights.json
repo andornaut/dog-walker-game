@@ -1,5 +1,20 @@
 {
   "attach": {
+    "brewery-dray": [
+      {
+        "angle": 0,
+        "dx": 80.5,
+        "dy": -19.5,
+        "light": "bus-headlamp",
+        "zones": ["street"]
+      },
+      {
+        "dx": -85,
+        "dy": -15.5,
+        "light": "tail-red",
+        "zones": ["street"]
+      }
+    ],
     "cargo-bike": [
       {
         "angle": 90,
