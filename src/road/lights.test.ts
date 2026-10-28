@@ -109,8 +109,8 @@ describe("LIGHT_ATTACHMENTS", () => {
   const SPRITES: readonly string[] = manifest.sprites.map(({ key }) => key);
   const ATTACHED_KEYS = [...LIGHT_ATTACHMENTS.keys()];
 
-  it.each(ATTACHED_KEYS)("attaches lights to %s, a sprite the art has", (key) => {
-    expect(SPRITES).toContain(key);
+  it("attaches lights only to sprites the art has", () => {
+    expect(ATTACHED_KEYS.filter((key) => !SPRITES.includes(key))).toEqual([]);
   });
 
   // A sprite's Aseprite JSON: its frames in sheet order, as a hash or an array.
@@ -165,27 +165,30 @@ describe("LIGHT_ATTACHMENTS", () => {
       anchor === undefined ? [] : [[key, anchor.feetY] as const],
     ),
   );
+  // Each cone attachment, with every frame it shows on, from each depth step and on either side.
   const cones = ATTACHED_KEYS.flatMap((key) =>
     (LIGHT_ATTACHMENTS.get(key) ?? [])
       .filter(({ light }) => LIGHTS.get(light)?.shape === "cone")
-      .flatMap((attachment) =>
-        depthSteps.steps
+      .map((attachment) => ({
+        attachment,
+        key,
+        light: attachment.light,
+        views: depthSteps.steps
           .filter(({ suffix }) => ANCHORS.has(`${key}${suffix}`))
           .flatMap(({ scale, suffix }) =>
             framesOf(`${key}${suffix}`).flatMap((_, frame) =>
               attachment.offsets[frame % attachment.offsets.length] === null
                 ? []
                 : [false, true].map((leftOfRoad) => ({
-                    attachment,
                     frame,
                     leftOfRoad,
                     scale,
                     step: `${key}${suffix}`,
-                    zone: attachment.zones?.[0] ?? itemAt(WORLD.zones, 0).id,
                   })),
             ),
           ),
-      ),
+        zone: attachment.zones?.[0] ?? itemAt(WORLD.zones, 0).id,
+      })),
   );
 
   // A frame's pixels as RGB keys, null where clear or off its rect on the sheet, which may be
@@ -228,43 +231,51 @@ describe("LIGHT_ATTACHMENTS", () => {
     return ring.size >= RING_CREAM;
   };
 
+  // One test per attachment, so a failure lists every view whose apex misses the lamp.
   it.each(cones.length > 0 ? cones : [null])(
-    "shines $attachment.light from the lamp of $step on frame $frame, left of the road $leftOfRoad",
+    "shines $light from the lamp of $key on every frame, depth step and side",
     (cone) => {
       if (cone === null) {
         return;
       }
-      // The frame, anchored as drawn: centred across its full frame, its feet on the manifest's
-      // row.
-      const { data, width } = decodePng(readFileSync(`public/art/sprites/${cone.step}.png`));
-      const sheetFrame = itemAt(framesOf(cone.step), cone.frame);
-      const anchor = {
-        flipX: false,
-        frame: cone.frame,
-        key: cone.step.replace(/@\d+$/, ""),
-        leftOfRoad: cone.leftOfRoad,
-        scale: cone.scale,
-        x: sheetFrame.sourceSize.w / 2,
-        y: ANCHORS.get(cone.step) ?? 0,
-      };
-      const out = newAttachedLightPlaces();
-      const places = out.slice(0, placeAttachedLights(cone.zone, [anchor], out));
-      const apex = places.find(({ key: light }) => light === cone.attachment.light);
-      expect(apex).toBeDefined();
+      const { attachment } = cone;
       // A lamp dims with its light's pulse and stays where it is, so it is looked for on the
       // frame its light shows brightest.
-      const pulse = cone.attachment.pulse ?? [1];
+      const pulse = attachment.pulse ?? [1];
       const strength = (frame: number) => pulse[frame % pulse.length] ?? 1;
-      const brightest = framesOf(cone.step).reduce(
-        (best, _, frame) => (strength(frame) > strength(best) ? frame : best),
-        cone.frame,
-      );
-      const lampFrame = itemAt(framesOf(cone.step), brightest);
-      const x = Math.floor(apex?.x ?? 0) - lampFrame.spriteSourceSize.x;
-      const y = Math.floor(apex?.y ?? 0) - lampFrame.spriteSourceSize.y;
-      const colour = colourAt(data, width, lampFrame);
-      const near = [-1, 0, 1].flatMap((dx) => [-1, 0, 1].map((dy) => [x + dx, y + dy] as const));
-      expect(near.some(([nx, ny]) => isLampCore(colour, nx, ny))).toBe(true);
+      const misses = cone.views.flatMap((view) => {
+        // The frame, anchored as drawn: centred across its full frame, its feet on the
+        // manifest's row.
+        const { data, width } = decodePng(readFileSync(`public/art/sprites/${view.step}.png`));
+        const frames = framesOf(view.step);
+        const sheetFrame = itemAt(frames, view.frame);
+        const anchor = {
+          flipX: false,
+          frame: view.frame,
+          key: cone.key,
+          leftOfRoad: view.leftOfRoad,
+          scale: view.scale,
+          x: sheetFrame.sourceSize.w / 2,
+          y: ANCHORS.get(view.step) ?? 0,
+        };
+        const out = newAttachedLightPlaces();
+        const places = out.slice(0, placeAttachedLights(cone.zone, [anchor], out));
+        const apex = places.find(({ key: light }) => light === cone.light);
+        const brightest = frames.reduce(
+          (best, _, frame) => (strength(frame) > strength(best) ? frame : best),
+          view.frame,
+        );
+        const lampFrame = itemAt(frames, brightest);
+        const colour = colourAt(data, width, lampFrame);
+        const x = Math.floor(apex?.x ?? 0) - lampFrame.spriteSourceSize.x;
+        const y = Math.floor(apex?.y ?? 0) - lampFrame.spriteSourceSize.y;
+        const near = [-1, 0, 1].flatMap((dx) => [-1, 0, 1].map((dy) => [x + dx, y + dy] as const));
+        return apex !== undefined && near.some(([nx, ny]) => isLampCore(colour, nx, ny))
+          ? []
+          : [`${view.step} frame ${view.frame} ${view.leftOfRoad ? "left" : "right"} of the road`];
+      });
+      expect(cone.views.length).toBeGreaterThan(0);
+      expect(misses).toEqual([]);
     },
   );
 });
