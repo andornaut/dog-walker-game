@@ -503,8 +503,8 @@ describe("movers", { timeout: 120_000 }, () => {
   });
 
   // A stop-and-go across, planned in its zones at the first zone's pace and the last's with every
-  // mover moving: the lanes it covers while it stands, first and last, and whether they take in the
-  // path's lane on its row.
+  // mover moving: the lanes it covers while it stands, first and last, whether it stands on whole
+  // lanes, and whether they take in the path's lane on its row.
   const stopKinds = OBSTACLE_KINDS.filter(
     (kind) => movementOf(kind)?.kind === "stopAndGoAcross" && zonesOf(kind).length > 0,
   );
@@ -526,13 +526,15 @@ describe("movers", { timeout: 120_000 }, () => {
             return [];
           }
           const since = mover.warning + mover.pause.after / mover.lanesPerPixel + 1;
-          const left = laneAt(moverPlace(LANE_COUNT, mover, since).lanePosition);
+          const { lanePosition } = moverPlace(LANE_COUNT, mover, since);
+          const left = laneAt(lanePosition);
           // Its row comes on screen enterTravel less its cue before it does.
           const row = distance - mover.enterTravel + mover.warning;
           const pathLane = road.path.find((held) => Math.abs(held.distance - row) < 1e-6)?.lane;
           expect(pathLane).toBeDefined();
           const closes = pathLane !== undefined && pathLane >= left && pathLane < left + span;
-          return [{ closes, stands: [left, left + span - 1] }];
+          const whole = Math.abs(lanePosition - left) < 1e-9;
+          return [{ closes, stands: [left, left + span - 1], whole }];
         });
       }),
     );
@@ -549,11 +551,14 @@ describe("movers", { timeout: 120_000 }, () => {
     },
   );
   const STOP_SEEDS = [1, 2, 3, 4, 5, 6];
+  // On whole lanes, so it covers only as many lanes as it is wide: a 2-lane one never straddles
+  // three.
   it.each(stopKinds)("stands each %s in one of its stops, never over the path's lane", (kind) => {
     const stops = STOP_SEEDS.flatMap((seed) => stopsOn(kind, seed));
     expect(stops.length).toBeGreaterThan(0);
-    for (const { closes, stands } of stops) {
+    for (const { closes, stands, whole } of stops) {
       expect(stopsOf(kind)).toContainEqual(stands);
+      expect(whole).toBe(true);
       expect(closes).toBe(false);
     }
   });
