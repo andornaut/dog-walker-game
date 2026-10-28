@@ -91,6 +91,7 @@ import { drawnObstacleBox, exitLength, type PlacedPart, type RoadLens } from "./
 import { awayHop, nextShyChoiceAt, shyChoices, type ShyPath, takeHop } from "./shy";
 import { type PathRow, type SpawnEvent, takeDueSpawns } from "./spawning";
 import {
+  blocksLane,
   footprintOf,
   isGearDrop,
   isMinorObstacle,
@@ -99,6 +100,7 @@ import {
   isPullObstacle,
   type ItemCategory,
   itemCategory,
+  movementOf,
   type ObstacleKind,
   type PickupKind,
   type WalkItem,
@@ -429,19 +431,16 @@ export function obstacleOnRoad(
 // By lens, then the pack band's bottom, then the parts.
 const EXIT_LENGTHS = new WeakMap<object, Map<number, Map<readonly PlacedPart[], number>>>();
 
-// An obstacle's hit length: how far its drawn hit box runs up the road from its near edge as it
-// leaves the pack's band (exitLength), so its rows overlap the band exactly while its drawn hit
-// box does. Anything else's is its item height.
-export function itemHeight(
+type HitGeometry = Pick<RoadGeometry, "cell" | "itemHeights" | "lens" | "packBand">;
+
+// How far an obstacle's drawn hit box runs up the road from its near edge as it leaves the pack's
+// band (exitLength).
+function drawnHitLength(
   data: Pick<GameData, "encounters" | "minorObstacles">,
-  geometry: Pick<RoadGeometry, "cell" | "itemHeights" | "lens" | "packBand">,
-  kind: WalkItemKind,
+  geometry: HitGeometry,
+  kind: ObstacleKind,
   moving: boolean,
 ): number {
-  if (!isObstacle(data, kind)) {
-    const category = itemCategory(data, kind) as Exclude<ItemCategory, "minor" | "obstacle">;
-    return geometry.itemHeights[category];
-  }
   const parts = obstacleOnRoad(data, geometry, kind, moving);
   const { bottom } = geometry.packBand;
   const byBottom = getOrInsertComputed(geometry.lens, () => new Map(), EXIT_LENGTHS);
@@ -450,6 +449,61 @@ export function itemHeight(
     parts,
     () => exitLength(geometry.lens, PART_INSET, parts, bottom),
     lengths,
+  );
+}
+
+// The planner's inset at each end of a footprint row: whatever lane-blocking obstacle stands in
+// a footprint, standing or moving, its hit length is no more than the footprint's rows less this
+// at each end, so every blocking span it plans covers the obstacle's. A standing obstacle hits
+// within its rows (hitReach), so only a mover drawn longer than its rows makes it negative.
+export function plannedCellInset(
+  data: Pick<GameData, "encounters" | "minorObstacles">,
+  geometry: HitGeometry,
+): number {
+  const kinds = [
+    ...Object.keys(data.minorObstacles),
+    ...Object.keys(data.encounters).filter((kind) => blocksLane(data, kind as EncounterId)),
+  ] as ObstacleKind[];
+  const { length } = geometry.cell;
+  const over = Math.max(
+    ...kinds.flatMap((kind) =>
+      (movementOf(data, kind) === null ? [false] : [false, true]).map(
+        (moving) =>
+          itemHeight(data, geometry, kind, moving) - (footprintOf(data, kind).rows - 1) * length,
+      ),
+    ),
+  );
+  return (length - over) / 2;
+}
+
+// How far up the road from its near edge an obstacle may hit: a moving one as far as it is
+// drawn, and a standing one no farther than its footprint's rows, so a standing sprite drawn
+// taller than its rows draws over the road behind it but hits only within them.
+export function hitReach(
+  data: Pick<GameData, "encounters" | "minorObstacles">,
+  geometry: Pick<RoadGeometry, "cell">,
+  kind: ObstacleKind,
+  moving: boolean,
+): number {
+  return moving ? Infinity : footprintOf(data, kind).rows * geometry.cell.length;
+}
+
+// An obstacle's hit length: how far its drawn hit box runs up the road from its near edge as it
+// leaves the pack's band (exitLength), so its rows overlap the band exactly while its drawn hit
+// box does, at most its hitReach. Anything else's is its item height.
+export function itemHeight(
+  data: Pick<GameData, "encounters" | "minorObstacles">,
+  geometry: HitGeometry,
+  kind: WalkItemKind,
+  moving: boolean,
+): number {
+  if (!isObstacle(data, kind)) {
+    const category = itemCategory(data, kind) as Exclude<ItemCategory, "minor" | "obstacle">;
+    return geometry.itemHeights[category];
+  }
+  return Math.min(
+    drawnHitLength(data, geometry, kind, moving),
+    hitReach(data, geometry, kind, moving),
   );
 }
 
@@ -671,8 +725,9 @@ function poseTags(path: MoverPath, since: number): readonly string[] {
 
 // The box an obstacle hits the pack's parts with, in the lanes of its footprint: as it is drawn
 // (drawnObstacleBox), from its sprites standing on its near edge across from the middle of the
-// lanes it is drawn over (drawnLanes for a mover), a mover in its pose (poseTags). Its spacing on
-// the road is planned with its silhouette over every frame, which holds every pose's.
+// lanes it is drawn over (drawnLanes for a mover), a mover in its pose (poseTags), and a standing
+// obstacle no farther up the road than its hitReach. Its spacing on the road is planned with its
+// silhouette over every frame, which holds every pose's.
 export function obstacleHitBox(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   geometry: Pick<RoadGeometry, "cell" | "itemHeights" | "laneCount" | "lens" | "packBand">,
@@ -688,9 +743,11 @@ export function obstacleHitBox(
   const { mover } = item;
   const drawn = mover === undefined ? item.laneSpan : drawnLanes(item.laneSpan, mover.path);
   const tags = mover === undefined ? [] : poseTags(mover.path, mover.since);
-  const parts = obstacleOnRoad(data, geometry, item.kind, mover !== undefined, tags);
+  const moving = mover !== undefined;
+  const parts = obstacleOnRoad(data, geometry, item.kind, moving, tags);
   const x = (lane + drawn / 2) * cell.length;
-  return { ...drawnObstacleBox(lens, PART_INSET, parts, { feetY, x }), lanes };
+  const reach = hitReach(data, geometry, item.kind, moving);
+  return { ...drawnObstacleBox(lens, PART_INSET, parts, { feetY, x }, reach), lanes };
 }
 
 // The chance a plain hit landing on the dog misses it: probability.smallDodgeChance for a small

@@ -16,6 +16,7 @@ import { type MoverPath, moverPlace } from "../runner/movers";
 import {
   itemHeight,
   laneMoveSeconds,
+  plannedCellInset,
   type RoadGeometry,
   type Walk,
   walkScrollSpeed,
@@ -23,7 +24,6 @@ import {
 } from "../runner/walk";
 import { walkGeometry, walkProjection } from "../runner/walkGeometry";
 import { blocksLane, footprintOf, type WalkItem } from "../runner/walkItems";
-import { plannedCellInset } from "../runner/zonePlan";
 import { newRun, type RunState } from "../state/runState";
 import { type BlockingSpan } from "./avoidable";
 import { data } from "./walk";

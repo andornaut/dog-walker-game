@@ -4,9 +4,9 @@ import type { ScaledBox } from "./collision";
 
 // An obstacle's hit box is what it draws, as the pack's parts are: the bounding box of its
 // sprites' opaque pixels at its depth, less an inset on every side. Rows run down the flat road,
-// so a sprite drawn taller than its footprint, as a cyclist is, hits as tall as it is drawn,
-// and a long footprint, such as a truck's, hits only as long as the truck is drawn. Columns are
-// screen columns, kept at the scale of the obstacle's feet row.
+// so a sprite drawn taller than its footprint, as a cyclist is, hits as tall as it is drawn, up
+// to the reach the walk gives it, and a long footprint, such as a truck's, hits only as long as
+// the truck is drawn. Columns are screen columns, kept at the scale of the obstacle's feet row.
 
 // The road's projection in road pixels: centreX is the road's centre across from its left edge.
 export interface RoadLens {
@@ -33,12 +33,13 @@ interface ObstaclePlace {
 
 // The hit box of an obstacle whose sprites are drawn as itemViews draws them: each on its feet
 // row through the projection, at the projected scale capped at 1, inset by inset screen pixels on
-// every side.
+// every side, and running no more than reach up the road from its near edge.
 export function drawnObstacleBox(
   lens: RoadLens,
   inset: number,
   parts: readonly PlacedPart[],
   place: ObstaclePlace,
+  reach = Infinity,
 ): ScaledBox {
   let top = Infinity;
   let bottom = -Infinity;
@@ -63,7 +64,7 @@ export function drawnObstacleBox(
     left: across(left),
     right: across(right),
     scale,
-    top: lens.footY - distanceAtY(lens, top),
+    top: Math.max(lens.footY - distanceAtY(lens, top), place.feetY - reach),
   };
 }
 

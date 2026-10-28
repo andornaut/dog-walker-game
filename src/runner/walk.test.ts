@@ -98,6 +98,7 @@ import {
   headHome,
   itemHeight,
   laneMoveSeconds,
+  plannedCellInset,
   type RoadGeometry,
   startRoad,
   steerWalk,
@@ -119,7 +120,6 @@ import {
   firstContactSeconds,
   minorObstacleWeights,
   obstacleWeights,
-  plannedCellInset,
   planZone,
   spawnQuotas,
 } from "./zonePlan";

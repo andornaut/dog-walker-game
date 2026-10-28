@@ -18,10 +18,16 @@ import { hitDog, type ScaledBox } from "./collision";
 import { stillInLane } from "./laneMotion";
 import { drawnObstacleBox } from "./obstacleBox";
 import { screenRoadGeometry } from "./screenGeometry";
-import { itemHeight, obstacleOnRoad, packBoxes } from "./walk";
+import {
+  hitReach,
+  itemHeight,
+  obstacleHitBox,
+  obstacleOnRoad,
+  packBoxes,
+  plannedCellInset,
+} from "./walk";
 import { walkProjection } from "./walkGeometry";
 import { footprintOf } from "./walkItems";
-import { plannedCellInset } from "./zonePlan";
 
 type Kind = EncounterId | MinorObstacleId;
 
@@ -169,7 +175,9 @@ describe("an obstacle's hit length", () => {
       const height = itemHeight(gameData, GEOMETRY, kind, moving);
       const parts = obstacleOnRoad(gameData, GEOMETRY, kind, moving);
       const bottom = GEOMETRY.packBand.bottom;
-      const box = drawnObstacleBox(lens, PART_INSET, parts, { feetY: bottom + height, x: 0 });
+      const reach = hitReach(gameData, GEOMETRY, kind, moving);
+      const place = { feetY: bottom + height, x: 0 };
+      const box = drawnObstacleBox(lens, PART_INSET, parts, place, reach);
       expect(box.top).toBeCloseTo(bottom, 6);
     }
   });
@@ -180,6 +188,49 @@ describe("an obstacle's hit length", () => {
     for (const { kind, moving } of LOOKS) {
       const planned = footprintOf(gameData, kind).rows * cell.length - 2 * inset;
       expect(itemHeight(gameData, GEOMETRY, kind, moving)).toBeLessThanOrEqual(planned);
+    }
+  });
+});
+
+// A standing obstacle's rows' length up the road from its near edge.
+const rowsLength = (kind: Kind) => footprintOf(gameData, kind).rows * cell.length;
+const STANDING = LOOKS.filter(({ moving }) => !moving).map(({ kind }) => kind);
+// Near edges from the road's far edge in view down to the pack's band.
+const FEET_ROWS = Array.from(
+  { length: Math.floor((GEOMETRY.packBand.bottom - GEOMETRY.roadTop) / 16) + 1 },
+  (_, i) => GEOMETRY.roadTop + 16 * i,
+);
+
+describe("a standing obstacle's hit box", () => {
+  // Every standing obstacle's art, drawn up to 4 times as tall, anywhere on the road in view: it
+  // hits up the road to its drawn top or its rows' far end, whichever is nearer.
+  const CASES = STANDING.flatMap((kind) => [1, 2, 4].map((times) => ({ kind, times })));
+  it.each(CASES)("never runs past $kind's rows drawn $times times as tall", ({ kind, times }) => {
+    const reach = hitReach(gameData, GEOMETRY, kind, false);
+    const parts = obstacleOnRoad(gameData, GEOMETRY, kind, false).map((part) => ({
+      ...part,
+      silhouette: { ...part.silhouette, above: part.silhouette.above * times },
+    }));
+    for (const feetY of FEET_ROWS) {
+      const drawn = drawnObstacleBox(lens, PART_INSET, parts, { feetY, x: 0 });
+      const hit = drawnObstacleBox(lens, PART_INSET, parts, { feetY, x: 0 }, reach);
+      expect(feetY - hit.top).toBeLessThanOrEqual(rowsLength(kind) + 1e-9);
+      expect(hit.top).toBeCloseTo(Math.max(drawn.top, feetY - rowsLength(kind)), 9);
+    }
+  });
+
+  // Each standing obstacle on the road, as the walk hits it, runs up the road to its drawn top or
+  // its rows' far end, whichever is nearer.
+  it.each(STANDING)("hits %s on the road as drawn, within its rows", (kind) => {
+    const height = itemHeight(gameData, GEOMETRY, kind, false);
+    const lanes = footprintOf(gameData, kind).lanes;
+    const parts = obstacleOnRoad(gameData, GEOMETRY, kind, false);
+    const x = (lanes / 2) * cell.length;
+    for (const feetY of FEET_ROWS) {
+      const item = { height, id: 1, kind, lane: 0, laneSpan: lanes, y: feetY - height };
+      const drawn = drawnObstacleBox(lens, PART_INSET, parts, { feetY, x });
+      const { top } = obstacleHitBox(gameData, GEOMETRY, item);
+      expect(top).toBeCloseTo(Math.max(drawn.top, feetY - rowsLength(kind)), 9);
     }
   });
 });

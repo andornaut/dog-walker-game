@@ -28,6 +28,7 @@ import {
   laneMoveSeconds,
   obstacleHitBox,
   packBoxes,
+  plannedCellInset,
   startRoad,
   steerWalk,
   sweptPackBoxes,
@@ -35,7 +36,6 @@ import {
   walkScrollSpeed,
 } from "../runner/walk";
 import { blocksLane, type WalkItem, type WalkItemKind } from "../runner/walkItems";
-import { plannedCellInset } from "../runner/zonePlan";
 import type { PackDogs } from "../state/runState";
 import { defined } from "../testing/defined";
 import { hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";

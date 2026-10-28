@@ -22,20 +22,14 @@ import type { SpawnQuota } from "./spawning";
 import { spacedStretch } from "./stretches";
 import {
   itemHeight,
+  plannedCellInset,
   type RoadGeometry,
   type Walk,
   type WalkData,
   walkScrollSpeed,
   zoneLength,
 } from "./walk";
-import {
-  blocksLane,
-  footprintOf,
-  movementOf,
-  type ObstacleKind,
-  opensACard,
-  type WalkItemKind,
-} from "./walkItems";
+import { blocksLane, footprintOf, movementOf, opensACard, type WalkItemKind } from "./walkItems";
 import { planSpawns } from "./zonePlanner";
 
 // The entries of a zone's weights above 0, in the data's order.
@@ -262,28 +256,4 @@ export function planZone(
   }));
   const { events, path } = planSpawns(streams, plan);
   return { road: { ...road, path, pending: events, planned }, run };
-}
-
-// The planner's inset at each end of a footprint row: whatever lane-blocking obstacle stands in
-// a footprint, standing or moving, its hit length is no more than the footprint's rows less this
-// at each end, so every blocking span it plans covers the obstacle's. Negative where an obstacle
-// is drawn longer than its rows.
-export function plannedCellInset(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
-  geometry: Pick<RoadGeometry, "cell" | "itemHeights" | "lens" | "packBand">,
-): number {
-  const kinds = [
-    ...Object.keys(data.minorObstacles),
-    ...Object.keys(data.encounters).filter((kind) => blocksLane(data, kind as EncounterId)),
-  ] as ObstacleKind[];
-  const { length } = geometry.cell;
-  const over = Math.max(
-    ...kinds.flatMap((kind) =>
-      (movementOf(data, kind) === null ? [false] : [false, true]).map(
-        (moving) =>
-          itemHeight(data, geometry, kind, moving) - (footprintOf(data, kind).rows - 1) * length,
-      ),
-    ),
-  );
-  return (length - over) / 2;
 }
