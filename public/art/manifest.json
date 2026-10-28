@@ -1048,6 +1048,11 @@
       "json": "sprites/badge-clean-paws.json"
     },
     {
+      "key": "badge-clean-streets",
+      "png": "sprites/badge-clean-streets.png",
+      "json": "sprites/badge-clean-streets.json"
+    },
+    {
       "key": "badge-close-shave",
       "png": "sprites/badge-close-shave.png",
       "json": "sprites/badge-close-shave.json"

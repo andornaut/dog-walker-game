@@ -720,6 +720,25 @@ def _(g):
         g.p(x, y, "yellow")
 
 
+@icon("clean-streets")
+def _(g):
+    """A Toronto green bin standing upright with its lid shut: a dgreen cart lit green down its left and shaded
+    forest on its right, tapering to two dslate wheels, its lid overhanging the top with a grip at the front and
+    an lgrey latch below it."""
+    g.rect(9, 8, 14, 3, "green")
+    g.rect(9, 10, 14, 1, "dgreen")
+    g.rect(10, 7, 12, 1, "green")
+    g.rect(14, 11, 4, 1, "forest")
+    for y in range(11, 24):
+        inset = (y - 11) // 6
+        g.rect(10 + inset, y, 12 - 2 * inset, 1, "dgreen")
+        g.p(10 + inset, y, "green")
+        g.rect(20 - inset, y, 2, 1, "forest")
+    g.rect(15, 12, 2, 3, "lgrey")
+    g.rect(11, 23, 3, 3, "dslate")
+    g.rect(18, 23, 3, 3, "dslate")
+
+
 BADGES = {
     "double-leash": "firsts", "pack-leader": "firsts", "round-trip": "firsts",
     "legend-of-the-leash": "legend",
@@ -729,7 +748,7 @@ BADGES = {
     "full-kennel": "collection", "kitted-out": "collection", "local-favourite": "collection",
     "tag-team": "collection", "whole-city": "collection",
     "big-screen": "silly", "bird-brain": "silly", "burned-bridges": "silly", "cat-whisperer": "silly",
-    "close-shave": "silly", "eau-de-skunk": "silly", "fender-bender": "silly", "finders-keepers": "silly",
+    "clean-streets": "silly", "close-shave": "silly", "eau-de-skunk": "silly", "fender-bender": "silly", "finders-keepers": "silly",
     "fishmongers-friend": "silly", "mud-season": "silly", "paparazzi": "silly", "popular-pack": "silly",
     "say-cheese": "silly", "snack-attack": "silly", "sniff-test": "silly", "squirrel": "silly",
     "sugar-rush": "silly", "trash-panda": "silly", "yoink": "silly", "youre-fired": "silly",
