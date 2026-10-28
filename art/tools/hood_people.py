@@ -41,7 +41,11 @@ delivery-cyclist    48x72   Kensington Market and Yonge Street; a fast rider com
                             on the back, wider than the shoulders and over the head, with a reflective
                             band; a black helmet, a violet jacket, jeans, a black bike with a
                             white headlamp and a phone on the bars; ride (4 frames, 90ms):
-                            hazards.CYCLIST_RIDE's pedalling and 1px sway
+                            hazards.CYCLIST_RIDE's pedalling and 1px sway; merge (4 frames, 100ms):
+                            changing lanes right (the game mirrors it for left), still pedalling, the
+                            bike, the rider and the box leaning right about the handlebar, the box's top
+                            over to the frame's right edge and the tire swinging out left, the head
+                            upright over the neck
 gardener            48x72   Cabbagetown; a slow rider coming down a lane at the player, walking behind
                             a green wheelbarrow heaped with autumn leaves (reds, oranges and browns, no
                             gold or amber): an olive canvas sun hat with a wide brim, white hair, a
@@ -540,13 +544,26 @@ def strolling_busker(strum=0, nod=0, flourish=None, note=None, **q):
 
 DELIVERY_RIDE = CYCLIST_RIDE
 DELIVERY_RIDE_MS = 90
+# Merging a lane right (the game mirrors it for left), as the taxi's merge: still pedalling hazards.CYCLIST_RIDE's
+# stroke, the bike and box leaning DELIVERY_TILT layout pixels right at the top about the handlebar, the tire
+# swinging out left under it, the head upright over the neck. 4 frames at 100ms.
+DELIVERY_TILT = 4
+DELIVERY_MERGE = tuple(dict(lf=q["lf"], rf=q["rf"], tilt=DELIVERY_TILT) for q in CYCLIST_RIDE)
+DELIVERY_MERGE_MS = 100
+# The layout rows the merge's tilt turns about (the handlebar) and carries the head by (the neck).
+DELIVERY_PIVOT = 24
+DELIVERY_NECK = 20
 DELIVERY_RIM = {**LIT, "violet": ("lilac", None), "dturq": ("turquoise", None), "blue": ("sky", None)}
 
 
-def delivery_cyclist(lf=36, rf=41):
+def delivery_cyclist(lf=36, rf=41, part="all"):
     """The delivery rider facing the player, laid out on 32x48 as hazards.cyclist is; delivery_at draws it at
-    size and adds the sway."""
+    size and adds the sway. part "body" leaves out the head and "head" draws only the head, for the merge's
+    tilt."""
     g = edged(Grid(32, 48))
+    if part == "head":
+        delivery_head(g)
+        return g
     # the insulated box on the back: turquoise, lit along its top, a reflective band across, wider than the
     # shoulders and standing over the head
     g.rect(5, 1, 22, 22, "turquoise")
@@ -590,7 +607,13 @@ def delivery_cyclist(lf=36, rf=41):
     g.rect(15, 25.5, 2, 1.5, "cyan")
     for x in (4, 25):
         g.rect(x, 25, 3, 4, "ink")
-    # head: the face, then a black helmet with a grey vent stripe
+    if part == "all":
+        delivery_head(g)
+    return rim(g, DELIVERY_RIM)
+
+
+def delivery_head(g):
+    """The delivery rider's head on g: the face, then a black helmet with a grey vent stripe."""
     face_disc(g, 16, 14, 7.5, 6.5, "skin2", "brown")
     road.face_front(g, 16, 13.5)
     g.cel(16, 9, 8, 4, "navy", "ink", "dslate")
@@ -598,17 +621,46 @@ def delivery_cyclist(lf=36, rf=41):
     g.rect(21, 10, 3, 2, "ink")
     g.rect(8.5, 12, 15, 1, "ink")
     g.rect(15.5, 5.5, 1, 4, "grey")
-    return rim(g, DELIVERY_RIM)
 
 
-def delivery_at(s, lf=36, rf=41, sway=0):
+def delivery_at(s, lf=36, rf=41, sway=0, tilt=0):
     """delivery_cyclist on a Mini at road.SCALE x step s. At full size the rider leans (road.lean shears about
-    the feet); smaller, the rows above the handlebar shift sideways, which keeps the bars and wheel put."""
-    g = raster(minis.small(sys.modules[__name__], SCALE * s, delivery_cyclist, lf=lf, rf=rf))
+    the feet); smaller, the rows above the handlebar shift sideways, which keeps the bars and wheel put. tilt
+    instead leans the whole bike into a merge, tilt layout pixels right at the top (see delivery_tilted)."""
+    here = sys.modules[__name__]
+    g = raster(minis.small(here, SCALE * s, delivery_cyclist, lf=lf, rf=rf))
+    if tilt:
+        body = raster(minis.small(here, SCALE * s, delivery_cyclist, lf=lf, rf=rf, part="body"))
+        head = raster(minis.small(here, SCALE * s, delivery_cyclist, lf=lf, rf=rf, part="head"))
+        return delivery_tilted(g, body, head, tilt, SCALE * s)
     if s == 1:
         return edged(lean(g, sway)) if sway else g
     sway_rows(g, sway, scaled(26, SCALE * s))
     return g
+
+
+def delivery_tilted(whole, body, head, tilt, p):
+    """The rider at scale p leaning into a merge: the bike, the rider and the box sheared about the handlebar
+    (DELIVERY_PIVOT), tilt layout pixels right at the top row and the tire swinging out left under it as a
+    rider countersteering into a turn; the head (its pixels as drawn in whole) carried along unsheared by the
+    neck's shift, so it stays upright over the tilted shoulders."""
+    pivot = DELIVERY_PIVOT * p
+
+    def shift(y):
+        return round(tilt * p * (pivot - y - 0.5) / pivot)
+
+    out = edged(Grid(whole.w, whole.h))
+    for y in range(whole.h):
+        dx = shift(y)
+        for x in range(whole.w):
+            if body.px[y][x] and 0 <= x + dx < whole.w:
+                out.px[y][x + dx] = body.px[y][x]
+    neck = shift(DELIVERY_NECK * p)
+    for y in range(whole.h):
+        for x in range(whole.w):
+            if head.px[y][x] and 0 <= x + neck < whole.w:
+                out.px[y][x + neck] = whole.px[y][x]
+    return out
 
 
 # ---------- gardener: facing the player, pushing a wheelbarrow of leaves at it ----------
@@ -1754,7 +1806,9 @@ def steps(suffix, s):
         ("idle", [person(strolling_busker, q) for q in STROLLING_IDLE], STROLLING_IDLE_MS),
         ("cue", [person(strolling_busker, q) for q in STROLLING_CUE], STROLLING_CUE_MS)]
     yield f"delivery-cyclist{suffix}", [("ride", [delivery_at(s, **q).outlined() for q in DELIVERY_RIDE],
-                                         DELIVERY_RIDE_MS)]
+                                         DELIVERY_RIDE_MS),
+                                        ("merge", [delivery_at(s, **q).outlined() for q in DELIVERY_MERGE],
+                                         DELIVERY_MERGE_MS)]
     yield f"gardener{suffix}", [("push", [own(gardener, q) for q in GARDENER_PUSH], GARDENER_PUSH_MS),
                                 ("idle", [own(gardener, q) for q in GARDENER_IDLE], road.BREATH_MS),
                                 ("cue", [own(gardener, q) for q in GARDENER_CUE], GARDENER_CUE_MS)]

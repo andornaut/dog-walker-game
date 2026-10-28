@@ -30,6 +30,38 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
     "sourceSize": { "w": 36, "h": 54 },
     "duration": 90
+   },
+   "delivery-cyclist@75 4.aseprite": {
+    "frame": { "x": 144, "y": 0, "w": 36, "h": 54 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
+    "sourceSize": { "w": 36, "h": 54 },
+    "duration": 100
+   },
+   "delivery-cyclist@75 5.aseprite": {
+    "frame": { "x": 180, "y": 0, "w": 36, "h": 54 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
+    "sourceSize": { "w": 36, "h": 54 },
+    "duration": 100
+   },
+   "delivery-cyclist@75 6.aseprite": {
+    "frame": { "x": 216, "y": 0, "w": 36, "h": 54 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
+    "sourceSize": { "w": 36, "h": 54 },
+    "duration": 100
+   },
+   "delivery-cyclist@75 7.aseprite": {
+    "frame": { "x": 252, "y": 0, "w": 36, "h": 54 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
+    "sourceSize": { "w": 36, "h": 54 },
+    "duration": 100
    }
  },
  "meta": {
@@ -37,10 +69,11 @@
   "version": "1.2.30-x64",
   "image": "delivery-cyclist@75.png",
   "format": "RGBA8888",
-  "size": { "w": 144, "h": 54 },
+  "size": { "w": 288, "h": 54 },
   "scale": "1",
   "frameTags": [
-   { "name": "ride", "from": 0, "to": 3, "direction": "forward" }
+   { "name": "ride", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "merge", "from": 4, "to": 7, "direction": "forward" }
   ]
  }
 }
