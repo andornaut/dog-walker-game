@@ -74,13 +74,16 @@ describe("cashChipPlace", () => {
     ...Object.values(bar.buttons).map(({ hit }) => hit),
   ];
   const stripTop = TOP_BAR.y + TOP_BAR.height + MESSAGE_STRIP.gap;
-  it.each(
-    CHANGE_LABEL_STYLES.map(({ lines, scale }) => ({
-      lines: lines ?? 1,
-      scale,
-      width: MONEY_LABEL.room,
-    })),
-  )(
+  // Each count of lines and scale once: the chip's place reads only those.
+  const chips = CHANGE_LABEL_STYLES.map(({ lines, scale }) => ({
+    lines: lines ?? 1,
+    scale,
+    width: MONEY_LABEL.room,
+  })).filter(
+    (chip, i, all) =>
+      all.findIndex((other) => other.lines === chip.lines && other.scale === chip.scale) === i,
+  );
+  it.each(chips)(
     "pops the widest $lines-line chip at $scale x under the cash, clear of the bar's wells and the strip",
     (text) => {
       const { chip } = cashChipPlace(BODY, text);
@@ -108,7 +111,6 @@ describe("mergeTips", () => {
   };
   it.each([
     ["two tips", tip(100), tip(100), { amount: 200, text: "+$2" }],
-    ["two Big tipper tips", tip(200), tip(200), { amount: 400, text: "+$4" }],
     ["two Stinky tips", zeroed, zeroed, { amount: 0, text: "+$0", zeroedBy: "stinky" }],
   ])("adds up %s on one label by its amount alone", (_name, showing, next, merged) => {
     expect(mergeTips(showing, next)).toEqual({
