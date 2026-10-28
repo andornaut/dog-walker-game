@@ -4,6 +4,7 @@ import { LANE_COUNT } from "../data/screen";
 import { TUNING } from "../data/tuning";
 import type { ZoneId } from "../data/types";
 import { WORLD } from "../data/world";
+import { keysOf } from "../lib/records";
 import { read } from "../rules/units";
 import { lanesReachedAtEnd, pathShortfalls } from "../testing/avoidable";
 import { type HopMovement, hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
@@ -21,15 +22,17 @@ import {
   type Real,
   realRun,
   ROAD_LENGTH,
+  standingSpan,
   TALL_PACK_ROAD,
   TALLER,
   walkwayOf,
   widerRows,
   ZONE_IDS,
 } from "../testing/planner";
+import { mapZones } from "../testing/world";
 import { STEP_SECONDS } from "./fixedStep";
-import { onScreenOf } from "./moverPlanning";
-import { hasLeftRoad, type MoverPath, moverPlace } from "./movers";
+import { onScreenOf, sweptLanes } from "./moverPlanning";
+import { crossSpan, hasLeftRoad, type MoverPath, moverPlace } from "./movers";
 import { moverOutcomes } from "./outcomes";
 import { itemHeight, type RoadGeometry, startRoad, type Walk, walkScrollSpeed } from "./walk";
 import { blocksLane, footprintOf, movementOf } from "./walkItems";
@@ -111,7 +114,13 @@ describe("the planned road", { timeout: 120_000 }, () => {
     ...ZONE_IDS.map((zone) => ({ zone, zoneIndex: WORLD.walkLength - 1 })),
     { zone: WORLD.firstZone as ZoneId, zoneIndex: 0 },
   ];
-  type PassableCase = { road: RoadGeometry; tuned: Real; zone: ZoneId; zoneIndex: number };
+  type PassableCase = {
+    road: RoadGeometry;
+    seed?: number;
+    tuned: Real;
+    zone: ZoneId;
+    zoneIndex: number;
+  };
   // Every world, pack and zone place.
   const PASSABLE: readonly PassableCase[] = worlds.flatMap(({ packs: sized, tuned }) =>
     sized.flatMap(({ road, taller }) =>
@@ -123,13 +132,13 @@ describe("the planned road", { timeout: 120_000 }, () => {
       })),
     ),
   );
-  // Each case's plan on seed 1, planned once for every check made of it.
+  // Each case's plan on its seed, 1 unless given, planned once for every check made of it.
   const plans = new Map<PassableCase, Walk>();
   const planOf = (passable: PassableCase): Walk => {
     let walk = plans.get(passable);
     if (walk === undefined) {
-      const { road, tuned, zone, zoneIndex } = passable;
-      walk = planZone(tuned, road, plannerStreams(1), {
+      const { road, seed = 1, tuned, zone, zoneIndex } = passable;
+      walk = planZone(tuned, road, plannerStreams(seed), {
         road: startRoad(LANE_COUNT),
         run: inZone(realRun(tuned, FASTEST_WALKER), zone, zoneIndex),
       });
@@ -174,6 +183,83 @@ describe("the planned road", { timeout: 120_000 }, () => {
     } finally {
       unbiased.on = false;
     }
+  });
+  // Each dart more than a lane wide, in each zone it comes in, weighed there as heavily as the
+  // zone's other minor obstacles together, so every plan has several, planned on many seeds with
+  // the zone first in the walk and last: each one crosses as wide as its footprint, some turn
+  // back and some cross, and the road stays passable around them (expectPassable). The lanes the
+  // planner blocks for one in the pack's window (sweptLanes), which openLanesPerRowMin and
+  // openStretches weigh, hold every lane its hit box meets the pack in, and leave
+  // openLanesPerRowMin open.
+  const WIDE_DARTS = keysOf(REAL.minorObstacles).flatMap((kind) =>
+    movementOf(REAL, kind)?.kind === "dart" && footprintOf(REAL, kind).lanes > 1
+      ? WORLD.zones
+          .filter(({ weights }) => weights.minorObstacles[kind] > 0)
+          .map(({ id }) => ({ kind, zone: id }))
+      : [],
+  );
+  const WIDE_DART_SEEDS = Array.from({ length: 10 }, (_, i) => i + 1);
+  const WIDE_DART_CASES = WIDE_DARTS.flatMap(({ kind, zone }) => {
+    const tuned: Real = {
+      ...REAL,
+      world: mapZones((each) => {
+        if (each.id !== zone) {
+          return each;
+        }
+        const weights = each.weights.minorObstacles;
+        const others = keysOf(weights)
+          .filter((other) => other !== kind)
+          .reduce((sum, other) => sum + weights[other], 0);
+        return {
+          ...each,
+          weights: { ...each.weights, minorObstacles: { ...weights, [kind]: others } },
+        };
+      }, WORLD),
+    };
+    return [0, WORLD.walkLength - 1].flatMap((zoneIndex) =>
+      WIDE_DART_SEEDS.map((seed) => ({
+        kind,
+        passable: { road: GAME_ROAD, seed, tuned, zone, zoneIndex },
+        seed,
+        zone,
+        zoneIndex,
+      })),
+    );
+  });
+  it.each(WIDE_DART_CASES)(
+    "places $kind in $zone (zone $zoneIndex, seed $seed) by every placement rule",
+    ({ kind, passable, zone }) => {
+      const { tuned } = passable;
+      expectPassable([passable]);
+      const blocking = planOf(passable).road.pending.filter((event) =>
+        blocksLane(tuned, event.kind),
+      );
+      const wide = blocking.flatMap(({ distance, kind: other, mover }) =>
+        other === kind && mover?.motion === "cross" ? [{ distance, kind, mover }] : [],
+      );
+      expect(wide.length).toBeGreaterThan(0);
+      const minOpen = read(tuned.tuning, "counts", "openLanesPerRowMin");
+      for (const dart of wide) {
+        expect(crossSpan(dart.mover)).toBe(footprintOf(tuned, kind).lanes);
+        const touched = new Set(
+          moverSpans("planned", tuned, GAME_ROAD, zone, dart).map(({ lane }) => lane),
+        );
+        const sight = GAME_ROAD.sightLength;
+        const window = standingSpan(tuned, GAME_ROAD, zone, { ...dart, lane: 0 }).length;
+        const { count, first } = sweptLanes(LANE_COUNT, dart.mover, sight, sight + window);
+        const swept = Array.from({ length: count }, (_, i) => first + i);
+        expect(swept).toEqual(expect.arrayContaining([...touched]));
+        expect(swept.length).toBeLessThanOrEqual(LANE_COUNT - minOpen);
+      }
+    },
+  );
+  it.each(WIDE_DARTS)("plans $kind in $zone both crossing and turning back", ({ kind, zone }) => {
+    const outcomes = WIDE_DART_CASES.filter((wide) => wide.kind === kind && wide.zone === zone)
+      .flatMap(({ passable }) => planOf(passable).road.pending)
+      .flatMap(({ kind: other, mover }) =>
+        other === kind && mover?.motion === "cross" ? [mover.turnAfter === null] : [],
+      );
+    expect([...new Set(outcomes)].sort()).toEqual([false, true]);
   });
   // A pack following the zone's path passes every obstacle with full margins (pathShortfalls),
   // measured as drawn: each obstacle at its kind's drawn hit length, the pack at the tallest pack's
