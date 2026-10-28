@@ -167,7 +167,6 @@ describe("changeLabels", () => {
 
 describe("a money change's label", () => {
   const money = (amount: Cents, sign: "+" | "−") => `${sign}${formatDollars(amount)}`;
-  const tip = read(tuning, "money", "tip");
   const kilo = testState({ kilo: 5 });
   const resolved = (effect: Effect, source: Parameters<typeof resolveEffects>[1]["source"]) =>
     resolveEffects(gameData, { affected: ["kilo"], source }, [effect], kilo).changes;
@@ -179,13 +178,8 @@ describe("a money change's label", () => {
     { kilo: 5 },
     { debuffs: [{ debuff: "stinky", secondsLeft: 20, untilZone: 0 }] },
   );
+  // A tip's and a Big tipper tip's label are the money counter's, below.
   it.each([
-    ["a tip", () => [tipValue(gameData, kilo)], money(tip, "+")],
-    [
-      "a Big tipper tip",
-      () => [tipValue(gameData, testState({ kilo: 5 }, { modifiers: [bigTipper] }))],
-      money(cents(tip + read(tuning, "money", "bigTipperTipBonus")), "+"),
-    ],
     ["a Stinky tip", () => [tipValue(gameData, stinky)], "+$0"],
     [
       "a lucky find",
