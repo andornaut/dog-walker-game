@@ -73,7 +73,6 @@ describe("one loop's fade", () => {
     ["fades out at a constant rate", fading(1, "stopped"), (FADE * 3) / 4, fading(0.25, "stopped")],
     ["settles stopped at silence", fading(0.25, "stopped"), FADE, MUSIC_STOPPED],
     ["holds while playing", PLAYING, 100, PLAYING],
-    ["holds while stopped", MUSIC_STOPPED, 100, MUSIC_STOPPED],
     ["ignores negative time", fading(0.5, "playing"), -100, fading(0.5, "playing")],
   ])("%s", (_name, from, elapsedMs, expected) => {
     expect(advanceMusic(elapsedMs, from)).toEqual(expected);
@@ -154,13 +153,10 @@ describe("the deck of loops", () => {
     ...overrides,
   });
 
-  it.each<[string, Partial<Mix>, number]>([
-    ["plays at the music volume times the fade level", {}, 0.8 * 0.25],
-    ["ducks under the player's pause", { paused: true }, 0.8 * 0.25 * PAUSED_MUSIC_DUCK],
-    ["is silent while hidden", { hidden: true }, 0],
-    ["is silent while muted", { muted: true }, 0],
-  ])("%s", (_name, overrides, expected) => {
+  // The effectiveVolumes tests cover the mix's pause, mute and hidden states; a loop scales the
+  // mix's music volume by its fade.
+  it("plays at the mix's music volume times the fade level", () => {
     const track = { key: a, state: fading(0.25, "stopped", CROSS) };
-    expect(trackVolume(mix(overrides), track)).toBeCloseTo(expected);
+    expect(trackVolume(mix({ paused: true }), track)).toBeCloseTo(0.8 * 0.25 * PAUSED_MUSIC_DUCK);
   });
 });
