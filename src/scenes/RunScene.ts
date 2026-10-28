@@ -25,7 +25,7 @@ import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../p
 import { AmbientView } from "../road/phaser/ambientView";
 import { BackdropView } from "../road/phaser/backdropView";
 import type { CardView, Choice } from "../rules/choices";
-import { currentZone, currentZoneId, zoneAt } from "../rules/route";
+import { currentZone, currentZoneId, previousZone } from "../rules/route";
 import {
   type FixedStepLimits,
   frameSteps,
@@ -667,10 +667,9 @@ export class RunScene extends Scene implements HudRun {
       travelled: distanceBeforeZone + walk.run.zoneDistance,
     });
     world.road.draw(walk, zone, distanceBeforeZone);
-    const { route, zoneIndex } = walk.run;
     world.roadside.draw(
       zone.art,
-      zoneIndex === 0 ? null : zoneAt(gameData, route, zoneIndex - 1).art,
+      previousZone(gameData, walk.run)?.art ?? null,
       distanceBeforeZone,
       distanceBeforeZone + walk.run.zoneDistance,
     );

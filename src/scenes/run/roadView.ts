@@ -15,7 +15,7 @@ import {
 } from "../../layout/roadRaster";
 import { getOrInsert } from "../../lib/maps";
 import type { Rect } from "../../lib/rect";
-import { zoneAt } from "../../rules/route";
+import { previousZone } from "../../rules/route";
 import type { Walk } from "../../runner/walk";
 import { colourFromHex } from "../../ui/phaser/palette";
 import { DEPTH, LAYOUT, PROJECTION } from "./stage";
@@ -133,13 +133,10 @@ export class RoadView {
       return;
     }
     this.drawn = drawn;
-    const previous =
-      walk.run.zoneIndex === 0
-        ? undefined
-        : zoneAt(gameData, walk.run.route, walk.run.zoneIndex - 1);
+    const previous = previousZone(gameData, walk.run);
     const startKey = roadStartKey(zone);
     const transition =
-      previous !== undefined && textures.exists(startKey) && textures.exists(roadTileKey(previous))
+      previous !== null && textures.exists(startKey) && textures.exists(roadTileKey(previous))
         ? {
             previous: this.art.look(previous, roadTileKey(previous)),
             start: this.art.look(zone, startKey),

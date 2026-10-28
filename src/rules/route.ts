@@ -60,6 +60,14 @@ export function currentZone(data: RouteData, run: Pick<RunState, "route" | "zone
   return zoneAt(data, run.route, run.zoneIndex);
 }
 
+// The zone the run walked before its current one, or null in its first.
+export function previousZone(
+  data: RouteData,
+  run: Pick<RunState, "route" | "zoneIndex">,
+): Zone | null {
+  return run.zoneIndex === 0 ? null : zoneAt(data, run.route, run.zoneIndex - 1);
+}
+
 // The id of the zone the run is in.
 export function currentZoneId(data: RouteData, run: Pick<RunState, "route" | "zoneIndex">): ZoneId {
   return zoneIdAt(data, run.route, run.zoneIndex);

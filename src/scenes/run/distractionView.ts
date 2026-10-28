@@ -9,7 +9,7 @@ import { itemAt } from "../../lib/arrays";
 import { getOrInsert } from "../../lib/maps";
 import type { Random } from "../../lib/random";
 import { ROADSIDE } from "../../road/roadsideProps";
-import { currentZone, zoneAt } from "../../rules/route";
+import { currentZone, previousZone } from "../../rules/route";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import type { Walk, WalkItem } from "../../runner/walk";
 import { firstTag, playTag, showAtDepth, spriteMetrics } from "../sprites";
@@ -58,7 +58,6 @@ export class DistractionView {
   // kept is the verge scenery as it stands now, which a distraction keeps clear of too.
   draw(walk: Walk, kept: readonly WalkItem[], frame: { halted: boolean; still: boolean }): void {
     const { run } = walk;
-    const { route, zoneIndex } = run;
     const geometry = screenRoadGeometry(run);
     stepDistractions(
       this.deps,
@@ -66,7 +65,7 @@ export class DistractionView {
         geometry,
         items: [...walk.road.items, ...kept],
         pending: walk.road.pending,
-        previousArt: zoneIndex === 0 ? null : zoneAt(gameData, route, zoneIndex - 1).art,
+        previousArt: previousZone(gameData, run)?.art ?? null,
         zone: currentZone(gameData, run),
         zoneDistance: run.zoneDistance,
         zoneIndex: run.zoneIndex,
