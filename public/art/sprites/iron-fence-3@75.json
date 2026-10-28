@@ -14,6 +14,22 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 132, "h": 27 },
     "sourceSize": { "w": 132, "h": 27 },
     "duration": 500
+   },
+   "iron-fence-3@75 2.aseprite": {
+    "frame": { "x": 264, "y": 0, "w": 132, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 132, "h": 27 },
+    "sourceSize": { "w": 132, "h": 27 },
+    "duration": 500
+   },
+   "iron-fence-3@75 3.aseprite": {
+    "frame": { "x": 396, "y": 0, "w": 132, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 132, "h": 27 },
+    "sourceSize": { "w": 132, "h": 27 },
+    "duration": 500
    }
  },
  "meta": {
@@ -21,10 +37,10 @@
   "version": "1.2.30-x64",
   "image": "iron-fence-3@75.png",
   "format": "RGBA8888",
-  "size": { "w": 264, "h": 27 },
+  "size": { "w": 528, "h": 27 },
   "scale": "1",
   "frameTags": [
-   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
   ]
  }
 }

@@ -55,8 +55,8 @@ iron-fence-2        112x36  2 lanes: a Victorian wrought-iron fence in front of
                             a bay-and-gable house, coal iron lit ash, square posts under ball caps at
                             its ends and each lane's edge, four 2px pickets a lane with spear points
                             through a top and a bottom rail, on a low driftwood stone curb lit cream;
-                            no outline round the iron, so the gaps stay clear at @50. idle (2 frames,
-                            500ms): a white glint along the top rail on frame 1
+                            no outline round the iron, so the gaps stay clear at @50. idle (4 frames,
+                            500ms): a white glint along the top rail on frame 2
 iron-fence-3        176x36  3 lanes: the same fence, a lane wider
 leaf-pile           48x48   1 lane, a raked dome of autumn leaves cel shaded orange, lit amber and
                             shaded rust, its rim ragged with gold, amber and rust leaves and a few more
@@ -842,8 +842,8 @@ def cherry_trees(pose=0, w=obstacles.span(3)):
     return lit(g, dict(bark=("clay", None), walnut=("bark", None), stone=("driftwood", None)))
 
 
-# The fence's idle: rest, then a glint along the top rail.
-IRON_FENCE_IDLE = (0, 1), 500
+# The fence's idle: rest, rest, a glint along the top rail, rest.
+IRON_FENCE_IDLE = (0, 0, 1, 0), 500
 # The iron, by K name: a coal body, ash lit on its upper and left edges, ink shading the posts' right sides.
 IRON = ("coal", "ash", "ink")
 # Pickets in each section, between two posts, one section a lane.
