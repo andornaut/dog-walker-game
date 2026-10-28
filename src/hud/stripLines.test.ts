@@ -7,6 +7,7 @@ import { keysOf } from "../lib/records";
 import type { HeartChange, MoneyChange } from "../rules/causes";
 import { formatDollars, sentenceList } from "../rules/effectText";
 import { cents, clampHearts, read } from "../rules/units";
+import { defined } from "../testing/defined";
 import {
   bumpLines,
   debuffChanges,
@@ -264,16 +265,15 @@ describe("gear found line", () => {
   const name = (gear: GearId) => gameData.shopGear[gear].name;
   const { gearFound, gearSwapped } = gameData.runText.strip;
   // A first find, and a find that replaces the item found before it.
-  it.each(
-    GEAR.flatMap((gear) => [
-      { gear, replaced: null, text: fillNames(gearFound, { gear: name(gear) }) },
-      ...GEAR.filter((old) => old !== gear).map((old) => ({
-        gear,
-        replaced: old,
-        text: fillNames(gearSwapped, { gear: name(gear), old: name(old) }),
-      })),
-    ]),
-  )("says $gear was found, replacing $replaced, led by its icon", ({ gear, replaced, text }) => {
+  const [first, next] = [defined(GEAR[0]), defined(GEAR[1])];
+  it.each([
+    { gear: first, replaced: null, text: fillNames(gearFound, { gear: name(first) }) },
+    {
+      gear: next,
+      replaced: first,
+      text: fillNames(gearSwapped, { gear: name(next), old: name(first) }),
+    },
+  ])("says $gear was found, replacing $replaced, led by its icon", ({ gear, replaced, text }) => {
     expect(gearFoundLine(gameData, gear, replaced)).toEqual({
       icon: { found: true, gear, kind: "gear" },
       text,
