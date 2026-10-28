@@ -13757,6 +13757,11 @@
       "m4a": "sounds/sfx-hit-fish-crates.m4a"
     },
     {
+      "key": "sfx-hit-green-bin",
+      "ogg": "sounds/sfx-hit-green-bin.ogg",
+      "m4a": "sounds/sfx-hit-green-bin.m4a"
+    },
+    {
       "key": "sfx-hit-other-dog",
       "ogg": "sounds/sfx-hit-other-dog.ogg",
       "m4a": "sounds/sfx-hit-other-dog.m4a"

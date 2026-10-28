@@ -71,6 +71,8 @@ sfx-hit-cheese-crates 0.40s a soft wooden thunk, a squish, then a rising plop th
 sfx-hit-wedding-shoot 0.58s a flash charging up, the shutter's double click, then a triangle
                             "ding dong" of wedding bells
 sfx-hit-fish-crates 0.46s   a wooden thunk, ice chips clattering, then two wet flops
+sfx-hit-green-bin   0.44s   a hollow plastic thunk, the lid clattering down in three shrinking knocks,
+                            then a soft squelch and a gloop
 
 Cards (75x56), one per option, composed from the sprites above and the pack's exports:
 card-cheese-crates-sniff, -buy and -hurry-on at a brick shopfront's wooden door, which fits both the
@@ -1486,6 +1488,23 @@ EFFECTS = {
         ("triangle", 0.08, (440, 200), 0.25, dict(vol=0.9, attack=0.003, release=0.8, shape="h")),
         ("pinknoise", 0.07, None, 0.38, dict(vol=0.4, low=1400, high=300, attack=0.003, release=0.8)),
         ("triangle", 0.08, (400, 180), 0.38, dict(vol=0.72, attack=0.003, release=0.8, shape="h")),
+    ],
+    # the bin's hollow plastic thunk, its lid clattering down in three shrinking knocks, then a soft squelch
+    # and a gloop as the scraps settle
+    f"sfx-hit-{BIN}": [
+        ("square", 0.12, (340, 160), 0, dict(vol=0.6, low=1000, attack=0.003, release=0.8, shape="h")),
+        ("triangle", 0.12, (340, 140), 0, dict(vol=0.35, attack=0.003, release=0.85)),
+        ("pinknoise", 0.04, None, 0, dict(vol=0.25, low=2500, high=600, attack=0.001, release=0.8,
+                                          fx=("lowpass", "3000"))),
+        ("square", 0.035, (720, 560), 0.07, dict(vol=0.5, duty=35, low=1600, attack=0.002, release=0.7,
+                                                 fx=("lowpass", "3000"))),
+        ("square", 0.03, (680, 540), 0.12, dict(vol=0.38, duty=35, low=1600, attack=0.002, release=0.7,
+                                                fx=("lowpass", "3000"))),
+        ("square", 0.025, (650, 520), 0.16, dict(vol=0.26, duty=35, low=1600, attack=0.002, release=0.7,
+                                                 fx=("lowpass", "3000"))),
+        ("pinknoise", 0.1, None, 0.23, dict(vol=0.5, low=1400, high=300, attack=0.012, release=0.75)),
+        ("triangle", 0.1, (520, 210), 0.23, dict(vol=0.8, attack=0.01, release=0.8, shape="h")),
+        ("triangle", 0.09, (260, 560), 0.35, dict(vol=0.6, attack=0.006, release=0.7, shape="h")),
     ],
 }
 
