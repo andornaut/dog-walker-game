@@ -64,6 +64,7 @@ import { onSceneEvent } from "./overlay";
 import { currentSettings } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { type ScenePicture, showAsPicture } from "./scenePicture";
+import { guardScreenInput } from "./screenGuard";
 import { addStandingSprite, playFirstTag, playTag } from "./sprites";
 import { listenTargetPress, type TargetPressListener } from "./targetPress";
 import { addMenuButton, addNineSlice, listenButtonTap, tagFrame } from "./uiKit";
@@ -175,7 +176,9 @@ export class CardScene extends Scene {
     this.homeParts = [];
     this.refusing = false;
     const { walkView } = SCREEN_LAYOUT;
-    addRampDim(this, walkView);
+    // A card the help draws as a picture takes no input; a played card takes none for
+    // seconds.screenTapGuard from its first drawn frame.
+    addRampDim(this, walkView, picture === undefined ? guardScreenInput(this).drawn : undefined);
 
     this.entries = [
       ...view.options.map((option) => ({

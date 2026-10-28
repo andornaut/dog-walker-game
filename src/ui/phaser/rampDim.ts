@@ -1,4 +1,4 @@
-import { Core, type Scene } from "phaser";
+import { Core, type Scene, Scenes } from "phaser";
 
 import { remapDarker } from "../../assets/darkRamp";
 import type { Rect } from "../../lib/rect";
@@ -29,10 +29,17 @@ function shownPart(scene: Scene, rect: Rect): { canvas: Rect; world: Rect } | un
 // scene's cameras are hidden for that frame, so the read-back holds only the scenes beneath it,
 // never the overlay's own objects, which may later hide or move. Only the part the scene's
 // camera shows is read back. Where the renderer gives no snapshot to remap, the ink layer stands
-// in. Each scene keeps its own texture, so two overlays can dim at once.
-export function addRampDim(scene: Scene, rect: Rect): void {
+// in. Each scene keeps its own texture, so two overlays can dim at once. onDrawn, if given, is
+// called as the overlay's first drawn frame begins, unless the scene shuts down first.
+export function addRampDim(scene: Scene, rect: Rect, onDrawn?: () => void): void {
+  const drawn = () => {
+    if (onDrawn !== undefined) {
+      onceBeforeRender(scene, onDrawn);
+    }
+  };
   const shown = shownPart(scene, rect);
   if (shown === undefined) {
+    drawn();
     return;
   }
   const { canvas, world } = shown;
@@ -46,6 +53,7 @@ export function addRampDim(scene: Scene, rect: Rect): void {
   shownCameras.forEach((camera) => camera.setVisible(false));
   scene.game.events.once(Core.Events.POST_RENDER, () => {
     shownCameras.forEach((camera) => camera.setVisible(true));
+    drawn();
   });
   scene.game.renderer.snapshotArea(canvas.x, canvas.y, canvas.width, canvas.height, (snapshot) => {
     if (!dim.active) {
@@ -71,4 +79,12 @@ export function addRampDim(scene: Scene, rect: Rect): void {
     texture.refresh();
     dim.setTexture(key).setVisible(true);
   });
+}
+
+// Calls then once, before the game's next frame is rendered, unless scene shuts down first.
+function onceBeforeRender(scene: Scene, then: () => void): void {
+  const { events } = scene.game;
+  const forget = () => events.off(Core.Events.PRE_RENDER, then);
+  events.once(Core.Events.PRE_RENDER, then);
+  scene.events.once(Scenes.Events.SHUTDOWN, forget);
 }

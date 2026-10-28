@@ -132,8 +132,9 @@ export function listenOutsideTap(
 }
 
 // Calls onTap on a tap on the bare page beside the game's canvas (onBarePage) while scene is
-// running and open says a panel is open, so an overlay paused under another never takes it.
-// The page's listeners go when the scene shuts down.
+// running, takes input and open says a panel is open, so an overlay paused under another, or
+// holding its input off (guardScreenInput), never takes it. The page's listeners go when the
+// scene shuts down.
 function listenPageTap(
   scene: Scene,
   tapMaxDistance: number,
@@ -148,7 +149,7 @@ function listenPageTap(
       y: event.clientY,
     });
   const counts = (event: PointerEvent) =>
-    scene.sys.isActive() && open() && onBarePage(bare, event.target);
+    scene.sys.isActive() && scene.input.enabled && open() && onBarePage(bare, event.target);
   let press: OutsidePress | undefined;
   const down = (event: PointerEvent) => {
     press = counts(event) ? { start: toGame(event), tapping: true } : undefined;

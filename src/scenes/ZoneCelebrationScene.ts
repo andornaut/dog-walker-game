@@ -31,6 +31,7 @@ import { addConfetti } from "./badges";
 import { closeOverlay, listenOutsideTap, type OverlayData } from "./overlay";
 import { currentSettings, walkerSpriteKey } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
+import { guardScreenInput } from "./screenGuard";
 import { soundboardOf } from "./soundboard";
 import { playFirstTag } from "./sprites";
 import { addMenuButton, addPanel, BODY_TEXT, listenButtonTap } from "./uiKit";
@@ -56,7 +57,8 @@ function atLineTop<T extends GameObjects.BitmapText>(label: T, top: number): T {
 // Between zones, over the paused walk: the walker cheers on a starburst under the zone's name
 // and earnings over a button, and waits for a tap or key 1; or a newly unlocked walker hops in,
 // greets the pack in a bubble with their agility and perk, and waits for Welcome! (key 1).
-// Confetti falls in both, unless motion is reduced.
+// Confetti falls in both, unless motion is reduced. Both take no input for
+// seconds.screenTapGuard from their first drawn frame.
 export class ZoneCelebrationScene extends Scene {
   private done = false;
 
@@ -67,7 +69,7 @@ export class ZoneCelebrationScene extends Scene {
   create(data: ZoneCelebrationSceneData): void {
     this.done = false;
     const reduced = currentSettings(this).reducedMotion;
-    addRampDim(this, LAYOUT.dim);
+    addRampDim(this, LAYOUT.dim, guardScreenInput(this).drawn);
     if (!reduced) {
       this.dropConfetti();
     }
