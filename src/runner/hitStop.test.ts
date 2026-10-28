@@ -1,18 +1,25 @@
 import { describe, expect, it } from "vitest";
 
 import type { CardSource } from "../state/runState";
+import { STEP_SECONDS } from "./fixedStep";
 import { type HitStop, hitStopLength, startHitStop, tickHitStop } from "./hitStop";
 
 const LENGTHS = { encounter: 1, minor: 0.6 };
 const CARD: CardSource = { affected: ["kilo"], encounter: "skunk", kind: "encounter" };
 
 describe("hitStopLength", () => {
-  it("is the encounter's length for an encounter, the minor one's for a bump, else 0", () => {
-    expect(hitStopLength(LENGTHS, { encounters: 1, minors: 0 })).toBe(1);
-    expect(hitStopLength(LENGTHS, { encounters: 0, minors: 2 })).toBe(0.6);
-    expect(hitStopLength(LENGTHS, { encounters: 1, minors: 1 })).toBe(1);
-    expect(hitStopLength(LENGTHS, { encounters: 0, minors: 0 })).toBe(0);
-  });
+  // The encounter's length for an encounter, the minor one's for a bump, else 0.
+  it.each([
+    { encounters: 1, length: LENGTHS.encounter, minors: 0 },
+    { encounters: 0, length: LENGTHS.minor, minors: 2 },
+    { encounters: 1, length: LENGTHS.encounter, minors: 1 },
+    { encounters: 0, length: 0, minors: 0 },
+  ])(
+    "is $length for $encounters encounters and $minors bumps",
+    ({ encounters, length, minors }) => {
+      expect(hitStopLength(LENGTHS, { encounters, minors })).toBe(length);
+    },
+  );
 });
 
 describe("startHitStop", () => {
@@ -30,12 +37,12 @@ describe("startHitStop", () => {
 });
 
 describe("tickHitStop", () => {
-  // Ticks a stop at 60 steps a second, counting the steps until it lets go.
+  // Ticks a stop a fixed step at a time, counting the steps until it lets go.
   const stepsHeld = (seconds: number) => {
     let stop: HitStop | null = startHitStop(false, seconds, { cards: [CARD], zoneEnded: false });
     let steps = 0;
     while (stop !== null) {
-      const ticked = tickHitStop(1 / 60, stop);
+      const ticked = tickHitStop(STEP_SECONDS, stop);
       steps += 1;
       if ("released" in ticked) {
         expect(ticked.released).toEqual({ cards: [CARD], zoneEnded: false });
