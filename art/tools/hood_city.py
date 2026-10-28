@@ -29,9 +29,10 @@ volleyball-net-2    112x36  minor, 2 lanes, The Beaches' barrier-2: a beach voll
                             elevation, strung between white posts held by guy ropes, a white top band edged
                             azure over coal mesh with clear holes, white bands down its ends and along its
                             foot, a red and white striped antenna over each end, a rippled drift of sand
-                            under it heaped round the posts and a volleyball half sunk in it. idle (4
-                            frames, 450ms): on frame 2 a breeze lifts the net's foot 1px in the middle and
-                            bends the antenna tips out 1px
+                            under it heaped round the posts and a volleyball half sunk in it (left out at
+                            @69 and smaller, where it would be a square chip). idle (4 frames, 450ms): on
+                            frame 2 a breeze lifts the net's foot 1px in the middle and bends the antenna
+                            tips out 1px
 volleyball-net-3    176x36  minor, 3 lanes, The Beaches' barrier-3: the same net, a lane wider
 
 Yonge Street:
@@ -644,6 +645,8 @@ def lifeguard_chair(lift=0):
 # ---------- volleyball net ----------
 
 NET_IDLE = (0, 0, 1, 0), 450
+# Below this scale the half-sunk volleyball rasterizes as a square chip, so the far steps leave it out.
+BALL_MIN = 0.85
 # The mesh's holes while it is drawn and outlined, so the outline does not fill them; net() clears them after.
 HOLE = "000001"
 
@@ -659,8 +662,8 @@ def volleyball_net(lanes, breeze=0):
     tops the net: a white top band edged azure along its foot, coal mesh in a 1px grid every 3 drawn pixels
     with clear holes, a white band down each end and along the bottom, and a red and white striped antenna
     rising well over each end. A rippled drift of sand runs under it all, heaped round each post, with a
-    volleyball (hood_people.volley_ball) half sunk in it by the right post. breeze lifts the bottom band's
-    middle half and bends each antenna's tip outward 1px."""
+    volleyball (hood_people.volley_ball) half sunk in it by the right post, left out below BALL_MIN. breeze
+    lifts the bottom band's middle half and bends each antenna's tip outward 1px."""
     w = obstacles.span(lanes)
     g = edged(Grid(w, obstacles.ROW), net_edge)
     px, s = raster(g), scale_of(g)
@@ -710,7 +713,8 @@ def volleyball_net(lanes, breeze=0):
         px.p(x, Y(obstacles.ROW) - 1, "brown")
     for x in posts:
         g.cel(x + 2, 27, 6, 3.5, "tan", "brown", "cream")
-    hood_people.volley_ball(g, posts[1] - 11, 26)
+    if s >= BALL_MIN:
+        hood_people.volley_ball(g, posts[1] - 11, 26)
     return lit(g)
 
 
