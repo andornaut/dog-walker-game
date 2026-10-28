@@ -49,15 +49,14 @@ export class HitBoxView {
   }
 
   // A box on the road, from its left edge across and down its rows.
-  private onRoad({ bottom, left: boxLeft, right: boxRight, top }: Box): void {
-    const { footY, visibleDistance } = PROJECTION;
-    const near = Math.max(NEAREST_DISTANCE, footY - bottom);
-    const far = Math.min(visibleDistance, footY - top);
-    if (near >= far) {
+  private onRoad(box: Box): void {
+    const span = distancesInView(box);
+    if (span === null) {
       return;
     }
-    const left = LAYOUT.road.x + boxLeft;
-    const right = LAYOUT.road.x + boxRight;
+    const { far, near } = span;
+    const left = LAYOUT.road.x + box.left;
+    const right = LAYOUT.road.x + box.right;
     const start = project(PROJECTION, { distance: near, x: left });
     const { graphics } = this;
     graphics.beginPath();
@@ -75,12 +74,11 @@ export class HitBoxView {
 
   // A box as it is drawn: the screen rectangle over its rows, its columns at its scale.
   private asDrawn(box: ScaledBox): void {
-    const { footY, visibleDistance } = PROJECTION;
-    const near = Math.max(NEAREST_DISTANCE, footY - box.bottom);
-    const far = Math.min(visibleDistance, footY - box.top);
-    if (near >= far) {
+    const span = distancesInView(box);
+    if (span === null) {
       return;
     }
+    const { far, near } = span;
     const across = (x: number) => screenXAt(PROJECTION, box.scale, LAYOUT.road.x + x);
     const top = screenYAt(PROJECTION, far);
     const left = across(box.left);
@@ -91,4 +89,13 @@ export class HitBoxView {
       screenYAt(PROJECTION, near) - top,
     );
   }
+}
+
+// The road distances a box's rows cover within the projection's view, nearest and farthest, or
+// null with none in view.
+function distancesInView(box: Pick<Box, "bottom" | "top">): { far: number; near: number } | null {
+  const { footY, visibleDistance } = PROJECTION;
+  const near = Math.max(NEAREST_DISTANCE, footY - box.bottom);
+  const far = Math.min(visibleDistance, footY - box.top);
+  return near >= far ? null : { far, near };
 }
