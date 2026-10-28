@@ -1534,27 +1534,22 @@ def stroller(lf=0, rf=0, bob=0, arms=0):
     puffer jacket quilted across, jeans and brown shoes, a takeaway coffee in his left hand, his right hand on
     the handlebar. The stroller rolls beside him on his right, its back to the player: a sky-blue hood ribbed
     where it folds over a navy seat back, the handlebar across the top, a basket under the seat, the rear legs
-    splaying out to two round rear wheels and the two front wheels inside them, further up the road. It rolls
+    running straight down to two round rear wheels and the two front wheels inside them, further up the road,
+    every wheel a plain ink tire under the lit rim. It rolls
     steadily while he bobs. The road outline and the lit rim, the puffer's teal shade lit green."""
     g = edged(Grid(32, 48))
     b = bob
     # the front wheels, further up the road, inside the rear ones
     for cx in (21.5, 27.5):
         g.ell(cx, 37.5, 1.6, 2.6, "ink")
-        g.p(cx, 37.5, "grey")
-    # the rear legs splay out from the seat to the rear wheels
-    for i in range(9):
-        g.p(20 - i // 5, 31 + i, "lgrey")
-        g.p(28 + i // 5, 31 + i, "lgrey")
-    # the rear wheels: round tires lit along the top, a hub in the middle
+    # the rear legs run straight down from the seat to the rear wheels
+    for x in (18, 29):
+        g.rect(x, 31, 1, 9, "lgrey")
+    # the rear wheels: round ink tires, lit by the rim
     for cx in (18.5, 29.5):
         g.ell(cx, 42.5, 1.7, 3.2, "ink")
-        g.p(cx, 40, "slate")
-        g.p(cx, 42, "grey")
     # the basket slung under the seat
     g.rect(20, 32, 9, 3, "ink")
-    for x in range(21, 29, 2):
-        g.p(x, 33, "slate")
     # the seat back in navy, the hood a sky-blue dome over it, folded in ribs, the handlebar across the top
     g.rect(19, 26, 11, 7, "navy")
     g.rect(19, 26, 1, 7, "dslate")
