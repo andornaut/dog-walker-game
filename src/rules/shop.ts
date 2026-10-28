@@ -1,8 +1,8 @@
 import type { GameData, LiveTuning, PriceKey, Unlock } from "../data/types";
-import { type Cents, cents, dollarsToCents } from "./units";
+import { type Cents, cents, readTable } from "./units";
 
 export function price(tuning: LiveTuning, key: PriceKey): Cents {
-  return dollarsToCents(tuning.money.prices[key]);
+  return readTable(tuning, "money", "prices", key);
 }
 
 // What an unlockable item costs: nothing for one owned from the start.
