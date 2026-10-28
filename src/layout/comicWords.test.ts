@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import comicFont from "../../public/art/fonts/font-comic.fnt?raw";
 import shippedManifest from "../../public/art/manifest.json";
-import { kebabCase, shownArtKey } from "../assets/spriteKeys";
+import { kebabCase } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import type { EncounterId } from "../data/types";
 import { keysOf } from "../lib/records";
@@ -22,9 +22,7 @@ const widthOf = (word: string) => comicWordWidth((char) => glyphs.get(char), wor
 const LINE_HEIGHT = Number(/lineHeight="(\d+)"/.exec(comicFont)?.[1]);
 
 const sprites = new Set(shippedManifest.sprites.map(({ key }) => key));
-const bursts = keysOf(gameData.encounters).filter((id) =>
-  sprites.has(shownArtKey(`fx-hit-${kebabCase(id)}`)),
-);
+const bursts = keysOf(gameData.encounters).filter((id) => sprites.has(`fx-hit-${kebabCase(id)}`));
 
 // Art's measured place (the ring's top-left) and size of each word on its 77x77 burst frame,
 // for each burst the manifest has.
@@ -32,6 +30,7 @@ const ART_PLACES: Readonly<Partial<Record<EncounterId, [number, number, number]>
   capybara: [16, 43, 43],
   cheeseCrates: [20, 41, 35],
   droppedCone: [20, 43, 37],
+  greenBin: [23, 41, 30],
   otherDog: [21, 41, 34],
   porchCat: [24, 38, 27],
   promoTeam: [20, 38, 36],
@@ -39,10 +38,6 @@ const ART_PLACES: Readonly<Partial<Record<EncounterId, [number, number, number]>
   thief: [20, 43, 35],
   weddingShoot: [22, 38, 33],
 };
-// CLEANUP (added 2026-10-28): the green bin's burst is fx-hit-fish-crates's stand-in, which art
-// measured for another word. Drop this set once art sends the green bin's place.
-const UNMEASURED: ReadonlySet<EncounterId> = new Set(["greenBin"]);
-const measured = bursts.filter((id) => !UNMEASURED.has(id));
 
 describe("font-comic", () => {
   it("draws A to Z, ! ? - and space", () => {
@@ -57,14 +52,14 @@ describe("the burst words", () => {
   });
 
   it("give every burst a word font-comic draws as wide as art's", () => {
-    for (const id of measured) {
+    for (const id of bursts) {
       const word = hitWord(gameData.encounters[id]) ?? "";
       expect(widthOf(word)).toBe(ART_PLACES[id]?.[2]);
     }
   });
 
   it("place every burst's word where art does", () => {
-    for (const id of measured) {
+    for (const id of bursts) {
       const word = hitWord(gameData.encounters[id]) ?? "";
       const place = burstWordPlace(widthOf(word) ?? 0, COMIC_WORDS.burst.starRows[id] ?? 0);
       expect([place.x, place.y]).toEqual(ART_PLACES[id]?.slice(0, 2));

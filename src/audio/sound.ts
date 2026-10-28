@@ -1,7 +1,7 @@
 // Game events, the manifest sound keys they play, and the mixing rules. No Phaser here: the
 // soundboard in src/scenes/ applies these to the sound manager.
 
-import { kebabCase, shownArtKey } from "../assets/spriteKeys";
+import { kebabCase } from "../assets/spriteKeys";
 import type { Encounter, EncounterId } from "../data/types";
 import { clamp01 } from "../lib/numbers";
 
@@ -40,7 +40,7 @@ export function soundKeysOf(cue: SoundCue): readonly string[] {
     return [SOUND_KEYS[cue]];
   }
   return cue.startsWith(HIT_PREFIX)
-    ? [shownArtKey(`sfx-hit-${kebabCase(cue.slice(HIT_PREFIX.length))}`), SOUND_KEYS.bump]
+    ? [`sfx-hit-${kebabCase(cue.slice(HIT_PREFIX.length))}`, SOUND_KEYS.bump]
     : [`sfx-${kebabCase(cue.slice(LUCKY_HIT_PREFIX.length))}`];
 }
 

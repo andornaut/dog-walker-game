@@ -7,7 +7,6 @@ import {
   cardFrameTag,
   DIFFICULTY_KEY,
   encounterSpriteKey,
-  shownArtKey,
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
@@ -129,7 +128,7 @@ function sourceSpriteKey(source: CardSource): string | undefined {
 
 // The option's illustration, or the Skip card's. A path card's is its zone's preview.
 function illustrationKey(option: OptionView | undefined): string {
-  return option === undefined ? SKIP_CARD_ART : shownArtKey(option.art);
+  return option?.art ?? SKIP_CARD_ART;
 }
 
 // Up to three cards over the dimmed band and road. The walk bar and dog cards stay in view, and

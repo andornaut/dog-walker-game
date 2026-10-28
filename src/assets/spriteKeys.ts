@@ -26,26 +26,8 @@ export function kebabCase(id: string): string {
   return id.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 }
 
-// CLEANUP (added 2026-10-28): the drawn art each undrawn key shows until art draws its own.
-// Remove an entry once its key is in the manifest, and the table with shownArtKey once it is
-// empty.
-const ART_STAND_INS: Readonly<Record<string, string>> = {
-  "badge-clean-streets": "badge-fishmongers-friend",
-  "card-green-bin-hurry-past": "card-fish-crates-hurry-past",
-  "card-green-bin-pay": "card-fish-crates-pay",
-  "card-green-bin-wade-through": "card-fish-crates-wade-through",
-  "fx-hit-green-bin": "fx-hit-fish-crates",
-  "green-bin": "fish-crates",
-  "sfx-hit-green-bin": "sfx-hit-fish-crates",
-};
-
-// The key an art key draws or plays: its stand-in while it has one, or the key itself.
-export function shownArtKey(key: string): string {
-  return ART_STAND_INS[key] ?? key;
-}
-
 export function encounterSpriteKey(encounter: EncounterId): string {
-  return shownArtKey(kebabCase(encounter));
+  return kebabCase(encounter);
 }
 
 // Every dog-keyed art key names the dog by its art id, which can differ from its data id.
@@ -69,7 +51,7 @@ export function walkerPortraitKey(walker: WalkerId): string {
 
 // An achievement's 32x32 badge, tagged earned and locked.
 export function badgeKey(achievement: AchievementId): string {
-  return shownArtKey(`badge-${kebabCase(achievement)}`);
+  return `badge-${kebabCase(achievement)}`;
 }
 
 // A gear item's 32x32 icon image.

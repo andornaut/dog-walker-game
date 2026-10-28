@@ -1,6 +1,6 @@
 import type { GameObjects, Scene } from "phaser";
 
-import { kebabCase, shownArtKey } from "../assets/spriteKeys";
+import { kebabCase } from "../assets/spriteKeys";
 import type { Encounter, EncounterId } from "../data/types";
 import { encounterFlashColour } from "../layout/bumpFlash";
 import { burstWordPlace, COMIC_WORDS } from "../layout/comicWords";
@@ -73,7 +73,7 @@ export function hitLook(kind: Encounter["kind"], encounter: EncounterId): HitLoo
     return { burst: `fx-${art}`, flash: null, plate: "lucky" };
   }
   const colour = encounterFlashColour(encounter);
-  return { burst: shownArtKey(`fx-hit-${art}`), flash: `ui-hit-flash-${colour}`, plate: "normal" };
+  return { burst: `fx-hit-${art}`, flash: `ui-hit-flash-${colour}`, plate: "normal" };
 }
 
 // The look's burst, or fx-bump when its art is missing.

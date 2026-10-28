@@ -1069,7 +1069,7 @@
       "zones": [
         "shops"
       ],
-      "spriteKey": "fish-crates"
+      "spriteKey": "green-bin"
     },
     {
       "id": "lostWallet",

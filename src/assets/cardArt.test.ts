@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import manifest from "../../public/art/manifest.json";
 import { gameData } from "../data";
 import { SKIP_CARD_ART } from "./cardArt";
-import { shownArtKey } from "./spriteKeys";
 
 const images = new Set(manifest.images.map(({ key }) => key));
 
@@ -21,6 +20,6 @@ describe("card art", () => {
       ),
       ...Object.values(upgrades).map((upgrade) => upgrade.art),
     ];
-    expect(keys.filter((key) => !images.has(shownArtKey(key)))).toEqual([]);
+    expect(keys.filter((key) => !images.has(key))).toEqual([]);
   });
 });
