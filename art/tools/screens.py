@@ -39,10 +39,11 @@ reads on them.
   ramp step darker, the windows lit), and the leash hooks. Below the
   tabs the wall is open for the stats panel and the badge wall (8,108 to
   352,552).
-- screen-end: a Cabbagetown street at dusk. Between the logo (116,8) and the
-  summary panel (24,112 to 336,412), the front of the brick cottage the pack
-  comes home to: the logo stands on its slate roof's ridge (row 38), a steep
-  centre gable trimmed in white rises behind it, two lit sash windows flank
+- screen-end: a Cabbagetown street at dusk. Between the logo (END_LOGO_AT
+  107,2) and the summary panel (24,112 to 336,412), the front of the brick
+  cottage the pack comes home to: the logo stands on its slate roof's ridge
+  (END_RIDGE, row 43), a low centre gable trimmed in white rises from the
+  ridge with a small lit arched window, two lit sash windows flank
   the front door (171,73 18x23) under its lit transom, which opens onto a step
   (164,96 32x4), and a flagstone path (168,100 24x12) runs down behind the
   panel's top edge. Bay-and-gables stand either side, their lamps lit behind
@@ -840,6 +841,8 @@ END_STREET = 370  # top of the street strip on screen-end
 # Cabbagetown's dusk, top to horizon, as its backdrop: lilac over pink and peach to a gold glow.
 DUSK_SKY = ("lilac", "pink", "peach", "gold")
 END_CN = (306, 96, 4)  # the CN Tower's centre column, foot and mast tip on screen-end
+END_RIDGE = 43  # the house's roof ridge on screen-end, under the logo's foot
+END_LOGO_AT = ((W - LOGO_W) // 2, END_RIDGE - LOGO_H)  # where EndScene draws the logo, 107,2
 
 
 def end():
@@ -862,23 +865,24 @@ def end():
                                  (300, "brick", "shale", "ttc"), (354, "dbrick", "dslate", "forest")):
         bd.bay_gable(cv, cx, 46, wall, roof, door, 96, trim="cream", curtains="orange")
     # the house the pack comes home to, between the logo and the panel: a brick Cabbagetown cottage whose
-    # slate roof's ridge the logo stands on like a sign, a steep centre gable trimmed in white over the door
-    for i in range(12):
-        cv.fill(122 - i, 38 + i, 116 + 2 * i, 1, "shale")
-        cv.fill(122 - i, 38 + i, 2, 1, "ash")
+    # slate roof's ridge (END_RIDGE) the logo stands on, a low centre gable trimmed in white over the door
+    for i in range(49 - END_RIDGE):
+        cv.fill(122 - 2 * i, END_RIDGE + i, 116 + 4 * i, 1, "shale")
+        cv.fill(122 - 2 * i, END_RIDGE + i, 2, 1, "ash")
     cv.fill(108, 49, 144, 2, "coal")
     cv.fill(124, 51, 112, 45, "brick")
     cv.fill(233, 51, 3, 45, "dbrick")
     for y in range(55, 96, 5):
         for x in range(124 + (y // 5 % 2) * 6, 233, 12):
             cv.fill(x, y, 1, 1, "dbrick")
-    for i in range(30):
-        half = 2 + i * 22 // 29
-        cv.fill(180 - half, 24 + i, 2 * half, 1, "brick")
-        cv.fill(180 - half - 1, 24 + i, 2, 1, "white")
-        cv.fill(180 + half - 1, 24 + i, 2, 1, "white")
+    rows = 54 - END_RIDGE
+    for i in range(rows):
+        half = 2 + i * 22 // (rows - 1)
+        cv.fill(180 - half, END_RIDGE + i, 2 * half, 1, "brick")
+        cv.fill(180 - half - 1, END_RIDGE + i, 2, 1, "white")
+        cv.fill(180 + half - 1, END_RIDGE + i, 2, 1, "white")
     cv.fill(158, 54, 44, 1, "white")
-    lit_window(cv, 178, 40, 5, 10, "stone", True, arch=True)
+    lit_window(cv, 178, 47, 5, 5, "stone", True, arch=True)
     # two tall sash windows lit gold under stone lintels
     for wx in (134, 208):
         cv.fill(wx - 2, 58, 22, 3, "stone")
@@ -1506,7 +1510,7 @@ def ui(cv, key):
             sn.text(cv, "THE GOAL", x + 36, y + 20, "lgrey", 2)
             sn.text(cv, "SECOND LINE", x + 36, y + 36, "lgrey", 2)
     elif key == "screen-end":
-        cv.paste(logo().img, 116, 8)
+        cv.paste(logo().img, *END_LOGO_AT)
         for x, foot in ((116, 110), (144, 110), (216, 110)):
             figure(x, foot, 16, 40, "skin1")
         figure(180, 110, 16, 40, "sky")
