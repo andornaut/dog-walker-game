@@ -1,0 +1,88 @@
+{ "frames": {
+   "stilt-walker@50 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 24, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 48 },
+    "sourceSize": { "w": 24, "h": 48 },
+    "duration": 150
+   },
+   "stilt-walker@50 1.aseprite": {
+    "frame": { "x": 24, "y": 0, "w": 24, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 48 },
+    "sourceSize": { "w": 24, "h": 48 },
+    "duration": 150
+   },
+   "stilt-walker@50 2.aseprite": {
+    "frame": { "x": 48, "y": 0, "w": 24, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 48 },
+    "sourceSize": { "w": 24, "h": 48 },
+    "duration": 150
+   },
+   "stilt-walker@50 3.aseprite": {
+    "frame": { "x": 72, "y": 0, "w": 24, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 48 },
+    "sourceSize": { "w": 24, "h": 48 },
+    "duration": 150
+   },
+   "stilt-walker@50 4.aseprite": {
+    "frame": { "x": 96, "y": 0, "w": 24, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 48 },
+    "sourceSize": { "w": 24, "h": 48 },
+    "duration": 300
+   },
+   "stilt-walker@50 5.aseprite": {
+    "frame": { "x": 120, "y": 0, "w": 24, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 48 },
+    "sourceSize": { "w": 24, "h": 48 },
+    "duration": 300
+   },
+   "stilt-walker@50 6.aseprite": {
+    "frame": { "x": 144, "y": 0, "w": 24, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 48 },
+    "sourceSize": { "w": 24, "h": 48 },
+    "duration": 120
+   },
+   "stilt-walker@50 7.aseprite": {
+    "frame": { "x": 168, "y": 0, "w": 24, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 48 },
+    "sourceSize": { "w": 24, "h": 48 },
+    "duration": 120
+   },
+   "stilt-walker@50 8.aseprite": {
+    "frame": { "x": 192, "y": 0, "w": 24, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 48 },
+    "sourceSize": { "w": 24, "h": 48 },
+    "duration": 120
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "stilt-walker@50.png",
+  "format": "RGBA8888",
+  "size": { "w": 216, "h": 48 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "idle", "from": 4, "to": 5, "direction": "forward" },
+   { "name": "cue", "from": 6, "to": 8, "direction": "forward" }
+  ]
+ }
+}

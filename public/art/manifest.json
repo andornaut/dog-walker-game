@@ -10220,6 +10220,87 @@
       }
     },
     {
+      "key": "stilt-walker",
+      "png": "sprites/stilt-walker.png",
+      "json": "sprites/stilt-walker.json",
+      "anchor": {
+        "feetY": 95,
+        "opaqueWidth": 46
+      }
+    },
+    {
+      "key": "stilt-walker@50",
+      "png": "sprites/stilt-walker@50.png",
+      "json": "sprites/stilt-walker@50.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "stilt-walker@56",
+      "png": "sprites/stilt-walker@56.png",
+      "json": "sprites/stilt-walker@56.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "stilt-walker@62",
+      "png": "sprites/stilt-walker@62.png",
+      "json": "sprites/stilt-walker@62.json",
+      "anchor": {
+        "feetY": 59,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "stilt-walker@69",
+      "png": "sprites/stilt-walker@69.png",
+      "json": "sprites/stilt-walker@69.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "stilt-walker@75",
+      "png": "sprites/stilt-walker@75.png",
+      "json": "sprites/stilt-walker@75.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "stilt-walker@81",
+      "png": "sprites/stilt-walker@81.png",
+      "json": "sprites/stilt-walker@81.json",
+      "anchor": {
+        "feetY": 77,
+        "opaqueWidth": 37
+      }
+    },
+    {
+      "key": "stilt-walker@88",
+      "png": "sprites/stilt-walker@88.png",
+      "json": "sprites/stilt-walker@88.json",
+      "anchor": {
+        "feetY": 83,
+        "opaqueWidth": 40
+      }
+    },
+    {
+      "key": "stilt-walker@94",
+      "png": "sprites/stilt-walker@94.png",
+      "json": "sprites/stilt-walker@94.json",
+      "anchor": {
+        "feetY": 89,
+        "opaqueWidth": 43
+      }
+    },
+    {
       "key": "stink-garbage-truck",
       "png": "sprites/stink-garbage-truck.png",
       "json": "sprites/stink-garbage-truck.json",

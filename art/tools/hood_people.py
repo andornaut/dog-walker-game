@@ -36,6 +36,18 @@ strolling-busker    48x72   Kensington Market; a guitarist walking, a stepper fa
                             hand down and up, his head nodding 1px on the second beat; cue (4 frames,
                             120ms): a strum flourish, the hand thrown up, swept down past the sound
                             hole and flung out low, a note rising beside the hat
+stilt-walker        48x96   Distillery District and Kensington Market; a Pedestrian Sunday performer on
+                            stilts, a stepper facing the player as the couple is, laid out on 32 x 64 so
+                            it stands a head and a half over every adult mover: bold yellow and violet
+                            striped trousers flared over the stilts down to big black shoes, an oversized
+                            denim jacket with red, lime and gold patches over a yellow shirt, a red bow
+                            tie, white gloves, curly orange hair, a big smiling face with rosy cheeks
+                            and a green top hat with a pink band and a daisy; walk (4 frames, 150ms): a
+                            stilted high-knee step, each foot lifted 8 rows with the knee bent toward the
+                            player, the body swaying 1px over the planted leg, the arms swinging out
+                            against the legs; idle (2 frames, 300ms): waving the screen-right glove beside
+                            the hat, swaying; cue (3 frames, 120ms): the wind-up, the arms dropped to the
+                            sides as the body sinks, out, then up in a V as the first knee lifts
 delivery-cyclist    48x72   Kensington Market and Yonge Street; a fast rider coming down a lane at the
                             player, facing it as cyclist does: a big turquoise insulated delivery box
                             on the back, wider than the shoulders and over the head, with a reflective
@@ -549,6 +561,108 @@ def strolling_top(strum=0, nod=0, flourish=None, note_at=None):
 def strolling_busker(strum=0, nod=0, flourish=None, note=None, **q):
     """The strolling busker facing the player, with the road outline and the lit rim."""
     return rim(edged(road.person(strolling_top(strum, nod, flourish, note), **STROLLING, **q)), STROLLING_RIM)
+
+
+# ---------- stilt-walker: a Pedestrian Sunday performer on stilts, facing the player ----------
+
+# The stilt walker's design grid: 32 columns by STILT_ROWS, so 48x96 at road.SCALE, a third taller than the
+# other movers' 48x72 so it stands a head and a half over them.
+STILT_ROWS = 64
+# The planted shoes' top row and each leg's left column (screen left, then screen right).
+STILT_SHOE = 60
+STILT_LEGS = (8, 18)
+# The trousers' three bold stripes on each leg, from screen left, and their shade down the right column.
+STILT_STRIPES = ("yellow", "violet", "yellow")
+STILT_SHADE = "amber"
+# Each arm pose's gloves, (screen left, screen right), on the design grid before the sway and the bob.
+STILT_ARMS = {
+    "in": ((4, 31), (28, 31)),
+    "left-low": ((3.5, 29), (28.5, 12)),
+    "out": ((3, 22), (29, 22)),
+    "right-low": ((3.5, 12), (28.5, 29)),
+    "v": ((3, 8), (29, 8)),
+    "wave": ((3.5, 29), (27.5, 4)),
+    "wave-out": ((3.5, 29), (30, 6)),
+}
+# Walking: a stilted high-knee step, each foot lifted 8 rows in turn and set down through 2, the body swaying
+# 1px over the planted leg and the arms swinging out against the legs. Idle: waving the screen-right glove
+# beside the hat, swaying. Cue: the wind-up before each step, the arms dropped to the sides as the body
+# sinks, then swung up into a V as the first knee lifts.
+STILT_WALK = (dict(lf=-8, sway=1, arms="left-low"), dict(lf=-2, bob=-1, arms="out"),
+              dict(rf=-8, sway=-1, arms="right-low"), dict(rf=-2, bob=-1, arms="out"))
+STILT_WALK_MS = 150
+STILT_IDLE = (dict(arms="wave"), dict(arms="wave-out", sway=1))
+STILT_IDLE_MS = 300
+STILT_CUE = (dict(arms="in", bob=1), dict(arms="out"), dict(arms="v", lf=-3, bob=-1))
+STILT_CUE_MS = 120
+STILT_RIM = {**LIT, "cobalt": ("azure", None), "violet": ("lilac", None)}
+
+
+def stilt_walker(lf=0, rf=0, bob=0, sway=0, arms="out"):
+    """The stilt walker facing the player: yellow and violet striped trousers down over the stilts to big
+    black shoes, an oversized patched denim jacket, white gloves, a red bow tie, curly orange hair and a green
+    top hat with a pink band and a daisy. lf and rf lift each shoe (negative is up), bob lifts the body, sway
+    moves the body above the legs sideways and arms names the gloves' pose in STILT_ARMS."""
+    g = edged(Grid(32, STILT_ROWS))
+    b, o = bob, sway
+    # the legs: each a trouser leg of three bold stripes from under the jacket to a flared cuff, a lifted
+    # one shorter with its knee bent up toward the player, then a big black shoe
+    for x, f in zip(STILT_LEGS, (lf, rf)):
+        top, foot = 33 + b, STILT_SHOE + f
+        for k, c in enumerate(STILT_STRIPES):
+            g.rect(x + 2 * k, top, 2, foot - top, c)
+        g.rect(x + 5, top, 1, foot - top, STILT_SHADE)
+        g.rect(x - 1, foot - 3, 1, 3, STILT_STRIPES[0])
+        g.rect(x + 6, foot - 3, 1, 3, STILT_SHADE)
+        if f <= -4:
+            # the bent knee pushed toward the player: the leg 1 column wider each side over it, a crease under it
+            knee = round(top + (foot - top) * 0.4)
+            g.rect(x - 1, knee - 1, 1, 3, STILT_STRIPES[0])
+            g.rect(x + 6, knee - 1, 1, 3, STILT_SHADE)
+            g.rect(x, knee + 2, 6, 1, STILT_SHADE)
+        g.cel(x + 3, foot + 1.5, 4, 1.6, "ink", "ink", "dslate", power=3)
+    # the oversized denim jacket, broad shoulders to a band at the hips, lit down its left edge
+    g.rect(6 + o, 20 + b, 20, 14, "azure")
+    g.rect(23 + o, 20 + b, 3, 14, "cobalt")
+    g.rect(6 + o, 21 + b, 1, 11, "sky")
+    g.rect(6 + o, 32 + b, 20, 2, "cobalt")
+    # the open front over a yellow shirt, its lapels and gold buttons
+    g.tri((12 + o, 20 + b), (20 + o, 20 + b), (16 + o, 28 + b), "yellow")
+    g.rect(15.5 + o, 28 + b, 1, 4, "cobalt")
+    for y in (29, 31):
+        g.p(14 + o, y + b, "gold")
+    # the patches: red on the left breast, lime on the left shoulder, gold low on the right, each stitched
+    for x, y, c in ((7.5, 25, "red"), (8, 21, "lime"), (19.5, 28, "gold")):
+        g.rect(x + o, y + b, 3, 3, c)
+        g.p(x + 1 + o, y + 1 + b, "white")
+    # the neck and the red bow tie
+    g.rect(13 + o, 18 + b, 6, 2, "skin1")
+    g.tri((11.5 + o, 18.5 + b), (11.5 + o, 22.5 + b), (16 + o, 20.5 + b), "red")
+    g.tri((20.5 + o, 18.5 + b), (20.5 + o, 22.5 + b), (16 + o, 20.5 + b), "red")
+    g.rect(15 + o, 19.5 + b, 2, 2, "dred")
+    # the arms: denim sleeves from the shoulders, each to a white glove
+    for (sx, sy), (hx, hy) in zip(((8, 22), (24, 22)), STILT_ARMS[arms]):
+        limb(g, sx + o, sy + b, hx + o, hy + b, 4, ((1, "cobalt"),))
+        limb(g, sx - 0.5 + o, sy + b, hx - 0.5 + o, hy + b, 3, ((1, "azure"),))
+        g.cel(hx + o, hy + b, 2.2, 2.2, "white", "lgrey")
+        g.p(hx - 2 + o, hy - 1 + b, "white")
+    # the big friendly face: curly orange hair out at the sides, rosy cheeks and a wide smile
+    for cx in (8.5, 23.5):
+        g.cel(cx + o, 13 + b, 2.5, 3.5, "orange", "rust", "amber")
+    face_disc(g, 16 + o, 13 + b, 7, 6.5, "skin1", "skin2")
+    road.face_front(g, 16 + o, 12 + b, lips="dred")
+    for x in (10, 21):
+        g.p(x + o, 15 + b, "pink")
+    # the green top hat: its tall crown, a pink band with a daisy, and the brim
+    g.rect(10.5 + o, 2 + b, 11, 6, "green")
+    g.rect(19.5 + o, 2 + b, 2, 6, "dgreen")
+    g.rect(10.5 + o, 2 + b, 1, 5, "lime")
+    g.rect(10.5 + o, 6 + b, 11, 1.5, "pink")
+    g.cel(13 + o, 6.5 + b, 1.6, 1.6, "white")
+    g.p(13 + o, 6.5 + b, "amber")
+    g.rect(7 + o, 7.5 + b, 18, 1.5, "green")
+    g.rect(7 + o, 8.5 + b, 18, 1, "dgreen")
+    return rim(g, STILT_RIM)
 
 
 # ---------- delivery-cyclist: facing the player, riding down a lane at it ----------
@@ -1917,6 +2031,9 @@ def steps(suffix, s):
         ("walk", [person(strolling_busker, q) for q in STROLLING_WALK], road.PERSON_WALK_MS),
         ("idle", [person(strolling_busker, q) for q in STROLLING_IDLE], STROLLING_IDLE_MS),
         ("cue", [person(strolling_busker, q) for q in STROLLING_CUE], STROLLING_CUE_MS)]
+    yield f"stilt-walker{suffix}", [("walk", [own(stilt_walker, q) for q in STILT_WALK], STILT_WALK_MS),
+                                    ("idle", [own(stilt_walker, q) for q in STILT_IDLE], STILT_IDLE_MS),
+                                    ("cue", [own(stilt_walker, q) for q in STILT_CUE], STILT_CUE_MS)]
     yield f"delivery-cyclist{suffix}", [("ride", [delivery_at(s, **q).outlined() for q in DELIVERY_RIDE],
                                          DELIVERY_RIDE_MS),
                                         ("merge", [delivery_at(s, **q).outlined() for q in DELIVERY_MERGE],
