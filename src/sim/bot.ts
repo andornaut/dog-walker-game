@@ -1,6 +1,6 @@
 import type { DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
-import { screenXAt } from "../layout/projection";
+import { type RoadProjection, screenXAt } from "../layout/projection";
 import { getOrInsert } from "../lib/maps";
 import { chance, type Random } from "../lib/random";
 import type { LanedBox, ScaledBox } from "../runner/collision";
@@ -195,14 +195,13 @@ function holdTogether(pairs: readonly (readonly [Edge, Edge])[]): boolean {
 // can clip a part's corner between two samples, where the walk's collision, at its own walk
 // steps, can meet it. With the two samples the same, it is touchesAsDrawn's test.
 function touchesBetween(
-  centreX: number,
+  lens: Pick<RoadProjection, "centreX">,
   band: RoadGeometry["packBand"],
   part: ScaledBox,
   from: MoverSample,
   to: MoverSample,
 ): boolean {
-  const road = { centreX };
-  const across = (scale: number, x: number) => screenXAt(road, scale, x);
+  const across = (scale: number, x: number) => screenXAt(lens, scale, x);
   const a = from.box;
   const b = to.box;
   // Clear of the part all the way along: the box between them stays within both samples'.
@@ -263,7 +262,7 @@ function touchesPackIn(
   const { dogs, walker } = geometry.packParts;
   return [...dogs, walker].some((part) =>
     touchesBetween(
-      geometry.lens.centreX,
+      geometry.lens,
       geometry.packBand,
       { ...part, left: part.left + x - left, right: part.right + x + right },
       from,
