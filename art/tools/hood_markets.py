@@ -68,7 +68,8 @@ sfx-hit-fish-crates 0.46s   a wooden thunk, ice chips clattering, then two wet f
 Cards (75x56), one per option, composed from the sprites above and the pack's exports:
 card-cheese-crates-sniff, -buy and -hurry-on at a brick shopfront's wooden door, which fits both the
 neighbourhoods it stands in; card-wedding-shoot-pose, -walk-around and -reshoot on the Distillery
-District's road; card-fish-crates-sniff, -pay and -hurry-past on Kensington Market's. The paid options
+District's road; card-fish-crates-sniff, -pay, -hurry-past and -wade-through on Kensington Market's, the
+last with the pack slipping through the crate's spilt fish slime. The paid options
 show a bill (icon-bill) changing hands: the photographer reaching out to take it, the fishmonger in a
 white apron and the cheesemonger in an ochre shirt and white apron holding it up.
 
@@ -1150,6 +1151,74 @@ def card_fish_hurry_past():
     return a
 
 
+def loose_fish(back, belly, flip=False, tail=0.0):
+    """One spilt fish lying loose on the road, on a 16x6 design grid, as fish draws it."""
+    g = edged(Grid(16, 6))
+    fish(g, 1.5, 3, 13, back, belly, flip=flip, tail=tail)
+    return lit(g)
+
+
+def slime(a, blobs):
+    """The fish slime spilt across the cobbles: the union of the ellipses blobs (cx, cy, rx, ry), olive with
+    a dolive rim and moss in its depths."""
+    def inside(x, y, inset):
+        return any(((x + 0.5 - cx) / (rx - inset)) ** 2 + ((y + 0.5 - cy) / (ry - inset)) ** 2 <= 1
+                   for cx, cy, rx, ry in blobs if rx > inset and ry > inset)
+    from cards import AH, AW
+    for y in range(AH):
+        for x in range(AW):
+            if inside(x, y, 0):
+                a.fill(x, y, 1, 1, "moss" if inside(x, y, 3.5) else "olive" if inside(x, y, 1.2) else "dolive")
+
+
+# A leg splayed out down-left to a white paw, outlined by cards.pixmap; mirrored for one splayed right.
+SPLAYED = ["....bb", "...bb.", "..bb..", "wwb...", "www..."]
+
+
+def card_fish_wade_through():
+    """Wade through: the spilt crate drawn small up the road at the left, its fish slime running down
+    across the wet cobbles under the pack, lime streaks and white glints on it. Duchess picks her way
+    through at the left, a slate fish under her paws; Archie, mid-slip at the right, tips over sideways
+    with a front leg skidding out left and a hind leg out right over a red snapper, haze skid marks behind
+    him, slime and water thrown up either side and white wobble ticks by his head. Brown mud splats on
+    both dogs."""
+    import cards
+    from PIL import Image
+    a = cards.Art()
+    a.ground("shops")
+    slime(a, [(20, 22, 12, 4), (30, 31, 22, 6), (40, 42, 32, 9), (38, 53, 36, 6)])
+    crate = to_image(drawn(PERSON * 0.6, fish_crates).outlined())
+    a.paste(crate, 18 - crate.width // 2, 25 - crate.height)
+    for x, y, w in ((14, 30, 6), (40, 33, 5), (4, 41, 4), (62, 40, 6), (22, 50, 4), (62, 52, 5)):
+        a.fill(x, y, w, 1, "lime")
+    for x, y in ((19, 30), (44, 33), (67, 40), (7, 41), (65, 52)):
+        a.fill(x, y, 1, 1, "white")
+    a.paste(to_image(drawn(PERSON * 0.7, loose_fish, "slate", "lgrey").outlined()), 4, 47)
+    c = a.dog("duchess", "walk", 16, 56, 1, step=75)
+    a.lead(16, c, 12)
+    cx, foot = 48, 55
+    a.shadow(cx, foot, 28)
+    for pts in (((23, 46), (29, 47), (33, 49)), ((25, 50), (31, 51), (35, 52))):
+        for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+            a.line(x0, y0, x1, y1, "haze")
+    a.paste(to_image(drawn(PERSON * 0.7, loose_fish, "red", "pink", flip=True, tail=1).outlined()), 52, 45)
+    archie = cards.sn.frame("dog-archie@75", "walk", 1).rotate(-24, Image.NEAREST, expand=True)
+    a.paste(archie, cx - archie.width // 2, foot - archie.height)
+    leg = cards.pixmap(SPLAYED, {"b": "brown", "w": "white"})
+    a.paste(leg, 34, 43)
+    a.paste(leg.transpose(Image.FLIP_LEFT_RIGHT), 52, 42)
+    a.lead(cx, foot - 13, 54)
+    for x, y in ((12, 41), (18, 39), (15, 47), (44, 44), (50, 33)):
+        a.fill(x, y, 2, 2, "brown")
+        a.fill(x + 1, y + 1, 1, 1, "dbrown")
+    a.drops([(33, 45), (30, 49), (66, 44), (69, 48), (64, 40)], "lime")
+    a.drops([(36, 42), (61, 37)], "foam")
+    for x, d in ((38, 1), (62, -1)):
+        a.fill(x, 22, 1, 3, "white")
+        a.fill(x + d, 20, 1, 2, "white")
+    return a
+
+
 def shop_door(a):
     """The cheese crate's setting, the same in both neighbourhoods it stands in: a red brick shopfront in a
     running bond of dbrick mortar across the top, a bark wooden door in a dbrown frame with a gold knob over a
@@ -1273,6 +1342,7 @@ CARDS = {
     "card-fish-crates-sniff": card_fish_sniff,
     "card-fish-crates-pay": card_fish_pay,
     "card-fish-crates-hurry-past": card_fish_hurry_past,
+    "card-fish-crates-wade-through": card_fish_wade_through,
     f"card-{CHEESE}-sniff": card_cheese_sniff,
     f"card-{CHEESE}-buy": card_cheese_buy,
     f"card-{CHEESE}-hurry-on": card_cheese_hurry_on,
