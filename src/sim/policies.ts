@@ -1,4 +1,4 @@
-import { chance, type Random } from "../lib/random";
+import { chance, type Random, randomInt } from "../lib/random";
 import { heartsForgiven } from "../rules/causes";
 import { type CardView, type Choice, type ChoiceData, chooseOption } from "../rules/choices";
 import type { Cents } from "../rules/units";
@@ -46,7 +46,7 @@ export function choosePath(random: () => number, policy: RoutePolicyId, pathCoun
     case "straight":
       return Math.floor((pathCount - 1) / 2);
     default:
-      return Math.floor(random() * pathCount);
+      return randomInt(random, 0, pathCount);
   }
 }
 

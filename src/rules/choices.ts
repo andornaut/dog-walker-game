@@ -12,7 +12,7 @@ import type {
   ZoneId,
 } from "../data/types";
 import { fillNames } from "../lib/lines";
-import { type Random, randomInt } from "../lib/random";
+import { type Random, randomInt, randomPick } from "../lib/random";
 import { packDogs, walkingAmong } from "../state/pack";
 import type { CardSource, EffectSource, RunState } from "../state/runState";
 import { countOptionPick } from "./achievements";
@@ -127,7 +127,7 @@ export interface QuipCue {
 // One of the owner's lines for the cue, drawn at random.
 export function quipLine(data: Pick<GameData, "quips">, random: Random, cue: QuipCue): string {
   const lines = data.quips[cue.dog][cue.moment];
-  return lines[Math.floor(random() * lines.length)] ?? lines[0];
+  return randomPick(random, lines);
 }
 
 // Everything a scene needs to animate a choice or an instant encounter without recomputing

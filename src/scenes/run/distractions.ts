@@ -1,7 +1,7 @@
 import { minorObstacleSpriteKey } from "../../assets/spriteKeys";
 import type { GameData, MinorObstacleId, Zone } from "../../data/types";
 import { clamp01 } from "../../lib/numbers";
-import { type Random, weightedPick } from "../../lib/random";
+import { type Random, randomPick, weightedPick } from "../../lib/random";
 import { eachRoadsideProp, type RoadsideTable, START_STRIP_LENGTH } from "../../road/roadsideProps";
 import { read } from "../../rules/units";
 import { type Box, overlaps } from "../../runner/collision";
@@ -202,7 +202,7 @@ export function planDistractions(
   const planned: Distraction[] = [];
   for (let i = 0; i < count; i++) {
     const pick = random();
-    const pattern = PATTERNS[Math.floor(random() * PATTERNS.length)] ?? "visit";
+    const pattern = randomPick(random, PATTERNS);
     const side = random() < 0.5 ? -1 : 1;
     const row = stretch * (i + ROW_SHARE * random());
     const step = random();

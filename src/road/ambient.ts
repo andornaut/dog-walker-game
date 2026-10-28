@@ -2,7 +2,7 @@ import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import type { AmbientGait, AmbientMover, ZoneId } from "../data/types";
 import { CROSS_STREET } from "../layout/crossStreet";
 import { project, type RoadProjection, scaleAt, scaleAtY } from "../layout/projection";
-import type { Random } from "../lib/random";
+import { type Random, randomInt } from "../lib/random";
 import { noise, sidewalkTo, type Verge, VERGES, walkFrom } from "./roadside";
 
 // The ambient movers: cars, bikes, people, animals and planes moving across the backdrop's cross
@@ -215,7 +215,7 @@ function setOut(
   slot.bornAt = frame.now;
   slot.mover = mover;
   slot.direction = random() < 0.5 ? -1 : 1;
-  slot.seed = Math.floor(random() * 65536);
+  slot.seed = randomInt(random, 0, 65536);
   slot.look = random();
   switch (mover.path) {
     case "crossStreet":
@@ -226,7 +226,7 @@ function setOut(
       return;
     case "sky": {
       const { from, to } = skyRows(mover);
-      slot.row = from + Math.floor(random() * (to - from + 1));
+      slot.row = randomInt(random, from, to + 1);
       return;
     }
     case "sidewalkAway":
