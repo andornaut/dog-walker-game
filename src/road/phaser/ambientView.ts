@@ -17,7 +17,7 @@ import {
   stepAmbient,
 } from "../ambient";
 
-// The sprites a mover may wear, one picked by its slot's look.
+// The art of a slot with no mover: none.
 const NO_ART: readonly string[] = [];
 
 // Band movers lie over the backdrop's approach, nearer rows in front; the rows add at most

@@ -113,7 +113,8 @@ interface BoxLike {
 }
 
 // Where the notice goes, in page pixels, for the canvas's bounding box: centred on it
-// (centreX is the notice's centre), its top at game y 48, and at most 260 game pixels wide.
+// (centreX is the notice's centre), its top at game y NOTICE.top, and at most NOTICE.maxWidth
+// game pixels wide.
 export function noticePlacement(canvas: BoxLike): {
   centreX: number;
   maxWidth: number;
