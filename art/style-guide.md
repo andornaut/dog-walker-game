@@ -282,6 +282,7 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 - Curbs and verges stay inside the outer 5 to 8px of the strip, clear of the 8px each side of a 48px sprite in its lane.
 - Every zone has a start strip: a neutral cross street (near curb, asphalt with a zebra, far curb) on rows 20 to 63 and the zone's strip on rows 0 to 19, so it follows any zone at a fork.
 - The rows from the road's far edge down to about y 214 sample the strip shrunk 4×, so lane dashes and texture along the road repeat every 8 rows or more, lines across the road are at least 2 rows tall and low in contrast, fine detail runs along the road, and small texture is spaced irregularly.
+- Texture on the road is sparse grit of 2px or more, with no single-pixel specks and no grit lighter than a pale road (Cabbagetown's grey): either shimmers as the road scrolls and competes with the road objects.
 - Joints and seams across the road repeat every 32 rows (`SEAM_PERIOD` in `roads.py`) or not at all: the road scrolls up to 11 px a frame at 30 fps, and a shorter period strobes, its motion seeming to stall or reverse. Paving with short joints lays them along the road, each column's joints at its own row.
 
 ### Verges

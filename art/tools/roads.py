@@ -190,10 +190,11 @@ def cracks(g, rnd, runs, col):
 
 
 def cabbagetown_ground(g):
-    """Pale asphalt with granite gutters in stone, their joints every 32 rows."""
+    """Pale asphalt with sparse 2px slate grit, a few cracks and leaves, and granite gutters in stone, their
+    joints every 32 rows. No grit lighter than the asphalt: light flecks shimmer like rain as the road scrolls."""
     rnd = random.Random("road-cabbagetown")
     g.rect(0, 0, W, H, "grey")
-    grit(g, rnd, 60, ("slate", "slate", "dslate", "lgrey", "lgrey"))
+    grit(g, rnd, 30, ("slate", "slate", "dslate"))
     cracks(g, rnd, ((43, 12, 10), (100, 40, 12), (160, 62, 9), (224, 50, 14), (286, 30, 8)), "dslate")
     leaves(g, rnd, 4, 10, W - 10, (("moss", "olive", "dolive"), ("gold", "ochre", "rust")))
     for x0, edge in ((0, 4), (W - 4, W - 5)):
@@ -232,8 +233,8 @@ def root(g, rnd, x, y, dx, steps):
 
 def high_park_ground(g):
     """Packed earth on High Park's trail: skin1 worn patches down the middle of each lane where feet go,
-    scuffed cream; skin2 damp patches; roots creeping in from the undergrowth; stones, pebbles, needles
-    and fallen leaves; ragged pine undergrowth along both edges with grass spilling onto the dirt."""
+    scuffed cream; skin2 damp patches and 2px grit; roots creeping in from the undergrowth; stones,
+    needles and fallen leaves, with no single-pixel specks; ragged pine undergrowth along both edges with grass spilling onto the dirt."""
     rnd = random.Random("road-high-park")
     g.rect(0, 0, W, H, "tan")
     # worn ground down each lane where feet go: skin1 patches chained along the lane's middle, drifting
@@ -249,8 +250,7 @@ def high_park_ground(g):
             wrect(worn, cx + drift + rnd.randint(-2, 1), y + rnd.randint(3, h - 6), 1, rnd.randint(2, 3), "cream")
             drift = max(-8, min(8, drift + rnd.randint(-4, 4)))
             y += rnd.randint(h // 2, h + 8)
-    specks(g, rnd, 90, "brown", 9, W - 9)
-    specks(g, rnd, 40, "skin2", 9, W - 9, 0.3)
+    specks(g, rnd, 30, "skin2", 9, W - 9, 1.0)
     for y in range(H):
         for x in range(W):
             if worn.px[y][x]:
@@ -277,8 +277,6 @@ def high_park_ground(g):
         wp(g, x, y, "lgrey")
         wp(g, x + 2, y + 1, "stone")
         wrect(g, x, y + 2, 3, 1, "brown")
-    for x, y in scatter(rnd, 20, 10, W - 10, 5, ok=lambda x, y: 2 < (x + 1) % LANE < 61):
-        wp(g, x, y, rnd.choice(("stone", "driftwood", "driftwood", "dstone")))
     # fallen needles in pairs, clear of the lane lines
     for x, y in scatter(rnd, 14, 10, W - 12, 9, ok=lambda x, y: (x + 4) % LANE >= 8):
         wp(g, x, y, "bark")
@@ -355,8 +353,8 @@ def distillery_lines(g):
 
 
 def kensington_ground(g):
-    """Dark brick flagstones in offset courses between clay gutters: dbrick stones in plum joints, brick,
-    walnut and mauve flecks worn into them; clay stones on the outer 4 columns inside a bark seam, a bark
+    """Dark brick flagstones in offset courses between clay gutters: dbrick stones in plum joints, sparse
+    2px brick and walnut grit worn into them; clay stones on the outer 4 columns inside a bark seam, a bark
     joint every 32 rows."""
     rnd = random.Random("road-kensington-market")
     g.rect(0, 0, W, H, "dbrick")
@@ -367,9 +365,7 @@ def kensington_ground(g):
         g.rect(0, y + SEAM_PERIOD - 2, W, 2, "plum")
         for x in range(off - 1, W, 32):
             g.rect(x, y, 1, SEAM_PERIOD - 2, "plum")
-    specks(g, rnd, 20, "brick", 6, W - 6)
-    specks(g, rnd, 10, "walnut", 6, W - 6)
-    specks(g, rnd, 6, "mauve", 6, W - 6)
+    grit(g, rnd, 16, ("brick", "brick", "walnut"))
     for x0, inner in ((0, 4), (W - 4, W - 5)):
         g.rect(x0, 0, 4, H, "clay")
         g.rect(inner, 0, 1, H, "bark")
@@ -417,7 +413,7 @@ def yonge_ground(g):
     dstone granite gutters, their joints in shale every 32 rows."""
     rnd = random.Random("road-yonge-street")
     g.rect(0, 0, W, H, "shale")
-    grit(g, rnd, 50, ("ash", "ash", "coal", "coal", "dslate"))
+    grit(g, rnd, 30, ("ash", "coal", "coal", "dslate"))
     cracks(g, rnd, ((40, 20, 9), (150, 50, 11), (230, 12, 8)), "coal")
     for y in (14, 46):
         g.rect(0, y, W, 2, "coal")
