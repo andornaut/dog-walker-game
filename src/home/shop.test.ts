@@ -66,14 +66,17 @@ const slotSets = allSlots
   .map((set) => [set.join(" and "), set] as const);
 
 describe("shopRowLook", () => {
-  // Every row for sale (each slot, gear item and dog not owned) with the bank at its price and
-  // a cent short.
+  // Every row for sale (each slot, gear item and dog not owned), and the first of each kind of
+  // purchase with the bank at its price and a cent short: the look reads only the price.
   const forSale: readonly ShopRow[] = [
     ...slotRows(data, owned),
     ...gearRows(data, owned),
     ...dogRows(data, owned),
   ].filter((row) => row.price !== null);
-  const banks = forSale.flatMap((row) => {
+  const firstOfKind = forSale.filter(
+    (row, i) => forSale.findIndex((other) => other.purchase.kind === row.purchase.kind) === i,
+  );
+  const banks = firstOfKind.flatMap((row) => {
     const price = row.price ?? cents(0);
     return [
       { art: "colour", bank: price, box: GREYED.affordBox, id: row.id, look: "affordable", row },
