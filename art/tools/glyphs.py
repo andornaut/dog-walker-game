@@ -587,16 +587,17 @@ def second_chance20():
 
 
 def big_tipper20():
-    """A short stack of three coins under a fourth seen from above, and a small green arrow up beside
-    it, kept to the well's middle 14x9 so it sits quietly in the walk bar."""
+    """A stack of five coins under a sixth seen from above, and a green arrow up beside it, filling the well
+    as the other effect icons do."""
     g = Grid(20, 20)
-    for x, y in ((4, 13), (5, 11), (4, 9)):
-        g.rect(x, y, 8, 2, "amber")
-        g.rect(x, y + 1, 8, 1, "orange")
+    for x, y in ((2, 16), (3, 14), (2, 12), (3, 10), (2, 8)):
+        g.rect(x, y, 9, 2, "amber")
+        g.rect(x, y + 1, 9, 1, "orange")
         g.p(x + 1, y, "yellow")
-    g.ell(8.5, 8, 4, 2, "yellow", "amber")
-    g.tri((15, 6.5), (12.5, 9.5), (17.5, 9.5), "green")
-    g.rect(14, 9, 2, 5, "green")
+    g.ell(6.5, 6.5, 4.5, 2.2, "yellow", "amber")
+    g.rect(4, 6, 5, 1, "amber")
+    g.tri((15, 1), (11.5, 5.5), (18.5, 5.5), "green")
+    g.rect(14, 5, 2, 13, "green")
     return g
 
 
