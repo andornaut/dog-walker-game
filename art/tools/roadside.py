@@ -1037,11 +1037,12 @@ def gap(*props):
 # dz is road px from the slot's z, nearer negative. Each table is sparse: an empty lot and six gaps,
 # a prop in gaps 0 and 3, so each side has a prop every 6 slots (840 px): the neighbourhood's tree or
 # street furniture in gap 0, then its own prop in gap 3. The right side's gapStart of 2 puts its props
-# 3 slots after the left's, so they alternate sides, one every 420 px. Kensington Market and The Beaches
-# run twelve gaps, so one prop stands every 210 px. Kensington: the violet shopfront in gap 0 and the ochre
-# in 6, the fruit stand in 3, the Garden Car in 9, café patios in 1 and 7 and mural walls in 4 and 10. The
-# Beaches: the Leuty in gaps 0 and 6, dune grass in 3, the ice cream stand in 9, and beach umbrellas and
-# chairs in 1, 4, 7 and 10.
+# 3 slots after the left's, so they alternate sides, one every 420 px. Kensington Market, The Beaches and
+# Yonge Street run twelve gaps, so one prop stands every 210 px. Kensington: the violet shopfront in gap 0
+# and the ochre in 6, the fruit stand in 3, the Garden Car in 9, café patios in 1 and 7 and mural walls in 4
+# and 10. The Beaches: the Leuty in gaps 0 and 6, dune grass in 3, the ice cream stand in 9, and beach
+# umbrellas and chairs in 1, 4, 7 and 10. Yonge Street: street lamps in gaps 0, 1, 4, 6, 7 and 10 and the
+# transit stop in 3 and 9.
 SIDES = dict(
     left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=1),
     right=dict(offset=1, lotStart=0, lotStride=1, gapStart=2, gapStride=1),
@@ -1079,7 +1080,12 @@ PLACEMENT = {
         9: (("ice-cream-stand", 216, 0),),
         10: (("beach-chair-coral", 213, 0),),
     }),
-    "yonge-street": sparse(("street-lamp", 213, 0), ("transit-stop", 213, 0)),
+    "yonge-street": sparse(("street-lamp", 213, 0), ("transit-stop", 213, 0), {
+        1: (("street-lamp", 213, 0),),
+        4: (("street-lamp", 213, 0),),
+        7: (("street-lamp", 213, 0),),
+        10: (("street-lamp", 213, 0),),
+    }),
 }
 
 # Curb props stand on the sidewalk or paving, each frame wholly inside the zone's curb band: from 2 road

@@ -484,7 +484,13 @@
             "dz": 0
           }
         ],
-        [],
+        [
+          {
+            "key": "roadside-street-lamp",
+            "across": 243,
+            "dz": 0
+          }
+        ],
         [],
         [
           {
@@ -493,7 +499,43 @@
             "dz": 0
           }
         ],
+        [
+          {
+            "key": "roadside-street-lamp",
+            "across": 243,
+            "dz": 0
+          }
+        ],
         [],
+        [
+          {
+            "key": "roadside-street-lamp",
+            "across": 243,
+            "dz": 0
+          }
+        ],
+        [
+          {
+            "key": "roadside-street-lamp",
+            "across": 243,
+            "dz": 0
+          }
+        ],
+        [],
+        [
+          {
+            "key": "roadside-transit-stop",
+            "across": 234,
+            "dz": 0
+          }
+        ],
+        [
+          {
+            "key": "roadside-street-lamp",
+            "across": 243,
+            "dz": 0
+          }
+        ],
         []
       ],
       "sides": {
