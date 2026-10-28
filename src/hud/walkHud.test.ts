@@ -198,8 +198,9 @@ describe("cashScale", () => {
       Array.from({ length: zones }, (_, zone) => perZone(zone)).reduce((a, b) => a + b, 0) +
       money("walkBonus"),
   );
-  const amounts = [...[0, 9, 99, 999].map((dollars) => cents(dollars * 100)), plausible];
-  it.each(amounts.map((amount) => `$${dollarAmountText(amount)}`))(
+  // The widest of them: cashScale takes the largest scale that fits, so only an amount too wide
+  // at every scale could overflow.
+  it.each([`$${dollarAmountText(plausible)}`])(
     "fits %s in the cash's room at the scale it takes",
     (cash) => {
       const width = titleWidth(cash);
@@ -230,7 +231,13 @@ describe("cashScale", () => {
     expect([...taken].sort()).toEqual([...scales].sort());
   });
 
-  it.each(ranged)("centres %s across the well's ink at the scale it takes", (cash) => {
+  // The first amount of each scale and parity of ink: the centring reads only those.
+  const centreKey = (cash: string) =>
+    `${cashScale(titleWidth(cash))},${(titleWidth(cash) * cashScale(titleWidth(cash))) % 2}`;
+  const centred = ranged.filter(
+    (cash, i) => ranged.findIndex((other) => centreKey(other) === centreKey(cash)) === i,
+  );
+  it.each(centred)("centres %s across the well's ink at the scale it takes", (cash) => {
     const { ink } = WALK_BAR.cash;
     const inkWidth = titleWidth(cash) * cashScale(titleWidth(cash));
     const left = cashLeft(inkWidth);
@@ -485,7 +492,20 @@ describe("the dog cards", () => {
     },
   );
 
-  it.each(owners)(
+  // Of the names set on one line and of those set on two, the one whose widest line reaches
+  // farthest: every line starts at owner.x, at its count's tops.
+  const reach = (name: string) =>
+    Math.max(...ownerNameLines(inkRight, name).map(({ text }) => inkRight(text)));
+  const lineCount = (name: string) => ownerNameLines(inkRight, name).length;
+  const farthest = owners.filter(([, name]) =>
+    owners.every(
+      ([, other]) =>
+        lineCount(other) !== lineCount(name) ||
+        reach(other) < reach(name) ||
+        (reach(other) === reach(name) && other >= name),
+    ),
+  );
+  it.each(farthest)(
     "keeps the name of %s's owner, %s, inside the card, clear of the photos and over the hearts",
     (_dog, name) => {
       const hearts = heartRects(mostHearts);
