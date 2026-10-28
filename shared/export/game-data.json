@@ -2885,7 +2885,7 @@
       "maxEmptyRows": 3,
       "maxMovers": 10,
       "maxSlowVehicles": 4,
-      "minorObstaclesFirstZone": 90,
+      "minorObstaclesFirstZone": 72,
       "minorObstaclesGainPerZone": 2,
       "obstaclesFirstZone": 25,
       "obstaclesGainPerZone": 3,
@@ -2894,7 +2894,7 @@
       "sweetTalkerFreeCards": 1,
       "tipsFirstZone": 31,
       "tipsGainPerZone": -3,
-      "treatsPerZone": 3
+      "treatsPerZone": 4
     },
     "hearts": {
       "bump": 1,
