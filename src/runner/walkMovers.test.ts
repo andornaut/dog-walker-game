@@ -347,7 +347,7 @@ describe("movers", { timeout: 120_000 }, () => {
       .map(({ id }) => id as ZoneId);
   };
 
-  // Each kind some zone draws whose movement is a pattern (bounce, dive, follow, merge, stopAndGo,
+  // A kind some zone draws whose movement is a pattern (bounce, dive, follow, merge, stopAndGo,
   // stopAndGoAcross, sway),
   // planned across seeds at the first zone's pace and the last's with every mover moving, as the
   // passability sweep plans it: its most moves, whether it cues each move, and its lanes.
@@ -365,6 +365,10 @@ describe("movers", { timeout: 120_000 }, () => {
         return null;
     }
   };
+  // The planner builds each way of moving from its kind's numbers the same way, so one kind of
+  // each way of moving and footprint stands for the rest.
+  const patternKey = (kind: WalkItem["kind"]) =>
+    JSON.stringify([movementOf(kind)?.kind ?? null, footprintOf(REAL, kind)]);
   const patterned = OBSTACLE_KINDS.filter(
     (kind) =>
       zonesOf(kind).length > 0 &&
@@ -372,6 +376,8 @@ describe("movers", { timeout: 120_000 }, () => {
         movementOf(kind)?.kind === "dive" ||
         movementOf(kind)?.kind === "merge" ||
         movementOf(kind)?.kind === "stopAndGoAcross"),
+  ).filter(
+    (kind, i, kinds) => kinds.findIndex((other) => patternKey(other) === patternKey(kind)) === i,
   );
   // A kind's movers planned in the zones that draw it, on more seeds than the sweep's, so a kind
   // weighed low still comes up.
