@@ -1721,7 +1721,9 @@
       "id": "deliveryCyclist",
       "movement": {
         "factor": 1.8,
-        "kind": "inLane"
+        "kind": "merge",
+        "mergeAt": 0.4,
+        "mergeSeconds": 0.4
       },
       "name": "Delivery cyclist",
       "shape": {
@@ -2072,10 +2074,9 @@
     {
       "id": "raccoon",
       "movement": {
-        "kind": "hop",
-        "most": 2,
-        "times": {
-          "max": 5,
+        "kind": "approach",
+        "steps": {
+          "max": 3,
           "min": 2
         }
       },

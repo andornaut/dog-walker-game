@@ -81,7 +81,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   deliveryCyclist: {
-    movement: { factor: 1.8, kind: "inLane" },
+    movement: { factor: 1.8, kind: "merge", mergeAt: 0.4, mergeSeconds: 0.4 },
     name: "Delivery cyclist",
     shape: { lanes: 1, rows: 1 },
     zones: ["shops", "homeStretch"],
@@ -199,7 +199,7 @@ export const MINOR_OBSTACLES = {
   porchSteps: { name: "Porch steps", shape: { lanes: 1, rows: 1 }, zones: ["snoozeCrescent"] },
   produceCrates: { name: "Produce crates", shape: { lanes: 1, rows: 1 }, zones: ["shops"] },
   raccoon: {
-    movement: { kind: "hop", most: 2, times: { max: 5, min: 2 } },
+    movement: { kind: "approach", steps: { max: 3, min: 2 } },
     name: "Raccoon",
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
