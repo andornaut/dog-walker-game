@@ -19,6 +19,8 @@ import {
   type RoadFrame,
   roadRaster,
   solidStrip,
+  START_STRIP_ZONE_ROWS,
+  STRIP,
   stripLevels,
 } from "./roadRaster";
 import { screenLayout, walkerFootY } from "./screenLayout";
@@ -42,12 +44,16 @@ const { approach, rasterView: view, road } = screenLayout(SCREEN_CONFIG);
 const projection = roadProjection(ROAD_CAMERA, walkerFootY(road), road);
 const raster = roadRaster(projection, approach.y, view);
 
-const frameAt = (scroll: number, band: Uint32Array | null = null): RoadFrame => ({
-  approach: band,
-  current: { strip: stripLevels(solidStrip(0x123456)), zone: ZONE },
+// Another zone's verge, with no pools and none of their colours.
+const OTHER: ZoneId = "shops";
+const lookOf = (zone: ZoneId) => ({ strip: stripLevels(solidStrip(0x123456)), zone });
+const frameAt = (scroll: number, overrides: Partial<RoadFrame> = {}): RoadFrame => ({
+  approach: null,
+  current: lookOf(ZONE),
   scroll,
   transition: null,
   zoneStart: 0,
+  ...overrides,
 });
 const draw = (frame: RoadFrame) => {
   const out = new Uint32Array(view.width * view.height);
@@ -72,49 +78,98 @@ const poolWordAt = (side: VergeSide, z: number, across: number): number | null =
   return within(0) ? EDGE : null;
 };
 
-// Every verge pixel of the rows below the approach at a scroll, with its side, across and z.
-const vergePixels = (scroll: number) =>
+// Every verge pixel of the rows below the approach in a frame, with its side and across, the
+// zone whose verge lies beside the row, whether the row is one of its seams, and the row's z
+// along that zone's road from its start strip, as roadside props count it. While a start strip
+// rolls in, the previous zone's verge lies beside its road and the start strip's cross street.
+const vergePixels = (frame: RoadFrame) =>
   raster.rows.slice(raster.approachRows).flatMap((row, k) => {
     const y = raster.approachRows + k;
-    const z = scroll + row.distance;
+    const z = frame.scroll + row.distance;
+    const along = Math.floor(z - frame.zoneStart - raster.visibleDistance);
+    const { transition } = frame;
+    const previous = transition !== null && along < STRIP.height - START_STRIP_ZONE_ROWS;
+    const zone = previous ? transition.previous.zone : frame.current.zone;
+    const start = previous ? transition.previousStart : frame.zoneStart;
     return Array.from(row.across, (across, i) => ({
       across,
       i,
-      seam: seamRow(verge, z, row.span),
+      seam: seamRow(VERGES[zone], z, row.span),
       side: (i < row.roadStart ? "left" : "right") as VergeSide,
       y,
-      z,
+      zone,
+      zoneZ: z - start - raster.visibleDistance,
     })).filter(({ across }) => across >= 0);
   });
+
+// Checks every verge pixel off a seam: the pool's word where a pool lies on the pooled zone's
+// verge, and neither pool colour elsewhere. Returns how many pool pixels it saw.
+const expectPools = (frame: RoadFrame): number => {
+  const out = draw(frame);
+  let drawn = 0;
+  for (const { across, i, seam, side, y, zone, zoneZ } of vergePixels(frame)) {
+    if (seam) {
+      continue;
+    }
+    const word = out[y * view.width + i];
+    const want = zone === ZONE ? poolWordAt(side, zoneZ, across) : null;
+    if (want === null) {
+      expect(word === EDGE || word === CORE, `row ${y} column ${i}`).toBe(false);
+    } else {
+      expect(word, `row ${y} column ${i}`).toBe(want);
+      drawn += 1;
+    }
+  }
+  return drawn;
+};
 
 describe("pools of light on the verge", () => {
   it.each([0, 3.7, 40, 100, 333.5])(
     "draws each side's pools at scroll %d, core inside edge over the paving and its dots",
     (scroll) => {
-      const out = draw(frameAt(scroll));
-      const pixels = vergePixels(scroll).filter(({ seam }) => !seam);
-      const drawn = { left: 0, right: 0 };
-      for (const { across, i, side, y, z } of pixels) {
-        const word = out[y * view.width + i];
-        const want = poolWordAt(side, z, across);
-        if (want === null) {
-          expect(word === EDGE || word === CORE, `row ${y} column ${i}`).toBe(false);
-        } else {
-          expect(word, `row ${y} column ${i}`).toBe(want);
-          drawn[side] += 1;
-        }
-      }
-      // The sides' pools are staggered, so a scroll may show either side's alone.
-      expect(drawn.left + drawn.right).toBeGreaterThan(0);
+      expect(expectPools(frameAt(scroll))).toBeGreaterThan(0);
     },
   );
+
+  // A walk started mid-route, or a zone reached after another walk length, puts the zone's start
+  // at another scroll: its pools stay where they lie along its own road.
+  it.each([1667, 12345.5, -777])("counts pools from the zone's start at %d", (zoneStart) => {
+    for (const into of [0, 40, 333.5]) {
+      expect(expectPools(frameAt(zoneStart + into, { zoneStart }))).toBeGreaterThan(0);
+    }
+  });
+
+  // The previous zone's start is not a whole number of pools before the current one's, so each
+  // zone's pools only line up with its own start.
+  it.each([
+    { current: OTHER, name: "leaving", previous: ZONE },
+    { current: ZONE, name: "entering", previous: OTHER },
+  ])("counts each zone's pools from its own start while $name the pooled zone", (zones) => {
+    const zoneStart = 5000;
+    let drawn = 0;
+    for (const into of [10, 40, 90, 200]) {
+      drawn += expectPools(
+        frameAt(zoneStart + into, {
+          current: lookOf(zones.current),
+          transition: {
+            previous: lookOf(zones.previous),
+            previousStart: zoneStart - 3333,
+            start: lookOf(zones.current),
+          },
+          zoneStart,
+        }),
+      );
+    }
+    expect(drawn).toBeGreaterThan(0);
+  });
 
   it("draws the seams across the pools", () => {
     let covered = 0;
     for (const scroll of [0, 8, 16, 24, 40, 64, 100]) {
-      const out = draw(frameAt(scroll));
-      for (const { across, i, seam, side, y, z } of vergePixels(scroll)) {
-        if (seam && across >= walkFrom(verge) && poolWordAt(side, z, across) !== null) {
+      const frame = frameAt(scroll);
+      const out = draw(frame);
+      for (const { across, i, seam, side, y, zoneZ } of vergePixels(frame)) {
+        if (seam && across >= walkFrom(verge) && poolWordAt(side, zoneZ, across) !== null) {
           expect(out[y * view.width + i]).toBe(SEAM);
           covered += 1;
         }
@@ -135,7 +190,7 @@ describe("pools of light on the verge", () => {
           band[(raster.junctionRows + k) * view.width + i] = across < 0 ? 0 : pixelWord(rgb);
         });
       });
-      const out = draw(frameAt(7, band));
+      const out = draw(frameAt(7, { approach: band }));
       return raster.rows
         .slice(raster.junctionRows, raster.approachRows)
         .flatMap((row, k) =>

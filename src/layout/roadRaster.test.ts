@@ -405,7 +405,7 @@ describe("drawRoad", () => {
           frameOf({
             current,
             scroll: 5000 + zoneDistance,
-            transition: { previous, start },
+            transition: { previous, previousStart: 0, start },
             zoneStart: 5000,
           }),
         ),
@@ -437,7 +437,12 @@ describe("drawRoad", () => {
       const zoneStart = 5000;
       const along = STRIP.height - 1 - stripRow;
       const scroll = zoneStart + raster.visibleDistance + along + 0.5 - row.distance;
-      const frame = frameOf({ current: start, scroll, transition: { previous, start }, zoneStart });
+      const frame = frameOf({
+        current: start,
+        scroll,
+        transition: { previous, previousStart: 0, start },
+        zoneStart,
+      });
       return draw(frame)[(y - view.y) * view.width + curbX];
     };
     expect(vergeAt(START_STRIP_ZONE_ROWS - 1)).not.toBe(pixelWord(VERGES.street.curbColour));

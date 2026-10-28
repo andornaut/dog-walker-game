@@ -124,13 +124,17 @@ interface StripLines {
 
 // approach, when set, is the backdrop's pixels on the approach rows across the view.
 // zoneStart is the scroll at which the current zone began. While its start strip rolls in, it
-// lies just past the far edge of the road in view at zoneStart, with the previous zone's road
-// on the near side of it.
+// lies just past the far edge of the road in view at zoneStart, with the previous zone's road,
+// which began at previousStart, on the near side of it.
 export interface RoadFrame {
   readonly approach?: Uint32Array | null;
   readonly current: RoadLook;
   readonly scroll: number;
-  readonly transition: { readonly previous: RoadLook; readonly start: RoadLook } | null;
+  readonly transition: {
+    readonly previous: RoadLook;
+    readonly previousStart: number;
+    readonly start: RoadLook;
+  } | null;
   readonly zoneStart: number;
 }
 
@@ -666,11 +670,13 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
     const look = lookAt(frame, along);
     const stripRow = stripRowAt(along);
     // Below its own zone's rows, the start strip is a cross street that follows the previous
-    // zone: the verge beside it is the previous zone's.
-    const vergeZone =
-      look === frame.transition?.start && stripRow >= START_STRIP_ZONE_ROWS
-        ? frame.transition.previous.zone
-        : look.zone;
+    // zone: the verge beside it is the previous zone's, as on the previous zone's road.
+    const { transition } = frame;
+    const previous =
+      transition !== null &&
+      (look === transition.previous ||
+        (look === transition.start && stripRow >= START_STRIP_ZONE_ROWS));
+    const vergeZone = previous ? transition.previous.zone : look.zone;
     const verge = vergeAt(vergeZone);
     const offset = y * width;
     const vergePixels = vergeOf(raster, vergeZone);
@@ -746,10 +752,13 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
       }
     }
 
+    // Pools count along their own zone's road, as roadside props do, so they line up with them.
+    const zoneZ =
+      z - (previous ? transition.previousStart : frame.zoneStart) - raster.visibleDistance;
     for (let p = 0; p < plan.pools.length; p++) {
       const pool = plan.pools[p];
       if (pool !== undefined) {
-        drawPool(out, offset, row, pool, z);
+        drawPool(out, offset, row, pool, zoneZ);
       }
     }
 
@@ -974,8 +983,8 @@ function drawDots(
   }
 }
 
-// A pool's chords across this row on each side, at the road's z: its edge, then its core over
-// the edge's middle.
+// A pool's chords across this row on each side, at the road's z from its zone's start strip:
+// its edge, then its core over the edge's middle.
 function drawPool(
   out: Uint32Array,
   offset: number,
