@@ -671,9 +671,11 @@ VERGES = {
                                           dict(colours=["rust"], share=0.02)],
                                 seamColour="dbrown", seamEvery=32, walkTo=None, lawn="none",
                                 lawnColours=None, leaves=False),
-    "kensington-market": dict(curbColour="stone", curbTo=162, strips=[dict(colour="teal", dots=[], to=166)],
-                              walkColour="dturq", walkDots=[dict(colours=["turquoise"], share=0.05)],
-                              seamColour="teal", seamEvery=32, walkTo=None, lawn="none",
+    "kensington-market": dict(curbColour="stone", curbTo=162, strips=[dict(colour="mauve", dots=[], to=166)],
+                              walkColour="grey",
+                              walkDots=[dict(colours=["lgrey"], share=0.03), dict(colours=["slate"], share=0.03),
+                                        dict(colours=["pink", "lime", "lilac", "cyan"], share=0.016)],
+                              seamColour="slate", seamEvery=32, walkTo=None, lawn="none",
                               lawnColours=None, leaves=False),
     "the-beaches": dict(curbColour="clay", curbTo=164, strips=[], walkColour="driftwood",
                         walkDots=[dict(colours=["stone"], share=0.05), dict(colours=["white"], share=0.008)],
@@ -693,6 +695,16 @@ def dotted(dots, value):
             return d["colours"][math.floor(value / d["share"] * len(d["colours"]))]
         value -= d["share"]
     return None
+
+
+def verge_paving(zone):
+    """A painter for the far side's ground and the cross street's corners, paved as the zone's verge
+    (VERGES): its sidewalk or paving colour with its dots."""
+    v = VERGES[zone]
+
+    def paint(px, py):
+        return dotted(v["walkDots"], noise(px, py)) or v["walkColour"]
+    return paint
 
 
 def verge(zone, road, patches=()):
@@ -1491,10 +1503,8 @@ def kensington():
                                      (270, W, BASE - 40))):
         bunting(cv, x0, x1, y, 5, pennants[i:] + pennants[:i])
 
-    def paving(px, py):
-        return "turquoise" if hashed(px, py, 23) else "dturq"
-
-    yard(cv, BASE, FAR_WALK, paving)
+    ground = verge_paving("kensington-market")
+    yard(cv, BASE, FAR_WALK, ground)
     # out front: produce, the Garden Car, a stall, a vintage rail, a busker's pitch, bikes and a patio
     crates(cv, 4, FAR_WALK - 1, ("red", "lime", "orange"))
     garden_car(cv, 58, FAR_WALK - 1)
@@ -1519,7 +1529,7 @@ def kensington():
             return "plum"
         return "brick" if hashed(px, py, 61) else "dbrick"
 
-    cross(cv, flat(road), "bark", paving, curb="stone")
+    cross(cv, flat(road), "bark", ground, curb=VERGES["kensington-market"]["curbColour"])
     cross_line(cv, "gold", "dred", dash=(12, 64))
     street(cv, verge("kensington-market", road))
     lanes(cv, LANE_PAINT, tuple(dk(c) for c in LANE_PAINT), dash=(10, 32))
