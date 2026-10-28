@@ -65,6 +65,17 @@ ranger-cart         48x72   High Park, 1 lane; a park ranger's small utility car
                             flashing on frames 1 and 3 while the ranger looks left, then right; cue
                             (4 frames, 120ms): restarting, the ranger's free hand raised pointing
                             ahead, jabbing 1px higher on frames 1 and 3, the light flashing on 0 and 2
+ice-cream-bike      48x72   The Beaches; an ice cream vendor's front-loading tricycle riding its lane at
+                            the player and stopping for a beat, facing it as cyclist does: a red and
+                            white striped umbrella over the rider, a white freezer box in front with a
+                            foam lid, a shallow band and an orange popsicle sign with a bite out of it,
+                            a wheel under each corner; the rider in a sky shirt with short brown hair,
+                            the hands on the bar along the box, a gold bell at its left end; push (4
+                            frames, 120ms): the sneakers going round under the box, the tread falling
+                            down the tires, the rider swaying 1px; idle (2 frames, 400ms): stopped, a
+                            strawberry cone held out in the screen-right hand, lifted 1px as the rider
+                            breathes; cue (2 frames, 150ms): ringing the bell, the bell rocking and
+                            amber ring marks flashing out over it
 
 Each has depth variants at every step in minis.STEPS (@94 to @50), redrawn at the
 step on a Mini at road.SCALE x the step, with the original's tags, frame counts
@@ -89,6 +100,8 @@ import road  # noqa: E402
 from hazards import CYCLIST_RIDE, sway_rows  # noqa: E402
 from minis import STEPS, scaled, snap  # noqa: E402
 from obstacles import treads, unit  # noqa: E402
+from obstacles import treads  # noqa: E402
+from pixel import K  # noqa: E402
 from road import LIT, SCALE, face_disc, lean, rim, stair, swung  # noqa: E402
 
 # ---------- tourist: facing the player, a stepper like the mail carrier ----------
@@ -782,6 +795,143 @@ def ranger_cart(roll=None, light=0, look=0, point=0):
     body = px.px
     px.px = [[(body[y - dip][x] if y >= dip else None) or wheels[y][x] for x in range(px.w)] for y in range(px.h)]
     return rim(g, RANGER_RIM)
+# ---------- ice-cream-bike: facing the player, pedalling a freezer box down a lane ----------
+
+# Pedalling: each foot's row under the box (the pedals go round), the wheels' tread roll and the rider's
+# 1px sway toward the foot pushing down; 4 frames at 120ms.
+ICE_PUSH = [dict(lf=41, rf=44, roll=0, sway=-2 / 3), dict(lf=42.5, rf=42.5, roll=1),
+            dict(lf=44, rf=41, roll=2, sway=2 / 3), dict(lf=42.5, rf=42.5, roll=3)]
+ICE_PUSH_MS = 120
+# Stopped: the feet down, a cone held out in the screen-right hand, lifted 1px on frame 1 as the rider
+# breathes; 2 frames at 400ms.
+ICE_IDLE = [dict(offer=True), dict(offer=True, lift=2 / 3, bob=-2 / 3)]
+ICE_IDLE_MS = 400
+# Restarting: the thumb on the bell, the bell rocking and its ring marks flashing out; 2 frames at 150ms.
+ICE_CUE = [dict(ring=1), dict(ring=2)]
+ICE_CUE_MS = 150
+ICE_RIM = {**LIT, "blue": ("sky", None)}
+# The ring marks over the bell, in drawn pixels so they keep their strokes at any scale: three strokes
+# fanning out: up and up-left on ring 1, all three further out on ring 2.
+RING = (("......#...", "......#...", "...#......", "....#.....", "..........", "..........",
+         ".........."),
+        ("......#...", "......#...", ".#........", "..#.......", "..........", "##........",
+         ".........."))
+
+def recolour(g, x0, x1, y1, inside, swap):
+    """In design columns x0 to x1 and rows above y1, where inside(x, y) holds, swap each drawn pixel's colour
+    by swap (K names)."""
+    s, sy = scale_of(g), getattr(g, "sy", scale_of(g))
+    px = raster(g)
+    swap = {K[a]: K[b] for a, b in swap.items()}
+    for y in range(min(px.h, scaled(y1, sy))):
+        for x in range(max(0, scaled(x0, s)), min(px.w, scaled(x1, s))):
+            if px.px[y][x] in swap and inside((x + 0.5) / s, (y + 0.5) / sy):
+                px.px[y][x] = swap[px.px[y][x]]
+
+
+def bitmap_at(g, rows, x, y, c):
+    """A character map with its top-left at design (x, y), one drawn pixel per character."""
+    s, sy = scale_of(g), getattr(g, "sy", scale_of(g))
+    px = raster(g)
+    for j, row in enumerate(rows):
+        for i, ch in enumerate(row):
+            if ch == "#":
+                px.p(scaled(x, s) + i, scaled(y, sy) + j, c)
+
+
+def ice_cream_bike(lf=42.5, rf=42.5, roll=None, sway=0, offer=False, lift=0, bob=0, ring=0):
+    """The ice cream vendor's front-loading tricycle coming down a lane at the player, laid out on 32x48: a
+    red and white striped umbrella over the rider, a white freezer box in front facing the player, its lid
+    lit foam, an orange popsicle sign with a bite out of it on its face, a shallow band along its foot,
+    the two wheels under its corners and the rider's shins and white sneakers on the pedals between them.
+    The rider wears a white paper cap with a red band and a sky shirt, the hands on the bar along the box's
+    back, a gold bell at its left end. sway moves the rider (not the umbrella or box) sideways; roll (0 to
+    3) falls the tread down the tires; offer holds a strawberry cone out in the screen-right hand, lift
+    raising it; ring rocks the bell and draws its ring marks."""
+    g = edged(Grid(32, 48))
+    u = 1 / scale_of(g)
+    d = sway
+    h = bob
+    # the umbrella: a dome lit on its upper left, in six panels, red and white, that taper to the top
+    g.cel(16, 7.5, 15, 7, "red", "dred", "pink")
+    g.rect(0, 7.5, 32, 8, None)
+
+    def panel(x, y):
+        hw = 15 * max(0.05, (1 - ((y - 7.5) / 7) ** 2)) ** 0.5
+        return math.floor(((x - 16) / hw + 1) * 3) % 2 == 1
+
+    recolour(g, 0, 32, 7.5, panel, dict(red="white", pink="white", dred="lgrey"))
+    g.rect(15.5, 0, 1, 1, "dred")
+    # its valance, a scallop under each panel
+    for k in range(6):
+        red = k % 2 == 0
+        g.cel(3.5 + k * 5, 7.5, 2.5, 1.7, "red" if red else "white", "dred" if red else "lgrey")
+    # the wheels under the box's corners, edge-on, their tread falling as they roll at the player
+    for x in (5, 27):
+        g.blob(x, 43.5, 1.8, 4, "ink")
+        if roll is not None:
+            treads(g, x - 0.5, 40, 1, 7, roll, u, back=True)
+        g.rect(x - 1.5, 39.5, 3, 1.5, "lgrey")
+    # the rider's shins and white sneakers on the pedals, behind the axle
+    for x, foot in ((11.5, lf), (17.5, rf)):
+        g.rect(x + d, 39, 3, foot - 39, "skin1")
+        g.rect(x + 2 + d, 39, 1, foot - 39, "skin2")
+        g.rect(x - 0.5 + d, foot, 4, 2, "white")
+        g.rect(x - 0.5 + d, foot + 1.5, 4, 0.75, "lgrey")
+    g.rect(4, 40.5, 24, 1, "dslate")
+    # the rider: the sky shirt, its white collar, the shoulders over the box
+    g.cel(16 + d, 25 + h, 8, 5.5, "sky", "blue", "cyan", power=3)
+    g.rect(14 + d, 19.5 + h, 4, 1.5, "white")
+    # the arms down to the bar, unless the screen-right hand holds a cone out
+    for x in (6, 23) if not offer else (6,):
+        g.rect(x + d, 21 + h, 3, 3, "sky")
+        g.rect(x + 2 + d, 21 + h, 1, 3, "blue")
+        g.rect(x + d, 24 + h, 3, 2, "skin1")
+        g.rect(x + 2 + d, 24 + h, 1, 2, "skin2")
+    # the head: the face under short brown hair, a fringe over the brow
+    face_disc(g, 16 + d, 14.5 + h, 6.5, 5.5, "skin1", "skin2")
+    g.cel(16 + d, 10.5 + h, 7, 3, "brown", "dbrown", "tan")
+    g.rect(9.5 + d, 10.5 + h, 2, 4, "brown")
+    g.rect(20.5 + d, 10.5 + h, 2, 4, "dbrown")
+    road.face_front(g, 16 + d, 14 + h)
+    g.p(11 + d, 17 + h, "pink")
+    g.p(21 + d, 17 + h, "pink")
+    if offer:
+        # the cone held out to screen right: the sleeve up from the shoulder, the hand under a waffle cone
+        # with a strawberry scoop
+        c = -lift
+        g.rect(23, 20 + h, 4, 3, "sky")
+        g.rect(26, 20 + h, 1, 3, "blue")
+        g.rect(25.5, 17 + c, 3, 4, "skin1")
+        g.rect(27.5, 17 + c, 1, 4, "skin2")
+        g.tri((24.5, 13.5 + c), (30.5, 13.5 + c), (27.5, 19 + c), "tan")
+        g.tri((27.5, 13.5 + c), (30.5, 13.5 + c), (27.5, 19 + c), "ochre")
+        g.cel(27.5, 12 + c, 3, 2.5, "pink", "mauve", "white")
+    # the bar along the box's back, the bell at its left end
+    g.rect(4, 26, 24, 1.5, "slate")
+    g.rect(4, 26, 24, 0.75, "grey")
+    rock = (-1, 1)[ring - 1] * u if ring else 0
+    g.cel(4 + rock, 24.5, 2, 1.8, "gold", "amber", "yellow")
+    g.rect(3.5 + rock, 24, 1, 0.75, "white")
+    if ring:
+        g.rect(5.5, 24.5, 1.5, 1.5, "skin1")
+    # the freezer box: lit foam along its lid, white down its face, shaded lgrey down the right
+    g.rect(3, 27, 26, 13.5, "white")
+    g.rect(26, 27, 3, 13.5, "lgrey")
+    g.rect(2.5, 27, 27, 2, "foam")
+    g.rect(2.5, 28.5, 27, 0.75, "shallow")
+    g.rect(3, 37.5, 26, 2, "shallow")
+    g.rect(26, 37.5, 3, 2, "lake")
+    # the popsicle sign on its face: a creamsicle with a bite out of its top right, on a tan stick
+    g.rect(15, 35, 2, 3, "tan")
+    g.rect(16.5, 35, 0.75, 3, "brown")
+    g.cel(16, 32, 3, 4, "orange", "rust", "amber", power=4)
+    g.cel(18.5, 28.5, 1.5, 1.5, "white")
+    g.rect(14, 30, 1, 3, "white")
+    if ring:
+        # the ring marks: three short strokes out from the bell, up, up-left and left, further out on ring 2
+        bitmap_at(g, RING[ring - 1], 0, 19.5, K["amber"])
+    return rim(g, ICE_RIM)
 
 
 # ---------- every sprite at a depth step ----------
@@ -820,6 +970,16 @@ def steps(suffix, s):
     yield f"ranger-cart{suffix}", [("push", [own(ranger_cart, q) for q in RANGER_PUSH], RANGER_PUSH_MS),
                                    ("idle", [own(ranger_cart, q) for q in RANGER_IDLE], RANGER_IDLE_MS),
                                    ("cue", [own(ranger_cart, q) for q in RANGER_CUE], RANGER_CUE_MS)]
+
+    def bike(q):
+        # the tread frame, the offered cone and the ring are choices, not offsets, so they skip the snap
+        keep = {k: q[k] for k in ("roll", "offer", "ring") if k in q}
+        rest = {k: v for k, v in q.items() if k not in keep}
+        return minis.small(here, p, ice_cream_bike, **posed(rest, p), **keep).outlined()
+
+    yield f"ice-cream-bike{suffix}", [("push", [bike(q) for q in ICE_PUSH], ICE_PUSH_MS),
+                                      ("idle", [bike(q) for q in ICE_IDLE], ICE_IDLE_MS),
+                                      ("cue", [bike(q) for q in ICE_CUE], ICE_CUE_MS)]
 
 
 def sprites():
