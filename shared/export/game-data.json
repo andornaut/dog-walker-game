@@ -118,43 +118,43 @@
       "title": "Dropped ice cream"
     },
     {
-      "art": "card-fish-crates-wade-through",
+      "art": "card-green-bin-wade-through",
       "frame": "encounter",
       "id": "wade-through",
       "index": 0,
       "name": "Wade through",
       "source": {
-        "id": "fishCrates",
+        "id": "greenBin",
         "kind": "encounter"
       },
       "text": "Muddy: lane changes 67% slower for 30s",
-      "title": "Fish crate spill"
+      "title": "Green bin spill"
     },
     {
-      "art": "card-fish-crates-pay",
+      "art": "card-green-bin-pay",
       "frame": "encounter",
       "id": "pay",
       "index": 1,
-      "name": "Pay for the fish",
+      "name": "Pay for cleanup",
       "source": {
-        "id": "fishCrates",
+        "id": "greenBin",
         "kind": "encounter"
       },
       "text": "−$20",
-      "title": "Fish crate spill"
+      "title": "Green bin spill"
     },
     {
-      "art": "card-fish-crates-hurry-past",
+      "art": "card-green-bin-hurry-past",
       "frame": "encounter",
       "id": "hurry-past",
       "index": 2,
       "name": "Hurry past",
       "source": {
-        "id": "fishCrates",
+        "id": "greenBin",
         "kind": "encounter"
       },
       "text": "−1♥ each",
-      "title": "Fish crate spill"
+      "title": "Green bin spill"
     },
     {
       "art": "card-other-dog-sniff",
@@ -1015,16 +1015,16 @@
       "spriteKey": "dropped-cone"
     },
     {
-      "id": "fishCrates",
-      "hitLabel": "FISHY!",
-      "hitWord": "FLOP!",
+      "id": "greenBin",
+      "hitLabel": "SPLAT!",
+      "hitWord": "SQUISH!",
       "kind": "obstacle",
-      "name": "Fish crate spill",
+      "name": "Green bin spill",
       "resolution": {
         "kind": "card",
         "options": [
           {
-            "art": "card-fish-crates-wade-through",
+            "art": "card-green-bin-wade-through",
             "effects": [
               {
                 "debuff": "muddy",
@@ -1035,19 +1035,19 @@
             "name": "Wade through"
           },
           {
-            "art": "card-fish-crates-pay",
+            "art": "card-green-bin-pay",
             "effects": [
               {
-                "amount": "fishCleanUp",
+                "amount": "greenBinCleanUp",
                 "change": "lose",
                 "kind": "money"
               }
             ],
             "id": "pay",
-            "name": "Pay for the fish"
+            "name": "Pay for cleanup"
           },
           {
-            "art": "card-fish-crates-hurry-past",
+            "art": "card-green-bin-hurry-past",
             "effects": [
               {
                 "amount": -1,
@@ -2778,7 +2778,7 @@
       "cheeseBuy": 20,
       "encounterHigh": 20,
       "encounterLow": 20,
-      "fishCleanUp": 20,
+      "greenBinCleanUp": 20,
       "lostWalletKeep": 20,
       "missedTips": 20,
       "newCone": 20,
@@ -3143,7 +3143,7 @@
           "capybara": 0,
           "cheeseCrates": 0,
           "droppedCone": 0,
-          "fishCrates": 0,
+          "greenBin": 0,
           "otherDog": 1.1,
           "porchCat": 1,
           "promoTeam": 0,
@@ -3256,7 +3256,7 @@
           "capybara": 1,
           "cheeseCrates": 0,
           "droppedCone": 0,
-          "fishCrates": 0,
+          "greenBin": 0,
           "otherDog": 2.2,
           "porchCat": 0,
           "promoTeam": 0,
@@ -3369,7 +3369,7 @@
           "capybara": 0,
           "cheeseCrates": 1.1,
           "droppedCone": 0,
-          "fishCrates": 0,
+          "greenBin": 0,
           "otherDog": 1.1,
           "porchCat": 0,
           "promoTeam": 0,
@@ -3482,7 +3482,7 @@
           "capybara": 0,
           "cheeseCrates": 1,
           "droppedCone": 0,
-          "fishCrates": 1,
+          "greenBin": 1,
           "otherDog": 1.1,
           "porchCat": 0,
           "promoTeam": 0,
@@ -3595,7 +3595,7 @@
           "capybara": 0,
           "cheeseCrates": 0,
           "droppedCone": 1,
-          "fishCrates": 0,
+          "greenBin": 0,
           "otherDog": 0,
           "porchCat": 0,
           "promoTeam": 0,
@@ -3708,7 +3708,7 @@
           "capybara": 0,
           "cheeseCrates": 0,
           "droppedCone": 0,
-          "fishCrates": 0,
+          "greenBin": 0,
           "otherDog": 0,
           "porchCat": 0,
           "promoTeam": 2,

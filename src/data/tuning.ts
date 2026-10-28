@@ -78,8 +78,8 @@ export const TUNING = {
     cheeseBuy: 20,
     encounterHigh: 20,
     encounterLow: 20,
-    // The Fish crate spill's Pay for the fish.
-    fishCleanUp: 20,
+    // The Green bin spill's Pay for cleanup.
+    greenBinCleanUp: 20,
     lostWalletKeep: 20,
     missedTips: 20,
     // The Dropped ice cream's Buy a new cone.

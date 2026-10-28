@@ -456,7 +456,7 @@ describe("counters", () => {
       ["capybara", "help"],
       ["capybara", "help"],
       ["capybara", "drag"],
-      ["fishCrates", "wadeThrough"],
+      ["greenBin", "wadeThrough"],
     ] as const;
     const after = picked.reduce(
       (state, [encounter, option]) => countOptionPick(encounter, option, state),
@@ -464,7 +464,7 @@ describe("counters", () => {
     );
     expect(after.optionPicks).toEqual({
       capybara: { drag: 1, help: 2 },
-      fishCrates: { wadeThrough: 1 },
+      greenBin: { wadeThrough: 1 },
     });
     expect(runCountersOf(after).optionPicks).toEqual(after.optionPicks);
   });

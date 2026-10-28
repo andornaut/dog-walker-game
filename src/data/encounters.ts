@@ -104,28 +104,28 @@ export const ENCOUNTERS = {
     shape: { lanes: 1, rows: 1 },
     zones: ["pawsPromenade"],
   },
-  fishCrates: {
-    hitLabel: "FISHY!",
-    hitWord: "FLOP!",
+  greenBin: {
+    hitLabel: "SPLAT!",
+    hitWord: "SQUISH!",
     kind: "obstacle",
-    name: "Fish crate spill",
+    name: "Green bin spill",
     resolution: {
       kind: "card",
       options: [
         {
-          art: "card-fish-crates-wade-through",
+          art: "card-green-bin-wade-through",
           effects: [{ debuff: "muddy", kind: "debuff" }],
           id: "wadeThrough",
           name: "Wade through",
         },
         {
-          art: "card-fish-crates-pay",
-          effects: [{ amount: "fishCleanUp", change: "lose", kind: "money" }],
+          art: "card-green-bin-pay",
+          effects: [{ amount: "greenBinCleanUp", change: "lose", kind: "money" }],
           id: "pay",
-          name: "Pay for the fish",
+          name: "Pay for cleanup",
         },
         {
-          art: "card-fish-crates-hurry-past",
+          art: "card-green-bin-hurry-past",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
           id: "hurryPast",
           name: "Hurry past",

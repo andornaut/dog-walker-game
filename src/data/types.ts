@@ -15,7 +15,7 @@ export type EncounterId =
   | "capybara"
   | "cheeseCrates"
   | "droppedCone"
-  | "fishCrates"
+  | "greenBin"
   | "lostWallet"
   | "otherDog"
   | "pettingNeighbour"

@@ -18,7 +18,7 @@ export const COMIC_WORDS = {
       capybara: 48,
       cheeseCrates: 46,
       droppedCone: 48,
-      fishCrates: 46,
+      greenBin: 46,
       otherDog: 46,
       porchCat: 43,
       promoTeam: 43,

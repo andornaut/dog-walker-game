@@ -42,7 +42,7 @@ export const FLASH_COLOURS: Readonly<Partial<Record<EncounterId, FlashColour>>> 
   capybara: "amber",
   cheeseCrates: "amber",
   droppedCone: "pink",
-  fishCrates: "sky",
+  greenBin: "sky",
   otherDog: "pink",
   porchCat: "orange",
   promoTeam: "amber",

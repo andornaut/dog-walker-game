@@ -247,12 +247,12 @@ export const ACHIEVEMENTS = [
     shortGoal: "Lick 10 cones",
   },
   {
-    badgeLine: "They save you the good crates.",
-    conditions: [{ count: 10, encounter: "fishCrates", kind: "optionPicks", option: "pay" }],
-    goal: "Pay for the fish 10 times",
-    id: "fishmongersFriend",
-    name: "Fishmonger's Friend",
-    shortGoal: "Pay for fish 10 times",
+    badgeLine: "Kensington thanks you.",
+    conditions: [{ count: 10, encounter: "greenBin", kind: "optionPicks", option: "pay" }],
+    goal: "Pay for cleanup 10 times",
+    id: "cleanStreets",
+    name: "Clean Streets",
+    shortGoal: "Pay for 10 cleanups",
   },
   {
     badgeLine: "The porch cats have you on retainer.",
