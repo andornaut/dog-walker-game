@@ -402,13 +402,9 @@ export class CardScene extends Scene {
     this.addCharms(marks, { height, width: LARGE.width, x, y }, 2);
     this.addLargeBody(option, x + LARGE.body.x, y + LARGE.body.y);
     const badge = { ...LARGE.badge, x: x + LARGE.badge.x, y: y + LARGE.badge.y + shift };
-    const plaque = hasPlaque(option) || marks.plaque !== null;
-    if (!plaque) {
-      // A free option's foot stays plain.
-    } else if (this.textures.exists(COST_KEY)) {
-      this.add.image(badge.x, badge.y, COST_KEY).setOrigin(0).setScale(2);
-    } else {
-      fillRect(g, PALETTE.cream, badge);
+    // A free option's foot stays plain.
+    if (hasPlaque(option) || marks.plaque !== null) {
+      this.addPlaque(g, badge, 2, false);
     }
     const marker =
       option !== undefined && option.fires.length > 0
@@ -460,6 +456,16 @@ export class CardScene extends Scene {
     [...this.headerParts, ...this.parts.flat(), ...this.homeParts].forEach((part) => {
       (part as GameObjects.GameObject & { visible: boolean }).visible = visible;
     });
+  }
+
+  // The cost plaque at badge, its art at scale or a cream stand-in while the art is missing,
+  // greyed on a greyed card.
+  private addPlaque(g: GameObjects.Graphics, badge: Rect, scale: number, grey: boolean): void {
+    if (this.textures.exists(COST_KEY)) {
+      this.add.image(badge.x, badge.y, this.shownKey(grey, COST_KEY)).setOrigin(0).setScale(scale);
+    } else {
+      fillRect(g, grey ? PALETTE[GREYED.plateFace] : PALETTE.cream, badge);
+    }
   }
 
   // A texture key as a card shows it: its greyed copy on a greyed card.
@@ -658,14 +664,9 @@ export class CardScene extends Scene {
 
     const badge = { ...BADGE, x: x + BADGE.x, y: y + BADGE.y };
     const option = entry.option;
-    const plaque = hasPlaque(option) || marks.plaque !== null;
-    if (!plaque) {
-      // A free option's foot stays plain.
-    } else if (this.textures.exists(COST_KEY)) {
-      const key = this.shownKey(grey, COST_KEY);
-      this.add.image(badge.x, badge.y, key).setOrigin(0);
-    } else {
-      fillRect(g, grey ? PALETTE[GREYED.plateFace] : PALETTE.cream, badge);
+    // A free option's foot stays plain.
+    if (hasPlaque(option) || marks.plaque !== null) {
+      this.addPlaque(g, badge, 1, grey);
     }
     const marker =
       fires.length > 0
