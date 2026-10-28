@@ -19,6 +19,14 @@ rollerblader        48x72   minor rider, 1 lane, coming down its lane at the pac
                             hair, on white inline skates with yellow wheels. ride (4 frames, 100ms): a
                             skating stride, each foot pushing out to its side in turn, lifted 1px, the
                             body swaying 1px toward the gliding foot, the wheels' tread rolling 1px a frame
+volleyball-net-2    112x36  minor, 2 lanes, The Beaches' barrier-2: a beach volleyball net in front
+                            elevation, strung between white posts held by guy ropes, a white top band edged
+                            azure over coal mesh with clear holes, white bands down its ends and along its
+                            foot, a red and white striped antenna over each end, a rippled drift of sand
+                            under it heaped round the posts and a volleyball half sunk in it. idle (4
+                            frames, 450ms): on frame 2 a breeze lifts the net's foot 1px in the middle and
+                            bends the antenna tips out 1px
+volleyball-net-3    176x36  minor, 3 lanes, The Beaches' barrier-3: the same net, a lane wider
 
 Yonge Street:
 promo-team          48x72   card obstacle (Big screen promo): a street team promoter in a turquoise
@@ -51,7 +59,8 @@ with the original's tags, frames and durations, drawn on a minis.Mini with its o
 and the riders are laid out on 32x48 and drawn at road.SCALE (1.5) as road.py's are, the minor
 obstacles in layout pixels at obstacles.SCALE (1.2) as obstacles.py's, the bus at obstacles.CAR_SCALE
 (56 columns, rows 1.2x) as the streetcar. All take the road outline (pixel.road_edge) and road.LIT's
-rim on their dark colours.
+rim on their dark colours; the volleyball nets' whites take obstacles.white_keyline's plum, as the
+barriers' do, and their mesh holes stay clear, unoutlined.
 
 Hits (77x77, play: 8 frames, 70ms, laid out on 64x64 as hits.py's), each opening on hits.impact:
 fx-hit-dropped-cone the impact star in pink, then the strawberry scoop shoots up off a pink splat,
@@ -95,6 +104,7 @@ import tempfile
 sys.path.insert(0, os.path.dirname(__file__))
 import depths  # noqa: E402
 import hits  # noqa: E402
+import hood_people  # noqa: E402
 import obstacles  # noqa: E402
 import road  # noqa: E402
 import sounds  # noqa: E402
@@ -547,6 +557,85 @@ def lifeguard_chair(lift=0):
     return lit(g)
 
 
+# ---------- volleyball net ----------
+
+NET_IDLE = (0, 0, 1, 0), 450
+# The mesh's holes while it is drawn and outlined, so the outline does not fill them; net() clears them after.
+HOLE = "000001"
+
+
+def net_edge(c):
+    """obstacles.white_keyline, and no outline beside a hole."""
+    return None if c == HOLE else obstacles.white_keyline(c)
+
+
+def volleyball_net(lanes, breeze=0):
+    """Front elevation across lanes lanes, laid out in obstacles.py's pixels (obstacles.span(lanes) by
+    obstacles.ROW): a white post at each end held by a guy rope to a stake outside it, and strung between their
+    tops the net: a white top band edged azure along its foot, coal mesh in a 1px grid every 3 drawn pixels
+    with clear holes, a white band down each end and along the bottom, and a red and white striped antenna
+    rising well over each end. A rippled drift of sand runs under it all, heaped round each post, with a
+    volleyball (hood_people.volley_ball) half sunk in it by the right post. breeze lifts the bottom band's
+    middle half and bends each antenna's tip outward 1px."""
+    w = obstacles.span(lanes)
+    g = edged(Grid(w, obstacles.ROW), net_edge)
+    px, s = raster(g), scale_of(g)
+    sy = getattr(g, "sy", s)
+
+    def X(v):
+        return math.floor(v * s + 0.5)
+
+    def Y(v):
+        return math.floor(v * sy + 0.5)
+
+    posts = (7, w - 11)
+    # the guy ropes, from each post's top out to a stake in the sand
+    for top_x, stake_x in ((posts[0], 1), (posts[1] + 4, w - 1.5)):
+        x0, y0, x1, y1 = X(top_x), Y(4), X(stake_x), Y(26)
+        for y in range(y0, y1 + 1):
+            px.p(round(x0 + (x1 - x0) * (y - y0) / (y1 - y0)), y, "driftwood")
+    # the posts, white lit down their left and shaded lgrey down their right, an lgrey cap on each
+    for x in posts:
+        g.rect(x, 4, 4, 23, "white")
+        g.rect(x + 3, 4, 1, 23, "lgrey")
+        g.rect(x - 0.5, 3, 5, 1.5, "lgrey")
+    # the net between the posts, on the drawn grid so every line stays 1px
+    x0, x1 = X(posts[0] + 4), X(posts[1])
+    top, foot, bottom = Y(6), Y(9), Y(19)
+    px.rect(x0, top, x1 - x0, foot - top, "white")
+    px.rect(x0, foot - 1, x1 - x0, 1, "azure")
+    lift = x0 + (x1 - x0) // 4, x1 - (x1 - x0) // 4
+    for x in range(x0, x1):
+        low = bottom - (1 if breeze and lift[0] <= x < lift[1] else 0)
+        for y in range(foot, low):
+            px.p(x, y, "coal" if (x - x0) % 3 == 0 or (y - foot) % 3 == 2 else HOLE)
+        px.p(x, low, "white")
+    for x in (x0, x1 - 1):
+        px.rect(x, foot, 1, bottom - foot, "white")
+    # the antennas, just inside each end band, striped red and white every 2 drawn pixels; breeze bends the
+    # tip outward
+    for x, out in ((x0 + 2, -1), (x1 - 3, 1)):
+        for y in range(Y(0), bottom):
+            c = "red" if (y - Y(0)) // 2 % 2 == 0 else "white"
+            px.p(x + (out if breeze and y == Y(0) else 0), y, c)
+    # the sand: a drift the width of the net, its top rippling a pixel, heaped into a mound round each post
+    for x in range(X(2), X(w - 2)):
+        crest = Y(26.5) - (1 if (x // max(2, X(5))) % 2 else 0)
+        px.rect(x, crest, 1, Y(obstacles.ROW) - crest, "tan")
+        px.p(x, crest, "cream")
+        px.p(x, Y(obstacles.ROW) - 1, "brown")
+    for x in posts:
+        g.cel(x + 2, 27, 6, 3.5, "tan", "brown", "cream")
+    hood_people.volley_ball(g, posts[1] - 11, 26)
+    return lit(g)
+
+
+def net(s, lanes, breeze):
+    """volleyball_net at s, outlined, its holes cleared."""
+    frame = small(this(), s, volleyball_net, lanes, breeze).outlined()
+    return [[None if c == HOLE else c for c in row] for row in frame]
+
+
 # ---------- sandwich board ----------
 
 BOARD_IDLE = (0, 0, 1, 0), 450
@@ -772,6 +861,9 @@ def sprites():
                                       ("lifeguard-chair", lifeguard_chair, LIFEGUARD_IDLE),
                                       ("sandwich-board", sandwich_board, BOARD_IDLE)):
             yield f"{key}{suffix}", [("idle", [small(me, o, draw, a).outlined() for a in args], ms)]
+        args, ms = NET_IDLE
+        for lanes in (2, 3):
+            yield f"volleyball-net-{lanes}{suffix}", [("idle", [net(o, lanes, a) for a in args], ms)]
         args, ms = BUS_IDLE
         yield f"ttc-bus{suffix}", [("idle", [small(me, car, ttc_bus, a).outlined() for a in args], ms),
                                    ("drive", [small(me, car, ttc_bus, roll=r).outlined() for r in drive], 100)]

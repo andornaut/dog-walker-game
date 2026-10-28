@@ -1,0 +1,46 @@
+{ "frames": {
+   "volleyball-net-2 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 112, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 112, "h": 36 },
+    "sourceSize": { "w": 112, "h": 36 },
+    "duration": 450
+   },
+   "volleyball-net-2 1.aseprite": {
+    "frame": { "x": 112, "y": 0, "w": 112, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 112, "h": 36 },
+    "sourceSize": { "w": 112, "h": 36 },
+    "duration": 450
+   },
+   "volleyball-net-2 2.aseprite": {
+    "frame": { "x": 224, "y": 0, "w": 112, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 112, "h": 36 },
+    "sourceSize": { "w": 112, "h": 36 },
+    "duration": 450
+   },
+   "volleyball-net-2 3.aseprite": {
+    "frame": { "x": 336, "y": 0, "w": 112, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 112, "h": 36 },
+    "sourceSize": { "w": 112, "h": 36 },
+    "duration": 450
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "volleyball-net-2.png",
+  "format": "RGBA8888",
+  "size": { "w": 448, "h": 36 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

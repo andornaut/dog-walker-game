@@ -11694,6 +11694,168 @@
       }
     },
     {
+      "key": "volleyball-net-2",
+      "png": "sprites/volleyball-net-2.png",
+      "json": "sprites/volleyball-net-2.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 112
+      }
+    },
+    {
+      "key": "volleyball-net-2@50",
+      "png": "sprites/volleyball-net-2@50.png",
+      "json": "sprites/volleyball-net-2@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 56
+      }
+    },
+    {
+      "key": "volleyball-net-2@56",
+      "png": "sprites/volleyball-net-2@56.png",
+      "json": "sprites/volleyball-net-2@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 63
+      }
+    },
+    {
+      "key": "volleyball-net-2@62",
+      "png": "sprites/volleyball-net-2@62.png",
+      "json": "sprites/volleyball-net-2@62.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 70
+      }
+    },
+    {
+      "key": "volleyball-net-2@69",
+      "png": "sprites/volleyball-net-2@69.png",
+      "json": "sprites/volleyball-net-2@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 77
+      }
+    },
+    {
+      "key": "volleyball-net-2@75",
+      "png": "sprites/volleyball-net-2@75.png",
+      "json": "sprites/volleyball-net-2@75.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 84
+      }
+    },
+    {
+      "key": "volleyball-net-2@81",
+      "png": "sprites/volleyball-net-2@81.png",
+      "json": "sprites/volleyball-net-2@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 91
+      }
+    },
+    {
+      "key": "volleyball-net-2@88",
+      "png": "sprites/volleyball-net-2@88.png",
+      "json": "sprites/volleyball-net-2@88.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 98
+      }
+    },
+    {
+      "key": "volleyball-net-2@94",
+      "png": "sprites/volleyball-net-2@94.png",
+      "json": "sprites/volleyball-net-2@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 105
+      }
+    },
+    {
+      "key": "volleyball-net-3",
+      "png": "sprites/volleyball-net-3.png",
+      "json": "sprites/volleyball-net-3.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 176
+      }
+    },
+    {
+      "key": "volleyball-net-3@50",
+      "png": "sprites/volleyball-net-3@50.png",
+      "json": "sprites/volleyball-net-3@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 88
+      }
+    },
+    {
+      "key": "volleyball-net-3@56",
+      "png": "sprites/volleyball-net-3@56.png",
+      "json": "sprites/volleyball-net-3@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 99
+      }
+    },
+    {
+      "key": "volleyball-net-3@62",
+      "png": "sprites/volleyball-net-3@62.png",
+      "json": "sprites/volleyball-net-3@62.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 110
+      }
+    },
+    {
+      "key": "volleyball-net-3@69",
+      "png": "sprites/volleyball-net-3@69.png",
+      "json": "sprites/volleyball-net-3@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 121
+      }
+    },
+    {
+      "key": "volleyball-net-3@75",
+      "png": "sprites/volleyball-net-3@75.png",
+      "json": "sprites/volleyball-net-3@75.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 132
+      }
+    },
+    {
+      "key": "volleyball-net-3@81",
+      "png": "sprites/volleyball-net-3@81.png",
+      "json": "sprites/volleyball-net-3@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 143
+      }
+    },
+    {
+      "key": "volleyball-net-3@88",
+      "png": "sprites/volleyball-net-3@88.png",
+      "json": "sprites/volleyball-net-3@88.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 154
+      }
+    },
+    {
+      "key": "volleyball-net-3@94",
+      "png": "sprites/volleyball-net-3@94.png",
+      "json": "sprites/volleyball-net-3@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 165
+      }
+    },
+    {
       "key": "volleyball-player",
       "png": "sprites/volleyball-player.png",
       "json": "sprites/volleyball-player.json",
