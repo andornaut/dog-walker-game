@@ -309,7 +309,7 @@ export function packFitsOnPath(
     return true;
   }
   // The first change past the nearer one.
-  const first = partitionPoint(changes, (change) => change.at <= near.distance);
+  const first = partitionPoint((change) => change.at <= near.distance, changes);
   for (let i = first; i < changes.length && itemAt(changes, i).at <= far.distance; i++) {
     const moves = pathMovesBetween(itemAt(changes, i), near, far);
     if (moves > 0 && gap < packGap(plan, moves) - ROUNDING) {
@@ -577,7 +577,7 @@ export function planSpawns<Kind extends string>(
   const widestGap = packGap(plan, PATH_MOST_LANES);
   const addPlaced = (place: BlockingPlace) => {
     placed.splice(
-      partitionPoint(placed, (other) => other.distance < place.distance),
+      partitionPoint((other) => other.distance < place.distance, placed),
       0,
       place,
     );
@@ -588,7 +588,7 @@ export function planSpawns<Kind extends string>(
   const fitsPlaced = (place: BlockingPlace): boolean => {
     const from = place.distance - longestPlaced - widestGap;
     const to = place.distance + Math.max(0, place.length) + widestGap;
-    for (let i = partitionPoint(placed, (other) => other.distance < from); i < placed.length; i++) {
+    for (let i = partitionPoint((other) => other.distance < from, placed); i < placed.length; i++) {
       const other = itemAt(placed, i);
       if (other.distance > to) {
         return true;

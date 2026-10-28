@@ -10,6 +10,6 @@ describe("partitionPoint", () => {
     { below: 3, index: 3, items: [1, 2, 2, 3] },
     { below: 9, index: 4, items: [1, 2, 2, 3] },
   ])("finds the first of $items not below $below at $index", ({ below, index, items }) => {
-    expect(partitionPoint(items, (item) => item < below)).toBe(index);
+    expect(partitionPoint((item) => item < below, items)).toBe(index);
   });
 });

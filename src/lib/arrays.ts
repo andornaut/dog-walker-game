@@ -13,7 +13,7 @@ export function clampIndex(length: number, index: number): number {
 
 // The index of the first item in items for which before is false, items.length if none: items
 // must hold every item before is true for ahead of every item it is false for (a binary search).
-export function partitionPoint<T>(items: readonly T[], before: (item: T) => boolean): number {
+export function partitionPoint<T>(before: (item: T) => boolean, items: readonly T[]): number {
   let low = 0;
   let high = items.length;
   while (low < high) {
