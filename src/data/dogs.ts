@@ -9,7 +9,7 @@ export const DOGS = {
     name: "Archie",
     owner: {
       name: "Kiwi",
-      role: "grandmother",
+      role: "Grandmother",
     },
     size: "medium",
     unlock: "start",
@@ -21,7 +21,7 @@ export const DOGS = {
     name: "Biscuit",
     owner: {
       name: "Clare",
-      role: "psychology student",
+      role: "Psychology Student",
     },
     price: "biscuit",
     size: "medium",
@@ -34,7 +34,7 @@ export const DOGS = {
     name: "Buddy",
     owner: {
       name: "Jason",
-      role: "lawn care pro",
+      role: "Lawn Care Pro",
     },
     price: "buddy",
     size: "small",
@@ -60,7 +60,7 @@ export const DOGS = {
     name: "Kilo",
     owner: {
       name: "Ralph",
-      role: "retired pilot",
+      role: "Retired Pilot",
     },
     price: "kilo",
     size: "large",
@@ -73,7 +73,7 @@ export const DOGS = {
     name: "Penny",
     owner: {
       name: "Gadget",
-      role: "inspector",
+      role: "Inspector",
     },
     price: "penny",
     size: "large",
@@ -86,7 +86,7 @@ export const DOGS = {
     name: "Pepe",
     owner: {
       name: "Ms. Tara",
-      role: "dog-show judge",
+      role: "Dog-Show Judge",
     },
     price: "pierre",
     size: "medium",
@@ -99,7 +99,7 @@ export const DOGS = {
     name: "Reggie",
     owner: {
       name: "Ryan",
-      role: "engineer",
+      role: "Engineer",
     },
     price: "reggie",
     size: "small",
@@ -112,7 +112,7 @@ export const DOGS = {
     name: "Sequoia",
     owner: {
       name: "Aunt Judy",
-      role: "tennis star",
+      role: "Tennis Star",
     },
     price: "snowball",
     size: "large",
