@@ -2723,7 +2723,7 @@
       "dartLanesPerSecond": 3,
       "dartStopLanesMax": 4,
       "dartStopLanesMin": 2,
-      "distractionsPerZone": 13,
+      "distractionsPerZone": 17,
       "gearDropsPerZone": {
         "1": 0.5,
         "2": 0.8,

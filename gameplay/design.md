@@ -190,7 +190,7 @@ Good things to bump into on purpose. Each neighbourhood rolls its own number of 
 
 ### Distractions
 
-About 13 times a neighbourhood, a red herring: one of the neighbourhood's own people or animals, a kind that is a hazard there, steps onto an edge lane near the top of the road and back, or waits at the road's edge and leaves, and is gone well before its row nears the pack. It never shows a mover's cue, so a hazard that cues is always real. Red herrings never touch anything, never stand on a pickup, an obstacle or a roadside prop, and leave the road's plan as it is.
+About 17 times a neighbourhood, a red herring: one of the neighbourhood's own people or animals, a kind that is a hazard there, steps onto an edge lane near the top of the road and back, or waits at the road's edge and leaves, and is gone well before its row nears the pack. It never shows a mover's cue, so a hazard that cues is always real. Red herrings never touch anything, never stand on a pickup, an obstacle or a roadside prop, and leave the road's plan as it is.
 
 ### Moving hazards
 
