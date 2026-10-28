@@ -8,7 +8,7 @@ cel shaded.
 
 tourist             48x72   Distillery District and Yonge Street; a stepper facing the player, as the
                             mail carrier is: a straw sun hat with a red band, a turquoise holiday shirt
-                            with a few pink and yellow flowers, a silver-topped camera on a strap round
+                            with a few pink flowers, a silver-topped camera on a strap round
                             the neck, a rust backpack (its straps and its top showing over the
                             shoulders), driftwood shorts and sandals, an open map in the right hand
                             (screen left); walk (4 frames, 100ms): road.PERSON_WALK, the free arm
@@ -234,7 +234,6 @@ def tourist_top(g, b, arms=0):
     g.rect(9, 22 + b, 1, 10, "foam")
     for x, y in ((11, 30), (19, 30), (6, 23)):
         g.rect(x, y + b, 2, 2, "pink")
-        g.p(x, y + b, "white")
     g.rect(14, 21 + b, 4, 1, "white")
     g.rect(15, 22 + b, 2, 1, "white")
     # the backpack's straps down the chest, over the shoulders from the pack behind
@@ -250,15 +249,11 @@ def tourist_top(g, b, arms=0):
     g.rect(15, 26 + b, 3, 3, "grey")
     g.p(16, 27 + b, "ink")
     g.p(15, 26 + b, "white")
-    # the open map held at the hip, the hand on its top corner: cream paper folded in four, a blue river,
-    # a green park and a red pin
+    # the open map held at the hip, the hand on its top corner: cream paper folded in four, a green park
     g.rect(0.5, 30 + b, 8, 7, "cream")
     g.rect(4.5, 30 + b, 1, 7, "tan")
     g.rect(0.5, 33 + b, 8, 1, "tan")
     g.rect(1.5, 31 + b, 2, 2, "green")
-    for k in range(4):
-        g.p(6 + (k > 1), 33 + b + k - (k > 2), "sky")
-    g.p(2, 35 + b, "red")
     g.rect(5, 29 + b, 4, 3, "skin1")
     g.rect(8, 29 + b, 1, 3, "skin2")
     # head: the face, brown hair at the sides, the straw sun hat with a red band and a wide brim
