@@ -51,6 +51,13 @@ fallen-log          112x36  2 lanes, a fallen oak trunk lying across the path: f
                             left, a branch stub, two moss patches and two tan-capped mushrooms on its
                             back and four fallen leaves along its foot;
                             idle (4 frames, 450ms): a leaf on its back stirs 1px on frame 2
+iron-fence-2        112x36  2 lanes: a Victorian wrought-iron fence in front of
+                            a bay-and-gable house, coal iron lit ash, square posts under ball caps at
+                            its ends and each lane's edge, four 2px pickets a lane with spear points
+                            through a top and a bottom rail, on a low driftwood stone curb lit cream;
+                            no outline round the iron, so the gaps stay clear at @50. idle (2 frames,
+                            500ms): a white glint along the top rail on frame 1
+iron-fence-3        176x36  3 lanes: the same fence, a lane wider
 leaf-pile           48x48   1 lane, a raked dome of autumn leaves cel shaded orange, lit amber and
                             shaded rust, its rim ragged with gold, amber and rust leaves and a few more
                             over its face, a red maple leaf on top; idle (4 frames,
@@ -131,8 +138,8 @@ import road  # noqa: E402
 import scene as sn  # noqa: E402
 import sounds  # noqa: E402
 from minis import STEPS  # noqa: E402
-from pixel import ZONE_ROADS, Grid, build as build_sprites, depth_settled, edged, to_image  # noqa: E402
-from pixel import K, raster, road_edge, scale_of  # noqa: E402
+from pixel import ZONE_ROADS, Grid, K, build as build_sprites, depth_settled, edged, road_edge, to_image  # noqa: E402
+from pixel import raster, scale_of  # noqa: E402
 from pixel import preview as sheet  # noqa: E402
 from road import lit  # noqa: E402
 
@@ -835,6 +842,87 @@ def cherry_trees(pose=0, w=obstacles.span(3)):
     return lit(g, dict(bark=("clay", None), walnut=("bark", None), stone=("driftwood", None)))
 
 
+# The fence's idle: rest, then a glint along the top rail.
+IRON_FENCE_IDLE = (0, 1), 500
+# The iron, by K name: a coal body, ash lit on its upper and left edges, ink shading the posts' right sides.
+IRON = ("coal", "ash", "ink")
+# Pickets in each section, between two posts, one section a lane.
+PICKETS = 4
+
+
+def fence_edge(c):
+    """road_edge, but no outline round the iron or its glint: coal is as dark as its outline would be, and a
+    line either side of each 2px picket would close the gaps between them at the small steps."""
+    return None if c in {K[n] for n in (*IRON, "white")} else road_edge(c)
+
+
+def iron_fence(lanes, glint=0):
+    """A Victorian wrought-iron fence in front elevation across lanes lanes, laid out in obstacles.py's pixels
+    (obstacles.span(lanes) by ROW) and drawn in drawn pixels so every bar keeps its width at every step: a
+    square post under a ball cap at each end and at each lane's edge, and between each pair PICKETS pickets,
+    2px wide with even gaps, rising through a top and a bottom rail to spear points (a 2px tip flaring to 4px and
+    6px as far as the gaps keep 2px between points; plain 2px tips at the far steps), all on a low curb of
+    pale driftwood stone lit cream along its top. The iron is coal lit ash along the rails' and the posts'
+    upper and left edges, the posts shaded ink down their right. glint 1 runs a white glint along the top
+    rail's lit edge in the first section."""
+    w = obstacles.span(lanes)
+    g = edged(Grid(w, ROW), fence_edge)
+    px, s = raster(g), scale_of(g)
+    sy = getattr(g, "sy", s)
+
+    def Y(v):
+        return math.floor(v * sy + 0.5)
+
+    big = s >= 0.85
+    curb, rail_top, rail_low, tip = Y(25), Y(7), Y(21), Y(3)
+    ball = 4 if big else 2
+    plate = 2 if big else 1
+    post_w = max(4, math.floor(5 * s + 0.5))
+    # the curb: driftwood stone, lit cream along its top and shaded stone along its foot
+    px.rect(1, curb, px.w - 2, px.h - curb, "driftwood")
+    px.rect(1, curb, px.w - 2, 1, "cream")
+    px.rect(1, px.h - 1, px.w - 2, 1, "stone")
+    # the posts: one at each end and one at each lane's edge, their left edges
+    posts = [2] + [round(px.w * k / lanes - post_w / 2) for k in range(1, lanes)] + [px.w - 2 - post_w]
+    # the pickets in each section, one even gap in every section (the narrowest's), the spare pixels split
+    # between a section's ends
+    sections = [(a + post_w, b) for a, b in zip(posts, posts[1:])]
+    gap = min((x1 - x0 - 2 * PICKETS) // (PICKETS + 1) for x0, x1 in sections)
+    # the spear point: a 2px tip flaring 1px a row each side, as far as the gaps keep 2px between points
+    head = (0, 1, 2) if gap >= 6 else (0, 1) if gap >= 4 else (0,)
+    for x0, x1 in sections:
+        spare = x1 - x0 - 2 * PICKETS - gap * (PICKETS + 1)
+        for i in range(PICKETS):
+            x = x0 + spare // 2 + gap + i * (gap + 2)
+            px.rect(x, tip, 2, curb - tip, "coal")
+            for k, half in enumerate(head):
+                px.rect(x - half, tip + k, 2 + 2 * half, 1, "coal")
+    # the rails between the end posts, lit along their tops; the glint runs along the first section's
+    for y in (rail_top, rail_low):
+        px.rect(posts[0], y, posts[-1] - posts[0], 2, "coal")
+        px.rect(posts[0], y, posts[-1] - posts[0], 1, "ash")
+    if glint:
+        n = 4 if big else 3
+        px.rect(posts[0] + post_w + (4 if big else 2), rail_top, n, 1, "white")
+    # the posts, each under a cap plate and a ball, lit down their left and shaded down their right
+    for x in posts:
+        px.rect(x, ball + plate, post_w, curb - ball - plate, "coal")
+        px.rect(x, ball + plate, 1, curb - ball - plate, "ash")
+        px.rect(x + post_w - 1, ball + plate, 1, curb - ball - plate, "ink")
+        px.rect(x - 1, ball, post_w + 2, plate, "coal")
+        px.rect(x - 1, ball, post_w + 2, 1, "ash")
+        bx = x + (post_w - ball) // 2
+        px.rect(bx, 0, ball, ball, "coal")
+        if big:
+            for cx, cy in ((0, 0), (ball - 1, 0), (0, ball - 1), (ball - 1, ball - 1)):
+                px.p(bx + cx, cy, None)
+            px.rect(bx + 1, 0, 2, 1, "ash")
+            px.p(bx, 1, "ash")
+        else:
+            px.p(bx, 0, "ash")
+    return g
+
+
 # ---------- hit moments ----------
 
 # The calico's fur tufts, thrown out of the scuffle.
@@ -1165,14 +1253,18 @@ def road_sprites(suffix, step):
                                   ("porch-steps", porch_steps, PORCH_STEPS_IDLE)):
         yield f"{key}{suffix}", [("idle", [minis.small(sys.modules[__name__], o, draw, f).outlined() for f in args],
                                   ms)]
+    args, ms = IRON_FENCE_IDLE
+    for lanes in (2, 3):
+        yield f"iron-fence-{lanes}{suffix}", [
+            ("idle", [minis.small(sys.modules[__name__], o, iron_fence, lanes, f).outlined() for f in args], ms)]
 
 
 # Where each road sprite's .aseprite source goes: the card obstacles with the encounters, the rest with the
 # obstacles.
 SOURCES = {"capybara": "art/encounters", "porch-cat": "art/encounters", "cherry-trees": "art/obstacles",
            "fallen-log": "art/obstacles", "ferrets": "art/obstacles", "hen": "art/obstacles",
-           "leaf-pile": "art/obstacles", "little-free-library": "art/obstacles", "picnic-blanket": "art/obstacles",
-           "porch-steps": "art/obstacles"}
+           "iron-fence-2": "art/obstacles", "iron-fence-3": "art/obstacles", "leaf-pile": "art/obstacles",
+           "little-free-library": "art/obstacles", "picnic-blanket": "art/obstacles", "porch-steps": "art/obstacles"}
 
 
 def sprites():

@@ -6494,6 +6494,168 @@
       "json": "sprites/icon-sound-panel.json"
     },
     {
+      "key": "iron-fence-2",
+      "png": "sprites/iron-fence-2.png",
+      "json": "sprites/iron-fence-2.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 112
+      }
+    },
+    {
+      "key": "iron-fence-2@50",
+      "png": "sprites/iron-fence-2@50.png",
+      "json": "sprites/iron-fence-2@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 56
+      }
+    },
+    {
+      "key": "iron-fence-2@56",
+      "png": "sprites/iron-fence-2@56.png",
+      "json": "sprites/iron-fence-2@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 63
+      }
+    },
+    {
+      "key": "iron-fence-2@62",
+      "png": "sprites/iron-fence-2@62.png",
+      "json": "sprites/iron-fence-2@62.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 70
+      }
+    },
+    {
+      "key": "iron-fence-2@69",
+      "png": "sprites/iron-fence-2@69.png",
+      "json": "sprites/iron-fence-2@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 77
+      }
+    },
+    {
+      "key": "iron-fence-2@75",
+      "png": "sprites/iron-fence-2@75.png",
+      "json": "sprites/iron-fence-2@75.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 84
+      }
+    },
+    {
+      "key": "iron-fence-2@81",
+      "png": "sprites/iron-fence-2@81.png",
+      "json": "sprites/iron-fence-2@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 91
+      }
+    },
+    {
+      "key": "iron-fence-2@88",
+      "png": "sprites/iron-fence-2@88.png",
+      "json": "sprites/iron-fence-2@88.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 98
+      }
+    },
+    {
+      "key": "iron-fence-2@94",
+      "png": "sprites/iron-fence-2@94.png",
+      "json": "sprites/iron-fence-2@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 105
+      }
+    },
+    {
+      "key": "iron-fence-3",
+      "png": "sprites/iron-fence-3.png",
+      "json": "sprites/iron-fence-3.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 176
+      }
+    },
+    {
+      "key": "iron-fence-3@50",
+      "png": "sprites/iron-fence-3@50.png",
+      "json": "sprites/iron-fence-3@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 88
+      }
+    },
+    {
+      "key": "iron-fence-3@56",
+      "png": "sprites/iron-fence-3@56.png",
+      "json": "sprites/iron-fence-3@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 99
+      }
+    },
+    {
+      "key": "iron-fence-3@62",
+      "png": "sprites/iron-fence-3@62.png",
+      "json": "sprites/iron-fence-3@62.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 110
+      }
+    },
+    {
+      "key": "iron-fence-3@69",
+      "png": "sprites/iron-fence-3@69.png",
+      "json": "sprites/iron-fence-3@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 121
+      }
+    },
+    {
+      "key": "iron-fence-3@75",
+      "png": "sprites/iron-fence-3@75.png",
+      "json": "sprites/iron-fence-3@75.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 132
+      }
+    },
+    {
+      "key": "iron-fence-3@81",
+      "png": "sprites/iron-fence-3@81.png",
+      "json": "sprites/iron-fence-3@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 143
+      }
+    },
+    {
+      "key": "iron-fence-3@88",
+      "png": "sprites/iron-fence-3@88.png",
+      "json": "sprites/iron-fence-3@88.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 154
+      }
+    },
+    {
+      "key": "iron-fence-3@94",
+      "png": "sprites/iron-fence-3@94.png",
+      "json": "sprites/iron-fence-3@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 165
+      }
+    },
+    {
       "key": "jogger",
       "png": "sprites/jogger.png",
       "json": "sprites/jogger.json",
