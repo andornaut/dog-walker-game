@@ -37,6 +37,7 @@ import {
 import { blocksLane, type WalkItem, type WalkItemKind } from "../runner/walkItems";
 import { plannedCellInset } from "../runner/zonePlan";
 import type { PackDogs } from "../state/runState";
+import { defined } from "../testing/defined";
 import { hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
 import { testState } from "../testing/runState";
 import { IDEAL_SKILL, simConfig } from "../testing/sim";
@@ -595,15 +596,16 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
 
   // At the top of its tilt range, at the slowest pace and the fastest, a dart tilted toward the
   // pack sets off no higher than shows its cue wholly on the road and no lower than leaves the
-  // pack its reaction margin, at both ends of its start draw and at each lift the planner retries
-  // it at. It keeps its range's top tilt unless it sets off at that highest start, where the
-  // zone's pace leaves no start for a steeper one.
+  // pack its reaction margin, at both ends of its start draw, as drawn and lifted all the way: a
+  // lift only raises its start, so the lowest start meets the margin and the highest the cue. It
+  // keeps its range's top tilt unless it sets off at that highest start, where the zone's pace
+  // leaves no start for a steeper one.
   it.each(
     ZONE_ENDS.flatMap((zoneIndex) =>
       [...movements.values()].flatMap((entry) =>
         entry.movement.kind === "dart" && entry.movement.tilt.max > 0
           ? [LOW, HIGH].flatMap((draws) =>
-              [0, ...DART_LIFTS].map((lift) => ({
+              [0, defined(DART_LIFTS.at(-1))].map((lift) => ({
                 ...entry,
                 draws: { ...draws, tilt: 0.999999 },
                 lift,
