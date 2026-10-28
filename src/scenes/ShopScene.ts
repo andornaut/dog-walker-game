@@ -1,9 +1,9 @@
 import { type GameObjects, type Input, Scene } from "phaser";
 
-import { dogFaceKey, dogPortraitKey, gearIconKey } from "../assets/spriteKeys";
+import { dogFaceKey, gearIconKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import { type DetailPicture, dogDetail, gearDetail } from "../home/detail";
+import { dogDetail, gearDetail } from "../home/detail";
 import { FEEDBACK, shakeOffset } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
 import { dollarText, type Purchase } from "../home/home";
@@ -75,7 +75,14 @@ import { GREYED, pictureBox, type PlateKind } from "../ui/selection";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { addDetailCard, drawDetailCard } from "./homePanels";
-import { addBadge, addPlate, drawDogSlotFallback, plateColours, SHOP_ART } from "./itemArt";
+import {
+  addPlate,
+  addTileBadge,
+  drawDogSlotFallback,
+  plateColours,
+  purchasePicture,
+  SHOP_ART,
+} from "./itemArt";
 import { closeOverlay, listenDismiss, openOverlay, type OverlayData } from "./overlay";
 import { currentSettings, profileSave, purchaseInProfile, takeCelebrations } from "./profileStore";
 import { drawPurchaseConfirm, type PurchaseConfirmHits } from "./purchaseConfirmView";
@@ -157,21 +164,6 @@ function purchaseArt(purchase: Purchase): string {
       return SHOP_ART.dogSlot;
     case "gear":
       return gearIconKey(purchase.gear);
-    default:
-      return purchase satisfies never;
-  }
-}
-
-// A purchase's picture on its detail card and its confirm: a dog's portrait, a gear item's
-// icon or the slot's art at 2x.
-export function purchasePicture(purchase: Purchase): DetailPicture {
-  switch (purchase.kind) {
-    case "dog":
-      return { key: dogPortraitKey(gameData, purchase.dog), scale: 1 };
-    case "dogSlot":
-      return { key: SHOP_ART.dogSlot, scale: 2 };
-    case "gear":
-      return { key: gearIconKey(purchase.gear), scale: 2 };
     default:
       return purchase satisfies never;
   }
@@ -816,7 +808,7 @@ export class ShopScene extends Scene {
       y: boxRect.y + ROW.art,
     });
     if (view.badge !== null) {
-      addBadge(this, content, view.badge, { x: rect.x + badge.dx, y: rect.y + badge.dy });
+      addTileBadge(this, content, view.badge, { x: rect.x + badge.dx, y: rect.y + badge.dy });
     }
     const ink = PALETTE[tile.look.text];
     const mid = rect.y + Math.floor(rect.height / 2);

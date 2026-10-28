@@ -133,7 +133,14 @@ import { addNamePills } from "./effectNameColours";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { addAffordFrame, drawDetailCard } from "./homePanels";
-import { addBadge, addPlate, drawPetShopFallback, plateColours, SHOP_ART } from "./itemArt";
+import {
+  addPlate,
+  addTileBadge,
+  drawPetShopFallback,
+  plateColours,
+  purchasePicture,
+  SHOP_ART,
+} from "./itemArt";
 import { listenOnePress } from "./onePress";
 import { listenOutsideTap, onBackPressed, onSceneEvent, openOverlay } from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
@@ -152,7 +159,6 @@ import { type RunPick, runSceneData } from "./run/runStart";
 import { SCENE_KEYS } from "./sceneKeys";
 import { SETTINGS_CLOSED_EVENT } from "./SettingsScene";
 import {
-  purchasePicture,
   SHOP_CHANGED_EVENT,
   SHOP_CLOSED_EVENT,
   type ShopClosed,
@@ -1656,7 +1662,7 @@ export class StartScene extends Scene {
       }
       // A locked dog shows its name over its price plate, and its badge.
       fitText(dog.name, y + lockedNameY);
-      addBadge(this, content, badge, { x: x + badgeAt.dx, y: y + badgeAt.dy });
+      addTileBadge(this, content, badge, { x: x + badgeAt.dx, y: y + badgeAt.dy });
       const plateY = dogTilePlateY(body);
       this.lockedPlate(content, tile, { capY: y + plateY - 1, originX: 0, x: x + textX });
     });
@@ -1701,7 +1707,7 @@ export class StartScene extends Scene {
         view.face = { object: icon, y: at.y };
       }
       if (badge !== null) {
-        addBadge(this, content, badge, { x: x + badgeAt.dx, y: y + badgeAt.dy });
+        addTileBadge(this, content, badge, { x: x + badgeAt.dx, y: y + badgeAt.dy });
         const plateAt = { capY: y + POCKET.priceY, originX: 0.5, x: x + width / 2 };
         this.lockedPlate(content, tile, plateAt);
       }
@@ -1784,7 +1790,7 @@ export class StartScene extends Scene {
         });
       }
       if (badge !== null) {
-        addBadge(this, content, badge, { x: x + badgeAt.dx, y: y + badgeAt.dy });
+        addTileBadge(this, content, badge, { x: x + badgeAt.dx, y: y + badgeAt.dy });
       }
       // Every walker's name on the goal plate, owned or locked.
       const plateAt = { capY: y + plateY, originX: 0.5, x: x + rect.width / 2 };

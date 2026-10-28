@@ -1,5 +1,9 @@
 import type { GameObjects, Scene } from "phaser";
 
+import { dogPortraitKey, gearIconKey } from "../assets/spriteKeys";
+import { gameData } from "../data";
+import type { DetailPicture } from "../home/detail";
+import type { Purchase } from "../home/home";
 import type { Rect } from "../lib/rect";
 import type { Badge } from "../ui/interaction";
 import { fillRect } from "../ui/phaser/draw";
@@ -21,7 +25,7 @@ export const BADGE_KEYS: Readonly<Record<Badge, string>> = {
 };
 
 // The badge over an item's top-left corner, or nothing while the art is missing.
-export function addBadge(
+export function addTileBadge(
   scene: Scene,
   parent: GameObjects.Container,
   badge: Badge,
@@ -30,6 +34,21 @@ export function addBadge(
   const key = BADGE_KEYS[badge];
   if (scene.textures.exists(key)) {
     parent.add(scene.add.image(at.x, at.y, key).setOrigin(0));
+  }
+}
+
+// A purchase's picture on its detail card and its confirm: a dog's portrait, a gear item's
+// icon or the slot's art at 2x.
+export function purchasePicture(purchase: Purchase): DetailPicture {
+  switch (purchase.kind) {
+    case "dog":
+      return { key: dogPortraitKey(gameData, purchase.dog), scale: 1 };
+    case "dogSlot":
+      return { key: SHOP_ART.dogSlot, scale: 2 };
+    case "gear":
+      return { key: gearIconKey(purchase.gear), scale: 2 };
+    default:
+      return purchase satisfies never;
   }
 }
 
