@@ -9,14 +9,14 @@ full outline at the small size (see minis.py).
 
 At every step here: other-dog-owner, thief, petting-neighbour, mail-carrier,
 stroller, jogger, kid-on-bike, ice-cream-truck, puddle (no
-outline), hedge, hot-dog-cart, barrier-2, barrier-3, parked-car, delivery-truck
-and streetcar. Walkers
+outline), hedge, hot-dog-cart, barrier-2, barrier-3, parked-car, delivery-truck,
+streetcar and taxi. Walkers
 are the pack, always drawn at 1x, and have none.
 
 Every variant keeps the original's tags, frame counts and durations, and its
 frame is floor(original size x scale + 0.5). road.py's people are drawn at
 road.SCALE x the step, as road.py draws them at road.SCALE. The ice cream truck,
-the obstacles, and the parked car, delivery truck and streetcar are drawn at their
+the obstacles, and the parked car, delivery truck, streetcar and taxi are drawn at their
 full size's scale
 (road.TRUCK_SCALE, obstacles.SCALE, obstacles.CAR_SCALE) x the step. Offsets that move a
 part by pixels (a step, a breath, a wag) are snapped to whole pixels at the small
@@ -130,6 +130,13 @@ def own(s):
         ("drive", [small(obstacles, car, obstacles.delivery_truck, roll=f).outlined() for f in drive], drive_ms)]
     yield "streetcar", obstacle(car, obstacles.streetcar, obstacles.STREETCAR_IDLE) + [
         ("drive", [small(obstacles, car, obstacles.streetcar, roll=f).outlined() for f in drive], drive_ms)]
+    cue, cue_ms = obstacles.TAXI_CUE
+    merge, merge_ms = obstacles.TAXI_MERGE
+    yield "taxi", [
+        ("drive", [small(obstacles, car, obstacles.taxi, roll=f).outlined() for f in drive], drive_ms),
+        ("cue", [small(obstacles, car, obstacles.taxi, roll=f, signal=b).outlined() for f, b in cue], cue_ms),
+        ("merge", [small(obstacles, car, obstacles.taxi, roll=f, signal=b, turn=True).outlined() for f, b in merge],
+         merge_ms)]
 
 
 def hazard(s):

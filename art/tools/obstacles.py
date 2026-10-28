@@ -32,13 +32,22 @@ streetcar           56x66   1 lane by 3 rows of footprint, a red TTC Flexity fro
                             on the roof, drawn at the footprint's near edge; idle (4 frames, 400ms): a
                             spark at the pan head on frame 2. drive (4 frames, 100ms): tread lines climb
                             the wheels and the body sways 1px over the bogie
+taxi                56x42   1 lane by 2 rows of footprint, Yonge Street's mover: a gold Toronto cab from
+                            straight behind, drawn at CAR_SCALE as the parked car, a white TAXI roof
+                            light lettered in dred, black mirrors, rocker band and bumper. drive (4
+                            frames, 100ms): the parked car's tread roll. cue (6 frames, 100ms, 600ms in
+                            all, played once): the roll with the right indicator and its mirror repeater
+                            lit on frames 0, 1, 4 and 5. merge (4 frames, 100ms): angled right, changing
+                            lanes, the right flank showing, the indicator lit on frames 2 and 3. The
+                            game mirrors cue and merge for a merge left. No idle: it falls back to drive
 
-Every obstacle has a looping idle, so nothing on the road is frozen. Each idle
-frame is one argument to the drawing function, listed in the *_IDLE tuples;
-frame 0 is the rest pose. The drawings are in layout pixels, 40 for a 1-lane
-sprite and 30 rows for a lane-spanning one, drawn SCALE (1.2) times bigger on a
-minis.Mini, which keeps 1px lines 1px; the parked car, the delivery truck and the
-streetcar keep their 56 layout columns and draw only their rows SCALE times taller. minis.py and depths.py run them at
+Every obstacle but the taxi, which only drives, has a looping idle, so nothing
+on the road is frozen. Each idle frame is one argument to the drawing function,
+listed in the *_IDLE tuples; frame 0 is the rest pose. The drawings are in
+layout pixels, 40 for a 1-lane sprite and 30 rows for a lane-spanning one, drawn
+SCALE (1.2) times bigger on a minis.Mini, which keeps 1px lines 1px; the parked
+car, the delivery truck, the streetcar and the taxi keep their 56 layout columns
+and draw only their rows SCALE times taller. minis.py and depths.py run them at
 SCALE (or CAR_SCALE) times each depth step for the depth variants.
 
 Usage:
@@ -304,8 +313,8 @@ HEDGE_IDLE = ((), (5,), (10,), (1,)), 350
 PARKED_CAR_IDLE = (False, True), 500
 # The pull-out: 4 frames of parked_car's roll, and their duration in ms.
 PULL_OUT = range(4), 100
-# The drive: 4 frames of parked_car's, delivery_truck's or streetcar's roll with no indicator, and their
-# duration in ms.
+# The drive: 4 frames of parked_car's, delivery_truck's, streetcar's or taxi's roll with no indicator, and
+# their duration in ms.
 DRIVE = range(4), 100
 # The delivery truck's idle: an exhaust puff on frame 2, drifting up and thinning on frame 3.
 DELIVERY_IDLE = (0, 0, 1, 2), 400
@@ -386,7 +395,8 @@ def delivery_truck(puff=0, roll=None):
 # 3x5 letters for the streetcar's route sign and wordmark, one string per row, 1 for a lit pixel.
 LETTERS = {"0": ("111", "101", "101", "101", "111"), "4": ("101", "101", "111", "001", "001"),
            "5": ("111", "100", "111", "001", "111"), "C": ("111", "100", "100", "100", "111"),
-           "T": ("111", "010", "010", "010", "010")}
+           "T": ("111", "010", "010", "010", "010"), "A": ("010", "101", "111", "101", "101"),
+           "I": ("111", "010", "010", "010", "111"), "X": ("101", "101", "010", "101", "101")}
 # The streetcar's idle: a spark at the pantograph on frame 2.
 STREETCAR_IDLE = (False, False, True, False), 400
 # Its drive's sideways sway, in drawn pixels per frame, as the bogies roll under it.
@@ -480,6 +490,106 @@ def streetcar(spark=False, roll=None):
     body = px.px
     px.px = [[(body[y][x - sway] if 0 <= x - sway < px.w else None) or wheels[y][x] for x in range(px.w)]
              for y in range(px.h)]
+    return lit(g)
+
+
+# The taxi's cue, (roll, signal) a frame: the drive's tread roll at its 100ms with the right indicator lit on
+# frames 0, 1, 4 and 5, 600ms in all, the game's mover warning. Its merge carries the beat on, lit on frames 2
+# and 3, angled right.
+TAXI_CUE = ((0, True), (1, True), (2, False), (3, False), (0, True), (1, True)), 100
+TAXI_MERGE = ((0, False), (1, False), (2, True), (3, True)), 100
+
+
+def taxi(roll=None, signal=False, turn=False):
+    """A Toronto taxi from straight behind, a sedan a lane wide, laid out on 56x35 and drawn at CAR_SCALE to
+    56x42 as the parked car: a white TAXI roof light lettered in dred over a gold body lit yellow along its top
+    and left edges and shaded amber down its right, the dark rear window between the pillars, the trunk lid's
+    lip, tail light clusters in ink housings at the outer corners (red inside, the indicator outside), a white
+    plate, a black rocker band and bumper and both rear tires, mirrors at the window's base. signal lights the
+    right indicator amber and the repeater on the right mirror; unlit they are dbrown and ochre. roll (0 to 3)
+    is a drive frame: tread lines climb the tires 1px a frame (treads). turn angles it right, changing lanes:
+    the rear face narrows and slides left, the roof light and cabin lean 2px further right, and the right flank
+    shows down the right edge in amber, its side window, its mirror and repeater, and the right rear tire side
+    on."""
+    g = edged(Grid(56, 35))
+    uy = unit(g)[1]
+    # the rear face's columns, narrowed and slid left when turning; up leans the upper parts further right
+    k, x0, lean = (0.875, 3, 2) if turn else (1, 4, 0)
+
+    def X(x, up=0):
+        return x0 + (x - 4) * k + (lean if up else 0)
+
+    def r(x, y, w, h, c, up=0):
+        g.rect(X(x, up), y, w * k, h, c)
+
+    # rear tires, under the body at either side
+    for x in (6, 42):
+        r(x, 26, 8, 8, "ink")
+        r(x, 26, 2, 7, "dslate")
+        if roll is not None:
+            treads(g, X(x + 2), 29, 6 * k, 5, roll, uy)
+    if turn:
+        # the right flank: the beltline and rocker rising toward the front, the rear tire side on
+        g.tri((X(52), 17), (54, 16), (54, 26), "amber")
+        g.tri((X(52), 17), (X(52), 27), (54, 26), "amber")
+        g.rect(X(52), 25, 54 - X(52), 2, "ink")
+        g.cel(50, 29.5, 3.2, 4, "ink", None, "dslate")
+        if scale_of(g) >= TEXTURE_MIN:
+            g.cel(50, 29.5, 1.3, 1.5, "grey", None, "lgrey")
+        # the cabin's side: the side window under the roof's edge
+        g.rect(X(44, 1), 8, 52 - X(44, 1), 9, "amber")
+        g.rect(X(44, 1), 8, 52 - X(44, 1), 1, "yellow")
+        g.rect(X(45, 1), 10, 50 - X(45, 1), 6, "navy")
+    # roof and rear window, narrower than the body, between the pillars
+    r(12, 8, 32, 2, "gold", 1)
+    r(12, 8, 32, 1, "yellow", 1)
+    g.tri((X(9), 17), (X(12, 1), 9), (X(12, 1), 17), "gold")
+    g.tri((X(47), 17), (X(44, 1), 9), (X(44, 1), 17), "amber")
+    g.rect(X(12, 1), 10, X(44, 1) - X(12, 1), 7, "navy")
+    g.rect(X(12, 1), 10, X(44, 1) - X(12, 1), 1, "dslate")
+    g.tri((X(16, 1), 16), (X(21, 1), 11), (X(26, 1), 11), "slate")
+    g.p(X(9), 16, "yellow")
+    # the roof light: a white box on a short base, lettered TAXI
+    r(25, 7, 6, 1, "dslate", 1)
+    r(19, 1, 18, 6, "white", 1)
+    r(19, 6, 18, 1, "lgrey", 1)
+    r(35, 2, 2, 4, "lgrey", 1)
+    lettering(g, X(28, 1), 1.3, "TAXI", "dred", "dred")
+    # black mirrors at the window's base; the right one carries the indicator's repeater
+    r(3, 13, 5, 3, "ink")
+    mx, my = (50, 12) if turn else (X(48), 13)
+    g.rect(mx, my, 5 * k if not turn else 5, 3, "ink")
+    g.rect(mx + 1, my + 1, 3, 2, "amber" if signal else "dslate")
+    if signal:
+        g.rect(mx + 1, my + 1, 3, 1, "yellow")
+    # the trunk lid's lip and the rear face: lit along the top and the left, shaded on the right
+    r(4, 17, 48, 10, "gold")
+    r(4, 17, 48, 1, "yellow")
+    r(4, 17, 1, 10, "yellow")
+    r(48, 18, 4, 9, "amber")
+    r(4, 19, 48, 1, "amber")
+    # tail light clusters: red inside, the indicator outside, in ink housings
+    for x, tail in ((5, 11), (39, 40)):
+        r(x, 20, 13, 6, "ink")
+        r(tail, 21, 6, 4, "red")
+        r(tail, 21, 6, 1, "pink")
+    r(6, 21, 5, 4, "dbrown")
+    if signal:
+        r(46, 21, 5, 4, "amber")
+        r(47, 21, 3, 3, "yellow")
+        r(48, 22, 1, 1, "white")
+    else:
+        r(46, 21, 5, 4, "dbrown")
+    # the plate, white with a blue line, and the black rocker band and bumper
+    r(22, 20, 12, 5, "white")
+    r(22, 24, 12, 1, "lgrey")
+    r(24, 22, 8, 1, "blue")
+    if turn:
+        # the tail light housing wraps round the corner onto the flank
+        g.rect(X(52), 20, 1, 6, "ink")
+    r(4, 26, 48, 1, "ink")
+    r(3, 27, 50, 3, "ink")
+    r(3, 27, 50, 1, "dslate")
     return lit(g)
 
 
@@ -584,6 +694,12 @@ def sprites():
     yield "hot-dog-cart", idle(lambda f: hot_dog_cart(steam=f), HOT_DOG_CART_IDLE)
     yield "streetcar", idle(streetcar, STREETCAR_IDLE, CAR_SCALE) + [
         ("drive", [drawn(CAR_SCALE, streetcar, roll=f).outlined() for f in drive], drive_ms)]
+    cue, cue_ms = TAXI_CUE
+    merge, merge_ms = TAXI_MERGE
+    yield "taxi", [("drive", [drawn(CAR_SCALE, taxi, roll=f).outlined() for f in drive], drive_ms),
+                   ("cue", [drawn(CAR_SCALE, taxi, roll=f, signal=b).outlined() for f, b in cue], cue_ms),
+                   ("merge", [drawn(CAR_SCALE, taxi, roll=f, signal=b, turn=True).outlined() for f, b in merge],
+                    merge_ms)]
 
 
 if __name__ == "__main__":
