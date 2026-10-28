@@ -1,8 +1,12 @@
 import type { GameObjects, Scene } from "phaser";
 
+import { animationKey } from "../../assets/asepriteAnimations";
+import { IDLE_TAG } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import { distanceAtY } from "../../layout/projection";
+import { getOrInsertComputed } from "../../lib/maps";
 import {
+  idleFrame,
   newRoadsidePlaces,
   placeRoadside,
   ROADSIDE,
@@ -17,6 +21,9 @@ import { DEPTH, JUNCTURE_Y, LAYOUT, PROJECTION, ROW_DEPTH, sceneryFade, showOnRo
 // The roadside props' sprites, a fixed pool made once and reused frame to frame: each drawn
 // through the projection from its depth steps like the road's sprites, cut off at the
 // juncture, with their zone's ground shadow under the free-standing ones. Cosmetic only.
+// A prop whose art step has an idle tag of more than one frame shows the frame idleFrame picks
+// on the walk's ambient clock, set each frame rather than played: the pool hands a sprite to
+// another prop as props scroll out, and every depth step shows the same frame.
 export class RoadsideView {
   private readonly frame: RoadsideFrame = {
     current: "",
@@ -25,6 +32,8 @@ export class RoadsideView {
     previousStart: 0,
     scroll: 0,
   };
+  // Each art step's idle loop by texture key, null for one with no loop.
+  private readonly loops = new Map<string, IdleLoop | null>();
   private readonly places = newRoadsidePlaces();
   private readonly shadows: ShadowPool;
   private readonly sprites: GameObjects.Sprite[];
@@ -45,8 +54,15 @@ export class RoadsideView {
 
   // The zone being walked and the one before it (null in the first), by art id; zoneStart is
   // the road distance from the walk's start where the current zone began, and scroll the road
-  // distance at the walker's feet.
-  draw(current: string, previous: string | null, zoneStart: number, scroll: number): void {
+  // distance at the walker's feet; ms is the ambient clock idle loops run on, and still holds
+  // each on its first frame.
+  draw(
+    current: string,
+    previous: string | null,
+    zoneStart: number,
+    scroll: number,
+    motion: { ms: number; still: boolean },
+  ): void {
     const { frame, places, sprites } = this;
     frame.current = current;
     frame.previous = previous;
@@ -67,6 +83,13 @@ export class RoadsideView {
         continue;
       }
       const drawn = showAtDepth(sprite, place.key, place.scale);
+      const loop = this.loop(sprite.scene, drawn.key);
+      if (loop !== null) {
+        const shown = loop.frames[idleFrame(motion.still, loop.durations, place.phase, motion.ms)];
+        if (shown !== undefined && sprite.frame.name !== shown) {
+          sprite.setFrame(shown);
+        }
+      }
       const x = Math.round(place.x);
       const y = Math.round(place.y);
       sprite.setPosition(x, y).setDepth(DEPTH.roadside + y * ROW_DEPTH);
@@ -78,4 +101,27 @@ export class RoadsideView {
     }
     this.shadows.hideUnused();
   }
+
+  // An art step's idle tag as frame names and durations, read once; null with no tag or a
+  // one-frame tag, which draws as a still image.
+  private loop(scene: Scene, key: string): IdleLoop | null {
+    return getOrInsertComputed(
+      key,
+      () => {
+        const frames = scene.anims.get(animationKey(key, IDLE_TAG))?.frames ?? [];
+        return frames.length < 2
+          ? null
+          : {
+              durations: frames.map(({ duration }) => duration),
+              frames: frames.map(({ textureFrame }) => String(textureFrame)),
+            };
+      },
+      this.loops,
+    );
+  }
+}
+
+interface IdleLoop {
+  readonly durations: readonly number[];
+  readonly frames: readonly string[];
 }

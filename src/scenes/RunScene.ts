@@ -659,9 +659,10 @@ export class RunScene extends Scene implements HudRun {
     const held = halted || session.walk.road.hitStop?.firing === true;
     world.backdrop.draw(zone);
     const zoneId = currentZoneId(gameData, walk.run);
+    const ambientMs = this.ambientMs + (held ? 0 : alpha * STEP_MS);
     world.ambient.draw(gameData.ambient[zoneId], zoneId, {
       halted: held,
-      now: (this.ambientMs + (held ? 0 : alpha * STEP_MS)) / 1000,
+      now: ambientMs / 1000,
       still,
       travelled: distanceBeforeZone + walk.run.zoneDistance,
     });
@@ -671,6 +672,7 @@ export class RunScene extends Scene implements HudRun {
       previousZone(gameData, walk.run)?.art ?? null,
       distanceBeforeZone,
       distanceBeforeZone + walk.run.zoneDistance,
+      { ms: ambientMs, still },
     );
     const shadow = world.shadows.frame(colourFromHex(zone.roadShadowColour));
     world.items.draw(walk, held, still, shadow);

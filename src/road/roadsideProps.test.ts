@@ -12,12 +12,14 @@ import { walkProjection } from "../runner/walkGeometry";
 import { curbBand, curbFits, VERGES, VERGES_BY_ART, walkFrom } from "./roadside";
 import {
   eachRoadsideProp,
+  idleFrame,
   newRoadsidePlaces,
   placeRoadside,
   ROADSIDE,
   ROADSIDE_LIMIT,
   type RoadsideCurb,
   type RoadsideFrame,
+  roadsidePhase,
   type RoadsidePlace,
   type RoadsideStage,
   type RoadsideTable,
@@ -375,4 +377,117 @@ describe("placeRoadside", () => {
       }
     }
   });
+
+  // Between two scrolls that place the same props in the same order, each keeps its phase.
+  it.each(TABLES)("keeps each prop's phase as the road scrolls, %s", (_, table) => {
+    const zone = zoneOf(table);
+    for (let scroll = 0; scroll < repeatSlots(zone) * zone.slot; scroll += 7) {
+      const before = placed(table, frame({ scroll }));
+      const after = placed(table, frame({ scroll: scroll + 0.5 }));
+      if (before.map(({ key }) => key).join() === after.map(({ key }) => key).join()) {
+        expect(after.map(({ phase }) => phase)).toEqual(before.map(({ phase }) => phase));
+      }
+    }
+  });
+
+  it.each(ZONES)("gives each of %s's props of one kind in view its own phase", (art, zone) => {
+    for (let scroll = 0; scroll < repeatSlots(zone) * zone.slot; scroll += zone.slot) {
+      const phases = new Map<string, Set<number>>();
+      const counts = new Map<string, number>();
+      for (const { key, phase } of placed(ROADSIDE, frame({ current: art, scroll }))) {
+        phases.set(key, (phases.get(key) ?? new Set()).add(phase));
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
+      for (const [key, count] of counts) {
+        expect(phases.get(key)?.size).toBe(count);
+      }
+    }
+  });
+});
+
+describe("roadsidePhase", () => {
+  // Every road distance over a long stretch, at one across.
+  const STRETCH = Array.from({ length: 4000 }, (_, i) => i);
+
+  it.each([-231, 186, 270])("spreads the phases at across %i over [0, 1) evenly", (across) => {
+    const phases = STRETCH.map((distance) => roadsidePhase(distance, across));
+    expect(phases.every((phase) => phase >= 0 && phase < 1)).toBe(true);
+    for (const quarter of [0, 1, 2, 3]) {
+      const share = phases.filter((phase) => Math.floor(phase * 4) === quarter).length;
+      expect(share / STRETCH.length).toBeCloseTo(1 / 4, 1);
+    }
+  });
+
+  it.each([
+    ["the same place on the two sides", [1200, -231], [1200, 231]],
+    ["neighbouring acrosses", [1200, 231], [1200, 232]],
+    ["neighbouring distances", [1200, 231], [1201, 231]],
+  ] as const)("differs between %s", (_, [distance, across], [other, otherAcross]) => {
+    expect(roadsidePhase(distance, across)).not.toBe(roadsidePhase(other, otherAcross));
+  });
+
+  it("rounds the distance, so a prop keeps its phase over a fractional zone start", () => {
+    expect(roadsidePhase(1200.4, 231)).toBe(roadsidePhase(1200, 231));
+  });
+});
+
+describe("idleFrame", () => {
+  const LOOP = [100, 200, 300];
+
+  it.each([
+    { durations: LOOP, frame: 0, ms: 0, phase: 0, still: false },
+    { durations: LOOP, frame: 1, ms: 150, phase: 0, still: false },
+    { durations: LOOP, frame: 2, ms: 0, phase: 0.5, still: false },
+    { durations: LOOP, frame: 0, ms: 300, phase: 0.5, still: false },
+    { durations: LOOP, frame: 2, ms: 600 * 40 + 350, phase: 0, still: false },
+    { durations: LOOP, frame: 0, ms: 150, phase: 0.5, still: true },
+    { durations: [1000], frame: 0, ms: 700, phase: 0.9, still: false },
+  ])(
+    "shows frame $frame at $ms ms from phase $phase, still $still",
+    ({ durations, frame: shown, ms, phase, still }) => {
+      expect(idleFrame(still, durations, phase, ms)).toBe(shown);
+    },
+  );
+
+  // Idle tags with uneven frame durations, as art draws a lamp's slow fade or a sign's flicker.
+  const UNEVEN = [
+    [2400, 300, 250, 900, 250, 300],
+    [2600, 250, 350, 250],
+    [1800, 300, 300],
+  ].map((durations) => ({ durations }));
+  // Every frame's run of shown ms over one loop from start, sampled every millisecond.
+  function frameRuns(durations: readonly number[], phase: number, start: number) {
+    const total = durations.reduce((sum, duration) => sum + duration, 0);
+    const runs: { frame: number; ms: number }[] = [];
+    for (let ms = start; ms < start + total; ms++) {
+      const frame = idleFrame(false, durations, phase, ms);
+      const last = runs.at(-1);
+      if (last?.frame === frame) {
+        last.ms += 1;
+      } else {
+        runs.push({ frame, ms: 1 });
+      }
+    }
+    return runs;
+  }
+
+  it.each(UNEVEN)(
+    "shows each frame of the loop $durations for its own duration",
+    ({ durations }) => {
+      expect(frameRuns(durations, 0, 0)).toEqual(durations.map((ms, frame) => ({ frame, ms })));
+    },
+  );
+
+  // From a phase the loop starts part way through, and still shows every frame for its own
+  // duration in turn.
+  it.each(UNEVEN)(
+    "shows each frame of the loop $durations for its duration from a phase",
+    ({ durations }) => {
+      const total = durations.reduce((sum, duration) => sum + duration, 0);
+      const phase = 0.25;
+      expect(frameRuns(durations, phase, total - phase * total)).toEqual(
+        durations.map((ms, frame) => ({ frame, ms })),
+      );
+    },
+  );
 });

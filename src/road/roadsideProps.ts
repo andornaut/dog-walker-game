@@ -11,6 +11,9 @@ import { getOrInsertComputed } from "../lib/maps";
 // in the walk reads them and they draw no random numbers, so a seed plays the same walk with
 // or without them.
 //
+// A prop whose sprite has an idle tag loops it from its own phase (roadsidePhase), so props of
+// one kind never change in step, and with reduced motion holds its first frame (idleFrame).
+//
 // Road px: across is the distance from the road's centre line to a prop frame's centre, z the
 // distance along the road from the zone's start strip's near edge, as the road raster counts
 // its strip rows. Each side has a slot every `slot` along z, slot n at z = n * slot. With
@@ -179,10 +182,44 @@ function visitSlot(
   }
 }
 
-// Where a prop is drawn: its key, its feet on screen, its projected scale, and the colour of
-// its ground shadow, or null for a prop with none.
+// The share of its idle loop's length a prop starts at, in [0, 1): the murmur3 finalizer over
+// where it stands, its road distance from the walk's start and its across, signed by its side
+// (left negative), each rounded. So it keeps its phase as the road scrolls, and its neighbours
+// of the same kind take others. It draws no random numbers.
+export function roadsidePhase(distance: number, across: number): number {
+  let hash = Math.imul(Math.round(distance), 0x9e3779b1) ^ Math.round(across);
+  hash = Math.imul(hash ^ (hash >>> 16), 0x85ebca6b);
+  hash = Math.imul(hash ^ (hash >>> 13), 0xc2b2ae35);
+  return ((hash ^ (hash >>> 16)) >>> 0) / 2 ** 32;
+}
+
+// The frame of its idle loop a prop shows ms into the walk, by the loop's frame durations: the
+// loop runs on from phase, a share of its length. With still it holds the first frame.
+export function idleFrame(
+  still: boolean,
+  durationsMs: readonly number[],
+  phase: number,
+  ms: number,
+): number {
+  const total = durationsMs.reduce((sum, duration) => sum + duration, 0);
+  if (still || !(total > 0)) {
+    return 0;
+  }
+  let into = mod(ms + phase * total, total);
+  for (const [i, duration] of durationsMs.entries()) {
+    if (into < duration) {
+      return i;
+    }
+    into -= duration;
+  }
+  return 0;
+}
+
+// Where a prop is drawn: its key, its feet on screen, its projected scale, the colour of its
+// ground shadow, or null for a prop with none, and the phase its idle loop starts at.
 export interface RoadsidePlace {
   key: string;
+  phase: number;
   scale: number;
   shadow: number | null;
   x: number;
@@ -192,6 +229,7 @@ export interface RoadsidePlace {
 export function newRoadsidePlaces(): RoadsidePlace[] {
   return Array.from({ length: ROADSIDE_LIMIT }, () => ({
     key: "",
+    phase: 0,
     scale: 1,
     shadow: null,
     x: 0,
@@ -246,6 +284,7 @@ function placeProp(prop: RoadsideProp, sign: RoadsideSign, z: number): void {
     return;
   }
   place.key = prop.key;
+  place.phase = roadsidePhase(placing.origin + z, sign * prop.across);
   place.scale = placed.scale;
   place.shadow = stage.table.shadowed.includes(prop.key) ? placing.shadow : null;
   place.x = placed.x;
