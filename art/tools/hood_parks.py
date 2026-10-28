@@ -28,8 +28,12 @@ picnic-blanket      112x36  2 lanes, a red and white checked blanket on the road
                             on it, a baguette leaning out of the basket, a lemonade jug and two
                             apples; idle (4 frames, 450ms): the blanket's near right corner lifts
                             1px in a breeze on frame 2
+fallen-log          112x36  2 lanes, a fallen oak trunk lying across the path: ridged bark, a sawn end
+                            at the right showing growth rings, a splintered broken end at the left, a
+                            branch stub, moss, two tan-capped mushrooms and fallen leaves along its foot;
+                            idle (4 frames, 450ms): a leaf on its back stirs 1px on frame 2
 
-Each of the five also has <key>@<step> for each depth step in minis.STEPS (from
+Each of the six also has <key>@<step> for each depth step in minis.STEPS (from
 shared/depth-steps.json), redrawn at the step with the original's tags, frames and
 durations and a full outline. Road outline (pixel.road_edge) and road.LIT's rim on dark
 fills, so every one holds 3:1 on every road.
@@ -428,6 +432,78 @@ def picnic_blanket(lift=0, w=obstacles.span(2)):
     return lit(g)
 
 
+# The log's idle: rest, rest, the leaf on its back stirred 1px right and up, rest.
+FALLEN_LOG_IDLE = ((0, 0), (0, 0), (1, -1), (0, 0)), 450
+# The trunk, in layout pixels at full size: its top and bottom rows and its broken end's column.
+LOG_TOP, LOG_BOTTOM, LOG_LEFT = 11, 27, 9
+# The bark's ridges along the trunk: (row, from, to) as fractions of the trunk's length, lit brown on its upper
+# half and dbrown below.
+RIDGES = ((13, 0.05, 0.3), (13, 0.42, 0.68), (15, 0.18, 0.5), (15, 0.6, 0.92), (17, 0.02, 0.22),
+          (17, 0.34, 0.58), (19, 0.12, 0.4), (19, 0.66, 0.9), (21, 0.28, 0.62), (23, 0.06, 0.3), (23, 0.72, 0.96))
+# The fallen leaves drifted in pairs against its foot: (column as a fraction of the frame's width less 1.5px
+# margin each side, row, colour index).
+LOG_LEAVES = ((0.0, 25, 4), (0.05, 26, 0), (0.3, 25, 2), (0.36, 26, 1), (0.6, 25, 3), (0.66, 26, 0),
+              (0.88, 25, 2), (0.94, 26, 1))
+
+
+def fallen_log(leaf=(0, 0), w=obstacles.span(2)):
+    """A fallen oak trunk lying across the road, side on: rough bark with ridges running along it, lit brown
+    above and dbrown below, shaded walnut along its underside; a sawn end at the right showing cream wood in
+    tan growth rings round a brown heart, and a broken end at the left, pale splinters jutting out of the
+    bark. A broken branch stub rises from its back at the left, its snapped end pale; moss grows over its
+    back and down its side, two tan-capped mushrooms stand on it and fallen leaves lie along its foot. leaf
+    offsets the amber leaf on its back."""
+    g = edged(Grid(w, ROW))
+    ux, uy = obstacles.unit(g)
+    cut = w - 8
+    rx, ry = 5.5, (LOG_BOTTOM - LOG_TOP) / 2
+    cy = (LOG_TOP + LOG_BOTTOM) / 2
+    # the branch stub, behind the trunk: a short limb rising up and left, its snapped end pale
+    bar(g, (30, LOG_TOP + 2), (24, 3), 5, "bark")
+    bar(g, (31.5, LOG_TOP + 2), (25.5, 3), 1.5, "walnut")
+    g.cel(24.2, 3.4, 2.4, 1.4, "tan", None, "cream")
+    # the trunk: bark, lit along its back and shaded walnut along its underside
+    length = cut - LOG_LEFT
+    g.rect(LOG_LEFT, LOG_TOP, length, LOG_BOTTOM - LOG_TOP, "bark")
+    g.rect(LOG_LEFT, LOG_TOP, length, 1.5, "dbrown")
+    g.rect(LOG_LEFT, LOG_BOTTOM - 4, length, 4, "walnut")
+    for y, a, b in RIDGES:
+        x0, x1 = LOG_LEFT + a * length, LOG_LEFT + b * length
+        g.rect(x0, y, x1 - x0, 1, "brown" if y < cy else "dbrown")
+        g.rect(x0 + 1, y + 1, x1 - x0 - 1, 1, "walnut")
+    # the broken end at the left: pale splinters jutting out of the bark, shaded tan below
+    for a, b, tip in (((LOG_LEFT + 1, LOG_TOP + 1), (LOG_LEFT + 1, LOG_TOP + 7), (2, LOG_TOP + 3)),
+                      ((LOG_LEFT + 1, LOG_TOP + 5), (LOG_LEFT + 1, LOG_TOP + 12), (4, LOG_TOP + 9)),
+                      ((LOG_LEFT + 1, LOG_TOP + 10), (LOG_LEFT + 1, LOG_BOTTOM - 1), (1, LOG_BOTTOM - 3))):
+        g.tri(a, b, tip, "cream")
+        g.tri((a[0], (a[1] + b[1]) / 2), b, tip, "tan")
+    g.rect(LOG_LEFT, LOG_TOP, 1.5, LOG_BOTTOM - LOG_TOP, "dbrown")
+    # the sawn end at the right: the bark's rim round cream sapwood, tan growth rings and a brown heart
+    g.ell(cut, cy, rx, ry, "bark")
+    g.ell(cut, cy, rx - 1, ry - 1, "cream")
+    for k in (0.72, 0.45):
+        g.ell(cut, cy, (rx - 1) * k, (ry - 1) * k, "tan")
+        g.ell(cut, cy, (rx - 1) * k - 0.8, (ry - 1) * k - 0.8, "cream")
+    g.ell(cut, cy, 1.2, 1.6, "brown")
+    # moss over its back and down its side, lit lime on top
+    for x, y, mx, my in ((40, LOG_TOP + 0.5, 7, 2), (66, LOG_TOP + 0.5, 5, 1.8), (19, 20.5, 4, 1.6),
+                       (23.5, 22, 3, 1.4)):
+        g.cel(x, y, mx, my, "moss", "olive", "lime")
+    # two mushrooms on its back: cream stems under tan caps, lit cream and shaded ochre
+    for x, h, cx, cyy in ((51, 3, 3.2, 1.8), (56.5, 2, 2.4, 1.4)):
+        g.rect(x - 0.75, LOG_TOP - h, 1.5, h + 1, "cream")
+        g.cel(x, LOG_TOP - h, cx, cyy, "tan", "ochre", "cream")
+    # the leaf on its back, stirred by leaf
+    x, y = round(w * 0.8) + leaf[0] * ux, LOG_TOP - 1 + leaf[1] * uy
+    g.rect(x, y, 4, 1, "amber")
+    g.rect(x + 1, y + 1, 4, 1, "orange")
+    g.p(x + 5, y + 1, "rust")
+    # the fallen leaves along its foot
+    for f, y, k in LOG_LEAVES:
+        lens(g, 1.5 + f * (w - LEAF - 3), y, *LEAF_COLOURS[k])
+    return lit(g, dict(bark=("clay", None), walnut=("bark", None)))
+
+
 # ---------- hit moments ----------
 
 # The calico's fur tufts, thrown out of the scuffle.
@@ -774,7 +850,8 @@ def road_sprites(suffix, step):
                                 ("walk", frames(a, capybara, CAPYBARA_WALK), CAPYBARA_WALK_MS)]
     for key, draw, (args, ms) in (("leaf-pile", leaf_pile, LEAF_PILE_IDLE),
                                   ("porch-steps", porch_steps, PORCH_STEPS_IDLE),
-                                  ("picnic-blanket", picnic_blanket, PICNIC_IDLE)):
+                                  ("picnic-blanket", picnic_blanket, PICNIC_IDLE),
+                                  ("fallen-log", fallen_log, FALLEN_LOG_IDLE)):
         yield f"{key}{suffix}", [("idle", [minis.small(sys.modules[__name__], o, draw, f).outlined() for f in args],
                                   ms)]
 
@@ -782,7 +859,7 @@ def road_sprites(suffix, step):
 # Where each road sprite's .aseprite source goes: the card obstacles with the encounters, the rest with the
 # obstacles.
 SOURCES = {"porch-cat": "art/encounters", "capybara": "art/encounters", "leaf-pile": "art/obstacles",
-           "porch-steps": "art/obstacles", "picnic-blanket": "art/obstacles"}
+           "porch-steps": "art/obstacles", "picnic-blanket": "art/obstacles", "fallen-log": "art/obstacles"}
 
 
 def sprites():

@@ -4947,6 +4947,87 @@
       "json": "sprites/face-walker-trista.json"
     },
     {
+      "key": "fallen-log",
+      "png": "sprites/fallen-log.png",
+      "json": "sprites/fallen-log.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 109
+      }
+    },
+    {
+      "key": "fallen-log@50",
+      "png": "sprites/fallen-log@50.png",
+      "json": "sprites/fallen-log@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 55
+      }
+    },
+    {
+      "key": "fallen-log@56",
+      "png": "sprites/fallen-log@56.png",
+      "json": "sprites/fallen-log@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 61
+      }
+    },
+    {
+      "key": "fallen-log@62",
+      "png": "sprites/fallen-log@62.png",
+      "json": "sprites/fallen-log@62.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 68
+      }
+    },
+    {
+      "key": "fallen-log@69",
+      "png": "sprites/fallen-log@69.png",
+      "json": "sprites/fallen-log@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 75
+      }
+    },
+    {
+      "key": "fallen-log@75",
+      "png": "sprites/fallen-log@75.png",
+      "json": "sprites/fallen-log@75.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 82
+      }
+    },
+    {
+      "key": "fallen-log@81",
+      "png": "sprites/fallen-log@81.png",
+      "json": "sprites/fallen-log@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 89
+      }
+    },
+    {
+      "key": "fallen-log@88",
+      "png": "sprites/fallen-log@88.png",
+      "json": "sprites/fallen-log@88.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 95
+      }
+    },
+    {
+      "key": "fallen-log@94",
+      "png": "sprites/fallen-log@94.png",
+      "json": "sprites/fallen-log@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 102
+      }
+    },
+    {
       "key": "fish-crates",
       "png": "sprites/fish-crates.png",
       "json": "sprites/fish-crates.json",
