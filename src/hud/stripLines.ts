@@ -8,7 +8,7 @@ import type { FaceMood } from "../rules/treats";
 import { read } from "../rules/units";
 import type { ActiveDebuff, EffectSource, RunState } from "../state/runState";
 import { debuffNameMarks } from "./effectNames";
-import { faceSentenceList, type FaceText, fillFaceLine, ownerFaceText } from "./faceText";
+import { type FaceText, fillFaceLine, ownerFaceText } from "./faceText";
 import type { MessageIcon, MessageLine } from "./messageStrip";
 import { STRIP_LINE_FIELDS } from "./runText";
 
@@ -31,7 +31,6 @@ export function stripLine<K extends StripKey>(
 // on a heart loss, happy on a gain, neutral otherwise.
 export const STRIP_OWNER_MOODS = {
   fired: "upset",
-  luckyNeighbourGain: "happy",
   plainHit: "upset",
   secondChance: "neutral",
   spareTreatUsed: "happy",
@@ -168,7 +167,7 @@ export function pullLine(data: StripData, dog: DogId): MessageLine {
   return { icon: "pull", text: stripLine(data, "pull", { dog: data.dogs[dog].name }) };
 }
 
-type LuckyData = StripData & Pick<GameData, "encounters" | "homeText" | "tuning">;
+type LuckyData = StripData & Pick<GameData, "encounters" | "tuning">;
 
 // The hearts an encounter's effects share by the pack, in all.
 function sharedTotal(
@@ -184,26 +183,9 @@ function sharedTotal(
   );
 }
 
-// Each owner's gain in changes, as luckyNeighbourGain says it, joined as a sentence lists them
-// in the changes' order.
-function gainsText(data: LuckyData, changes: readonly Change[]): FaceText {
-  return faceSentenceList(
-    data.homeText.sentenceList,
-    changes.flatMap((change) =>
-      change.kind === "hearts" && change.after > change.before
-        ? [
-            ownerLine(data, "luckyNeighbourGain", change.dog, {
-              dog: data.dogs[change.dog].name,
-              hearts: String(change.after - change.before),
-            }),
-          ]
-        : [],
-    ),
-  );
-}
-
-// A lucky find's line, from the changes it made: the hearts the friendly neighbour shares and
-// each owner's gain, or the money a wallet held. A find with no line of its own says nothing.
+// A lucky find's line: the hearts the friendly neighbour shares, whose owners' gains their heart
+// pops show, or the money a wallet held, from the changes it made. A find with no line of its
+// own says nothing.
 export function luckyLine(
   data: LuckyData,
   encounter: EncounterId,
@@ -211,11 +193,7 @@ export function luckyLine(
 ): MessageLine | null {
   if (encounter === "pettingNeighbour") {
     const hearts = String(sharedTotal(data, encounter));
-    const gains = gainsText(data, changes);
-    return {
-      icon: "lucky",
-      ...fillFaceLine(STRIP_LINE_FIELDS, data.runText.strip, "luckyNeighbour", { gains, hearts }),
-    };
+    return { icon: "lucky", text: stripLine(data, "luckyNeighbour", { hearts }) };
   }
   if (encounter === "lostWallet") {
     const amount = changes.reduce(

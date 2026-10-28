@@ -29,7 +29,6 @@ import {
   bumpLines,
   firedLine,
   forgivenLines,
-  luckyLine,
   spareTreatUsedLine,
   treatLine,
 } from "./stripLines";
@@ -56,15 +55,6 @@ const forgiven = hearts(4, 4, [
   { amount: -1, kind: "bump" },
   { amount: 1, forgives: true, kind: "modifier", source: { kind: "walker", walker: "casey" } },
 ]);
-// The friendly neighbour's line said as its gains alone, so a gain's face shows.
-const gainsOnly = {
-  ...gameData,
-  runText: {
-    ...gameData.runText,
-    strip: { ...gameData.runText.strip, luckyNeighbour: "{gains}" },
-  },
-};
-
 // An owner's face shows upset on a heart loss, happy on a gain, and neutral otherwise.
 const MOOD = { gain: "happy", loss: "upset", none: "neutral" } as const satisfies Record<
   string,
@@ -77,7 +67,6 @@ const PLACES: readonly (readonly [string, FaceText | null | undefined, keyof typ
   ["lowHearts", lowHeartsText(gameData, DOG), "loss"],
   ["strip.fired", firedLine(gameData, DOG), "loss"],
   ["strip.secondChance", forgivenLines(gameData, [forgiven])[0], "none"],
-  ["strip.luckyNeighbourGain", luckyLine(gainsOnly, "pettingNeighbour", [hearts(2, 3)]), "gain"],
   [
     "strip.plainHit",
     bumpLines(gameData, { cash: null, change: hearts(4, 2), dodged: false, dog: DOG }, "Cone")[0],
