@@ -9,8 +9,8 @@ they keep 1px lines 1px; their pixel maps and twinkles keep their pixels. Every 
 opens on an impact frame (impact): an eight-point star in its colour with a white core
 and white speed lines.
 
-fx-hit-skunk       77x77  play (8 frames, 70ms)  lumpy mauve gas cloud that thins to a dither, wisps
-                                                  and stink squiggles
+fx-hit-skunk       77x77  play (8 frames, 70ms)  lumpy mauve gas cloud that breaks into puffs and
+                                                  shrinks away, stink squiggles rising
 fx-hit-thief       77x77  play (8 frames, 70ms)  the tip pouch flying up out of a poof, three coins
                                                   thrown out
 fx-hit-other-dog   77x77  play (8 frames, 70ms)  tangle cloud, fur tufts and hearts
@@ -127,8 +127,8 @@ def impact(g, outer, cx=32, cy=32):
 # ---------- hit bursts ----------
 
 def hit_skunk(step):
-    """The cloud swells in seven lobes, each with a scalloped rim of smaller puffs, then the lobes drift apart,
-    shrink and thin to a dither as the gas clears, trailing dithered wisps. Mauve, as skunk-cloud: the puffs
+    """The cloud swells in seven lobes, each with a scalloped rim of smaller puffs, then the lobes drift apart
+    and shrink as the gas clears, solid to the last frame. Mauve, as skunk-cloud: the puffs
     mauve, shaded purple on their lower right and lit pink on their upper left, so the pink carries the dslate
     road and the plum rim the light roads. Stink squiggles rise out of it, pink with a plum side, so they read
     over the cloud and on every road."""
@@ -155,7 +155,7 @@ def hit_skunk(step):
         g.ell(cx, cy, pr, pr, "mauve")
     # a purple seam along the lower right of the core and every other lobe, where it lies inside the cloud,
     # so the puffs in front read over the ones behind
-    # the seams, shading, dither, wisps and squiggles are laid on the drawn pixels
+    # the seams, shading and squiggles are laid on the drawn pixels
     px, w, h = raster(g), raster(g).w, raster(g).h
     mass = [row[:] for row in px.px]
     front = [(cx, cy, rk) for k, (cx, cy, rk, _) in enumerate(lobes) if k % 2 == 0] + ([(32, 33, core)] if core else [])
@@ -179,32 +179,10 @@ def hit_skunk(step):
         g.ell(32 - core * 0.35, 33 - core * 0.4, core * 0.3, core * 0.2, "pink")
         g.ell(32 - core * 0.3, 33 - core * 0.3, core * 0.3, core * 0.2, "mauve")
     rim(g, "plum")
-    if step >= 5:
-        # clearing: the inside thins to a checker dither, the solid rim and the edge just inside it stay
-        solid = [row[:] for row in px.px]
-        for y in range(2, h - 2):
-            for x in range(2, w - 2):
-                if all(solid[y + dy][x + dx] for dx in (-2, 0, 2) for dy in (-2, 0, 2)) and (x + y + step) % 2:
-                    px.p(x, y, None)
-    if step >= 2:
-        # wisps curling off the cloud, dithered: alternate pixels pink and plum, so they hold on every road,
-        # with a second strand on alternate pixels at the base
-        t = step - 2
-        for deg, curl in ((200, 1), (330, -1), (60, 1), (140, -1), (265, 1)):
-            a = math.radians(deg + step * 5)
-            r0 = d + r + 1 + t * 2
-            for i in range(6 + t):
-                b = a + curl * i * 0.1
-                rr = r0 + i * 1.2
-                x, y = drawn_at(g, 32 + math.cos(b) * rr, 33 + math.sin(b) * rr * 0.9)
-                for k, (dx, dy) in enumerate(((0, 0), (1, 1)) if i < 3 else ((0, 0),)):
-                    xx, yy = x + dx, y + dy
-                    if 1 <= xx < w - 1 and 1 <= yy < h - 1 and not px.px[yy][xx] and (k == 0 or i % 2):
-                        px.p(xx, yy, "pink" if (i + k) % 2 == 0 else "plum")
     if step >= 1:
-        # five rising S-lines: 2px a frame up over an 8px wave, the outer ones leaning out
+        # five rising S-lines: 2px a frame up over an 8px wave, the outer ones leaning out, gone with the cloud
         rise = (0, 0, 4, 8, 12, 15, 18, 20)[step]
-        length = (0, 5, 8, 9, 9, 8, 6, 4)[step]
+        length = (0, 5, 8, 9, 9, 7, 0, 0)[step]
         sc = scale_of(g)
         for j, (x0, y0, lean) in enumerate(((14, 26, -1), (22, 20, -0.5), (32, 17, 0), (42, 20, 0.5), (50, 26, 1))):
             for t in range(round(length * sc)):
@@ -269,8 +247,14 @@ def hit_thief(step):
 TUFTS = ("cream", "white", "tan", "lgrey", "brown", "grey")
 
 
+# A fur tuft, 2px thick so it reads as a clump in a few frames: two prongs over a base, or (flipped) a
+# diagonal wisp.
+TUFT = ((0, 0), (3, 0), (0, 1), (1, 1), (2, 1), (3, 1), (1, 2), (2, 2))
+TUFT_FLIP = ((0, 0), (1, 0), (1, 1), (2, 1), (3, 1), (2, 2), (3, 2))
+
+
 def tuft(g, x, y, col, flip):
-    dots(g, x, y, [(dx, dy, col) for dx, dy in ((0, 0), (1, 1), (2, 0), (1, 2), (3, -1) if flip else (-1, -1))])
+    dots(g, x, y, [(dx, dy, col) for dx, dy in (TUFT_FLIP if flip else TUFT)])
 
 
 def hit_other_dog(step):

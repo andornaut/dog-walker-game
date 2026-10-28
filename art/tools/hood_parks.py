@@ -726,8 +726,8 @@ BLADES = ((-8, -9, "green"), (-3, -11, "dgreen"), (4, -10, "green"), (9, -8, "dg
 
 
 def blade(g, x, y, lean, col):
-    """A 3px grass blade leaning lean pixels a row."""
-    hits.dots(g, x, y, [(round(k * lean), -k, col) for k in range(3)])
+    """A grass blade 4px tall, 2px thick at its foot and 1px at its tip, leaning lean pixels a row."""
+    hits.dots(g, x, y, [(round(k * lean) + i, -k, col) for k in range(4) for i in range(2 if k < 3 else 1)])
 
 
 def hit_capybara(step):
