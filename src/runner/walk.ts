@@ -1224,7 +1224,7 @@ function stalkersStepped(
       const centre = moverCentre(geometry, item, moverPlace(laneCount, path, at));
       path = takeStep(
         path,
-        nearestStep(cell.length, centre, pack, approachChoices(path), path.burst),
+        nearestStep(cell.length, path.burst, centre, pack, approachChoices(path)),
       );
       choice = nextChoiceAt(path);
     }
@@ -1257,7 +1257,7 @@ function shyHopped(
         item,
         moverPlace(laneCount, path, path.pending[0] ?? choice),
       );
-      path = takeHop(path, awayHop(cell.length, centre, pack, shyChoices(path), path.burst));
+      path = takeHop(path, awayHop(cell.length, path.burst, centre, pack, shyChoices(path)));
       choice = nextShyChoiceAt(path);
     }
     return path === mover.path ? item : { ...item, mover: { ...mover, path } };

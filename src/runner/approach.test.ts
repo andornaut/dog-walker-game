@@ -31,7 +31,7 @@ const ORIGIN = { x: 0, y: 0 };
 // The pack, lanes across and rows down from the stalker.
 const packAt = (lanes: number, rows: number) => ({ x: lanes * CELL, y: rows * CELL });
 const choose = (path: ApproachPath, pack: { x: number; y: number }) =>
-  nearestStep(CELL, ORIGIN, pack, approachChoices(path), path.burst);
+  nearestStep(CELL, path.burst, ORIGIN, pack, approachChoices(path));
 
 describe("a stalker's step", () => {
   // Wherever the pack is, the step nearest it, never up the road: beside or behind it, the

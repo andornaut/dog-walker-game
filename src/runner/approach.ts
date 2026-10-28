@@ -77,10 +77,10 @@ export function takeStep(path: ApproachPath, shape: StepShape | null): ApproachP
 // moves it a cell per lane across and burst per row down.
 export function nearestStep(
   cellLength: number,
+  burst: number,
   centre: RoadPoint,
   pack: RoadPoint,
   choices: readonly StepShape[],
-  burst: number,
 ): StepShape | null {
   let best: { readonly distance: number; readonly shape: StepShape } | null = null;
   for (const shape of choices) {

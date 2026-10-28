@@ -51,7 +51,7 @@ describe("awayHop", () => {
   )("hops $name away with the pack $packName", ({ pack, shapes }) => {
     for (let lane = 0; lane < LANES; lane++) {
       const centre = { x: centreX(lane), y: 300 };
-      const hop = awayHop(CELL, centre, pack, onRoad(lane, shapes), CELL);
+      const hop = awayHop(CELL, CELL, centre, pack, onRoad(lane, shapes));
       if (pack.lanes.includes(lane)) {
         expect(hop, `from lane ${lane}`).not.toBeNull();
       }

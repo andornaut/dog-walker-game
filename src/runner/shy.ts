@@ -64,10 +64,10 @@ export interface PackPlace extends RoadPoint {
 // lane across and burst per row along the road.
 export function awayHop(
   cellLength: number,
+  burst: number,
   centre: RoadPoint,
   pack: PackPlace,
   choices: readonly StepShape[],
-  burst: number,
 ): StepShape | null {
   const across = Math.abs(centre.x - pack.x);
   let best: { readonly distance: number; readonly shape: StepShape } | null = null;
