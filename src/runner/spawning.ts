@@ -734,9 +734,14 @@ export function planSpawns<Kind extends string>(
     return quota.moversRestOn === true ? held : held | (restHeld[row] ?? 0);
   };
 
-  // A lane-blocking standing spawn's length in the pack-fit gap: its kind's drawn hit length.
-  const gapLength = (quota: SpawnQuota<Kind> | undefined, footprint: Footprint) =>
-    quota?.hitLength ?? hitLength(plan, footprint.rows);
+  // A lane-blocking standing spawn as the pack meets it, its length in the pack-fit gap its
+  // kind's drawn hit length.
+  const blockingPlace = (quota: SpawnQuota<Kind>, cell: Cell, footprint: Footprint) => ({
+    distance: itemAt(rows, cell.row),
+    lane: cell.lane,
+    lanes: footprint.lanes,
+    length: quota.hitLength ?? hitLength(plan, footprint.rows),
+  });
   const fits = (cell: Cell, footprint: Footprint, quota: SpawnQuota<Kind>): boolean => {
     const { blocksLane } = quota;
     if (cell.lane + footprint.lanes > laneCount) {
@@ -766,13 +771,7 @@ export function planSpawns<Kind extends string>(
     if (footprint.lanes >= WIDE_LANES && !clearOfWide(cell.row, lastHitRow(cell, footprint))) {
       return false;
     }
-    const place = {
-      distance: itemAt(rows, cell.row),
-      lane: cell.lane,
-      lanes: footprint.lanes,
-      length: gapLength(quota, footprint),
-    };
-    return fitsPlaced(place) && tryBlock(cell, footprint, false);
+    return fitsPlaced(blockingPlace(quota, cell, footprint)) && tryBlock(cell, footprint, false);
   };
 
   const freeCells = (
@@ -1072,12 +1071,7 @@ export function planSpawns<Kind extends string>(
         wideRows.fill(1, cell.row, lastHitRow(cell, footprint) + 1);
       }
       tryBlock(cell, footprint, true);
-      const place = {
-        distance: itemAt(rows, cell.row),
-        lane: cell.lane,
-        lanes: footprint.lanes,
-        length: gapLength(quota, footprint),
-      };
+      const place = blockingPlace(quota, cell, footprint);
       addPlaced(place);
       standing.push({ block: itemAt(blocks, blocks.length - 1), cell, event, place, quota });
     }
