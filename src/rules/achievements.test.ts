@@ -227,7 +227,7 @@ describe("profile conditions", () => {
     [
       "optionPicks, an option of the same id on another card",
       { count: 10, encounter: "otherDog", kind: "optionPicks", option: "sniff" },
-      withStats({ optionPicks: { fishCrates: { sniff: 10 } } }),
+      withStats({ optionPicks: { cheeseCrates: { sniff: 10 } } }),
       false,
     ],
     ["timesFired at the count", count("timesFired", 10), withStats({ timesFired: 10 }), true],
@@ -456,13 +456,16 @@ describe("counters", () => {
       ["capybara", "help"],
       ["capybara", "help"],
       ["capybara", "drag"],
-      ["fishCrates", "sniff"],
+      ["fishCrates", "wadeThrough"],
     ] as const;
     const after = picked.reduce(
       (state, [encounter, option]) => countOptionPick(encounter, option, state),
       run,
     );
-    expect(after.optionPicks).toEqual({ capybara: { drag: 1, help: 2 }, fishCrates: { sniff: 1 } });
+    expect(after.optionPicks).toEqual({
+      capybara: { drag: 1, help: 2 },
+      fishCrates: { wadeThrough: 1 },
+    });
     expect(runCountersOf(after).optionPicks).toEqual(after.optionPicks);
   });
 });

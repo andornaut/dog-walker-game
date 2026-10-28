@@ -113,10 +113,10 @@ export const ENCOUNTERS = {
       kind: "card",
       options: [
         {
-          art: "card-fish-crates-sniff",
-          effects: [{ debuff: "stinky", kind: "debuff" }],
-          id: "sniff",
-          name: "Sniff the fish",
+          art: "card-fish-crates-wade-through",
+          effects: [{ debuff: "muddy", kind: "debuff" }],
+          id: "wadeThrough",
+          name: "Wade through",
         },
         {
           art: "card-fish-crates-pay",

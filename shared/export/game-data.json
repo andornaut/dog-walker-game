@@ -118,16 +118,16 @@
       "title": "Dropped ice cream"
     },
     {
-      "art": "card-fish-crates-sniff",
+      "art": "card-fish-crates-wade-through",
       "frame": "encounter",
-      "id": "sniff",
+      "id": "wade-through",
       "index": 0,
-      "name": "Sniff the fish",
+      "name": "Wade through",
       "source": {
         "id": "fishCrates",
         "kind": "encounter"
       },
-      "text": "Stinky: tips pay nothing for 60s",
+      "text": "Muddy: lane changes 50% slower for 30s",
       "title": "Fish crate spill"
     },
     {
@@ -1024,15 +1024,15 @@
         "kind": "card",
         "options": [
           {
-            "art": "card-fish-crates-sniff",
+            "art": "card-fish-crates-wade-through",
             "effects": [
               {
-                "debuff": "stinky",
+                "debuff": "muddy",
                 "kind": "debuff"
               }
             ],
-            "id": "sniff",
-            "name": "Sniff the fish"
+            "id": "wadeThrough",
+            "name": "Wade through"
           },
           {
             "art": "card-fish-crates-pay",

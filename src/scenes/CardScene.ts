@@ -1,6 +1,6 @@
 import { type GameObjects, Scene } from "phaser";
 
-import { SKIP_CARD_ART } from "../assets/cardArt";
+import { cardArtKeysOf, SKIP_CARD_ART } from "../assets/cardArt";
 import { greyTextureKey } from "../assets/phaser/greyTextures";
 import {
   CARD_FRAME_KEY,
@@ -126,9 +126,13 @@ function sourceSpriteKey(source: CardSource): string | undefined {
   return source.kind === "encounter" ? encounterSpriteKey(source.encounter) : undefined;
 }
 
-// The option's illustration, or the Skip card's. A path card's is its zone's preview.
-function illustrationKey(option: OptionView | undefined): string {
-  return option?.art ?? SKIP_CARD_ART;
+// The option's illustration, or its stand-in while it is undrawn, or the Skip card's. A path
+// card's is its zone's preview.
+function illustrationKey(has: (key: string) => boolean, option: OptionView | undefined): string {
+  if (option === undefined) {
+    return SKIP_CARD_ART;
+  }
+  return cardArtKeysOf(option.art).find(has) ?? option.art;
 }
 
 // Up to three cards over the dimmed band and road. The walk bar and dog cards stay in view, and
@@ -390,7 +394,7 @@ export class CardScene extends Scene {
       fillRect(g, PALETTE.cream, insetRect(4, card));
     }
     this.centred(x + LARGE.width / 2, y + LARGE.band.y + 5, bandLabel(entry), PALETTE.white);
-    const art = illustrationKey(option);
+    const art = illustrationKey((key) => this.textures.exists(key), option);
     if (this.textures.exists(art)) {
       this.add
         .image(x + LARGE.art.x, y + LARGE.art.y, art)
@@ -591,7 +595,7 @@ export class CardScene extends Scene {
     this.centred(x + CARD.width / 2, y + BAND.y + 3, bandLabel(entry), PALETTE.white);
 
     const art = { ...ART, x: x + ART.x, y: y + ART.y };
-    const illustration = illustrationKey(entry.option);
+    const illustration = illustrationKey((key) => this.textures.exists(key), entry.option);
     if (this.textures.exists(illustration)) {
       const key = this.shownKey(grey, illustration);
       this.add.image(art.x, art.y, key).setOrigin(0).setCrop(0, 0, art.width, art.height);
