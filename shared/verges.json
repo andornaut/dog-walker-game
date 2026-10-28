@@ -144,26 +144,6 @@
     "walkTo": null,
     "lawn": "none",
     "lawnColours": null,
-    "leaves": false,
-    "pools": [
-      {
-        "light": "neon-mauve",
-        "across": 209,
-        "every": 3360,
-        "offset": {
-          "left": 840,
-          "right": 420
-        }
-      },
-      {
-        "light": "neon-azure",
-        "across": 209,
-        "every": 3360,
-        "offset": {
-          "left": 1540,
-          "right": 1120
-        }
-      }
-    ]
+    "leaves": false
   }
 }

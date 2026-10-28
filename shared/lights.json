@@ -1,18 +1,75 @@
 {
   "attach": {
+    "delivery-truck": [
+      {
+        "dx": 0,
+        "dy": 2,
+        "light": "tail-red",
+        "zones": ["homeStretch", "shops"]
+      }
+    ],
+    "ice-cream-truck": [
+      {
+        "dx": 0,
+        "dy": 2,
+        "light": "tail-red",
+        "zones": ["homeStretch", "shops"]
+      }
+    ],
+    "parked-car": [
+      {
+        "dx": 0,
+        "dy": 2,
+        "light": "tail-red",
+        "zones": ["homeStretch", "shops"]
+      }
+    ],
     "roadside-gas-lamp": [
       {
         "dx": -4,
         "dy": 0,
         "light": "gas-lamp-pool",
-        "zones": ["homeStretch", "shops", "snoozeCrescent", "street"]
+        "pulse": [1, 0.8, 0.6, 0.8],
+        "zones": ["shops", "street"]
       },
       {
         "angle": 125,
         "dx": -4,
         "dy": -126,
         "light": "gas-lamp-cone",
-        "zones": ["homeStretch", "shops", "snoozeCrescent", "street"]
+        "pulse": [1, 0.8, 0.6, 0.8],
+        "zones": ["shops", "street"]
+      },
+      {
+        "dx": -4,
+        "dy": 0,
+        "light": "gas-lamp-pool-dusk",
+        "pulse": [1, 0.8, 0.6, 0.8],
+        "zones": ["snoozeCrescent"]
+      },
+      {
+        "angle": 125,
+        "dx": -4,
+        "dy": -126,
+        "light": "gas-lamp-cone-dusk",
+        "pulse": [1, 0.8, 0.6, 0.8],
+        "zones": ["snoozeCrescent"]
+      }
+    ],
+    "roadside-shopfront-ochre": [
+      {
+        "dx": 0,
+        "dy": 4,
+        "light": "shop-window",
+        "zones": ["shops"]
+      }
+    ],
+    "roadside-shopfront-violet": [
+      {
+        "dx": 0,
+        "dy": 4,
+        "light": "shop-window",
+        "zones": ["shops"]
       }
     ],
     "roadside-street-lamp": [
@@ -21,7 +78,7 @@
         "dy": 0,
         "light": "street-lamp-pool",
         "pulse": [1, 0.75, 0.5, 0.2, 0.5, 0.75],
-        "zones": ["homeStretch", "shops", "snoozeCrescent", "street"]
+        "zones": ["homeStretch"]
       },
       {
         "angle": 125,
@@ -29,105 +86,165 @@
         "dy": -157,
         "light": "street-lamp-cone",
         "pulse": [1, 0.75, 0.5, 0.2, 0.5, 0.75],
-        "zones": ["homeStretch", "shops", "snoozeCrescent", "street"]
+        "zones": ["homeStretch"]
+      }
+    ],
+    "stink-garbage-truck": [
+      {
+        "dx": 0,
+        "dy": 2,
+        "light": "tail-red",
+        "zones": ["homeStretch", "shops"]
+      }
+    ],
+    "streetcar": [
+      {
+        "dx": 0,
+        "dy": 2,
+        "light": "tail-red",
+        "zones": ["homeStretch", "shops"]
+      }
+    ],
+    "taxi": [
+      {
+        "dx": 0,
+        "dy": 2,
+        "light": "tail-red",
+        "zones": ["homeStretch", "shops"]
+      }
+    ],
+    "ttc-bus": [
+      {
+        "dx": 0,
+        "dy": 2,
+        "light": "tail-red",
+        "zones": ["homeStretch", "shops"]
       }
     ]
   },
   "defs": {
     "gas-lamp-cone": {
       "colour": "amber",
-      "height": 154,
+      "height": 170,
       "rings": [
         {
           "scale": 1,
-          "strength": 0.07
+          "strength": 0.03
         },
         {
           "scale": 0.66,
-          "strength": 0.13
+          "strength": 0.07
         },
         {
           "scale": 0.33,
-          "strength": 0.19
+          "strength": 0.15
         }
       ],
       "shape": "cone",
-      "width": 72
+      "width": 80
+    },
+    "gas-lamp-cone-dusk": {
+      "colour": "amber",
+      "height": 170,
+      "rings": [
+        {
+          "scale": 1,
+          "strength": 0.03
+        },
+        {
+          "scale": 0.66,
+          "strength": 0.06
+        },
+        {
+          "scale": 0.33,
+          "strength": 0.11
+        }
+      ],
+      "shape": "cone",
+      "width": 80
     },
     "gas-lamp-pool": {
       "colour": "amber",
-      "height": 24,
+      "height": 26,
       "rings": [
         {
           "scale": 1,
-          "strength": 0.07
+          "strength": 0.05
         },
         {
           "scale": 0.66,
-          "strength": 0.13
+          "strength": 0.09
         },
         {
           "scale": 0.33,
-          "strength": 0.19
+          "strength": 0.14
         }
       ],
       "shape": "ellipse",
-      "width": 96
+      "width": 88
     },
-    "neon-azure": {
-      "colour": "azure",
-      "height": 40,
-      "rings": [
-        {
-          "scale": 1,
-          "strength": 0.16
-        },
-        {
-          "scale": 0.5,
-          "strength": 0.32
-        }
-      ],
-      "shape": "band",
-      "width": 8
-    },
-    "neon-mauve": {
-      "colour": "mauve",
-      "height": 40,
-      "rings": [
-        {
-          "scale": 1,
-          "strength": 0.16
-        },
-        {
-          "scale": 0.5,
-          "strength": 0.32
-        }
-      ],
-      "shape": "band",
-      "width": 8
-    },
-    "street-lamp-cone": {
+    "gas-lamp-pool-dusk": {
       "colour": "amber",
-      "height": 192,
+      "height": 26,
       "rings": [
         {
           "scale": 1,
-          "strength": 0.07
+          "strength": 0.04
         },
         {
           "scale": 0.66,
-          "strength": 0.13
+          "strength": 0.07
         },
         {
           "scale": 0.33,
-          "strength": 0.19
+          "strength": 0.1
+        }
+      ],
+      "shape": "ellipse",
+      "width": 88
+    },
+    "shop-window": {
+      "colour": "amber",
+      "height": 22,
+      "rings": [
+        {
+          "scale": 1,
+          "strength": 0.05
+        },
+        {
+          "scale": 0.55,
+          "strength": 0.1
+        },
+        {
+          "scale": 0.3,
+          "strength": 0.15
+        }
+      ],
+      "shape": "ellipse",
+      "width": 84
+    },
+    "street-lamp-cone": {
+      "colour": "amber",
+      "height": 200,
+      "rings": [
+        {
+          "scale": 1,
+          "strength": 0.03
+        },
+        {
+          "scale": 0.66,
+          "strength": 0.07
+        },
+        {
+          "scale": 0.33,
+          "strength": 0.16
         }
       ],
       "shape": "cone",
       "width": 96
     },
     "street-lamp-pool": {
-      "colour": "cream",
+      "colour": "amber",
       "height": 36,
       "rings": [
         {
@@ -145,6 +262,22 @@
       ],
       "shape": "ellipse",
       "width": 144
+    },
+    "tail-red": {
+      "colour": "red",
+      "height": 12,
+      "rings": [
+        {
+          "scale": 1,
+          "strength": 0.1
+        },
+        {
+          "scale": 0.5,
+          "strength": 0.2
+        }
+      ],
+      "shape": "ellipse",
+      "width": 52
     }
   }
 }

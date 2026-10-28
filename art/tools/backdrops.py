@@ -43,7 +43,6 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import fonts  # noqa: E402
-import roadside  # noqa: E402
 import scene as sn  # noqa: E402
 from pixel import K, MURAL, dk  # noqa: E402
 from roads import LANE_PAINT  # noqa: E402
@@ -655,64 +654,13 @@ def crescent_bend(px):
 # darkness ranges from the open sand of The Beaches to Yonge Street's evening and Kensington
 # Market's Pedestrian Sunday at twilight, and each has its own sky.
 
-# A pool of light on a verge (its pools): the light def keyed light (shared/lights.json), centred across from
-# the road's centre line, repeating every road px along each side from its offset there, counted from the
-# zone's start strip as the roadside slots are; every is a whole number of the road's 32 px joints. zones,
-# when given, lists the zone ids it shows in. The game draws it (src/road/lightPlaces.ts); the stub rows
-# paint none, since the light layer draws over the backdrop's approach.
-def pool(light, across, every, left, right, zones=None):
-    p = {"light": light, "across": across, "every": every, "offset": {"left": left, "right": right}}
-    if zones is not None:
-        p["zones"] = list(zones)
-    return p
-
-
-def prop_slots(zone, key):
-    """Where a zone's roadside props named key stand along one period of its placement (roadside.PLACEMENT),
-    as (period, left zs, right zs), z from the zone's start as the game places them."""
-    table = roadside.PLACEMENT[zone]
-    period = table["slot"] * 2 * math.lcm(len(table["gaps"]), len(table["lots"]))
-    zs = {}
-    for name, side in table["sides"].items():
-        zs[name] = []
-        for n in range(period // table["slot"]):
-            m = n - side["offset"]
-            k = m // 2
-            groups, start, stride = (("lots", "lotStart", "lotStride") if m % 2 == 0
-                                     else ("gaps", "gapStart", "gapStride"))
-            group = table[groups][(side[start] + k * side[stride]) % len(table[groups])]
-            zs[name] += [(n * table["slot"] + dz) % period for k_, _, dz in group if k_ == f"roadside-{key}"]
-        zs[name].sort()
-    return period, zs["left"], zs["right"]
-
-
-def under_lamps(zone, light):
-    """A light under each of a zone's street lamps, at the lamps' across, one entry per lamp of a period of its
-    placement (each entry's every that period), pairing the sides' lamps in order."""
-    period, left, right = prop_slots(zone, "street-lamp")
-    across = next(p for g in roadside.PLACEMENT[zone]["gaps"] for p in g if p[0] == "roadside-street-lamp")[1]
-    return [pool(light, across, period, lz, rz) for lz, rz in zip(left, right)]
-
-
-def between_lamps(zone, lights, across, gap=560):
-    """Lights midway between a zone's street lamps where they stand gap road px or more apart on a side, one
-    entry per light in turn, pairing the sides' wide gaps in order."""
-    period, left, right = prop_slots(zone, "street-lamp")
-
-    def middles(zs):
-        return [round((z + (zs[(i + 1) % len(zs)] - z) % period / 2) % period / 2) * 2
-                for i, z in enumerate(zs) if (zs[(i + 1) % len(zs)] - z) % period >= gap]
-    return [pool(light, across, period, lz, rz) for light, lz, rz in zip(lights, middles(left), middles(right))]
-
-
 # The game's verge beside each road, keyed by art id, with colours
 # by K name (shared/verges.json):
 # the curb to curbTo, the strips (each to its to), the sidewalk or paving with a seam every
 # seamEvery to walkTo (None: paving on out, with no lawn), then the lawn, mown or rough. lawnColours
 # are the lawn's base, its mown stripes and rough patches, and its 2-row tufts, which draw their own
 # colour rather than darkening the pixel under them; None where there is no lawn. walkDots are single
-# pixels that shimmer as the road scrolls, so together they cover 6% or less of the paving. pools, where
-# a verge has them, are lights the game draws along it (pool).
+# pixels that shimmer as the road scrolls, so together they cover 6% or less of the paving.
 VERGES = {
     "cabbagetown": dict(curbColour="dstone", curbTo=CURB, strips=[], walkColour="stone", walkDots=[],
                         seamColour="dstone", seamEvery=32, walkTo=WALK, lawn="mown",
@@ -737,9 +685,7 @@ VERGES = {
                         lawnColours=None, leaves=False),
     "yonge-street": dict(curbColour="grey", curbTo=164, strips=[], walkColour="dslate",
                          walkDots=[dict(colours=["slate"], share=0.012)], seamColour="navy", seamEvery=32,
-                         walkTo=None, lawn="none", lawnColours=None, leaves=False,
-                         pools=under_lamps("yonge-street", "street-lamp-pool")
-                         + between_lamps("yonge-street", ("neon-mauve", "neon-azure"), 209)),
+                         walkTo=None, lawn="none", lawnColours=None, leaves=False),
 }
 
 
