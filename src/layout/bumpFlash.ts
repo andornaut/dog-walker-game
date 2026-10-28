@@ -40,6 +40,7 @@ export type FlashColour = "amber" | "mauve" | "orange" | "pink" | "sky";
 
 export const FLASH_COLOURS: Readonly<Partial<Record<EncounterId, FlashColour>>> = {
   capybara: "amber",
+  cheeseCrates: "amber",
   droppedCone: "pink",
   fishCrates: "sky",
   otherDog: "pink",

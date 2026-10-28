@@ -13,6 +13,7 @@ import type { WORLD } from "./world";
 // The rule vocabulary: adding a value means new rules code, not only data.
 export type EncounterId =
   | "capybara"
+  | "cheeseCrates"
   | "droppedCone"
   | "fishCrates"
   | "lostWallet"

@@ -29,6 +29,7 @@ const bursts = (Object.keys(gameData.encounters) as EncounterId[]).filter((id) =
 // for each burst the manifest has.
 const ART_PLACES: Readonly<Partial<Record<EncounterId, [number, number, number]>>> = {
   capybara: [16, 43, 43],
+  cheeseCrates: [20, 41, 35],
   droppedCone: [20, 43, 37],
   fishCrates: [23, 41, 30],
   otherDog: [21, 41, 34],

@@ -16,6 +16,7 @@ export const COMIC_WORDS = {
     // By encounter, as fx-hit-<encounter> draws its star.
     starRows: {
       capybara: 48,
+      cheeseCrates: 46,
       droppedCone: 48,
       fishCrates: 46,
       otherDog: 46,

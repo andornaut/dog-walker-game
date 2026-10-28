@@ -40,6 +40,45 @@
       "title": "Escaped capybara"
     },
     {
+      "art": "card-cheese-crates-sniff",
+      "frame": "encounter",
+      "id": "sniff",
+      "index": 0,
+      "name": "Have a sniff",
+      "source": {
+        "id": "cheeseCrates",
+        "kind": "encounter"
+      },
+      "text": "Stinky: tips pay nothing for 30s",
+      "title": "Cheese crates"
+    },
+    {
+      "art": "card-cheese-crates-buy",
+      "frame": "encounter",
+      "id": "buy",
+      "index": 1,
+      "name": "Buy the cheese",
+      "source": {
+        "id": "cheeseCrates",
+        "kind": "encounter"
+      },
+      "text": "−$20",
+      "title": "Cheese crates"
+    },
+    {
+      "art": "card-cheese-crates-hurry-on",
+      "frame": "encounter",
+      "id": "hurry-on",
+      "index": 2,
+      "name": "Hurry on",
+      "source": {
+        "id": "cheeseCrates",
+        "kind": "encounter"
+      },
+      "text": "−1♥ each",
+      "title": "Cheese crates"
+    },
+    {
       "art": "card-dropped-cone-lick",
       "frame": "encounter",
       "id": "lick",
@@ -846,6 +885,64 @@
         "park"
       ],
       "spriteKey": "capybara"
+    },
+    {
+      "id": "cheeseCrates",
+      "hitLabel": "PEE-YEW!",
+      "hitWord": "WHIFF!",
+      "kind": "obstacle",
+      "name": "Cheese crates",
+      "resolution": {
+        "kind": "card",
+        "options": [
+          {
+            "art": "card-cheese-crates-sniff",
+            "effects": [
+              {
+                "debuff": "stinky",
+                "kind": "debuff"
+              }
+            ],
+            "id": "sniff",
+            "name": "Have a sniff"
+          },
+          {
+            "art": "card-cheese-crates-buy",
+            "effects": [
+              {
+                "amount": "cheeseBuy",
+                "change": "lose",
+                "kind": "money"
+              }
+            ],
+            "id": "buy",
+            "name": "Buy the cheese"
+          },
+          {
+            "art": "card-cheese-crates-hurry-on",
+            "effects": [
+              {
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "id": "hurryOn",
+            "name": "Hurry on"
+          }
+        ]
+      },
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "shops",
+        "street"
+      ],
+      "spriteKey": "cheese-crates"
     },
     {
       "id": "droppedCone",
@@ -2487,6 +2584,7 @@
     "money": {
       "bigTipperTipBonus": 1,
       "capybaraCall": 20,
+      "cheeseBuy": 20,
       "encounterHigh": 20,
       "encounterLow": 20,
       "fishCleanUp": 20,
@@ -2841,6 +2939,7 @@
         },
         "obstacles": {
           "capybara": 0,
+          "cheeseCrates": 0,
           "droppedCone": 0,
           "fishCrates": 0,
           "otherDog": 1.1,
@@ -2942,6 +3041,7 @@
         },
         "obstacles": {
           "capybara": 1,
+          "cheeseCrates": 0,
           "droppedCone": 0,
           "fishCrates": 0,
           "otherDog": 2.2,
@@ -3043,13 +3143,14 @@
         },
         "obstacles": {
           "capybara": 0,
+          "cheeseCrates": 1.1,
           "droppedCone": 0,
           "fishCrates": 0,
           "otherDog": 1.1,
           "porchCat": 0,
           "promoTeam": 0,
           "puddle": 0,
-          "skunk": 1.1,
+          "skunk": 0,
           "squirrel": 1,
           "thief": 1.1,
           "weddingShoot": 2
@@ -3144,6 +3245,7 @@
         },
         "obstacles": {
           "capybara": 0,
+          "cheeseCrates": 1,
           "droppedCone": 0,
           "fishCrates": 1,
           "otherDog": 1.1,
@@ -3245,6 +3347,7 @@
         },
         "obstacles": {
           "capybara": 0,
+          "cheeseCrates": 0,
           "droppedCone": 1,
           "fishCrates": 0,
           "otherDog": 0,
@@ -3346,6 +3449,7 @@
         },
         "obstacles": {
           "capybara": 0,
+          "cheeseCrates": 0,
           "droppedCone": 0,
           "fishCrates": 0,
           "otherDog": 0,

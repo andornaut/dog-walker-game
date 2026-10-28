@@ -86,6 +86,7 @@ export const WORLD = {
         },
         obstacles: {
           capybara: 0,
+          cheeseCrates: 0,
           droppedCone: 0,
           fishCrates: 0,
           otherDog: 1.1,
@@ -176,6 +177,7 @@ export const WORLD = {
         },
         obstacles: {
           capybara: 1,
+          cheeseCrates: 0,
           droppedCone: 0,
           fishCrates: 0,
           otherDog: 2.2,
@@ -266,13 +268,14 @@ export const WORLD = {
         },
         obstacles: {
           capybara: 0,
+          cheeseCrates: 1.1,
           droppedCone: 0,
           fishCrates: 0,
           otherDog: 1.1,
           porchCat: 0,
           promoTeam: 0,
           puddle: 0,
-          skunk: 1.1,
+          skunk: 0,
           squirrel: 1,
           thief: 1.1,
           weddingShoot: 2,
@@ -356,6 +359,7 @@ export const WORLD = {
         },
         obstacles: {
           capybara: 0,
+          cheeseCrates: 1,
           droppedCone: 0,
           fishCrates: 1,
           otherDog: 1.1,
@@ -446,6 +450,7 @@ export const WORLD = {
         },
         obstacles: {
           capybara: 0,
+          cheeseCrates: 0,
           droppedCone: 1,
           fishCrates: 0,
           otherDog: 0,
@@ -536,6 +541,7 @@ export const WORLD = {
         },
         obstacles: {
           capybara: 0,
+          cheeseCrates: 0,
           droppedCone: 0,
           fishCrates: 0,
           otherDog: 0,

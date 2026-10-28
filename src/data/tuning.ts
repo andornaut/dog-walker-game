@@ -74,6 +74,8 @@ export const TUNING = {
     bigTipperTipBonus: 1,
     // The Escaped capybara's Call the zoo.
     capybaraCall: 20,
+    // The Cheese crates' Buy the cheese.
+    cheeseBuy: 20,
     encounterHigh: 20,
     encounterLow: 20,
     // The Fish crate spill's Pay for the fish.

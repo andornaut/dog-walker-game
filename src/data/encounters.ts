@@ -9,7 +9,7 @@ import type { Encounter, EncounterId } from "./types";
 // art is a key into the art manifest's images. A card option's id, unique on its card, is what
 // the save counts its picks by: keep it when the option is renamed.
 export const ENCOUNTERS = {
-  // Each neighbourhood's own card obstacle comes only in its zone.
+  // A neighbourhood card obstacle comes only in its zones.
   capybara: {
     hitLabel: "CAPYBARA!",
     hitWord: "SQUEAK!",
@@ -41,6 +41,37 @@ export const ENCOUNTERS = {
     },
     shape: { lanes: 1, rows: 1 },
     zones: ["park"],
+  },
+  cheeseCrates: {
+    hitLabel: "PEE-YEW!",
+    hitWord: "WHIFF!",
+    kind: "obstacle",
+    name: "Cheese crates",
+    resolution: {
+      kind: "card",
+      options: [
+        {
+          art: "card-cheese-crates-sniff",
+          effects: [{ debuff: "stinky", kind: "debuff" }],
+          id: "sniff",
+          name: "Have a sniff",
+        },
+        {
+          art: "card-cheese-crates-buy",
+          effects: [{ amount: "cheeseBuy", change: "lose", kind: "money" }],
+          id: "buy",
+          name: "Buy the cheese",
+        },
+        {
+          art: "card-cheese-crates-hurry-on",
+          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          id: "hurryOn",
+          name: "Hurry on",
+        },
+      ],
+    },
+    shape: { lanes: 1, rows: 1 },
+    zones: ["shops", "street"],
   },
   droppedCone: {
     hitLabel: "MELTDOWN!",
