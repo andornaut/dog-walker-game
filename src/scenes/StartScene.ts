@@ -705,7 +705,7 @@ export class StartScene extends Scene {
   private shopClosed(closed: ShopClosed): void {
     const { action } = closed;
     if (action.kind === "bought" && action.purchase.kind === "dog") {
-      this.pops.set(`dog:${action.purchase.dog}`, this.time.now);
+      this.pops.set(targetId({ dog: action.purchase.dog, kind: "dog" }), this.time.now);
       this.drawQuip(action.purchase.dog);
     }
     this.action = action;
@@ -840,11 +840,11 @@ export class StartScene extends Scene {
   private setLoadout(next: HomeLoadout): void {
     const now = this.time.now;
     for (const dog of next.dogs.filter((picked) => !this.loadout.dogs.includes(picked))) {
-      this.pops.set(`dog:${dog}`, now);
+      this.pops.set(targetId({ dog, kind: "dog" }), now);
       this.drawQuip(dog);
     }
     if (next.gear !== null && next.gear !== this.loadout.gear) {
-      this.pops.set(`gear:${next.gear}`, now);
+      this.pops.set(targetId({ gear: next.gear, kind: "gear" }), now);
     }
     this.loadout = next;
     this.action = { kind: "none" };
@@ -976,7 +976,7 @@ export class StartScene extends Scene {
       this.startButton.down.setVisible(down);
     }
     for (const { dog, footY, sprite } of this.gateDogs) {
-      sprite.setY(footY + hopOffset(reduced, now, this.pops.get(`dog:${dog}`)));
+      sprite.setY(footY + hopOffset(reduced, now, this.pops.get(targetId({ dog, kind: "dog" }))));
     }
   }
 
@@ -1381,7 +1381,7 @@ export class StartScene extends Scene {
         this.gateDogs.push({ dog, footY: feet.footY, sprite });
       }
       // A dog that just joined hops onto the path in a puff of dust.
-      const popped = this.pops.get(`dog:${dog}`);
+      const popped = this.pops.get(targetId({ dog, kind: "dog" }));
       if (!reduced && popped !== undefined && now - popped < FEEDBACK.dustFrameMs) {
         playEffect(this, "fx-dust", "play", { x: feet.x, y: feet.footY - 6 }, 0);
       }
@@ -1463,7 +1463,7 @@ export class StartScene extends Scene {
       );
       const rect = { ...GEAR_BADGE, x: Math.min(clear, PET_SHOP.x - GEAR_BADGE.width) };
       const badge = this.tileView(root, "gateBadge");
-      badge.rise = `gear:${this.loadout.gear}`;
+      badge.rise = targetId({ gear: this.loadout.gear, kind: "gear" });
       fillRect(this.graphics(badge.container), PALETTE.plum, rect);
       const at = { x: rect.x + 1, y: rect.y + 1 };
       this.addGearIcon(badge.container, "colour", this.loadout.gear, at, 0.5);
@@ -1614,13 +1614,18 @@ export class StartScene extends Scene {
         price: purchasePrice(gameData, owned, purchase),
       });
       const { art, badge, state } = itemTileLook(tile);
-      const { content, look, view } = this.selectTile(root, `dog:${id}`, rect, {
-        edge: true,
-        // A picked dog wears a tick: the game sets the pack's order by the dogs' sizes.
-        mark: "tick",
-        state,
-        tile: true,
-      });
+      const { content, look, view } = this.selectTile(
+        root,
+        targetId({ dog: id, kind: "dog" }),
+        rect,
+        {
+          edge: true,
+          // A picked dog wears a tick: the game sets the pack's order by the dogs' sizes.
+          mark: "tick",
+          state,
+          tile: true,
+        },
+      );
       const ink = PALETTE[look.text];
       const { badge: badgeAt, face: faceBox, lockedNameY, textX } = DOG_TILE;
       fillRect(this.graphics(content), PALETTE[pictureBox({ art, state })], {
@@ -1677,7 +1682,7 @@ export class StartScene extends Scene {
         price: purchasePrice(gameData, owned, purchase),
       });
       const { art, badge, state } = itemTileLook(tile);
-      const { content, view } = this.selectTile(root, `gear:${id}`, rect, {
+      const { content, view } = this.selectTile(root, targetId({ gear: id, kind: "gear" }), rect, {
         edge: true,
         mark: "tick",
         state,
@@ -1745,12 +1750,17 @@ export class StartScene extends Scene {
       const { x, y } = rect;
       const tile = walkerTile(gameData, save, id);
       const { art, badge, state } = itemTileLook(tile);
-      const { content, look, view } = this.selectTile(root, `walker:${id}`, rect, {
-        edge: true,
-        mark: "tick",
-        state,
-        tile: true,
-      });
+      const { content, look, view } = this.selectTile(
+        root,
+        targetId({ kind: "walker", walker: id }),
+        rect,
+        {
+          edge: true,
+          mark: "tick",
+          state,
+          tile: true,
+        },
+      );
       const { badge: badgeAt, box, face: faceAt, icons, plateY } = WALKER_TILE;
       fillRect(this.graphics(content), PALETTE[pictureBox({ art, state })], {
         height: box.size,
