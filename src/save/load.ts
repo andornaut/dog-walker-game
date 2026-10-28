@@ -14,6 +14,7 @@ import type {
   WalkerId,
   ZoneId,
 } from "../data/types";
+import { clamp01 } from "../lib/numbers";
 import { startingDogSlots } from "../rules/shop";
 import {
   createDefaultSave,
@@ -170,10 +171,6 @@ function keepKnownWalk<W extends { dogs: string[] }>(
   return { ...walk, dogs: keepKnown(known.dogs, walk.dogs) };
 }
 
-function clamp(min: number, max: number, value: number): number {
-  return Math.min(max, Math.max(min, value));
-}
-
 // Drops ids the game no longer has, and loadout picks the player does not own. The free dogs
 // and walkers are always owned, and a walker not owned becomes the default. The starting dog
 // slots are always owned, and a slot number the game has no slot for is dropped. Volumes are
@@ -219,8 +216,8 @@ function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
     owned,
     settings: {
       ...settings,
-      musicVolume: clamp(0, 1, settings.musicVolume),
-      sfxVolume: clamp(0, 1, settings.sfxVolume),
+      musicVolume: clamp01(settings.musicVolume),
+      sfxVolume: clamp01(settings.sfxVolume),
     },
     shownHints: keepKnown(known.hints, save.shownHints),
     stats: {
