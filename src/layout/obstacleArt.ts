@@ -34,7 +34,7 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   couple: { above: 65, left: -37, right: 36 },
   coyote: { above: 31, left: -24, right: 22 },
   cyclist: { above: 67, left: -20, right: 20 },
-  "delivery-cyclist": { above: 69, left: -20, right: 20 },
+  "delivery-cyclist": { above: 69, left: -20, right: 24 },
   "delivery-truck": { above: 53, left: -28, right: 28 },
   "dropped-cone": { above: 57, left: -20, right: 24 },
   "fish-crates": { above: 32, left: -24, right: 24 },
