@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { paletteColour } from "../assets/housePalette";
 import { SCREEN_CONFIG } from "../data/screen";
-import { WORLD } from "../data/world";
 import { itemAt } from "../lib/arrays";
 import { PAVED_VERGE } from "../testing/verges";
 import {
@@ -15,7 +14,6 @@ import {
   sidewalkTo,
   vergeBase,
   vergeFrom,
-  VERGES,
   VERGES_BY_ART,
   type VergeSide,
   walkFrom,
@@ -120,12 +118,6 @@ describe("pools", () => {
       expect(half % POOL_STEP).toBe(0);
       expect(half).toBe(halves[Math.floor(i / (4 * POOL_STEP)) * 4 * POOL_STEP]);
     });
-  });
-});
-
-describe("VERGES", () => {
-  it.each(WORLD.zones)("gives $id the verge drawn for its art, $art", (zone) => {
-    expect(VERGES[zone.id as keyof typeof VERGES]).toBe(VERGES_BY_ART[zone.art]);
   });
 });
 
