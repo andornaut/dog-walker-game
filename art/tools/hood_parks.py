@@ -43,8 +43,9 @@ lane-spanning one) and drawn at obstacles.SCALE (1.2) on a minis.Mini:
 cherry-trees        176x36  3 lanes, High Park's own: its sakura grove, three low cherry trees in blossom
                             in a row in a stone planter, wide crowns of pink lobes shaded mauve along
                             their lower right over short dark bark trunks, the planter's stone blocks
-                            lipped in driftwood; idle (2 frames, 500ms): the crowns' top lobes sway 1px
-                            right on frame 1
+                            lipped in driftwood; idle (4 frames, 500ms): the crowns' top lobes sway 1px
+                            right on frame 2, and on frame 3 a petal drifts down between the first two
+                            trees (left out at @62 and smaller, where the gap is too narrow)
 fallen-log          112x36  2 lanes, a fallen oak trunk lying across the path: five long bark ridges, a
                             sawn end at the right showing growth rings, a splintered broken end at the
                             left, a branch stub, two moss patches and two tan-capped mushrooms on its
@@ -777,8 +778,13 @@ def fallen_log(leaf=(0, 0), w=obstacles.span(2)):
     return lit(g, dict(bark=("clay", None), walnut=("bark", None)))
 
 
-# The grove's idle: rest, then the crowns' tops swayed 1px right.
-CHERRY_IDLE = (0, 1), 500
+# The grove's idle: rest, rest, the crowns' tops swayed 1px right, then a petal drifting down.
+CHERRY_IDLE = (0, 0, 1, 2), 500
+# The drifting petal, in layout pixels at full size: its top left, in the gap between the first two trees.
+PETAL = (47.5, 17.5)
+# Below this scale the gap between the crowns is too narrow for the petal's outline to stay clear of them and the
+# planter, so the far steps leave it out.
+PETAL_MIN = 0.8
 # Each crown's lobes, the lowest row first, as (dx, cy, rx, ry, sways) from its tree's centre column, in layout
 # pixels at full size: two low lobes either side of the trunk, three across the middle and two on top, the ones
 # on top swaying in the idle.
@@ -793,14 +799,17 @@ PLANTER_TOP = 23
 JOINTS = (0.22, 0.5, 0.78)
 
 
-def cherry_trees(sway=0, w=obstacles.span(3)):
+def cherry_trees(pose=0, w=obstacles.span(3)):
     """High Park's cherry grove in blossom, three low trees in a row standing in a stone planter across the
     road, front elevation: each a wide crown of pink lobes, every lobe shaded mauve along its lower right so
     the blossom clusters read, the middle crown mirrored, over a short dark bark trunk flared at its foot,
     forking into the crown and shaded walnut down its right; the planter a long box of stone blocks lipped in
-    driftwood and shaded dstone along its foot. sway shifts each crown's top lobes 1 drawn pixel right."""
+    driftwood and shaded dstone along its foot. pose 1 sways each crown's top lobes 1 drawn pixel right, and
+    pose 2 shows one petal, 2 drawn pixels square, drifting down between the first two trees, left out
+    below PETAL_MIN."""
     g = edged(Grid(w, ROW))
-    ux = obstacles.unit(g)[0]
+    ux, uy = obstacles.unit(g)
+    sway = pose == 1
     centres = [w * (2 * k + 1) / 6 for k in range(3)]
     # the trunks: short and dark, flared at the foot, forking into two limbs under the crown
     for cx in centres:
@@ -821,6 +830,8 @@ def cherry_trees(sway=0, w=obstacles.span(3)):
     g.rect(1, ROW - 1.5, w - 2, 1.5, "dstone")
     for f in JOINTS:
         g.rect(1 + f * (w - 2), PLANTER_TOP + 2, 1, ROW - PLANTER_TOP - 3.5, "dstone")
+    if pose == 2 and scale_of(g) >= PETAL_MIN:
+        g.rect(PETAL[0], PETAL[1], 2 * ux, 2 * uy, "pink")
     return lit(g, dict(bark=("clay", None), walnut=("bark", None), stone=("driftwood", None)))
 
 

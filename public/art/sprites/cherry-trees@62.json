@@ -14,6 +14,22 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 110, "h": 23 },
     "sourceSize": { "w": 110, "h": 23 },
     "duration": 500
+   },
+   "cherry-trees@62 2.aseprite": {
+    "frame": { "x": 220, "y": 0, "w": 110, "h": 23 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 110, "h": 23 },
+    "sourceSize": { "w": 110, "h": 23 },
+    "duration": 500
+   },
+   "cherry-trees@62 3.aseprite": {
+    "frame": { "x": 330, "y": 0, "w": 110, "h": 23 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 110, "h": 23 },
+    "sourceSize": { "w": 110, "h": 23 },
+    "duration": 500
    }
  },
  "meta": {
@@ -21,10 +37,10 @@
   "version": "1.2.30-x64",
   "image": "cherry-trees@62.png",
   "format": "RGBA8888",
-  "size": { "w": 220, "h": 23 },
+  "size": { "w": 440, "h": 23 },
   "scale": "1",
   "frameTags": [
-   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
   ]
  }
 }
