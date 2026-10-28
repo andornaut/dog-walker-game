@@ -369,15 +369,15 @@
       "rings": [
         {
           "scale": 1,
-          "strength": 0.03
+          "strength": 0.041
         },
         {
           "scale": 0.66,
-          "strength": 0.07
+          "strength": 0.095
         },
         {
           "scale": 0.33,
-          "strength": 0.16
+          "strength": 0.216
         }
       ],
       "shape": "cone",
@@ -389,15 +389,15 @@
       "rings": [
         {
           "scale": 1,
-          "strength": 0.03
+          "strength": 0.041
         },
         {
           "scale": 0.66,
-          "strength": 0.07
+          "strength": 0.095
         },
         {
           "scale": 0.33,
-          "strength": 0.15
+          "strength": 0.203
         }
       ],
       "shape": "cone",
@@ -409,15 +409,15 @@
       "rings": [
         {
           "scale": 1,
-          "strength": 0.03
+          "strength": 0.041
         },
         {
           "scale": 0.66,
-          "strength": 0.06
+          "strength": 0.081
         },
         {
           "scale": 0.33,
-          "strength": 0.11
+          "strength": 0.149
         }
       ],
       "shape": "cone",
@@ -429,15 +429,15 @@
       "rings": [
         {
           "scale": 1,
-          "strength": 0.05
+          "strength": 0.075
         },
         {
           "scale": 0.66,
-          "strength": 0.09
+          "strength": 0.135
         },
         {
           "scale": 0.33,
-          "strength": 0.14
+          "strength": 0.21
         }
       ],
       "shape": "ellipse",
@@ -449,15 +449,15 @@
       "rings": [
         {
           "scale": 1,
-          "strength": 0.04
+          "strength": 0.06
         },
         {
           "scale": 0.66,
-          "strength": 0.07
+          "strength": 0.105
         },
         {
           "scale": 0.33,
-          "strength": 0.1
+          "strength": 0.15
         }
       ],
       "shape": "ellipse",
@@ -469,15 +469,15 @@
       "rings": [
         {
           "scale": 1,
-          "strength": 0.03
+          "strength": 0.041
         },
         {
           "scale": 0.66,
-          "strength": 0.07
+          "strength": 0.095
         },
         {
           "scale": 0.33,
-          "strength": 0.16
+          "strength": 0.216
         }
       ],
       "shape": "cone",
@@ -489,15 +489,15 @@
       "rings": [
         {
           "scale": 1,
-          "strength": 0.05
+          "strength": 0.068
         },
         {
           "scale": 0.66,
-          "strength": 0.1
+          "strength": 0.135
         },
         {
           "scale": 0.33,
-          "strength": 0.2
+          "strength": 0.27
         }
       ],
       "shape": "cone",
@@ -509,15 +509,15 @@
       "rings": [
         {
           "scale": 1,
-          "strength": 0.05
+          "strength": 0.075
         },
         {
           "scale": 0.55,
-          "strength": 0.1
+          "strength": 0.15
         },
         {
           "scale": 0.3,
-          "strength": 0.15
+          "strength": 0.225
         }
       ],
       "shape": "ellipse",
@@ -529,15 +529,15 @@
       "rings": [
         {
           "scale": 1,
-          "strength": 0.03
+          "strength": 0.041
         },
         {
           "scale": 0.66,
-          "strength": 0.07
+          "strength": 0.095
         },
         {
           "scale": 0.33,
-          "strength": 0.16
+          "strength": 0.216
         }
       ],
       "shape": "cone",
@@ -549,15 +549,15 @@
       "rings": [
         {
           "scale": 1,
-          "strength": 0.07
+          "strength": 0.105
         },
         {
           "scale": 0.66,
-          "strength": 0.13
+          "strength": 0.195
         },
         {
           "scale": 0.33,
-          "strength": 0.19
+          "strength": 0.285
         }
       ],
       "shape": "ellipse",
@@ -569,11 +569,11 @@
       "rings": [
         {
           "scale": 1,
-          "strength": 0.1
+          "strength": 0.15
         },
         {
           "scale": 0.5,
-          "strength": 0.2
+          "strength": 0.3
         }
       ],
       "shape": "ellipse",
