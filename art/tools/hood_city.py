@@ -69,14 +69,15 @@ pedicab             48x72   minor rider, 1 lane, coming down its lane at the pac
                             wears a purple tee and a white headband, a lit headlamp on the fork crown.
                             ride (4 frames, 120ms): the pedals going round, the front tire's tread
                             falling 1px a frame
-streetcar-platform  176x36  minor, 3 lanes, Yonge Street's own 3-lane static: a TTC streetcar stop
+streetcar-platform  176x48  minor, 3 lanes, Yonge Street's own 3-lane static: a TTC streetcar stop
                             island in front elevation, a long low concrete platform, grey under an
-                            lgrey top and a white lit curb edge; on it a glass shelter under a ttc red
-                            roof band, white frame posts round navy panes with cyan glints and a lit ad
-                            panel, an azure poster in white, at its left end; a short grey railing at
-                            the platform's left end, its gaps clear, and a TTC stop sign, red round a
-                            white band, on a slate pole at its right. idle (2 frames, 500ms): the ad
-                            panel's light dips to lgrey and cobalt on frame 1
+                            lgrey top and a white lit curb edge; on it a glass shelter as tall as a
+                            person under a ttc red roof band that overhangs it, white frame posts round
+                            navy panes with cyan glints and a lit ad panel, an azure poster in white,
+                            at its left end; a grey railing at the platform's left end, its gaps
+                            clear, and a TTC stop sign, red round a white band, on a slate pole at its
+                            right, clear over the roof line. idle (2 frames, 500ms): the ad panel's
+                            light dips to lgrey and cobalt on frame 1
 
 Every key above also has <key>@<step> for each depth step in minis.STEPS, floor(size x scale + 0.5),
 with the original's tags, frames and durations, drawn on a minis.Mini with its own outline. The people
@@ -733,17 +734,21 @@ def net(s, lanes, breeze):
 
 # The platform's idle: rest, then the shelter's ad panel light dips on frame 1.
 PLATFORM_IDLE = (0, 1), 500
+# The platform's layout rows: taller than obstacles.ROW so the shelter stands as tall as a person, a multiple
+# of 5 so every depth step is a whole number of rows at obstacles.SCALE.
+PLATFORM_ROWS = 40
 
 
 def streetcar_platform(dim=0):
     """A TTC streetcar stop island in front elevation across 3 lanes, laid out in obstacles.py's pixels
-    (obstacles.span(3) by ROW) and drawn on the drawn grid so every line keeps its width at every step: a long
-    low concrete platform, grey with a white lit curb edge over its lgrey top; on it a glass shelter under a
-    ttc red roof band lit pink, white frame posts round navy panes with cyan glints, a lit ad panel at its
-    left end; a short grey railing at the platform's left end and a TTC stop sign, red round a white band, on
-    a slate pole at its right. dim dips the ad panel's light."""
+    (obstacles.span(3) by PLATFORM_ROWS) and drawn on the drawn grid so every line keeps its width at every
+    step: a long low concrete platform, grey with a white lit curb edge over its lgrey top; on it a glass
+    shelter as tall as a person under a ttc red roof band lit pink that overhangs it, white frame posts round
+    navy panes with cyan glints, a lit ad panel at its left end; a grey railing at the platform's left end and
+    a TTC stop sign, red round a white band, on a slate pole at its right, the sign clear over the roof line.
+    dim dips the ad panel's light."""
     w = obstacles.span(3)
-    g = edged(Grid(w, obstacles.ROW), net_edge)
+    g = edged(Grid(w, PLATFORM_ROWS), net_edge)
     px, s = raster(g), scale_of(g)
     sy = getattr(g, "sy", s)
     W, H = px.w, px.h
@@ -756,7 +761,7 @@ def streetcar_platform(dim=0):
 
     big = s >= 0.85
     # the platform: an lgrey top under a white lit curb edge, a grey face, slate along its foot and right end
-    top, face = Y(23), Y(25)
+    top, face = Y(PLATFORM_ROWS - 7), Y(PLATFORM_ROWS - 5)
     px.rect(1, top, W - 2, H - top, "grey")
     px.rect(1, top, W - 2, face - top, "lgrey")
     px.rect(1, top, W - 2, 1, "white")
@@ -766,18 +771,18 @@ def streetcar_platform(dim=0):
         for v in (w / 4, w / 2, 3 * w / 4):
             px.rect(X(v), face, 1, H - face - 1, "slate")
     # the railing at the left end: two posts and a top and a middle rail, its gaps HOLE until platform()
-    rail_top, post = Y(14), 2 if big else 1
+    rail_top, post = Y(PLATFORM_ROWS - 18), 2 if big else 1
     r0, r1 = X(4), X(20) + post
     px.rect(r0, rail_top, r1 - r0, top - rail_top, HOLE)
     for x in (r0, r1 - post):
         px.rect(x, rail_top, post, top - rail_top, "grey")
-    for y in (rail_top, Y(18.5)):
+    for y in (rail_top, Y(PLATFORM_ROWS - 12.5)):
         px.rect(r0, y, r1 - r0, 1, "lgrey")
     # the shelter: the roof band, the glass under it, the frame round the panes
     x0, x1 = X(30), X(100)
-    roof0, roof1 = Y(3), Y(8)
-    px.rect(x0 - post, roof0, x1 - x0 + 2 * post, roof1 - roof0, "ttc")
-    px.rect(x0 - post, roof0, x1 - x0 + 2 * post, 1, "pink")
+    over, roof0, roof1 = 2 * post, Y(6), Y(11)
+    px.rect(x0 - over, roof0, x1 - x0 + 2 * over, roof1 - roof0, "ttc")
+    px.rect(x0 - over, roof0, x1 - x0 + 2 * over, 1, "pink")
     foot = top - 1
     px.rect(x0, roof1, x1 - x0, foot - roof1, "navy")
     posts = [x0, X(48), X(74), x1 - post]

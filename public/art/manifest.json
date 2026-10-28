@@ -11777,7 +11777,7 @@
       "png": "sprites/streetcar-platform.png",
       "json": "sprites/streetcar-platform.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 47,
         "opaqueWidth": 176
       }
     },
@@ -11786,7 +11786,7 @@
       "png": "sprites/streetcar-platform@50.png",
       "json": "sprites/streetcar-platform@50.json",
       "anchor": {
-        "feetY": 17,
+        "feetY": 23,
         "opaqueWidth": 88
       }
     },
@@ -11795,7 +11795,7 @@
       "png": "sprites/streetcar-platform@56.png",
       "json": "sprites/streetcar-platform@56.json",
       "anchor": {
-        "feetY": 19,
+        "feetY": 26,
         "opaqueWidth": 99
       }
     },
@@ -11804,7 +11804,7 @@
       "png": "sprites/streetcar-platform@62.png",
       "json": "sprites/streetcar-platform@62.json",
       "anchor": {
-        "feetY": 22,
+        "feetY": 29,
         "opaqueWidth": 110
       }
     },
@@ -11813,7 +11813,7 @@
       "png": "sprites/streetcar-platform@69.png",
       "json": "sprites/streetcar-platform@69.json",
       "anchor": {
-        "feetY": 24,
+        "feetY": 32,
         "opaqueWidth": 121
       }
     },
@@ -11822,7 +11822,7 @@
       "png": "sprites/streetcar-platform@75.png",
       "json": "sprites/streetcar-platform@75.json",
       "anchor": {
-        "feetY": 26,
+        "feetY": 35,
         "opaqueWidth": 132
       }
     },
@@ -11831,7 +11831,7 @@
       "png": "sprites/streetcar-platform@81.png",
       "json": "sprites/streetcar-platform@81.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 38,
         "opaqueWidth": 143
       }
     },
@@ -11840,7 +11840,7 @@
       "png": "sprites/streetcar-platform@88.png",
       "json": "sprites/streetcar-platform@88.json",
       "anchor": {
-        "feetY": 31,
+        "feetY": 41,
         "opaqueWidth": 154
       }
     },
@@ -11849,7 +11849,7 @@
       "png": "sprites/streetcar-platform@94.png",
       "json": "sprites/streetcar-platform@94.json",
       "anchor": {
-        "feetY": 33,
+        "feetY": 44,
         "opaqueWidth": 165
       }
     },

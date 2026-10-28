@@ -1,18 +1,18 @@
 { "frames": {
    "streetcar-platform@62 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 110, "h": 23 },
+    "frame": { "x": 0, "y": 0, "w": 110, "h": 30 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 110, "h": 23 },
-    "sourceSize": { "w": 110, "h": 23 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 110, "h": 30 },
+    "sourceSize": { "w": 110, "h": 30 },
     "duration": 500
    },
    "streetcar-platform@62 1.aseprite": {
-    "frame": { "x": 110, "y": 0, "w": 110, "h": 23 },
+    "frame": { "x": 110, "y": 0, "w": 110, "h": 30 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 110, "h": 23 },
-    "sourceSize": { "w": 110, "h": 23 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 110, "h": 30 },
+    "sourceSize": { "w": 110, "h": 30 },
     "duration": 500
    }
  },
@@ -21,7 +21,7 @@
   "version": "1.2.30-x64",
   "image": "streetcar-platform@62.png",
   "format": "RGBA8888",
-  "size": { "w": 220, "h": 23 },
+  "size": { "w": 220, "h": 30 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
