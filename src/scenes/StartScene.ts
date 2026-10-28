@@ -142,7 +142,13 @@ import {
   SHOP_ART,
 } from "./itemArt";
 import { listenOnePress } from "./onePress";
-import { listenOutsideTap, onBackPressed, onSceneEvent, openOverlay } from "./overlay";
+import {
+  listenOutsideTap,
+  onBackPressed,
+  onceSceneEvent,
+  onSceneEvent,
+  openOverlay,
+} from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
 import {
   currentSettings,
@@ -901,8 +907,7 @@ export class StartScene extends Scene {
       go();
       return;
     }
-    this.game.events.once(HELP_CLOSED_EVENT, go);
-    this.events.once("shutdown", () => this.game.events.off(HELP_CLOSED_EVENT, go));
+    onceSceneEvent(this, this.game.events, HELP_CLOSED_EVENT, go);
     openHelp(this, SCENE_KEYS.start);
   }
 

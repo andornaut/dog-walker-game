@@ -53,6 +53,18 @@ export function onSceneEvent<Args extends unknown[]>(
   scene.events.once("shutdown", () => emitter.off(type, listener));
 }
 
+// Listens once for an event on emitter, as onSceneEvent does, dropping the listener unheard if
+// scene shuts down first.
+export function onceSceneEvent<Args extends unknown[]>(
+  scene: Scene,
+  emitter: Events.EventEmitter,
+  type: string,
+  listener: (...args: Args) => void,
+): void {
+  emitter.once(type, listener);
+  scene.events.once("shutdown", () => emitter.off(type, listener));
+}
+
 // Calls back on the phone's back button while scene is running, so a screen paused under an
 // overlay leaves the press to the overlay.
 export function onBackPressed(scene: Scene, back: () => void): void {

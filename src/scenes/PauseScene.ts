@@ -26,7 +26,7 @@ import { addPixelText, pixelFontMetrics, wrapPixelText } from "../ui/phaser/pixe
 import { addRampDim } from "../ui/phaser/rampDim";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
-import { listenOutsideTap, openOverlay } from "./overlay";
+import { listenOutsideTap, onceSceneEvent, openOverlay } from "./overlay";
 import { SCENE_KEYS } from "./sceneKeys";
 import { SETTINGS_CLOSED_EVENT } from "./SettingsScene";
 import { soundboardOf } from "./soundboard";
@@ -169,14 +169,12 @@ export class PauseScene extends Scene {
     if (overlay !== undefined) {
       const closed = overlay.open === "help" ? HELP_CLOSED_EVENT : SETTINGS_CLOSED_EVENT;
       if (overlay.alone) {
-        this.game.events.once(closed, onResume);
-        this.events.once("shutdown", () => this.game.events.off(closed, onResume));
+        onceSceneEvent(this, this.game.events, closed, onResume);
       }
       // Opened once the dim has read back its first frame, so the dim holds the walk, never
       // the page, when the page closes back to the menu.
       const open = () => presses[overlay.open]();
-      this.game.events.once(Core.Events.POST_RENDER, open);
-      this.events.once("shutdown", () => this.game.events.off(Core.Events.POST_RENDER, open));
+      onceSceneEvent(this, this.game.events, Core.Events.POST_RENDER, open);
     }
   }
 
