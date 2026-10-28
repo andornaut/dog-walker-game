@@ -33,7 +33,7 @@ roadside-mural-wall      120x96   a Kensington brick wall between piers, painted
 roadside-shopfront-*     108x96   a Kensington vintage shop: a painted wall, a sign board, a striped awning and a
                                   window onto a rail of second-hand clothes; ochre (red awning, forest sign) or
                                   violet (dturq awning, navy sign)
-roadside-street-lamp     60x180   a downtown street light, an arm each way, lit gold beneath
+roadside-street-lamp     60x180   a downtown street light, an arm each way, lit cream and white beneath
 roadside-transit-stop    42x150   a TTC stop pole with its sign and a timetable box
 roadside-tree-maple      114x156  a street maple in lobes over a trunk
 roadside-tree-oak        144x174  a big park oak
@@ -126,7 +126,8 @@ def gas_lamp():
 
 
 def street_lamp():
-    """A downtown street light: an ash pole, an arm each way, a flat lgrey head on each lit gold beneath."""
+    """A downtown street light: an ash pole, an arm each way, a flat lgrey head on each, white along its top,
+    lit cream and white beneath, never gold, which reads as a tip coin."""
     w, h = 40, 120
 
     def draw(g, f=0):
@@ -136,8 +137,10 @@ def street_lamp():
         g.rect(15, base - 6, 10, 7, "shale")
         g.rect(8, 10, 24, 3, "ash")
         for x in (3, 27):
-            g.rect(x, 9, 10, 4, "lgrey")
-            g.rect(x + 1, 13, 8, 2, "gold")
+            g.rect(x, 8, 10, 5, "lgrey")
+            g.rect(x, 8, 10, 1, "white")
+            g.rect(x + 1, 13, 8, 3, "cream")
+            g.rect(x + 2, 13, 6, 2, "white")
     return w, h, draw
 
 

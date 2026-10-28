@@ -202,7 +202,7 @@ Placed by the style guide's Roadside table (`shared/roadside.json`): the lawn pr
 | `roadside-love-lock`                  | 78×90   | The Distillery's heart of padlocks on a plinth                      |
 | `roadside-mural-wall`                 | 120×96  | A Kensington brick wall painted with a dog's face and tags          |
 | `roadside-shopfront-<colourway>`      | 108×96  | ochre, violet; a vintage shop, second-hand clothes in its window    |
-| `roadside-street-lamp`                | 60×180  | A downtown street light, lit both ways                              |
+| `roadside-street-lamp`                | 60×180  | A downtown street light, lit cream and white both ways              |
 | `roadside-transit-stop`               | 42×150  | A TTC stop pole                                                     |
 | `roadside-tree-maple`                 | 114×156 | A street maple                                                      |
 | `roadside-tree-oak`                   | 144×174 | A spreading park oak                                                |
