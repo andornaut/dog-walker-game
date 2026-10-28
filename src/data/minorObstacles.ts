@@ -93,6 +93,13 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   fallenLog: { name: "Fallen log", shape: { lanes: 2, rows: 1 }, zones: ["park"] },
+  ferrets: {
+    movement: { kind: "dart", stopShare: 0, tilt: { max: 0, min: 0 }, turnBackShare: 0.3 },
+    name: "Ferrets",
+    onFoot: true,
+    shape: { lanes: 2, rows: 1 },
+    zones: ["park"],
+  },
   foodCartVendor: {
     movement: {
       factor: 0.7,

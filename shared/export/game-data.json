@@ -1903,6 +1903,28 @@
       "spriteKey": "fallen-log"
     },
     {
+      "id": "ferrets",
+      "movement": {
+        "kind": "dart",
+        "stopShare": 0,
+        "tilt": {
+          "max": 0,
+          "min": 0
+        },
+        "turnBackShare": 0.3
+      },
+      "name": "Ferrets",
+      "onFoot": true,
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "zones": [
+        "park"
+      ],
+      "spriteKey": "ferrets"
+    },
+    {
       "id": "foodCartVendor",
       "movement": {
         "factor": 0.7,
@@ -3095,6 +3117,7 @@
           "deliveryTruck": 0,
           "ducklings": 0,
           "fallenLog": 0,
+          "ferrets": 0,
           "foodCartVendor": 0,
           "frisbeeDog": 3,
           "garbageTruck": 0,
@@ -3204,11 +3227,12 @@
           "cone": 0,
           "couple": 2,
           "coyote": 3,
-          "cyclist": 4,
+          "cyclist": 3,
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
           "ducklings": 4,
           "fallenLog": 4,
+          "ferrets": 2,
           "foodCartVendor": 0,
           "frisbeeDog": 0,
           "garbageTruck": 0,
@@ -3221,7 +3245,7 @@
           "hotDogCart": 0,
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
-          "jogger": 5,
+          "jogger": 4,
           "kegDollyWorker": 0,
           "kidOnBike": 0,
           "leafPile": 0,
@@ -3323,6 +3347,7 @@
           "deliveryTruck": 0,
           "ducklings": 0,
           "fallenLog": 0,
+          "ferrets": 0,
           "foodCartVendor": 0,
           "frisbeeDog": 0,
           "garbageTruck": 0,
@@ -3437,6 +3462,7 @@
           "deliveryTruck": 2,
           "ducklings": 0,
           "fallenLog": 0,
+          "ferrets": 0,
           "foodCartVendor": 2,
           "frisbeeDog": 0,
           "garbageTruck": 0,
@@ -3551,6 +3577,7 @@
           "deliveryTruck": 0,
           "ducklings": 0,
           "fallenLog": 0,
+          "ferrets": 0,
           "foodCartVendor": 0,
           "frisbeeDog": 0,
           "garbageTruck": 0,
@@ -3665,6 +3692,7 @@
           "deliveryTruck": 4,
           "ducklings": 0,
           "fallenLog": 0,
+          "ferrets": 0,
           "foodCartVendor": 0,
           "frisbeeDog": 0,
           "garbageTruck": 2,
