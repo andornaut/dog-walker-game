@@ -272,22 +272,125 @@ def other_dog_pull_away():
     return a
 
 
-def thief_chase():
-    a = Art()
-    a.ground("street")
-    a.put("thief", "flee", 54, 59, 1)
-    a.put("dog-archie", "react", 22, 58)
-    a.fill(34, 12, 2, 5, "red")
-    a.fill(34, 18, 2, 2, "red")
-    return a
+# The walker's tip pouch, which the thief snatches: a green cloth drawstring pouch lit lime on its left and
+# shaded forest on its right, its neck gathered under a cream drawstring tied off at the top, a yellow coin
+# with an amber centre on its face. TIP_POUCH is held close; FAR_POUCH is the same pouch in a distant hand.
+TIP_POUCH = ["..c.c..", "...c...", "..lgf..", ".lgggf.", "lggyggf", "lgyaygf", "lggyggf", ".gggff.", "..fff.."]
+FAR_POUCH = [".c.c.", "..c..", ".lgf.", "lgygf", "lgggf", ".fff."]
+POUCH_INK = {"c": "cream", "l": "lime", "g": "green", "f": "forest", "y": "yellow", "a": "amber"}
+
+
+def tip_pouch(far=False):
+    return pixmap(FAR_POUCH if far else TIP_POUCH, POUCH_INK)
+
+
+def thief(s, draw, *args, k=0, **q):
+    """road.drawn(s, draw, *args, **q) as an outlined image, leaned k layout pixels as road.lean leans a
+    person: the thief at scale s (road.SCALE is his road size)."""
+    g = road.raster(road.drawn(s, draw, *args, **q))
+    return to_image((road.lean(g, k) if k else g).outlined())
+
+
+def thief_reaching(g, b, arms=0):
+    """thief_top without the sack, his free arm (screen left) out level from the shoulder to grab: a lgrey
+    sleeve banded ink as his shirt is, the hand at its end."""
+    road.thief_top(g, b, sack=False)
+    g.rect(5, 22 + b, 4, 12, None)
+    g.rect(2, 22 + b, 8, 4, "lgrey")
+    for x in (3.5, 7):
+        g.rect(x, 22 + b, 1.5, 4, "ink")
+    g.rect(0, 22 + b, 2.5, 4, "skin2")
+
+
+def stand(a, img, cx, foot, shadow=True):
+    """img standing on its shadow with its bottom row on foot; returns its top left."""
+    x, y = round(cx - img.width / 2), foot - img.height
+    if shadow:
+        a.shadow(cx, foot - 3 * img.height // 48, img.width * 0.6)
+    a.paste(img, x, y)
+    return x, y
+
+
+def dust(a, x, y):
+    """A 5x3 puff of dust kicked up at a paw, lgrey lit white."""
+    a.fill(x + 1, y, 3, 1, "white")
+    a.fill(x, y + 1, 5, 2, "lgrey")
+
+
+def ears_flying(a, key, tag, cx, foot, i=0):
+    """White motion ticks beside the ears of key's frame put at cx, foot: the ears flapping as it bounds."""
+    f = sn.frame(key, tag, i)
+    x0, y0, x1, _ = f.getbbox()
+    left, top = round(cx - f.width / 2), foot - f.height
+    for x, d in ((left + x0 - 2, 1), (left + x1 + 1, -1)):
+        a.fill(x, top + y0 + 1, 1, 2, "white")
+        a.fill(x + d, top + y0 + 3, 1, 1, "white")
 
 
 def thief_let_go():
+    """Let the tips go: Archie stands watching the thief run off up the street with the walker's green tip
+    pouch swinging from his hand, dust puffing at his heels."""
     a = Art()
     a.ground("street")
-    a.put("thief", "walk", 52, 58)
-    a.coins([(8, 30), (18, 36)], 1)
-    a.bubble(4, 8, 24, ["-$$"], "dred")
+    s = 0.8
+    t = thief(s, road.thief_fleeing, 1, sack=False)
+    x, y = stand(a, t, 50, 40)
+    # the pouch hangs from his back-swung hand (screen right), layout 23..27 x 31..33
+    a.paste(tip_pouch(), x + round(23 * s), y + round(30 * s))
+    dust(a, x + 4, y + t.height - 4)
+    dust(a, x + 18, y + t.height - 2)
+    for lx, ly, h in ((40, 6, 5), (64, 4, 6), (66, 16, 5)):
+        a.fill(lx, ly, 1, h, "lgrey")
+    c = a.put("dog-archie", "idle", 20, 58)
+    a.lead(20, c, 12)
+    return a
+
+
+def thief_grab_back():
+    """Grab it back: a tug-of-war over the tip pouch. The thief leans back on the right, his arm out to the
+    pouch's drawstring pulled taut to his fist; Archie, dug in on the left, has the pouch's other end in his
+    mouth, out of sight behind his head, and his leash runs off the bottom edge. Strain ticks either side of
+    the pouch and a red ! over Archie."""
+    a = Art()
+    a.ground("street")
+    s = 1.2
+    t = thief(s, road.dressed, thief_reaching, k=3)
+    x, y = stand(a, t, 56, 56)
+    hand_x, hand_y = x + 1, y + round(24 * s)
+    px, py = 24, hand_y - 4
+    a.paste(tip_pouch(), px, py)
+    a.line(px + 5, py + 1, hand_x, hand_y, "cream")
+    c = a.put("dog-archie", "pull", 22, 58, flip=True)
+    a.lead(22, c, 8, 2)
+    for tx, ty in ((px + 3, py - 4), (px + 8, py - 3), (px + 4, py + 12), (px + 9, py + 11)):
+        a.fill(tx, ty, 1, 2, "white")
+    a.fill(8, 3, 2, 5, "red")
+    a.fill(8, 9, 2, 2, "red")
+    return a
+
+
+def thief_give_chase():
+    """Dogs give chase: the pack in full zoomies up the street after the thief, who runs off small in the
+    distance clutching the tip pouch. Biscuit, Archie and Duchess bound off the ground mid-leap over their
+    shadows, ears flapping, their leashes streaming back off the bottom edge, lgrey speed lines behind them
+    and dust kicked up at their paws."""
+    a = Art()
+    a.ground("street")
+    s = 0.5
+    t = thief(s, road.thief_fleeing, -1, sack=False)
+    x, y = stand(a, t, 45, 29)
+    a.paste(tip_pouch(far=True), x + round(4 * s) - 3, y + round(31 * s))
+    dust(a, x + 8, y + t.height - 3)
+    for lx, ly, h in ((16, 40, 12), (19, 46, 10), (45, 36, 12), (48, 43, 13), (51, 38, 10), (73, 40, 12)):
+        a.fill(lx, ly, 1, h, "lgrey")
+    for name, cx, foot, step, i in (("biscuit", 8, 44, 75, 0), ("duchess", 63, 54, 100, 2), ("archie", 27, 55, 100, 1)):
+        key = f"dog-{name}" + ("" if step == 100 else f"@{step}")
+        a.shadow(cx, foot, 20 * step / 100)
+        c = a.dog(name, "react", cx, foot - 5, i, step=step, shadow=False)
+        ears_flying(a, key, "react", cx, foot - 5, i)
+        a.lead(cx, c, cx - 4)
+        dust(a, cx - 9, foot - 2)
+        dust(a, cx + 5, foot - 1)
     return a
 
 
@@ -945,8 +1048,9 @@ ILLUSTRATIONS = {
     "card-skunk-ignore": skunk_ignore,
     "card-other-dog-sniff": other_dog_sniff,
     "card-other-dog-pull-away": other_dog_pull_away,
-    "card-thief-chase": thief_chase,
     "card-thief-let-go": thief_let_go,
+    "card-thief-grab-back": thief_grab_back,
+    "card-thief-give-chase": thief_give_chase,
     "card-lost-wallet-keep": wallet_keep,
     "card-petting-neighbour-take": neighbour_take,
     "card-belly-rubs": belly_rubs,

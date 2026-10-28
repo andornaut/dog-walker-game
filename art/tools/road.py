@@ -1125,20 +1125,22 @@ def stripes(g, x, y0, y1, w, b, light="white"):
         px.rect(e(x), r, max(1, e(x + w) - e(x)), 1, light if (r - anchor) % period < period // 2 else "ink")
 
 
-def thief_top(g, b, arms=0):
+def thief_top(g, b, arms=0, sack=True):
     """The thief coming down the road: striped shirt, beanie, mask and the loot sack over his shoulder; the
-    free arm (screen left) swings, the one under the sack stays."""
+    free arm (screen left) swings, the one under the sack stays. sack=False leaves the sack off, for the
+    cards, which draw the tip pouch he snatches instead."""
     stripes(g, 9, 21 + b, 34 + b, 14, b)
     for x, n in ((5, swung(arms, -1)), (23, 0)):
         stripes(g, x, 22 + b, 31 + b - n, 4, b, "lgrey")
         g.rect(x, 31 + b - n, 4, 3, "skin2")
-    # the loot sack slung over the shoulder: its neck tied and flared at the shoulder, the bag bulging
-    # below it, a $ on its face
-    g.cel(26, 23 + b, 4.5, 5.5, "tan", "brown", "cream")
-    g.tri((22.5, 20 + b), (29.5, 20 + b), (26, 15 + b), "tan")
-    g.tri((24, 13 + b), (28, 13 + b), (26, 15.5 + b), "tan")
-    g.rect(24.5, 15 + b, 3, 1, "brown")
-    dollar(g, 26, 23 + b, "dbrown")
+    if sack:
+        # the loot sack slung over the shoulder: its neck tied and flared at the shoulder, the bag bulging
+        # below it, a $ on its face
+        g.cel(26, 23 + b, 4.5, 5.5, "tan", "brown", "cream")
+        g.tri((22.5, 20 + b), (29.5, 20 + b), (26, 15 + b), "tan")
+        g.tri((24, 13 + b), (28, 13 + b), (26, 15.5 + b), "tan")
+        g.rect(24.5, 15 + b, 3, 1, "brown")
+        dollar(g, 26, 23 + b, "dbrown")
     face_disc(g, 16, 12.5 + b, 8, 8, "skin2", "brown")
     g.cel(16, 7.5 + b, 8.5, 5, "navy", "ink", "dslate")
     g.rect(8, 9 + b, 17, 2, "dslate")
@@ -1164,10 +1166,11 @@ def dollar(g, cx, cy, c):
                 px.p(x0 + i, y0 + j, c)
 
 
-def thief_fleeing(stride):
+def thief_fleeing(stride, sack=True):
     """The thief running off up the road, seen from behind: stride is -1 or 1, the side whose knee is up.
     The arms pump against the legs from the shoulders (the far arm bent forward, its forearm hidden, the near
-    one swung back and low), and the loot sack bounces on his back. The road outline and the lit rim."""
+    one swung back and low), and the loot sack bounces on his back (sack=False leaves it off, as thief_top).
+    The road outline and the lit rim."""
     g = edged(Grid(32, 48))
     s = stride
     b = -1
@@ -1197,11 +1200,12 @@ def thief_fleeing(stride):
     g.p(22, 21 + b, None)
     # loot sack slung over the right shoulder, bouncing a pixel against the stride, its neck gathered at the top
     k = b + (1 if s > 0 else 0)
-    g.cel(22, 28 + k, 5, 5, "tan", "brown", "cream")
-    g.tri((19.5, 24 + k), (24.5, 24 + k), (22, 19 + k), "tan")
-    g.rect(21, 21 + k, 3, 2, "brown")
-    g.rect(20, 23 + k, 5, 1, "dbrown")
-    dollar(g, 22, 28 + k, "dbrown")
+    if sack:
+        g.cel(22, 28 + k, 5, 5, "tan", "brown", "cream")
+        g.tri((19.5, 24 + k), (24.5, 24 + k), (22, 19 + k), "tan")
+        g.rect(21, 21 + k, 3, 2, "brown")
+        g.rect(20, 23 + k, 5, 1, "dbrown")
+        dollar(g, 22, 28 + k, "dbrown")
     # the back of the head: the beanie, the ears and the mask's band tied all the way round
     g.rect(14, 19 + b, 4, 3, "skin2")
     g.cel(16, 12.5 + b, 8, 8, "skin2", "brown", "skin1")

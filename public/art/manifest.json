@@ -12806,8 +12806,12 @@
       "png": "images/card-sweet-talker.png"
     },
     {
-      "key": "card-thief-chase",
-      "png": "images/card-thief-chase.png"
+      "key": "card-thief-give-chase",
+      "png": "images/card-thief-give-chase.png"
+    },
+    {
+      "key": "card-thief-grab-back",
+      "png": "images/card-thief-grab-back.png"
     },
     {
       "key": "card-thief-let-go",
