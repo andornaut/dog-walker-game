@@ -1,5 +1,5 @@
 import { laneMask } from "../layout/lanes";
-import { itemAt, partitionPoint } from "../lib/arrays";
+import { itemAt, partitionPoint, removeItem } from "../lib/arrays";
 import { randomPick, weightedPick } from "../lib/random";
 import { approachOutcomes } from "./approach";
 import {
@@ -701,10 +701,6 @@ interface Block {
   row: number;
 }
 
-function without<Item>(items: Item[], item: Item): void {
-  items.splice(items.indexOf(item), 1);
-}
-
 // The lanes the lane-blocking spawns block in each row's window and in the gap after it, the
 // blocks kept, and the rows wide ones' hit boxes are on. pathHeld is the lanes the path keeps
 // clear in each row's window and gap, a row for each of the zone's rows.
@@ -804,7 +800,7 @@ class LaneBlocks {
   // Drops a block kept, and recomputes the lanes blocked in the windows and gaps it overlapped
   // from the blocks still kept. The lanes darts and walls sweep stay as they are.
   remove(block: Block): void {
-    without(this.blocks, block);
+    removeItem(block, this.blocks);
     const first = block.row;
     const last = Math.max(block.lastRow, block.lastGap);
     this.blocked.fill(0, first, last + 1);
@@ -917,7 +913,7 @@ class PlacedPlaces {
   }
 
   remove(place: BlockingPlace): void {
-    without(this.places, place);
+    removeItem(place, this.places);
   }
 
   // Saves the places, and returns what puts them back. longest is kept: it only bounds the
@@ -1471,8 +1467,8 @@ class ZonePlanner<Kind extends string> {
     }
     this.lanes.remove(block);
     this.places.remove(place);
-    without(this.events, event);
-    without(this.standing, lifted);
+    removeItem(event, this.events);
+    removeItem(lifted, this.standing);
   }
 
   // Saves what a move changes, and returns what puts it back.
@@ -1528,7 +1524,7 @@ class ZonePlanner<Kind extends string> {
     for (const quota of this.unplaced) {
       const cells = this.cellsIn(quota, run);
       if (cells.length > 0) {
-        without(this.unplaced, quota);
+        removeItem(quota, this.unplaced);
         this.placeAt(quota, randomPick(streams.spawns, cells));
         return true;
       }
@@ -1542,7 +1538,7 @@ class ZonePlanner<Kind extends string> {
         streams.spawns,
         ranked.filter(({ busy }) => busy === busiest),
       );
-      without(ranked, pick);
+      removeItem(pick, ranked);
       const undo = this.save();
       this.lift(pick.from);
       // The run as it stands with the spawn lifted, longer where the spawn stood beside it.
