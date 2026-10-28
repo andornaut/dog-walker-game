@@ -6,6 +6,7 @@ import { modifiedStat } from "../rules/modifiers";
 import { read } from "../rules/units";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
+import type { RoadPoint } from "./collision";
 import { pullLane } from "./laneControl";
 import { destinationLane } from "./laneMotion";
 import { isWaiting, laneAt, moverPlace, moverY } from "./movers";
@@ -126,7 +127,7 @@ export function pullWalk(
 // A target where it is now: its lane position and how near the pack it is. centre is its
 // middle in road pixels.
 interface Target {
-  readonly centre: { readonly x: number; readonly y: number };
+  readonly centre: RoadPoint;
   readonly itemId: number;
   readonly kind: PullTargetKind;
   readonly lanePosition: number;

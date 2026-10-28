@@ -80,14 +80,14 @@ export function itemBox(
 }
 
 // The squared distance from a point to a box, 0 inside it.
-function distanceSquared(box: Box, point: { x: number; y: number }): number {
+function distanceSquared(box: Box, point: RoadPoint): number {
   const dx = Math.max(box.left - point.x, 0, point.x - box.right);
   const dy = Math.max(box.top - point.y, 0, point.y - box.bottom);
   return dx * dx + dy * dy;
 }
 
 // The point of contact: the middle of where the box overlaps the pack's outline.
-function contactPoint(outline: Box, box: Box): { x: number; y: number } {
+function contactPoint(outline: Box, box: Box): RoadPoint {
   return {
     x: (Math.max(outline.left, box.left) + Math.min(outline.right, box.right)) / 2,
     y: (Math.max(outline.top, box.top) + Math.min(outline.bottom, box.bottom)) / 2,
@@ -97,7 +97,7 @@ function contactPoint(outline: Box, box: Box): { x: number; y: number } {
 // Of the dogs, the one whose rectangle is nearest the point, the first in pack order on a tie.
 function nearestOf<Dog extends string>(
   dogs: readonly DogBox<Dog>[],
-  point: { x: number; y: number },
+  point: RoadPoint,
 ): DogBox<Dog> | undefined {
   let nearest: { distance: number; dog: DogBox<Dog> } | undefined;
   for (const dog of dogs) {
