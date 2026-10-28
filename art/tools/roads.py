@@ -353,13 +353,20 @@ def distillery_lines(g):
 
 
 def kensington_ground(g):
-    """Worn stone asphalt: big dstone patches, 2px or more even in the far rows, which sample the strip shrunk
+    """Worn stone asphalt: long dstone patches, 2px or more even in the far rows, which sample the strip shrunk
     4x; sparse 2px dstone grit and a few dstone cracks; 2-row dstone joints across every 32 rows; dstone
     gutters on the outer 4 columns inside a coal seam, a coal joint every 32 rows."""
     rnd = random.Random("road-kensington-market")
     g.rect(0, 0, W, H, "stone")
-    for x, y in scatter(rnd, 6, 10, W - 14, 14, ok=lambda x, y: 4 < (x + 2) % LANE < 52):
-        oval(g, rnd, x, y, rnd.randint(8, 12), rnd.randint(14, 22), "dstone")
+    # patches 4 or 5 wide (7 at most where a ragged row spreads), so none reads as a seam across the road, and
+    # 14 to 22 long, so the far rows still show them 2px or more; one to a lane and stretch, the stretches clear
+    # of the joints by 2 rows, so a joint stays one even line across the road
+    bands = ((18, 44), (50, 76))
+    spots = rnd.sample([(lane, band) for lane in range(W // LANE) for band in range(2)], 6)
+    for lane, band in spots:
+        h, w = rnd.randint(14, 22), rnd.randint(4, 5)
+        lo, hi = bands[band]
+        oval(g, rnd, lane * LANE + rnd.randint(10, LANE - 18), rnd.randint(lo, hi - h), w, h, "dstone")
     grit(g, rnd, 24, ("dstone",))
     cracks(g, rnd, ((40, 20, 9), (150, 50, 11), (230, 12, 8)), "dstone")
     for y in (14, 14 + SEAM_PERIOD):
