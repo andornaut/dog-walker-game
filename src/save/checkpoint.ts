@@ -25,7 +25,8 @@ export function zonesFinishedBy(result: Pick<RunResult, "outcome" | "zone">): nu
   return result.outcome === "finished" ? result.zone : result.zone - 1;
 }
 
-// Lifetime counts with a run's added, key by key: the tallies, or the bumps by kind.
+// Lifetime counts with a run's added, key by key: the tallies, the bumps by kind, or an
+// encounter's option picks.
 function addCounts<Key extends string>(
   lifetime: Readonly<Partial<Record<Key, number>>>,
   run: Readonly<Partial<Record<Key, number>>>,
@@ -41,11 +42,8 @@ function addCounts<Key extends string>(
 function addPicks(lifetime: OptionPicks, run: OptionPicks): OptionPicks {
   const sum: OptionPicks = { ...lifetime };
   for (const [encounter, picks] of Object.entries(run) as [EncounterId, Record<string, number>][]) {
-    const added: Record<string, number> = { ...sum[encounter] };
-    for (const [option, count] of Object.entries(picks)) {
-      added[option] = (added[option] ?? 0) + count;
-    }
-    sum[encounter] = added;
+    // Every option addCounts returns has a count.
+    sum[encounter] = addCounts(sum[encounter] ?? {}, picks) as Record<string, number>;
   }
   return sum;
 }
