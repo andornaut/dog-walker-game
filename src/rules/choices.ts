@@ -13,7 +13,7 @@ import type {
 } from "../data/types";
 import { fillNames } from "../lib/lines";
 import { type Random, randomInt } from "../lib/random";
-import { packDogs } from "../state/pack";
+import { packDogs, walkingAmong } from "../state/pack";
 import type { CardSource, EffectSource, RunState } from "../state/runState";
 import { countOptionPick } from "./achievements";
 import {
@@ -174,11 +174,6 @@ function cardContent(data: ChoiceData, source: EncounterCardSource): readonly So
   }));
 }
 
-// The dogs the encounter affected that are still walking.
-function affectedBy(state: RunState, source: EncounterCardSource): DogId[] {
-  return packDogs(state).filter((dog) => source.affected.includes(dog));
-}
-
 function walkingHearts(state: RunState): Map<DogId, Hearts> {
   return new Map(
     state.pack.flatMap((slot) =>
@@ -331,7 +326,7 @@ export function cardFor(data: CardData, state: RunState, source: CardSource): Ca
 function effectCard(data: ChoiceData, state: RunState, source: EncounterCardSource): CardView {
   const options = cardContent(data, source);
   const title = data.encounters[source.encounter].name;
-  const affected = affectedBy(state, source);
+  const affected = walkingAmong(state, source.affected);
   const skipBy =
     data.encounters[source.encounter].kind === "obstacle" && !state.skipUsed
       ? state.skipPass
@@ -545,7 +540,7 @@ export function applyInstantEncounter(
   if (state.phase.kind === "ended") {
     throw new Error("The run has ended");
   }
-  const affected = packDogs(state).filter((dog) => caught.includes(dog));
+  const affected = walkingAmong(state, caught);
   const source = { encounter, kind: "instant" } as const;
   return outcomeOf(data, { affected, source }, resolution.effects, state);
 }

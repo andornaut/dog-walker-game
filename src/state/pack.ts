@@ -34,6 +34,11 @@ export function packDogs(state: Pick<RunState, "pack">): DogId[] {
   return dogs;
 }
 
+// Those of dogs still walking (packDogs), in pack order.
+export function walkingAmong(state: Pick<RunState, "pack">, dogs: readonly DogId[]): DogId[] {
+  return packDogs(state).filter((dog) => dogs.includes(dog));
+}
+
 export function heartsOf(state: Pick<RunState, "pack">, dog: DogId): Hearts | undefined {
   const slot = state.pack.find((candidate) => candidate.dog === dog);
   return slot?.status === "walking" ? slot.hearts : undefined;

@@ -9,7 +9,7 @@ import type {
   Target,
 } from "../data/types";
 import { assertNever } from "../lib/assertNever";
-import { heartsOf, mapPack, packDogs, packOrder } from "../state/pack";
+import { heartsOf, mapPack, packDogs, packOrder, walkingAmong } from "../state/pack";
 import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
 import {
   type Cause,
@@ -58,7 +58,7 @@ export function targetDogs(
   const pack = packDogs(state);
   switch (target.kind) {
     case "affected":
-      return pack.filter((id) => context.affected.includes(id));
+      return walkingAmong(state, context.affected);
     case "all":
       return pack;
     case "lead":
