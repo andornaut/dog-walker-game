@@ -44,4 +44,4 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 
 **Done when:** a walk lasts about 8 minutes, we want to play "one more", and it works by touch on a phone browser.
 
-The tuning pass is done: a buyout of the Pet shop takes about 50 walks, Big Payday sits within reach of a great walk, and the cozy curve stays. What's left is a phone playtest of the tuned build, which calls version 1. The game is called Dog Walker.
+The tuning pass is done: a buyout of the Pet shop takes about 50 walks, Big Payday sits within reach of a great walk, and the cozy curve stays. What's left is a phone playtest of the tuned build, which calls version 1. The game is called Archie's Dog Walks.
