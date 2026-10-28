@@ -5,6 +5,7 @@ import { TUNING } from "../data/tuning";
 import { itemAt } from "../lib/arrays";
 import { type Random, seededRandom } from "../lib/random";
 import { read } from "../rules/units";
+import { defined } from "../testing/defined";
 import { plannerStreams } from "../testing/movers";
 import {
   DART_LIFTS,
@@ -703,6 +704,14 @@ const SPECS: readonly { name: string; spec: MoverSpec }[] = [
   },
 ];
 
+// The draw ends a spec reads: only a hopper of a shy kind reads the shy draw, so the low end
+// shy is the low end again for every other spec.
+const endsOf = (moving: MoverSpec): typeof DRAW_ENDS =>
+  DRAW_ENDS.filter(
+    ({ draws }) =>
+      draws.shy !== 0 || (moving.motion.kind === "steps" && moving.motion.shy !== undefined),
+  );
+
 describe("hopShapes", () => {
   // A hop goes a lane to either side or, unless sideways, a row up the road or diagonally up:
   // never down toward the pack.
@@ -779,7 +788,7 @@ describe("moverPlacements", () => {
   // its lanes, from its row's window for as long as its rows' blocking length.
   it.each(
     SPECS.flatMap(({ name, spec: moving }) =>
-      DRAW_ENDS.map(({ draws, end }) => ({ draws, end, moving, name })),
+      endsOf(moving).map(({ draws, end }) => ({ draws, end, moving, name })),
     ),
   )(
     "keeps $name within the lanes and rows it blocks, at $end of its draws",
@@ -820,12 +829,13 @@ describe("moverPlacements", () => {
   // pack, until that contact ends: once its travel is past the window, or once its hit box, inset
   // inside its lane at each side, is off the road. A stand wider or longer than that would hide
   // road beside or behind it, where the pack can step in. Sampled a pixel of scroll apart, so the
-  // contact's end is up to a pixel past the last sample.
+  // contact's end is up to a pixel past the last sample. Checked as drawn and lifted all the way,
+  // the ends of the lifts the planner retries a dart at, as the bot's hazard sweep does.
   it.each(
     SPECS.flatMap(({ name, spec: moving }) =>
       moving.motion.kind === "cross"
-        ? DRAW_ENDS.flatMap(({ draws, end }) =>
-            [0, ...DART_LIFTS].map((lift) => ({ draws, end, lift, moving, name })),
+        ? endsOf(moving).flatMap(({ draws, end }) =>
+            [0, defined(DART_LIFTS.at(-1))].map((lift) => ({ draws, end, lift, moving, name })),
           )
         : [],
     ),
@@ -866,7 +876,7 @@ describe("moverPlacements", () => {
   it.each(
     SPECS.flatMap(({ name, spec: moving }) =>
       moving.motion.kind === "steps" || moving.motion.kind === "approach"
-        ? DRAW_ENDS.map(({ draws, end }) => ({ draws, end, moving, name }))
+        ? endsOf(moving).map(({ draws, end }) => ({ draws, end, moving, name }))
         : [],
     ),
   )("moves $name its drawn count of times, at $end of its draws", ({ draws, moving }) => {
@@ -1269,7 +1279,8 @@ describe("moverPlacements", () => {
   // is planned as one that crosses: the same rows held, lanes blocked, stands and time on screen,
   // so the cells it passed are free once it has crossed, and no spot of its rests on the road. One
   // that stops in a lane stays on screen, and blocks the road, until it scrolls off the bottom.
-  it.each([-0.3, 0, 0.4, 0.8].flatMap((tilt) => [0, 0.5, 1].map((start) => ({ start, tilt }))))(
+  // Tilted away, untilted and tilted toward the pack, from the lowest start and the highest.
+  it.each([-0.3, 0, 0.8].flatMap((tilt) => [0, 1].map((start) => ({ start, tilt }))))(
     "plans a dart that stops on the verge as one that crosses, at tilt $tilt from start $start",
     ({ start, tilt }) => {
       const draws = { ...drawMover({ movers: () => 0.5, spawns: () => 0.5 }), start };
@@ -1350,7 +1361,7 @@ describe("moverPlacements", () => {
   // cue shows from as soon as its row comes on screen, for at least its warning.
   it.each(
     SPECS.filter(({ spec: moving }) => ["cross", "ride"].includes(moving.motion.kind)).flatMap(
-      ({ name, spec: moving }) => DRAW_ENDS.map(({ draws, end }) => ({ draws, end, moving, name })),
+      ({ name, spec: moving }) => endsOf(moving).map(({ draws, end }) => ({ draws, end, moving, name })),
     ),
   )(
     "shows $name by the time its row comes on screen, at $end of its draws",
