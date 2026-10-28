@@ -9,11 +9,11 @@ The bark pop is 16x16. The ice cream truck (56x60, one lane, like
 obstacles.delivery_truck; tags idle, 2 frames at 400ms, and drive, 4 at 100ms) is drawn in
 its own pixels at 56x50 on a grid that keeps its columns and draws its rows ROW_SCALE (1.2)
 times; the puddle (112x48) is drawn in its own
-pixels, and so is the pothole (112x48, idle: 2 frames at 500ms, the glint and sheen moving
-a pixel on frame 1), a ground decal like the puddle in the Toronto coal and ash asphalt,
-with no outline; the skunk's stink haze (112x60) is a ground decal laid out on an 88x40 design
-and stretched to its frame on the drawn grid. All are chibi and in Endesga 32 with
-coloured outlines. The walker is seen from behind, like the
+pixels, and so is the pothole (112x48, idle: 2 frames at 500ms, the glint moving a pixel on
+frame 1), a ground decal like the puddle, recessed into the road: a deep far wall, a lit
+broken near lip and murky water, with no outline; the skunk's stink haze (112x60) is a
+ground decal laid out on an 88x40 design and stretched to its frame on the drawn grid. All
+are chibi and in Endesga 32 with coloured outlines. The walker is seen from behind, like the
 dogs, except in wave and cheer; everything coming down the road faces the player:
 jogger (48x72, run: 4 frames at 100ms, a knee driven up, then that foot passing
 down, each side in turn, the ponytail swinging out from behind the head) wears
@@ -1000,45 +1000,51 @@ def puddle(f, w=112, h=48):
 
 # The pothole's outline: corners at (angle in degrees clockwise from the right on screen, radius as a share of a
 # rounded oval's), joined straight, so its edge is broken and uneven.
-POTHOLE_EDGE = ((0, 0.98), (24, 1.0), (46, 0.92), (72, 0.99), (100, 0.94), (128, 1.0), (158, 0.98), (184, 0.98),
-                (208, 0.94), (232, 1.0), (256, 0.95), (282, 1.0), (308, 0.93), (336, 1.0))
-# The broken rim's chunks as (from, to) in degrees, with how far each end reaches into the hole in pixels
-# across (rows are POTHOLE_SQUASH of it), so their inner edges break at angles. Between them are cracks. A
-# chunk centred between 140 and 300 degrees faces the top-left light.
-POTHOLE_CHUNKS = ((-30, 8, 5, 8), (14, 50, 9, 5), (56, 100, 6, 9), (106, 140, 8, 5), (146, 180, 6, 10),
-                  (186, 222, 9, 6), (228, 262, 6, 10), (268, 300, 10, 7), (306, 324, 6, 8))
+POTHOLE_EDGE = ((0, 0.95), (12, 0.98), (30, 0.9), (50, 0.97), (68, 0.93), (88, 1.0), (108, 0.94), (126, 0.99),
+                (146, 0.9), (168, 0.97), (180, 0.95), (192, 0.98), (204, 1.0), (222, 0.9), (240, 0.97), (262, 0.92),
+                (284, 1.0), (304, 0.9), (320, 0.98), (348, 0.97))
+# The near lip's broken slabs as (from, to) in degrees, with how far each end reaches into the hole in pixels
+# across (rows are POTHOLE_SQUASH of it), so their inner edges break at angles. Between them are ink cracks.
+POTHOLE_LIP = ((28, 64, 3, 8), (68, 108, 9, 6), (112, 150, 8, 3))
+# The far rim's two chunks broken off over the hole as (from, to, reach).
+POTHOLE_FAR = ((214, 236, 3), (300, 318, 3))
 POTHOLE_SQUASH = 0.6
-# The loose chips on the road as (x, y, width), each lgrey on a coal crack.
-POTHOLE_CHIPS = ((6, 40, 5), (100, 41, 4), (98, 4, 4))
+# The cracks running out from the rim into the road as (from, to), each 2px tall.
+POTHOLE_CRACKS = (((5, 21), (2, 24)), ((103, 14), (110, 11)), ((100, 33), (107, 37)))
 
 
 def pothole(f, w=112, h=48):
-    """The road's 2-lane pothole, 112x48 like the puddle, a ground decal with no outline: a coal crack ring round
-    a broken rim of asphalt chunks (lgrey facing the top-left light, grey away from it, coal cracks between),
-    the far chunks' broken faces in ash, dark navy water with a dlake sheen and a white glint over a foam
-    streak at its top left, and three loose chips on the road. The glint and sheen move a pixel on frame 1."""
+    """The road's 2-lane pothole, 112x48 like the puddle, a ground decal with no outline, recessed into the road:
+    an ink edge, lit grey along its top and left (the lit rim), round a coal far wall that runs deep under the far
+    rim and thins down the sides, two lgrey chunks broken off the far rim, murky dlake water filling the near part
+    with one white glint, and a near lip of three lgrey slabs tilted into the hole, each with a grey broken edge
+    over the water and ink cracks between them. Three ink cracks run out from the rim into the road. The glint
+    moves a pixel on frame 1."""
     g = Grid(w, h)
     cx, cy, rx, ry = w / 2, h / 2, w / 2 - 1, h / 2 - 1.5
     corners = POTHOLE_EDGE + ((360 + POTHOLE_EDGE[0][0], POTHOLE_EDGE[0][1]),)
 
-    def oval(a, m, inset):
+    def oval(a, m, ix, iy):
         t = math.radians(a)
         c, s = math.cos(t), math.sin(t)
-        r = m / (abs(c) ** 2.4 + abs(s) ** 2.4) ** (1 / 2.4)
-        return cx + (rx * r - inset) * c, cy + (ry * r - inset * POTHOLE_SQUASH) * s
+        r = m / (abs(c) ** 2.5 + abs(s) ** 2.5) ** (1 / 2.5)
+        return cx + (rx * r - ix) * c, cy + (ry * r - iy) * s
 
-    def at(a, inset=0.0):
+    def at(a, ix=0.0, iy=None):
+        """The point on the outline at angle a, ix pixels in across and iy down (POTHOLE_SQUASH of ix unless
+        given)."""
+        iy = ix * POTHOLE_SQUASH if iy is None else iy
         a %= 360
         for (a0, m0), (a1, m1) in zip(corners, corners[1:]):
             if a0 <= a <= a1:
-                (x0, y0), (x1, y1) = oval(a0, m0, inset), oval(a1, m1, inset)
+                (x0, y0), (x1, y1) = oval(a0, m0, ix, iy), oval(a1, m1, ix, iy)
                 k = (a - a0) / (a1 - a0)
                 return x0 + (x1 - x0) * k, y0 + (y1 - y0) * k
 
     def band(a0, a1, i0, i1, j0, j1, col):
         """Fill between insets i (outer) and j (inner) from a0 to a1, each running from its first value to its
         second."""
-        steps = max(2, round((a1 - a0) / 5))
+        steps = max(2, round((a1 - a0) / 4))
         for k in range(steps):
             b0, b1 = a0 + (a1 - a0) * k / steps, a0 + (a1 - a0) * (k + 1) / steps
             u0, u1 = k / steps, (k + 1) / steps
@@ -1048,27 +1054,30 @@ def pothole(f, w=112, h=48):
             g.tri(o0, n1, n0, col)
 
     def disc(inset, col):
-        pts = [at(a, inset) for a in range(0, 360, 4)]
+        """Fill inside the outline inset by inset(a) = (across, down) at each angle."""
+        pts = [at(a, *inset(a)) for a in range(0, 360, 3)]
         for i in range(len(pts)):
-            g.tri((cx, cy), pts[i], pts[(i + 1) % len(pts)], col)
+            g.tri((cx, cy + 4), pts[i], pts[(i + 1) % len(pts)], col)
 
-    # the crack ring, then the water inside it; each chunk sits 2px in from the ring's edge, and a far chunk
-    # (on the top half) shows its broken face in ash below it
-    disc(0, "coal")
-    disc(4, "navy")
-    for a0, a1, d0, d1 in POTHOLE_CHUNKS:
-        mid = (a0 + a1) / 2 % 360
-        if mid > 180:
-            band(a0, a1, d0, d1, d0 + 6, d1 + 6, "ash")
-        band(a0, a1, 2, 2, d0, d1, "lgrey" if 140 <= mid <= 300 else "grey")
-    s = 1 if f else 0
-    g.rect(round(w * 0.27) + s, round(h * 0.42), round(w * 0.09), 2, "white")
-    g.rect(round(w * 0.25) + s, round(h * 0.42) + 2, round(w * 0.13), 1, "foam")
-    for fx, fy, fw in ((0.52, 0.52, 0.12), (0.62, 0.66, 0.1), (0.38, 0.64, 0.07)):
-        g.rect(round(fx * w) - s, round(fy * h), max(2, round(fw * w)), 1, "dlake")
-    for x, y, cw in POTHOLE_CHIPS:
-        g.rect(x, y, cw, 2, "lgrey")
-        g.rect(x + 1, y + 2, cw, 1, "coal")
+    def water(a):
+        """The water's inset: 3px across, 1 row at the near edge, 12 under the far rim."""
+        up = max(0.0, -math.sin(math.radians(a)))
+        return 3 + 2 * up, 1 + 11 * up
+
+    disc(lambda a: (0, 0), "ink")
+    disc(lambda a: (1, 1), "coal")
+    disc(water, "dlake")
+    for a0, a1, d0, d1 in POTHOLE_LIP:
+        band(a0, a1, 1.5, 1.5, d0 + 4, d1 + 4, "grey")
+        band(a0, a1, 1.5, 1.5, d0 + 1, d1 + 1, "lgrey")
+    for a0, a1, d in POTHOLE_FAR:
+        band(a0, a1, 1, 1, d + 3, d + 3, "grey")
+        band(a0, a1, 1, 1, d, d, "lgrey")
+    g.rect(30 + (1 if f else 0), 27, 8, 2, "white")
+    rim(g, dict(ink=("grey", None)))
+    for (x0, y0), (x1, y1) in POTHOLE_CRACKS:
+        g.tri((x0, y0), (x1, y1), (x1, y1 + 2), "ink")
+        g.tri((x0, y0), (x1, y1 + 2), (x0, y0 + 2), "ink")
     return g
 
 
