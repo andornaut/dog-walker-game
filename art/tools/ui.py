@@ -1251,7 +1251,7 @@ def owner_tab():
 # Each zone's colour on its pip: its road colour, which the zone's road shadow (one ramp step
 # down) dims.
 ZONE_COLOURS = {
-    "cabbagetown": "grey", "high-park": "tan", "distillery-district": "dslate", "kensington-market": "dbrick",
+    "cabbagetown": "grey", "high-park": "tan", "distillery-district": "dslate", "kensington-market": "stone",
     "the-beaches": "cream", "yonge-street": "shale",
 }
 def pip_rim(well):
