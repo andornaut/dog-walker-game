@@ -17,8 +17,9 @@ type StripData = Pick<GameData, "dogs" | "minorObstacles" | "runText">;
 
 type StripKey = keyof typeof STRIP_LINE_FIELDS;
 
-function line<K extends StripKey>(
-  data: StripData,
+// The strip's line at key, filled with fields.
+export function stripLine<K extends StripKey>(
+  data: Pick<GameData, "runText">,
   key: K,
   fields: Readonly<Record<(typeof STRIP_LINE_FIELDS)[K][number], string>>,
 ): string {
@@ -70,7 +71,7 @@ export function bumpLines(
   const dog = data.dogs[bump.dog].name;
   const name = obstacle.toLowerCase();
   if (bump.dodged) {
-    return [{ icon: "bump", text: line(data, "dodge", { dog, obstacle: name }) }];
+    return [{ icon: "bump", text: stripLine(data, "dodge", { dog, obstacle: name }) }];
   }
   const { cash, change } = bump;
   const hearts: MessageLine[] =
@@ -92,7 +93,7 @@ export function bumpLines(
       : [
           {
             icon: "bump",
-            text: line(data, "cashHit", { amount: formatDollars(cents(-cash.amount)) }),
+            text: stripLine(data, "cashHit", { amount: formatDollars(cents(-cash.amount)) }),
           },
         ];
   return [...hearts, ...paid];
@@ -150,7 +151,7 @@ export function firedLine(data: StripData, dog: DogId): MessageLine {
 
 // A dog that started straining toward a squirrel. A pull the player steers away from is quiet.
 export function pullLine(data: StripData, dog: DogId): MessageLine {
-  return { icon: "pull", text: line(data, "pull", { dog: data.dogs[dog].name }) };
+  return { icon: "pull", text: stripLine(data, "pull", { dog: data.dogs[dog].name }) };
 }
 
 type LuckyData = StripData & Pick<GameData, "encounters" | "homeText" | "tuning">;
@@ -209,7 +210,7 @@ export function luckyLine(
     );
     return {
       icon: "lucky",
-      text: line(data, "luckyWallet", { amount: formatDollars(cents(amount)) }),
+      text: stripLine(data, "luckyWallet", { amount: formatDollars(cents(amount)) }),
     };
   }
   return null;
@@ -222,14 +223,13 @@ export function gearFoundLine(
   gear: GearId,
   replaced: GearId | null,
 ): MessageLine {
-  const { strip } = data.runText;
   const name = data.shopGear[gear].name;
   return {
     icon: { found: true, gear, kind: "gear" },
     text:
       replaced === null
-        ? fillLine(STRIP_LINE_FIELDS, strip, "gearFound", { gear: name })
-        : fillLine(STRIP_LINE_FIELDS, strip, "gearSwapped", {
+        ? stripLine(data, "gearFound", { gear: name })
+        : stripLine(data, "gearSwapped", {
             gear: name,
             old: data.shopGear[replaced].name,
           }),
@@ -243,7 +243,7 @@ export function fullPackLine(data: StripData, fees: readonly MoneyChange[]): Mes
     ? null
     : {
         icon: "lucky",
-        text: line(data, "fullPackHome", { amount: formatDollars(bonus.amount) }),
+        text: stripLine(data, "fullPackHome", { amount: formatDollars(bonus.amount) }),
       };
 }
 

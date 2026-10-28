@@ -12,7 +12,8 @@ import { packDogs } from "../state/pack";
 import type { ModifierSource } from "../state/runState";
 import { effectIconKey, type EffectItem, effectLine, effectName } from "./effectIcons";
 import type { MessageLine } from "./messageStrip";
-import { RUN_TEXT_FIELDS, STRIP_LINE_FIELDS } from "./runText";
+import { RUN_TEXT_FIELDS } from "./runText";
+import { stripLine } from "./stripLines";
 
 // What the player sees of a buff changing the game: its charm (the buff's walk bar icon in an
 // effect well) on the card, the road and the bar, and the value it made.
@@ -313,7 +314,6 @@ export function walkStartMarks(
   data: MarkData,
   run: StandingRun,
 ): { glints: EffectItem[]; lines: MessageLine[] } {
-  const strip = data.runText.strip;
   const values = standingModified(data, run).filter(({ subject }) => subject.kind === "agility");
   const gear = values.flatMap((value) =>
     value.by.flatMap((cause) => {
@@ -327,14 +327,14 @@ export function walkStartMarks(
     lines: [
       ...gear.map((item): MessageLine => ({
         icon: item,
-        text: fillLine(STRIP_LINE_FIELDS, strip, "effectStart", {
+        text: stripLine(data, "effectStart", {
           effect: effectLine(data, item),
           name: effectName(data, item),
         }),
       })),
       ...large.map((dog): MessageLine => ({
         icon: "hint",
-        text: fillLine(STRIP_LINE_FIELDS, strip, "largeDog", {
+        text: stripLine(data, "largeDog", {
           dog: data.dogs[dog].name,
           speed: largeSpeedText(data.tuning),
         }),

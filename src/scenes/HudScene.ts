@@ -28,7 +28,7 @@ import type { ChangeLabel } from "../hud/hudView";
 import type { MessageLine } from "../hud/messageStrip";
 import { cardOwnerMood, curvePoint, FORGIVEN_EVENT, type ForgivenCue } from "../hud/moments";
 import { MONEY_LABEL, moneyChipPlace, moneyFlightPath, stackOrders } from "../hud/moneyLabels";
-import { STRIP_LINE_FIELDS } from "../hud/runText";
+import { stripLine } from "../hud/stripLines";
 import {
   buttonIcon,
   pauseButtonIcon,
@@ -64,7 +64,6 @@ import {
   zoneShare,
 } from "../hud/walkHud";
 import { screenLayout } from "../layout/screenLayout";
-import { fillLine } from "../lib/lines";
 import type { Point, Rect } from "../lib/rect";
 import { ownerMaxHearts } from "../rules/dogs";
 import { debuffLasting } from "../rules/durations";
@@ -980,9 +979,7 @@ export class HudScene extends Scene {
   private sayAchievements(ids: readonly AchievementId[]): void {
     for (const id of ids) {
       const achievement = gameData.achievements.find((candidate) => candidate.id === id);
-      const text = fillLine(STRIP_LINE_FIELDS, gameData.runText.strip, "achievement", {
-        name: achievement?.name ?? id,
-      });
+      const text = stripLine(gameData, "achievement", { name: achievement?.name ?? id });
       soundboardOf(this).play("badge");
       this.messages.say({ icon: "achievement", text });
     }
