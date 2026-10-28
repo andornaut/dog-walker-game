@@ -6737,6 +6737,87 @@
       }
     },
     {
+      "key": "newspaper-box",
+      "png": "sprites/newspaper-box.png",
+      "json": "sprites/newspaper-box.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 48
+      }
+    },
+    {
+      "key": "newspaper-box@50",
+      "png": "sprites/newspaper-box@50.png",
+      "json": "sprites/newspaper-box@50.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "newspaper-box@56",
+      "png": "sprites/newspaper-box@56.png",
+      "json": "sprites/newspaper-box@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "newspaper-box@62",
+      "png": "sprites/newspaper-box@62.png",
+      "json": "sprites/newspaper-box@62.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "newspaper-box@69",
+      "png": "sprites/newspaper-box@69.png",
+      "json": "sprites/newspaper-box@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "newspaper-box@75",
+      "png": "sprites/newspaper-box@75.png",
+      "json": "sprites/newspaper-box@75.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "newspaper-box@81",
+      "png": "sprites/newspaper-box@81.png",
+      "json": "sprites/newspaper-box@81.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "newspaper-box@88",
+      "png": "sprites/newspaper-box@88.png",
+      "json": "sprites/newspaper-box@88.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "newspaper-box@94",
+      "png": "sprites/newspaper-box@94.png",
+      "json": "sprites/newspaper-box@94.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 45
+      }
+    },
+    {
       "key": "other-dog",
       "png": "sprites/other-dog.png",
       "json": "sprites/other-dog.json",

@@ -47,6 +47,14 @@ sandwich-board      48x48   minor, 1 lane: a café's A-frame sign, a forest chal
                             wooden frame with a chalk coffee cup and two lines of chalk writing, on
                             splayed legs. idle (4 frames, 450ms): the chalk steam over the cup wavers
                             on frame 2
+newspaper-box       48x48   minor, 1 lane: a row of three street newspaper boxes chained together on a
+                            concrete pad, a sky blue box, a taller red one in front and a yellow one,
+                            each with a white masthead band and an unreadable bar, a window onto a
+                            folded paper, a coin panel and a coal plinth; a grey chain sags along their
+                            feet to an amber padlock and a paper lies on the yellow box's lid. A cluster
+                            in bold colours a lane wide, unlike Kensington's roadside curb-news-box, a
+                            single cobalt box on legs. idle (4 frames, 400ms): the lid paper's corner
+                            lifts 1px on frame 2
 pedicab             48x72   minor rider, 1 lane, coming down its lane at the pack, facing the player: a
                             bike taxi, its cobalt canopy edged in a white scalloped valance with yellow
                             string lights shading a padded red bench on two wheels, a passenger in a
@@ -677,6 +685,74 @@ def sandwich_board(steam=0):
     return lit(g, dict(forest=("green", None)))
 
 
+# ---------- newspaper boxes ----------
+
+NEWS_IDLE = (0, 0, 1, 0), 400
+# Each box: its left edge, width, top row, body, shade and masthead bar colours. The red one is the
+# tallest and, drawn last, stands in front of its neighbours.
+NEWS_BOXES = ((3, 11, 11, "sky", "blue", "blue"), (26, 11, 12, "yellow", "amber", "red"),
+              (14, 12, 8, "red", "dred", "dred"))
+
+
+def news_box_front(g, x, w, top, body, shade, bar):
+    """One vending box standing on the pad (its foot on row 35): a lid lit along its top, a white masthead
+    band with an unreadable bar, a window onto a folded paper, a coin panel with its slot and a pull
+    handle (left off below obstacles.TEXTURE_MIN), a coal plinth, the body shaded down its right."""
+    g.rect(x, top, w, 35 - top, body)
+    g.rect(x + w - 2, top, 2, 35 - top, shade)
+    # the lid, overhanging a pixel each side
+    g.rect(x - 0.5, top - 1, w + 1, 2, shade)
+    g.rect(x - 0.5, top - 1, w + 1, 1, body)
+    # the masthead
+    g.rect(x + 1, top + 2, w - 3, 3, "white")
+    g.rect(x + 2, top + 3, w - 6, 1, bar)
+    # the window: a dark frame onto the day's paper, its headline and a photo
+    g.rect(x + 1, top + 6, w - 3, 8, "navy")
+    g.rect(x + 2, top + 7, w - 5, 6, "white")
+    g.rect(x + 2, top + 7, w - 5, 1, "ink")
+    g.rect(x + 2, top + 9, 3, 2, "red" if body == "sky" else "sky")
+    g.rect(x + 6, top + 9, w - 9, 1, "grey")
+    g.rect(x + 2, top + 11, w - 5, 1, "grey")
+    # the coin panel, its slot, and the pull handle beside it
+    g.rect(x + w - 6, top + 15, 3, 3, "lgrey")
+    g.rect(x + w - 5, top + 15.5, 1, 2, "ink")
+    if scale_of(g) >= obstacles.TEXTURE_MIN:
+        g.rect(x + 2, top + 16, 3, 1, "lgrey")
+    # the plinth
+    g.rect(x, 33, w, 2, "coal")
+
+
+def newspaper_box(lift=0):
+    """A row of three street newspaper boxes chained together on a concrete pad, front on, laid out on
+    obstacles.SIZE: a sky blue box, a taller red one in the middle and a yellow one, each with a white
+    masthead band, a window onto a folded paper, a coin panel and a coal plinth, a chain sagging in two
+    loops along their feet to an amber padlock, its links alternating lgrey and slate (all lgrey below
+    obstacles.TEXTURE_MIN), and a paper left lying on the yellow box's lid. lift raises the paper's loose
+    corner that many drawn pixels."""
+    g = edged(Grid(obstacles.SIZE, obstacles.SIZE))
+    # the pad, a sliver of its top over its front
+    g.rect(1, 34, 38, 3, "grey")
+    g.rect(1, 34, 38, 1, "lgrey")
+    g.rect(35, 35, 4, 2, "slate")
+    for spec in NEWS_BOXES:
+        news_box_front(g, *spec)
+    fine = scale_of(g) >= obstacles.TEXTURE_MIN
+    # the chain, sagging in two loops along the boxes' feet to a padlock on the red box
+    for x in range(4, 37):
+        t = (x + 0.5 - (12 if x < 20 else 28)) / 8
+        g.rect(x, 30.5 + 1.5 * (1 - t * t), 1, 1, "lgrey" if x % 2 or not fine else "slate")
+    g.rect(19.5, 29.5, 2, 1.5, "grey")
+    g.rect(18.5, 31, 4, 3, "amber")
+    g.rect(18.5, 31, 4, 1, "yellow")
+    # the paper on the yellow box's lid, its left corner lifting
+    g.rect(28, 9.5, 7, 1.5, "white")
+    g.rect(28, 10.5, 7, 0.5, "lgrey")
+    if lift:
+        x0, y0 = px_at(g, 28, 9.5)
+        raster(g).p(x0, y0 - lift, "white")
+    return lit(g)
+
+
 # ---------- ttc-bus ----------
 
 # 3x5 letters for the bus's route sign and wordmark: obstacles.LETTERS and the route's digits.
@@ -859,7 +935,8 @@ def sprites():
                                              for q in PEDICAB_RIDE], PEDICAB_RIDE_MS)]
         for key, draw, (args, ms) in (("sandcastle", sandcastle, SANDCASTLE_IDLE),
                                       ("lifeguard-chair", lifeguard_chair, LIFEGUARD_IDLE),
-                                      ("sandwich-board", sandwich_board, BOARD_IDLE)):
+                                      ("sandwich-board", sandwich_board, BOARD_IDLE),
+                                      ("newspaper-box", newspaper_box, NEWS_IDLE)):
             yield f"{key}{suffix}", [("idle", [small(me, o, draw, a).outlined() for a in args], ms)]
         args, ms = NET_IDLE
         for lanes in (2, 3):
