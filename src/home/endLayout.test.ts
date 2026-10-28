@@ -293,12 +293,13 @@ describe("a badge strip's names", () => {
         lines.every((line) => bodyWidth(set.style, line) <= slotWidth(count) - 4),
     );
 
-  it.each(counts.flatMap((count) => names.map((name) => [name, count] as const)))(
-    "sets %s at 2x on at most 2 lines in a row of %i",
-    (name, count) => {
-      expect(fits(count, badgeRowNames(bodyWidth, slotWidth(count), [name]))).toBe(true);
-    },
-  );
+  // In the fullest named row, whose slots are the narrowest: a name that wraps onto 2 lines
+  // there wraps onto no more in a wider slot.
+  it.each(names)("sets %s at 2x on at most 2 lines in the fullest named row", (name) => {
+    expect(fits(strip.maxNamed, badgeRowNames(bodyWidth, slotWidth(strip.maxNamed), [name]))).toBe(
+      true,
+    );
+  });
 
   // Every name sits on the row's one style, the closer glyphs only when a name needs them.
   it.each(counts)("sets a row of %i of the widest names in one style at 2x", (count) => {
