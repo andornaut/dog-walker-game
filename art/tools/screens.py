@@ -298,10 +298,14 @@ FAR_HOMES = ((-8, 30, "brick", "white", "dbrick", True), (24, 30, "cream", "ston
 FAR_CN = (340, 89, 36)  # the CN Tower's centre column, foot and mast tip on screen-home, over the laneway
 
 
+# The far houses' window glass: a muted lake blue, so the row across the street stays behind the porch.
+FAR_GLASS = "shallow"
+
+
 def far_gable(cv, x, w, wall, trim, door, bay_left, base=FAR_BASE):
     """A small Cabbagetown bay-and-gable across the street, w wide on row base, 34 rows tall: a steep front
     gable edged in a coal roof and a trim bargeboard over an arched attic window, a two-storey bay on one
-    half (three windows a storey, cyan glass in daylight) and the door with its transom on the other,
+    half (three windows a storey, FAR_GLASS in daylight) and the door with its transom on the other,
     on a stone stoop."""
     top, gable_h = base - 34, 14
     cx, half = x + w // 2, w // 2 + 2
@@ -315,7 +319,7 @@ def far_gable(cv, x, w, wall, trim, door, bay_left, base=FAR_BASE):
             cv.fill(cx + inset - 1, top + i, 1, 1, trim)
     cv.fill(x - 2, top + gable_h - 1, w + 4, 1, "coal")
     cv.fill(cx - 2, top + 6, 3, 5, trim)
-    cv.fill(cx - 1, top + 7, 1, 4, "cyan")
+    cv.fill(cx - 1, top + 7, 1, 4, FAR_GLASS)
     wy = top + gable_h
     cv.fill(x, wy, w, base - wy, wall)
     cv.fill(x + w - 2, wy, 2, base - wy, dk(wall))
@@ -327,13 +331,13 @@ def far_gable(cv, x, w, wall, trim, door, bay_left, base=FAR_BASE):
     cv.fill(bx - 1, wy + 10, bw + 2, 1, trim)
     for sy in (wy + 3, wy + 12):
         for wx in (bx + 1, bx + bw // 2 - 1, bx + bw - 3):
-            cv.fill(wx, sy, 2, 5, "cyan")
+            cv.fill(wx, sy, 2, 5, FAR_GLASS)
             cv.fill(wx, sy, 2, 1, trim)
     dc = x + w - 1 - bw // 2 - 1 if bay_left else x + bw // 2
-    cv.fill(dc - 2, wy + 3, 4, 5, "cyan")
+    cv.fill(dc - 2, wy + 3, 4, 5, FAR_GLASS)
     cv.fill(dc - 2, wy + 3, 4, 1, trim)
     cv.fill(dc - 3, base - 10, 6, 10, trim)
-    cv.fill(dc - 2, base - 9, 4, 2, "cyan")
+    cv.fill(dc - 2, base - 9, 4, 2, FAR_GLASS)
     cv.fill(dc - 2, base - 7, 4, 7, door)
     cv.fill(dc - 3, base, 6, 2, "stone")
     cv.fill(dc - 4, base + 2, 8, 1, "dstone")
@@ -433,7 +437,6 @@ def urn(cv, x, foot):
 
 def home():
     cv = sn.Canvas(W, H)
-    r = rand(7)
     # the bar strip the game draws its bar over
     cv.fill(0, 0, W, 38, "plum")
     cv.fill(0, 38, W, 2, "dbrown")
@@ -462,8 +465,6 @@ def home():
         cv.fill(x, FAR_BASE + 3, 1, 4, "grey")
     cv.fill(0, FAR_BASE + 7, W, 1, "grey")
     cv.fill(0, FAR_BASE + 8, W, 92 - FAR_BASE - 8, "dslate")
-    for _ in range(90):
-        cv.fill(int(r() * W), FAR_BASE + 8 + int(r() * (92 - FAR_BASE - 8)), 1, 1, "slate" if r() < 0.6 else "navy")
     cv.fill(52, 88, 18, 4, "navy")
     for x in range(54, 70, 3):
         cv.fill(x, 89, 1, 3, "ink")
