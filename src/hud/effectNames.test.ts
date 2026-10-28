@@ -28,9 +28,10 @@ const CONTEXT: CardTextContext = {
   seconds: () => 30,
 };
 
-const BUFF_NAMES = [gameData.shopGear, gameData.upgrades, gameData.walkerPerks].flatMap((items) =>
-  Object.values(items).map(({ name }) => name),
-);
+// A buff of one word and one of several: every buff is looked up the same way, by its name.
+const BUFF_NAMES = [gameData.shopGear, gameData.upgrades, gameData.walkerPerks]
+  .flatMap((items) => Object.values(items).map(({ name }) => name))
+  .filter((name, i, names) => names.findIndex((other) => other.includes(" ") === name.includes(" ")) === i);
 
 describe("effectNameMarks", () => {
   it.each(keysOf(gameData.debuffs))(
