@@ -593,14 +593,14 @@ def cheese_wheel(g, cx, cy, r, turn=0.0, cut=True):
 def blue_wedge(g, x, y, w, h):
     """A wedge of blue cheese lying on its side, x, y to x + w, y + h in design units: its white paste shaded
     lgrey along the bottom, blue veins speckled through it, its rind a cream strip down the tall back end on
-    the left, the point at the right."""
-    g.tri((x, y), (x, y + h), (x + w, y + h), "white")
+    the right, the point at the left."""
+    g.tri((x + w, y), (x + w, y + h), (x, y + h), "white")
     g.rect(x, y + h - 1, w, 1, "lgrey")
-    g.rect(x, y, 1.5, h, "cream")
+    g.rect(x + w - 1.5, y, 1.5, h, "cream")
     for vx, vy in ((0.2, 0.35), (0.35, 0.7), (0.15, 0.75), (0.55, 0.8), (0.28, 0.5), (0.75, 0.88)):
-        g.p(x + w * vx, y + h * vy, "blue")
+        g.p(x + w * (1 - vx), y + h * vy, "blue")
     for vx, vy in ((0.4, 0.62), (0.2, 0.58), (0.62, 0.72)):
-        g.p(x + w * vx, y + h * vy, "sky")
+        g.p(x + w * (1 - vx), y + h * vy, "sky")
 
 
 def stink_wisps(g, phase, xs=(9, 17, 25), top=1, bottom=9):
@@ -631,7 +631,7 @@ def cheese_crates(phase=0):
         g.rect(12.5, top, 2, 4, "orange")
         g.cel(9, top, 5.5, 2, "gold", None, "yellow")
     cheese_wheel(g, 22, 12, 6.5, turn=35)
-    blue_wedge(g, 8.5, 12.5, 13, 7)
+    blue_wedge(g, 6, 12.5, 13, 7)
     crate(g, 3, 19, 26, 12)
     # the chalk price tag on its string, hung from the crate's rim, two lines of chalk writing on it
     g.rect(20.5, 19, 1, 2, "cream")
