@@ -593,14 +593,24 @@ describe("movers", { timeout: 120_000 }, () => {
     },
   );
 
-  // Every obstacle kind that blocks a lane, moving or standing, starts against each edge of the
+  // An obstacle kind that blocks a lane, moving or standing, starts against each edge of the
   // road on some seed: its leftmost lane is lane 0 on some plan and the last its width leaves on
-  // another.
+  // another. The planner draws a start lane by footprint and way of moving, so one kind of each
+  // footprint, way of moving and table covers them all.
   const blocking = OBSTACLE_KINDS.filter((kind) => blocksLane(everyMover, kind));
+  const edgeKey = (kind: WalkItem["kind"]) =>
+    JSON.stringify([
+      footprintOf(everyMover, kind),
+      movementOf(kind)?.kind ?? null,
+      Object.hasOwn(MINOR_OBSTACLES, kind),
+    ]);
+  const edgeKinds = blocking.filter(
+    (kind, i) => blocking.findIndex((other) => edgeKey(other) === edgeKey(kind)) === i,
+  );
   // Each kind is planned in its zones one seed at a time until it has started against both edges,
   // so a kind that a zone's weights plan less often takes more seeds rather than failing.
   const EDGE_SEEDS_MOST = 20;
-  it.each(blocking)("starts a %s against each edge of the road on some seed", (kind) => {
+  it.each(edgeKinds)("starts a %s against each edge of the road on some seed", (kind) => {
     const edges = [0, LANE_COUNT - footprintOf(everyMover, kind).lanes];
     const zones = zonesOf(kind);
     const lanes = new Set<number>();
