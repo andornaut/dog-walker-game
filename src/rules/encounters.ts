@@ -24,7 +24,8 @@ export function hitLabel(encounter: Encounter): string | null {
   return "hitLabel" in encounter ? encounter.hitLabel : null;
 }
 
-// The comic word over an obstacle's hit burst; null for a lucky find, which has none.
+// The comic word over a card obstacle's hit burst; null for anything else, which plays no hit
+// moment.
 export function hitWord(encounter: Encounter): string | null {
-  return encounter.kind === "obstacle" ? encounter.hitWord : null;
+  return "hitLabel" in encounter ? encounter.hitWord : null;
 }

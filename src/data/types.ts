@@ -480,9 +480,9 @@ type NeighbourhoodZones = readonly [string, ...string[]];
 // obstacle does nothing when touched. An obstacle the pack is immune to is harmless. "lucky": a
 // good thing to bump into, one cell big, applied on contact with no card. An obstacle or lucky
 // encounter with a movement comes as a mover at the zone's moverShare; a lucky one stays a prize
-// as it moves, never something the pack steers around. hitWord is the comic word drawn in
-// font-comic over its hit burst: A to Z, ! ? - and space. An obstacle with zones appears only
-// in those zones: weighted in each and 0 in every other.
+// as it moves, never something the pack steers around. A card obstacle's hitWord is the comic
+// word drawn in font-comic over its hit burst: A to Z, ! ? - and space. An obstacle with zones
+// appears only in those zones: weighted in each and 0 in every other.
 export type Encounter = {
   readonly name: string;
 } & (
@@ -492,14 +492,17 @@ export type Encounter = {
       readonly resolution: InstantResolution;
     }
   | ({
-      readonly hitWord: string;
       readonly kind: "obstacle";
       readonly movement?: Movement;
       readonly shape: Shape;
       // Zone ids, typed as strings since ZoneId comes from the world, which names this type.
       readonly zones?: NeighbourhoodZones;
     } & (
-      | { readonly hitLabel: string; readonly resolution: CardResolution }
+      | {
+          readonly hitLabel: string;
+          readonly hitWord: string;
+          readonly resolution: CardResolution;
+        }
       | { readonly resolution: ContactResolution | PullResolution }
     ))
 );
@@ -507,13 +510,12 @@ export type Encounter = {
 // An obstacle that opens no card: bumping it costs the touching dog's owner hearts.bump, as
 // bumpHearts modifiers change it, and, while a debuff with bumpMoney such as Spotlight lasts and
 // there is cash, that cash too; the dog it lands on may dodge it.
-// The hit stops the road for seconds.minorHitStopSeconds, showing hitLabel when it has one.
+// The hit stops the road for seconds.minorHitStopSeconds.
 // Each zone's weights set how often it appears there; one with zones appears only in those zones,
 // weighted in each and 0 in every other. One with a movement comes as a mover at the zone's
 // moverShare. One onFoot is a person or an animal, not a vehicle or a thing, which the
 // distraction movers are drawn from.
 export interface MinorObstacle {
-  readonly hitLabel?: string;
   readonly movement?: Movement;
   readonly name: string;
   readonly onFoot?: true;

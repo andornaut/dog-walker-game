@@ -216,7 +216,6 @@ export const ENCOUNTERS = {
     zones: ["snoozeCrescent"],
   },
   pothole: {
-    hitWord: "SPLUNK!",
     kind: "obstacle",
     name: "Pothole",
     resolution: {
@@ -259,7 +258,6 @@ export const ENCOUNTERS = {
     zones: ["homeStretch"],
   },
   puddle: {
-    hitWord: "SPLOSH!",
     kind: "obstacle",
     name: "Puddle",
     resolution: {
@@ -308,7 +306,6 @@ export const ENCOUNTERS = {
     shape: { lanes: 2, rows: 2 },
   },
   squirrel: {
-    hitWord: "CHIRP!",
     kind: "obstacle",
     movement: { kind: "dart", stopShare: 0, tilt: { max: 0, min: 0 }, turnBackShare: 0 },
     name: "Squirrel",

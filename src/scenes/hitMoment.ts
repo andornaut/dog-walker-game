@@ -93,16 +93,6 @@ export function playHitMoment(scene: Scene, moment: HitMoment): void {
   }
 }
 
-// A minor obstacle's hit label, on the normal plate over the bump's stop, as an encounter
-// hit's label shows.
-export function playMinorHitLabel(
-  scene: Scene,
-  moment: Pick<HitMoment, "centre" | "depth" | "label" | "seconds" | "still">,
-): void {
-  const totalMs = momentMs(moment.seconds);
-  showLabel(scene, moment, "normal", totalMs);
-}
-
 // A moving burst carries the word on its own art, not on fx-bump standing in for it.
 function playBurst(scene: Scene, moment: HitMoment, look: HitLook, totalMs: number): void {
   const key = hitBurstKey(scene, look);

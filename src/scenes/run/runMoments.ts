@@ -2,7 +2,7 @@ import type { Scene } from "phaser";
 
 import { hitCue } from "../../audio/sound";
 import { gameData } from "../../data";
-import type { DogId, HintId, HintTrigger, MinorObstacleId } from "../../data/types";
+import type { DogId, HintId, HintTrigger } from "../../data/types";
 import { type BuffPop, leashPops, popsOf, stepValues, walkStartMarks } from "../../hud/buffMarks";
 import { type EffectItem, effectItems, gearWell } from "../../hud/effectIcons";
 import { heartPopFrame } from "../../hud/feedback";
@@ -81,7 +81,7 @@ import { PALETTE } from "../../ui/phaser/palette";
 import { pixelLinePoints } from "../../ui/pixelShapes";
 import { floatValue, popCharm } from "../buffCharm";
 import { FEEDBACK_ART } from "../feedbackArt";
-import { hitLabelOf, hitLook, playEdgeFlash, playHitMoment, playMinorHitLabel } from "../hitMoment";
+import { hitLabelOf, hitLook, playEdgeFlash, playHitMoment } from "../hitMoment";
 import { sayMessage } from "../messageStripView";
 import { playDodge, playForgiven } from "../packFeedback";
 import { earnedIfBanked, shownHints } from "../profileStore";
@@ -322,7 +322,6 @@ export class RunMoments {
         [bump.change, bump.cash].flatMap((change) => (change === null ? [] : [change])),
         BUFF_POP.fadeAtMs,
       );
-      this.playBumpLabel(kind, step, pack);
       this.hint({ kind: "minorBump" });
     }
     this.sayLowHearts(
@@ -675,19 +674,5 @@ export class RunMoments {
     if (nudge) {
       shakeRoad(this.scene);
     }
-  }
-
-  // A minor obstacle's hit label over the stop; none shows while it has none.
-  private playBumpLabel(kind: MinorObstacleId, step: WalkStep, pack: Point): void {
-    const label = gameData.minorObstacles[kind].hitLabel;
-    if (label === undefined) {
-      return;
-    }
-    playMinorHitLabel(this.scene, {
-      ...hitPlace(step, pack),
-      depth: DEPTH.popup,
-      label,
-      still: this.deps.still(),
-    });
   }
 }
