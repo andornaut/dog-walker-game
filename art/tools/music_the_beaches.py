@@ -2,9 +2,9 @@
 
 16 bars: a hook phrase over F Dm Bb C, the same hook answered and resolved, a bridge that steps down over
 Bb Am Gm C, and the hook again with a climb to F6 and a turnaround that leads back to the top. A steel
-pan lead (a triangle struck with a quick attack and a long fall, a sine octave that fades first, and a
-short pulse ping for the stick), a bouncing triangle bass on the calypso dotted rhythm, plucked pulse
-chords on the offbeat eighths, a soft kick, hand drum taps and a band-limited shaker.
+pan lead (a triangle struck with a quick attack and a long fall, a softened triangle octave that fades
+first, and a short pulse ping for the stick), a bouncing triangle bass on the calypso dotted rhythm, plucked
+pulse chords on the offbeat eighths, a soft kick, hand drum taps and a band-limited shaker on the eighths.
 """
 
 from sounds import hz, mix, n, parse, tone, voice
@@ -56,8 +56,8 @@ def drum_score():
 
 
 def shaker_score():
-    """A shake on every sixteenth, leaning on the offbeat eighths."""
-    return [(accent, 1) for _ in range(16 * 4) for accent in ("soft", "soft", "loud", "soft")]
+    """A shake on every eighth, leaning on the offbeats."""
+    return [(accent, 2) for _ in range(16 * 4) for accent in ("soft", "loud")]
 
 
 def lead_body(path, length, note):
@@ -67,9 +67,11 @@ def lead_body(path, length, note):
 
 
 def lead_octave(path, length, note):
-    """The bright overtone: a sine an octave up that fades before the body does."""
+    """The bright overtone: a triangle an octave up, low-passed near its fundamental, that fades before the body
+    does."""
     ring = min(length, n(0.22))
-    tone(path, ring, "sine", 2 * hz(note), vol=0.35, attack=0.008, release=0.9, shape="t", tail=length - ring)
+    tone(path, ring, "triangle", 2 * hz(note), vol=0.35, low=3000, attack=0.008, release=0.9, shape="t",
+         tail=length - ring)
 
 
 def lead_ping(path, length, note):
@@ -113,12 +115,12 @@ def shake(path, length, accent):
 
 def music(tmp, out):
     layers = [
-        (voice(tmp, "pan", parse(LEAD), lead_body, step=STEP), 0.5),
-        (voice(tmp, "pan-octave", parse(LEAD), lead_octave, step=STEP), 0.5),
+        (voice(tmp, "pan", parse(LEAD), lead_body, step=STEP), 0.6),
+        (voice(tmp, "pan-octave", parse(LEAD), lead_octave, step=STEP), 0.8),
         (voice(tmp, "pan-ping", parse(LEAD), lead_ping, step=STEP), 0.5),
-        (voice(tmp, "bass", parse(BASS), bass, step=STEP), 0.45),
+        (voice(tmp, "bass", parse(BASS), bass, step=STEP), 0.6),
         *((voice(tmp, f"chord{part}", chord_score(part), stab(part), step=STEP), 0.3) for part in range(3)),
-        (voice(tmp, "drums", drum_score(), drum, step=STEP), 0.6),
-        (voice(tmp, "shaker", shaker_score(), shake, step=STEP), 0.9),
+        (voice(tmp, "drums", drum_score(), drum, step=STEP), 0.5),
+        (voice(tmp, "shaker", shaker_score(), shake, step=STEP), 0.7),
     ]
     mix(layers, out)
