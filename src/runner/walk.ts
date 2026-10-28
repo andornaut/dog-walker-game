@@ -1526,18 +1526,28 @@ export function stepWalk(
         return;
       }
       const { resolution } = data.encounters[kind];
-      if (resolution.kind === "instant" || resolution.kind === "contact") {
-        const outcome = applyInstantEncounter(data, nextRun, kind, affected);
-        nextRun = outcome.state;
-        if (resolution.kind === "instant") {
-          nextRun = countTally(resolution.tally, nextRun);
-          instants.push({ encounter: kind, item, outcome });
-        } else {
-          contacts.push({ dog, encounter: kind, item, outcome });
+      switch (resolution.kind) {
+        case "card":
+          cards.push({ affected, encounter: kind, kind: "encounter" });
+          return;
+        case "contact":
+        case "instant": {
+          const outcome = applyInstantEncounter(data, nextRun, kind, affected);
+          nextRun = outcome.state;
+          if (resolution.kind === "instant") {
+            nextRun = countTally(resolution.tally, nextRun);
+            instants.push({ encounter: kind, item, outcome });
+          } else {
+            contacts.push({ dog, encounter: kind, item, outcome });
+          }
+          modifiedAt(item, outcome.modified);
+          return;
         }
-        modifiedAt(item, outcome.modified);
-      } else if (resolution.kind === "card") {
-        cards.push({ affected, encounter: kind, kind: "encounter" });
+        // A pull obstacle passes through the pack (passing), so the pack never meets one.
+        case "pull":
+          return;
+        default:
+          assertNever(resolution);
       }
     }
   };
