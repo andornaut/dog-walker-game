@@ -422,13 +422,15 @@ def found_wallet():
 
 def wallet_keep():
     """The found wallet, big and alone with a glint, cut out to float over the road: a lucky find shows the
-    thing found."""
+    thing found. Its two sparkles are solid yellow plus signs, 5px across, so they read as glints and not
+    as scattered dots."""
     a = Art(clear=True)
     img = to_image(found_wallet().outlined())
     x, y = (AW - img.width) // 2, AH - img.height - 6
     a.paste(img, x, y)
-    a.sparkle(x + img.width - 2, y + 3, "yellow")
-    a.sparkle(x + 2, y + 8, "yellow")
+    for sx, sy in ((x + img.width - 2, y + 3), (x + 2, y + 8)):
+        a.fill(sx - 2, sy, 5, 1, "yellow")
+        a.fill(sx, sy - 2, 1, 5, "yellow")
     return a
 
 
@@ -466,7 +468,8 @@ def neighbour_take():
                 a.fill(x + dx, y + dy, 1, 1, "plum")
     for x, y in hand:
         a.fill(x, y, 1, 1, "skin2" if y == 21 or x == 50 else "skin1")
-    a.hearts([(44, 3), (57, 9), (66, 2), (64, 19)])
+    # three hearts rising over the pair, clear of her face, so she and the dog stay the focal point
+    a.hearts([(44, 3), (57, 9), (66, 2)])
     return a
 
 
