@@ -43,7 +43,6 @@ curb-bollard             18x39    a cast-iron heritage bollard with a gold colla
 curb-hydrant             27x39    a red Toronto hydrant under a silver cap
 curb-life-ring           27x51    a lifebuoy on a driftwood post
 curb-mailbox             30x54    a red Canada Post letter box under a dome, tagged in lime and white
-curb-news-box            27x45    a cobalt newspaper box on legs
 curb-pay-station         21x51    a pay-and-display machine under a P sign
 curb-rope-posts          36x30    two driftwood posts with a rope between
 curb-urn                 33x42    a cast-iron garden urn heaped with geraniums
@@ -830,26 +829,6 @@ def bike_ring():
     return w, h, draw
 
 
-def news_box():
-    """A newspaper box on legs: a cobalt cabinet under a red masthead, a window onto the day's paper and a
-    pull handle under it."""
-    w, h = 18, 30
-
-    def draw(g, f=0):
-        base = h - 2
-        g.rect(4, base - 6, 2, 7, "coal")
-        g.rect(12, base - 6, 2, 7, "coal")
-        g.rect(2, 4, 14, base - 9, "cobalt")
-        g.rect(14, 4, 2, base - 9, "navy")
-        g.rect(2, 4, 14, 2, "red")
-        g.rect(14, 4, 2, 2, "dred")
-        g.rect(4, 8, 8, 7, "cream")
-        g.rect(5, 9, 6, 1, "ink")
-        g.rect(5, 11, 4, 1, "ash")
-        g.rect(5, 13, 5, 1, "ash")
-        g.rect(6, 16, 4, 1, "lgrey")
-    return w, h, draw
-
 
 def rope_posts():
     """Two driftwood posts with a tan rope sagging between, one unbroken line."""
@@ -1004,7 +983,6 @@ PROPS = {
     "curb-hydrant": (hydrant(), (0,), STILL_MS, True),
     "curb-life-ring": (life_ring(), (0,), STILL_MS, True),
     "curb-mailbox": (mailbox(), (0,), STILL_MS, True),
-    "curb-news-box": (news_box(), (0,), STILL_MS, True),
     "curb-pay-station": (pay_station(), (0,), STILL_MS, True),
     "curb-rope-posts": (rope_posts(), (0,), STILL_MS, True),
     "curb-urn": (urn(), (0,), STILL_MS, True),

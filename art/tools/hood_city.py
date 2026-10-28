@@ -59,8 +59,8 @@ newspaper-box       48x48   minor, 1 lane: a row of three street newspaper boxes
                             each with a white masthead band and an unreadable bar, a window onto a
                             folded paper, a coin panel and a coal plinth; a grey chain sags along their
                             feet to an amber padlock and a paper lies on the yellow box's lid. A cluster
-                            in bold colours a lane wide, unlike Kensington's roadside curb-news-box, a
-                            single cobalt box on legs. idle (4 frames, 400ms): the lid paper's corner
+                            in bold colours a lane wide, unlike Kensington's roadside curb-mailbox, a
+                            single red box under a dome. idle (4 frames, 400ms): the lid paper's corner
                             lifts 1px on frame 2
 pedicab             48x72   minor rider, 1 lane, coming down its lane at the pack, facing the player: a
                             bike taxi, its cobalt canopy edged in a white scalloped valance with yellow

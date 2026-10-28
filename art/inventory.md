@@ -185,7 +185,6 @@ Placed by the style guide's Roadside table (`shared/roadside.json`): the lawn pr
 | `curb-hydrant`                        | 27×39   | A red hydrant under a silver cap                                    |
 | `curb-life-ring`                      | 27×51   | A lifebuoy on a driftwood post                                      |
 | `curb-mailbox`                        | 30×54   | A red Canada Post letter box under a dome, tagged in lime and white |
-| `curb-news-box`                       | 27×45   | A cobalt newspaper box on legs                                      |
 | `curb-pay-station`                    | 21×51   | A pay-and-display machine under a P sign                            |
 | `curb-rope-posts`                     | 36×30   | Two driftwood posts with a rope between                             |
 | `curb-urn`                            | 33×42   | A cast-iron urn heaped with geraniums                               |
