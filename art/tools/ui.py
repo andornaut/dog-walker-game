@@ -1055,18 +1055,17 @@ def strip_well():
 WALK_BAR = (360, 48)
 # The walk bar's wells, in screen pixels: the cash, and the neighbourhood with its name and "n of N"
 # on one line.
-WALK_WELLS = ((5, 5, 70, 37), (83, 5, 140, 12))
+WALK_WELLS = ((5, 5, 70, 37), (81, 5, 144, 12))
 # The row of effect wells under the neighbourhood well, kept plain wood so the wells sit clear of
-# the grain: six 22x22 wells side by side from x 87 (the perk, Pocket, found item and three upgrades),
-# each lip against the next well, on rows 20 to 41. Between the trim lines (row 1 and row 45) the
-# neighbourhood well (rows 5 to 16) and the wells split the height evenly, 3 wood rows above the name
-# well, 3 between and 3 under the wells, and the cash well spans the same rows 5 to 41. Across the bar
-# the cash well sits 5 columns from the screen's edge, and the neighbourhood column (x 83 to 222,
-# its text and effect wells 4 columns in from each side) sits 8 columns from the cash well and 8 from
-# Help's face, with plain wood from x 223 to the four buttons. Their hits, 34 wide, fill x 224 to 359 at
-# a 34 pitch, each face centred in its hit (faces at 231 + 34i), so 7 columns lie before Help's face
-# and after Pause's.
-EFFECT_ROW = (82, 17, 142, 26)
+# the grain: six 22x22 wells from x 81, on the neighbourhood well's left edge (the perk, Pocket, found
+# item and three upgrades), 2 columns of plain wood between each, on rows 20 to 41. Between the trim
+# lines (row 1 and row 45) the neighbourhood well (rows 5 to 16) and the wells split the height evenly,
+# 3 wood rows above the name well, 3 between and 3 under the wells, and the cash well spans the same
+# rows 5 to 41. Across the bar the cash well sits 5 columns from the screen's edge, and the
+# neighbourhood column (x 81 to 224) sits 6 columns from the cash well and 6 from Help's face. The
+# buttons' hits, 34 wide, fill x 224 to 359 at a 34 pitch, each face centred in its hit (faces at
+# 231 + 34i), so 7 columns lie before Help's face and after Pause's.
+EFFECT_ROW = (80, 17, 146, 26)
 EFFECT_WELL = 22
 
 
