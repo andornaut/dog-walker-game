@@ -538,9 +538,88 @@ function countsOf(range: MoveCount): number[] {
   return Array.from({ length: range.max - range.min + 1 }, (_, i) => range.min + i);
 }
 
+// A lane to one side.
+const SIDESTEPS: readonly StepShape[] = [
+  { lanes: -1, travel: 0 },
+  { lanes: 1, travel: 0 },
+];
+
+// Steps steps a lane to one side and back in turn, starting toward direction.
+function swayed(direction: -1 | 1, steps: number): StepShape[] {
+  return Array.from({ length: steps }, (_, i) => ({
+    lanes: i % 2 === 0 ? direction : -direction,
+    travel: 0,
+  }));
+}
+
+// Every sequence of steps sideways steps, a lane to either side each: 2 to the power of steps.
+function sidestepSequences(steps: number): StepShape[][] {
+  return Array.from({ length: 2 ** steps }, (_, index) =>
+    Array.from({ length: steps }, (__, i) => itemAt(SIDESTEPS, (index >> (steps - 1 - i)) & 1)),
+  );
+}
+
+// The sequences of a pattern mover, which draws nothing: a bounce's and a sway's back and forth,
+// either way first, a follower's every way to step sideways, and a stop-and-go's pushes in its
+// lane. Each sequence's length is its count of steps.
+function patternMotion(
+  data: Pick<GameData, "tuning">,
+  movement: Extract<Movement, { kind: "bounce" | "follow" | "stopAndGo" | "sway" }>,
+): MoverMotion {
+  const { tuning } = data;
+  const stepSeconds = read(tuning, "seconds", "moverStepSeconds");
+  switch (movement.kind) {
+    case "bounce":
+      return {
+        count: movement.hops,
+        cueEach: true,
+        kind: "steps",
+        pauseSeconds: movement.pauseSeconds,
+        sequences: countsOf(movement.hops).flatMap((hops) => [swayed(-1, hops), swayed(1, hops)]),
+        stepSeconds: read(tuning, "seconds", "moverHopSeconds"),
+      };
+    case "follow":
+      return {
+        count: movement.steps,
+        cueEach: true,
+        kind: "steps",
+        pauseSeconds: movement.pauseSeconds,
+        sequences: countsOf(movement.steps).flatMap(sidestepSequences),
+        stepSeconds,
+      };
+    case "stopAndGo": {
+      const pushes = { max: movement.stops.max + 1, min: movement.stops.min + 1 };
+      return {
+        count: pushes,
+        cueEach: true,
+        drift: movement.factor - 1,
+        kind: "steps",
+        pauseSeconds: movement.stopSeconds,
+        sequences: countsOf(pushes).map((count) =>
+          Array.from({ length: count }, () => ({ lanes: 0, travel: 0 })),
+        ),
+        stepSeconds: movement.goSeconds,
+      };
+    }
+    default:
+      return {
+        count: { max: 2 * movement.times.max, min: 2 * movement.times.min },
+        kind: "steps",
+        pauseSeconds: movement.pauseSeconds,
+        sequences: countsOf(movement.times).flatMap((times) => [
+          swayed(-1, 2 * times),
+          swayed(1, 2 * times),
+        ]),
+        stepSeconds,
+      };
+  }
+}
+
 // How a mover moves, by its movement and the tuning. A stepper's steps are drawn here, as many as
 // its most, the first min from the spawns stream and any more from the movers stream; it may take
-// the first steps of them, or of their mirror image, as many as its drawn count. A hopper may make
+// the first steps of them, or of their mirror image, as many as its drawn count. A bounce, a
+// follower, a stop-and-go and a sway draw nothing here (patternMotion). A dive is a dart that
+// always stops in a lane, never on the verge, sliding its last lane. A hopper may make
 // any hops it can, as many as its drawn count, of up to HOP_SEQUENCES_MOST ways for each count,
 // drawn here from the movers stream where there are more. The planner takes whichever way keeps
 // the road passable, drawing among those from the zone's seed.
@@ -552,10 +631,11 @@ export function moverSpec(
 ): MoverSpec {
   const { tuning } = data;
   let motion: MoverMotion;
-  if (movement.kind === "dart") {
+  if (movement.kind === "dart" || movement.kind === "dive") {
+    const dive = movement.kind === "dive";
     motion = {
       kind: "cross",
-      lanesPerSecond: read(tuning, "counts", "dartLanesPerSecond"),
+      lanesPerSecond: read(tuning, "counts", "dartLanesPerSecond") * (dive ? movement.speed : 1),
       reactionSeconds: read(tuning, "seconds", "pathReactionMargin"),
       startRoadShare: [
         read(tuning, "multipliers", "dartStartRoadShareMin"),
@@ -565,15 +645,23 @@ export function moverSpec(
         max: read(tuning, "counts", "dartStopLanesMax"),
         min: read(tuning, "counts", "dartStopLanesMin"),
       },
-      stopShare: movement.stopShare,
+      ...(dive ? { slide: movement.slide } : {}),
+      stopShare: dive ? 1 : movement.stopShare,
       tilt: [movement.tilt.min, movement.tilt.max],
       turnAtShare: [
         read(tuning, "multipliers", "dartTurnAtShareMin"),
         read(tuning, "multipliers", "dartTurnAtShareMax"),
       ],
-      turnBackShare: movement.turnBackShare,
-      vergeShare: read(tuning, "probability", "dartVergeStopShare"),
+      turnBackShare: dive ? 0 : movement.turnBackShare,
+      vergeShare: dive ? 0 : read(tuning, "probability", "dartVergeStopShare"),
     };
+  } else if (
+    movement.kind === "bounce" ||
+    movement.kind === "follow" ||
+    movement.kind === "stopAndGo" ||
+    movement.kind === "sway"
+  ) {
+    motion = patternMotion(data, movement);
   } else if (movement.kind === "inLane") {
     motion = { kind: "ride", speedMultiplier: movement.factor };
   } else if (movement.kind === "approach") {
@@ -636,7 +724,9 @@ export function moverSpec(
       speedShare: read(
         tuning,
         "multipliers",
-        movement.kind === "dart" ? "dartSpeedJitter" : "moverSpeedJitter",
+        movement.kind === "dart" || movement.kind === "dive"
+          ? "dartSpeedJitter"
+          : "moverSpeedJitter",
       ),
     },
     warningSeconds: read(tuning, "seconds", "moverWarningSeconds"),

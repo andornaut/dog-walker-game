@@ -1499,13 +1499,12 @@
     {
       "id": "ball",
       "movement": {
-        "kind": "dart",
-        "stopShare": 0,
-        "tilt": {
-          "max": 0,
-          "min": 0
+        "hops": {
+          "max": 4,
+          "min": 2
         },
-        "turnBackShare": 0
+        "kind": "bounce",
+        "pauseSeconds": 0.6
       },
       "name": "Ball",
       "shape": {
@@ -1569,7 +1568,6 @@
         "rows": 1
       },
       "zones": [
-        "shops",
         "homeStretch"
       ],
       "spriteKey": "busker"
@@ -1602,6 +1600,28 @@
         "shops"
       ],
       "spriteKey": "cargo-bike"
+    },
+    {
+      "id": "carriage",
+      "movement": {
+        "factor": 0.7,
+        "goSeconds": 0.5,
+        "kind": "stopAndGo",
+        "stopSeconds": 0.6,
+        "stops": {
+          "max": 3,
+          "min": 2
+        }
+      },
+      "name": "Horse-drawn carriage",
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "zones": [
+        "street"
+      ],
+      "spriteKey": "carriage"
     },
     {
       "id": "cat",
@@ -1646,10 +1666,11 @@
     {
       "id": "couple",
       "movement": {
-        "kind": "step",
-        "steps": {
-          "max": 2,
-          "min": 1
+        "kind": "sway",
+        "pauseSeconds": 0.25,
+        "times": {
+          "max": 3,
+          "min": 2
         }
       },
       "name": "Couple",
@@ -1728,11 +1749,9 @@
     {
       "id": "ducklings",
       "movement": {
-        "kind": "hop",
-        "most": 2,
-        "shy": true,
-        "sideways": true,
-        "times": {
+        "kind": "follow",
+        "pauseSeconds": 0.6,
+        "steps": {
           "max": 3,
           "min": 2
         }
@@ -1746,15 +1765,38 @@
       "spriteKey": "chase-ducklings"
     },
     {
+      "id": "foodCartVendor",
+      "movement": {
+        "factor": 0.7,
+        "goSeconds": 0.5,
+        "kind": "stopAndGo",
+        "stopSeconds": 0.6,
+        "stops": {
+          "max": 3,
+          "min": 2
+        }
+      },
+      "name": "Food cart vendor",
+      "onFoot": true,
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "shops"
+      ],
+      "spriteKey": "food-cart-vendor"
+    },
+    {
       "id": "frisbeeDog",
       "movement": {
-        "kind": "dart",
-        "stopShare": 0.2,
+        "kind": "dive",
+        "slide": 0.4,
+        "speed": 1,
         "tilt": {
           "max": 1.6,
           "min": 0.1
-        },
-        "turnBackShare": 0
+        }
       },
       "name": "Frisbee dog",
       "onFoot": true,
@@ -1776,6 +1818,28 @@
         "rows": 3
       },
       "spriteKey": "stink-garbage-truck"
+    },
+    {
+      "id": "gardener",
+      "movement": {
+        "factor": 0.7,
+        "goSeconds": 0.5,
+        "kind": "stopAndGo",
+        "stopSeconds": 0.6,
+        "stops": {
+          "max": 3,
+          "min": 2
+        }
+      },
+      "name": "Gardener",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "snoozeCrescent"
+      ],
+      "spriteKey": "gardener"
     },
     {
       "id": "goose",
@@ -1808,6 +1872,28 @@
         "rows": 1
       },
       "spriteKey": "hot-dog-cart"
+    },
+    {
+      "id": "iceCreamBike",
+      "movement": {
+        "factor": 0.7,
+        "goSeconds": 0.5,
+        "kind": "stopAndGo",
+        "stopSeconds": 0.6,
+        "stops": {
+          "max": 3,
+          "min": 2
+        }
+      },
+      "name": "Ice cream bike",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "pawsPromenade"
+      ],
+      "spriteKey": "ice-cream-bike"
     },
     {
       "id": "iceCreamTruck",
@@ -2001,6 +2087,28 @@
       "spriteKey": "snatch-raccoon"
     },
     {
+      "id": "rangerCart",
+      "movement": {
+        "factor": 0.7,
+        "goSeconds": 0.5,
+        "kind": "stopAndGo",
+        "stopSeconds": 0.6,
+        "stops": {
+          "max": 3,
+          "min": 2
+        }
+      },
+      "name": "Park ranger's cart",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "park"
+      ],
+      "spriteKey": "ranger-cart"
+    },
+    {
       "id": "rollerblader",
       "movement": {
         "factor": 2,
@@ -2094,6 +2202,27 @@
       "spriteKey": "snatch-seagull"
     },
     {
+      "id": "signSpinner",
+      "movement": {
+        "hops": {
+          "max": 4,
+          "min": 2
+        },
+        "kind": "bounce",
+        "pauseSeconds": 0.6
+      },
+      "name": "Sign spinner",
+      "onFoot": true,
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "homeStretch"
+      ],
+      "spriteKey": "sign-spinner"
+    },
+    {
       "id": "streetcar",
       "movement": {
         "factor": 0.7,
@@ -2119,6 +2248,48 @@
         "rows": 1
       },
       "spriteKey": "stroller"
+    },
+    {
+      "id": "strollingBusker",
+      "movement": {
+        "kind": "sway",
+        "pauseSeconds": 0.25,
+        "times": {
+          "max": 3,
+          "min": 2
+        }
+      },
+      "name": "Strolling busker",
+      "onFoot": true,
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "shops"
+      ],
+      "spriteKey": "strolling-busker"
+    },
+    {
+      "id": "tourGroup",
+      "movement": {
+        "kind": "follow",
+        "pauseSeconds": 0.6,
+        "steps": {
+          "max": 2,
+          "min": 1
+        }
+      },
+      "name": "Tour group",
+      "onFoot": true,
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "zones": [
+        "street"
+      ],
+      "spriteKey": "tour-group"
     },
     {
       "id": "tourist",
@@ -2177,6 +2348,28 @@
         "street"
       ],
       "spriteKey": "velvet-rope"
+    },
+    {
+      "id": "volleyballPlayer",
+      "movement": {
+        "kind": "dive",
+        "slide": 0.4,
+        "speed": 1.5,
+        "tilt": {
+          "max": 0.3,
+          "min": 0
+        }
+      },
+      "name": "Volleyball player",
+      "onFoot": true,
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "pawsPromenade"
+      ],
+      "spriteKey": "volleyball-player"
     }
   ],
   "tuning": {
@@ -2534,6 +2727,7 @@
           "busker": 0,
           "car": 1.5,
           "cargoBike": 0,
+          "carriage": 0,
           "cat": 2.25,
           "clothingRack": 0,
           "cone": 3.5,
@@ -2543,11 +2737,14 @@
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
           "ducklings": 0,
+          "foodCartVendor": 0,
           "frisbeeDog": 3,
           "garbageTruck": 0,
+          "gardener": 2,
           "goose": 0,
           "hedge": 3.5,
           "hotDogCart": 0,
+          "iceCreamBike": 0,
           "iceCreamTruck": 0,
           "jogger": 2,
           "kidOnBike": 2,
@@ -2562,18 +2759,23 @@
           "porchSteps": 2,
           "produceCrates": 0,
           "raccoon": 2,
+          "rangerCart": 0,
           "rollerblader": 0,
           "rollingBarrel": 0,
           "sandcastle": 0,
           "sandwichBoard": 0,
           "scooter": 0,
           "seagull": 0,
+          "signSpinner": 0,
           "streetcar": 0,
           "stroller": 2,
+          "strollingBusker": 0,
+          "tourGroup": 0,
           "tourist": 0,
           "trashCan": 3.5,
           "ttcBus": 0,
-          "velvetRope": 0
+          "velvetRope": 0,
+          "volleyballPlayer": 0
         },
         "obstacles": {
           "capybara": 0,
@@ -2623,6 +2825,7 @@
           "busker": 0,
           "car": 0,
           "cargoBike": 0,
+          "carriage": 0,
           "cat": 0,
           "clothingRack": 0,
           "cone": 8,
@@ -2632,11 +2835,14 @@
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
           "ducklings": 3,
+          "foodCartVendor": 0,
           "frisbeeDog": 0,
           "garbageTruck": 0,
+          "gardener": 0,
           "goose": 3,
           "hedge": 8,
           "hotDogCart": 0,
+          "iceCreamBike": 0,
           "iceCreamTruck": 0,
           "jogger": 5,
           "kidOnBike": 2,
@@ -2651,18 +2857,23 @@
           "porchSteps": 0,
           "produceCrates": 0,
           "raccoon": 2,
+          "rangerCart": 2,
           "rollerblader": 0,
           "rollingBarrel": 0,
           "sandcastle": 0,
           "sandwichBoard": 0,
           "scooter": 0,
           "seagull": 0,
+          "signSpinner": 0,
           "streetcar": 0,
           "stroller": 3,
+          "strollingBusker": 0,
+          "tourGroup": 0,
           "tourist": 0,
           "trashCan": 8,
           "ttcBus": 0,
-          "velvetRope": 0
+          "velvetRope": 0,
+          "volleyballPlayer": 0
         },
         "obstacles": {
           "capybara": 1,
@@ -2712,6 +2923,7 @@
           "busker": 0,
           "car": 0,
           "cargoBike": 0,
+          "carriage": 2,
           "cat": 1.5,
           "clothingRack": 0,
           "cone": 6,
@@ -2721,11 +2933,14 @@
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
           "ducklings": 0,
+          "foodCartVendor": 0,
           "frisbeeDog": 0,
           "garbageTruck": 0,
+          "gardener": 0,
           "goose": 0,
           "hedge": 0,
           "hotDogCart": 3,
+          "iceCreamBike": 0,
           "iceCreamTruck": 0,
           "jogger": 4,
           "kidOnBike": 3,
@@ -2740,18 +2955,23 @@
           "porchSteps": 0,
           "produceCrates": 0,
           "raccoon": 0,
+          "rangerCart": 0,
           "rollerblader": 0,
           "rollingBarrel": 2,
           "sandcastle": 0,
           "sandwichBoard": 0,
           "scooter": 2,
           "seagull": 0,
+          "signSpinner": 0,
           "streetcar": 0,
           "stroller": 10,
+          "strollingBusker": 0,
+          "tourGroup": 2,
           "tourist": 2,
           "trashCan": 3,
           "ttcBus": 0,
-          "velvetRope": 3
+          "velvetRope": 3,
+          "volleyballPlayer": 0
         },
         "obstacles": {
           "capybara": 0,
@@ -2798,9 +3018,10 @@
           "barrier3": 3.75,
           "bench": 7.5,
           "bunny": 0,
-          "busker": 2,
+          "busker": 0,
           "car": 0,
           "cargoBike": 2,
+          "carriage": 0,
           "cat": 1.5,
           "clothingRack": 2,
           "cone": 3.75,
@@ -2810,13 +3031,16 @@
           "deliveryCyclist": 2,
           "deliveryTruck": 2,
           "ducklings": 0,
+          "foodCartVendor": 2,
           "frisbeeDog": 0,
           "garbageTruck": 0,
+          "gardener": 0,
           "goose": 0,
           "hedge": 0,
           "hotDogCart": 3.75,
+          "iceCreamBike": 0,
           "iceCreamTruck": 1,
-          "jogger": 3,
+          "jogger": 0,
           "kidOnBike": 3,
           "leafPile": 0,
           "lifeguardChair": 0,
@@ -2829,18 +3053,23 @@
           "porchSteps": 0,
           "produceCrates": 5.75,
           "raccoon": 2,
+          "rangerCart": 0,
           "rollerblader": 0,
           "rollingBarrel": 0,
           "sandcastle": 0,
           "sandwichBoard": 0,
           "scooter": 3,
           "seagull": 0,
+          "signSpinner": 0,
           "streetcar": 2,
           "stroller": 7,
+          "strollingBusker": 5,
+          "tourGroup": 0,
           "tourist": 0,
           "trashCan": 3.75,
           "ttcBus": 0,
-          "velvetRope": 0
+          "velvetRope": 0,
+          "volleyballPlayer": 0
         },
         "obstacles": {
           "capybara": 0,
@@ -2890,6 +3119,7 @@
           "busker": 0,
           "car": 0,
           "cargoBike": 0,
+          "carriage": 0,
           "cat": 0,
           "clothingRack": 0,
           "cone": 3.75,
@@ -2899,11 +3129,14 @@
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
           "ducklings": 0,
+          "foodCartVendor": 0,
           "frisbeeDog": 0,
           "garbageTruck": 0,
+          "gardener": 0,
           "goose": 3,
           "hedge": 3.75,
           "hotDogCart": 3.75,
+          "iceCreamBike": 2,
           "iceCreamTruck": 0,
           "jogger": 5,
           "kidOnBike": 2,
@@ -2918,18 +3151,23 @@
           "porchSteps": 0,
           "produceCrates": 0,
           "raccoon": 0,
+          "rangerCart": 0,
           "rollerblader": 2,
           "rollingBarrel": 0,
           "sandcastle": 2,
           "sandwichBoard": 0,
           "scooter": 1,
           "seagull": 3,
+          "signSpinner": 0,
           "streetcar": 0,
           "stroller": 4,
+          "strollingBusker": 0,
+          "tourGroup": 0,
           "tourist": 0,
           "trashCan": 3.75,
           "ttcBus": 0,
-          "velvetRope": 0
+          "velvetRope": 0,
+          "volleyballPlayer": 2
         },
         "obstacles": {
           "capybara": 0,
@@ -2979,6 +3217,7 @@
           "busker": 2,
           "car": 7,
           "cargoBike": 0,
+          "carriage": 0,
           "cat": 2.25,
           "clothingRack": 0,
           "cone": 6,
@@ -2988,11 +3227,14 @@
           "deliveryCyclist": 2,
           "deliveryTruck": 4,
           "ducklings": 0,
+          "foodCartVendor": 0,
           "frisbeeDog": 0,
           "garbageTruck": 2,
+          "gardener": 0,
           "goose": 0,
           "hedge": 0,
           "hotDogCart": 12.5,
+          "iceCreamBike": 0,
           "iceCreamTruck": 2,
           "jogger": 2,
           "kidOnBike": 1,
@@ -3007,18 +3249,23 @@
           "porchSteps": 0,
           "produceCrates": 0,
           "raccoon": 2,
+          "rangerCart": 0,
           "rollerblader": 0,
           "rollingBarrel": 0,
           "sandcastle": 0,
           "sandwichBoard": 8,
           "scooter": 2,
           "seagull": 1.5,
+          "signSpinner": 2,
           "streetcar": 3,
           "stroller": 3,
+          "strollingBusker": 0,
+          "tourGroup": 0,
           "tourist": 7.12,
           "trashCan": 6,
           "ttcBus": 2,
-          "velvetRope": 0
+          "velvetRope": 0,
+          "volleyballPlayer": 0
         },
         "obstacles": {
           "capybara": 0,

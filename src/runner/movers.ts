@@ -28,7 +28,8 @@ export interface MoverStep {
 // as it crosses. With turnAfter, once it has crossed that many lanes it turns back, with no cue,
 // and crosses the whole road back the other way. With stopAfter, once it has crossed that many
 // lanes it stops, with no cue, and stands there, coming down the road with it. With both null it
-// crosses once.
+// crosses once. With slide (a dive), it crosses its last lane before its stop at slide of its
+// speed, sliding to its stop.
 // ride (inLane): its cue is at the top of its lanes, where it enters once the cue ends, coming
 // down them at speedMultiplier of the road's speed.
 // steps (step, hop): it stands on the road from its spawn and takes each step in turn.
@@ -53,6 +54,7 @@ export type MoverPath = {
       readonly idle: number;
       readonly lanesPerPixel: number;
       readonly motion: "cross";
+      readonly slide?: number;
       readonly stopAfter: number | null;
       readonly tilt: number;
       readonly turnAfter: number | null;
@@ -122,22 +124,55 @@ export function drawnLanes(laneSpan: number, path: MoverPath): number {
   return path.motion === "ride" ? path.lanes : laneSpan;
 }
 
+type CrossPath = Extract<MoverPath, { motion: "cross" }>;
+
+// The lanes a diving crosser crosses at its full speed: up to a lane short of its stop, where it
+// lands and slides the rest; null for a crosser that does not slide.
+function landingLanes(path: CrossPath): number | null {
+  return path.slide === undefined || path.stopAfter === null
+    ? null
+    : Math.max(0, path.stopAfter - 1);
+}
+
 // How far across the road a crosser is, in lanes from the edge it entered from, moved scroll after
-// setting off: out to its turn, if it has one, and back from there.
-function crossedLanes(path: Extract<MoverPath, { motion: "cross" }>, moved: number): number {
+// setting off: out to its turn, if it has one, and back from there; a diver at its full speed to
+// where it lands, and at its slide's from there.
+function crossedLanes(path: CrossPath, moved: number): number {
   const across = path.lanesPerPixel * Math.max(0, moved);
+  const landing = landingLanes(path);
+  if (landing !== null && across > landing) {
+    return landing + (across - landing) * (path.slide ?? 1);
+  }
   const { turnAfter } = path;
   return turnAfter === null || across <= turnAfter ? across : 2 * turnAfter - across;
 }
 
-// The scroll from a crosser setting off until it stops, or Infinity for one that never stops.
-function crossingScroll(path: Extract<MoverPath, { motion: "cross" }>): number {
-  return path.stopAfter === null ? Infinity : path.stopAfter / path.lanesPerPixel;
+// The scroll from a crosser setting off until it stops, or Infinity for one that never stops: a
+// diver's slide takes 1 / slide as long as its speed would.
+export function crossingScroll(path: CrossPath): number {
+  if (path.stopAfter === null) {
+    return Infinity;
+  }
+  const landing = landingLanes(path);
+  return landing === null
+    ? path.stopAfter / path.lanesPerPixel
+    : (landing + (path.stopAfter - landing) / (path.slide ?? 1)) / path.lanesPerPixel;
+}
+
+// Whether a diving crosser is sliding, since scroll after its cue appeared: from landing until it
+// stops.
+export function isSliding(path: MoverPath, since: number): boolean {
+  if (path.motion !== "cross") {
+    return false;
+  }
+  const landing = landingLanes(path);
+  const moved = since - path.warning;
+  return landing !== null && moved >= landing / path.lanesPerPixel && moved < crossingScroll(path);
 }
 
 // The scroll from a crosser setting off until its travel reaches travel: at 1 + tilt of the
 // road's speed while it crosses, and at the road's once it has stopped.
-function crossScrollTo(path: Extract<MoverPath, { motion: "cross" }>, travel: number): number {
+function crossScrollTo(path: CrossPath, travel: number): number {
   const crossing = crossingScroll(path);
   const rise = travel - path.enterTravel;
   return rise <= (1 + path.tilt) * crossing ? rise / (1 + path.tilt) : rise - path.tilt * crossing;
@@ -149,7 +184,7 @@ export function hasStopped(path: MoverPath, since: number): boolean {
 }
 
 // Whether a crosser has turned back, since scroll after its cue appeared.
-export function turnedBack(path: Extract<MoverPath, { motion: "cross" }>, since: number): boolean {
+export function turnedBack(path: CrossPath, since: number): boolean {
   return (
     path.turnAfter !== null &&
     path.lanesPerPixel * Math.max(0, since - path.warning) > path.turnAfter
@@ -569,11 +604,16 @@ interface ShyHops {
 // from turnAtShare, and crosses the whole road back. At stopShare of them, drawn with the same
 // draw (dartOutcome), it stops: at vergeShare of those on the far verge, DART_VERGE_LANES past the
 // road's far edge, out of play, and at the rest in the lane stopLanes lanes from the edge it
-// enters from, drawn per mover, standing there.
+// enters from, drawn per mover, standing there. With slide (a dive), it crosses its last lane
+// before that stop at slide of its speed.
 // ride: down its lane at speedMultiplier of the road's speed, above 1 toward the pack, below 1
 // away. steps: one of the sequences as long as its count, drawn per mover from count, each step
 // stepSeconds long however many spots it covers; the planner picks whichever keeps the road
-// passable. With shy, a share of them hop shy instead, as many times as their count. approach:
+// passable. The count is drawn from the lengths of the sequences within count, each as likely. Each
+// step after the first comes pauseSeconds after the one before ends, none without it; with cueEach,
+// each step has a cue of its own, and the pause is at least the cue. With drift, each step also
+// travels drift of its length down the road, up when below 0: a push at a speed. With shy, a share
+// of them hop shy instead, as many times as their count. approach:
 // steps steps toward the pack, drawn per mover, each stepSeconds long, the first's cue
 // firstDelaySeconds after the mover is wholly on the road and each later one, with no cue, once
 // the step before has ended and the road between it and the pack is secondRoadShare of the road's
@@ -592,6 +632,7 @@ export type MoverMotion =
       readonly reactionSeconds: number;
       readonly startRoadShare: readonly [number, number];
       readonly stopLanes: MoveCount;
+      readonly slide?: number;
       readonly stopShare: number;
       readonly tilt: readonly [number, number];
       readonly turnAtShare: readonly [number, number];
@@ -601,7 +642,10 @@ export type MoverMotion =
   | { readonly kind: "ride"; readonly speedMultiplier: number }
   | {
       readonly count: MoveCount;
+      readonly cueEach?: true;
+      readonly drift?: number;
       readonly kind: "steps";
+      readonly pauseSeconds?: number;
       readonly sequences: readonly (readonly StepShape[])[];
       readonly shy?: ShyHops;
       readonly stepSeconds: number;
@@ -649,7 +693,7 @@ export interface MoverDraws {
 }
 
 // How many move delays and lengths each mover draws: as many as the most moves any kind makes.
-const MOVE_DRAWS = 6;
+export const MOVE_DRAWS = 6;
 
 const EVEN_DRAWS: MoverDraws = {
   count: 0,
@@ -859,6 +903,9 @@ function crossPlacements(
     lanesPerPixel,
     motion: "cross",
     movement: spec.movement,
+    ...(motion.slide !== undefined && stopAfter !== null && !crosses
+      ? { slide: motion.slide }
+      : {}),
     stopAfter,
     tilt,
     turnAfter,
@@ -1069,11 +1116,27 @@ function standingPlacements(
   return placements;
 }
 
+// The step count a draw from 0 up to 1 picks: one of the lengths of the sequences within the
+// motion's count, each as likely. Where every count in the range has sequences, as a stepper's and
+// a hopper's do, it is drawnCount's.
+export function drawnStepCount(
+  motion: Pick<Extract<MoverMotion, { kind: "steps" }>, "count" | "sequences">,
+  draw: number,
+): number {
+  const { max, min } = motion.count;
+  const lengths = [...new Set(motion.sequences.map((sequence) => sequence.length))]
+    .filter((length) => length >= min && length <= max)
+    .sort((a, b) => a - b);
+  return lengths[Math.min(lengths.length - 1, Math.floor(draw * lengths.length))] ?? min;
+}
+
 // A stepping mover takes each step of a sequence as long as its drawn count in turn, each step
 // its drawn length. Its first step's cue shows once it is wholly on the road; each later step,
-// with no cue, starts as the step before ends. Each move comes up to its drawn delay later, so
-// later moves pause a random gap between them. A step that would start once the mover has
-// reached the pack's rows, at sightLength, never comes, nor any after it; a sequence with no
+// with no cue unless the motion cues each, starts its pause after the step before ends. Each move
+// comes up to its drawn delay later, so later moves pause a random gap between them. A step with
+// drift travels drift of its length along the road, and stands at a spot each cell of it. A step
+// that would start once the mover has reached the pack's rows, at sightLength, never comes, nor
+// any after it; a sequence with no
 // step left has no placement, since a mover always moves. It stands at every spot a step of
 // several spots passes over, as it does at each step's ends, and at both corners of each diagonal
 // spot: moving a lane across and a row along at once, its hit box is in the lane it leaves while
@@ -1089,7 +1152,10 @@ function stepsPlacements(
   const warning = spec.warningSeconds * scrollSpeed;
   const length = motion.stepSeconds * scrollSpeed;
   const height = spec.footprint.rows * cellLength;
-  const count = drawnCount(motion.count, draws.count);
+  const count = drawnStepCount(motion, draws.count);
+  const pause = (motion.pauseSeconds ?? 0) * scrollSpeed;
+  const gap = motion.cueEach === true ? Math.max(pause, warning) : pause;
+  const drift = motion.drift ?? 0;
   if (motion.shy !== undefined && draws.shy < motion.shy.share) {
     return shyPlacements(geometry, spec, motion.shy, motion.stepSeconds, count, draws);
   }
@@ -1099,25 +1165,26 @@ function stepsPlacements(
     const steps: MoverStep[] = [];
     let ready = height + warning;
     for (const [i, shape] of shapes.entries()) {
-      const at = ready + delayOf(spec.variation, draws, i) * scrollSpeed;
+      const at = ready + (i > 0 ? gap : 0) + delayOf(spec.variation, draws, i) * scrollSpeed;
       const last = spots.at(-1) ?? { lane: 0, travel: 0 };
       if (at + last.travel >= sightLength) {
         break;
       }
       const stepLength = moveLength(spec.variation, draws, i, length);
-      const spotCount = stepSpots(shape);
+      const travel = shape.travel * cellLength + drift * stepLength;
+      const spotCount = Math.max(stepSpots(shape), Math.ceil(Math.abs(travel) / cellLength - 1e-9));
       for (let spot = 1; spot <= spotCount; spot++) {
         spots.push({
           lane: last.lane + (shape.lanes * spot) / spotCount,
-          travel: last.travel + (shape.travel * cellLength * spot) / spotCount,
+          travel: last.travel + (travel * spot) / spotCount,
         });
       }
       steps.push({
         at,
         lanes: shape.lanes,
         length: stepLength,
-        travel: shape.travel * cellLength,
-        ...(steps.length > 0 ? { uncued: true } : {}),
+        travel,
+        ...(steps.length > 0 && motion.cueEach !== true ? { uncued: true } : {}),
       });
       ready = at + stepLength;
     }

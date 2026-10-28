@@ -21,6 +21,7 @@ import {
   inZone,
   LUCKY_IDS,
   MINOR_OBSTACLE_IDS,
+  MOVER_SCROLL,
   OBSTACLE_IDS,
   REAL,
   type Real,
@@ -36,6 +37,7 @@ import {
   hopShapes,
   inMotion,
   type MoverPath,
+  moverPlace,
   type MoverStep,
   moverTell,
 } from "./movers";
@@ -332,6 +334,132 @@ describe("movers", { timeout: 120_000 }, () => {
     }
   });
 
+  // The zones that plan a kind: those that weigh it above 0, of its own zones if it has any.
+  const zonesOf = (kind: WalkItem["kind"]): ZoneId[] => {
+    const minor = Object.hasOwn(MINOR_OBSTACLES, kind);
+    const entry = minor
+      ? everyMover.minorObstacles[kind as MinorObstacleId]
+      : everyMover.encounters[kind as ObstacleEncounterId];
+    return everyMover.world.zones
+      .filter(({ id, weights }) => {
+        const weight = minor
+          ? weights.minorObstacles[kind as MinorObstacleId]
+          : weights.obstacles[kind as ObstacleEncounterId];
+        return (
+          weight > 0 && (!("zones" in entry) || (entry.zones as readonly string[]).includes(id))
+        );
+      })
+      .map(({ id }) => id as ZoneId);
+  };
+
+  // Each kind some zone draws whose movement is a pattern (bounce, dive, follow, stopAndGo, sway),
+  // planned across seeds at the first zone's pace and the last's with every mover moving, as the
+  // passability sweep plans it: its most moves, whether it cues each move, and its lanes.
+  const patternOf = (movement: Movement | null) => {
+    switch (movement?.kind) {
+      case "bounce":
+        return { cueEach: true, most: movement.hops.max, rocks: true };
+      case "follow":
+        return { cueEach: true, most: movement.steps.max, rocks: false };
+      case "stopAndGo":
+        return { cueEach: true, most: movement.stops.max + 1, rocks: false };
+      case "sway":
+        return { cueEach: false, most: 2 * movement.times.max, rocks: true };
+      default:
+        return null;
+    }
+  };
+  const patterned = OBSTACLE_KINDS.filter(
+    (kind) =>
+      zonesOf(kind).length > 0 &&
+      (patternOf(movementOf(kind)) !== null || movementOf(kind)?.kind === "dive"),
+  );
+  // A kind's movers planned in the zones that draw it, on more seeds than the sweep's, so a kind
+  // weighed low still comes up.
+  const PATTERN_SEEDS = [1, 2, 3, 4];
+  const pathsOf = (kind: WalkItem["kind"]) => {
+    const planned = zonesOf(kind)
+      .flatMap((zone) => planIn(zone, PATTERN_SEEDS))
+      .flatMap((spawn) => (spawn.kind === kind && spawn.mover !== undefined ? [spawn.mover] : []));
+    expect(planned.length).toBeGreaterThan(0);
+    return planned;
+  };
+
+  // A stepping pattern moves at least once and at most its most, each step a lane to one side
+  // (back the way it came, for a bounce or a sway, so it rocks between two lanes), or in its lane
+  // only for a stop-and-go, at its kind's speed; it stays on the road. A dive always lands and
+  // slides into a lane, never turning back or stopping on the verge.
+  it.each(patterned)("moves each %s in its pattern, within its lanes", (kind) => {
+    const movement = movementOf(kind);
+    const pattern = patternOf(movement);
+    const span = footprintOf(REAL, kind).lanes;
+    for (const mover of pathsOf(kind)) {
+      if (mover.motion === "cross") {
+        expect(movement?.kind).toBe("dive");
+        expect(mover.slide).toBe(movement?.kind === "dive" ? movement.slide : undefined);
+        expect(mover.turnAfter).toBeNull();
+        expect(mover.stopAfter).not.toBeNull();
+        expect(mover.stopAfter ?? Infinity).toBeLessThanOrEqual(LANE_COUNT);
+        continue;
+      }
+      expect(mover.motion).toBe("steps");
+      const steps = mover.motion === "steps" ? mover.steps : [];
+      expect(steps.length).toBeGreaterThanOrEqual(1);
+      expect(steps.length).toBeLessThanOrEqual(pattern?.most ?? 0);
+      let lane = mover.lane;
+      for (const [i, { lanes, travel }] of steps.entries()) {
+        if (movement?.kind === "stopAndGo") {
+          expect(lanes).toBe(0);
+          expect(Math.sign(travel)).toBe(Math.sign(movement.factor - 1));
+        } else {
+          expect(Math.abs(lanes)).toBe(1);
+          expect(travel).toBe(0);
+        }
+        if (pattern?.rocks === true && i > 0) {
+          expect(lanes).toBe(-(steps[i - 1]?.lanes ?? 0));
+        }
+        lane += lanes;
+        expect(lane).toBeGreaterThanOrEqual(0);
+        expect(lane + span).toBeLessThanOrEqual(LANE_COUNT);
+      }
+    }
+  });
+
+  // Its first move is cued: a dive's arrow before it sets off, a stepping pattern's wander mark
+  // before its first step and, where its kind cues each, before every step.
+  it.each(patterned)("cues each %s's first move, and each later one its kind cues", (kind) => {
+    const pattern = patternOf(movementOf(kind));
+    for (const mover of pathsOf(kind)) {
+      if (mover.motion === "cross") {
+        expect(moverTell(mover, mover.warning - 1e-6)?.kind).toBe("across");
+        continue;
+      }
+      const steps = mover.motion === "steps" ? mover.steps : [];
+      const cues = steps.map(({ at }) => moverTell(mover, at - 1e-6)?.kind ?? null);
+      expect(cues).toEqual(
+        steps.map((_, i) => (i === 0 || pattern?.cueEach === true ? "wander" : null)),
+      );
+    }
+  });
+
+  // It never comes back up the screen toward a pack that has passed it: its travel down the road
+  // never falls as the road scrolls, and no step starts once it has reached the pack's rows.
+  it.each(patterned)("never moves a %s back up the road", (kind) => {
+    for (const mover of pathsOf(kind)) {
+      let travel = -Infinity;
+      for (let since = 0; since < MOVER_SCROLL; since += 2) {
+        const place = moverPlace(LANE_COUNT, mover, since);
+        expect(place.travel).toBeGreaterThanOrEqual(travel - 1e-9);
+        travel = place.travel;
+      }
+      if (mover.motion === "steps") {
+        for (const { at } of mover.steps) {
+          expect(moverPlace(LANE_COUNT, mover, at).travel).toBeLessThan(GAME_ROAD.sightLength);
+        }
+      }
+    }
+  });
+
   // A pull obstacle passes through the pack, so it blocks no lane: one that moves is planned as a
   // moving prize, as a walking lucky find is, and comes moving on every plan.
   const movingPull = OBSTACLE_KINDS.filter(
@@ -425,23 +553,6 @@ describe("movers", { timeout: 120_000 }, () => {
   // road on some seed: its leftmost lane is lane 0 on some plan and the last its width leaves on
   // another.
   const blocking = OBSTACLE_KINDS.filter((kind) => blocksLane(everyMover, kind));
-  // The zones that plan a kind: those that weigh it above 0, of its own zones if it has any.
-  const zonesOf = (kind: WalkItem["kind"]): ZoneId[] => {
-    const minor = Object.hasOwn(MINOR_OBSTACLES, kind);
-    const entry = minor
-      ? everyMover.minorObstacles[kind as MinorObstacleId]
-      : everyMover.encounters[kind as ObstacleEncounterId];
-    return everyMover.world.zones
-      .filter(({ id, weights }) => {
-        const weight = minor
-          ? weights.minorObstacles[kind as MinorObstacleId]
-          : weights.obstacles[kind as ObstacleEncounterId];
-        return (
-          weight > 0 && (!("zones" in entry) || (entry.zones as readonly string[]).includes(id))
-        );
-      })
-      .map(({ id }) => id as ZoneId);
-  };
   // Each kind is planned in its zones one seed at a time until it has started against both edges,
   // so a kind that a zone's weights plan less often takes more seeds rather than failing.
   const EDGE_SEEDS_MOST = 20;

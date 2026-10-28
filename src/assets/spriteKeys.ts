@@ -205,12 +205,22 @@ export const MOVER_SPRITE_KEYS: Readonly<Partial<Record<string, string>>> = {
 };
 export const MOVING_TAGS: Readonly<Record<MovementKind, readonly string[]>> = {
   approach: ["step", "walk", "run"],
+  bounce: ["hop", "bounce", "run", "walk"],
   dart: ["flee", "run", "bounce", "walk"],
+  dive: ["run", "flee", "walk"],
+  follow: ["walk", "hop", "run"],
   hop: ["hop", "pull-out", "run", "walk"],
   inLane: ["drive", "ride", "run", "walk", "pull-out"],
   step: ["walk", "run"],
+  stopAndGo: ["push", "walk", "ride", "drive"],
+  sway: ["walk", "run"],
 };
 export const IDLE_TAG = "idle";
+
+// A mover's poses, each played over its other tags while it holds, where its sprite has it: cue
+// while its cue shows (a tour guide's flag dip, a sign spinner's spin), and dive while a diver
+// slides its last lane.
+export type MoverPose = "cue" | "dive";
 
 // A standing road item plays the first of these tags its sprite has: its own motion while the
 // walk goes on, and standing still while a card or the pause menu holds the walk. The movement
@@ -220,20 +230,22 @@ export const STANDING_TAGS = {
   walking: ["walk", "wave", "loop", "idle", "run", "ride", "drive", "bounce", "flee", "hop"],
 } as const;
 
-// The tag a mover's body plays, of those has says its sprite has: while it moves, its
-// movement's first tag, else its idle; otherwise its idle, else that movement tag; and
-// failing both, what a standing item would play. A stalker drawn with a step (a lunge) for its
-// steps stalks between them, playing walk.
+// The tag a mover's body plays, of those has says its sprite has: its pose, if it holds one;
+// while it moves, its movement's first tag, else its idle; otherwise its idle, else that movement
+// tag; and failing both, what a standing item would play. A stalker drawn with a step (a lunge)
+// for its steps stalks between them, playing walk.
 export function moverBodyTag(
   has: (tag: string) => boolean,
   movement: MovementKind,
   moving: boolean,
+  pose: MoverPose | null = null,
 ): string | undefined {
   const motion = MOVING_TAGS[movement];
   const stalking = movement === "approach" && has("step") ? ["walk"] : [];
+  const posed = pose === null ? [] : [pose];
   const tags = moving
-    ? [...motion, IDLE_TAG, ...STANDING_TAGS.walking]
-    : [...stalking, IDLE_TAG, ...motion, ...STANDING_TAGS.halted];
+    ? [...posed, ...motion, IDLE_TAG, ...STANDING_TAGS.walking]
+    : [...posed, ...stalking, IDLE_TAG, ...motion, ...STANDING_TAGS.halted];
   return tags.find(has);
 }
 

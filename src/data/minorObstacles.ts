@@ -6,7 +6,7 @@ import type { MinorObstacle } from "./types";
 // and stands still otherwise. onFoot marks a person or an animal, not a vehicle or a thing.
 export const MINOR_OBSTACLES = {
   ball: {
-    movement: { kind: "dart", stopShare: 0, tilt: { max: 0, min: 0 }, turnBackShare: 0 },
+    movement: { hops: { max: 4, min: 2 }, kind: "bounce", pauseSeconds: 0.6 },
     name: "Ball",
     shape: { lanes: 1, rows: 1 },
   },
@@ -29,7 +29,7 @@ export const MINOR_OBSTACLES = {
     name: "Busker",
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
-    zones: ["shops", "homeStretch"],
+    zones: ["homeStretch"],
   },
   car: {
     movement: { factor: 2.3, kind: "inLane" },
@@ -42,6 +42,18 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 2 },
     zones: ["shops"],
   },
+  carriage: {
+    movement: {
+      factor: 0.7,
+      goSeconds: 0.5,
+      kind: "stopAndGo",
+      stopSeconds: 0.6,
+      stops: { max: 3, min: 2 },
+    },
+    name: "Horse-drawn carriage",
+    shape: { lanes: 2, rows: 1 },
+    zones: ["street"],
+  },
   cat: {
     movement: { kind: "dart", stopShare: 0.5, tilt: { max: 1.6, min: 0.1 }, turnBackShare: 0.33 },
     name: "Cat",
@@ -51,7 +63,7 @@ export const MINOR_OBSTACLES = {
   clothingRack: { name: "Clothing rack", shape: { lanes: 1, rows: 1 }, zones: ["shops"] },
   cone: { name: "Cone", shape: { lanes: 1, rows: 1 } },
   couple: {
-    movement: { kind: "step", steps: { max: 2, min: 1 } },
+    movement: { kind: "sway", pauseSeconds: 0.25, times: { max: 3, min: 2 } },
     name: "Couple",
     onFoot: true,
     shape: { lanes: 2, rows: 1 },
@@ -80,13 +92,26 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 3 },
   },
   ducklings: {
-    movement: { kind: "hop", most: 2, shy: true, sideways: true, times: { max: 3, min: 2 } },
+    movement: { kind: "follow", pauseSeconds: 0.6, steps: { max: 3, min: 2 } },
     name: "Ducklings",
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
+  foodCartVendor: {
+    movement: {
+      factor: 0.7,
+      goSeconds: 0.5,
+      kind: "stopAndGo",
+      stopSeconds: 0.6,
+      stops: { max: 3, min: 2 },
+    },
+    name: "Food cart vendor",
+    onFoot: true,
+    shape: { lanes: 1, rows: 1 },
+    zones: ["shops"],
+  },
   frisbeeDog: {
-    movement: { kind: "dart", stopShare: 0.2, tilt: { max: 1.6, min: 0.1 }, turnBackShare: 0 },
+    movement: { kind: "dive", slide: 0.4, speed: 1, tilt: { max: 1.6, min: 0.1 } },
     name: "Frisbee dog",
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
@@ -96,6 +121,18 @@ export const MINOR_OBSTACLES = {
     name: "Garbage truck",
     shape: { lanes: 1, rows: 3 },
   },
+  gardener: {
+    movement: {
+      factor: 0.7,
+      goSeconds: 0.5,
+      kind: "stopAndGo",
+      stopSeconds: 0.6,
+      stops: { max: 3, min: 2 },
+    },
+    name: "Gardener",
+    shape: { lanes: 1, rows: 1 },
+    zones: ["snoozeCrescent"],
+  },
   goose: {
     movement: { factor: 2.07, kind: "inLane" },
     name: "Goose",
@@ -104,6 +141,18 @@ export const MINOR_OBSTACLES = {
   },
   hedge: { name: "Hedge", shape: { lanes: 3, rows: 1 } },
   hotDogCart: { name: "Hot dog cart", shape: { lanes: 2, rows: 1 } },
+  iceCreamBike: {
+    movement: {
+      factor: 0.7,
+      goSeconds: 0.5,
+      kind: "stopAndGo",
+      stopSeconds: 0.6,
+      stops: { max: 3, min: 2 },
+    },
+    name: "Ice cream bike",
+    shape: { lanes: 1, rows: 1 },
+    zones: ["pawsPromenade"],
+  },
   iceCreamTruck: {
     movement: { factor: 0.7, kind: "inLane" },
     name: "Ice cream truck",
@@ -155,6 +204,18 @@ export const MINOR_OBSTACLES = {
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
+  rangerCart: {
+    movement: {
+      factor: 0.7,
+      goSeconds: 0.5,
+      kind: "stopAndGo",
+      stopSeconds: 0.6,
+      stops: { max: 3, min: 2 },
+    },
+    name: "Park ranger's cart",
+    shape: { lanes: 1, rows: 1 },
+    zones: ["park"],
+  },
   rollerblader: {
     movement: { factor: 2.0, kind: "inLane" },
     name: "Rollerblader",
@@ -180,6 +241,13 @@ export const MINOR_OBSTACLES = {
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
+  signSpinner: {
+    movement: { hops: { max: 4, min: 2 }, kind: "bounce", pauseSeconds: 0.6 },
+    name: "Sign spinner",
+    onFoot: true,
+    shape: { lanes: 1, rows: 1 },
+    zones: ["homeStretch"],
+  },
   streetcar: {
     movement: { factor: 0.7, kind: "inLane" },
     name: "Streetcar",
@@ -190,6 +258,20 @@ export const MINOR_OBSTACLES = {
     name: "Stroller",
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
+  },
+  strollingBusker: {
+    movement: { kind: "sway", pauseSeconds: 0.25, times: { max: 3, min: 2 } },
+    name: "Strolling busker",
+    onFoot: true,
+    shape: { lanes: 1, rows: 1 },
+    zones: ["shops"],
+  },
+  tourGroup: {
+    movement: { kind: "follow", pauseSeconds: 0.6, steps: { max: 2, min: 1 } },
+    name: "Tour group",
+    onFoot: true,
+    shape: { lanes: 2, rows: 1 },
+    zones: ["street"],
   },
   tourist: {
     movement: { kind: "step", steps: { max: 4, min: 2 } },
@@ -206,4 +288,11 @@ export const MINOR_OBSTACLES = {
     zones: ["homeStretch"],
   },
   velvetRope: { name: "Velvet rope", shape: { lanes: 2, rows: 1 }, zones: ["street"] },
+  volleyballPlayer: {
+    movement: { kind: "dive", slide: 0.4, speed: 1.5, tilt: { max: 0.3, min: 0 } },
+    name: "Volleyball player",
+    onFoot: true,
+    shape: { lanes: 1, rows: 1 },
+    zones: ["pawsPromenade"],
+  },
 } as const satisfies Record<string, MinorObstacle>;

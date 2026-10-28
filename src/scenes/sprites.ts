@@ -200,8 +200,15 @@ function dropPendingOnce(sprite: GameObjects.Sprite): void {
 }
 
 // Plays one of the sprite's Aseprite tags, if it has it; a placeholder has none. still shows
-// the tag's first frame instead, for reduced motion.
-export function playTag(sprite: GameObjects.Sprite, key: string, tag: string, still = false): void {
+// the tag's first frame instead, for reduced motion. once plays it through a single time and holds
+// its last frame, rather than looping.
+export function playTag(
+  sprite: GameObjects.Sprite,
+  key: string,
+  tag: string,
+  still = false,
+  once = false,
+): void {
   const animation = animationKey(key, tag);
   if (!sprite.scene.anims.exists(animation)) {
     return;
@@ -217,7 +224,7 @@ export function playTag(sprite: GameObjects.Sprite, key: string, tag: string, st
   }
   if (!current) {
     dropPendingOnce(sprite);
-    sprite.play(animation);
+    sprite.play(once ? { key: animation, repeat: 0 } : animation);
   } else if (sprite.anims.isPaused) {
     sprite.anims.resume();
   }

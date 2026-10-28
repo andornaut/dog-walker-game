@@ -76,7 +76,7 @@ export function deliveryGroup(
   if (movement === null) {
     return "minorStatic";
   }
-  if (movement === "dart") {
+  if (movement === "dart" || movement === "dive") {
     return "minorDart";
   }
   return movement === "inLane" ? "minorRider" : "minorOther";

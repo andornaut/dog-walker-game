@@ -140,3 +140,69 @@ describe("a sight reading", () => {
     expect(sightPaths(road, since, item(hidden))).toEqual(sightPaths(road, since, item(path)));
   });
 });
+
+// What a player who knows a pattern mover's kind reads of its cued step: a bounce's or a sway's
+// way back once it has stepped aside, either way before; a follower's either way; a stop-and-go's
+// push down its lane at its speed. A dive's stop shows once it lands and slides, not before.
+describe("a pattern mover's sight reading", () => {
+  const BOUNCE = kindMoving((movement) => movement.kind === "bounce");
+  const DIVE = kindMoving((movement) => movement.kind === "dive");
+  const FOLLOW = kindMoving((movement) => movement.kind === "follow");
+  const STOP_AND_GO = kindMoving((movement) => movement.kind === "stopAndGo");
+  const SWAY = kindMoving((movement) => movement.kind === "sway");
+  const { cell } = road.geometry;
+  const pushCells = (() => {
+    const { movement } = gameData.minorObstacles[STOP_AND_GO as MinorObstacleId];
+    return movement?.kind === "stopAndGo"
+      ? ((movement.factor - 1) * movement.goSeconds * road.speed) / cell.length
+      : NaN;
+  })();
+  const aside = { at: 100, lanes: 1, length: 40, travel: 0 } as const;
+  const cued = { at: 200, lanes: -1, length: 40, travel: 0 } as const;
+  const item = (kind: WalkItemKind, path: MoverPath, since: number): WalkItem => ({
+    height: 40,
+    id: 1,
+    kind,
+    lane: 2,
+    laneSpan: 1,
+    mover: { path, since },
+    y: 0,
+  });
+  const SIDEWAYS = [
+    { lanes: -1, travel: 0 },
+    { lanes: 1, travel: 0 },
+  ];
+  it.each([
+    { kind: BOUNCE, reads: [{ lanes: -1, travel: 0 }], started: [aside] },
+    { kind: BOUNCE, reads: SIDEWAYS, started: [] },
+    { kind: SWAY, reads: [{ lanes: -1, travel: 0 }], started: [aside] },
+    { kind: FOLLOW, reads: SIDEWAYS, started: [aside] },
+    { kind: STOP_AND_GO, reads: [{ lanes: 0, travel: pushCells }], started: [] },
+  ])("reads $kind's cued step after $started.length steps", ({ kind, reads, started }) => {
+    const path: MoverPath = {
+      lane: 2,
+      motion: "steps",
+      movement: "step",
+      steps: [...started, cued],
+      warning: 60,
+    };
+    const read = sightPaths(road, 170, item(kind, path, 170)).map((seen) => {
+      const last = seen.motion === "steps" ? seen.steps.at(-1) : undefined;
+      return { lanes: last?.lanes, travel: (last?.travel ?? NaN) / cell.length };
+    });
+    expect(read.map(({ lanes }) => lanes)).toEqual(reads.map(({ lanes }) => lanes));
+    read.forEach(({ travel }, i) => {
+      expect(travel).toBeCloseTo(reads[i]?.travel ?? NaN);
+    });
+  });
+
+  // A dive 2.5 lanes to its stop at 0.01 lanes a pixel, landing 1.5 lanes in.
+  const dive: MoverPath = { ...dart, movement: "dive", slide: 0.5, stopAfter: 2.5, tilt: 0 };
+  it.each([
+    { name: "before it lands", since: dart.warning + 140, stops: false },
+    { name: "as it slides", since: dart.warning + 160, stops: true },
+  ])("reads a dive's stop $name: $stops", ({ since, stops }) => {
+    const read = sightPaths(road, since, item(DIVE, dive, since));
+    expect(read.map((path) => path.motion === "cross" && path.stopAfter !== null)).toEqual([stops]);
+  });
+});

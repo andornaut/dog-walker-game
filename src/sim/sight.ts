@@ -1,9 +1,11 @@
+import type { Movement } from "../data/types";
 import { read } from "../rules/units";
 import { approachOutcomes } from "../runner/approach";
 import {
   cuedStep,
   hasStopped,
   hopShapes,
+  isSliding,
   type MoverPath,
   type MoverStep,
   type StepShape,
@@ -61,6 +63,9 @@ export function moverShows(path: MoverPath, since: number): string {
     if (turnedBack(path, since)) {
       return "turned";
     }
+    if (isSliding(path, since)) {
+      return "sliding";
+    }
     return hasStopped(path, since) ? "stopped" : "crossing";
   }
   if (path.motion === "ride") {
@@ -89,13 +94,14 @@ function lengthsSeen(lengths: readonly number[], started: number, nominal: numbe
 
 // The paths a mover may take as a player reads it from what it shows since scroll after its cue
 // appeared, or it spawned for a stepping mover (moverShows):
-// - a dart, before it sets off, at its kind's speed and at tilts across its kind's range, crossing
-//   once, and while it waits at its edge, as waiting there until it has left the road;
-//   then at its own speed and tilt, crossing once until it turns back or stops, then as it does.
+// - a dart or a dive, before it sets off, at its kind's speed and at tilts across its kind's range,
+//   crossing once, and while it waits at its edge, as waiting there until it has left the road;
+//   then at its own speed and tilt, crossing once until it turns back, stops or lands and slides,
+//   then as it does.
 // - a rider at its kind's speed until it enters, then at its own.
 // - a stepper, stalker or shy hopper with the steps it has started; with its wander mark showing,
-//   also the next step, at its start, as each shape it may take, its kind's length long. An uncued
-//   step is unknown until it starts.
+//   also the next step, at its start, as each shape it may take (nextShapes), its kind's length
+//   long. An uncued step is unknown until it starts.
 // Each moment's real path is one of them until the mover shows something new.
 export function sightPaths(road: SightRoad, since: number, item: WalkItem): readonly MoverPath[] {
   const { mover } = item;
@@ -108,14 +114,17 @@ export function sightPaths(road: SightRoad, since: number, item: WalkItem): read
   if (path.motion === "cross") {
     if (since >= path.warning) {
       const turnAfter = turnedBack(path, since) ? path.turnAfter : null;
-      const stopAfter = hasStopped(path, since) ? path.stopAfter : null;
+      const stopAfter = hasStopped(path, since) || isSliding(path, since) ? path.stopAfter : null;
       return turnAfter === path.turnAfter && stopAfter === path.stopAfter
         ? [path]
         : [{ ...path, stopAfter, turnAfter }];
     }
-    const lanesPerPixel = read(tuning, "counts", "dartLanesPerSecond") / road.speed;
+    const speed = movement?.kind === "dive" ? movement.speed : 1;
+    const lanesPerPixel = (read(tuning, "counts", "dartLanesPerSecond") * speed) / road.speed;
     const tilts =
-      movement?.kind === "dart" ? tiltsBetween(movement.tilt.min, movement.tilt.max) : [path.tilt];
+      movement?.kind === "dart" || movement?.kind === "dive"
+        ? tiltsBetween(movement.tilt.min, movement.tilt.max)
+        : [path.tilt];
     // Waiting at its edge, it is read as waiting there until it has left the road: it shows
     // nothing of when its cue will begin.
     if (since < path.idle) {
@@ -169,11 +178,7 @@ export function sightPaths(road: SightRoad, since: number, item: WalkItem): read
   if (cued === undefined) {
     return started.length === path.steps.length ? [path] : [{ ...path, steps: started }];
   }
-  const hop = movement?.kind === "hop";
-  const shapes: readonly StepShape[] = hop
-    ? hopShapes(movement.most, movement.sideways === true)
-    : STEP_SHAPES;
-  const length = read(tuning, "seconds", hop ? "moverHopSeconds" : "moverStepSeconds") * road.speed;
+  const { length, shapes } = nextShapes(road, movement, started);
   const lane = path.lane + started.reduce((sum, step) => sum + step.lanes, 0);
   return shapes
     .filter((shape) => lane + shape.lanes >= 0 && lane + shape.lanes + item.laneSpan <= laneCount)
@@ -184,4 +189,50 @@ export function sightPaths(road: SightRoad, since: number, item: WalkItem): read
         { at: cued.at, lanes: shape.lanes, length, travel: shape.travel * cell.length },
       ],
     }));
+}
+
+const SIDEWAYS: readonly StepShape[] = [
+  { lanes: -1, travel: 0 },
+  { lanes: 1, travel: 0 },
+];
+
+// The shapes a stepping mover's cued step may take, as a player who knows its kind reads it after
+// the steps started, and the step's length at its kind's: a hopper's hops; a bounce's and a sway's
+// way back from its last step sideways, or either way before one; a follower's either way; a
+// stop-and-go's push, its travel in cells; and a stepper's steps.
+function nextShapes(
+  road: SightRoad,
+  movement: Movement | null,
+  started: readonly MoverStep[],
+): { readonly length: number; readonly shapes: readonly StepShape[] } {
+  const { tuning } = road.data;
+  const seconds = (key: "moverHopSeconds" | "moverStepSeconds") =>
+    read(tuning, "seconds", key) * road.speed;
+  const last = started.filter((step) => step.lanes !== 0).at(-1)?.lanes;
+  const back: readonly StepShape[] =
+    last === undefined ? SIDEWAYS : [{ lanes: -Math.sign(last), travel: 0 }];
+  switch (movement?.kind) {
+    case "bounce":
+      return { length: seconds("moverHopSeconds"), shapes: back };
+    case "follow":
+      return { length: seconds("moverStepSeconds"), shapes: SIDEWAYS };
+    case "hop":
+      return {
+        length: seconds("moverHopSeconds"),
+        shapes: hopShapes(movement.most, movement.sideways === true),
+      };
+    case "stopAndGo": {
+      const length = movement.goSeconds * road.speed;
+      return {
+        length,
+        shapes: [
+          { lanes: 0, travel: ((movement.factor - 1) * length) / road.geometry.cell.length },
+        ],
+      };
+    }
+    case "sway":
+      return { length: seconds("moverStepSeconds"), shapes: back };
+    default:
+      return { length: seconds("moverStepSeconds"), shapes: STEP_SHAPES };
+  }
 }

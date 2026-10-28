@@ -2,6 +2,7 @@ import { itemAt } from "../lib/arrays";
 import { randomPick, weightedPick } from "../lib/random";
 import { approachOutcomes } from "./approach";
 import {
+  crossingScroll,
   hasLeftRoad,
   laneAt,
   laneBalanceWeight,
@@ -413,7 +414,7 @@ export function moverRests(laneCount: number, cue: number, path: MoverPath): Mov
       if (path.stopAfter === null || stopsOnVerge(laneCount, path)) {
         return [];
       }
-      const since = path.warning + path.stopAfter / path.lanesPerPixel;
+      const since = path.warning + crossingScroll(path);
       const place = moverPlace(laneCount, path, since);
       return [{ distance: cue + since - place.travel, lane: laneAt(place.lanePosition) }];
     }

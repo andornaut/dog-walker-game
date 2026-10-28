@@ -23,6 +23,7 @@ import {
   facesLeft,
   hasStopped,
   inMotion,
+  isSliding,
   type MoverOnRoad,
   moverPlace,
   moverTell,
@@ -38,6 +39,11 @@ import { type StandFrame, standPart } from "./standPart";
 // it or below it on screen. The wander mark's top-left corner is at wander from the top
 // centre of the stepper's art.
 const CUE = { inset: 10, size: 16, top: 20, wander: { x: -8, y: -18 } };
+
+// The pose a mover holds while its cue shows, and the poses played once through, not looped: the
+// cue into its move and a diver's dive into lying down.
+const CUE_POSE = "cue";
+const ONCE_POSES: ReadonlySet<string> = new Set([CUE_POSE, "dive"]);
 
 // The ball carries its own shadow, bouncing on the road.
 const BALL_KEY = "ball-bounce";
@@ -70,7 +76,8 @@ export function moverBodyKey(scene: Scene, kind: EncounterId | MinorObstacleId):
 // the juncture; a cue shows only once wholly below it. A mover stands on the road through the
 // projection, across the middle of the lanes it is drawn over (drawnLanes), while it is solid,
 // sized by showAtDepth on its body part's feet, mirrored while it faces left (facesLeft), playing
-// the tag moverBodyTag picks, or prizeMoverTag for a lucky find. Before a dart or in-lane move
+// the tag moverBodyTag picks, in its cue or dive pose while it holds one (played once through,
+// not looped), or prizeMoverTag for a lucky find. Before a dart or in-lane move
 // only its cue shows, at 1x, each part only while its art is loaded:
 // a sign at the road's edge on its row with the arrow pointing across, or a sign at the top of
 // its lanes with the arrow pointing down or up. A crosser with an idle tag also stands at the
@@ -116,9 +123,10 @@ export function drawMover(
       const placed = project(PROJECTION, { distance, x: laneX });
       const drawn = showAtDepth(body.sprite, body.key, placed.scale, body.feet);
       const has = (candidate: string) => scene.anims.exists(animationKey(drawn.key, candidate));
+      const pose = isSliding(path, since) ? "dive" : tell === null ? null : CUE_POSE;
       const tag = lucky
         ? prizeMoverTag(has, path.movement, moving && !halted, halted)
-        : moverBodyTag(has, path.movement, moving && !halted);
+        : moverBodyTag(has, path.movement, moving && !halted, pose);
       const x = Math.round(placed.x);
       const y = Math.round(placed.y);
       body.sprite
@@ -128,7 +136,7 @@ export function drawMover(
       clipToRoad(body.sprite);
       if (tag !== undefined) {
         const standing = hasStopped(path, since) && !has(IDLE_TAG);
-        playTag(body.sprite, drawn.key, tag, still || standing);
+        playTag(body.sprite, drawn.key, tag, still || standing, ONCE_POSES.has(tag));
       }
       const cycle = body.sprite.anims.currentAnim?.duration;
       if (body.key !== BALL_KEY) {

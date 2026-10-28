@@ -341,7 +341,8 @@ export interface Tilt {
 }
 
 // How an obstacle moves when it comes as a mover, its first move after a cue
-// seconds.moverWarningSeconds long and each later one with no cue, and only while the mover is
+// seconds.moverWarningSeconds long and each later one with no cue unless its kind cues each, and
+// only while the mover is
 // still ahead of the pack's rows. A stepper's or hopper's later moves run back to back. approach:
 // steps steps toward the pack, each to the spot a lane to either side, a row down or diagonally
 // down that is nearest the pack as the step is chosen, seconds.moverStepSeconds each; the first's
@@ -368,18 +369,36 @@ export interface Tilt {
 // of the road's travel, ending in neither the pack's lane nor one it is moving into, no nearer it
 // across the road, and at most most rows up the road. step: steps spots, each a lane to either side
 // or a row toward or away, seconds.moverStepSeconds each.
+// bounce: hops hops a lane to one side and then back, strictly left and right in turn, the first
+// either way, seconds.moverHopSeconds each, each after a cue pauseSeconds long (the sign
+// spinner's spin). dive: across the road at speed of counts.dartLanesPerSecond, tilted as a
+// dart is, landing a lane short of the lane counts.dartStopLanesMin to Max lanes from the edge it
+// enters from, drawn per dive, then sliding that last lane at slide of its speed and staying down
+// there, coming down the road with it; it never turns back and never stops on the verge. follow:
+// steps steps a lane to either side as one block, seconds.moverStepSeconds each, each after a cue
+// pauseSeconds long (the leader's signal). stopAndGo: stops + 1 pushes down its lane at factor of
+// the road's speed, goSeconds each, standing still on the road for stopSeconds between them, each
+// push after a cue. sway: times times a step a lane to one side and back, rocking between two
+// lanes, seconds.moverStepSeconds each, pausing pauseSeconds after every step. A cue at least
+// seconds.moverWarningSeconds long precedes each move that has one.
+// The archetypes: dash and swoop are dart (a swoop has a tilt or a turn back), wander is step,
+// stalk is approach, cruise is inLane, and hop, bounce, dive, follow (follow the leader),
+// stopAndGo and sway are their own names.
 // Each in-lane mover's speed varies by up to multipliers.moverSpeedJitter either way and each
-// dart's by up to multipliers.dartSpeedJitter, each step and hop comes up to
+// dart's and dive's by up to multipliers.dartSpeedJitter, each step and hop comes up to
 // seconds.moverTimingJitter late, and each step's and hop's length varies by up to
 // seconds.moverMoveSecondsJitter of it either way.
 export type Movement =
   | { readonly kind: "approach"; readonly steps: MoveCount }
+  | { readonly hops: MoveCount; readonly kind: "bounce"; readonly pauseSeconds: number }
   | {
       readonly kind: "dart";
       readonly stopShare: number;
       readonly tilt: Tilt;
       readonly turnBackShare: number;
     }
+  | { readonly kind: "dive"; readonly slide: number; readonly speed: number; readonly tilt: Tilt }
+  | { readonly kind: "follow"; readonly pauseSeconds: number; readonly steps: MoveCount }
   | {
       readonly kind: "hop";
       readonly most: 1 | 2;
@@ -388,7 +407,15 @@ export type Movement =
       readonly times: MoveCount;
     }
   | { readonly kind: "inLane"; readonly factor: number }
-  | { readonly kind: "step"; readonly steps: MoveCount };
+  | { readonly kind: "step"; readonly steps: MoveCount }
+  | {
+      readonly factor: number;
+      readonly goSeconds: number;
+      readonly kind: "stopAndGo";
+      readonly stopSeconds: number;
+      readonly stops: MoveCount;
+    }
+  | { readonly kind: "sway"; readonly pauseSeconds: number; readonly times: MoveCount };
 export type MovementKind = Movement["kind"];
 
 // "obstacle": hit by accident. A card obstacle opens a card for the whole pack, with hitLabel
