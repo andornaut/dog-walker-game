@@ -14,7 +14,7 @@ export const TUNING = {
     dartStopLanesMin: 2,
     // About this many distraction movers step on and off each zone's edge lanes as scenery,
     // spread through it.
-    distractionsPerZone: 17,
+    distractionsPerZone: 21,
     // The Fanny pack holds this many spare treats.
     fannyPackTreats: 1,
     // The gear drops a neighbourhood places on average, by its position in the walk from 1: the
