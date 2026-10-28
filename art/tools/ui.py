@@ -1021,26 +1021,27 @@ def strip_well():
 WALK_BAR = (360, 48)
 # The walk bar's wells, in screen pixels: the cash, and the neighbourhood with its name and "n of N"
 # on one line.
-WALK_WELLS = ((5, 5, 70, 37), (87, 5, 132, 12))
+WALK_WELLS = ((5, 5, 70, 37), (83, 5, 140, 12))
 # The row of effect wells under the neighbourhood well, kept plain wood so the wells sit clear of
 # the grain: six 22x22 wells side by side from x 87 (the perk, Pocket, found item and three upgrades),
 # each lip against the next well, on rows 20 to 41. Between the trim lines (row 1 and row 45) the
 # neighbourhood well (rows 5 to 16) and the wells split the height evenly, 3 wood rows above the name
 # well, 3 between and 3 under the wells, and the cash well spans the same rows 5 to 41. Across the bar
-# the cash well sits 5 columns from the screen's edge, and the neighbourhood column (x 87 to 218) sits
-# 12 columns from the cash well and 12 from Help's face, with plain wood from x 219 to the four
-# buttons. Their hits, 34 wide, fill x 224 to 359 at
+# the cash well sits 5 columns from the screen's edge, and the neighbourhood column (x 83 to 222,
+# its text and effect wells 4 columns in from each side) sits 8 columns from the cash well and 8 from
+# Help's face, with plain wood from x 223 to the four buttons. Their hits, 34 wide, fill x 224 to 359 at
 # a 34 pitch, each face centred in its hit (faces at 231 + 34i), so 7 columns lie before Help's face
 # and after Pause's.
-EFFECT_ROW = (86, 17, 134, 26)
+EFFECT_ROW = (82, 17, 142, 26)
 EFFECT_WELL = 22
 
 
 def walk_bar():
     """360x48, ui-walk-bar: plum wood with a trim (dbrown on row 1; brown, dbrown and ink on rows
     45 to 47) and two ink wells, the grain kept 1px clear of each and of the effect row:
-    cash 5,5 70x37, sized for "$888" at 3x with no coin, and neighbourhood 87,5 132x12, one text line as
-    wide as the six effect wells under it, 12 columns from the cash well and 12 from Help's face at x 231.
+    cash 5,5 70x37, sized for "$888" at 3x with no coin, and neighbourhood 83,5 140x12, one text line
+    over the six effect wells with 4 columns of padding each side, 8 columns from the cash well and 8 from
+    Help's face at x 231.
     The game draws the effect wells, the Help, Sound, Settings and Pause buttons and every text and
     icon on it."""
     w, h = WALK_BAR
