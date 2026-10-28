@@ -119,10 +119,14 @@ def eve_top(wave):
             g.rect(24, 26 + b, 1, 6, "mauve")
             g.rect(22, 32 + b, 3, 2, "skin1")
         elif wave == "up":
-            g.rect(22, 19 + b, 3, 8, "pink")
-            g.rect(24, 19 + b, 1, 8, "mauve")
-            g.rect(22, 16 + b, 3, 3, "skin1")
-            g.p(21, 17 + b, "skin1")
+            # the forearm raised straight out past the hair, so the arm and hand break her outline and keep
+            # their own, the hand 5 rows above out's
+            g.rect(22, 22 + b, 3, 5, "pink")
+            g.rect(24, 22 + b, 1, 5, "mauve")
+            g.rect(25, 14 + b, 3, 9, "pink")
+            g.rect(27, 14 + b, 1, 9, "mauve")
+            g.rect(25, 11 + b, 3, 3, "skin1")
+            g.p(24, 12 + b, "skin1")
         else:
             g.rect(22, 23 + b, 3, 4, "pink")
             g.rect(24, 23 + b, 1, 4, "mauve")
