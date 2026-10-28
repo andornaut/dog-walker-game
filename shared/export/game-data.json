@@ -1499,12 +1499,13 @@
     {
       "id": "ball",
       "movement": {
-        "hops": {
-          "max": 4,
-          "min": 2
+        "kind": "dart",
+        "stopShare": 0,
+        "tilt": {
+          "max": 0,
+          "min": 0
         },
-        "kind": "bounce",
-        "pauseSeconds": 0.6
+        "turnBackShare": 0
       },
       "name": "Ball",
       "shape": {

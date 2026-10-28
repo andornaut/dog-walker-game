@@ -6,7 +6,7 @@ import type { MinorObstacle } from "./types";
 // and stands still otherwise. onFoot marks a person or an animal, not a vehicle or a thing.
 export const MINOR_OBSTACLES = {
   ball: {
-    movement: { hops: { max: 4, min: 2 }, kind: "bounce", pauseSeconds: 0.6 },
+    movement: { kind: "dart", stopShare: 0, tilt: { max: 0, min: 0 }, turnBackShare: 0 },
     name: "Ball",
     shape: { lanes: 1, rows: 1 },
   },
