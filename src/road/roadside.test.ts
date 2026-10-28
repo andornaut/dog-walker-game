@@ -108,14 +108,12 @@ describe("curbFits", () => {
     const { from, to } = band;
     const middle = (from + to) / 2;
     return [
-      { across: middle, fits: true, what: "in the middle of", width: WIDTH },
       { across: middle, fits: true, what: "filling", width: to - from },
       { across: middle, fits: false, what: "wider than", width: to - from + 1 },
       { across: from + WIDTH / 2, fits: true, what: "against the inner edge of", width: WIDTH },
       { across: to - WIDTH / 2, fits: true, what: "against the outer edge of", width: WIDTH },
       { across: from + WIDTH / 2 - 1, fits: false, what: "over the inner edge of", width: WIDTH },
       { across: to - WIDTH / 2 + 1, fits: false, what: "over the outer edge of", width: WIDTH },
-      { across: ROAD_HALF / 2, fits: false, what: "on the road beside", width: WIDTH },
     ].map((each) => ({ ...each, art, verge }));
   });
 

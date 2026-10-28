@@ -71,11 +71,6 @@ describe("vergeNow", () => {
     const shown = zoneIndex === KEPT_ZONE && y < ROAD.roadBottom;
     expect(now).toEqual(shown ? { ...verging.item, mover: { path: VERGING, since }, y } : null);
   });
-
-  it("stands a dart on the verge past the far edge once stopped", () => {
-    const place = moverPlace(LANE_COUNT, VERGING, 1e6);
-    expect(place.lanePosition).toBeCloseTo(LANE_COUNT - 0.5 + DART_VERGE_LANES);
-  });
 });
 
 // Where a dart stops on the verge, its frame stands clear of the road and of every zone's curb

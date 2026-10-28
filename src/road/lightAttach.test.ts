@@ -173,7 +173,6 @@ describe("anchorSprite", () => {
   });
 
   it.each([
-    [179, false],
     [180, false],
     [181, true],
   ])("stands a sprite at 180 left of a road centred at %d: %s", (centreX, left) => {

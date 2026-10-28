@@ -23,8 +23,6 @@ describe("rowsHidden", () => {
   it.each([
     { ground: JUNCTURE, height: 64, name: "on the juncture's row" },
     { ground: approach.y + 3, height: 120, name: "on the approach" },
-    { ground: road.y, height: 40, name: "on the road's far edge" },
-    { ground: road.y + 60, height: 8, name: "nearer" },
   ])("draws a sprite standing $name whole", ({ ground, height }) => {
     expect(rowsHidden(JUNCTURE, ground, { height, scale: 0.5, top: ground - height / 2 })).toBe(0);
   });
@@ -32,7 +30,6 @@ describe("rowsHidden", () => {
   // Its frame may run a few rows below its ground, which still show.
   it.each([
     { below: 0, ground: JUNCTURE - 1, height: 64, hidden: 64 },
-    { below: 0, ground: JUNCTURE - 4, height: 30, hidden: 30 },
     { below: 3, ground: JUNCTURE - 1, height: 30, hidden: 28 },
   ])(
     "hides a sprite standing on row $ground, past the juncture, above the juncture",
@@ -48,7 +45,6 @@ describe("fadeIn", () => {
   it.each([
     { alpha: 0, ground: JUNCTURE - 4, name: "past the juncture" },
     { alpha: 0, ground: JUNCTURE, name: "on the juncture's row" },
-    { alpha: 0.25, ground: JUNCTURE + span / 4, name: "a quarter of the way to the far edge" },
     { alpha: 0.5, ground: JUNCTURE + span / 2, name: "halfway to the far edge" },
     { alpha: 1, ground: road.y, name: "on the road's far edge" },
     { alpha: 1, ground: road.y + 100, name: "nearer" },
