@@ -186,15 +186,13 @@ describe("the roadside table", () => {
     expect(zone.slot).toBeGreaterThan(0);
   });
 
-  it.each(KEYS.flatMap((key) => DEPTH_STEPS.map(({ suffix }) => `${key}${suffix}`)))(
-    "has %s in the manifest",
-    (key) => {
-      expect(MANIFEST_KEYS).toContain(key);
-    },
-  );
+  it("has every prop at every depth step in the manifest", () => {
+    const keys = KEYS.flatMap((key) => DEPTH_STEPS.map(({ suffix }) => `${key}${suffix}`));
+    expect(keys.filter((key) => !MANIFEST_KEYS.has(key))).toEqual([]);
+  });
 
-  it.each(ROADSIDE.shadowed)("shadows %s, a key the manifest has", (key) => {
-    expect(MANIFEST_KEYS).toContain(key);
+  it("shadows only keys the manifest has", () => {
+    expect(ROADSIDE.shadowed.filter((key) => !MANIFEST_KEYS.has(key))).toEqual([]);
   });
 
   // On a lawn, past the sidewalk; on paving out to the screen's edges, past the curb and strips.
