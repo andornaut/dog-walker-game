@@ -27,7 +27,6 @@ import {
 import {
   BUTTON_COLOURS,
   type ButtonLook,
-  DISABLED_COLOURS,
   GREYED,
   SELECT_OUTSET,
   type SelectLook,
@@ -172,7 +171,7 @@ const BUTTON_LIP_PX = 4;
 function drawDisabledButton(g: GameObjects.Graphics, rect: Rect): void {
   drawFramedRect(
     g,
-    { border: PALETTE.ink, fill: PALETTE[DISABLED_COLOURS.face] },
+    { border: PALETTE.ink, fill: PALETTE[GREYED.face] },
     { ...rect, height: rect.height - BUTTON_LIP_PX, y: rect.y + BUTTON_PRESS_PX },
   );
 }
@@ -541,8 +540,7 @@ export interface SelectTileOptions {
 function drawTileFace(scene: Scene, edge: boolean, look: SelectLook, rect: Rect) {
   const g = scene.add.graphics();
   const fill = PALETTE[look.face];
-  const border =
-    look.state === "selected" ? PALETTE.ink : edge ? PALETTE[DISABLED_COLOURS.edge] : fill;
+  const border = look.state === "selected" ? PALETTE.ink : edge ? PALETTE[GREYED.edge] : fill;
   drawFramedRect(g, { border, fill }, rect);
   return g;
 }

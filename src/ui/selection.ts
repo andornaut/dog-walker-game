@@ -41,14 +41,6 @@ const LOOKS: Readonly<Record<TileState, Omit<SelectLook, "state">>> = {
   selected: { face: "yellow", text: "plum" },
 };
 
-// The disabled look drawn in code where the art has none: the flat grey face in its line,
-// and its label.
-export const DISABLED_COLOURS = {
-  edge: GREYED.edge,
-  face: GREYED.face,
-  text: GREYED.text,
-} as const;
-
 // A button's look: its interaction state, or secondary, the cream button a card's own
 // controls wear in place of normal, with ui-button's secondary tags.
 export type ButtonLook = ButtonState | "secondary";
@@ -56,7 +48,7 @@ export type ButtonLook = ButtonState | "secondary";
 // How ui-button colours each look: its face, the lip under a raised one, and the label.
 // Primary is the green go button; disabled is flat, with no lip.
 export const BUTTON_COLOURS = {
-  disabled: { face: DISABLED_COLOURS.face, label: DISABLED_COLOURS.text, lip: null },
+  disabled: { face: GREYED.face, label: GREYED.text, lip: null },
   normal: { face: "cream", label: "plum", lip: "tan" },
   primary: { face: "green", label: "ink", lip: "forest" },
   secondary: { face: "cream", label: "plum", lip: "tan" },

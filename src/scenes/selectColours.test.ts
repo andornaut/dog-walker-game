@@ -7,14 +7,7 @@ import { STATS_LAYOUT } from "../home/statsLayout";
 import type { EffectNameKind } from "../hud/effectNames";
 import { keysOf } from "../lib/records";
 import { NEUTRAL_RAMP, PALETTE } from "../ui/phaser/palette";
-import {
-  BUTTON_COLOURS,
-  DISABLED_COLOURS,
-  GREYED,
-  pictureBox,
-  PLATE_LOOKS,
-  selectLook,
-} from "../ui/selection";
+import { BUTTON_COLOURS, GREYED, pictureBox, PLATE_LOOKS, selectLook } from "../ui/selection";
 import { DEBUFF_COLOURS } from "./debuffColours";
 import { EFFECT_PILLS, pillColours } from "./effectNameColours";
 
@@ -76,15 +69,10 @@ describe("interaction-state colours", () => {
         PALETTE[BUTTON_COLOURS.disabled.face],
         EXEMPT,
       ],
-      [
-        "a muted volume row's label on the panel",
-        PALETTE[DISABLED_COLOURS.text],
-        PALETTE.cream,
-        TEXT,
-      ],
+      ["a muted volume row's label on the panel", PALETTE[GREYED.text], PALETTE.cream, TEXT],
       [
         "a disabled card's effect",
-        PALETTE[DISABLED_COLOURS.text],
+        PALETTE[GREYED.text],
         greyFor(NEUTRAL_RAMP, 0, PALETTE.cream),
         TEXT,
       ],

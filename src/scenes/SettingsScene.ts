@@ -30,7 +30,7 @@ import { PLAIN_ITEM, tileState } from "../ui/interaction";
 import { drawFocusRing, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, fitPixelTextsAlike, type LabelToFit } from "../ui/phaser/pixelText";
-import { DISABLED_COLOURS } from "../ui/selection";
+import { GREYED } from "../ui/selection";
 import { addDetailCard } from "./homePanels";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
@@ -365,7 +365,7 @@ export class SettingsScene extends Scene {
     const { track: slider } = this.layout;
     const active = tileState({ ...PLAIN_ITEM, available: !settings.muted }) !== "disabled";
     const steps = volumeSteps(settings[key]);
-    const ink = active ? PALETTE.plum : PALETTE[DISABLED_COLOURS.text];
+    const ink = active ? PALETTE.plum : PALETTE[GREYED.text];
     const { iconDy, labelDy } = SETTINGS_ROW.slider;
     addTagImage(this, row.icon, active && steps > 0 ? "on" : "off", x + ICON_DX, y + iconDy);
     const words = gameData.menuText.settings;

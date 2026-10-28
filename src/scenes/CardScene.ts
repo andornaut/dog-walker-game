@@ -57,7 +57,7 @@ import {
   withProbe,
 } from "../ui/phaser/pixelText";
 import { addRampDim } from "../ui/phaser/rampDim";
-import { DISABLED_COLOURS, GREYED } from "../ui/selection";
+import { GREYED } from "../ui/selection";
 import { addCharm } from "./buffCharm";
 import { addNamePills } from "./effectNameColours";
 import { onSceneEvent } from "./overlay";
@@ -648,7 +648,7 @@ export class CardScene extends Scene {
       snapCentre(warning, centreX);
     }
     if (marks.forgiven === null) {
-      const effectColour = grey ? PALETTE[DISABLED_COLOURS.text] : PALETTE.plum;
+      const effectColour = grey ? PALETTE[GREYED.text] : PALETTE.plum;
       const effect = this.centred(centreX, 0, "", effectColour);
       setFittedText(effect, shown.effect, centreX, y + shown.box.y);
       snapCentre(effect, centreX);
