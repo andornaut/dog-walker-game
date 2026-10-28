@@ -58,6 +58,16 @@ delivery-cyclist    48x72   Kensington Market and Yonge Street; a fast rider com
                             bike, the rider and the box leaning right about the handlebar, the box's top
                             over to the frame's right edge and the tire swinging out left, the head
                             upright over the neck
+segway-rider        48x72   Distillery District, 1 lane; a Segway tour rider coming down a lane at the
+                            player, facing it as delivery-cyclist does, standing upright on the
+                            platform between the Segway's two tires (edge-on either side under light
+                            grey fenders), the hands on the T handlebar's grips, its column down in
+                            front of the legs: a white bike helmet with two vents, black sunglasses, an
+                            open hi-vis yellow vest with two silver reflective bands over an azure
+                            tee, stone shorts, white sneakers, an orange pennant on a whip pole behind
+                            the screen-right shoulder; ride (4 frames, 90ms): nothing to pedal, so a
+                            1px bob over frames 1 and 2, the tread falling down both tires 1px a frame
+                            and the pennant's tip fluttering up, level, down, level
 gardener            48x72   Cabbagetown; a slow rider coming down a lane at the player, walking behind
                             a green wheelbarrow heaped with autumn leaves (reds, oranges and browns, no
                             gold or amber): an olive canvas sun hat with a wide brim, white hair, a
@@ -797,6 +807,102 @@ def delivery_tilted(whole, body, head, tilt, p):
             if head.px[y][x] and 0 <= x + neck < whole.w:
                 out.px[y][x + neck] = whole.px[y][x]
     return out
+
+
+# ---------- segway-rider: facing the player, standing on a Segway coming down a lane at it ----------
+
+# Riding: nothing to pedal, so the rider bobs 1px over the cobbles on frames 1 and 2, the knees taking it, the
+# tread falls down both tires 1px a frame and the pennant flutters, its tip up, level, down, level. 4 frames
+# at 90ms.
+SEGWAY_RIDE = tuple(dict(bob=b, roll=k, flag=f) for k, (b, f) in enumerate(((0, -1), (1, 0), (1, 1), (0, 0))))
+SEGWAY_RIDE_MS = 90
+SEGWAY_RIM = {**LIT, "cobalt": ("azure", None), "dstone": ("stone", None)}
+
+
+def segway_rider(bob=0, roll=0, flag=0):
+    """A Segway tour rider facing the player, standing upright on the platform between its two wheels, laid
+    out on 32x48 as delivery_cyclist is: a white bike helmet with two vents and dark straps, black
+    sunglasses, an azure tee under an open hi-vis yellow vest with two silver reflective bands, stone shorts,
+    white sneakers; the hands on the grips of the T handlebar, its column down in front of the legs to the
+    black platform; the tires edge-on either side under light grey fenders; behind the screen-right shoulder
+    a whip pole with an orange pennant at its tip. bob lowers everything above the shoes; roll is the tread's
+    phase; flag moves the pennant's tip up (-1) or down (1). The road outline and the lit rim."""
+    g = edged(Grid(32, 48))
+    b = bob
+    # the whip pole up from the back of the platform, the orange pennant flying from its tip
+    g.rect(26.5, 1 + b, 0.67, 40, "lgrey")
+    g.tri((27, 1 + b), (27, 7 + b), (31.5, 4 + 1.5 * flag + b), "orange")
+    g.tri((27, 4.5 + b), (27, 7 + b), (31.5, 4 + 1.5 * flag + b), "rust")
+    # the tires edge-on either side of the platform, the tread rolling down them, light grey fenders on top
+    for cx in (6, 26):
+        g.blob(cx, 40.5, 2.6, 6, "ink")
+        for x in (cx - 1, cx):
+            tread_rows(g, x, 36, 46.5, roll, K["dslate"])
+        g.cel(cx, 35, 3, 1.6, "lgrey", "grey", "white")
+    # the platform between them: a slate mat on top, its black face
+    g.rect(8.5, 42, 15, 1, "slate")
+    g.rect(8.5, 43, 15, 2, "ink")
+    # the legs standing on the platform, the knees taking the bob: stone shorts, bare shins, white sneakers
+    for x in (11, 18):
+        g.rect(x, 31 + b, 3, 4, "stone")
+        g.rect(x + 2, 31 + b, 1, 4, "dstone")
+        g.rect(x, 35 + b, 3, 5.5 - b, "skin1")
+        g.rect(x + 2, 35 + b, 1, 5.5 - b, "skin2")
+        g.rect(x - 0.5, 40, 4, 2, "white")
+        g.rect(x - 0.5, 41.5, 4, 0.67, "lgrey")
+    # the azure tee, the short sleeves, the forearms down to the grips
+    g.rect(9, 20 + b, 14, 11, "azure")
+    g.rect(20, 20 + b, 3, 11, "cobalt")
+    g.p(9, 20 + b, None)
+    g.p(22, 20 + b, None)
+    for x in (6, 23):
+        g.rect(x, 21 + b, 3, 3.5, "azure" if x < 16 else "cobalt")
+        g.rect(x, 24.5 + b, 3, 2.5, "skin1")
+        g.rect(x + 2, 24.5 + b, 1, 2.5, "skin2")
+    # the hi-vis vest over it, open down the front, two silver reflective bands across
+    for x0 in (9, 17):
+        g.rect(x0, 20.5 + b, 6, 10, "yellow")
+    g.rect(20, 20.5 + b, 3, 10, "amber")
+    g.rect(9, 20.5 + b, 1, 10, "cream")
+    for y in (24, 27.5):
+        g.rect(9, y + b, 6, 1, "lgrey")
+        g.rect(17, y + b, 6, 1, "lgrey")
+        g.rect(20, y + b, 3, 1, "grey")
+    g.p(9, 20.5 + b, None)
+    g.p(22, 20.5 + b, None)
+    # the T handlebar: the bar across, the column down in front of the legs to the platform, the hands on the
+    # grips
+    g.rect(7, 27.5 + b, 18, 1.5, "ink")
+    g.rect(7, 27.5 + b, 18, 0.67, "grey")
+    g.rect(15, 29 + b, 2, 13 - b, "dslate")
+    g.rect(15, 29 + b, 0.67, 13 - b, "slate")
+    g.rect(14, 26.5 + b, 4, 2.5, "ink")
+    g.p(16, 27.5 + b, "green")
+    for x in (5.5, 23.5):
+        g.rect(x, 26.5 + b, 3, 3, "skin1")
+        g.rect(x + 2, 26.5 + b, 1, 3, "skin2")
+    # head: the neck, brown hair at the sides, the face, black sunglasses and a smile
+    g.rect(14, 18.5 + b, 4, 2, "skin2")
+    g.rect(8, 10 + b, 2, 5, "brown")
+    g.rect(22, 10 + b, 2, 5, "dbrown")
+    face_disc(g, 16, 14 + b, 7.5, 6.5, "skin1", "skin2")
+    g.rect(9, 12.5 + b, 14, 2.5, "ink")
+    g.rect(15, 12.5 + b, 2, 1, "slate")
+    g.p(10.5, 12.5 + b, "white")
+    g.p(18.5, 12.5 + b, "white")
+    g.p(14, 16.5 + b, "dbrown")
+    g.p(17, 16.5 + b, "dbrown")
+    g.rect(15, 17.5 + b, 2, 1, "dbrown")
+    # the dark chin straps down the cheeks, then the white bike helmet, its brim and two vents
+    g.rect(8.5, 13 + b, 1, 5, "dslate")
+    g.rect(22.5, 13 + b, 1, 5, "dslate")
+    g.cel(16, 9 + b, 8.5, 5, "white", "lgrey")
+    g.rect(7.5, 10 + b, 17, 2, "white")
+    g.rect(21.5, 10 + b, 3, 2, "lgrey")
+    g.rect(8, 12 + b, 16, 0.67, "grey")
+    for x in (12, 18.5):
+        g.rect(x, 5.5 + b, 1.5, 2.5, "grey")
+    return rim(g, SEGWAY_RIM)
 
 
 # ---------- gardener: facing the player, pushing a wheelbarrow of leaves at it ----------
@@ -2186,6 +2292,13 @@ def steps(suffix, s):
                                          DELIVERY_RIDE_MS),
                                         ("merge", [delivery_at(s, **q).outlined() for q in DELIVERY_MERGE],
                                          DELIVERY_MERGE_MS)]
+
+    def segway(q):
+        # the tread's phase and the pennant are choices, not offsets, so they skip the snap
+        return minis.small(here, p, segway_rider, roll=q["roll"], flag=q["flag"],
+                           **posed(dict(bob=q["bob"]), p)).outlined()
+
+    yield f"segway-rider{suffix}", [("ride", [segway(q) for q in SEGWAY_RIDE], SEGWAY_RIDE_MS)]
     yield f"gardener{suffix}", [("push", [own(gardener, q) for q in GARDENER_PUSH], GARDENER_PUSH_MS),
                                 ("idle", [own(gardener, q) for q in GARDENER_IDLE], road.BREATH_MS),
                                 ("cue", [own(gardener, q) for q in GARDENER_CUE], GARDENER_CUE_MS)]

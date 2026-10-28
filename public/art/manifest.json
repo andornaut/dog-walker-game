@@ -9977,6 +9977,87 @@
       }
     },
     {
+      "key": "segway-rider",
+      "png": "sprites/segway-rider.png",
+      "json": "sprites/segway-rider.json",
+      "anchor": {
+        "feetY": 70,
+        "opaqueWidth": 45
+      }
+    },
+    {
+      "key": "segway-rider@50",
+      "png": "sprites/segway-rider@50.png",
+      "json": "sprites/segway-rider@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "segway-rider@56",
+      "png": "sprites/segway-rider@56.png",
+      "json": "sprites/segway-rider@56.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "segway-rider@62",
+      "png": "sprites/segway-rider@62.png",
+      "json": "sprites/segway-rider@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "segway-rider@69",
+      "png": "sprites/segway-rider@69.png",
+      "json": "sprites/segway-rider@69.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "segway-rider@75",
+      "png": "sprites/segway-rider@75.png",
+      "json": "sprites/segway-rider@75.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "segway-rider@81",
+      "png": "sprites/segway-rider@81.png",
+      "json": "sprites/segway-rider@81.json",
+      "anchor": {
+        "feetY": 58,
+        "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "segway-rider@88",
+      "png": "sprites/segway-rider@88.png",
+      "json": "sprites/segway-rider@88.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "segway-rider@94",
+      "png": "sprites/segway-rider@94.png",
+      "json": "sprites/segway-rider@94.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 42
+      }
+    },
+    {
       "key": "sign-spinner",
       "png": "sprites/sign-spinner.png",
       "json": "sprites/sign-spinner.json",
