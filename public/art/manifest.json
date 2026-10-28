@@ -6512,7 +6512,7 @@
       "json": "sprites/owner-buddy.json",
       "anchor": {
         "feetY": 45,
-        "opaqueWidth": 24
+        "opaqueWidth": 28
       }
     },
     {
@@ -7458,6 +7458,492 @@
       "anchor": {
         "feetY": 67,
         "opaqueWidth": 45
+      }
+    },
+    {
+      "key": "roadside-beach-chair-blue",
+      "png": "sprites/roadside-beach-chair-blue.png",
+      "json": "sprites/roadside-beach-chair-blue.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "roadside-beach-chair-blue@50",
+      "png": "sprites/roadside-beach-chair-blue@50.png",
+      "json": "sprites/roadside-beach-chair-blue@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "roadside-beach-chair-blue@56",
+      "png": "sprites/roadside-beach-chair-blue@56.png",
+      "json": "sprites/roadside-beach-chair-blue@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "roadside-beach-chair-blue@62",
+      "png": "sprites/roadside-beach-chair-blue@62.png",
+      "json": "sprites/roadside-beach-chair-blue@62.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "roadside-beach-chair-blue@69",
+      "png": "sprites/roadside-beach-chair-blue@69.png",
+      "json": "sprites/roadside-beach-chair-blue@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "roadside-beach-chair-blue@75",
+      "png": "sprites/roadside-beach-chair-blue@75.png",
+      "json": "sprites/roadside-beach-chair-blue@75.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "roadside-beach-chair-blue@81",
+      "png": "sprites/roadside-beach-chair-blue@81.png",
+      "json": "sprites/roadside-beach-chair-blue@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "roadside-beach-chair-blue@88",
+      "png": "sprites/roadside-beach-chair-blue@88.png",
+      "json": "sprites/roadside-beach-chair-blue@88.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "roadside-beach-chair-blue@94",
+      "png": "sprites/roadside-beach-chair-blue@94.png",
+      "json": "sprites/roadside-beach-chair-blue@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "roadside-beach-chair-coral",
+      "png": "sprites/roadside-beach-chair-coral.png",
+      "json": "sprites/roadside-beach-chair-coral.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "roadside-beach-chair-coral@50",
+      "png": "sprites/roadside-beach-chair-coral@50.png",
+      "json": "sprites/roadside-beach-chair-coral@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "roadside-beach-chair-coral@56",
+      "png": "sprites/roadside-beach-chair-coral@56.png",
+      "json": "sprites/roadside-beach-chair-coral@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "roadside-beach-chair-coral@62",
+      "png": "sprites/roadside-beach-chair-coral@62.png",
+      "json": "sprites/roadside-beach-chair-coral@62.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "roadside-beach-chair-coral@69",
+      "png": "sprites/roadside-beach-chair-coral@69.png",
+      "json": "sprites/roadside-beach-chair-coral@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "roadside-beach-chair-coral@75",
+      "png": "sprites/roadside-beach-chair-coral@75.png",
+      "json": "sprites/roadside-beach-chair-coral@75.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "roadside-beach-chair-coral@81",
+      "png": "sprites/roadside-beach-chair-coral@81.png",
+      "json": "sprites/roadside-beach-chair-coral@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "roadside-beach-chair-coral@88",
+      "png": "sprites/roadside-beach-chair-coral@88.png",
+      "json": "sprites/roadside-beach-chair-coral@88.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "roadside-beach-chair-coral@94",
+      "png": "sprites/roadside-beach-chair-coral@94.png",
+      "json": "sprites/roadside-beach-chair-coral@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "roadside-beach-chair-green",
+      "png": "sprites/roadside-beach-chair-green.png",
+      "json": "sprites/roadside-beach-chair-green.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "roadside-beach-chair-green@50",
+      "png": "sprites/roadside-beach-chair-green@50.png",
+      "json": "sprites/roadside-beach-chair-green@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "roadside-beach-chair-green@56",
+      "png": "sprites/roadside-beach-chair-green@56.png",
+      "json": "sprites/roadside-beach-chair-green@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "roadside-beach-chair-green@62",
+      "png": "sprites/roadside-beach-chair-green@62.png",
+      "json": "sprites/roadside-beach-chair-green@62.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "roadside-beach-chair-green@69",
+      "png": "sprites/roadside-beach-chair-green@69.png",
+      "json": "sprites/roadside-beach-chair-green@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "roadside-beach-chair-green@75",
+      "png": "sprites/roadside-beach-chair-green@75.png",
+      "json": "sprites/roadside-beach-chair-green@75.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "roadside-beach-chair-green@81",
+      "png": "sprites/roadside-beach-chair-green@81.png",
+      "json": "sprites/roadside-beach-chair-green@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "roadside-beach-chair-green@88",
+      "png": "sprites/roadside-beach-chair-green@88.png",
+      "json": "sprites/roadside-beach-chair-green@88.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "roadside-beach-chair-green@94",
+      "png": "sprites/roadside-beach-chair-green@94.png",
+      "json": "sprites/roadside-beach-chair-green@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-blue",
+      "png": "sprites/roadside-beach-umbrella-blue.png",
+      "json": "sprites/roadside-beach-umbrella-blue.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-blue@50",
+      "png": "sprites/roadside-beach-umbrella-blue@50.png",
+      "json": "sprites/roadside-beach-umbrella-blue@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-blue@56",
+      "png": "sprites/roadside-beach-umbrella-blue@56.png",
+      "json": "sprites/roadside-beach-umbrella-blue@56.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-blue@62",
+      "png": "sprites/roadside-beach-umbrella-blue@62.png",
+      "json": "sprites/roadside-beach-umbrella-blue@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-blue@69",
+      "png": "sprites/roadside-beach-umbrella-blue@69.png",
+      "json": "sprites/roadside-beach-umbrella-blue@69.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 43
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-blue@75",
+      "png": "sprites/roadside-beach-umbrella-blue@75.png",
+      "json": "sprites/roadside-beach-umbrella-blue@75.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 47
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-blue@81",
+      "png": "sprites/roadside-beach-umbrella-blue@81.png",
+      "json": "sprites/roadside-beach-umbrella-blue@81.json",
+      "anchor": {
+        "feetY": 58,
+        "opaqueWidth": 50
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-blue@88",
+      "png": "sprites/roadside-beach-umbrella-blue@88.png",
+      "json": "sprites/roadside-beach-umbrella-blue@88.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-blue@94",
+      "png": "sprites/roadside-beach-umbrella-blue@94.png",
+      "json": "sprites/roadside-beach-umbrella-blue@94.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 58
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-coral",
+      "png": "sprites/roadside-beach-umbrella-coral.png",
+      "json": "sprites/roadside-beach-umbrella-coral.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-coral@50",
+      "png": "sprites/roadside-beach-umbrella-coral@50.png",
+      "json": "sprites/roadside-beach-umbrella-coral@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-coral@56",
+      "png": "sprites/roadside-beach-umbrella-coral@56.png",
+      "json": "sprites/roadside-beach-umbrella-coral@56.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-coral@62",
+      "png": "sprites/roadside-beach-umbrella-coral@62.png",
+      "json": "sprites/roadside-beach-umbrella-coral@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-coral@69",
+      "png": "sprites/roadside-beach-umbrella-coral@69.png",
+      "json": "sprites/roadside-beach-umbrella-coral@69.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 43
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-coral@75",
+      "png": "sprites/roadside-beach-umbrella-coral@75.png",
+      "json": "sprites/roadside-beach-umbrella-coral@75.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 47
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-coral@81",
+      "png": "sprites/roadside-beach-umbrella-coral@81.png",
+      "json": "sprites/roadside-beach-umbrella-coral@81.json",
+      "anchor": {
+        "feetY": 58,
+        "opaqueWidth": 50
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-coral@88",
+      "png": "sprites/roadside-beach-umbrella-coral@88.png",
+      "json": "sprites/roadside-beach-umbrella-coral@88.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-coral@94",
+      "png": "sprites/roadside-beach-umbrella-coral@94.png",
+      "json": "sprites/roadside-beach-umbrella-coral@94.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 58
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-green",
+      "png": "sprites/roadside-beach-umbrella-green.png",
+      "json": "sprites/roadside-beach-umbrella-green.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-green@50",
+      "png": "sprites/roadside-beach-umbrella-green@50.png",
+      "json": "sprites/roadside-beach-umbrella-green@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-green@56",
+      "png": "sprites/roadside-beach-umbrella-green@56.png",
+      "json": "sprites/roadside-beach-umbrella-green@56.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-green@62",
+      "png": "sprites/roadside-beach-umbrella-green@62.png",
+      "json": "sprites/roadside-beach-umbrella-green@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-green@69",
+      "png": "sprites/roadside-beach-umbrella-green@69.png",
+      "json": "sprites/roadside-beach-umbrella-green@69.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 43
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-green@75",
+      "png": "sprites/roadside-beach-umbrella-green@75.png",
+      "json": "sprites/roadside-beach-umbrella-green@75.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 47
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-green@81",
+      "png": "sprites/roadside-beach-umbrella-green@81.png",
+      "json": "sprites/roadside-beach-umbrella-green@81.json",
+      "anchor": {
+        "feetY": 58,
+        "opaqueWidth": 50
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-green@88",
+      "png": "sprites/roadside-beach-umbrella-green@88.png",
+      "json": "sprites/roadside-beach-umbrella-green@88.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "roadside-beach-umbrella-green@94",
+      "png": "sprites/roadside-beach-umbrella-green@94.png",
+      "json": "sprites/roadside-beach-umbrella-green@94.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 58
       }
     },
     {
