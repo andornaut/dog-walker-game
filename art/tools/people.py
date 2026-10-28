@@ -83,74 +83,89 @@ def cheeks(g, b, c="pink"):
 
 
 def eve_top(wave):
-    """Eve, YouTuber, dramatic: really small, her head and body drawn 6 rows lower than the others' over
-    shorter legs, and slighter, with a narrower torso and arms. Long blonde hair past the shoulders with a swept
-    fringe, gold hoop earrings, a bright pink puffer jacket over a white top, a denim-blue skirt and white
-    sneakers, and a silver vlog camera with a red recording light on a short grip, held up in her left hand
-    beside her hair, its lens turned on her face."""
+    """Eve, YouTuber, dramatic: a young girl, about 78% of an adult owner's height. Her head, the others' size,
+    is drawn 9 rows lower than theirs, over a short, slim torso and short, slim legs (eve_legs). Long blonde
+    hair past the shoulders with a swept fringe, gold hoop earrings, a bright pink puffer jacket over a white top,
+    a denim-blue skirt and white sneakers, and a silver vlog camera on a short grip held up in her left hand
+    beside her hair: a red recording light on its body, a top plate, and a round navy lens with a lit glass
+    turned on her face."""
     def top(g, b):
         # the skirt, flared at the hem
-        g.rect(10, 34 + b, 12, 4, "blue")
-        g.rect(9, 37 + b, 14, 1, "blue")
-        g.rect(19, 34 + b, 3, 4, "navy")
-        g.rect(19, 37 + b, 4, 1, "navy")
+        g.rect(11, 35 + b, 10, 3, "blue")
+        g.rect(10, 37 + b, 12, 1, "blue")
+        g.rect(18, 35 + b, 3, 3, "navy")
+        g.rect(18, 37 + b, 4, 1, "navy")
         # the puffer, quilted across, open over the white top
-        g.rect(10, 26 + b, 12, 8, "pink")
-        g.rect(19, 26 + b, 3, 8, "mauve")
-        for y in (29, 32):
-            g.rect(10, y + b, 9, 1, "mauve")
-            g.rect(19, y + b, 3, 1, "purple")
-        g.rect(15, 26 + b, 2, 8, "white")
-        head(g, b + 6, "skin1", "skin2")
+        g.rect(11, 29 + b, 10, 6, "pink")
+        g.rect(18, 29 + b, 3, 6, "mauve")
+        for y in (31, 34):
+            g.rect(11, y + b, 7, 1, "mauve")
+            g.rect(18, y + b, 3, 1, "purple")
+        g.rect(15, 29 + b, 2, 6, "white")
+        head(g, b + 9, "skin1", "skin2")
         # the hair down past the shoulders, and the fringe swept across the forehead
-        g.cel(16, 13.5 + b, 8.5, 4.5, "yellow", "amber", "white")
-        g.cel(12, 14.5 + b, 3.5, 2, "yellow", "amber", "white")
-        g.rect(8, 15 + b, 2, 14, "yellow")
-        g.rect(23, 15 + b, 2, 14, "amber")
-        # gold hoops under the bob, and the lashes at the eyes' outer corners
-        g.p(8, 22 + b, "orange")
-        g.p(24, 22 + b, "orange")
-        face_front(g, 16, 19 + b)
-        g.p(10, 18 + b, "ink")
-        g.p(22, 18 + b, "ink")
-        cheeks(g, b + 6)
-        # the right arm, over the bob: it hangs, or waves, up raised straight and out swung outward
+        g.cel(16, 16.5 + b, 8.5, 4.5, "yellow", "amber", "white")
+        g.cel(12, 17.5 + b, 3.5, 2, "yellow", "amber", "white")
+        g.rect(8, 18 + b, 2, 14, "yellow")
+        g.rect(23, 18 + b, 2, 14, "amber")
+        # gold hoops under the hair
+        g.p(8, 25 + b, "orange")
+        g.p(24, 25 + b, "orange")
+        face_front(g, 16, 22 + b)
+        cheeks(g, b + 9)
+        # the right arm, over the hair: it hangs, or waves, up raised straight and out swung outward
         if wave is None:
-            g.rect(22, 26 + b, 3, 6, "pink")
-            g.rect(24, 26 + b, 1, 6, "mauve")
-            g.rect(22, 32 + b, 3, 2, "skin1")
+            g.rect(21, 29 + b, 3, 6, "pink")
+            g.rect(23, 29 + b, 1, 6, "mauve")
+            g.rect(21, 35 + b, 3, 2, "skin1")
         elif wave == "up":
             # the forearm raised straight out past the hair, so the arm and hand break her outline and keep
             # their own, the hand 5 rows above out's
-            g.rect(22, 22 + b, 3, 5, "pink")
-            g.rect(24, 22 + b, 1, 5, "mauve")
-            g.rect(25, 14 + b, 3, 9, "pink")
-            g.rect(27, 14 + b, 1, 9, "mauve")
-            g.rect(25, 11 + b, 3, 3, "skin1")
-            g.p(24, 12 + b, "skin1")
+            g.rect(21, 25 + b, 4, 5, "pink")
+            g.rect(24, 25 + b, 1, 5, "mauve")
+            g.rect(25, 17 + b, 3, 9, "pink")
+            g.rect(27, 17 + b, 1, 9, "mauve")
+            g.rect(25, 14 + b, 3, 3, "skin1")
+            g.p(24, 15 + b, "skin1")
         else:
-            g.rect(22, 23 + b, 3, 4, "pink")
-            g.rect(24, 23 + b, 1, 4, "mauve")
-            g.rect(24, 19 + b, 3, 4, "pink")
-            g.rect(26, 19 + b, 1, 4, "mauve")
-            g.rect(25, 16 + b, 3, 3, "skin1")
-            g.p(24, 17 + b, "skin1")
+            g.rect(21, 26 + b, 4, 4, "pink")
+            g.rect(24, 26 + b, 1, 4, "mauve")
+            g.rect(24, 22 + b, 3, 4, "pink")
+            g.rect(26, 22 + b, 1, 4, "mauve")
+            g.rect(25, 19 + b, 3, 3, "skin1")
+            g.p(24, 20 + b, "skin1")
         # the left arm bent at the elbow, the forearm up to the fist beside the hair
-        g.rect(7, 26 + b, 3, 5, "pink")
-        g.rect(9, 26 + b, 1, 5, "mauve")
-        g.rect(4, 26 + b, 3, 5, "pink")
-        g.rect(4, 30 + b, 6, 1, "mauve")
-        g.rect(3, 23 + b, 4, 3, "skin1")
-        # the vlog camera on its short grip, held up at her eye line, its lens turned on her face
-        g.rect(3, 21 + b, 2, 2, "navy")
-        g.rect(1, 16 + b, 5, 5, "lgrey")
-        g.rect(1, 20 + b, 5, 1, "grey")
-        g.rect(6, 17 + b, 2, 3, "navy")
-        g.rect(2, 17 + b, 2, 1, "red")
+        g.rect(8, 29 + b, 3, 5, "pink")
+        g.rect(10, 29 + b, 1, 5, "mauve")
+        g.rect(5, 28 + b, 3, 6, "pink")
+        g.rect(5, 33 + b, 6, 1, "mauve")
+        g.rect(4, 25 + b, 4, 3, "skin1")
+        # the vlog camera, held up at her eye line: a short navy grip, a silver body with a top plate and the
+        # red recording light, and the round navy lens over its right end, its glass lit, turned on her face
+        g.rect(5, 23 + b, 2, 2, "navy")
+        g.rect(1, 17 + b, 7, 6, "lgrey")
+        g.rect(1, 22 + b, 7, 1, "grey")
+        g.rect(2, 16 + b, 3, 1, "lgrey")
+        g.rect(2, 18 + b, 2, 2, "red")
+        g.rect(7, 17 + b, 2, 5, "navy")
+        g.rect(6, 18 + b, 4, 3, "navy")
+        g.rect(7, 18 + b, 2, 1, "cyan")
+        g.rect(7, 19 + b, 2, 1, "sky")
         # the ends falling over the shoulders, in front of the arms
-        g.rect(9, 24 + b, 2, 5, "yellow")
-        g.rect(22, 24 + b, 2, 5, "amber")
+        g.rect(9, 27 + b, 2, 5, "yellow")
+        g.rect(22, 27 + b, 2, 5, "amber")
     return top
+
+
+def eve_legs(g, b):
+    """Eve's slim legs, 3px each below the skirt, in place of the 4px the standing figure draws, over her
+    sneakers."""
+    for y in range(38 + b, 45):
+        g.rect(11, y, 10, 1, None)
+    for x in (12, 17):
+        g.rect(x, 38 + b, 3, 5 - b, "skin1")
+        g.rect(x + 2, 38 + b, 1, 5 - b, "skin2")
+        g.rect(x - (1 if x == 12 else 0), 43, 4, 2, "white")
 
 
 def ryan_top(wave):
@@ -519,7 +534,7 @@ def jason_top(wave):
 
 # dog: (top, legs, shoes, extra), in owners.OWNERS order; extra draws over the legs after them
 OWNERS = {
-    "duchess": (eve_top, "skin1", "white", None),
+    "duchess": (eve_top, "skin1", "white", eve_legs),
     "reggie": (ryan_top, "slate", "dbrown", None),
     "buddy": (jason_top, "skin2", "dbrown", None),
     "pierre": (tara_top, "skin1", "ink", None),

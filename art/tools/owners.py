@@ -151,8 +151,8 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
 
 
 def eve(mood):
-    """YouTuber, dramatic: long blonde hair past the shoulders with a swept fringe, gold hoop
-    earrings, a bright pink puffer jacket over a white top."""
+    """YouTuber, dramatic: a young girl with no lashes drawn, long blonde hair past the shoulders with a swept
+    fringe, gold hoop earrings, a bright pink puffer jacket over a white top."""
     g = face()
     # the hair behind the face, down past the jaw
     g.cel(16, 14, 10, 9, "yellow", "amber")
@@ -173,7 +173,7 @@ def eve(mood):
     g.cel(11.5, 11, 3.5, 2, "yellow", "amber", "white")
     g.rect(7, 19, 1, 2, "orange")
     g.rect(24, 19, 1, 2, "orange")
-    expression(g, mood, lashes=True, wide=True)
+    expression(g, mood, wide=True)
     return g
 
 
