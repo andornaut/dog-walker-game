@@ -118,15 +118,25 @@ describe("the walk's lines that name an owner", () => {
     expect(line?.text.slice(mark?.at, (mark?.at ?? 0) + (mark?.length ?? 0))).toBe(NAME);
   });
 
-  it.each(PLACES)("%s draws the face left of the name, the name gap past it", (_path, line) => {
-    const said = line ?? { text: "" };
-    const at = said.marks?.[0]?.at ?? 0;
-    const [row] = faceRows(width2x, BOX_2X, Infinity, said);
-    const [face] = row?.faces ?? [];
-    const name = row?.texts.find(({ text }) => text.startsWith(NAME));
-    expect(face?.x).toBe(width2x(said.text.slice(0, at)));
-    expect(name?.x).toBe((face?.x ?? 0) + BOX_2X.framed + BOX_2X.gap);
-  });
+  // A line leading with the name and one naming the owner after other text: the face's place
+  // reads only where the name starts.
+  const leads = (line: FaceText | null | undefined) => (line?.marks?.[0]?.at ?? 0) === 0;
+  const placedBy = [
+    PLACES.find(([, line]) => leads(line)),
+    PLACES.find(([, line]) => !leads(line)),
+  ];
+  it.each(placedBy.filter((place) => place !== undefined))(
+    "%s draws the face left of the name, the name gap past it",
+    (_path, line) => {
+      const said = line ?? { text: "" };
+      const at = said.marks?.[0]?.at ?? 0;
+      const [row] = faceRows(width2x, BOX_2X, Infinity, said);
+      const [face] = row?.faces ?? [];
+      const name = row?.texts.find(({ text }) => text.startsWith(NAME));
+      expect(face?.x).toBe(width2x(said.text.slice(0, at)));
+      expect(name?.x).toBe((face?.x ?? 0) + BOX_2X.framed + BOX_2X.gap);
+    },
+  );
 
   // A row just too narrow for the name: it wraps onto the next row with its face.
   it.each(PLACES.filter(([, line]) => (line?.marks?.[0]?.at ?? 0) > 0))(
