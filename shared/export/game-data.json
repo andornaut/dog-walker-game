@@ -179,7 +179,7 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "Zoomies: the pack drifts on its own for 30s",
+      "text": "Zoomies: the pack drifts on its own for 40s",
       "title": "Other dog"
     },
     {
@@ -218,7 +218,7 @@
         "id": "porchCat",
         "kind": "encounter"
       },
-      "text": "Zoomies: the pack drifts on its own for 30s",
+      "text": "Zoomies: the pack drifts on its own for 40s",
       "title": "Porch cat"
     },
     {
@@ -2847,7 +2847,7 @@
       "stinkySeconds": 60,
       "zoneAtBaseSpeed": 148,
       "zoomiesDriftSeconds": 1,
-      "zoomiesSeconds": 30
+      "zoomiesSeconds": 40
     }
   },
   "upgrades": [

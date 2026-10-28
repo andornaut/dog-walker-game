@@ -256,6 +256,6 @@ export const TUNING = {
     // While the pack has Zoomies, it drifts a lane every this many seconds of walking.
     zoomiesDriftSeconds: 1,
     // How long the Zoomies debuff lasts, in walking time.
-    zoomiesSeconds: 30,
+    zoomiesSeconds: 40,
   },
 } satisfies Tuning;
