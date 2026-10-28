@@ -10715,7 +10715,7 @@
       "png": "sprites/sandcastle.png",
       "json": "sprites/sandcastle.json",
       "anchor": {
-        "feetY": 44,
+        "feetY": 71,
         "opaqueWidth": 46
       }
     },
@@ -10724,7 +10724,7 @@
       "png": "sprites/sandcastle@50.png",
       "json": "sprites/sandcastle@50.json",
       "anchor": {
-        "feetY": 22,
+        "feetY": 35,
         "opaqueWidth": 23
       }
     },
@@ -10733,7 +10733,7 @@
       "png": "sprites/sandcastle@56.png",
       "json": "sprites/sandcastle@56.json",
       "anchor": {
-        "feetY": 25,
+        "feetY": 40,
         "opaqueWidth": 26
       }
     },
@@ -10742,7 +10742,7 @@
       "png": "sprites/sandcastle@62.png",
       "json": "sprites/sandcastle@62.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 44,
         "opaqueWidth": 29
       }
     },
@@ -10751,7 +10751,7 @@
       "png": "sprites/sandcastle@69.png",
       "json": "sprites/sandcastle@69.json",
       "anchor": {
-        "feetY": 31,
+        "feetY": 49,
         "opaqueWidth": 31
       }
     },
@@ -10760,7 +10760,7 @@
       "png": "sprites/sandcastle@75.png",
       "json": "sprites/sandcastle@75.json",
       "anchor": {
-        "feetY": 33,
+        "feetY": 53,
         "opaqueWidth": 34
       }
     },
@@ -10769,7 +10769,7 @@
       "png": "sprites/sandcastle@81.png",
       "json": "sprites/sandcastle@81.json",
       "anchor": {
-        "feetY": 36,
+        "feetY": 58,
         "opaqueWidth": 37
       }
     },
@@ -10778,7 +10778,7 @@
       "png": "sprites/sandcastle@88.png",
       "json": "sprites/sandcastle@88.json",
       "anchor": {
-        "feetY": 39,
+        "feetY": 62,
         "opaqueWidth": 40
       }
     },
@@ -10787,7 +10787,7 @@
       "png": "sprites/sandcastle@94.png",
       "json": "sprites/sandcastle@94.json",
       "anchor": {
-        "feetY": 42,
+        "feetY": 67,
         "opaqueWidth": 43
       }
     },

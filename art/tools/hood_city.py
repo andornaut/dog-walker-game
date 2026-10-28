@@ -12,10 +12,12 @@ beach-umbrella      48x72   minor, 1 lane: someone's spot set up in the road, a 
                             handle beside it; red and white, with the towel and cooler, sets it apart
                             from the roadside umbrellas. idle (4 frames, 450ms): the canopy's valance
                             lifts on frame 2
-sandcastle          48x48   minor, 1 lane: a sandcastle of three bucket towers over a crenellated wall
-                            and an arched door on a mound of sand, a red pennant on the middle tower,
-                            the bucket rings on its towers down to obstacles.TEXTURE_MIN. idle (4
-                            frames, 400ms): the pennant flutters on frame 2
+sandcastle          48x72   minor, 1 lane, drawn 48 rows tall: a sandcastle of two notched bucket towers
+                            and a taller, wider middle tower standing clear of each other over a
+                            crenellated wall and an arched door on a mound of sand, a red pennant on
+                            the middle tower, the bucket rings on its towers down to
+                            obstacles.TEXTURE_MIN. idle (4 frames, 400ms): the pennant flutters on
+                            frame 2
 lifeguard-chair     48x72   minor, 1 lane: a tall wooden lifeguard chair, its legs splayed and laddered,
                             a red seat back with a white cross, a yellow and white umbrella over it and
                             an orange life ring hung on its leg; no box, roof or flag, unlike the Leuty
@@ -544,52 +546,58 @@ def beach_umbrella(lift=0):
 # ---------- sandcastle ----------
 
 SANDCASTLE_IDLE = (0, 1, 2, 1), 400
+SANDCASTLE_H = 60
 
 
 def sandcastle(flutter=0):
-    """A sandcastle, front on, laid out on obstacles.SIZE: a mound of sand, a crenellated wall with an
-    arched door between two bucket towers ribbed where the bucket left its rings, a taller middle tower
-    behind with a red pennant on a stick. Tan, lit cream on the left, shaded brown on the right.
-    The rings on the towers are drawn down to obstacles.TEXTURE_MIN. flutter lifts the pennant's tip that many
-    pixels, its hoist held still."""
-    g = edged(Grid(obstacles.SIZE, obstacles.SIZE))
+    """A sandcastle, front on, laid out on obstacles.SIZE by SANDCASTLE_H: two bucket towers and a wider,
+    taller middle tower behind, each notched along its top with gaps as wide as its merlons, standing clear
+    of each other over a crenellated wall with an arched door, a red pennant on a stick over the middle
+    tower, all on a mound of sand. Tan, lit cream on the left, shaded brown on the right. The bucket rings
+    on the towers are drawn down to obstacles.TEXTURE_MIN. flutter lifts the pennant's tip that many pixels,
+    its hoist held still."""
+    g = edged(Grid(obstacles.SIZE, SANDCASTLE_H))
     uy = unit(g)[1]
     fine = scale_of(g) >= obstacles.TEXTURE_MIN
+    base = 57
     # the pennant on its stick
-    g.rect(20, 2, 1, 8, "brown")
-    g.tri((21, 2), (21, 6), (26, 4 - flutter * uy), "red")
-    # the middle tower, behind
-    g.rect(15, 9, 11, 14, "tan")
-    g.rect(23, 9, 3, 14, "brown")
-    g.rect(15, 9, 1, 14, "cream")
-    for x in (15, 19, 23):
-        g.rect(x, 7, 3, 2, "tan")
-    g.rect(23, 7, 3, 2, "brown")
+    g.rect(20, 21, 1, 9, "brown")
+    g.tri((21, 21), (21, 25), (27, 23 - flutter * uy), "red")
+    # the middle tower, behind, three merlons along its top
+    g.rect(13, 33, 15, base - 33, "tan")
+    g.rect(25, 33, 3, base - 33, "brown")
+    g.rect(13, 33, 1, base - 33, "cream")
+    for x in (13, 19, 25):
+        g.rect(x, 30, 3, 3, "brown" if x == 25 else "tan")
     if fine:
-        g.rect(15, 13, 11, 1, "clay")
-    # the wall with its battlements and the arched door
-    g.rect(9, 20, 22, 11, "tan")
-    g.rect(27, 20, 4, 11, "brown")
+        g.rect(13, 38, 15, 1, "clay")
+    # the wall, its battlements and the arched door
+    g.rect(9, 45, 22, base - 45, "tan")
+    g.rect(27, 45, 4, base - 45, "brown")
     for x in (9, 13, 17, 21, 25, 29):
-        g.rect(x, 18, 2, 2, "brown" if x >= 27 else "tan")
-    g.cel(20, 27, 3, 3.5, "bark")
-    g.rect(17, 27, 6, 4, "bark")
-    # the bucket towers, wider at the base, their rings
-    for x0, sh in ((4, False), (29, True)):
-        g.tri((x0, 31), (x0 + 7, 31), (x0 + 1, 14), "tan")
-        g.tri((x0 + 1, 14), (x0 + 6, 14), (x0 + 7, 31), "tan")
-        g.rect(x0 + 4.5, 15, 2, 16, "brown")
-        if not sh:
-            g.rect(x0 + 1, 15, 1, 14, "cream")
+        g.rect(x, 43, 2, 2, "brown" if x >= 27 else "tan")
+    g.cel(20, 52, 3, 3.5, "bark")
+    g.rect(17, 52, 6, base - 52, "bark")
+    # the bucket towers, wider at the base, two merlons along the top, their rings inside the flare
+    top = 40
+    for x0, sh in ((2, False), (30, True)):
+        g.tri((x0, base), (x0 + 8, base), (x0 + 1, top), "tan")
+        g.tri((x0 + 1, top), (x0 + 7, top), (x0 + 8, base), "tan")
+        if sh:
+            g.rect(x0 + 2.5, top + 1, 5, base - top - 1, "brown")
         else:
-            g.rect(x0 + 2, 15, 4.5, 16, "brown")
-        g.rect(x0 + 1, 14, 6, 1, "skin1")
-        for y in (19, 24) if fine else ():
-            g.rect(x0 + 1, y, 6, 1, "clay")
+            g.rect(x0 + 5.5, top + 1, 2, base - top - 1, "brown")
+            g.rect(x0 + 1, top + 1, 1, base - top - 3, "cream")
+        for mx in (x0 + 1, x0 + 5):
+            g.rect(mx, top - 3, 2, 3, "brown" if sh or mx > x0 + 3 else "tan")
+        g.rect(x0 + 1, top, 6, 1, "skin1")
+        for y in (43, 50) if fine else ():
+            flare = (y - top) / (base - top)
+            g.rect(x0 + 1 - flare, y, 6 + 2 * flare, 1, "clay")
     # the mound of sand under it all
-    g.cel(20, 33, 18, 3.5, "tan", "brown", "skin1")
-    g.rect(2, 33, 36, 1.5, "tan")
-    g.rect(32, 33, 6, 1.5, "brown")
+    g.cel(20, base, 18, 3.5, "tan", "brown", "skin1")
+    g.rect(2, base, 36, 1.5, "tan")
+    g.rect(32, base, 6, 1.5, "brown")
     return lit(g)
 
 
