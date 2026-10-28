@@ -149,44 +149,114 @@
       {
         "coreColour": "dstone",
         "edgeColour": "ash",
-        "edgeWidth": 10,
-        "every": 320,
-        "from": 166,
-        "length": 112,
+        "edgeWidth": 6,
+        "every": 3360,
+        "from": 182,
+        "length": 96,
         "offset": {
-          "left": 0,
-          "right": 160
+          "left": 92,
+          "right": 3312
         },
-        "shape": "ellipse",
-        "to": 206
+        "shape": "band",
+        "to": 214
       },
       {
-        "coreColour": "cobalt",
-        "edgeColour": "blue",
-        "edgeWidth": 8,
-        "every": 1280,
-        "from": 170,
-        "length": 112,
+        "coreColour": "dstone",
+        "edgeColour": "ash",
+        "edgeWidth": 6,
+        "every": 3360,
+        "from": 182,
+        "length": 96,
         "offset": {
-          "left": 160,
-          "right": 320
+          "left": 372,
+          "right": 792
         },
-        "shape": "ellipse",
-        "to": 202
+        "shape": "band",
+        "to": 214
       },
       {
-        "coreColour": "mauve",
+        "coreColour": "dstone",
+        "edgeColour": "ash",
+        "edgeWidth": 6,
+        "every": 3360,
+        "from": 182,
+        "length": 96,
+        "offset": {
+          "left": 1212,
+          "right": 1352
+        },
+        "shape": "band",
+        "to": 214
+      },
+      {
+        "coreColour": "dstone",
+        "edgeColour": "ash",
+        "edgeWidth": 6,
+        "every": 3360,
+        "from": 182,
+        "length": 96,
+        "offset": {
+          "left": 1772,
+          "right": 1632
+        },
+        "shape": "band",
+        "to": 214
+      },
+      {
+        "coreColour": "dstone",
+        "edgeColour": "ash",
+        "edgeWidth": 6,
+        "every": 3360,
+        "from": 182,
+        "length": 96,
+        "offset": {
+          "left": 2052,
+          "right": 2472
+        },
+        "shape": "band",
+        "to": 214
+      },
+      {
+        "coreColour": "dstone",
+        "edgeColour": "ash",
+        "edgeWidth": 6,
+        "every": 3360,
+        "from": 182,
+        "length": 96,
+        "offset": {
+          "left": 2892,
+          "right": 3032
+        },
+        "shape": "band",
+        "to": 214
+      },
+      {
+        "coreColour": "purple",
         "edgeColour": "purple",
-        "edgeWidth": 10,
-        "every": 1280,
-        "from": 170,
-        "length": 112,
+        "edgeWidth": 2,
+        "every": 3360,
+        "from": 206,
+        "length": 64,
         "offset": {
-          "left": 800,
-          "right": 960
+          "left": 808,
+          "right": 388
         },
-        "shape": "ellipse",
-        "to": 202
+        "shape": "band",
+        "to": 212
+      },
+      {
+        "coreColour": "blue",
+        "edgeColour": "blue",
+        "edgeWidth": 2,
+        "every": 3360,
+        "from": 206,
+        "length": 64,
+        "offset": {
+          "left": 1508,
+          "right": 1088
+        },
+        "shape": "band",
+        "to": 212
       }
     ]
   }

@@ -43,6 +43,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import fonts  # noqa: E402
+import roadside  # noqa: E402
 import scene as sn  # noqa: E402
 from pixel import K, MURAL, dk  # noqa: E402
 from roads import LANE_PAINT  # noqa: E402
@@ -688,6 +689,46 @@ def pool_half(p, along, inset):
     return min(half_width, math.floor(half / POOL_STEP + 0.5) * POOL_STEP)
 
 
+def prop_slots(zone, key):
+    """Where a zone's roadside props named key stand along one period of its placement (roadside.PLACEMENT),
+    as (period, left zs, right zs), z from the zone's start as the game places them."""
+    table = roadside.PLACEMENT[zone]
+    period = table["slot"] * 2 * math.lcm(len(table["gaps"]), len(table["lots"]))
+    zs = {}
+    for name, side in table["sides"].items():
+        zs[name] = []
+        for n in range(period // table["slot"]):
+            m = n - side["offset"]
+            k = m // 2
+            groups, start, stride = (("lots", "lotStart", "lotStride") if m % 2 == 0
+                                     else ("gaps", "gapStart", "gapStride"))
+            group = table[groups][(side[start] + k * side[stride]) % len(table[groups])]
+            zs[name] += [(n * table["slot"] + dz) % period for k_, _, dz in group if k_ == f"roadside-{key}"]
+        zs[name].sort()
+    return period, zs["left"], zs["right"]
+
+
+def under_lamps(zone, length, start, end, core, edge, edge_width, shape="band"):
+    """Pools centred under a zone's street lamps, one entry per lamp of a period of its placement (each
+    entry's every that period), pairing the sides' lamps in order."""
+    period, left, right = prop_slots(zone, "street-lamp")
+    return [pool(core, edge, edge_width, period, start, end, length, (lz - length // 2) % period,
+                 (rz - length // 2) % period, shape)
+            for lz, rz in zip(left, right)]
+
+
+def between_lamps(zone, length, start, end, colours, gap=560):
+    """Thin neon bands midway between a zone's street lamps where they stand gap road px or more apart on a
+    side, one entry per colour in turn, pairing the sides' wide gaps in order."""
+    period, left, right = prop_slots(zone, "street-lamp")
+
+    def middles(zs):
+        return [round((z + (zs[(i + 1) % len(zs)] - z) % period / 2) % period / 2) * 2
+                for i, z in enumerate(zs) if (zs[(i + 1) % len(zs)] - z) % period >= gap]
+    return [pool(c, c, 2, period, start, end, length, (lz - length // 2) % period, (rz - length // 2) % period, "band")
+            for c, lz, rz in zip(colours, middles(left), middles(right))]
+
+
 def pooled(pools, x, z):
     """The colour of the verge's pools at x across (signed) and z along, the later pools over the earlier,
     or None."""
@@ -736,11 +777,9 @@ VERGES = {
                         lawnColours=None, leaves=False),
     "yonge-street": dict(curbColour="grey", curbTo=164, strips=[], walkColour="dslate",
                          walkDots=[dict(colours=["slate"], share=0.012)], seamColour="navy", seamEvery=32,
-                         walkTo=None, lawn="none", lawnColours=None, leaves=False, pools=[
-                             pool("dstone", "ash", 10, 320, 166, 206, 112, 0, 160),
-                             pool("cobalt", "blue", 8, 1280, 170, 202, 112, 160, 320),
-                             pool("mauve", "purple", 10, 1280, 170, 202, 112, 800, 960),
-                         ]),
+                         walkTo=None, lawn="none", lawnColours=None, leaves=False,
+                         pools=under_lamps("yonge-street", 96, 182, 214, "dstone", "ash", 6)
+                         + between_lamps("yonge-street", 64, 206, 212, ("purple", "blue"))),
 }
 
 
