@@ -662,7 +662,7 @@ def crescent_bend(px):
 VERGES = {
     "cabbagetown": dict(curbColour="dstone", curbTo=CURB, strips=[], walkColour="stone", walkDots=[],
                         seamColour="dstone", seamEvery=32, walkTo=WALK, lawn="mown",
-                        lawnColours=("olive", "dolive", "fir"), leaves=False),
+                        lawnColours=("olive", "dolive", "pine"), leaves=False),
     "high-park": dict(curbColour="pine", curbTo=160, strips=[], walkColour="pine", walkDots=[],
                       seamColour="pine", seamEvery=32, walkTo=160, lawn="rough",
                       lawnColours=("pine", "bark", "fir"), leaves=False),
