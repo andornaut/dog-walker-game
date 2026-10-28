@@ -10,6 +10,7 @@ import {
   explainTargetAt,
 } from "../../hud/walkHud";
 import type { GestureAction } from "../../input/gestures";
+import { holdRule } from "../../input/hold";
 import { walkKeyAction } from "../../input/keyBindings";
 import {
   idleTrack,
@@ -159,7 +160,7 @@ export class RunInput {
 }
 
 // A tap on a debuff bar does nothing, and a press on anything that explains itself opens its
-// explanation once still for explainHoldSeconds within swipeStartDistance, the drag's first
+// explanation once still for holdSeconds within swipeStartDistance, the drag's first
 // step. dimmed: the pause menu's dim takes the presses on the walk.
 function trackContext(
   dimmed: boolean,
@@ -170,10 +171,7 @@ function trackContext(
   return {
     config: { laneCount: LANE_COUNT, swipeStartDistance },
     explainAt: (point) => explainTargetAt(LAYOUT, shown, dimmed, point),
-    hold: {
-      holdMs: read(gameData.tuning, "seconds", "explainHoldSeconds") * 1000,
-      slopPx: swipeStartDistance,
-    },
+    hold: holdRule(gameData.tuning, swipeStartDistance),
     layout: LAYOUT,
     quietTaps: debuffBarRects(LAYOUT.topBar, shown.debuffs.length),
     stepMoves,

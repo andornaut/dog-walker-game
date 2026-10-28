@@ -89,7 +89,15 @@ import {
 import { withNamePills } from "../hud/effectNames";
 import { downTail } from "../hud/moments";
 import { cashLeft } from "../hud/walkHud";
-import { HOLD, type HoldPress, moveHold, releaseHold, startHold, tickHold } from "../input/hold";
+import {
+  type HoldPress,
+  holdRule,
+  moveHold,
+  releaseHold,
+  startHold,
+  tickHold,
+  TILE_SLOP_PX,
+} from "../input/hold";
 import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { screenArea } from "../input/outsideTap";
 import type { PackPlacement } from "../layout/packFormation";
@@ -474,7 +482,11 @@ export class StartScene extends Scene {
         const kind = this.pressedTarget?.kind;
         this.hold =
           kind === "dog" || kind === "gear" || kind === "walker"
-            ? startHold(HOLD, { x: pointer.x, y: pointer.y }, this.time.now)
+            ? startHold(
+                holdRule(gameData.tuning, TILE_SLOP_PX),
+                { x: pointer.x, y: pointer.y },
+                this.time.now,
+              )
             : undefined;
         this.press =
           this.pressedTarget === undefined

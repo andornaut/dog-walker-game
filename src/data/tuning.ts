@@ -207,9 +207,6 @@ export const TUNING = {
     ballBounceSeconds: 0.4,
     // After a hit, obstacles are ignored this long; pickups still count.
     collisionGrace: 0.7,
-    // A still press held this long on the walk HUD's effect icons, debuff bars or dog cards
-    // opens a detail card with what it explains, pausing the walk until a tap closes it.
-    explainHoldSeconds: 0.3,
     // An owner who fires you holds the walk still this long while their moment plays.
     firingHoldSeconds: 3,
     // The walk's first zone's first obstacle meets the pack no sooner than this long in, on the
@@ -217,6 +214,11 @@ export const TUNING = {
     firstZoneContact: 2,
     // An obstacle encounter holds the road and the pack still this long before its card.
     hitStopSeconds: 1,
+    // A press held this long holds instead of tapping: on a home screen or Pet shop tile it opens
+    // the item's detail card, on a choice card it enlarges the card, and on the walk HUD's effect
+    // icons, debuff bars or dog cards it opens a detail card with what it explains, pausing the
+    // walk until a tap closes it.
+    holdSeconds: 0.4,
     laneMove: 0.1,
     // Road in view ahead of the walker at the base scroll speed. Read once at load.
     lookAheadSeconds: 3.6,

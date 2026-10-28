@@ -42,7 +42,14 @@ import {
   shopTabFace,
   shopTabRects,
 } from "../home/shopLayout";
-import { HOLD, type HoldPress, moveHold, startHold, tickHold } from "../input/hold";
+import {
+  type HoldPress,
+  holdRule,
+  moveHold,
+  startHold,
+  tickHold,
+  TILE_SLOP_PX,
+} from "../input/hold";
 import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import {
   type ListScroll,
@@ -234,7 +241,11 @@ export class ShopScene extends Scene {
         const purchase = target?.kind === "row" ? this.rowById(target.id)?.purchase : undefined;
         this.hold =
           purchase !== undefined && purchase.kind !== "dogSlot"
-            ? startHold(HOLD, { x: pointer.x, y: pointer.y }, this.time.now)
+            ? startHold(
+                holdRule(gameData.tuning, TILE_SLOP_PX),
+                { x: pointer.x, y: pointer.y },
+                this.time.now,
+              )
             : undefined;
       },
       onPressed: (target) => {

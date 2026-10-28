@@ -11,7 +11,7 @@ import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
 import { type OptionMarks, optionMarks } from "../hud/buffMarks";
 import { largeBodyText, type PlaqueSize, plaqueTexts, smallCardText } from "../hud/cardText";
-import { type HoldPress, type HoldRule, startHold, tickHold } from "../input/hold";
+import { type HoldPress, holdRule, startHold, tickHold } from "../input/hold";
 import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
 import { cardCharmsAt } from "../layout/buffLayout";
@@ -88,9 +88,8 @@ const SELECTED_OUTLINE = 2;
 const COST_KEY = "card-cost";
 // A refused pick shakes its card and flashes its cost.
 const REFUSE = { flashMs: 80, flashes: 4, shake: 3, shakeMs: 40 };
-// Holding a card this long enlarges it, with the changes behind its numbers, however far
-// the finger moves.
-const CARD_HOLD: HoldRule = { holdMs: 400, slopPx: Number.POSITIVE_INFINITY };
+// Holding a card enlarges it, with the changes behind its numbers, however far the finger moves.
+const CARD_SLOP_PX = Number.POSITIVE_INFINITY;
 const LARGE = { ...CARD_LAYOUT.large, key: "card-frame-large" };
 // The enlarged card's body keeps this many rows clear under its text.
 const LARGE_BODY_GAP = 4;
@@ -240,7 +239,11 @@ export class CardScene extends Scene {
         this.hold =
           index === undefined
             ? undefined
-            : startHold(CARD_HOLD, { x: pointer.x, y: pointer.y }, this.time.now);
+            : startHold(
+                holdRule(gameData.tuning, CARD_SLOP_PX),
+                { x: pointer.x, y: pointer.y },
+                this.time.now,
+              );
       },
       onPressed: (index) => {
         this.pressed = index;
