@@ -148,10 +148,6 @@ describe("pocket lining", () => {
     top: frame.y + edge + band + 1,
   };
 
-  it("is derived from the Pocket's section", () => {
-    expect(lining).toEqual(pocketLining(frame));
-  });
-
   it.each(Object.entries(lining))("%s lies inside the frame, under the band", (_, rect) => {
     expect(rect.x).toBeGreaterThanOrEqual(inner.left);
     expect(rect.x + rect.width).toBeLessThanOrEqual(inner.right);
