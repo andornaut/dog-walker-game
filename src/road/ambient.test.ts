@@ -330,21 +330,26 @@ describe("sky movers", () => {
       rowsByKey.set(mover.key, [...(rowsByKey.get(mover.key) ?? []), from, to]);
     }
   }
-  const sky = [...rowsByKey].flatMap(([key, rows]) =>
-    [...new Set([Math.min(...rows), Math.max(...rows)])].map((row) => ({ key, row })),
-  );
+  const sky = [...rowsByKey].map(([key, rows]) => ({
+    highest: Math.min(...rows),
+    key,
+    lowest: Math.max(...rows),
+  }));
 
   // The sprite's top row stays at or below the band's top edge, and its bottom row inside the
   // band, at every feet row it can fly on.
-  it.each(sky)("draws $key inside the band with its feet on row $row", ({ key, row }) => {
-    const entry = sprites.get(key);
-    const sheet = entry === undefined ? undefined : sheets[`../../public/art/${entry.json}`];
-    const frame = sheet === undefined ? undefined : Object.values(sheet.frames)[0];
-    expect(entry?.anchor, key).toBeDefined();
-    expect(frame, key).toBeDefined();
-    const feetY = entry?.anchor?.feetY ?? 0;
-    const height = frame?.sourceSize.h ?? 0;
-    expect(row - feetY).toBeGreaterThanOrEqual(0);
-    expect(row - feetY + height).toBeLessThanOrEqual(LAYOUT.backdrop.height);
-  });
+  it.each(sky)(
+    "draws $key inside the band, its feet on row $highest to $lowest",
+    ({ highest, key, lowest }) => {
+      const entry = sprites.get(key);
+      const sheet = entry === undefined ? undefined : sheets[`../../public/art/${entry.json}`];
+      const frame = sheet === undefined ? undefined : Object.values(sheet.frames)[0];
+      expect(entry?.anchor, key).toBeDefined();
+      expect(frame, key).toBeDefined();
+      const feetY = entry?.anchor?.feetY ?? 0;
+      const height = frame?.sourceSize.h ?? 0;
+      expect(highest - feetY).toBeGreaterThanOrEqual(0);
+      expect(lowest - feetY + height).toBeLessThanOrEqual(LAYOUT.backdrop.height);
+    },
+  );
 });
