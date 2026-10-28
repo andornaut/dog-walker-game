@@ -149,6 +149,7 @@ describe("a steering bot", { timeout: 60_000 }, () => {
     const sparse = withoutPulls(shortZones(gameData, 0.1));
     const sharp: Skill = {
       ...SKILL_PRESETS.typical,
+      driftReactionSeconds: 0,
       errorRate: 0,
       lookAheadSeconds: Infinity,
       reactionSeconds: 0,
@@ -737,7 +738,7 @@ describe("a steering bot whose pack drifts", () => {
     }
   });
 
-  // A drift reaches the bot reactionSeconds after it sees it. Drifted into the lane of an
+  // A drift reaches the bot driftReactionSeconds after it sees it. Drifted into the lane of an
   // obstacle a second ahead, the bot plans its way out no sooner, and then at once.
   it.each(SKILL_PRESET_IDS)("reacts to a drift only after its reaction delay, as %s", (id) => {
     const skill = { ...SKILL_PRESETS[id], errorRate: 0 };
@@ -762,13 +763,13 @@ describe("a steering bot whose pack drifts", () => {
       reactedAt = lanes.length > 0 || bot.plan.length > 0 ? bot.clock : null;
     }
 
-    expect(reactedAt).toBeGreaterThanOrEqual(seenAt + skill.reactionSeconds - 1e-9);
-    expect(reactedAt).toBeLessThan(seenAt + skill.reactionSeconds + STEP_SECONDS);
+    expect(reactedAt).toBeGreaterThanOrEqual(seenAt + skill.driftReactionSeconds - 1e-9);
+    expect(reactedAt).toBeLessThan(seenAt + skill.driftReactionSeconds + STEP_SECONDS);
   });
 });
 
 // A Muddy pack changes lanes slower, and the bot plans with its old lane speed until it has
-// reacted to the Muddy beginning, reactionSeconds after it sees it.
+// reacted to the Muddy beginning, driftReactionSeconds after it sees it.
 describe("a steering bot whose pack gets Muddy", () => {
   const run = testState({ biscuit: 3, duchess: 3, snowball: 3 });
   const muddy = {
@@ -795,7 +796,7 @@ describe("a steering bot whose pack gets Muddy", () => {
     expect(slowed).toBeGreaterThan(clean);
     expect(read.filter(({ seconds }) => seconds === clean).length).toBeGreaterThan(0);
     for (const { at, seconds } of read) {
-      expect(seconds).toBe(at < skill.reactionSeconds - 1e-9 ? clean : slowed);
+      expect(seconds).toBe(at < skill.driftReactionSeconds - 1e-9 ? clean : slowed);
     }
   });
 });

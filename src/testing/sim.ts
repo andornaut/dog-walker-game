@@ -5,6 +5,7 @@ import type { PackDogs } from "../state/runState";
 
 // A bot that sees everything at once, never errs and plans over all it sees.
 export const IDEAL_SKILL: Skill = {
+  driftReactionSeconds: 0,
   errorRate: 0,
   laneChangeCooldown: 0,
   lookAheadSeconds: Infinity,

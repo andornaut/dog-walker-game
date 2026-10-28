@@ -528,7 +528,7 @@ export function laneMoveRead(bot: Bot, data: WalkData, run: RunState): number {
 }
 
 // A Zoomies drift the pack made in the step just walked, from control, its lane control just
-// before the drift. The bot reacts to it reactionSeconds after it sees it, and until then plans
+// before the drift. The bot reacts to it driftReactionSeconds after it sees it, and until then plans
 // as if the pack had not drifted.
 export function observeDrift(bot: Bot, control: LaneControl): void {
   bot.drifts.push({ at: bot.clock, believed: control });
@@ -811,16 +811,16 @@ export function actBot(
     return { lanes, walk };
   }
   const due = bot.clock + SAME_MOMENT;
-  const { reactionSeconds } = bot.skill;
+  const { driftReactionSeconds } = bot.skill;
   for (let drift = bot.drifts[0]; drift !== undefined; drift = bot.drifts[0]) {
-    if (drift.at + reactionSeconds > due) {
+    if (drift.at + driftReactionSeconds > due) {
       break;
     }
     bot.drifts.shift();
     bot.replan = true;
   }
   for (const slowing of bot.slowing.values()) {
-    if (!slowing.perceived && slowing.at + reactionSeconds <= due) {
+    if (!slowing.perceived && slowing.at + driftReactionSeconds <= due) {
       slowing.perceived = true;
       bot.replan = true;
     }

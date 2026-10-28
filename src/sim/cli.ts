@@ -32,7 +32,8 @@ const DEFAULT_SEED = 1;
 const presetLines = SKILL_PRESET_IDS.map((id) => {
   const skill = SKILL_PRESETS[id];
   return (
-    `  ${id.padEnd(8)} reaction ${skill.reactionSeconds}s, look-ahead ${skill.lookAheadSeconds}s, ` +
+    `  ${id.padEnd(8)} reaction ${skill.reactionSeconds}s, drift reaction ` +
+    `${skill.driftReactionSeconds}s, look-ahead ${skill.lookAheadSeconds}s, ` +
     `errors ${skill.errorRate * 100}%, cooldown ${skill.laneChangeCooldown}s`
   );
 });

@@ -30,6 +30,7 @@ const TRIO: PackDogs = ["duchess", "biscuit", "kilo"];
 const RISKY: PackDogs = ["buddy", "archie", "snowball"];
 // A bot that misses every lane change it plans, so it walks into whatever comes.
 const BLIND: Skill = {
+  driftReactionSeconds: 0,
   errorRate: 1,
   laneChangeCooldown: 0,
   lookAheadSeconds: 0,
