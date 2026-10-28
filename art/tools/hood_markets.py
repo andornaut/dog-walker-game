@@ -416,15 +416,16 @@ BARREL_RUN = tuple((k * 45, k % 2) for k in range(8)), 60
 
 def barrel_end(g, cx, cy, r, glint=None):
     """A barrel lying on its side with its head to the camera, centred on cx, cy with radius r in layout
-    pixels: its brown body showing above the head, lit tan, a grey hoop round it; a silver hoop (lgrey,
-    lit white on its upper left, shaded grey on its lower right) and a dbrown chime round the ochre head,
-    its brown stave seams upright and a bark stencil on it, a diamond round a dot. glint is the angle in
-    degrees, clockwise from the right, of a white glint on the hoop. Drawn pixel for pixel at the grid's
+    pixels: its brown body showing above the head, lit tan along its top; a silver hoop (lgrey, shaded grey
+    on its lower right) and a dbrown chime round the ochre head, its brown stave seams upright and a bark
+    stencil on it, a diamond round a dot. glint is the angle in degrees, clockwise from the right, of a
+    white glint on the hoop: the two hoop pixels nearest that angle. Drawn pixel for pixel at the grid's
     scale so its rings and seams stay 1px."""
     px, s = raster(g), scale_of(g)
     cx, cy, r = cx * s, cy * s, r * s
     lift = max(2, round(2.2 * s))
-    hoop, chime = max(1, round(1.2 * s)), max(1, round(1.2 * s)) + max(1, round(1.2 * s))
+    hoop = max(1, round(1.2 * s))
+    chime = 2 * hoop
     gap = max(4, round(3.3 * s))
     for y in range(px.h):
         for x in range(px.w):
@@ -453,17 +454,22 @@ def barrel_end(g, cx, cy, r, glint=None):
             px.p(x, y, "bark")
     px.p(ox, oy, "bark")
     if glint is not None:
-        a = math.radians(glint)
-        rr = r - hoop / 2
-        for t in (a, a + math.radians(8)):
-            px.p(math.floor(cx + math.cos(t) * rr), math.floor(cy + math.sin(t) * rr), "white")
+        ring = [(x, y) for y in range(px.h) for x in range(px.w)
+                if r - hoop < math.hypot(x + 0.5 - cx, y + 0.5 - cy) <= r]
+
+        def off(p):
+            a = math.degrees(math.atan2(p[1] + 0.5 - cy, p[0] + 0.5 - cx)) - glint
+            return abs((a + 180) % 360 - 180)
+
+        for x, y in sorted(ring, key=off)[:2]:
+            px.p(x, y, "white")
 
 
 def barrel_stack(glint=None):
     """Three whisky barrels stacked as a pyramid on a pallet in a lane, laid out on 40x40: two lying side by
     side with their heads to the camera and the third in the groove on top (barrel_end), bark wedges
-    chocking the bottom two at either end, all on a tan pallet lit cream with brown blocks, the road showing
-    through its fork openings. glint runs a white glint along the top barrel's hoop."""
+    chocking the bottom two at either end, all on a tan pallet lit cream with brown blocks, its fork openings
+    dark between them. glint puts a white glint on the top barrel's hoop at that angle."""
     g = edged(Grid(ob.SIZE, ob.SIZE))
     # the pallet's foot on row 37, as produce_crates' crates stand
     r, base = 7.5, 33
@@ -486,7 +492,7 @@ def barrel_stack(glint=None):
 
 
 # The glint runs down the top barrel's hoop on its upper left on frames 2 and 3.
-STACK_IDLE = (None, 200, 235, None), 400
+STACK_IDLE = (None, None, 235, 200), 400
 
 
 # ---------- the fish crate spill ----------
