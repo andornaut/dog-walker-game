@@ -1968,20 +1968,12 @@ def dundas_screens(cv, x, w, top):
 
 
 def street_level(cv, x, w, seed, sign=None):
-    """A tower's street level, rows BASE - 18 to BASE: a coal front under an ash canopy edge, shop
-    glass in 5-column bays, most lit gold under a cream top and some dark, and over it a neon sign,
-    (word, colour), on an ink board edged in its colour. Returns whether any bay is lit."""
+    """A tower's lit podium seen from far off, rows BASE - 18 to BASE: coal under an ash top edge, its
+    floors lit in runs of 2x2 windows, gold, amber and cream, with no doors or shopfronts; and over it a
+    neon sign, (word, colour), on an ink board edged in its colour."""
     cv.fill(x, BASE - 18, w, 18, "coal")
     cv.fill(x, BASE - 18, w, 1, "ash")
-    rnd = random.Random(f"street-{seed}")
-    any_on = False
-    for bx in range(x + 2, x + w - 6, 6):
-        on = rnd.random() < 0.7
-        cv.fill(bx, BASE - 8, 5, 8, "gold" if on else "dlake")
-        cv.fill(bx, BASE - 2, 5, 2, "amber" if on else "navy")
-        if on:
-            cv.fill(bx, BASE - 8, 5, 2, "cream")
-            any_on = True
+    lit(cv, x + 2, x + w - 2, BASE - 14, BASE, f"podium-{seed}", 1.2, ("gold", "amber", "cream"))
     if sign:
         s, col = sign
         bw = fonts.sign_width(s) + 4
@@ -1989,11 +1981,10 @@ def street_level(cv, x, w, seed, sign=None):
         cv.fill(bx, BASE - 17, bw, 9, "ink")
         outline_box(cv, bx, BASE - 17, bw, 9, col)
         word(cv, s, x + w / 2, BASE - 17, col)
-    return any_on
 
 
 def front_pool(cv, x0, x1, skip=()):
-    """A lit shopfront's light on the far sidewalk, rows BASE to FAR_WALK, under columns x0 to x1: stone
+    """A lit podium's light on the far sidewalk, rows BASE to FAR_WALK, under columns x0 to x1: stone
     on its first 2 rows inside a dstone edge, each row out a column wider a side, with no pixel in the
     column ranges skip (the side street's mouth)."""
     rows = FAR_WALK - BASE
@@ -2032,10 +2023,11 @@ def blade(cv, x, top, text, col):
 
 
 def eaton_centre(cv, x, w, top):
-    """The Eaton Centre: a dlake glass front from row top to the street under the galleria's barrel vault
-    of lake glass on white ribs, white mullions every 4 columns and 4 rows, some panes lit gold and amber,
-    a lit gold entrance at its middle, and on the roof the EATON CENTRE sign: cyan letters on an ink
-    board in a 2px border of marquee bulbs, on coal legs."""
+    """The Eaton Centre seen from far off, one huge mall mass with no entrance: the galleria's long barrel
+    vault of lake glass on white ribs across its whole width, then a dlake glass facade from the vault down
+    to the street, its right 3 columns navy in shade, white-foam mullions every 4 columns and 4 rows, its
+    floors lit gold and amber in long runs of 3x3 panes; and on the roof the EATON CENTRE sign: cyan letters
+    on an ink board in a 2px border of marquee bulbs, on coal legs."""
     vault = 7
     for dy in range(vault):
         half = round(w / 2 * math.sqrt(1 - ((vault - dy) / vault) ** 2))
@@ -2045,17 +2037,17 @@ def eaton_centre(cv, x, w, top):
     cv.fill(x, top + vault, w, BASE - top - vault, "dlake")
     cv.fill(x + w - 3, top + vault, 3, BASE - top - vault, "navy")
     rnd = random.Random("eaton")
-    for y in range(top + vault + 1, BASE - 12, 4):
+    for y in range(top + vault + 1, BASE - 2, 4):
+        run, col = 0, None
         for c in range(x + 1, x + w - 4, 4):
-            if rnd.random() < 0.35:
-                cv.fill(c, y, 3, 3, rnd.choice(("gold", "amber", "gold")))
+            if run == 0 and rnd.random() < 0.3:
+                run, col = rnd.randrange(2, 6), rnd.choice(("gold", "amber", "gold"))
+            if run:
+                cv.fill(c, y, 3, 3, col)
+                run -= 1
         cv.fill(x, y + 3, w - 3, 1, "foam")
     for c in range(x + 4, x + w - 3, 4):
-        cv.fill(c, top + vault, 1, BASE - 12 - top - vault, "foam")
-    door = 16
-    cv.fill(round(x + w / 2 - door / 2), BASE - 11, door, 11, "gold")
-    cv.fill(round(x + w / 2 - door / 2), BASE - 3, door, 3, "amber")
-    cv.fill(round(x + w / 2) - 1, BASE - 11, 2, 11, "brown")
+        cv.fill(c, top + vault, 1, BASE - top - vault, "foam")
     outline_box(cv, x, top + vault, w, BASE - top - vault + 1, "navy")
     text = "EATON CENTRE"
     bw = fonts.sign_width(text) + 8
@@ -2142,44 +2134,18 @@ def elgin(cv, x, top, base, text="ELGIN", col="red"):
 
 
 def marquee(cv, x, w, text, col):
-    """A theatre marquee over a street level, columns x to x + w - 1, rows BASE - 25 to BASE - 7: text in
-    col on a cream board in a 2px border of marquee bulbs, a dred underside over a lit cream soffit."""
+    """A theatre marquee over a street level, columns x to x + w - 1, rows BASE - 25 to BASE - 11: text in
+    col on a cream board in a 2px border of marquee bulbs."""
     y = BASE - 25
     cv.fill(x, y, w, 15, "ink")
     cv.fill(x + 2, y + 2, w - 4, 11, "cream")
     bulbs(cv, x, y, w, 15)
     word(cv, text, x + w / 2, y + 4, col)
-    cv.fill(x + 1, y + 15, w - 2, 2, "dred")
-    cv.fill(x + 2, y + 17, w - 4, 1, "cream")
 
 
 # A paw print, 11 by 10: four toe beans over the pad.
 PAW = ("..##...##..", ".####.####.", ".####.####.", "..##...##..", "##.......##", "##..###..##",
        "...#####...", "..#######..", "..#######..", "...##.##...")
-# A figure in the crowd: coats and skins.
-COATS = ("navy", "dred", "coal", "blue", "plum", "teal", "dbrick", "coal")
-SKINS = ("skin1", "skin2", "brown", "bark")
-HAIR = ("bark", "walnut", "ink", "gold", "cream")
-
-
-def crowd(cv, spans, foot, seed, every=6):
-    """Night crowds on the far sidewalk, standing on row foot or the row above across each (x0, x1) of
-    spans, one about every every columns: a 2x2 head under its hair, a 3-column coat, two ink legs."""
-    rnd = random.Random(f"crowd-{seed}")
-    for x0, x1 in spans:
-        x = x0
-        while x < x1:
-            f = foot - rnd.randrange(0, 2)
-            h = rnd.choice((7, 8, 8, 9))
-            top = f - h + 1
-            cv.fill(x, top, 2, 2, rnd.choice(SKINS))
-            cv.fill(x, top, 2, 1, rnd.choice(HAIR))
-            cv.fill(x - rnd.randrange(0, 2), top + 2, 3, h - 4, rnd.choice(COATS))
-            cv.fill(x, f - 1, 1, 2, "ink")
-            cv.fill(x + 1, f - 1, 1, 2, "ink")
-            x += every + rnd.randrange(0, 3)
-
-
 # One ramp step lighter, for the street's glow on the towers' feet.
 UP = dict(navy="dslate", dslate="slate", dlake="lake", shale="ash", coal="shale", ink="coal", lake="shallow",
           blue="cobalt", purple="mauve", dbrick="brick", brick="rust", ochre="amber", slate="grey", ash="stone",
@@ -2259,14 +2225,12 @@ def yonge():
     crown(cv, 332, 32, 34, "turquoise", "turquoise", steps=3)
     uplight(cv, BASE - 24, BASE - 18)
     uplight(cv, BASE - 21, BASE - 18)
-    fronts = []
-    for k, (x, w, sign) in enumerate(((-4, 18, None), (14, 30, ("CAFE", "turquoise")), (44, 30, None),
-                                      (74, 14, None), (CX - 32, 64, ("PIZZA", "gold")), (210, 20, None),
-                                      (230, 14, None), (246, 22, None), (270, 34, ("BOOKS", "lilac")),
-                                      (332, 32, ("BAR", "pink")))):
-        if street_level(cv, x, w, k, sign):
-            fronts.append((x + 1, x + w - 1))
-    eaton_centre(cv, 82, 72, BASE - 36)
+    fronts = ((-4, 18, None), (14, 30, ("CAFE", "turquoise")), (44, 30, None), (74, 14, None),
+              (CX - 32, 64, ("PIZZA", "gold")), (210, 20, None), (230, 14, None), (246, 22, None),
+              (270, 34, ("BOOKS", "lilac")), (332, 32, ("BAR", "pink")))
+    for k, (x, w, sign) in enumerate(fronts):
+        street_level(cv, x, w, k, sign)
+    eaton_centre(cv, 78, 76, BASE - 44)
     blade(cv, 3, 58, "HOTEL", "pink")
     screen(cv, 14, 46, 30, 20, "turquoise", word_art("WOOF!", "white"))
     screen(cv, 274, 46, 26, 20, "azure", paw_art)
@@ -2284,11 +2248,9 @@ def yonge():
         return "slate" if hashed(px, py, 67) else "dslate"
 
     yard(cv, BASE, FAR_WALK, paving)
-    # the lit shopfronts' light on the far sidewalk, and the crowds out under it
-    for x0, x1 in fronts + [(104, 132)]:
+    # the lit podiums' and the Eaton Centre's light on the far sidewalk
+    for x0, x1 in [(x + 1, x + w - 1) for x, w, _ in fronts] + [(79, 153)]:
         front_pool(cv, x0, x1, skip=((300, 334),))
-    crowd(cv, ((2, 40), (70, 100), (136, 170), (190, 226), (236, 262), (276, 300), (336, 358)), FAR_WALK - 1,
-          "yonge")
     # a side street jammed with traffic between the TD tower and the glass, down to the far sidewalk
     side_street(cv, 304, 331, BASE - 26)
 
