@@ -320,20 +320,23 @@ describe("sky movers", () => {
   const sheets = import.meta.glob<{
     frames: Record<string, { sourceSize: { h: number; w: number } }>;
   }>("../../public/art/sprites/*.json", { eager: true, import: "default" });
-  // Each mover's highest and lowest feet rows: the sprite's top is highest at the first and its
-  // bottom lowest at the last, so the rows between them can only fit when both ends do.
-  const sky = ZONES.flatMap((zone) =>
-    gameData.ambient[zone]
-      .filter((mover) => mover.path === "sky")
-      .flatMap((mover) => {
-        const { from, to } = skyRows(mover);
-        return [...new Set([from, to])].map((row) => ({ key: mover.key, row, zone }));
-      }),
+  // Each sprite's highest and lowest feet rows over every zone that flies it: its top is highest
+  // at the first and its bottom lowest at the last, so the rows between them, in any zone, can
+  // only fit when both ends do. The band is the same in every zone.
+  const rowsByKey = new Map<string, number[]>();
+  for (const zone of ZONES) {
+    for (const mover of gameData.ambient[zone].filter((each) => each.path === "sky")) {
+      const { from, to } = skyRows(mover);
+      rowsByKey.set(mover.key, [...(rowsByKey.get(mover.key) ?? []), from, to]);
+    }
+  }
+  const sky = [...rowsByKey].flatMap(([key, rows]) =>
+    [...new Set([Math.min(...rows), Math.max(...rows)])].map((row) => ({ key, row })),
   );
 
   // The sprite's top row stays at or below the band's top edge, and its bottom row inside the
   // band, at every feet row it can fly on.
-  it.each(sky)("draws $zone's $key inside the band with its feet on row $row", ({ key, row }) => {
+  it.each(sky)("draws $key inside the band with its feet on row $row", ({ key, row }) => {
     const entry = sprites.get(key);
     const sheet = entry === undefined ? undefined : sheets[`../../public/art/${entry.json}`];
     const frame = sheet === undefined ? undefined : Object.values(sheet.frames)[0];
