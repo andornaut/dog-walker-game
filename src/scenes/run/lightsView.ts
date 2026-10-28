@@ -1,7 +1,5 @@
 import { BlendModes, GameObjects, type Scene } from "phaser";
 
-import { animationKey } from "../../assets/asepriteAnimations";
-import { IDLE_TAG } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import type { ZoneId } from "../../data/types";
 import { distanceAtY } from "../../layout/projection";
@@ -32,16 +30,15 @@ import { DEPTH, JUNCTURE_Y, LAYOUT, PROJECTION, sceneryFade, showOnRoad } from "
 // with an additive blend over the road, the backdrop's approach and the shadows and under every
 // sprite, scaled with its anchor's depth. The verges' lights stand along the road, faded in with
 // the scenery from the juncture. The rest follow every sprite of a key that carries lights,
-// whichever view drew it this frame: at its feet, scale and flip, at its own opacity times their
-// pulse's strength, just under it, and cut off at the juncture as it is, while a band mover's
+// whichever view drew it this frame: at its feet, scale, flip and sheet frame, at its own opacity
+// times their pulse's strength, just under it, and cut off at the juncture as it is, while a band mover's
 // stay whole. Cosmetic only.
 export class LightsView {
   private readonly anchors: LightAnchor[] = [];
   private readonly attached = newAttachedLightPlaces();
   private readonly attachedSprites: GameObjects.Sprite[];
   private readonly baked = new Map<string, BakedLight>();
-  // Each texture key's art key (its depth step's suffix dropped), and its idle tag's frames by
-  // name.
+  // Each texture key's art key, its depth step's suffix dropped.
   private readonly baseKeys = new Map<string, string>();
   private readonly carriers: GameObjects.Sprite[] = [];
   private readonly frame: VergeLightFrame = {
@@ -51,7 +48,6 @@ export class LightsView {
     previousStart: 0,
     scroll: 0,
   };
-  private readonly idleFrames = new Map<string, ReadonlyMap<string, number>>();
   private readonly places = newLightPlaces(VERGE_LIGHT_LIMIT);
   private readonly scene: Scene;
   private readonly sprites: GameObjects.Sprite[];
@@ -152,7 +148,7 @@ export class LightsView {
           height: drawn.frameHeight,
           width: drawn.frameWidth,
         },
-        this.idleFrame(object, textureKey),
+        sheetFrame(object.frame.name),
         anchor,
       );
       carriers.push(object);
@@ -167,21 +163,6 @@ export class LightsView {
       () => textureKey.replace(DEPTH_STEP_SUFFIX, ""),
       this.baseKeys,
     );
-  }
-
-  // The place in its idle tag of the frame a sprite shows, or 0 for a frame outside it.
-  private idleFrame(sprite: GameObjects.Sprite, textureKey: string): number {
-    const frames = getOrInsertComputed(
-      textureKey,
-      () =>
-        new Map(
-          (this.scene.anims.get(animationKey(textureKey, IDLE_TAG))?.frames ?? []).map(
-            ({ textureFrame }, i) => [String(textureFrame), i],
-          ),
-        ),
-      this.idleFrames,
-    );
-    return frames.get(sprite.frame.name) ?? 0;
   }
 
   // Shows a light at its place and depth, or hides it with none.
@@ -205,6 +186,15 @@ export class LightsView {
       .setDepth(depth)
       .setPosition(Math.round(place.x), Math.round(place.y));
   }
+}
+
+// A sprite's frames are named for their place in its sheet, such as "cyclist@75 3.aseprite".
+const SHEET_FRAME = /(\d+)\.aseprite$/;
+
+// The place in its sprite's sheet of the frame named name, or 0 for an image's one frame.
+function sheetFrame(name: string): number {
+  const match = SHEET_FRAME.exec(name);
+  return match === null ? 0 : Number(match[1]);
 }
 
 // A depth step's suffix on its art key, such as "@75".

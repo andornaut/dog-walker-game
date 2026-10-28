@@ -14,14 +14,16 @@ import { WORLD } from "../data/world";
 // widens to width at height away, pointing down as drawn, its rings scaled toward the apex.
 // A light is drawn on its own along a verge (a verge's pools), or attached to a sprite: the
 // table's attach lists, by sprite key, the lights every sprite of that key carries, wherever any
-// view draws it, each dx and dy px at full size from its anchor (its feet) as the sprite is
-// drawn. A cone's angle is the way it points, in degrees as drawn (0 right, 90 down, 180 left):
-// a sprite drawn facing the pack shines down at 90. A flipped sprite mirrors its lights' dx and
-// angle; a roadside prop is never flipped, so a light with facesRoad is set out as for a prop on
-// the road's right and mirrored for one on its left, so a lamp's beam shines toward the road from
-// either side. A pulse lists the strength the light shows at each frame of its sprite's idle
-// tag, by the frame's place in the tag; with none it shows at full strength. zones lists the
-// zone ids it shows in, or null for every zone. Drawing only: nothing in the walk reads them.
+// view draws it, each at dx and dy px at full size from its anchor (its feet) as the sprite is
+// drawn, or by frames: an offset for each frame of the sprite's sheet, in sheet order, null on a
+// frame that shows no light, so a light can follow a lamp that moves as the sprite animates. A
+// cone's angle is the way it points, in degrees as drawn (0 right, 90 down, 180 left): a sprite
+// drawn facing the pack shines down at 90. A flipped sprite mirrors its lights' dx and angle; a
+// roadside prop is never flipped, so a light with facesRoad is set out as for a prop on the
+// road's right and mirrored for one on its left, so a lamp's beam shines toward the road from
+// either side. A pulse lists the strength the light shows on each frame of its sprite's sheet;
+// with none it shows at full strength. zones lists the zone ids it shows in, or null for every
+// zone. Drawing only: nothing in the walk reads them.
 
 export type LightShape = "band" | "cone" | "ellipse";
 
@@ -76,23 +78,37 @@ export function zonesOf(ids: readonly string[] | undefined): readonly ZoneId[] |
     : WORLD.zones.map((zone) => zone.id).filter((id) => ids.includes(id));
 }
 
-export interface LightAttachment {
-  readonly angle: number;
+// Where a light sits from its sprite's feet, in px at full size.
+export interface LightOffset {
   readonly dx: number;
   readonly dy: number;
+}
+
+// offsets holds the light's offset on each frame of its sprite's sheet, null where it shows
+// none, or one offset for every frame; pulse, its strength on each frame, or null for full
+// strength on every one.
+export interface LightAttachment {
+  readonly angle: number;
   readonly facesRoad: boolean;
   readonly light: string;
+  readonly offsets: readonly (LightOffset | null)[];
   readonly pulse: readonly number[] | null;
   readonly zones: readonly ZoneId[] | null;
 }
 
-const whole = v.pipe(v.number(), v.integer());
+// Whole or half px, so a light can centre on a pixel of a frame an even number of px wide.
+const halfPx = v.pipe(
+  v.number(),
+  v.check((value) => Number.isInteger(value * 2), "must be a whole or half px"),
+);
+const offsetSchema = v.strictObject({ dx: halfPx, dy: halfPx });
 
 const attachmentSchema = v.strictObject({
   angle: v.optional(v.number()),
-  dx: whole,
-  dy: whole,
+  dx: v.optional(halfPx),
+  dy: v.optional(halfPx),
   facesRoad: v.optional(v.boolean()),
+  frames: v.optional(v.pipe(v.array(v.nullable(offsetSchema)), v.minLength(1))),
   light: v.string(),
   pulse: v.optional(
     v.pipe(v.array(v.pipe(v.number(), v.minValue(0), v.maxValue(1))), v.minLength(1)),
@@ -133,12 +149,16 @@ export function lightsFrom(table: unknown): LightTable {
         if (entry.angle !== undefined && def.shape !== "cone") {
           throw new Error(`${sprite}'s light ${entry.light} takes an angle, but is no cone`);
         }
+        const { dx, dy, frames } = entry;
+        const single = dx !== undefined && dy !== undefined;
+        if (single === (frames !== undefined) || (dx === undefined) !== (dy === undefined)) {
+          throw new Error(`${sprite}'s light ${entry.light} sits at dx and dy, or by frames`);
+        }
         return {
           angle: entry.angle ?? CONE_ANGLE,
-          dx: entry.dx,
-          dy: entry.dy,
           facesRoad: entry.facesRoad ?? false,
           light: entry.light,
+          offsets: single ? [{ dx, dy }] : (frames ?? []),
           pulse: entry.pulse ?? null,
           zones: zonesOf(entry.zones),
         };

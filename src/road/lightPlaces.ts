@@ -121,7 +121,7 @@ function placeLight(
 
 // A sprite lights may attach to, as drawn this frame: its key, its anchor (its feet) on screen,
 // its scale against its full size, whether it is flipped, whether it stands left of the road's
-// centre line, and the place in its idle tag of the frame it shows.
+// centre line, and the frame of its sheet it shows.
 export interface LightAnchor {
   flipX: boolean;
   frame: number;
@@ -161,7 +161,8 @@ export function newAttachedLightPlaces(): AttachedLightPlace[] {
 // Writes the lights the anchors carry in zone into out, at most out.length of them, and returns
 // how many: each offset from its anchor by its dx and dy at the anchor's scale, a cone turned to
 // its angle, both mirrored with a flipped sprite, or for a light that faces the road on a sprite
-// left of the road, and at its pulse's strength for the anchor's frame.
+// left of the road, and at its pulse's strength, on the anchor's frame; none on a frame whose
+// offset is null.
 export function placeAttachedLights(
   zone: ZoneId,
   anchors: readonly LightAnchor[],
@@ -178,18 +179,22 @@ export function placeAttachedLights(
       if (attachment.zones !== null && !attachment.zones.includes(zone)) {
         continue;
       }
+      const { offsets, pulse } = attachment;
+      const offset = offsets[mod(anchor.frame, offsets.length)];
+      if (offset === null || offset === undefined) {
+        continue;
+      }
       const mirrored = anchor.flipX !== (attachment.facesRoad && anchor.leftOfRoad);
       const mirror = mirrored ? -1 : 1;
       const angle = mirrored ? 180 - attachment.angle : attachment.angle;
-      const { pulse } = attachment;
       place.anchor = index;
       place.groundY = anchor.y;
       place.key = attachment.light;
       place.rotation = def.shape === "cone" ? ((angle - CONE_DOWN) * Math.PI) / 180 : 0;
       place.scale = anchor.scale;
       place.strength = pulse === null ? 1 : (pulse[mod(anchor.frame, pulse.length)] ?? 1);
-      place.x = anchor.x + mirror * attachment.dx * anchor.scale;
-      place.y = anchor.y + attachment.dy * anchor.scale;
+      place.x = anchor.x + mirror * offset.dx * anchor.scale;
+      place.y = anchor.y + offset.dy * anchor.scale;
       count += 1;
     }
   }
@@ -232,13 +237,13 @@ export function anchorSprite(
   key: string,
   drawn: DrawnSprite,
   frame: DrawnFrame,
-  idleFrame: number,
+  sheetFrame: number,
   anchor: LightAnchor,
 ): void {
   const scaleX = Math.abs(drawn.scaleX);
   const scaleY = Math.abs(drawn.scaleY);
   anchor.flipX = drawn.flipX;
-  anchor.frame = idleFrame;
+  anchor.frame = sheetFrame;
   anchor.key = key;
   anchor.scale = (frame.height * scaleY) / frame.fullHeight;
   anchor.x = drawn.x + (0.5 - drawn.originX) * frame.width * scaleX;

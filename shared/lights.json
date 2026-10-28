@@ -1,5 +1,64 @@
 {
   "attach": {
+    "cargo-bike": [
+      {
+        "angle": 90,
+        "dx": 0.5,
+        "dy": -10.5,
+        "light": "rider-headlamp",
+        "zones": ["homeStretch", "shops"]
+      }
+    ],
+    "cyclist": [
+      {
+        "angle": 90,
+        "dx": 0.5,
+        "dy": -18.5,
+        "light": "rider-headlamp",
+        "zones": ["homeStretch", "shops"]
+      }
+    ],
+    "delivery-cyclist": [
+      {
+        "angle": 90,
+        "frames": [
+          {
+            "dx": -0.5,
+            "dy": -23.5
+          },
+          {
+            "dx": 0.5,
+            "dy": -23.5
+          },
+          {
+            "dx": 1.5,
+            "dy": -23.5
+          },
+          {
+            "dx": 0.5,
+            "dy": -23.5
+          },
+          {
+            "dx": -1.5,
+            "dy": -23.5
+          },
+          {
+            "dx": -1.5,
+            "dy": -23.5
+          },
+          {
+            "dx": -1.5,
+            "dy": -23.5
+          },
+          {
+            "dx": -1.5,
+            "dy": -23.5
+          }
+        ],
+        "light": "rider-headlamp",
+        "zones": ["homeStretch", "shops"]
+      }
+    ],
     "delivery-truck": [
       {
         "dx": 0,
@@ -16,11 +75,60 @@
         "zones": ["homeStretch", "shops"]
       }
     ],
+    "kid-on-bike": [
+      {
+        "angle": 90,
+        "dx": 0.5,
+        "dy": -14.5,
+        "light": "rider-headlamp",
+        "zones": ["homeStretch", "shops"]
+      }
+    ],
+    "minor-scooter": [
+      {
+        "angle": 90,
+        "frames": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          {
+            "dx": 0.5,
+            "dy": -38.5
+          },
+          {
+            "dx": 0.5,
+            "dy": -37.5
+          },
+          {
+            "dx": 0.5,
+            "dy": -37.5
+          },
+          {
+            "dx": 0.5,
+            "dy": -38.5
+          }
+        ],
+        "light": "rider-headlamp",
+        "zones": ["homeStretch", "shops"]
+      }
+    ],
     "parked-car": [
       {
         "dx": 0,
         "dy": 2,
         "light": "tail-red",
+        "zones": ["homeStretch", "shops"]
+      }
+    ],
+    "pedicab": [
+      {
+        "angle": 90,
+        "dx": 0.5,
+        "dy": -15.5,
+        "light": "rider-headlamp",
         "zones": ["homeStretch", "shops"]
       }
     ],
@@ -208,6 +316,26 @@
       ],
       "shape": "ellipse",
       "width": 88
+    },
+    "rider-headlamp": {
+      "colour": "amber",
+      "height": 60,
+      "rings": [
+        {
+          "scale": 1,
+          "strength": 0.03
+        },
+        {
+          "scale": 0.66,
+          "strength": 0.07
+        },
+        {
+          "scale": 0.33,
+          "strength": 0.16
+        }
+      ],
+      "shape": "cone",
+      "width": 40
     },
     "shop-window": {
       "colour": "amber",

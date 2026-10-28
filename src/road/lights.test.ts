@@ -6,7 +6,6 @@ import manifest from "../../public/art/manifest.json";
 import depthSteps from "../../shared/depth-steps.json";
 import lightTable from "../../shared/lights.json";
 import { paletteColour } from "../assets/housePalette";
-import { IDLE_TAG } from "../assets/spriteKeys";
 import { WORLD } from "../data/world";
 import { itemAt } from "../lib/arrays";
 import { decodePng } from "../testing/png";
@@ -47,17 +46,21 @@ describe("lightsFrom", () => {
     const read = (attach: Record<string, unknown>) =>
       lightsFrom(tableOf(DEF, attach)).attach.get("some-sprite");
     expect(read(ATTACHED)).toEqual([
-      { ...ATTACHED, angle: 90, facesRoad: false, pulse: null, zones: null },
+      {
+        angle: 90,
+        facesRoad: false,
+        light: "glow",
+        offsets: [{ dx: 2, dy: -3 }],
+        pulse: null,
+        zones: null,
+      },
     ]);
-    const beam = {
-      ...ATTACHED,
-      angle: 0,
-      facesRoad: true,
-      light: "beam",
-      pulse: [1, 0.5],
-      zones: [zone],
-    };
-    expect(read(beam)).toEqual([beam]);
+    const frames = [{ dx: 0.5, dy: -10.5 }, null];
+    expect(
+      read({ angle: 0, facesRoad: true, frames, light: "beam", pulse: [1, 0.5], zones: [zone] }),
+    ).toEqual([
+      { angle: 0, facesRoad: true, light: "beam", offsets: frames, pulse: [1, 0.5], zones: [zone] },
+    ]);
   });
 
   const [outer, middle, inner] = DEF.rings;
@@ -87,7 +90,12 @@ describe("lightsFrom", () => {
     ["a field it does not know", { ...ATTACHED, blend: "add" }],
     ["a light it does not know", { ...ATTACHED, light: "no-such-light" }],
     ["an angle on a light that is no cone", { ...ATTACHED, angle: 45 }],
-    ["a fraction of a px", { ...ATTACHED, dx: 0.5 }],
+    ["a quarter px", { ...ATTACHED, dx: 0.25 }],
+    ["an offset and frames both", { ...ATTACHED, frames: [{ dx: 0, dy: 0 }] }],
+    ["neither an offset nor frames", { light: "glow" }],
+    ["dx with no dy", { dx: 2, light: "glow" }],
+    ["no frames listed", { frames: [], light: "glow" }],
+    ["a frame with a field it does not know", { frames: [{ dx: 0, dy: 0, dz: 1 }], light: "glow" }],
     ["an empty pulse", { ...ATTACHED, pulse: [] }],
     ["a pulse past full strength", { ...ATTACHED, pulse: [1, 1.5] }],
     ["a zone it does not know", { ...ATTACHED, zones: ["no-such-zone"] }],
@@ -105,7 +113,7 @@ describe("LIGHT_ATTACHMENTS", () => {
     expect(SPRITES).toContain(key);
   });
 
-  // A sprite's Aseprite JSON: its frames in order, as a hash or an array, and its tags.
+  // A sprite's Aseprite JSON: its frames in sheet order, as a hash or an array.
   interface SheetFrame {
     readonly frame: {
       readonly h: number;
@@ -116,38 +124,42 @@ describe("LIGHT_ATTACHMENTS", () => {
     readonly sourceSize: { readonly h: number; readonly w: number };
     readonly spriteSourceSize: { readonly x: number; readonly y: number };
   }
-  const sheetOf = (key: string) => {
+  const framesOf = (key: string): readonly SheetFrame[] => {
     const sheet = JSON.parse(readFileSync(`public/art/sprites/${key}.json`, "utf8")) as {
       frames: SheetFrame[] | Record<string, SheetFrame>;
-      meta: { frameTags: { from: number; name: string; to: number }[] };
     };
-    const frames = Array.isArray(sheet.frames) ? sheet.frames : Object.values(sheet.frames);
-    const tag = sheet.meta.frameTags.find(({ name }) => name === IDLE_TAG);
-    return { frames, idle: tag ?? { from: 0, to: 0 } };
+    return Array.isArray(sheet.frames) ? sheet.frames : Object.values(sheet.frames);
   };
-  // The frames of a sprite's idle tag.
-  const idleFrames = (key: string): number => {
-    const { idle } = sheetOf(key);
-    return idle.to - idle.from + 1;
-  };
-  const pulsed = ATTACHED_KEYS.flatMap((key) =>
-    (LIGHT_ATTACHMENTS.get(key) ?? [])
-      .filter(({ pulse }) => pulse !== null && idleFrames(key) > 1)
-      .map(({ light, pulse }) => ({ key, light, pulses: pulse?.length ?? 0 })),
+
+  // A list by frame, a pulse or the offsets of a light that moves, has one entry for each frame
+  // of its sprite's sheet, once the sheet has more than one.
+  const byFrame = ATTACHED_KEYS.flatMap((key) =>
+    framesOf(key).length < 2
+      ? []
+      : (LIGHT_ATTACHMENTS.get(key) ?? []).flatMap(({ light, offsets, pulse }) => [
+          ...(pulse === null ? [] : [{ key, length: pulse.length, light, list: "pulse" }]),
+          ...(offsets.length === 1 ? [] : [{ key, length: offsets.length, light, list: "frames" }]),
+        ]),
   );
-  it.each(pulsed.length > 0 ? pulsed : [null])(
-    "pulses %o a strength for each frame of its sprite's idle tag",
-    (attached) => {
-      if (attached !== null) {
-        expect(attached.pulses).toBe(idleFrames(attached.key));
+  it.each(byFrame.length > 0 ? byFrame : [null])(
+    "lists $key's $light $list for each frame of its sheet",
+    (listed) => {
+      if (listed !== null) {
+        expect(listed.length).toBe(framesOf(listed.key).length);
       }
     },
   );
 
-  // A cone shines from its sprite's bulb: wherever the sprite is drawn, from any of its depth
-  // steps and on either side of the road, the cone's apex lies on a lit pixel, one with a
-  // channel at LIT or brighter.
+  // A cone shines from its sprite's lamp: on every frame it shows on, from each of its sprite's
+  // depth steps and on either side of the road, its apex lies on the lamp's core or the pixel
+  // beside it, a depth step's lamp sitting up to a pixel from where scaling puts it. A core
+  // pixel is lit, with a channel at LIT or brighter; a white one is a lamp only where its run of
+  // white has a cream ring, at least RING_CREAM cream pixels touching it, as a rider's chest
+  // band, helmet or reflector has not.
   const LIT = 232;
+  const WHITE = "255,255,255";
+  const CREAM = "234,212,170";
+  const RING_CREAM = 2;
   const ANCHORS = new Map(
     manifest.sprites.flatMap(({ anchor, key }) =>
       anchor === undefined ? [] : [[key, anchor.feetY] as const],
@@ -160,48 +172,90 @@ describe("LIGHT_ATTACHMENTS", () => {
         depthSteps.steps
           .filter(({ suffix }) => ANCHORS.has(`${key}${suffix}`))
           .flatMap(({ scale, suffix }) =>
-            [false, true].map((leftOfRoad) => ({
-              attachment,
-              leftOfRoad,
-              scale,
-              step: `${key}${suffix}`,
-              zone: attachment.zones?.[0] ?? itemAt(WORLD.zones, 0).id,
-            })),
+            framesOf(`${key}${suffix}`).flatMap((_, frame) =>
+              attachment.offsets[frame % attachment.offsets.length] === null
+                ? []
+                : [false, true].map((leftOfRoad) => ({
+                    attachment,
+                    frame,
+                    leftOfRoad,
+                    scale,
+                    step: `${key}${suffix}`,
+                    zone: attachment.zones?.[0] ?? itemAt(WORLD.zones, 0).id,
+                  })),
+            ),
           ),
       ),
   );
+
+  // A frame's pixels as RGB keys, null where clear or off its rect on the sheet, which may be
+  // trimmed.
+  const colourAt =
+    (data: Uint8Array, width: number, { frame }: SheetFrame) =>
+    (x: number, y: number): string | null => {
+      if (x < 0 || x >= frame.w || y < 0 || y >= frame.h) {
+        return null;
+      }
+      const i = ((frame.y + y) * width + frame.x + x) * 4;
+      return data[i + 3] === 0 ? null : [...data.subarray(i, i + 3)].join();
+    };
+  const isLampCore = (colour: (x: number, y: number) => string | null, x: number, y: number) => {
+    const core = colour(x, y);
+    if (core === null || Math.max(...core.split(",").map(Number)) < LIT) {
+      return false;
+    }
+    if (core !== WHITE) {
+      return true;
+    }
+    const run = new Set([`${x},${y}`]);
+    const queue: (readonly [number, number])[] = [[x, y]];
+    const ring = new Set<string>();
+    while (queue.length > 0) {
+      const [cx, cy] = queue.pop() ?? [0, 0];
+      for (const dx of [-1, 0, 1]) {
+        for (const dy of [-1, 0, 1]) {
+          const cell = `${cx + dx},${cy + dy}`;
+          const here = colour(cx + dx, cy + dy);
+          if (here === CREAM) {
+            ring.add(cell);
+          } else if (here === WHITE && dx * dy === 0 && !run.has(cell)) {
+            run.add(cell);
+            queue.push([cx + dx, cy + dy]);
+          }
+        }
+      }
+    }
+    return ring.size >= RING_CREAM;
+  };
+
   it.each(cones.length > 0 ? cones : [null])(
-    "shines $attachment.light from a lit bulb of $step, left of the road $leftOfRoad",
+    "shines $attachment.light from the lamp of $step on frame $frame, left of the road $leftOfRoad",
     (cone) => {
       if (cone === null) {
         return;
       }
-      // The idle tag's first frame, anchored as drawn: centred across its full frame, its feet
-      // on the manifest's row.
+      // The frame, anchored as drawn: centred across its full frame, its feet on the manifest's
+      // row.
       const { data, width } = decodePng(readFileSync(`public/art/sprites/${cone.step}.png`));
-      const { frames, idle } = sheetOf(cone.step);
-      const { frame, sourceSize, spriteSourceSize } = itemAt(frames, idle.from);
+      const sheetFrame = itemAt(framesOf(cone.step), cone.frame);
       const anchor = {
         flipX: false,
-        frame: 0,
+        frame: cone.frame,
         key: cone.step.replace(/@\d+$/, ""),
         leftOfRoad: cone.leftOfRoad,
         scale: cone.scale,
-        x: sourceSize.w / 2,
+        x: sheetFrame.sourceSize.w / 2,
         y: ANCHORS.get(cone.step) ?? 0,
       };
       const out = newAttachedLightPlaces();
       const places = out.slice(0, placeAttachedLights(cone.zone, [anchor], out));
       const apex = places.find(({ key: light }) => light === cone.attachment.light);
       expect(apex).toBeDefined();
-      // The apex's pixel in the frame's rect on the sheet, which may be trimmed.
-      const x = Math.floor(apex?.x ?? 0) - spriteSourceSize.x;
-      const y = Math.floor(apex?.y ?? 0) - spriteSourceSize.y;
-      expect(x >= 0 && x < frame.w && y >= 0 && y < frame.h).toBe(true);
-      const i = ((frame.y + y) * width + frame.x + x) * 4;
-      const [r = 0, g = 0, b = 0, a = 0] = data.subarray(i, i + 4);
-      expect(a).toBeGreaterThan(0);
-      expect(Math.max(r, g, b)).toBeGreaterThanOrEqual(LIT);
+      const x = Math.floor(apex?.x ?? 0) - sheetFrame.spriteSourceSize.x;
+      const y = Math.floor(apex?.y ?? 0) - sheetFrame.spriteSourceSize.y;
+      const colour = colourAt(data, width, sheetFrame);
+      const near = [-1, 0, 1].flatMap((dx) => [-1, 0, 1].map((dy) => [x + dx, y + dy] as const));
+      expect(near.some(([nx, ny]) => isLampCore(colour, nx, ny))).toBe(true);
     },
   );
 });
