@@ -2,8 +2,9 @@
 """Draw the 40 achievement badges and the celebration burst.
 
 badge-<achievement>: 32x32 medals, rimmed by category (firsts bronze, mastery
-silver, collection gold, silly pink, and the one legend, the hardest, purple), each with its own emblem for its goal: no
-two share a motif, so each reads apart from the rest at 1x on the badge wall.
+silver, collection gold, legend purple with gold studs for the one hardest badge,
+silly pink), each with its own emblem for its goal: no two share a motif, so each
+reads apart from the rest at 1x on the badge wall.
 Tags: earned (in colour) and locked (in the neutral greys of locked UI: an
 ndslate ring, an ngrey face, the emblem as a two-tone ink and ndslate silhouette,
 a small padlock), dark enough that it never reads as silver. Where an emblem's edge holds under 3:1 against the cream and tan
@@ -465,7 +466,7 @@ def _(g):
     g.rect(12, 26, 8, 1, "dslate")
     g.rect(5, 9, 22, 9, "navy")
     g.rect(6, 10, 20, 7, "blue")
-    g.rect(6, 15, 20, 1, "white")
+    g.rect(6, 16, 20, 1, "white")
     bitmap(g, 13, 10, SIGN_PAW, {"P": "white", "T": "white"})
     # the cap: a stepped crest over the blade's middle, as Toronto's signs have
     g.rect(11, 7, 10, 2, "navy")
@@ -772,9 +773,11 @@ def badge(name, locked=False):
     rim, rim_sh, rim_li = RIMS[BADGES[name]]
     g = Grid(32, 32)
     g.ell(16, 16, 14.5, 14.5, rim, rim_sh, rim_li)
+    # twelve studs round the ring, the right and bottom ones held 1px inside its outer edge (column and row
+    # 29) as the left and top ones are, so none breaks the rim
     for a in range(0, 360, 30):
-        g.p(16 + math.cos(math.radians(a)) * 13, 16 + math.sin(math.radians(a)) * 13,
-            STUDS.get(BADGES[name], rim_sh))
+        x, y = (min(int(16 + f(math.radians(a)) * 13), 28) for f in (math.cos, math.sin))
+        g.p(x, y, STUDS.get(BADGES[name], rim_sh))
     g.ell(16, 16, 11, 11, "cream", "tan")
     disc = Grid(32, 32)
     disc.ell(16, 16, 11, 11, "cream")
