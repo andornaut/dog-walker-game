@@ -1,4 +1,4 @@
-import { itemAt } from "../lib/arrays";
+import { itemAt, partitionPoint } from "../lib/arrays";
 import { randomPick, weightedPick } from "../lib/random";
 import { approachOutcomes } from "./approach";
 import {
@@ -319,17 +319,8 @@ export function packFitsOnPath(
     return true;
   }
   // The first change past the nearer one.
-  let low = 0;
-  let high = changes.length;
-  while (low < high) {
-    const middle = (low + high) >>> 1;
-    if (itemAt(changes, middle).at <= near.distance) {
-      low = middle + 1;
-    } else {
-      high = middle;
-    }
-  }
-  for (let i = low; i < changes.length && itemAt(changes, i).at <= far.distance; i++) {
+  const first = partitionPoint(changes, (change) => change.at <= near.distance);
+  for (let i = first; i < changes.length && itemAt(changes, i).at <= far.distance; i++) {
     const moves = pathMovesBetween(itemAt(changes, i), near, far);
     if (moves > 0 && gap < packGap(plan, moves) - ROUNDING) {
       return false;
@@ -595,17 +586,11 @@ export function planSpawns<Kind extends string>(
   let longestPlaced = 0;
   const widestGap = packGap(plan, PATH_MOST_LANES);
   const addPlaced = (place: BlockingPlace) => {
-    let low = 0;
-    let high = placed.length;
-    while (low < high) {
-      const middle = (low + high) >>> 1;
-      if (itemAt(placed, middle).distance < place.distance) {
-        low = middle + 1;
-      } else {
-        high = middle;
-      }
-    }
-    placed.splice(low, 0, place);
+    placed.splice(
+      partitionPoint(placed, (other) => other.distance < place.distance),
+      0,
+      place,
+    );
     longestPlaced = Math.max(longestPlaced, place.length);
   };
   // True when the pack fits between a place and every place placed along the path
@@ -613,17 +598,7 @@ export function planSpawns<Kind extends string>(
   const fitsPlaced = (place: BlockingPlace): boolean => {
     const from = place.distance - longestPlaced - widestGap;
     const to = place.distance + Math.max(0, place.length) + widestGap;
-    let low = 0;
-    let high = placed.length;
-    while (low < high) {
-      const middle = (low + high) >>> 1;
-      if (itemAt(placed, middle).distance < from) {
-        low = middle + 1;
-      } else {
-        high = middle;
-      }
-    }
-    for (let i = low; i < placed.length; i++) {
+    for (let i = partitionPoint(placed, (other) => other.distance < from); i < placed.length; i++) {
       const other = itemAt(placed, i);
       if (other.distance > to) {
         return true;
