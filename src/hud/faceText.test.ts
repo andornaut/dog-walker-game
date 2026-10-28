@@ -24,7 +24,6 @@ import {
 } from "./faceText";
 import { MESSAGE_LINE, MESSAGE_STRIP, messageStripLayout } from "./messageStrip";
 import { lowHeartsText } from "./moments";
-import { UNSAID_RUN_TEXT } from "./runText";
 import {
   bumpLines,
   firedLine,
@@ -96,8 +95,7 @@ function ownerLinePaths(text: object, path = ""): string[] {
 describe("the walk's lines that name an owner", () => {
   it("each lead the name with the owner's face, or are listed as plain", () => {
     const placed = [...PLACES.map(([path]) => path), ...PLAIN_OWNER_LINES].sort();
-    const said = ownerLinePaths(gameData.runText).filter((path) => !UNSAID_RUN_TEXT.includes(path));
-    expect(said.sort()).toEqual(placed);
+    expect(ownerLinePaths(gameData.runText).sort()).toEqual(placed);
   });
 
   it.each(PLACES)("%s marks the owner's name, in the mood of its change", (_path, line, change) => {

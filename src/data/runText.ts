@@ -43,7 +43,6 @@ export const RUN_TEXT = {
   firedBy: "{owner} fired you!",
   forgiven: "Forgiven!",
   foundGear: "{gear} (found)",
-  fullPackHome: "Walk bonus! +{amount}",
   homeQuestion: {
     headHome: "Head home",
     keepWalking: "Keep walking",
@@ -83,9 +82,7 @@ export const RUN_TEXT = {
     gearFound: "Found {gear}! In effect for the rest of the walk",
     gearSwapped: "Found {gear}! {old} goes back.",
     largeDog: "{dog} is large: −{speed} lane change speed.",
-    lowHearts: "{owner} has 1♥ left!",
     luckyNeighbour: "A neighbour pets the pack! +{hearts}♥ to share",
-    luckyNeighbourGain: "{owner} +{hearts}♥",
     luckyWallet: "Found a wallet!",
     plainHit: "{dog} bumped the {obstacle}! {owner} −{hearts}♥",
     pull: "{dog} spotted a squirrel!",

@@ -874,9 +874,6 @@ export interface RunText {
   // A gear drop's name wherever a change or a held card names what made it: {gear} is the
   // item's name.
   readonly foundGear: string;
-  // CLEANUP (added 2026-10-28): no code says this line; delete this field once gameplay has
-  // dropped it from the data.
-  readonly fullPackHome?: string;
   // lose is the current zone's pay the dogs still walking would earn, given up, and zonesLeft
   // the zones after this one, shown when any are.
   readonly homeQuestion: {
@@ -925,15 +922,9 @@ export interface RunText {
     readonly gearSwapped: string;
     // At a walk's start, for each large dog in the pack, which slows lane changes.
     readonly largeDog: string;
-    // CLEANUP (added 2026-10-28): no code says this line; delete this field once gameplay has
-    // dropped it from the data.
-    readonly lowHearts?: string;
     // The friendly neighbour's line: {hearts} is the total the neighbour shares; each owner's
     // heart pop shows their own gain.
     readonly luckyNeighbour: string;
-    // CLEANUP (added 2026-10-28): no code says this line; delete this field once gameplay has
-    // dropped it from the data.
-    readonly luckyNeighbourGain?: string;
     readonly luckyWallet: string;
     readonly plainHit: string;
     readonly pull: string;

@@ -22,22 +22,6 @@ export const STRIP_LINE_FIELDS = {
   treat: ["dog", "hearts", "owner"],
 } as const;
 
-// CLEANUP (added 2026-10-28): strip lines the walk no longer says, whose names the text may use
-// until gameplay drops them from the data; then delete this table and its paths in
-// UNSAID_RUN_TEXT.
-const UNSAID_STRIP_FIELDS = {
-  lowHearts: ["owner"],
-  luckyNeighbourGain: ["dog", "hearts", "owner"],
-} as const;
-
-// CLEANUP (added 2026-10-28): the paths of the walk text lines no code says, for the text tests
-// to pass over until gameplay drops them from the data; then delete this list.
-export const UNSAID_RUN_TEXT: readonly string[] = [
-  "fullPackHome",
-  "strip.lowHearts",
-  "strip.luckyNeighbourGain",
-];
-
 // The {name}s each walk text line may use, by group; a line left out uses none. A line is
 // filled with fillLine(RUN_TEXT_FIELDS.<group>, gameData.runText.<group>, key, fields).
 export const RUN_TEXT_FIELDS = {
@@ -52,9 +36,6 @@ export const RUN_TEXT_FIELDS = {
   },
   firedBy: ["owner"],
   foundGear: ["gear"],
-  // CLEANUP (added 2026-10-28): no code says this line; delete this entry once gameplay has
-  // dropped it from the data.
-  fullPackHome: ["amount"],
   homeQuestion: {
     lose: ["fees", "zone"],
     zonesLeft: ["count"],
@@ -68,7 +49,6 @@ export const RUN_TEXT_FIELDS = {
   seconds: ["seconds"],
   strip: {
     ...STRIP_LINE_FIELDS,
-    ...UNSAID_STRIP_FIELDS,
     debuffStart: {
       muddy: ["seconds", "slower"],
       spotlight: ["cash", "seconds"],
