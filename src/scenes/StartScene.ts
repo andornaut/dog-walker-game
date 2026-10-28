@@ -174,6 +174,7 @@ import { playEffect, playTag, spriteMetrics } from "./sprites";
 import {
   addIconButton,
   addNineSlice,
+  addPanel,
   addSelectTile,
   addTagImage,
   addTapBurst,
@@ -1442,12 +1443,7 @@ export class StartScene extends Scene {
       label.setX(rect.x + SPEECH.padX + widest / 2);
     });
     addNamePills(labels);
-    const quip = addNineSlice(this, "ui-quip", rect);
-    if (quip === undefined) {
-      drawFramedRect(this.graphics(bubble), { border: PALETTE.plum, fill: PALETTE.cream }, rect);
-    } else {
-      bubble.add(quip);
-    }
+    bubble.add(addPanel(this, rect, "ui-quip"));
     if (!faced || speech.owner === null || column === null) {
       nameLabel?.destroy();
     } else {
