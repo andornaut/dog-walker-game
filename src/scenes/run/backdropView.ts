@@ -2,7 +2,7 @@ import type { GameObjects, Scene } from "phaser";
 
 import { backdropKey } from "../../assets/spriteKeys";
 import type { Zone } from "../../data/types";
-import { DEPTH, LAYOUT } from "../../scenes/run/stage";
+import { DEPTH, LAYOUT } from "./stage";
 
 // The zone's backdrop band over the far end of the road, held still.
 export class BackdropView {

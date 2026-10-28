@@ -5,8 +5,6 @@ import { AMBIENT_VARIANTS, IDLE_TAG } from "../../assets/spriteKeys";
 import type { AmbientMover, ZoneId } from "../../data/types";
 import { getOrInsertComputed } from "../../lib/maps";
 import type { Random } from "../../lib/random";
-import { DEPTH, LAYOUT, PROJECTION, showOnRoad } from "../../scenes/run/stage";
-import { firstTag, playTag, showAtDepth } from "../../scenes/sprites";
 import {
   type AmbientDeps,
   type AmbientFrame,
@@ -15,7 +13,9 @@ import {
   placeAmbient,
   startAmbient,
   stepAmbient,
-} from "../ambient";
+} from "../../road/ambient";
+import { firstTag, playTag, showAtDepth } from "../sprites";
+import { DEPTH, LAYOUT, PROJECTION, showOnRoad } from "./stage";
 
 // The art of a slot with no mover: none.
 const NO_ART: readonly string[] = [];

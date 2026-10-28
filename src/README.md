@@ -62,7 +62,7 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 - `src/lib/`: helpers with no game knowledge
 - `src/pack/`: the pack drawing every screen shares: each leash from the walker's hand to the dog's collar and the draw order (dogs by their feet rows, then leashes, then the walker). `phaser/` draws the pack for the walk, the start screen's gate and the end screen's walk home, so the three draw it alike
 - `src/pwa/`, `src/dev/`: phone app and dev tools
-- `src/road/`: road clipping, the roadside, ambient movers and struck scenery; `phaser/` draws the backdrop band
+- `src/road/`: road clipping, the roadside, ambient movers and struck scenery
 - `src/rules/`, `src/state/`: run state and pure rules
 - `src/runner/`: the walk session, lane motion, spawn planning, collisions, movers and pulls. `walk.ts` steps the walk over the road items `walkItems.ts` sorts into kinds; `zonePlan.ts` turns a zone's data into spawn quotas, which `zonePlanner.ts` places on the row grid and path of `spawning.ts`, keeping its cells in `spawnCells.ts`; `moverSpecs.ts` reads each mover's spec from the data, `moverPlanning.ts` draws and places its path, and `movers.ts` moves it along that path
 - `src/save/`: persistence

@@ -58,8 +58,6 @@ const CONTEXTS = {
     "lib",
     "runner/walkGeometry",
     "runner/walkItems",
-    "scenes/run/stage",
-    "scenes/sprites",
   ],
   ui: ["assets", "lib", "rules/units"],
 };
