@@ -45,6 +45,15 @@ describe("vergeFrom", () => {
     expect(vergeFrom(plain).pools).toEqual([]);
   });
 
+  // A pool per lamp: a long period, one pool ending where its period does, beside another.
+  it.each([
+    ["a period of many joints", [{ ...POOL, every: 3360 }]],
+    ["a pool ending at its period's end", [{ ...POOL, offset: { left: 80, right: 0 } }]],
+    ["several pools", [POOL, { ...POOL, every: 1120, offset: { left: 1072, right: 0 } }]],
+  ])("reads %s", (_, pools) => {
+    expect(vergeFrom({ ...PAVED, pools }).pools).toHaveLength(pools.length);
+  });
+
   it.each([
     ["a colour name not on the palette", { ...PAVED, curbColour: "no-such-colour" }],
     ["a lawn kind it does not know", { ...PAVED, lawn: "meadow" }],
