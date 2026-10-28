@@ -1693,9 +1693,10 @@ KID_BIKE_RIDE_MS = 100
 
 def kid_on_bike(lf=0, rf=0, sway=0, flutter=(0, 0, 0)):
     """A kid riding a little bike down the road at the pack, facing the player as the cyclist does: a yellow
-    tee, sky shorts, red shoes and ochre hair under a red helmet with a white stripe and a dark visor. The
-    bike is mauve, its front tire edge-on under a mudguard with a white reflector, the training wheels
-    showing either side behind, streamers trailing from the grips. Shorter than an adult rider: the helmet's
+    tee, sky shorts, red shoes and ochre hair under a red helmet with a white stripe, its rim a dark visor line
+    with the face clear under it, as the cyclist's. The bike is mauve, its front tire edge-on under a mudguard
+    with a white reflector, the training wheels showing either side behind, a pink streamer 2 design pixels
+    wide trailing from each grip. Shorter than an adult rider: the helmet's
     top is 4 design rows (6px) lower than the cyclist's. The road outline and the lit rim."""
     g = edged(Grid(32, 48))
     w = sway
@@ -1726,10 +1727,10 @@ def kid_on_bike(lf=0, rf=0, sway=0, flutter=(0, 0, 0)):
         g.rect(x + w, 24, 3, 1, "skin1")
     # the handlebar across in front, the streamers trailing from the grips, the hands on the grips
     g.rect(6, 26, 20, 1, "grey")
-    for x, c in ((5, "pink"), (6, "cyan"), (7, "yellow"), (24, "yellow"), (25, "cyan"), (26, "pink")):
+    for x in (5, 6, 25, 26):
         side = -1 if x < 16 else 1
         for k, dx in enumerate(flutter):
-            g.rect(x + side * dx, 28 + 2 * k, 1, 2, c)
+            g.rect(x + side * dx, 28 + 2 * k, 1, 2, "pink")
     g.rect(5, 25, 3, 3, "ink")
     g.rect(24, 25, 3, 3, "ink")
     g.rect(6, 25, 3, 2, "skin1")
@@ -1739,7 +1740,7 @@ def kid_on_bike(lf=0, rf=0, sway=0, flutter=(0, 0, 0)):
     face_disc(g, 16 + w, 15.5, 6.5, 5.5, "skin1", "skin2")
     g.rect(9 + w, 13, 2, 5, "ochre")
     g.rect(21 + w, 13, 2, 5, "ochre")
-    g.cel(16 + w, 11.5, 7, 5, "red", "dred", "pink", power=2.2)
+    g.cel(16 + w, 10, 7, 3.5, "red", "dred", "pink", power=2.2)
     g.rect(15.5 + w, 7, 1, 6, "white")
     g.rect(9 + w, 13, 14, 1, "ink")
     face_front(g, 16 + w, 15)
