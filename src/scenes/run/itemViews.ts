@@ -26,7 +26,7 @@ import { PALETTE } from "../../ui/phaser/palette";
 import { addStandingSprite, ensurePlaceholder } from "../sprites";
 import { applyItemCue } from "./itemCueViews";
 import { drawMover, MOVER_CUE_PARTS, moverBodyKey } from "./moverView";
-import { DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
+import { DEPTH, LANE_XS, LAYOUT, PROJECTION, ROW_DEPTH, type Shadow } from "./stage";
 import { type StandFrame, standPart } from "./standPart";
 import { goesToVerge, type VergeItem, vergeNow } from "./vergeScenery";
 
@@ -92,9 +92,6 @@ export function ensureRoadPlaceholders(scene: Scene): void {
   const skunk = gameData.encounters.skunk;
   add(SKUNK_CLOUD_KEY, skunk.kind === "obstacle" ? skunk.shape.lanes : 1);
 }
-
-// A struck obstacle's depth steps this much a row, keeping every row under DEPTH.sprite.
-const STRUCK_ROW_DEPTH = 1 / 1000;
 
 // Where a mover's arrow sits among its parts: body, sign, arrow, wander mark, then any that go
 // with its body.
@@ -232,7 +229,7 @@ export class ItemViews {
       for (const { flat, sprite } of parts.filter((part) => part.sprite.visible)) {
         sprite.setPosition(sprite.x + Math.round(dx), sprite.y + Math.round(dy));
         if (!flat) {
-          sprite.setDepth(DEPTH.struck + sprite.y * STRUCK_ROW_DEPTH);
+          sprite.setDepth(DEPTH.struck + sprite.y * ROW_DEPTH);
         }
       }
     }

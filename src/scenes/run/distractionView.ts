@@ -21,14 +21,10 @@ import {
   startDistractions,
   stepDistractions,
 } from "./distractions";
-import { DEPTH, LANE_XS, LAYOUT, PROJECTION, showOnRoad } from "./stage";
+import { DEPTH, LANE_XS, LAYOUT, PROJECTION, ROW_DEPTH, showOnRoad } from "./stage";
 
 // The tags a distraction moves in, the first its art has: it walks, or hops.
 const MOVING_TAGS = ["walk", "hop", "run"] as const;
-
-// A distraction's depth steps this much a row from DEPTH.roadside, as a roadside prop's does, so
-// the two sort by row; half a step more stands it in front of a prop on its own row.
-const ROW_DEPTH = 1 / 1000;
 
 // The distraction movers' sprites, one per distraction shown, made as it first shows and
 // destroyed once it is gone. With reduced motion none is shown. Each stands on the road through
@@ -98,6 +94,7 @@ export class DistractionView {
     const x = itemAt(LANE_XS, 0) + (place.lanePosition * road.width) / LANE_COUNT;
     const placed = project(PROJECTION, { distance: PROJECTION.footY - place.y, x });
     const drawn = showAtDepth(sprite, key, placed.scale);
+    // Half a row's depth step more than a roadside prop stands it in front of a prop on its row.
     sprite
       .setPosition(Math.round(placed.x), Math.round(placed.y))
       .setFlipX(place.flip)

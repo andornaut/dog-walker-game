@@ -41,6 +41,11 @@ export const DEPTH = {
   struck: 9,
 };
 
+// How much each screen row adds to the depth of the layers drawn nearer rows in front: the
+// roadside props and the distractions, which sort by row together, and the struck obstacles. A
+// thousand rows' worth stays under the next layer.
+export const ROW_DEPTH = 1 / 1000;
+
 // The row where the road's junction meets the band's cross street.
 export const JUNCTURE_Y = LAYOUT.junction.y;
 
