@@ -1167,7 +1167,8 @@ def thief_top(g, b, arms=0, pouch=True):
             pouch_px(g, 25, 34 + b - n)
     face_disc(g, 16, 12.5 + b, 8, 8, "skin2", "brown")
     g.cel(16, 7.5 + b, 8.5, 5, "navy", "ink", "dslate")
-    g.rect(8, 9 + b, 17, 2, "dslate")
+    # the beanie's turned-up band meets the mask, so no sliver of skin shows at the temples
+    g.rect(8, 9 + b, 17, 3, "dslate")
     g.rect(8, 12 + b, 17, 3, "ink")
     g.rect(11, 13 + b, 2, 1, "white")
     g.rect(19, 13 + b, 2, 1, "white")
