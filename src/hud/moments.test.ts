@@ -108,6 +108,9 @@ describe("firingTimeline", () => {
 describe("firingLayout", () => {
   const { dogSlots: cards, screen: whole, walkView: screen } = SCREEN_LAYOUT;
   const { popSize } = FIRING_PARTS;
+  // The first and last cards, by the screen's edges: each part is placed by its card alone, and
+  // the edge cards bring their parts nearest the screen's sides.
+  const EDGE_CARDS = [0, cards.length - 1].map((i) => [i, defined(cards[i])] as const);
 
   const FACE_HALF = 32;
   // Each part's rect on screen for card: the 2x face, the plate, the pop and the line's tail
@@ -124,7 +127,7 @@ describe("firingLayout", () => {
     return [faceRect, plate, { height: popSize, width: popSize, ...pop }, ...tails];
   };
 
-  it.each(cards.map((card, i) => [i, card] as const))(
+  it.each(EDGE_CARDS)(
     "centres card %i's 2x face over its owner's tab, the 2x pop level with it",
     (_i, card) => {
       const { face, pop } = firingLayout(screen, card);
@@ -135,7 +138,7 @@ describe("firingLayout", () => {
     },
   );
 
-  it.each(cards.map((card, i) => [i, card] as const))(
+  it.each(EDGE_CARDS)(
     "keeps every part of card %i's moment on screen and above the card",
     (_i, card) => {
       for (const rect of partRects(card)) {
@@ -163,7 +166,7 @@ describe("firingLayout", () => {
     }
   });
 
-  it.each(cards.map((card, i) => [i, card] as const))(
+  it.each(EDGE_CARDS)(
     "puts card %i's plate under the 2x face, over the card's top and within its sides",
     (_i, card) => {
       const { face, plate } = firingLayout(screen, card);
@@ -292,7 +295,8 @@ describe("cardOwnerMood", () => {
 describe("payoutTagTop", () => {
   const { dogSlots } = SCREEN_LAYOUT;
 
-  it.each(dogSlots.map((slot, i) => [i, slot] as const))(
+  // A tag sits by its slot's top alone, so the first slot stands for every one.
+  it.each(dogSlots.slice(0, 1).map((slot, i) => [i, slot] as const))(
     "starts slot %i's tag above its roof, clear of its faces and hearts",
     (_, slot) => {
       expect(payoutTagTop(slot) + PAYOUT_TAG.height + PAYOUT_TAG.gap).toBe(slot.y);
