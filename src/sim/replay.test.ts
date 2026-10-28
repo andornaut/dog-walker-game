@@ -63,11 +63,16 @@ function replay(log: InputLog): RunState {
   return session.walk.run;
 }
 
+// A search simulates walks a seed at a time from a row's seed and replays the first that stores and
+// spends at least the row's spare treats, so a tuning change that leaves one seed spending fewer
+// takes a later one rather than failing, and fails only when the most seeds it simulates turn up
+// none.
+const SEARCH_SEEDS_MOST = 40;
+
 // A simulated run's seed and inputs, written as the game's input log and read back as the dev
 // panel reads a replay, play the same run in the game's replay.
 describe("a simulated run", { timeout: 60_000 }, () => {
-  // spares is how many spare treats the walk stores and spends at least, which the replay matches;
-  // a tuning change that leaves its seed spending fewer needs another seed.
+  // spares is how many spare treats the walk stores and spends at least, which the replay matches.
   it.each<{
     gear: GearId | null;
     pack: string;
@@ -93,14 +98,28 @@ describe("a simulated run", { timeout: 60_000 }, () => {
       skill: "novice",
       spares: 1,
     },
-  ])("replays in the game: $skill, $pack, $gear, seed $seed", (row) => {
-    const { gear, pack, policy, seed, skill, spares } = row;
+  ])("replays in the game: $skill, $pack, $gear, from seed $seed", (row) => {
+    const { gear, pack, policy, skill, spares } = row;
     const dogs = pack.split(",") as [never];
-    const result = simulateRun(
-      gameData,
-      seed,
-      simConfig(SKILL_PRESETS[skill], dogs, { gear, policy, walker: gameData.defaultWalker }),
-    );
+    const config = simConfig(SKILL_PRESETS[skill], dogs, {
+      gear,
+      policy,
+      walker: gameData.defaultWalker,
+    });
+    let found: { result: ReturnType<typeof simulateRun>; seed: number } | undefined;
+    for (let seed = row.seed; seed < row.seed + SEARCH_SEEDS_MOST && found === undefined; seed++) {
+      const result = simulateRun(gameData, seed, config);
+      const { spent, stored } = result.run.spareTreats;
+      if (Math.min(stored, spent) >= spares) {
+        found = { result, seed };
+      }
+    }
+    if (found === undefined) {
+      throw new Error(
+        `no walk stores and spends ${spares} spare treats on ${SEARCH_SEEDS_MOST} seeds from ${row.seed}`,
+      );
+    }
+    const { result, seed } = found;
     const log: InputLog = {
       events: result.inputs,
       setup: {
@@ -120,7 +139,5 @@ describe("a simulated run", { timeout: 60_000 }, () => {
 
     expect(result.inputs.length).toBeGreaterThan(0);
     expect(replay(decoded.log)).toEqual(result.run);
-    const { spent, stored } = result.run.spareTreats;
-    expect(Math.min(stored, spent)).toBeGreaterThanOrEqual(spares);
   });
 });
