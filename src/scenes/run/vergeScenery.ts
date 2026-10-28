@@ -1,4 +1,5 @@
-import { moverPlace, moverY, stopsOnVerge } from "../../runner/movers";
+import { stopsOnVerge } from "../../runner/moverPlanning";
+import { moverPlace, moverY } from "../../runner/movers";
 import type { RoadGeometry } from "../../runner/walk";
 import type { WalkItem } from "../../runner/walkItems";
 

@@ -13,13 +13,11 @@ import { STEP_SECONDS } from "../runner/fixedStep";
 import { type LaneMotion, stillInLane } from "../runner/laneMotion";
 import {
   DART_LIFTS,
-  hasLeftRoad,
   type MoverDraws,
   type MoverFootprint,
-  type MoverPath,
-  moverPlace,
   moverPlacements,
-} from "../runner/movers";
+} from "../runner/moverPlanning";
+import { hasLeftRoad, type MoverPath, moverPlace } from "../runner/movers";
 import { moverSpec } from "../runner/moverSpecs";
 import { moverOutcomes } from "../runner/outcomes";
 import { NO_PULLS } from "../runner/pulls";

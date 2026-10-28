@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { hopShapes, laneAt, type StepShape } from "./movers";
+import { hopShapes } from "./moverPlanning";
+import { laneAt, type StepShape } from "./movers";
 import {
   awayHop,
   nextShyChoiceAt,

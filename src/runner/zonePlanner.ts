@@ -3,18 +3,15 @@ import { itemAt, removeItem } from "../lib/arrays";
 import { randomPick, weightedPick } from "../lib/random";
 import { approachOutcomes } from "./approach";
 import {
-  hasLeftRoad,
   laneBalanceWeight,
-  type LaneSpan,
   type MoverBody,
-  type MoverPath,
-  moverPlace,
   type MoverSpec,
   type MoverStand,
   type OnScreen,
   placeMovers,
   type PlannerStreams,
-} from "./movers";
+} from "./moverPlanning";
+import { hasLeftRoad, type LaneSpan, type MoverPath, moverPlace } from "./movers";
 import { type Block, LaneBlocks, PlacedPlaces, SpawnCells } from "./spawnCells";
 import {
   blockingLength,

@@ -1,17 +1,8 @@
 import { laneMask } from "../layout/lanes";
 import { itemAt, partitionPoint } from "../lib/arrays";
 import { approachOutcomes } from "./approach";
-import {
-  crossingScroll,
-  laneAt,
-  type MoverCaps,
-  type MoverPath,
-  moverPlace,
-  type MoverSpec,
-  type MoverStep,
-  type PlannerStreams,
-  stopsOnVerge,
-} from "./movers";
+import { type MoverCaps, type MoverSpec, type PlannerStreams, stopsOnVerge } from "./moverPlanning";
+import { crossingScroll, laneAt, type MoverPath, moverPlace, type MoverStep } from "./movers";
 import { shyOutcomes } from "./shy";
 
 // What a spawn covers: lanes across, and rows along the road of footprint.cellLength each.

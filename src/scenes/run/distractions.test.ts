@@ -17,7 +17,8 @@ import {
 } from "../../road/roadsideProps";
 import { currentZone } from "../../rules/route";
 import { STEP_SECONDS } from "../../runner/fixedStep";
-import { DART_VERGE_LANES, moverPlace } from "../../runner/movers";
+import { DART_VERGE_LANES } from "../../runner/moverPlanning";
+import { moverPlace } from "../../runner/movers";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import {
   chooseCard,

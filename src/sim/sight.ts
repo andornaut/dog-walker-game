@@ -1,15 +1,14 @@
 import type { Movement } from "../data/types";
 import { read } from "../rules/units";
 import { approachOutcomes } from "../runner/approach";
+import { hopShapes, SIDESTEPS } from "../runner/moverPlanning";
 import {
   cuedStep,
   hasStopped,
-  hopShapes,
   isPausing,
   isSliding,
   type MoverPath,
   type MoverStep,
-  SIDESTEPS,
   type StepShape,
   turnedBack,
 } from "../runner/movers";

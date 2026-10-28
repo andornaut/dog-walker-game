@@ -28,7 +28,8 @@ import {
   ZONE_IDS,
 } from "../testing/planner";
 import { STEP_SECONDS } from "./fixedStep";
-import { hasLeftRoad, type MoverPath, moverPlace, onScreenOf } from "./movers";
+import { onScreenOf } from "./moverPlanning";
+import { hasLeftRoad, type MoverPath, moverPlace } from "./movers";
 import { moverOutcomes } from "./outcomes";
 import { itemHeight, type RoadGeometry, startRoad, type Walk, walkScrollSpeed } from "./walk";
 import { blocksLane, footprintOf, movementOf } from "./walkItems";

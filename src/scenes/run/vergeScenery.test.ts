@@ -4,7 +4,8 @@ import { ROAD_SPRITE_SIZE } from "../../assets/spriteKeys";
 import { LANE_COUNT, SCREEN_CONFIG } from "../../data/screen";
 import { WORLD } from "../../data/world";
 import { curbBand, VERGES } from "../../road/roadside";
-import { DART_VERGE_LANES, type MoverPath, moverPlace } from "../../runner/movers";
+import { DART_VERGE_LANES } from "../../runner/moverPlanning";
+import { type MoverPath, moverPlace } from "../../runner/movers";
 import { goesToVerge, type VergeItem, vergeNow } from "./vergeScenery";
 
 const ROAD = { laneCount: LANE_COUNT, roadBottom: 700, roadTop: 0 };

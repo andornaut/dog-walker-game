@@ -4,7 +4,8 @@ import { itemAt } from "../lib/arrays";
 import { keysOf } from "../lib/records";
 import { type Contact, lanesReachedAtEnd, pathShortfalls } from "../testing/avoidable";
 import { plannerStreams } from "../testing/movers";
-import { type MoverPath, moverPlace, type MoverSpec, sweptLanes } from "./movers";
+import { type MoverSpec, sweptLanes } from "./moverPlanning";
+import { type MoverPath, moverPlace } from "./movers";
 import {
   blockingLength,
   type Footprint,

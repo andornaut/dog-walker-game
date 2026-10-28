@@ -11,8 +11,8 @@ import {
   type MoverSpec,
   type PlannerStreams,
   SIDESTEPS,
-  type StepShape,
-} from "./movers";
+} from "./moverPlanning";
+import { type StepShape } from "./movers";
 import { movementOf, type WalkItemKind } from "./walkItems";
 
 // The movement a drawn spawn moves with: an obstacle, minor or not, or a lucky encounter with a

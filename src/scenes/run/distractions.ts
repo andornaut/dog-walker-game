@@ -5,15 +5,8 @@ import { type Random, randomPick, weightedPick } from "../../lib/random";
 import { eachRoadsideProp, type RoadsideTable, START_STRIP_LENGTH } from "../../road/roadsideProps";
 import { read } from "../../rules/units";
 import { type Box, overlaps } from "../../runner/collision";
-import {
-  DART_VERGE_LANES,
-  drawnLanes,
-  hasLeftRoad,
-  type MoverOnRoad,
-  moverPlace,
-  moverY,
-  stopsOnVerge,
-} from "../../runner/movers";
+import { DART_VERGE_LANES, stopsOnVerge } from "../../runner/moverPlanning";
+import { drawnLanes, hasLeftRoad, type MoverOnRoad, moverPlace, moverY } from "../../runner/movers";
 import type { SpawnEvent } from "../../runner/spawning";
 import { itemHeight, type RoadGeometry, zoneLength } from "../../runner/walk";
 import { footprintOf, type WalkItem, type WalkItemKind } from "../../runner/walkItems";

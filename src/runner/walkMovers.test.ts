@@ -31,11 +31,8 @@ import {
 } from "../testing/planner";
 import { heartsByDog } from "../testing/runState";
 import { atPack, data, geometry, inLane, step, walkWith, withHearts } from "../testing/walk";
+import { DART_VERGE_LANES, dartOutcome, drawMover, hopShapes } from "./moverPlanning";
 import {
-  DART_VERGE_LANES,
-  dartOutcome,
-  drawMover,
-  hopShapes,
   inMotion,
   isPausing,
   laneAt,

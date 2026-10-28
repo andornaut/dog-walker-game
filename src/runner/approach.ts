@@ -1,12 +1,6 @@
 import type { RoadPoint } from "./collision";
-import {
-  type MoverPath,
-  SIDESTEPS,
-  staysInReach,
-  type StepShape,
-  stepsTaken,
-  takeMove,
-} from "./movers";
+import { SIDESTEPS } from "./moverPlanning";
+import { type MoverPath, staysInReach, type StepShape, stepsTaken, takeMove } from "./movers";
 
 // A stalker steps toward the pack while it is still ahead of it. Its first step is chosen as its
 // cue begins; a later step has no cue of its own and is chosen as it starts. Each is chosen from

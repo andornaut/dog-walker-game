@@ -1,6 +1,6 @@
 import type { GameData, Movement, World } from "../data/types";
 import { randomStream, seededRandom } from "../lib/random";
-import type { PlannerStreams } from "../runner/movers";
+import type { PlannerStreams } from "../runner/moverPlanning";
 import { mapZones } from "./world";
 
 export type HopMovement = Extract<Movement, { kind: "hop" }>;

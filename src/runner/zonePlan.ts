@@ -16,7 +16,7 @@ import { slowestDebuffedAgility, slowestPackAgility } from "../rules/walkers";
 import { zoneStats } from "../rules/zones";
 import type { RunState } from "../state/runState";
 import { STEP_SECONDS } from "./fixedStep";
-import type { PlannerStreams } from "./movers";
+import type { PlannerStreams } from "./moverPlanning";
 import { moverMovement, moverSpec } from "./moverSpecs";
 import type { SpawnQuota } from "./spawning";
 import { spacedStretch } from "./stretches";
