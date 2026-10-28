@@ -15,17 +15,17 @@ The rules for drawing and placing the art. Exact sizes, tags, timings and coordi
 | Backdrop | 48 to 205   | `backdrop-<zone>`, 360×158                                            |
 | Road     | 206 to 481  | 5 lanes of 64px; at the pack the road spans x 20 to 340, centre x 180 |
 
-| Sprite                                                                                                         | Frame                      |
-| -------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| Large and small dogs on the road                                                                               | 54×54, 38×38               |
-| Dog and owner faces                                                                                            | 32×32                      |
-| Dog and walker portraits                                                                                       | 64×64                      |
-| Obstacle n lanes wide                                                                                          | (64n−16)×36                |
-| Owners                                                                                                         | 32×48                      |
-| Pickups                                                                                                        | 24×24                      |
-| Road animals (the other dog, skunk, squirrel, goose, `coyote`, `loose-dog`, `squirrel-dash`) and medium dogs   | 48×48                      |
-| Road people (walkers, the lucky and forced-stop people, the thief, the other dog's owner and the human movers) | 48×72 (kids drawn shorter) |
-| Small effects, icons                                                                                           | 16×16                      |
+| Sprite                                                                                                              | Frame                      |
+| ------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| Large and small dogs on the road                                                                                    | 54×54, 38×38               |
+| Dog and owner faces                                                                                                 | 32×32                      |
+| Dog and walker portraits                                                                                            | 64×64                      |
+| Obstacle n lanes wide                                                                                               | (64n−16)×36                |
+| Owners                                                                                                              | 32×48                      |
+| Pickups                                                                                                             | 24×24                      |
+| Road animals (the other dog, skunk, squirrel, goose, `coyote`, `hen`, `loose-dog`, `squirrel-dash`) and medium dogs | 48×48                      |
+| Road people (walkers, the lucky and forced-stop people, the thief, the other dog's owner and the human movers)      | 48×72 (kids drawn shorter) |
+| Small effects, icons                                                                                                | 16×16                      |
 
 - Road sprites are 1.2× the game's 40px hit box. Dogs, people, animals, pickups, movers and encounters are drawn on a 32-unit design grid and rasterized at 1.5× (depth variants at 1.5× the step): every shape scales, 1px lines and single pixels stay 1px, and feet keep to the frame's bottom rows. Minor obstacles are laid out in their own pixels (40 for one lane, 30 rows for a lane-spanning one) and drawn at 1.2×; vehicles keep their columns to their lanes and draw their rows at 1.2×. A 48px sprite leaves 8px of margin each side of its 64px lane. Sizes are in `inventory.md`.
 - Obstacles follow the OutRun rule: billboards (a front or rear elevation, never their length along the road), squat, scaled uniformly by 1/Z normalized to 1× at the pack, the base on the scanline of the footprint's near edge, drawn back to front. A footprint longer than one row lives in data, not in the sprite.
@@ -207,6 +207,7 @@ One word per moment, 2 to 7 letters, readable at 1×, built like the sign logo: 
 - `rollerblader`, `pedicab` and `cargo-bike` come down their lane facing the player; `ttc-bus` is slower than the road, so it is seen from behind; `porch-cat` and `capybara` are side views facing right, never mirrored while they stand.
 - `granny-cart-shopper` wanders facing the player like `mail-carrier`, never mirrored, her cart beside her on the screen right. Its red and green tartan cart and long camel coat tell it apart from `strolling-busker`, `food-cart-vendor`'s churro cart and `couple`'s red sweater.
 - `squirrel`, `squirrel-dash`, `icon-trait-chaser` and `badge-squirrel` are Toronto's black squirrel (`SQUIRREL_FUR` in `art/tools/road.py`), lit by `LIT`'s rim. On the road it is small in its 48×48 frame: its body, without the tail, stands about 20px, under the smallest dog's and no bigger than the rabbit's, and its bushy tail, its tip flicked over, carries the silhouette.
+- `hen` is a Riverdale Farm hen got loose, a Rhode Island Red (`HEN` in `art/tools/hood_parks.py`): a crosser drawn and timed like `squirrel-dash`, a little taller, its rust body, plum tail, red comb and wattle and yellow legs reading apart from the black squirrel. It runs flapping, its neck stretched forward, and its raised wing and comb carry the silhouette.
 - `pull-out` and every `drive` are 4 frames at 100ms and every `ride` 4 frames at 90 to 120ms, tread lines rolling 1px a frame; `pull-out` is drawn pulling right with the right indicator blinking, mirrored for left.
 - The warning cues are yellow, ink outlined, 16×16, 2 frames at 250ms.
 

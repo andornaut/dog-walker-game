@@ -5659,6 +5659,87 @@
       }
     },
     {
+      "key": "hen",
+      "png": "sprites/hen.png",
+      "json": "sprites/hen.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "hen@50",
+      "png": "sprites/hen@50.png",
+      "json": "sprites/hen@50.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "hen@56",
+      "png": "sprites/hen@56.png",
+      "json": "sprites/hen@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "hen@62",
+      "png": "sprites/hen@62.png",
+      "json": "sprites/hen@62.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "hen@69",
+      "png": "sprites/hen@69.png",
+      "json": "sprites/hen@69.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "hen@75",
+      "png": "sprites/hen@75.png",
+      "json": "sprites/hen@75.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "hen@81",
+      "png": "sprites/hen@81.png",
+      "json": "sprites/hen@81.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "hen@88",
+      "png": "sprites/hen@88.png",
+      "json": "sprites/hen@88.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "hen@94",
+      "png": "sprites/hen@94.png",
+      "json": "sprites/hen@94.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 33
+      }
+    },
+    {
       "key": "hopscotch-kid",
       "png": "sprites/hopscotch-kid.png",
       "json": "sprites/hopscotch-kid.json",

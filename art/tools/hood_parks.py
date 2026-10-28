@@ -15,6 +15,17 @@ capybara            a brown capybara side on: a barrel body on short legs and no
                     chew, rest, an ear flick, a blink. walk (4 frames, 160ms): a slow step, the
                     diagonal legs swapping and the body bobbing 1px on the passing frames
 
+A mover, laid out and drawn as the card obstacles are, side view facing right; the game mirrors
+it for a crossing to the left, as it does hazards.py's squirrel-dash, whose tags, frame counts
+and durations it keeps:
+hen                 a Riverdale Farm hen got loose, a Rhode Island Red: a plump rust body lit
+                    ochre, a short plum tail cocked up, dbrown wings with a brick band, a red
+                    comb and wattle, an amber beak and yellow legs, a little taller than
+                    squirrel-dash. idle (2 frames, 400ms): standing at the road's edge, neck up,
+                    then the head jerking forward. run (4 frames, 80ms): a flapping scramble, the
+                    neck stretched forward and the body bobbing, the near wing beating up, back,
+                    down and back while the legs run
+
 Minor obstacles, laid out in obstacles.py's pixels (40 for one lane, 30 rows for a
 lane-spanning one) and drawn at obstacles.SCALE (1.2) on a minis.Mini:
 leaf-pile           48x48   1 lane, a raked dome of overlapping autumn leaves in orange, amber,
@@ -243,6 +254,82 @@ def capybara(a=0, b=0, bob=0, chew=0, ear=0, blink=False):
     else:
         g.rect(hx + 1, hy - 2.5, 2, 2, "ink")
         g.p(hx + 1, hy - 2.5, "white")
+    return lit(g)
+
+
+# ---------- hen ----------
+
+# A Rhode Island Red: rust feathers shaded dbrown and lit ochre, a plum tail shaded ink, dbrown wings with a
+# brick covert band, a red comb and wattle shaded dred, an amber beak and yellow legs shaded amber.
+HEN = dict(feather="rust", shade="dbrown", lit="ochre", tail="plum", tail_sh="ink", wing="dbrown", wing_sh="plum",
+           band="brick", comb="red", comb_sh="dred", beak="amber", leg="yellow", leg_sh="amber")
+# Its scramble across the road, one dict per frame, read like hazards.SQUIRREL_RUN: body lift, the wing's
+# stroke, and the near and far feet (x, y of the foot's top-left). A design unit is 1.5px at full size, so
+# thirds land on whole pixels.
+HEN_RUN = (
+    dict(bob=0, wing="up", near=(16, 27 + 1 / 3), far=(13 + 1 / 3, 27 + 1 / 3)),                # gathered
+    dict(bob=-2 / 3, wing="mid", near=(11 + 1 / 3, 26 + 2 / 3), far=(18 + 2 / 3, 26)),           # push off
+    dict(bob=-4 / 3, wing="down", near=(18, 25 + 1 / 3), far=(12, 26)),                          # flight
+    dict(bob=-2 / 3, wing="mid", near=(18 + 2 / 3, 27 + 1 / 3), far=(12 + 2 / 3, 26 + 2 / 3)),   # lands
+)
+# Waiting at the road's edge: standing on both feet, the neck up, then the head jerking forward.
+HEN_IDLE = (dict(bob=0, wing="fold", near=(16, 27 + 1 / 3), far=(13 + 1 / 3, 27 + 1 / 3), reach=-2),
+            dict(bob=0, wing="fold", near=(16, 27 + 1 / 3), far=(13 + 1 / 3, 27 + 1 / 3), reach=-1))
+
+
+def hen(bob=0, wing="fold", near=(16, 27 + 1 / 3), far=(13 + 1 / 3, 27 + 1 / 3), reach=0):
+    """A Riverdale Farm hen got loose, side view facing right, small beside the pack as the squirrel is: a
+    plump rust body, a short plum tail cocked up behind, the neck stretched forward to a small head under a
+    red comb, a red wattle under an amber beak, on thin yellow legs. bob lifts the body (negative is up),
+    wing is the near wing's stroke (fold, up, mid or down), near and far are the feet, and reach pulls the
+    head back and up from its running stretch (negative is back)."""
+    c = HEN
+    g = edged(Grid())
+    u = 2 / 3
+    b = bob
+
+    def leg(foot, col, sh):
+        fx, fy = foot
+        # the shank from the hip down to the foot, then three toes forward and one back
+        bar(g, (14.8, 24 + b), (fx + u, fy), 2 * u, col)
+        g.rect(fx - u, fy, 3, u, col)
+        g.rect(fx + 2 * u, fy + u / 2, u, u, sh)
+
+    leg(far, c["leg_sh"], c["leg_sh"])
+    # the tail: a short fan of plum feathers cocked up and back from the rump, rounded at the tips
+    g.tri((11.5, 21 + b), (7, 11 + b), (13.5, 17 + b), c["tail"])
+    g.tri((11, 21.5 + b), (5, 13 + b), (9, 13 + b), c["tail"])
+    g.cel(7.2, 12.4 + b, 1.8, 1.6, c["tail"], c["tail_sh"])
+    g.cel(6, 14.2 + b, 1.3, 1.4, c["tail"], c["tail_sh"])
+    # the body: a plump egg, its breast full and round at the front
+    g.cel(14.5, 21 + b, 5.4, 4.6, c["feather"], c["shade"], c["lit"])
+    g.cel(18.2, 20.6 + b, 3.4, 3.9, c["feather"], c["shade"], c["lit"])
+    # the neck, stretched forward and up to the head
+    hx, hy = 24.5 + reach / 2, 14.5 + b + reach
+    bar(g, (18.5, 19 + b), (hx - 0.6, hy + 0.6), 3.6, c["feather"])
+    leg(near, c["leg"], c["leg_sh"])
+    # the near wing: folded along the side, or beating up and down in its panic, a brick band over its
+    # dbrown flight feathers
+    if wing == "fold":
+        g.cel(14, 20.8 + b, 4.2, 2.6, c["wing"], c["wing_sh"])
+        g.cel(15, 19.6 + b, 3.2, 1.2, c["band"])
+    else:
+        tip, back = {"up": ((13.5, 8 + b), (9, 10.5 + b)), "mid": ((5, 18 + b), (7, 21.5 + b)),
+                     "down": ((12, 28 + b), (8, 25.5 + b))}[wing]
+        g.tri((11.5, 20.5 + b), (17.5, 19 + b), tip, c["wing"])
+        g.tri((11.5, 20.5 + b), tip, back, c["wing_sh"])
+        # the leading edge lit brick from the shoulder to the tip
+        bar(g, (17, 19 + b), tip, 1, c["band"])
+        g.cel(15, 19.6 + b, 3, 1.4, c["band"])
+    # the head: a red comb of three points on top, the beak, the wattle hanging under it, a bright eye
+    g.cel(hx - 1.4, hy - 2.2, 0.9, 1, c["comb"])
+    g.cel(hx - 0.1, hy - 2.6, 0.9, 1.1, c["comb"])
+    g.cel(hx + 1.1, hy - 2.1, 0.8, 0.9, c["comb"])
+    g.cel(hx, hy, 2.2, 2, c["feather"], c["shade"], c["lit"])
+    g.tri((hx + 1.6, hy - 0.8), (hx + 4, hy + 0.2), (hx + 1.6, hy + 1), c["beak"])
+    g.cel(hx + 1.6, hy + 2.2, 0.8, 1.1, c["comb"], c["comb_sh"])
+    g.rect(hx + 0.2, hy - 0.8, 2 * u, 2 * u, "ink")
+    g.p(hx + 0.2, hy - 0.8, "white")
     return lit(g)
 
 
@@ -848,6 +935,7 @@ def road_sprites(suffix, step):
                                  ("walk", frames(a, porch_cat, PORCH_CAT_WALK), road.PERSON_WALK_MS)]
     yield f"capybara{suffix}", [("idle", frames(a, capybara, CAPYBARA_IDLE), 300),
                                 ("walk", frames(a, capybara, CAPYBARA_WALK), CAPYBARA_WALK_MS)]
+    yield f"hen{suffix}", [("idle", frames(a, hen, HEN_IDLE), 400), ("run", frames(a, hen, HEN_RUN), 80)]
     for key, draw, (args, ms) in (("leaf-pile", leaf_pile, LEAF_PILE_IDLE),
                                   ("porch-steps", porch_steps, PORCH_STEPS_IDLE),
                                   ("picnic-blanket", picnic_blanket, PICNIC_IDLE),
@@ -858,8 +946,9 @@ def road_sprites(suffix, step):
 
 # Where each road sprite's .aseprite source goes: the card obstacles with the encounters, the rest with the
 # obstacles.
-SOURCES = {"porch-cat": "art/encounters", "capybara": "art/encounters", "leaf-pile": "art/obstacles",
-           "porch-steps": "art/obstacles", "picnic-blanket": "art/obstacles", "fallen-log": "art/obstacles"}
+SOURCES = {"porch-cat": "art/encounters", "capybara": "art/encounters", "fallen-log": "art/obstacles",
+           "hen": "art/obstacles", "leaf-pile": "art/obstacles", "porch-steps": "art/obstacles",
+           "picnic-blanket": "art/obstacles"}
 
 
 def sprites():
