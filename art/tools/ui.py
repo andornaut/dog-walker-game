@@ -33,7 +33,7 @@ secondary, secondary-pressed, go, go-pressed, go-disabled), ui-icon-button (20x2
 16x16 icon such as pause, help or sound; tags normal, pressed), ui-switch (32x16; tags on, off),
 ui-slider (24x10 three-slice, 4px caps; tags filled, empty, filled-disabled, empty-disabled),
 ui-slider-knob (10x16; tags normal, pressed, disabled), icon-sound (tags on, off),
-icon-sound-panel, icon-music-panel, icon-effects-panel and icon-motion-panel (tags on, off),
+icon-sound-panel, icon-music-panel, icon-effects-panel, icon-motion-panel and icon-install-panel (tags on, off),
 ui-zone-pips (18x8; tags todo, and <zone> and <zone>-done for each zone in ZONE_COLOURS), ui-tile
 (24x24 nine-slice, 4px on every side; tags normal, selected, disabled), ui-touch-drag (104x40, the
 help screen's one lane-width drag; tags press, drag, release).
@@ -249,11 +249,11 @@ def stinky():
     return px
 
 
-def mute_x(g, y, col):
-    """The X that marks a muted icon, 5x5 in 2px strokes from (10, y)."""
+def mute_x(g, x, y, col):
+    """The X that marks a muted icon, 5x5 in 2px strokes from (x, y)."""
     for i in range(4):
-        g.rect(10 + i, y + i, 2, 2, col)
-        g.rect(13 - i, y + i, 2, 2, col)
+        g.rect(x + i, y + i, 2, 2, col)
+        g.rect(x + 3 - i, y + i, 2, 2, col)
 
 
 def speaker(ink, on, note=False):
@@ -271,7 +271,7 @@ def speaker(ink, on, note=False):
                      (12, 6), (12, 7), (11, 7)):
             g.p(x, y, face)
         if not on:
-            mute_x(g, 9, x_col)
+            mute_x(g, 10, 9, x_col)
         return g
     g.rect(1, 5, 4, 6, face)
     for i in range(4):
@@ -284,7 +284,7 @@ def speaker(ink, on, note=False):
         g.rect(11, 6, 1, 4, face)
         g.rect(14, 5, 1, 6, face)
     else:
-        mute_x(g, 5, x_col)
+        mute_x(g, 10, 5, x_col)
     return g
 
 
@@ -306,7 +306,7 @@ def effects(ink, on):
         g.rect(12, 10, 3, 1, face)
         g.p(10, 13, face)
     else:
-        mute_x(g, 5, x_col)
+        mute_x(g, 10, 5, x_col)
     return g
 
 
@@ -325,6 +325,24 @@ def motion(ink, on):
     else:
         g.rect(1, 14, 15, 1, face)
         g.rect(1, 15, 15, 1, shade)
+    return g
+
+
+def install(ink, on):
+    """The Settings Install app row: a phone, its screen a gap the panel shows through, with a
+    down arrow into the screen for on and the speaker's X in the arrow's place for off."""
+    face, shade, x_col = ink
+    g = Grid(16, 16)
+    for y, row in enumerate(["...ffffffffff...", "..fffffffffffs..", "..ff........fs..", "..ff........fs..",
+                             "..ff...fs...fs..", "..ff...fs...fs..", "..ff...fs...fs..", "..ff...fs...fs..",
+                             "..ff.ffffss.fs..", "..ff..ffss..fs..", "..ff...fs...fs..", "..ff........fs..",
+                             "..ff........fs..", "..fffffffffffs..", "..fffffffffffs..", "...ssssssssss..."]):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                g.p(x, y, face if ch == "f" else shade)
+    if not on:
+        g.rect(4, 4, 8, 7, None)
+        mute_x(g, 5, 5, x_col)
     return g
 
 
@@ -1533,6 +1551,7 @@ def sprites():
                                for t in ("on", "off")]
     yield "icon-effects-panel", [(t, [effects(CREAM_PANEL, t == "on").outlined(False)], 1000) for t in ("on", "off")]
     yield "icon-motion-panel", [(t, [motion(CREAM_PANEL, t == "on").outlined(False)], 1000) for t in ("on", "off")]
+    yield "icon-install-panel", [(t, [install(CREAM_PANEL, t == "on").outlined(False)], 1000) for t in ("on", "off")]
     yield "ui-zone-pips", [("todo", [zone_pip().outlined(False)], 1000)] + [
         (zone + suffix, [zone_pip(zone, bool(suffix)).outlined(False)], 1000)
         for zone in ZONE_COLOURS for suffix in ("", "-done")]
