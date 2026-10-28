@@ -7,12 +7,14 @@ import { awardAchievements, type AwardContext } from "./achievements";
 import type { Checkpoint, DogRun, DogStats, LastWalk, SaveDocument, SaveStats } from "./schema";
 import { ZERO_DOG_STATS } from "./stats";
 
-// A finished run. earnedCents is what the run banks. zone is the zone in progress when the run
-// ended, counting from 1; between zones it is the next one. A finished run ends in its last zone.
+// A finished run. earnedCents is what the run banks, and lostCents the cash it carried and lost
+// when every owner fired you (walkEarnings). zone is the zone in progress when the run ended,
+// counting from 1; between zones it is the next one. A finished run ends in its last zone.
 export interface RunResult {
   counters: RunCounters;
   dogs: DogRun[];
   earnedCents: Cents;
+  lostCents: Cents;
   outcome: EndReason;
   // The zones the run walked, in order, the one it ended in included.
   route: ZoneId[];

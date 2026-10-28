@@ -33,7 +33,7 @@ describe("earningsBreakdown", () => {
 
   it("totals pay, tips and card costs, and ignores heart changes", () => {
     const changes = [pay(1_000), tip(150), tip(100), card(-400), hearts, pay(1_000)];
-    expect(earningsBreakdown(gameData, changes, cents(1_850))).toEqual([
+    expect(earningsBreakdown(gameData, changes, { earned: cents(1_850), lost: cents(0) })).toEqual([
       { amount: 2_000, kind: "fees", label: labels.fees },
       { amount: 250, kind: "tips", label: labels.tips },
       { amount: -400, kind: "cardCosts", label: labels.cardCosts },
@@ -43,7 +43,9 @@ describe("earningsBreakdown", () => {
   it("adds lucky finds and starting money only when the run had some", () => {
     const changes = [pay(1_000), card(500)];
     expect(
-      earningsBreakdown(gameData, changes, cents(2_500)).map(({ amount, kind }) => [kind, amount]),
+      earningsBreakdown(gameData, changes, { earned: cents(2_500), lost: cents(0) }).map(
+        ({ amount, kind }) => [kind, amount],
+      ),
     ).toEqual([
       ["fees", 1_000],
       ["tips", 0],
@@ -53,8 +55,26 @@ describe("earningsBreakdown", () => {
     ]);
   });
 
-  it("always adds up to the earnings", () => {
-    const lines = earningsBreakdown(gameData, [pay(700), tip(55), card(-300)], cents(9_999));
+  it("shows the cash lost when every owner fired you as a cost, left out of the earnings", () => {
+    const changes = [pay(1_000), tip(300), card(-100)];
+    expect(
+      earningsBreakdown(gameData, changes, { earned: cents(1_000), lost: cents(200) }),
+    ).toEqual([
+      { amount: 1_000, kind: "fees", label: labels.fees },
+      { amount: 300, kind: "tips", label: labels.tips },
+      { amount: -100, kind: "cardCosts", label: labels.cardCosts },
+      { amount: -200, kind: "cashLost", label: labels.cashLost },
+    ]);
+  });
+
+  it.each([
+    ["with no cash lost", 0],
+    ["with cash lost", 400],
+  ])("always adds up to the earnings %s", (_name, lost) => {
+    const lines = earningsBreakdown(gameData, [pay(700), tip(55), card(-300)], {
+      earned: cents(9_999),
+      lost: cents(lost),
+    });
     expect(lines.reduce((total, line) => total + line.amount, 0)).toBe(9_999);
   });
 });

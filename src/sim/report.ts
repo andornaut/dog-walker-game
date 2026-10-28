@@ -122,6 +122,9 @@ export interface MatrixRow extends BadgeCounters {
   // Achievements a run earns on its own facts, per run.
   readonly meanBadges: number;
   readonly meanCardsSeen: number;
+  // The cash a walk carried and lost when every owner fired you, in cents per walk; meanEarnings
+  // and the percentiles count only what walks banked.
+  readonly meanCashLost: number;
   readonly meanDrops: number;
   readonly meanEarnings: number;
   readonly meanFirings: number;
@@ -446,6 +449,7 @@ function summarizeCell(
     luckyShare: touchedShare(countsOf(inCategory("lucky"))),
     meanBadges: mean(results.map((result) => result.badges.length)),
     meanCardsSeen: mean(results.map((result) => result.cardsSeen)),
+    meanCashLost: mean(results.map((result) => result.cashLost as number)),
     meanDrops: drops.reduce((sum, count) => sum + count.met, 0) / results.length,
     meanEarnings: mean(earnings),
     meanFirings: mean(results.map((result) => result.firings.length)),

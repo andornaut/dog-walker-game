@@ -15,6 +15,7 @@ import { addCents, type Cents, cents } from "../lib/units";
 import { earnedByRun, runCountersOf, type RunFacts } from "../rules/achievements";
 import { type CardView, type Choice, type ChoiceData } from "../rules/choices";
 import { currentZoneId } from "../rules/route";
+import { walkEarnings } from "../rules/run";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { advanceLaneControl, pullLane } from "../runner/laneControl";
 import { destinationLane } from "../runner/laneMotion";
@@ -155,6 +156,8 @@ export interface RunResult {
   readonly deliveries: readonly ZoneDelivery[];
   readonly debuffCosts: Readonly<Record<DebuffId, Readonly<DebuffCost>>>;
   readonly debuffsByZone: DebuffsByZone;
+  // The cash the run carried and lost when every owner fired you (walkEarnings).
+  readonly cashLost: Cents;
   // The money banked at the end of the run.
   readonly earnings: Cents;
   // What the achievements judge the run on: its session counters and how it ended.
@@ -564,21 +567,23 @@ export function simulateRun(data: SimData, seed: number, config: SimConfig): Run
     zones: [],
   };
   playBySkill(data, seed, config, tally);
+  const { banked, lost } = walkEarnings(tally.run);
   const facts: RunFacts = {
     ...runCountersOf(tally.run),
     dogsHome: packDogs(tally.run).length,
-    earnedCents: tally.run.money,
+    earnedCents: banked,
     packSize: config.pack.length,
     zonesFinished: tally.zones.length,
   };
   return {
     badges: earnedByRun(data, facts),
     cardsSeen: tally.cardsSeen,
+    cashLost: lost,
     choices: tally.choices,
     debuffCosts: tally.debuffCosts,
     debuffsByZone: tally.debuffsByZone,
     deliveries: tally.deliveries,
-    earnings: tally.run.money,
+    earnings: banked,
     facts,
     finished: tally.run.phase.kind === "ended" && tally.run.phase.reason === "finished",
     firings: tally.firings,

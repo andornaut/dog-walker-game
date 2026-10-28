@@ -197,6 +197,7 @@ const result = {
   counters: quietCounters(),
   dogs: [{ fired: false, id: "kilo" as const, zonesFinished: 4 }],
   earnedCents: cents(9_500),
+  lostCents: cents(0),
   outcome: "finished" as const,
   route: ["street" as const, "park" as const, "shops" as const, "homeStretch" as const],
   walker: "casey" as const,

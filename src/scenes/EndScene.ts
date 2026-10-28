@@ -173,7 +173,12 @@ export class EndScene extends Scene {
       addBurst(this, reduced, NEW_BEST_BURST, 1, x + width / 2, y + height / 2);
     }
     const lines =
-      ended === null ? [] : earningsBreakdown(gameData, ended.changes, walk.earnedCents);
+      ended === null
+        ? []
+        : earningsBreakdown(gameData, ended.changes, {
+            earned: walk.earnedCents,
+            lost: ended.lostCents,
+          });
     const closing = closingLines(gameData, Math.random, walk);
     const text = (x: number, y: number, value: string, colour: number, originX = 0) =>
       addBodyText(this, undefined, { x, y }, value, { colour, originX });

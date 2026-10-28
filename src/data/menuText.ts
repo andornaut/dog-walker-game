@@ -17,6 +17,7 @@ export const MENU_TEXT = {
     backHome: "Back home",
     earnings: {
       cardCosts: "Card costs",
+      cashLost: "Cash lost",
       fees: "Pay",
       fullPack: "Walk bonus",
       luckyFinds: "Lucky finds",

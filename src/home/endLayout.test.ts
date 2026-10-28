@@ -65,10 +65,11 @@ function fitted(role: Role, styles: readonly TextFitStyle[], room: number, text:
 }
 
 // Fees, tips and card costs always show, the other earnings only sometimes, so a breakdown
-// runs from 3 lines to one per kind of earnings; a walk has one owner's row per dog, up to a
-// slot each.
+// runs from 3 lines to one per kind of earnings but one, since the Walk bonus (a finished walk)
+// and cash lost (every owner fired you) never show together; a walk has one owner's row per
+// dog, up to a slot each.
 const EARNINGS_KINDS = Object.keys(gameData.menuText.end.earnings).length;
-const BREAKDOWN_LINES = Array.from({ length: EARNINGS_KINDS - 2 }, (_, i) => i + 3);
+const BREAKDOWN_LINES = Array.from({ length: EARNINGS_KINDS - 3 }, (_, i) => i + 3);
 // Every count of breakdown lines and owners' rows, the owners all happy or all firing you.
 const cases = BREAKDOWN_LINES.flatMap((lines) =>
   Array.from({ length: SCREEN_CONFIG.dogSlotCount }, (_, i) =>

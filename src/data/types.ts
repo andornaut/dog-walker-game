@@ -977,6 +977,8 @@ export interface MenuText {
     // The breakdown's lines, by what the money came from.
     readonly earnings: {
       readonly cardCosts: string;
+      // The cash carried and lost when every owner fired you, left out of the total.
+      readonly cashLost: string;
       readonly fees: string;
       readonly fullPack: string;
       readonly luckyFinds: string;

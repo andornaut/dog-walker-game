@@ -26,6 +26,7 @@ const start = newRun(data, 3, { dogs: ["kilo", "duchess"], gear: null, walker: "
 // In zone 3 with 2 zones paid; duchess fired you in zone 2.
 const midRun: RunState = {
   ...start,
+  bankedPay: cents(3_000),
   money: cents(4_250),
   pack: [defined(start.pack[0]), { dog: "duchess", status: "fired", zoneIndex: 1 }],
   route: ["street", "pawsPromenade", "park"],
@@ -93,6 +94,7 @@ describe("runResultOf", () => {
         { fired: true, id: "duchess", zonesFinished: 1 },
       ],
       earnedCents: 4_250,
+      lostCents: 0,
       outcome: "finished",
       route: ["street", "pawsPromenade", "park"],
       walker: start.walker,
@@ -105,7 +107,28 @@ describe("runResultOf", () => {
       ["a run that headed home", { ...midRun, phase: { kind: "ended", reason: "wentHome" } }],
       ["a run that has not ended", midRun],
     ] satisfies readonly [string, RunState][]) {
-      expect(runResultOf(data, run)).toMatchObject({ outcome: "wentHome", zone: 3 });
+      expect(runResultOf(data, run)).toMatchObject({
+        earnedCents: 4_250,
+        lostCents: 0,
+        outcome: "wentHome",
+        zone: 3,
+      });
     }
+  });
+
+  it("banks only the pay of a run every owner fired you out of, losing the cash carried", () => {
+    const firedOut: RunState = {
+      ...midRun,
+      pack: [
+        { dog: "kilo", status: "fired", zoneIndex: 2 },
+        { dog: "duchess", status: "fired", zoneIndex: 1 },
+      ],
+      phase: { kind: "ended", reason: "noDogs" },
+    };
+    expect(runResultOf(data, firedOut)).toMatchObject({
+      earnedCents: 3_000,
+      lostCents: 1_250,
+      outcome: "noDogs",
+    });
   });
 });

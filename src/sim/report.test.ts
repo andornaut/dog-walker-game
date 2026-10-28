@@ -45,6 +45,7 @@ vi.mock("./simulate", async (importOriginal) => {
     return {
       badges: [],
       cardsSeen: Math.floor(random() * 10),
+      cashLost: cents(0),
       // The debuffs policy falls back on 1 of 3 free cards; the others choose none.
       choices:
         config.policy === "debuffs"

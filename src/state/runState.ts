@@ -91,6 +91,9 @@ type Phase =
   | { readonly kind: "walking" };
 
 export interface RunState {
+  // The pay banked at each zone's end this walk, part of money. A walk that ends with every
+  // owner having fired you banks only this (walkEarnings).
+  readonly bankedPay: Cents;
   // Plain hits that cost their owner a heart, so neither dodged nor forgiven, by obstacle kind.
   readonly bumpsByKind: Readonly<Partial<Record<MinorObstacleId, number>>>;
   // Plain hits that landed, by zone index. A zone with no entry had none.
@@ -157,6 +160,7 @@ export interface Loadout {
 export function blankRun(start: Pick<RunState, "gear" | "pack" | "route" | "walker">): RunState {
   const { gear, pack, route, walker } = start;
   return {
+    bankedPay: cents(0),
     bumpsByKind: {},
     bumpsByZone: [],
     cardsThisZone: 0,

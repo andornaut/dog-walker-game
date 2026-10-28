@@ -101,8 +101,8 @@ export function payFor(tuning: LiveTuning): Cents {
   return read(tuning, "money", "payPerDog");
 }
 
-// At the end of a zone, every dog still walking earns the pay, banked into the money, one
-// change per dog.
+// At the end of a zone, every dog still walking earns the pay, banked into the money and
+// counted in bankedPay, one change per dog.
 export function payZone(data: Pick<GameData, "tuning">, state: RunState): Payments {
   const pay = payFor(data.tuning);
   const changes = packDogs(state).map((dog): MoneyChange => ({
@@ -111,8 +111,27 @@ export function payZone(data: Pick<GameData, "tuning">, state: RunState): Paymen
     dog,
     kind: "money",
   }));
-  const money = changes.reduce((sum, change) => addCents(sum, change.amount), state.money);
-  return { changes, state: { ...state, money } };
+  const paid = changes.reduce((sum, change) => addCents(sum, change.amount), cents(0));
+  return {
+    changes,
+    state: {
+      ...state,
+      bankedPay: addCents(state.bankedPay, paid),
+      money: addCents(state.money, paid),
+    },
+  };
+}
+
+// What a walk banks, and the cash it carried and lost. A walk that ends with every owner having
+// fired you banks only the pay its zones' ends banked, or all its money when card costs have
+// left less, and loses the rest; every other walk, ended or not, banks all its money.
+export function walkEarnings(run: Pick<RunState, "bankedPay" | "money" | "phase">): {
+  readonly banked: Cents;
+  readonly lost: Cents;
+} {
+  const firedOut = run.phase.kind === "ended" && run.phase.reason === "noDogs";
+  const banked = firedOut ? cents(Math.min(run.money, run.bankedPay)) : run.money;
+  return { banked, lost: cents(run.money - banked) };
 }
 
 // When every dog the walk set out with gets home after its last zone, the walk pays
@@ -137,7 +156,7 @@ interface Firing {
 }
 
 // Every owner at 0 hearts fires you and their dog leaves, so it earns no pay for the zone.
-// Money already banked stays.
+// Pay already banked stays.
 export function fireOwnersAtZero(state: RunState): Firing {
   const fired = state.pack.flatMap((slot) =>
     slot.status === "walking" && slot.hearts === 0 ? [slot.dog] : [],

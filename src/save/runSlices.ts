@@ -1,6 +1,7 @@
 import type { GameData } from "../data/types";
 import { runCountersOf } from "../rules/achievements";
 import { walkLength } from "../rules/route";
+import { walkEarnings } from "../rules/run";
 import type { RunState } from "../state/runState";
 import type { RunResult } from "./checkpoint";
 import type { Checkpoint, DogRun } from "./schema";
@@ -30,7 +31,7 @@ export function checkpointOf(data: RunSliceData, run: RunState): Checkpoint {
   return {
     counters: runCountersOf(run),
     dogs: dogRuns(data, run),
-    earnedCents: run.money,
+    earnedCents: walkEarnings(run).banked,
     route: [...run.route],
     zonesFinished: zonesDone(data, run),
   };
@@ -39,10 +40,12 @@ export function checkpointOf(data: RunSliceData, run: RunState): Checkpoint {
 // A run that has ended, for finishRun. A run that has not ended counts as heading home.
 export function runResultOf(data: RunSliceData, run: RunState): RunResult {
   const outcome = run.phase.kind === "ended" ? run.phase.reason : "wentHome";
+  const { banked, lost } = walkEarnings(run);
   return {
     counters: runCountersOf(run),
     dogs: dogRuns(data, run),
-    earnedCents: run.money,
+    earnedCents: banked,
+    lostCents: lost,
     outcome,
     route: [...run.route],
     walker: run.walker,

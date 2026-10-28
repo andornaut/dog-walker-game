@@ -68,6 +68,7 @@ const runResult = (changes: Partial<RunResult> = {}): RunResult => ({
     { fired: true, id: "biscuit", zonesFinished: 1 },
   ],
   earnedCents: cents(6_000),
+  lostCents: cents(0),
   outcome: "finished",
   route: ROUTE,
   walker: "casey",

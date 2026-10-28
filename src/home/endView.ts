@@ -6,7 +6,8 @@ import { quipLine } from "../rules/choices";
 import type { LastWalk } from "../save/schema";
 import { rectIndexAt } from "../ui/grid";
 
-type EarningsKind = "cardCosts" | "fees" | "fullPack" | "luckyFinds" | "start" | "tips";
+type EarningsKind =
+  "cardCosts" | "cashLost" | "fees" | "fullPack" | "luckyFinds" | "start" | "tips";
 
 interface EarningsLine {
   readonly amount: Cents;
@@ -22,6 +23,7 @@ const ORDER: readonly EarningsKind[] = [
   "luckyFinds",
   "fullPack",
   "cardCosts",
+  "cashLost",
   "start",
 ];
 
@@ -41,16 +43,16 @@ export function earningsKind(change: MoneyChange): EarningsKind {
   return change.amount < 0 ? "cardCosts" : "luckyFinds";
 }
 
-// What made up a run's earnings, from the changes it made. Money that no change accounts for
-// is what the run started with (the starting purse, or a dev start's money), so the lines always
-// add up to earned.
+// What made up a run's earnings, from the changes it made and the cash it lost when every owner
+// fired you, a cost. Money that no change accounts for is what the run started with (the
+// starting purse, or a dev start's money), so the lines always add up to earned.
 export function earningsBreakdown(
   data: Pick<GameData, "menuText" | "runText">,
   changes: readonly Change[],
-  earned: Cents,
+  money: { readonly earned: Cents; readonly lost: Cents },
 ): EarningsLine[] {
-  const totals = new Map<EarningsKind, number>();
-  let counted = 0;
+  const totals = new Map<EarningsKind, number>([["cashLost", -money.lost]]);
+  let counted = -money.lost;
   for (const change of changes) {
     if (change.kind === "money") {
       const kind = earningsKind(change);
@@ -58,7 +60,7 @@ export function earningsBreakdown(
       counted += change.amount;
     }
   }
-  totals.set("start", earned - counted);
+  totals.set("start", money.earned - counted);
   return ORDER.flatMap((kind) => {
     const amount = totals.get(kind) ?? 0;
     return amount !== 0 || ALWAYS_SHOWN.has(kind)

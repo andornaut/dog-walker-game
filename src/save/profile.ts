@@ -1,4 +1,5 @@
 import type { AchievementId, HintId } from "../data/types";
+import type { Cents } from "../lib/units";
 import { type AchievementData, newlyEarned } from "../rules/achievements";
 import type { Change } from "../rules/causes";
 import { earnedIfBanked } from "./achievementPreview";
@@ -16,10 +17,12 @@ import type { SaveStore, StoreLoadResult } from "./storage";
 export type StorageState = "available" | "newer" | "unavailable";
 
 // What the end screen shows beyond the saved stats: the achievements the run earned, whether
-// it beat the best walk, and every change it made, for the earnings breakdown.
+// it beat the best walk, and every change it made and the cash it lost, for the earnings
+// breakdown.
 export interface RunEnd {
   readonly achievements: readonly AchievementId[];
   readonly changes: readonly Change[];
+  readonly lostCents: Cents;
   readonly newBestWalk: boolean;
 }
 
@@ -182,6 +185,7 @@ export class ProfileSession {
     this.ended = {
       achievements: earnedSince(this.awards.data, before, this.document),
       changes,
+      lostCents: result.lostCents,
       newBestWalk:
         this.document.stats.bestCentsByPackSize[size] !== before.stats.bestCentsByPackSize[size],
     };
