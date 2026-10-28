@@ -43,9 +43,10 @@ green-bin           48x48   card obstacle, 1 lane: a Toronto green bin knocked o
                             side on, its lid propped open up and back off the mouth, a wheel up in the air
                             at the bottom's back corner, scraps, a lettuce leaf and a banana peel spilling
                             out across the road. idle (4 frames, 350ms): the lid rocks up 1px on frame 2
-produce-crates      48x48   minor, 1 lane: a pyramid of three wooden produce crates set down in the
-                            road, tomatoes on top over bok choy and eggplants, with no awning, posts
-                            or wheels. idle (4 frames, 400ms): a bok choy leaf lifts 1px on frame 2
+produce-crates      48x48   minor, 1 lane: three blue plastic crates set down in the road, two stacked
+                            on the left with tomatoes heaped on top and one on the right of upright bok
+                            choy, with no awning, posts or wheels. idle (4 frames, 400ms): the middle
+                            bok choy lifts 1px on frame 2
 clothing-rack       48x48   minor, 1 lane: a rolling rack of vintage clothes on chrome uprights and
                             casters: a mustard corduroy jacket, a plain lilac dress, a denim jacket
                             and a striped tee. idle (4 frames, 450ms): the dress sways 1px on frame 2
@@ -716,29 +717,40 @@ def crate(g, x, y, w, h):
     g.rect(x, y + h - 1, w, 1, "brown")
 
 
+def plastic_crate(g, x, y, w, h):
+    """A blue plastic stacking crate's front, x, y to x + w, y + h in layout pixels: lake lit shallow along
+    its top rim and left edge, shaded dlake down its right and along its foot, a navy handhole under the rim
+    and, from ob.TEXTURE_MIN up, three dlake vent slots along the bottom."""
+    g.rect(x, y, w, h, "lake")
+    g.rect(x, y, w, 2, "shallow")
+    g.rect(x, y, 1, h, "shallow")
+    g.rect(x + w - 2, y + 2, 2, h - 2, "dlake")
+    g.rect(x, y + h - 1, w, 1, "dlake")
+    g.rect(x + w / 2 - 3, y + 3, 6, 2, "navy")
+    for k in range(3) if scale_of(g) >= ob.TEXTURE_MIN else ():
+        g.rect(x + 4 + k * (w - 6) / 3, y + h - 5, 2, 3, "dlake")
+
+
 def produce_crates(leaf=0):
-    """A pyramid of three produce crates set down in a lane, laid out on 40x40: two crates side by side on
-    the road, bok choy heaped in the left (lime leaves, moss stems) and glossy eggplants in the right
-    (violet, lit lilac), and a third crate on top heaped with tomatoes (red, lit pink, green tops). leaf 1
-    lifts a bok choy leaf 1px."""
+    """A grocer's blue plastic crates set down in a lane, laid out on 40x40: two stacked on the left, the
+    top one heaped with tomatoes (red, lit pink, green tops), and one on the right with three upright heads of
+    bok choy (lime, green crescents and midribs), a stepped outline unlike the cheese crate's single tan box.
+    leaf 1 lifts the middle bok choy 1px."""
     g = edged(Grid(ob.SIZE, ob.SIZE))
     u = unit(g)
-    # bok choy over the left crate, eggplants over the right
-    for i, x in enumerate((6, 10, 14)):
-        dy = -u if leaf and i == 0 else 0
-        g.cel(x, 22 + dy, 3, 3.5, "lime", "green", "white")
-        g.rect(x - 0.5, 23, 1, 4, "moss")
-    for x, y in ((24, 23), (28.5, 22.5), (33, 23)):
-        g.cel(x, y, 2.6, 3.2, "violet", "purple", "lilac")
-        g.rect(x - 1, y - 3.5, 2, 1, "dgreen")
-    crate(g, 3, 25, 16, 12)
-    crate(g, 21, 25, 16, 12)
-    # the tomatoes over the top crate
-    for x, y in ((15, 13), (19, 12), (23, 13), (17, 15), (21, 15), (25, 15), (14, 15.5)):
-        g.cel(x, y, 2.2, 2.2, "red", "dred", "pink")
-        g.p(x, y - 2, "dgreen")
-    crate(g, 12, 16, 16, 10)
-    return lit(g)
+    for i, (x, y) in enumerate(((24.5, 21.5), (34, 21.5), (29.2, 20.5))):
+        dy = -u if leaf and i == 2 else 0
+        g.cel(x, y + dy, 3, 5, "lime", "green")
+        g.rect(x - 0.5, y - 2 + dy, 1, 6, "green")
+    plastic_crate(g, 21, 25, 16, 12)
+    tomatoes = ((11.5, 8.5), (7, 11), (16, 11), (9.2, 12.5), (13.8, 12.5))
+    for x, y in tomatoes:
+        g.cel(x, y, 2.4, 2.3, "red", "dred", "pink")
+    for x, y in tomatoes:
+        g.rect(x - 0.8, y - 2.3, 1.7, 1, "green")
+    plastic_crate(g, 3, 13, 17, 12)
+    plastic_crate(g, 3, 25, 17, 12)
+    return lit(g, dict(lake=("shallow", None), dlake=("lake", None)))
 
 
 PRODUCE_IDLE = (0, 0, 1, 0), 400
