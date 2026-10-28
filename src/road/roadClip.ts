@@ -6,6 +6,8 @@
 // nearer, from the juncture to the road's far edge, so a tall prop does not blink in whole
 // over the cross street.
 
+import { clamp01 } from "../lib/numbers";
+
 // A drawn sprite: its frame's top row on screen, its frame height in its own pixels and its
 // scale.
 interface DrawnRows {
@@ -29,5 +31,5 @@ export function rowsHidden(juncture: number, groundY: number, drawn: DrawnRows):
 // The opacity of a sprite whose ground is on screen row groundY: rising from 0 on the juncture
 // to 1 on the road's far edge, farY, and 1 nearer.
 export function fadeIn(juncture: number, farY: number, groundY: number): number {
-  return Math.min(1, Math.max(0, (groundY - juncture) / (farY - juncture)));
+  return clamp01((groundY - juncture) / (farY - juncture));
 }
