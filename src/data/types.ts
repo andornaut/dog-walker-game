@@ -384,7 +384,8 @@ interface Tilt {
 // stopShare of its kind instead, drawn with the same draw, the two shares adding up to at most 1:
 // with no cue, it stops in the lane counts.dartStopLanesMin to Max lanes from the edge it enters
 // from, drawn per dart, and stands there, coming down the road with it, until it scrolls off; past
-// the road's far edge, it crosses instead. A dart that stops never turns back. inLane: down its
+// the road's far edge, it crosses instead. A dart that stops never turns back. A dart is one row
+// long, and one wider than a lane, its lanes crossing together, never stops. inLane: down its
 // lane at factor of the road's speed, above 1 toward the pack, below 1 away. hop: times jumps, each
 // of 1 to most spots one way, lanes to either side or, unless sideways, a row up the road or
 // diagonally up, landing seconds.moverHopSeconds after it leaves; a shy hopper, at

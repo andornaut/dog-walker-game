@@ -141,13 +141,16 @@ describe("movers", { timeout: 120_000 }, () => {
     }
   });
 
-  // Movement values the planner can build: a dart is one cell and its tilt keeps it coming down
-  // the road, and an in-lane mover moves at another speed than the road.
+  // Movement values the planner can build: a dart is one row, one wider than a lane never stops,
+  // as its stop and verge spots are a lane's, and its tilt keeps it coming down the road; and an
+  // in-lane mover moves at another speed than the road.
   it("gives every obstacle a movement the planner can build", () => {
     for (const kind of OBSTACLE_KINDS) {
       const movement = movementOf(kind);
       if (movement?.kind === "dart") {
-        expect(footprintOf(REAL, kind)).toEqual({ lanes: 1, rows: 1 });
+        const { lanes, rows } = footprintOf(REAL, kind);
+        expect(rows).toBe(1);
+        expect(lanes === 1 || movement.stopShare === 0, kind).toBe(true);
         expect(movement.tilt.min).toBeLessThanOrEqual(movement.tilt.max);
         expect(movement.tilt.min).toBeGreaterThan(-1);
       } else if (movement?.kind === "inLane") {
