@@ -472,13 +472,16 @@ export function laneBalanceWeight(clearRows: number): number {
   return clearRows * clearRows;
 }
 
+// The planned hit length of a mover rows long: the window less the pack's length, which is a
+// one-row hit box, and a cell for each row after the first.
+function bodyLength(geometry: MoverGeometry, rows: number): number {
+  return geometry.window - geometry.packLength + (rows - 1) * geometry.cellLength;
+}
+
 // A mover's hit length for its stands: its kind's drawn one, or the planned hit length of its
-// footprint, the window less the pack and a row per footprint row past the first.
+// footprint (bodyLength).
 function drawnHitLength(geometry: MoverGeometry, spec: MoverSpec): number {
-  return (
-    spec.hitLength ??
-    geometry.window - geometry.packLength + (spec.footprint.rows - 1) * geometry.cellLength
-  );
+  return spec.hitLength ?? bodyLength(geometry, spec.footprint.rows);
 }
 
 // Lanes first to first + count - 1.
@@ -903,12 +906,6 @@ function moveLength(
 
 function within(range: readonly [number, number], draw: number): number {
   return range[0] + (range[1] - range[0]) * draw;
-}
-
-// The planned hit length of a mover rows long: the window less the pack's length, which is a
-// one-row hit box, and a cell for each row after the first.
-function bodyLength(geometry: MoverGeometry, rows: number): number {
-  return geometry.window - geometry.packLength + (rows - 1) * geometry.cellLength;
 }
 
 // The fewest rows whose blocking length covers rows' blocking length stretched by stretch.
