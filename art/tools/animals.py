@@ -28,20 +28,20 @@ motion), run (4 frames, 80ms: down the road at the player).
 
 Snatch, the thief's tags: walk (4 frames, 100ms, road.PERSON_WALK: a foot lifted,
 passing 1px higher, the other foot), flee (4 frames, 90ms: from behind, see FLEE
-and SEAGULL_FLEE), idle (2 frames, 400ms: breathing). Each carries a tan loot
-sack, but for the standing raccoon's chest bundle.
-  snatch-raccoon     38x57, standing about as tall as a medium dog, clutching at its chest (walk,
-                     idle) a lumpy grey-brown cloth bundle knotted at the top (bundle), never round
-                     or tan, so it never reads as a tip coin: a
-                     grey-brown coat (RACCOON_LIT) with dark legs and paws, the black bandit mask
-                     between white brows and a white muzzle, rounded white-rimmed ears and a bushy
-                     tail in bold light and coal rings; flee runs, the tail swinging against the
-                     stride; and, on all fours face on under a hunched back with the sack slung
-                     over its right shoulder, stalk (4 frames, 120ms: the creep, as the coyote's
-                     walk, a diagonal pair of paws lifting as the body sinks 1px under a level
-                     head) and step (4 frames, 80ms: a low lunge for each step, as the coyote's),
-                     settled at each depth step apart from the standing tags
-  snatch-seagull     32x48, a head shorter, the sack in its beak; flee flies, the wings beating
+and SEAGULL_FLEE), idle (2 frames, 400ms: breathing). Each carries a lumpy
+grey-brown loot bundle knotted at the top (bundle), never round or tan, so it never
+reads as a tip coin.
+  snatch-raccoon     38x57, standing about as tall as a medium dog, the bundle clutched at its
+                     chest in walk and idle: a grey-brown coat (RACCOON_LIT) with dark legs and
+                     paws, the black bandit mask between white brows and a white muzzle, rounded
+                     white-rimmed ears and a bushy tail in bold light and coal rings; flee runs,
+                     the tail swinging against the stride; and, on all fours face on under a
+                     hunched back with the bundle slung over its right shoulder, stalk (4 frames,
+                     120ms: the creep, as the coyote's walk, a diagonal pair of paws lifting as
+                     the body sinks 1px under a level head) and step (4 frames, 80ms: a low lunge
+                     for each step, as the coyote's), settled at each depth step apart from the
+                     standing tags
+  snatch-seagull     32x48, a head shorter, the bundle in its beak; flee flies, the wings beating
                      up, level, down, level
 
 Social, medium dogs (48x48, drawn SOCIAL_ZOOM narrower in it, about 26px wide
@@ -409,36 +409,31 @@ def rabbit_hop(phase):
 
 # ---------- Snatch ----------
 
-def sack(g, x, y):
-    """The tan loot sack centred on (x, y), its neck gathered at the top."""
-    g.cel(x, y, 4, 4, "tan", "brown", "cream")
-    g.tri((x - 2.5, y - 2.5), (x + 2.5, y - 2.5), (x, y - 6), "tan")
-    g.rect(x - 1, y - 5, 2, 1, "brown")
-    g.rect(x - 2, y - 4, 4, 1, "dbrown")
-    g.rect(x - 1, y - 1, 2, 1, "dbrown")
-    g.p(x - 1, y, "dbrown")
-    g.rect(x - 1, y + 1, 2, 1, "dbrown")
-
-
-# The lumps of the raccoon's chest bundle about its centre: (dx, dy, rx, ry), the two at the bottom side by side
+# The lumps of the snatchers' loot bundle about its centre: (dx, dy, rx, ry), the two at the bottom side by side
 # and the one over them smaller, so it reads as a soft knotted bundle and not a round coin.
 BUNDLE = ((-2, 1, 2.8, 2.6), (2.2, 1.2, 2.6, 2.4), (0, -1.4, 2.8, 2.4))
+# The bundle's size where a snatcher carries it slung, swinging or in a beak, so it fits over a shoulder and
+# under a beak; its knot stays full size, so its parts stay 2px.
+SLUNG = 0.75
 
 
-def bundle(g, x, y):
-    """The raccoon's loot clutched at its chest, centred on (x, y): a lumpy grey-brown cloth bundle, dstone lit
-    stone, in a coal line, gathered at the top under a knot whose two ends flare up either side. Darker than the
-    coat and grey, never tan, and lumpy, never round, so it never reads as a tip coin."""
-    knot = ((x - 1, y - 5, 2, 2), (x - 3, y - 6, 2, 2), (x + 1, y - 6, 2, 2))
-    for dx, dy, rx, ry in BUNDLE:
-        g.cel(x + dx, y + dy, rx + 0.9, ry + 0.9, "coal")
+def bundle(g, x, y, k=1):
+    """The snatchers' loot, centred on (x, y): a lumpy grey-brown cloth bundle, dstone lit stone, in a coal line,
+    gathered at the top under a knot whose two ends flare up either side. Grey, never tan, and lumpy, never
+    round, so it never reads as a tip coin. k scales the lumps about the centre; the knot keeps its size, so its
+    parts stay 2px, and sits 4 + 2k above the centre, on the top lump."""
+    lumps = [(x + dx * k, y + dy * k, rx * k, ry * k) for dx, dy, rx, ry in BUNDLE]
+    t = y - 4 - 2 * k
+    knot = ((x - 1, t + 1, 2, 2), (x - 3, t, 2, 2), (x + 1, t, 2, 2))
+    for cx, cy, rx, ry in lumps:
+        g.cel(cx, cy, rx + 0.9, ry + 0.9, "coal")
     for kx, ky, kw, kh in knot:
         g.rect(kx - 0.9, ky - 0.9, kw + 1.8, kh + 1.8, "coal")
-    for dx, dy, rx, ry in BUNDLE:
-        g.cel(x + dx, y + dy, rx, ry, "dstone", None, "stone")
+    for cx, cy, rx, ry in lumps:
+        g.cel(cx, cy, rx, ry, "dstone", None, "stone")
     for kx, ky, kw, kh in knot:
         g.rect(kx, ky, kw, kh, "dstone")
-    g.rect(x - 1.5, y - 3.2, 3, 1, "coal")
+    g.rect(x - 1.5, t + 2.8, 3, 1, "coal")
 
 
 # The raccoon's colours: a grey-brown coat in the stone ramp, so it holds on the dark roads as well as the
@@ -519,7 +514,7 @@ FLEE_MS = 90
 
 def raccoon_fleeing(stride, bob=-1):
     """The raccoon running off up the road, seen from behind: the lifted leg short, the other planted, the
-    bushy ringed tail swinging down its back against the stride and the loot sack bouncing over its right
+    bushy ringed tail swinging down its back against the stride and the loot bundle bouncing over its right
     shoulder, the white-rimmed ears and the mask's tips showing past its cheeks. stride 0 is the passing
     frame, both feet down and the arms at its sides; bob lifts it."""
     g = edged(Grid(32, 48))
@@ -537,7 +532,7 @@ def raccoon_fleeing(stride, bob=-1):
         g.rect(x - 1, y + 4 + b, 3, 2, "coal")
     g.cel(16, 31 + b, 8, 7.5, "stone", "dstone", "driftwood")
     k = b + (1 if s > 0 else 0)
-    sack(g, 22, 27 + k)
+    bundle(g, 22, 27 + k, SLUNG)
     # the tail down the back, swinging against the stride
     raccoon_tail(g, [(16 - s * (1 + i), y + b, 3, 2.3) for i, y in enumerate((29.5, 33.5, 37.5))],
                  (16 - s * 4, 41.5 + b, 2.2, 1.9))
@@ -563,7 +558,7 @@ RACCOON_STEP_MS = 80
 def raccoon_stalking(lf=0, rf=0, lh=0, rh=0, sink=0, head=0, ear=0):
     """The raccoon creeping at the player on all fours, face on, its paws on row 44: a low head under rounded
     white-rimmed ears that stand clear of its hunched, rounded back, the mask and pointed white snout fixed
-    forward, the loot sack slung over its right shoulder, the bushy ringed tail swept out past its right hip,
+    forward, the loot bundle slung over its right shoulder, the bushy ringed tail swept out past its right hip,
     dark forelegs splayed either side of a pale chest and the hind paws peeking out under it. lf, rf, lh and
     rh lift a paw (negative up); sink lowers the body, and head the head, which otherwise holds level; ear
     pins the ears back and out."""
@@ -571,8 +566,8 @@ def raccoon_stalking(lf=0, rf=0, lh=0, rh=0, sink=0, head=0, ear=0):
     s, h = sink, head
     # the hunched back, rounded, rising behind the head over the ears
     g.cel(16, 30 + s, 7.5, 5, "dstone", "coal", "stone")
-    # the sack slung over the right shoulder
-    sack(g, 24, 29 + s)
+    # the bundle slung over the right shoulder
+    bundle(g, 24, 29 + s, SLUNG)
     # the tail swept out low past the right hip
     raccoon_tail(g, [(x, y + s, 2.6, 2.2) for x, y in ((22.6, 37.2), (24.6, 39), (26.4, 40.8))],
                  (27.7, 42.4 + s, 1.7, 1.5))
@@ -598,7 +593,7 @@ def raccoon_stalking(lf=0, rf=0, lh=0, rh=0, sink=0, head=0, ear=0):
 
 def seagull(lf=0, rf=0, bob=0):
     """A seagull standing facing the player, its feet on row 44: white head and chest, grey wings folded at its
-    sides with black tips, pink legs, a yellow bill with the red spot, and the loot sack hanging from it. lf
+    sides with black tips, pink legs, a yellow bill with the red spot, and the loot bundle hanging from it. lf
     and rf lift a foot; bob raises everything above the legs."""
     g = edged(Grid(32, 48))
     b = bob
@@ -621,7 +616,7 @@ def seagull(lf=0, rf=0, bob=0):
         g.p(x + (0 if side < 0 else 1), 14 + b, "grey")
     g.rect(15, 19 + b, 2, 3, "yellow")
     g.p(16, 21 + b, "red")
-    sack(g, 16, 27 + b)
+    bundle(g, 16, 27 + b, SLUNG)
     # the pupils again in drawn pixels, at least 1px, so the eyes keep them at every depth step
     px, s = raster(g), scale_of(g)
     for x in (13, 19):
@@ -636,7 +631,7 @@ SEAGULL_FLEE = [dict(wings=-1), dict(wings=0), dict(wings=1, bob=-1), dict(wings
 
 def seagull_fleeing(wings, bob=0):
     """The seagull flying off up the road, seen from behind: grey back, white head and tail, wings spread with
-    black tips at wings (-1 raised, 0 level, 1 swept down), the sack dangling under it and its feet
+    black tips at wings (-1 raised, 0 level, 1 swept down), the bundle dangling under it and its feet
     tucked."""
     g = edged(Grid(32, 48))
     a = wings
@@ -647,7 +642,7 @@ def seagull_fleeing(wings, bob=0):
         g.tri(root_hi, root_lo, tip, "grey")
         g.tri(root_hi, (16 + side * 9, y0 + 4 + 4 * a), tip, "lgrey")
         g.tri((16 + side * 12, y0 + 3 + 7 * a), (16 + side * 13, y0 + 5.5 + 7.5 * a), tip, "ink")
-    sack(g, 16, y0 + 18)
+    bundle(g, 16, y0 + 18, SLUNG)
     g.rect(14, y0 + 13, 1, 2, "pink")
     g.rect(17, y0 + 13, 1, 2, "pink")
     g.cel(16, y0 + 7, 5, 6, "grey", "slate", "lgrey")
@@ -786,7 +781,7 @@ SNATCH_EXTRA = {
     "snatch-raccoon": [("stalk", raccoon_stalking, RACCOON_STALK, RACCOON_STALK_MS),
                        ("step", raccoon_stalking, RACCOON_STEP, RACCOON_STEP_MS)],
 }
-# road.PERSON_WALK's feet and bob: a snatcher holds its sack, so it has no free arm to swing.
+# road.PERSON_WALK's feet and bob: a snatcher holds its bundle, so it has no free arm to swing.
 SNATCH_WALK = [{k: v for k, v in q.items() if k in ("lf", "rf", "bob")} for q in road.PERSON_WALK]
 APART = {tag for extra in SNATCH_EXTRA.values() for tag, *_ in extra}
 # The pose arguments that move a part by pixels, snapped to whole pixels at each scale.
