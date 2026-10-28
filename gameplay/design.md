@@ -163,17 +163,17 @@ Ten card obstacles open a choice card: the other dog, the skunk and the thief, i
 
 The cards found in several neighbourhoods:
 
-| Card      | Neighbourhoods                                     | Options                                                            |
-| --------- | -------------------------------------------------- | ------------------------------------------------------------------ |
-| Other dog | Cabbagetown, Distillery, High Park, Kensington     | Let them sniff (+1♥ each, $20 of missed tips), Pull away (Zoomies) |
-| Skunk     | Beaches, Cabbagetown, High Park, Kensington, Yonge | Full groom ($20), Quick rinse (Stinky), Hold your nose (−1♥ each)  |
-| Thief     | Beaches, Distillery, Kensington, Yonge             | Let them go ($20), Chase them off (−1♥ each)                       |
+| Card      | Neighbourhoods                                     | Options                                                                   |
+| --------- | -------------------------------------------------- | ------------------------------------------------------------------------- |
+| Other dog | Cabbagetown, Distillery, High Park, Kensington     | Let them sniff (+1♥ each, $20 of missed tips), Pull away (Zoomies)        |
+| Skunk     | Beaches, Cabbagetown, High Park, Kensington, Yonge | Full groom ($20), Quick rinse (Stinky), Hold your nose (−1♥ each)         |
+| Thief     | Beaches, Distillery, Kensington, Yonge             | Let the tips go ($20), Grab it back (−1♥ each), Dogs give chase (Zoomies) |
 
-The escaped capybara is a mover: it steps once or twice, like any stepper. The wedding photo shoot is 2 lanes wide; the other neighbourhood cards are 1.
+The thief snatches the walker's tip pouch: Let the tips go loses it, Grab it back wins it back at a cost to the owners' patience, and Dogs give chase sends the pack after it. The escaped capybara is a mover: it steps once or twice, like any stepper. The wedding photo shoot is 2 lanes wide; the other neighbourhood cards are 1.
 
 A puddle opens no card: hitting one costs no heart and makes the pack _Muddy_, with a plain obstacle's hit stop.
 
-Debuffs come from puddles and card options: Muddy from a puddle, the capybara's Help the keeper or the dropped ice cream's Let them lick it (sticky paws); Stinky from the skunk's Quick rinse, the fish crates' Sniff the fish or the cheese crates' Have a sniff; Zoomies from the other dog's Pull away or the porch cat's Bolt past; Spotlight from the wedding shoot's Pose or the promo's Wave hello. Every neighbourhood lacks one debuff: Cabbagetown, High Park and Kensington Market have no Spotlight, the Distillery no Muddy, and The Beaches and Yonge Street no Zoomies. Debuffs are mild. Each lasts 30 seconds of walking (Zoomies 40, Stinky 60), or until the neighbourhood ends, whichever comes first. Nothing on the road cures one; it runs out. Applying one the pack already has restarts its time; none stacks. Each is announced in the message strip when it starts and when it ends. While it lasts, a bar in the debuff's own colour runs the full width of the game just below the top bar, over the clouds, with the debuff's icon and name, and drains over its time; two active debuffs show as two bars. Hold a bar to see what the debuff does.
+Debuffs come from puddles and card options: Muddy from a puddle, the capybara's Help the keeper or the dropped ice cream's Let them lick it (sticky paws); Stinky from the skunk's Quick rinse, the fish crates' Sniff the fish or the cheese crates' Have a sniff; Zoomies from the other dog's Pull away, the porch cat's Bolt past or the thief's Dogs give chase; Spotlight from the wedding shoot's Pose or the promo's Wave hello. Cabbagetown, High Park and Kensington Market have no Spotlight and the Distillery no Muddy; The Beaches and Yonge Street have all four. Debuffs are mild. Each lasts 30 seconds of walking (Zoomies 40, Stinky 60), or until the neighbourhood ends, whichever comes first. Nothing on the road cures one; it runs out. Applying one the pack already has restarts its time; none stacks. Each is announced in the message strip when it starts and when it ends. While it lasts, a bar in the debuff's own colour runs the full width of the game just below the top bar, over the clouds, with the debuff's icon and name, and drains over its time; two active debuffs show as two bars. Hold a bar to see what the debuff does.
 
 - **Muddy:** the pack's lane changes take twice as long (50% slower). Bumps cost what they always do
 - **Spotlight:** a bump costs $10 of cash on top of its hearts; with less on hand it takes what's left, and at $0 nothing. Second chance may forgive the heart, never the cash. A Spotlight bump keeps a bump's hit stop and grace window and counts toward bumps, bump-free neighbourhoods and bump badges
