@@ -24,11 +24,11 @@ export const HINTS = {
     trigger: { kind: "homeButton" },
   },
   luckyFind: {
-    text: "Some bumps are lucky. Aim for them!",
+    text: "Lucky finds pay off. Aim for them!",
     trigger: { kind: "luckyFind" },
   },
   minorBump: {
-    text: "A bump costs its owner 1♥.",
+    text: "A bump costs the dog's owner 1♥.",
     trigger: { kind: "minorBump" },
   },
   moverCue: {

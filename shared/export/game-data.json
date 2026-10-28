@@ -1016,7 +1016,7 @@
     },
     {
       "id": "greenBin",
-      "hitLabel": "SPLAT!",
+      "hitLabel": "BIN SPILL!",
       "hitWord": "GLOP!",
       "kind": "obstacle",
       "name": "Green bin spill",
@@ -1171,7 +1171,7 @@
     },
     {
       "id": "porchCat",
-      "hitLabel": "HISS!",
+      "hitLabel": "STANDOFF!",
       "hitWord": "HISS!",
       "kind": "obstacle",
       "name": "Porch cat",
@@ -1420,7 +1420,7 @@
     },
     {
       "id": "thief",
-      "hitLabel": "YOINK!",
+      "hitLabel": "THIEF!",
       "hitWord": "YOINK!",
       "kind": "obstacle",
       "movement": {

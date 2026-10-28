@@ -23,7 +23,7 @@ export const MENU_TEXT = {
       start: "Starting cash",
       tips: "Tips",
     },
-    firedYou: "{owner} fired you",
+    firedYou: "{owner} fired you!",
     newBest: "New best!",
     titles: {
       finished: "What a walk!",

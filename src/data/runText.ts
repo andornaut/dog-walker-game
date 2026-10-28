@@ -63,7 +63,7 @@ export const RUN_TEXT = {
   seconds: "{seconds}s",
   strip: {
     achievement: "Badge earned! {name}",
-    cashHit: "Spotlight! −{amount}",
+    cashHit: "Spotlight!",
     debuffEnd: {
       muddy: "All clean again.",
       spotlight: "The cameras moved on.",
@@ -86,7 +86,7 @@ export const RUN_TEXT = {
     lowHearts: "{owner} has 1♥ left!",
     luckyNeighbour: "A neighbour pets the pack! +{hearts}♥ to share",
     luckyNeighbourGain: "{owner} +{hearts}♥",
-    luckyWallet: "Found a wallet! +{amount}",
+    luckyWallet: "Found a wallet!",
     plainHit: "{dog} bumped the {obstacle}! {owner} −{hearts}♥",
     pull: "{dog} spotted a squirrel!",
     secondChance: "Second chance! {owner} lets it go.",
@@ -99,7 +99,7 @@ export const RUN_TEXT = {
     button: "Onward!",
     earnings: "{fees} pay · {tips} tips",
     subtitle: "{zone}",
-    title: "Neighbourhood done!",
+    title: "Well walked!",
   },
   zoneProgress: "{n} of {total}",
 } as const satisfies RunText;

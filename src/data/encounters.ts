@@ -105,7 +105,7 @@ export const ENCOUNTERS = {
     zones: ["pawsPromenade"],
   },
   greenBin: {
-    hitLabel: "SPLAT!",
+    hitLabel: "BIN SPILL!",
     hitWord: "GLOP!",
     kind: "obstacle",
     name: "Green bin spill",
@@ -185,7 +185,7 @@ export const ENCOUNTERS = {
     },
   },
   porchCat: {
-    hitLabel: "HISS!",
+    hitLabel: "STANDOFF!",
     hitWord: "HISS!",
     kind: "obstacle",
     name: "Porch cat",
@@ -316,7 +316,7 @@ export const ENCOUNTERS = {
     shape: { lanes: 1, rows: 1 },
   },
   thief: {
-    hitLabel: "YOINK!",
+    hitLabel: "THIEF!",
     hitWord: "YOINK!",
     kind: "obstacle",
     movement: { kind: "approach", steps: { max: 3, min: 2 } },
