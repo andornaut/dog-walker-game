@@ -213,7 +213,7 @@ def ralph_top(wave):
         g.p(20, 27 + b, "yellow")
         g.p(20, 28 + b, "amber")
         # the ponytail behind the head, hanging from the nape down behind the right shoulder, with a dbrown tie
-        for x, y, r, c in ((7.8, 16.5, 1.5, "cream"), (6.6, 18.7, 1.4, "cream"), (5.5, 20.7, 1.1, "tan")):
+        for x, y, r, c in ((7.8, 16.5, 1.5, "tan"), (6.6, 18.7, 1.4, "tan"), (5.5, 20.7, 1.1, "brown")):
             g.ell(x, y + b, r, r + 0.3, c)
         g.p(6, 18 + b, "lgrey")
         g.rect(7, 15 + b, 2, 1, "dbrown")
@@ -240,16 +240,18 @@ def ralph_top(wave):
         # the strong jaw, squared off under the face, with stubble shading its edge
         g.blob(16, 17 + b, 7, 3.5, "skin1", power=3)
         g.rect(12, 20 + b, 8, 1, "skin2")
-        # the hair pulled back tight over the crown and temples: sandy cream shaded tan, off a receding
-        # hairline, gone grey at the temples, with a lgrey streak combed back through it
-        g.cel(16, 7 + b, 8.8, 4.5, "cream", "tan")
+        # the hair pulled back tight over the crown and temples: sandy tan lit cream and shaded brown, off a
+        # receding hairline, gone grey at the temples, with a lgrey streak combed back through it
+        g.cel(16, 7 + b, 8.8, 4.5, "tan", "brown", "cream")
+        g.rect(11, 4 + b, 1, 2, "cream")
+        g.rect(18, 3 + b, 2, 1, "cream")
         g.ell(16, 10.5 + b, 5.5, 2.5, "skin1")
         g.rect(8, 8 + b, 2, 4, "lgrey")
         g.rect(22, 8 + b, 2, 4, "grey")
         g.rect(13, 4 + b, 1, 3, "lgrey")
         g.rect(14, 3 + b, 2, 1, "lgrey")
-        # the hairline a shade darker, so the cream hair stands apart from the fair forehead, as on his face
-        hairline(g, "cream", "skin1", "tan")
+        # the hairline a shade darker, so the sandy hair stands apart from the fair forehead, as on his face
+        hairline(g, "tan", "skin1", "brown")
         face_front(g, 16, 13 + b)
         # heavy brows, two rows deep and pulled low over the eyes, and a big nose
         g.rect(10, 10 + b, 4, 2, "brown")
@@ -331,13 +333,14 @@ def clare_top(wave):
 
 
 def kiwi_top(wave):
-    """Kiwi, grandmother, laid-back: a cloud of short white curls, a sky-blue cardigan over a white blouse with
-    a kiwi-slice brooch, a grey skirt, red shoes, and a ball of pink yarn on two knitting needles in her
-    left hand."""
+    """Kiwi, grandmother, laid-back: a cloud of short white curls, a blue cardigan lit sky on its left, over a
+    white blouse with a kiwi-slice brooch, a grey skirt, red shoes, and a ball of pink yarn on two knitting
+    needles in her left hand."""
     def top(g, b):
         g.rect(10, 33 + b, 12, 5, "slate")
         g.rect(19, 33 + b, 3, 5, "dslate")
-        torso(g, b, "sky", "blue")
+        torso(g, b, "blue", "navy")
+        g.rect(9, 21 + b, 2, 12, "sky")
         g.rect(14, 21 + b, 4, 12, "white")
         g.rect(17, 21 + b, 1, 12, "lgrey")
         g.rect(11, 24 + b, 2, 2, "green")
@@ -345,7 +348,8 @@ def kiwi_top(wave):
         # the curls round the head first, so a raised arm and its hand pass in front of them
         for cx, cy in ((8, 11), (24, 11), (9, 6.5), (23, 6.5), (12.5, 3.5), (19.5, 3.5), (16, 3)):
             g.cel(cx, cy + b, 2.6, 2.6, "white", "lgrey")
-        arms(g, b, wave, "sky", "blue", "brown")
+        arms(g, b, wave, "blue", "navy", "brown")
+        g.rect(5, 22 + b, 1, 9, "sky")
         # the yarn: a pink ball with two needles through it and a strand hanging from the fist
         for i in range(5):
             g.p(3 + i, 21 + i + b, "lgrey")

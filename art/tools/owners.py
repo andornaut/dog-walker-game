@@ -9,7 +9,8 @@ expressions go.
 
 face-owner-<dog>-20: 20x20, the same owner and tags for the walk's dog card. The hair, clothes and props
 are the 32x32 drawing rasterized at 20x20 by minis.Mini, with its own ink line; the expression is drawn
-natively at 20x20, one pixel per feature, and Tara's bun and Gadget's collar points are redrawn by hand.
+natively at 20x20, one pixel per feature, and Tara's bun, Aunt Judy's ponytail, Gadget's collar points and
+Clare's fringe shade are redrawn by hand.
 
 face-walker-<name>: 32x32 portraits for the walker picker. Tags: happy, neutral.
 
@@ -211,8 +212,8 @@ def ralph(mood):
     jacket with a cream fleece collar over a white shirt, and gold wings pinned on the chest."""
     g = face()
     # the ponytail behind the head, hanging from the nape down behind the right shoulder, with a dbrown tie
-    for x, y, r, c in ((8, 20.5, 1.8, "cream"), (6.8, 23, 1.7, "cream"), (5.6, 25.5, 1.4, "tan"),
-                       (4.8, 27.5, 1, "tan")):
+    for x, y, r, c in ((8, 20.5, 1.8, "tan"), (6.8, 23, 1.7, "tan"), (5.6, 25.5, 1.4, "tan"),
+                       (4.8, 27.5, 1, "brown")):
         g.ell(x, y, r, r + 0.3, c)
     if not isinstance(g, minis.Mini):
         # grey strands through the tail, left out at 20px, where they break it into specks
@@ -239,16 +240,18 @@ def ralph(mood):
     g.rect(21, 29, 5, 1, "amber")
     g.p(23, 29, "yellow")
     g.p(23, 30, "amber")
-    # the hair pulled back tight over the crown and temples: sandy cream shaded tan, off a receding hairline,
-    # gone grey at the temples, with a lgrey streak combed back through it
-    g.cel(16, 10.5, 9, 5, "cream", "tan")
+    # the hair pulled back tight over the crown and temples: sandy tan lit cream and shaded brown, off a
+    # receding hairline, gone grey at the temples, with a lgrey streak combed back through it
+    g.cel(16, 10.5, 9, 5, "tan", "brown", "cream")
+    g.rect(11, 7, 1, 2, "cream")
+    g.rect(18, 6, 2, 1, "cream")
     g.ell(16, 14.5, 6.5, 3.5, "skin1")
     g.rect(8, 11, 2, 4, "lgrey")
     g.rect(22, 11, 2, 4, "grey")
     g.rect(13, 7, 1, 3, "lgrey")
     g.rect(14, 6, 2, 1, "lgrey")
-    # the hairline a shade darker, so the cream hair stands apart from the fair forehead
-    hairline(g, "cream", "skin1", "tan")
+    # the hairline a shade darker, so the sandy hair stands apart from the fair forehead
+    hairline(g, "tan", "skin1", "brown")
     # the brows a step darker at 20px, where they are one pixel deep
     expression(g, mood, brow="dbrown" if isinstance(g, minis.Mini) else "brown")
     if not isinstance(g, minis.Mini):
@@ -313,17 +316,19 @@ def clare(mood):
 
 
 def kiwi(mood):
-    """Grandmother, laid-back: a cloud of short white curls, a sky-blue cardigan over a white collar, a
-    kiwi-slice brooch."""
+    """Grandmother, laid-back: a cloud of short white curls, a blue cardigan lit sky on its left, over a white
+    collar, a kiwi-slice brooch."""
     g = face()
     # the perm: round curls from ear to ear over the crown, each lit white and shaded lgrey
     for cx, cy in ((7.5, 15.5), (24.5, 15.5), (7.5, 11), (24.5, 11), (9.5, 7), (22.5, 7), (13, 4.5), (19, 4.5),
                    (16, 4)):
         g.cel(cx, cy, 2.6, 2.6, "white", "lgrey")
-    base(g, "brown", "dbrown", "sky", "blue")
+    base(g, "brown", "dbrown", "blue", "navy")
+    g.rect(6, 28, 2, 3, "sky")
+    g.p(8, 27, "sky")
     g.tri((12, 26), (16, 26), (14, 29), "white")
     g.tri((16, 26), (20, 26), (18, 29), "white")
-    g.rect(16, 29, 1, 2, "blue")
+    g.rect(16, 29, 1, 2, "navy")
     g.rect(10, 28, 3, 2, "green")
     g.p(11, 28, "yellow")
     # the fringe: a row of tight curls across the forehead
@@ -530,6 +535,27 @@ def tara_small_bun(g):
                 g.g.p(x, y, colours[c])
 
 
+def clare_small_fringe(g):
+    """Her fringe's shade lightened to dbrown at 20px, where the scaled plum crescent becomes a dark band across
+    the forehead over the brows; the locks either side of the face keep their plum."""
+    px = g.g.px
+    for y in range(5, 9):
+        for x in range(6, 14):
+            if px[y][x] == minis.K["plum"]:
+                g.g.p(x, y, "dbrown")
+
+
+def judy_small_ponytail(g):
+    """Her high ponytail redrawn wider at 20px, where it scales to a 1px column: three pixels across from the
+    crown down past the visor, lit white on the left and shaded grey on the right."""
+    for x, y, c in ((15, 1, "white"), (16, 1, "lgrey"), (14, 2, "white"), (15, 2, "white"), (16, 2, "lgrey"),
+                    (17, 2, "grey"), (15, 3, "white"), (16, 3, "lgrey"), (17, 3, "grey")):
+        g.g.p(x, y, c)
+    for y in range(4, 9):
+        g.g.p(16, y, "lgrey")
+        g.g.p(17, y, "grey")
+
+
 def gadget_small_collar(g):
     """His collar's points filled in against the neck at 20px, where the scaled points stop a pixel short and
     leave a gap ringed in ink beside the jaw."""
@@ -538,7 +564,8 @@ def gadget_small_collar(g):
 
 
 # Fixes drawn after the scaled owner, for shapes that do not survive the scale.
-SMALL_FIXES = {"penny": gadget_small_collar, "pierre": tara_small_bun}
+SMALL_FIXES = {"biscuit": clare_small_fringe, "penny": gadget_small_collar, "pierre": tara_small_bun,
+               "snowball": judy_small_ponytail}
 
 
 def small(dog, mood):
