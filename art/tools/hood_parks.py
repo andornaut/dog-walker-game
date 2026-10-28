@@ -265,9 +265,10 @@ def capybara(a=0, b=0, bob=0, chew=0, ear=0, blink=False):
 
 # ---------- hen ----------
 
-# A Rhode Island Red: rust feathers shaded dbrown and lit ochre, a plum tail shaded ink, dbrown wings with a
-# brick covert band, a red comb and wattle shaded dred, an amber beak and yellow legs shaded amber.
-HEN = dict(feather="rust", shade="dbrown", lit="ochre", tail="plum", tail_sh="ink", wing="dbrown", wing_sh="plum",
+# A Rhode Island Red: rust feathers shaded dbrown and lit ochre, a plum tail shaded walnut, dbrown wings with a
+# brick covert band, a red comb and wattle shaded dred, an amber beak and yellow legs shaded amber. The tail's
+# shade is walnut, not ink, so road.LIT gives it no cool rim and its tips stay solid at the small steps.
+HEN = dict(feather="rust", shade="dbrown", lit="ochre", tail="plum", tail_sh="walnut", wing="dbrown", wing_sh="plum",
            band="brick", comb="red", comb_sh="dred", beak="amber", leg="yellow", leg_sh="amber")
 # Its scramble across the road, one dict per frame, read like hazards.SQUIRREL_RUN: body lift, the wing's
 # stroke, and the near and far feet (x, y of the foot's top-left). A design unit is 1.5px at full size, so
@@ -278,9 +279,10 @@ HEN_RUN = (
     dict(bob=-4 / 3, wing="down", near=(18, 25 + 1 / 3), far=(12, 26)),                          # flight
     dict(bob=-2 / 3, wing="mid", near=(18 + 2 / 3, 27 + 1 / 3), far=(12 + 2 / 3, 26 + 2 / 3)),   # lands
 )
-# Waiting at the road's edge: standing on both feet, the neck up, then the head jerking forward.
+# Waiting at the road's edge: standing on both feet, the neck up, then the head jerking forward into the run's
+# stretch, a whole design unit or more apart so the two frames differ at every depth step.
 HEN_IDLE = (dict(bob=0, wing="fold", near=(16, 27 + 1 / 3), far=(13 + 1 / 3, 27 + 1 / 3), reach=-2),
-            dict(bob=0, wing="fold", near=(16, 27 + 1 / 3), far=(13 + 1 / 3, 27 + 1 / 3), reach=-1))
+            dict(bob=0, wing="fold", near=(16, 27 + 1 / 3), far=(13 + 1 / 3, 27 + 1 / 3), reach=0))
 
 
 def hen(bob=0, wing="fold", near=(16, 27 + 1 / 3), far=(13 + 1 / 3, 27 + 1 / 3), reach=0):
