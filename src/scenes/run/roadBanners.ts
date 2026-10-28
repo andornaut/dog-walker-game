@@ -30,12 +30,7 @@ export function showInstantPopup(scene: Scene, encounter: EncounterId, still: bo
   if (resolution.kind !== "instant" || !scene.textures.exists(resolution.art)) {
     return;
   }
-  const { road } = LAYOUT;
-  const art = scene.add
-    .image(PROJECTION.centreX, road.y + POPUP.artY, resolution.art)
-    .setOrigin(0.5, 0)
-    .setDepth(DEPTH.popup);
-  fadeAway(scene, [art], { ms: POPUP.fadeMs, rise: still ? 0 : POPUP.rise });
+  popUpArt(scene, resolution.art, 1, still);
 }
 
 // A gear drop grabbed pops up as a lucky find does: the item's shop art at 2x, as the explain
@@ -45,11 +40,15 @@ export function showGearPopup(scene: Scene, gear: GearId, still: boolean): void 
   if (!scene.textures.exists(key)) {
     return;
   }
-  const { road } = LAYOUT;
+  popUpArt(scene, key, GEAR_POPUP_SCALE, still);
+}
+
+// Art at scale over the road's centre, floating up as it fades, or fading in place when still.
+function popUpArt(scene: Scene, key: string, scale: number, still: boolean): void {
   const art = scene.add
-    .image(PROJECTION.centreX, road.y + POPUP.artY, key)
+    .image(PROJECTION.centreX, LAYOUT.road.y + POPUP.artY, key)
     .setOrigin(0.5, 0)
-    .setScale(GEAR_POPUP_SCALE)
+    .setScale(scale)
     .setDepth(DEPTH.popup);
   fadeAway(scene, [art], { ms: POPUP.fadeMs, rise: still ? 0 : POPUP.rise });
 }
