@@ -316,14 +316,16 @@ describe("run, world and walkers", () => {
     expect(weighted.length, weighted.join(", ")).toBeLessThanOrEqual(3);
   });
 
-  // A fixed obstacle with no room is swapped for one of its zone's narrower fixed ones, 2 lanes
-  // before 1, so every zone weighs a 2-lane obstacle that never moves.
-  it.each(world.zones)("weighs a fixed 2-lane obstacle in $name", ({ weights }) => {
+  // Every zone weighs obstacles that never move at each width, 1, 2 and 3 lanes, so a fixed one
+  // with no room always has a narrower one to be swapped for, 2 lanes before 1.
+  it.each(world.zones)("weighs fixed obstacles 1, 2 and 3 lanes wide in $name", ({ weights }) => {
     const weighed = weights.minorObstacles as Readonly<Record<string, number>>;
-    const fixedTwoLane = Object.entries(minorObstacles).flatMap(([id, minor]) =>
-      !("movement" in minor) && minor.shape.lanes === 2 && (weighed[id] ?? 0) > 0 ? [id] : [],
+    const fixedWidths = new Set(
+      Object.entries(minorObstacles).flatMap(([id, minor]) =>
+        !("movement" in minor) && (weighed[id] ?? 0) > 0 ? [minor.shape.lanes] : [],
+      ),
     );
-    expect(fixedTwoLane).not.toEqual([]);
+    expect([...fixedWidths].sort()).toEqual([1, 2, 3]);
   });
 
   it("fits the largest pack in the card row, one dog slot a place, the first free and the rest priced", () => {
