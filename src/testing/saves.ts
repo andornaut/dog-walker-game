@@ -6,7 +6,7 @@ import type { RunCounters } from "../rules/achievements";
 import { cents } from "../rules/units";
 import type { AwardContext } from "../save/achievements";
 import type { SaveContext } from "../save/load";
-import { SAVE_VERSION, type SaveDocument } from "../save/schema";
+import { createDefaultSave, SAVE_VERSION, type SaveDocument } from "../save/schema";
 import type { SaveStorage } from "../save/storage";
 
 // The dogs every player owns from the start, as the data marks them.
@@ -61,41 +61,7 @@ export const quietCounters = (): RunCounters => ({
 });
 
 // A new player: the free dogs, one slot, and the starter dog picked.
-export const newPlayerSave: SaveDocument = {
-  achievements: {},
-  bankCents: cents(0),
-  checkpoint: null,
-  helpSeen: false,
-  lastLoadout: { dogs: STARTER_DOGS.slice(0, 1), gear: null },
-  owned: {
-    dogSlots: [1],
-    dogs: [...STARTER_DOGS],
-    gear: [],
-    walkers: ["casey"],
-  },
-  settings: { musicVolume: 0.6, muted: false, reducedMotion: false, sfxVolume: 0.8 },
-  shownHints: [],
-  stats: {
-    bestCentsByPackSize: {},
-    bestWalk: null,
-    bestZoneFinished: 0,
-    bumpsByKind: {},
-    dogs: {},
-    dogsFinishedWith: [],
-    lastWalk: null,
-    lifetimeCents: cents(0),
-    lifetimeStartCents: cents(0),
-    noFiringStreak: 0,
-    optionPicks: {},
-    runs: { finished: 0, noDogs: 0, wentHome: 0 },
-    tallies: {},
-    timesFired: 0,
-    walkersFinishedWith: [],
-    zonesEverFinished: [],
-  },
-  version: SAVE_VERSION,
-  walker: "casey",
-};
+export const newPlayerSave: SaveDocument = createDefaultSave(testContext.defaults);
 
 // A player several runs in, with every field away from its default. It has finished every zone,
 // so it holds the badge for that.
