@@ -1033,8 +1033,8 @@ def ranger_cart(roll=None, light=0, look=0, point=0):
     32x48 and drawn at road.SCALE as the pedicab is: a white roof on two posts with an amber light on top, the
     ranger at the wheel on the cart's left (screen right) in an olive uniform and a tan flat-brimmed campaign
     hat, a kraft paper bag of leaves standing in the bed behind the passenger seat and a fan rake's head over
-    the roof, the green cowl with two headlights and a white plate with a red maple leaf, a black bumper and
-    the front tires under their fenders. roll (0 to 3) is a drive frame: the tread falls down the tires (still
+    the roof, the green cowl with two headlights and a white plate with its number in blue, a black bumper
+    and the front tires under their fenders. roll (0 to 3) is a drive frame: the tread falls down the tires (still
     at rest) and the body dips 1px onto them on frames 1 and 2. light lights the amber beacon, look turns the
     ranger's eyes (-1 screen left, 1 right) and point raises his free hand pointing ahead (2 a pixel higher)."""
     g = edged(Grid(32, 48))
