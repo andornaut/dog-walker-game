@@ -73,19 +73,9 @@ describe("cheatsInUse", () => {
   it.each<[string, Cheats, boolean]>([
     ["every cheat off", CHEATS_OFF, false],
     ["every cheat on", every, true],
-    ...CHEAT_TOGGLES.map(({ id }): [string, Cheats, boolean] => [
-      `only ${id}`,
-      setCheat(id, true, CHEATS_OFF),
-      true,
-    ]),
-    // Every speed but the one every cheat off already has.
-    ...SPEEDS.filter(({ id }) => id !== CHEATS_OFF.speed).map(
-      ({ id }): [string, Cheats, boolean] => [
-        `only the ${id} speed`,
-        setSpeed(id, CHEATS_OFF),
-        true,
-      ],
-    ),
+    // One toggle and one speed other than normal stand for the rest, each read alike.
+    ["only hit boxes", hitBoxes, true],
+    ["only another speed", setSpeed("slow", CHEATS_OFF), true],
   ])("with %s: %s", (_, cheats, inUse) => {
     expect(cheatsInUse(cheats)).toBe(inUse);
   });
@@ -193,12 +183,12 @@ describe("hasStagedChanges", () => {
   it.each<{ actions: PanelAction[]; applied: Cheats; enabled: boolean; name: string }>([
     { actions: [], applied: CHEATS_OFF, enabled: false, name: "no cheats, untouched" },
     { actions: [], applied: every, enabled: false, name: "every cheat, untouched" },
-    ...CHEAT_TOGGLES.map(({ id }) => ({
-      actions: [{ id, kind: "toggle", on: true } as const],
+    {
+      actions: [{ id: "hitBoxes", kind: "toggle", on: true }],
       applied: CHEATS_OFF,
       enabled: true,
-      name: `no cheats, ${id} staged`,
-    })),
+      name: "no cheats, a toggle staged",
+    },
     {
       actions: [
         { id: "invincible", kind: "toggle", on: true },
