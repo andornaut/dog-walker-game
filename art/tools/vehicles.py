@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Draw the vehicle minor obstacles: the garbage truck (garbageTruck) and the scooter (scooter), and High
-Park's tourist train. Like obstacles.py's the truck and the scooter are billboards from a low camera, a
-front elevation, squat, with at most a sliver of top surface; the train is a crosser, side on. All take
-the road outline and road.LIT's rim.
+"""Draw the vehicle minor obstacles: the garbage truck (garbageTruck) and the scooter (scooter), High Park's
+tourist train and Yonge Street's crossing TTC bus. Like obstacles.py's the truck and the scooter are
+billboards from a low camera, a front elevation, squat, with at most a sliver of top surface; the train and
+the bus are crossers, side on. All take the road outline and road.LIT's rim.
 
 stink-garbage-truck 56x60   a rear-loader garbage truck from behind, its hopper
                             open on bags and a banana peel, the beacon blinking, two flies.
@@ -35,6 +35,20 @@ tourist-train       176x64  High Park's trackless tourist train crossing the roa
                             400ms): stopped, the middle passenger of the second car waving, the hand
                             swung out on frame 2; cue (3 frames, 120ms): the whistle, a white puff out of the
                             stack growing and lifting away
+ttc-bus-crossing    176x64  a TTC bus crossing Yonge Street side on, facing right (the game mirrors it for
+                            left), on the train's grid: a red roof trim over the white upper body and
+                            its one long dark window band, glints across it, a roof pod at the back, the
+                            amber destination sign over the front door and windshield, the mirror on its
+                            arm off the roof's front, the ttc red lower body with a white stripe, two
+                            glass doors split down the middle, a white headlamp and an amber indicator,
+                            two black tires with grey hubs in dark arches, no pantograph; told apart
+                            from ttc-bus, the same bus from behind, and from the streetcar. push (4
+                            frames, 100ms): a spoke across each hub turning an eighth a frame, the body
+                            dipping 1px onto the wheels on frames 1 and 2; idle (4 frames, 400ms): at its
+                            stop, both doors open on a lit doorway with a yellow pole, the body kneeling
+                            1px on frames 1 and 2; cue (3 frames, 120ms): the doors shut, the indicator
+                            blinking, the body up off its kneel from frame 1 and the wheels a quarter
+                            turned on frame 2
 
 Every key also has <key>@<step> for each depth step in minis.STEPS, floor(size x scale + 0.5), with
 the original's tags, frames and durations, drawn on a minis.Mini with its own outline. The scooter's
@@ -500,13 +514,165 @@ def tourist_train(roll=None, wave=0, toot=0):
     return lit(g)
 
 
+# ---------- TTC bus crossing ----------
+
+
+# The key, and the bus's design grid: 176x64 at road.SCALE, as the tourist train's.
+BUS_KEY = "ttc-bus-crossing"
+BUS_W, BUS_H = TRAIN_W, TRAIN_H
+# The body's rear and front columns, its roof, belt (white over red) and sill rows; the wheels' centre row,
+# radius and columns, the feet a row above the frame's bottom row as the train's.
+BUS_REAR, BUS_FRONT, BUS_ROOF, BUS_BELT, BUS_SILL = 2, 112, 4, 22, 36.5
+BUS_AXLE, BUS_WHEEL, BUS_WHEELS = 37.2, 4.6, (28, 89)
+# The doors' left columns, middle and front, each BUS_DOOR wide.
+BUS_DOORS, BUS_DOOR = (52, 98), 7.5
+# Moving: the hubs' spokes turn a quarter of their spacing a frame (roll) and the body dips 1px onto its wheels
+# on frames 1 and 2; 4 frames at 100ms, as every drive. Stopped at its stop: the doors open, the body kneels
+# 1px on frames 1 and 2; 4 frames at 400ms. Pulling away: the doors shut and the front indicator blinks, the
+# body up off its kneel from frame 1 and the wheels a quarter turned on frame 2; 3 frames at 120ms, the
+# train's.
+BUS_TAGS = (
+    ("push", tuple(dict(roll=r) for r in range(4)), 100),
+    ("idle", (dict(doors=1), dict(doors=1, kneel=1), dict(doors=1, kneel=1), dict(doors=1)), 400),
+    ("cue", (dict(kneel=1, blink=1), dict(), dict(roll=1, blink=1)), 120),
+)
+
+
+def bus_wheel(g, cx, roll):
+    """A black tire side on round a flat grey hub, a dslate spoke across the hub turned an eighth of a turn
+    clockwise a frame (roll 0 to 3: |, /, - and \\), as a wheel rolling right turns; the spoke's two ends
+    make the loop seamless."""
+    r, cy = BUS_WHEEL, BUS_AXLE
+    g.ell(cx, cy, r, r, "ink")
+    g.rect(cx - r + 0.6, cy - 1.5, 0.75, 3, "dslate")
+    g.ell(cx, cy, r * 0.5, r * 0.5, "grey")
+    a, d = math.pi / 4 * roll, r * 0.42
+    dx, dy = d * math.sin(a), -d * math.cos(a)
+    strand(g, [(cx - dx, cy - dy), (cx + dx, cy + dy)], "dslate")
+
+
+def row(g, x0, x1, y, c):
+    """A 1px row in drawn pixels from design column x0 to x1 on design row y, so a stripe stays one pixel."""
+    s = scale_of(g)
+    raster(g).rect(math.floor(x0 * s), math.floor(y * s), math.floor(x1 * s) - math.floor(x0 * s), 1, c)
+
+
+def glint(g, x, y0, y1, c="dslate"):
+    """A glint across glass in drawn pixels: a stroke 2px wide from design (x, y1) leaning right up to row y0,
+    a column right every two rows, as ttc_bus's glints lean."""
+    s, px = scale_of(g), raster(g)
+    X, Y0, Y1 = math.floor(x * s), math.floor(y0 * s), math.floor(y1 * s)
+    for Y in range(Y0, Y1):
+        off = (Y1 - 1 - Y) // 2
+        px.p(X + off, Y, c)
+        px.p(X + off + 1, Y, c)
+
+
+def bus_door(g, x0, open_):
+    """A glass door from the window band's top to the sill in an lgrey frame: shut, two navy leaves split
+    down the middle; open, the leaves folded back to its sides on the lit doorway, a yellow pole up it and its
+    grey step."""
+    top, w = BUS_ROOF + 4, BUS_DOOR
+    g.rect(x0, top, w, BUS_SILL - top, "lgrey")
+    if open_:
+        g.rect(x0 + 1.5, top + 0.75, w - 3, BUS_SILL - top - 2.25, "dslate")
+        g.rect(x0 + 1.5, BUS_SILL - 1.5, w - 3, 1.5, "grey")
+        s = scale_of(g)
+        raster(g).rect(math.floor((x0 + w / 2) * s), math.floor((top + 0.75) * s), 1,
+                       math.floor((BUS_SILL - 1.5) * s) - math.floor((top + 0.75) * s), "yellow")
+        for x in (x0 + 0.75, x0 + w - 1.5):
+            g.rect(x, top + 0.75, 0.75, BUS_SILL - top - 1.5, "navy")
+    else:
+        for x in (x0 + 0.75, x0 + w / 2 + 0.375):
+            g.rect(x, top + 0.75, w / 2 - 1.125, BUS_SILL - top - 2.25, "navy")
+        glint(g, x0 + 1, top + 1.5, top + 7)
+
+
+def bus_body(g, doors=0, blink=0):
+    """The bus's body, facing right: a red roof trim over the white upper body and its long dark window band,
+    the roof pod at the back, the amber destination sign over the front door and windshield, the red lower
+    body with a white stripe and a dred sill, the two doors, the dark wheel arches, the bumpers, the
+    headlamp and the indicator, the mirror on its arm off the front of the roof."""
+    x0, x1, top, belt, sill = BUS_REAR, BUS_FRONT, BUS_ROOF, BUS_BELT, BUS_SILL
+    # the roof pod, white lit over lgrey, at the back
+    g.rect(9, top - 2, 30, 2, "lgrey")
+    row(g, 9, 39, top - 2, "white")
+    # the white upper body, its top corners rounded, shaded down the nose
+    r = 3
+    g.rect(x0 + r, top, x1 - x0 - 2 * r, belt - top, "white")
+    g.rect(x0, top + r, x1 - x0, belt - top - r, "white")
+    for cx in (x0 + r, x1 - r):
+        g.ell(cx, top + r, r, r, "white")
+    g.rect(x1 - 1, top + r, 1, belt - top - r, "lgrey")
+    row(g, x0 + r, x1 - r, top, "ttc")
+    # the long dark window band, glints across it
+    g.rect(x0 + 3, top + 4, 92, 11.5, "navy")
+    for x in (12, 16, 66, 70):
+        glint(g, x, top + 4, top + 15.5)
+    # the windshield wrapping round the front, under the sign
+    g.rect(x1 - 4.5, top + 4, 3.5, 18, "navy")
+    glint(g, x1 - 4.5, top + 4, top + 9)
+    # the destination sign: amber in an ink box, the route apart from its name
+    g.rect(x1 - 15, top + 0.75, 13.5, 3, "ink")
+    g.rect(x1 - 14, top + 1.5, 3, 1.5, "amber")
+    g.rect(x1 - 10, top + 1.5, 7.5, 1.5, "amber")
+    # the red lower body, lit along its top, a white stripe, the sill a step darker, shaded down the nose
+    g.rect(x0, belt, x1 - x0, sill - belt, "ttc")
+    row(g, x0, x1, belt, "red")
+    row(g, x0, x1, belt + 2.5, "white")
+    g.rect(x0, sill - 1.5, x1 - x0, 1.5, "dred")
+    g.rect(x1 - 1, belt + 1, 1, sill - belt - 1, "dred")
+    for x in BUS_DOORS:
+        bus_door(g, x, doors)
+    # the indicator and headlamp at the front, the bumpers at each end
+    g.rect(x1 - 7, belt + 5.5, 3, 2, "yellow" if blink else "amber")
+    if blink:
+        row(g, x1 - 7, x1 - 4, belt + 5.5, "white")
+    g.rect(x1 - 2.5, sill - 6.5, 2.5, 2.5, "white")
+    for x in (x0 - 0.5, x1 - 2):
+        g.rect(x, sill - 3.5, 2.5, 3.5, "dslate")
+        row(g, x, x + 2.5, sill - 3.5, "slate")
+    # the mirror on its arm off the front of the roof
+    g.rect(x1 - 1, top + 1, 3, 1, "dslate")
+    g.rect(x1 + 1.5, top + 1, 1, 3, "dslate")
+    g.rect(x1 + 1, top + 3.5, 2, 5, "ink")
+    # the wheel arches, dark, cut off at the sill
+    for cx in BUS_WHEELS:
+        g.ell(cx, BUS_AXLE, BUS_WHEEL + 1.5, BUS_WHEEL + 1.5, "navy")
+    g.rect(0, sill, BUS_W, BUS_H, None)
+
+
+def ttc_bus_crossing(roll=None, doors=0, kneel=0, blink=0):
+    """A TTC bus crossing Yonge Street side on, facing right (see the docstring). roll (0 to 3) is a push frame:
+    the spokes turn and the body dips onto its wheels on frames 1 and 2; doors opens both doors, kneel dips
+    the body 1px at the stop, blink lights the indicator."""
+    g = edged(Grid(BUS_W, BUS_H))
+    px = raster(g)
+    dip = 1 if roll in (1, 2) or kneel else 0
+    out = [[None] * px.w for _ in range(px.h)]
+
+    def layer(draw, dy):
+        px.px = [[None] * px.w for _ in range(px.h)]
+        draw()
+        for y in range(dy, px.h):
+            for x in range(px.w):
+                c = px.px[y - dy][x]
+                if c:
+                    out[y][x] = c
+
+    layer(lambda: bus_body(g, doors, blink), dip)
+    layer(lambda: [bus_wheel(g, x, roll or 0) for x in BUS_WHEELS], 0)
+    px.px = out
+    return lit(g, dict(ttc=("red", None)))
+
+
 # ---------- build ----------
 
 
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for each sprite at full size, then at every depth
-    step: the garbage truck on a minis.Mini at TRUCK_SCALE x the step, the scooter and the tourist train at
-    road.SCALE x the step."""
+    step: the garbage truck on a minis.Mini at TRUCK_SCALE x the step, the scooter, the tourist train and the
+    TTC bus at road.SCALE x the step."""
     this = sys.modules[__name__]
     drive, drive_ms = obstacles.DRIVE
     for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
@@ -521,6 +687,10 @@ def sprites():
         s = SCALE * step
         yield f"{TRAIN_KEY}{suffix}", [(tag, [small(this, s, tourist_train, **q).outlined() for q in poses], ms)
                                        for tag, poses, ms in TRAIN_TAGS]
+    for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
+        s = SCALE * step
+        yield f"{BUS_KEY}{suffix}", [(tag, [small(this, s, ttc_bus_crossing, **q).outlined() for q in poses], ms)
+                                     for tag, poses, ms in BUS_TAGS]
 
 
 if __name__ == "__main__":

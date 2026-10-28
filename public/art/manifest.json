@@ -12335,6 +12335,87 @@
       }
     },
     {
+      "key": "ttc-bus-crossing",
+      "png": "sprites/ttc-bus-crossing.png",
+      "json": "sprites/ttc-bus-crossing.json",
+      "anchor": {
+        "feetY": 63,
+        "opaqueWidth": 173
+      }
+    },
+    {
+      "key": "ttc-bus-crossing@50",
+      "png": "sprites/ttc-bus-crossing@50.png",
+      "json": "sprites/ttc-bus-crossing@50.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 87
+      }
+    },
+    {
+      "key": "ttc-bus-crossing@56",
+      "png": "sprites/ttc-bus-crossing@56.png",
+      "json": "sprites/ttc-bus-crossing@56.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 97
+      }
+    },
+    {
+      "key": "ttc-bus-crossing@62",
+      "png": "sprites/ttc-bus-crossing@62.png",
+      "json": "sprites/ttc-bus-crossing@62.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 108
+      }
+    },
+    {
+      "key": "ttc-bus-crossing@69",
+      "png": "sprites/ttc-bus-crossing@69.png",
+      "json": "sprites/ttc-bus-crossing@69.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 119
+      }
+    },
+    {
+      "key": "ttc-bus-crossing@75",
+      "png": "sprites/ttc-bus-crossing@75.png",
+      "json": "sprites/ttc-bus-crossing@75.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 130
+      }
+    },
+    {
+      "key": "ttc-bus-crossing@81",
+      "png": "sprites/ttc-bus-crossing@81.png",
+      "json": "sprites/ttc-bus-crossing@81.json",
+      "anchor": {
+        "feetY": 51,
+        "opaqueWidth": 141
+      }
+    },
+    {
+      "key": "ttc-bus-crossing@88",
+      "png": "sprites/ttc-bus-crossing@88.png",
+      "json": "sprites/ttc-bus-crossing@88.json",
+      "anchor": {
+        "feetY": 55,
+        "opaqueWidth": 151
+      }
+    },
+    {
+      "key": "ttc-bus-crossing@94",
+      "png": "sprites/ttc-bus-crossing@94.png",
+      "json": "sprites/ttc-bus-crossing@94.json",
+      "anchor": {
+        "feetY": 59,
+        "opaqueWidth": 162
+      }
+    },
+    {
       "key": "ttc-bus@50",
       "png": "sprites/ttc-bus@50.png",
       "json": "sprites/ttc-bus@50.json",
