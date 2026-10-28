@@ -27,10 +27,11 @@ icon-upgrade-<upgrade>      the shop, the cards and the message strip: belly-rub
 icon-gear-<gear>            the shop and the message strip: the shop's item art (icons.py) at 16x16
 <key>-20                    each icon-perk-*, icon-upgrade-* and icon-gear-* drawn again at 20x20 for
                             the walk bar's 22x22 effect wells: the same subject and colours
-icon-bump, icon-fired,      the walk's message strip, beside its lines, on cream: bump (an amber
-icon-hint, icon-last-heart, impact burst), fired (a pink slip under a dred stamp), hint (a white i
-icon-lucky                  on a sky disc), last-heart (a red heart cracked down from its notch),
-                            lucky (a four-leaf clover with a twinkle)
+icon-badge, icon-bump,      the walk's message strip, beside its lines, on cream: badge (a red
+icon-fired, icon-hint,      ribbon rosette round a cream face with a gold centre, on two navy
+icon-last-heart, icon-lucky tails), bump (an amber impact burst), fired (a pink slip under a dred
+                            stamp), hint (a white i on a sky disc), last-heart (a red heart
+                            cracked down from its notch), lucky (a four-leaf clover with a twinkle)
 The upgrade and gear ids are the data ids in kebab case.
 
 Sprite: ui-difficulty (55x10; tags 1 to 5), a zone's difficulty under its name on a fork's path
@@ -826,6 +827,39 @@ def gear_lucky_collar20():
 # ---------- the message strip, on its cream panel beside each line ----------
 # Each differs from the status and trait icons it shares the strip with by shape and colour family.
 
+# The ribbon rosette, as a badge's medal: r red pleats lit l pink along the upper left and shaded d dred along
+# the lower right, scalloped into eight bumps by the outline's notches; c the cream face of a badge with
+# t its tan crescent and g a gold centre; b blue tails shaded n navy, splayed and notched at their ends. The
+# red mass, the scallops and the dark tails keep it from reading as a coin, the hint's disc or a heart.
+BADGE = [
+    "................",
+    ".....ll..rr.....",
+    "....lrrllrrd....",
+    "...lrrrccrrrd...",
+    "..lrrrccccrrrd..",
+    "...lrccggccrd...",
+    "...rrccggctrd...",
+    "..rrrrccctrrrd..",
+    "...rrrrttrrrd...",
+    "....rrrddrrd....",
+    "...bbrd..ddbn...",
+    "...bbn....bbn...",
+    "..bbn......bbn..",
+    "..bbn......bbn..",
+    "..b.n......b.n..",
+    "................",
+]
+
+
+def badge():
+    """A red ribbon rosette with a cream badge face and a gold centre, on two navy tails, for a badge
+    earned."""
+    g = Grid(16, 16)
+    bitmap(g, 0, 0, BADGE, {"r": "red", "l": "pink", "d": "dred", "c": "cream", "t": "tan", "g": "amber",
+                            "b": "blue", "n": "navy"})
+    return g
+
+
 def bump():
     """An impact burst, as fx-bump: an amber eight-point star round a yellow one and a white core."""
     g = Grid(16, 16)
@@ -949,6 +983,7 @@ IMAGES = {
     "icon-gear-lucky-collar-20": gear_lucky_collar20,
     "icon-gear-hall-pass-20": gear_hall_pass20,
     "icon-gear-running-shoes-20": gear_running_shoes20,
+    "icon-badge": badge,
     "icon-bump": bump,
     "icon-fired": fired,
     "icon-hint": hint,

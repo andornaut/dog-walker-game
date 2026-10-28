@@ -13912,6 +13912,10 @@
       "png": "images/card-zone-yonge-street.png"
     },
     {
+      "key": "icon-badge",
+      "png": "images/icon-badge.png"
+    },
+    {
       "key": "icon-bill",
       "png": "images/icon-bill.png"
     },
