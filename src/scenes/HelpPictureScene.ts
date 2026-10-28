@@ -16,6 +16,7 @@ import { colourFromHex, PALETTE } from "../ui/phaser/palette";
 import type { CardSceneData } from "./CardScene";
 import type { HudSceneData } from "./HudScene";
 import type { HudWalk } from "./hudWalk";
+import { onceSceneEvent } from "./overlay";
 import { walkerSpriteKey } from "./profileStore";
 import { ensureRoadPlaceholders, ItemViews } from "./run/itemViews";
 import { PackView } from "./run/packView";
@@ -185,8 +186,6 @@ export class HelpPictureScene extends Scene {
   // Runs then once the scene of key is created, unless this picture has gone first.
   private whenCreated(key: string, then: (scene: Scene) => void): void {
     const scene = this.scene.get(key);
-    const created = () => then(scene);
-    scene.events.once(Scenes.Events.CREATE, created);
-    this.events.once(Scenes.Events.SHUTDOWN, () => scene.events.off(Scenes.Events.CREATE, created));
+    onceSceneEvent(this, scene.events, Scenes.Events.CREATE, () => then(scene));
   }
 }
