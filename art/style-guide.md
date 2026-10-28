@@ -221,6 +221,7 @@ One word per moment, 2 to 7 letters, readable at 1×, built like the sign logo: 
   - `cheese-crates` stands upright, heaped with gold cheese under stink wisps, unlike the tipped, icy `fish-crates`.
   - `dropped-cone`'s cone lies on its side, unlike `cone`.
   - `fallen-log` is dark ridged bark with a pale ringed sawn end and no legs, unlike the tan slatted `bench` and the green `hedge`.
+  - `green-bin` lies knocked over on its front, its lid propped open and a wheel up, scraps and a banana peel spilling out, unlike the upright `trash-can`.
   - `little-free-library` is a house-shaped cabinet under a pitched roof with book spines behind its glass door, unlike the flat-topped, painted `curb-utility-box`.
   - `newspaper-box` is three chained boxes in bold colours on a concrete pad, a lane wide, unlike `curb-mailbox`, a single red box under a dome with no window.
   - `porch-cat` is a white calico, unlike the tuxedo `chase-cat` and the ginger `ambient-cat`.

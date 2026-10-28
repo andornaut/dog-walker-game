@@ -39,6 +39,10 @@ fish-crates         48x48   card obstacle, 1 lane: a fishmonger's wooden crate t
                             in front of it: a silver fish left, a red snapper right. idle (4 frames,
                             350ms): the snapper flops, its tail flipping up on frame 2 and its head
                             on frame 3
+green-bin           48x48   card obstacle, 1 lane: a Toronto green bin knocked over onto its front, seen
+                            side on, its lid propped open up and back off the mouth, a wheel up in the air
+                            at the bottom's back corner, scraps, a lettuce leaf and a banana peel spilling
+                            out across the road. idle (4 frames, 350ms): the lid rocks up 1px on frame 2
 produce-crates      48x48   minor, 1 lane: a pyramid of three wooden produce crates set down in the
                             road, tomatoes on top over bok choy and eggplants, with no awning, posts
                             or wheels. idle (4 frames, 400ms): a bok choy leaf lifts 1px on frame 2
@@ -119,6 +123,8 @@ PERSON = road.SCALE
 OBSTACLE = ob.SCALE
 # The cheese crate's key, which its hit burst's and option pictures' keys extend.
 CHEESE = "cheese-crates"
+# The green bin's key, which its hit burst's and option pictures' keys extend.
+BIN = "green-bin"
 # The wedding shoot's design width: two lanes, 112px at PERSON.
 SHOOT_W = 224 / 3
 
@@ -550,6 +556,60 @@ def fish_crates(flop=0):
 FISH_IDLE = (0, 0, 1, 2), 350
 
 
+# ---------- the green bin spill ----------
+
+def poly(g, pts, c):
+    """A convex polygon through the corners pts, as a fan of triangles."""
+    for a, b in zip(pts[1:], pts[2:]):
+        g.tri(pts[0], a, b, c)
+
+
+def banana_peel(g, cx, base):
+    """A banana peel lying on the road side on, centred on column cx with its base on row base: a bark stem
+    on a short yellow neck, a flap splayed down to the ground either side and cream inside showing between
+    them."""
+    g.tri((cx - 1, base - 4), (cx - 6, base), (cx - 3, base), "yellow")
+    g.tri((cx + 1, base - 4), (cx + 6, base), (cx + 3, base), "yellow")
+    g.tri((cx - 1.5, base - 4), (cx + 1.5, base - 4), (cx, base), "cream")
+    g.rect(cx - 1.5, base - 6, 3, 2.5, "yellow")
+    g.rect(cx - 1, base - 8.5, 2, 2.5, "bark")
+
+
+def green_bin(rock=0):
+    """A Toronto green bin knocked over onto its front, seen side on, on the 32-unit grid: the dgreen body
+    lying along the road, lit green along its top and shaded forest along its bottom, its mouth at the left
+    in a thick forest lip with a moulded band behind it; the lid propped open up and back off its hinge at
+    the mouth's top, its top edge lit; a coal wheel with an ash hub up in the air at the bottom's back
+    corner. Scraps spill out over the lip and across the road in front: a clay heap shaded bark, a green
+    lettuce leaf and a banana peel lying in front. rock lifts the lid's far end that many drawn pixels."""
+    g = edged(Grid(32, 32))
+    s = scale_of(g)
+    r = rock / s
+    poly(g, [(10, 10), (2, 4.5 - r), (4, 1.5 - r), (12, 7)], "forest")
+    poly(g, [(12, 7), (4, 1.5 - r), (3.2, 2.7 - r), (11.2, 8.2)], "green")
+    # the body, the mouth end a little taller than the bottom end, which is rounded off
+    poly(g, [(9, 9), (28, 11.5), (30, 13.5), (30, 25.5), (28, 27.5), (9, 28)], "dgreen")
+    poly(g, [(9, 9), (28, 11.5), (29.5, 13), (9, 11.5)], "green")
+    poly(g, [(9, 25), (30, 24.5), (30, 25.5), (28, 27.5), (9, 28)], "forest")
+    g.rect(7.5, 9, 3, 19, "forest")
+    g.rect(7.5, 9, 1, 19, "green")
+    # the moulded band, 2 drawn pixels wide at every scale so it never thins to a single column
+    x0, y0, y1 = (math.floor(v * s + 0.5) for v in (13, 10.5, 24.5))
+    raster(g).rect(x0, y0, 2, y1 - y0, "forest")
+    g.cel(25.5, 9.5, 4.2, 4.2, "coal")
+    g.rect(24, 8, 3, 3, "ash")
+    g.cel(10.5, 28.5, 8.5, 3, "clay", "bark")
+    g.cel(9.5, 26, 3, 2.5, "clay", "bark")
+    g.cel(2.5, 29.5, 3, 1.5, "clay", "bark")
+    poly(g, [(13, 27), (16.5, 25), (19, 26.5), (16, 28.5)], "green")
+    banana_peel(g, 5, 30)
+    return lit(g, dict(coal=("ash", None), bark=("clay", None)))
+
+
+# The lid rocks up 1px on frame 2 and settles.
+BIN_IDLE = (0, 0, 1, 0), 350
+
+
 # ---------- the cheese crate ----------
 
 # The cut wheel's missing wedge in degrees: narrow enough that the wheel reads as cheese, not a mouth.
@@ -834,6 +894,8 @@ def road_sprites(s=1):
     yield "barrel-stack", [("idle", frames(o, barrel_stack, [dict(glint=a) for a in args]), ms)]
     args, ms = FISH_IDLE
     yield "fish-crates", [("idle", frames(p, fish_crates, [dict(flop=a) for a in args]), ms)]
+    args, ms = BIN_IDLE
+    yield BIN, [("idle", frames(p, green_bin, [dict(rock=a) for a in args]), ms)]
     args, ms = CHEESE_IDLE
     yield CHEESE, [("idle", frames(p, cheese_crates, [dict(phase=a) for a in args]), ms)]
     args, ms = PRODUCE_IDLE

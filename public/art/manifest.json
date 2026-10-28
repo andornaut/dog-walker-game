@@ -5826,6 +5826,87 @@
       }
     },
     {
+      "key": "green-bin",
+      "png": "sprites/green-bin.png",
+      "json": "sprites/green-bin.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 46
+      }
+    },
+    {
+      "key": "green-bin@50",
+      "png": "sprites/green-bin@50.png",
+      "json": "sprites/green-bin@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "green-bin@56",
+      "png": "sprites/green-bin@56.png",
+      "json": "sprites/green-bin@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "green-bin@62",
+      "png": "sprites/green-bin@62.png",
+      "json": "sprites/green-bin@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "green-bin@69",
+      "png": "sprites/green-bin@69.png",
+      "json": "sprites/green-bin@69.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "green-bin@75",
+      "png": "sprites/green-bin@75.png",
+      "json": "sprites/green-bin@75.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "green-bin@81",
+      "png": "sprites/green-bin@81.png",
+      "json": "sprites/green-bin@81.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 37
+      }
+    },
+    {
+      "key": "green-bin@88",
+      "png": "sprites/green-bin@88.png",
+      "json": "sprites/green-bin@88.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 40
+      }
+    },
+    {
+      "key": "green-bin@94",
+      "png": "sprites/green-bin@94.png",
+      "json": "sprites/green-bin@94.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 43
+      }
+    },
+    {
       "key": "hedge",
       "png": "sprites/hedge.png",
       "json": "sprites/hedge.json",
