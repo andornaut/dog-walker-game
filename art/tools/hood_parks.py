@@ -58,10 +58,11 @@ iron-fence-2        112x36  2 lanes: a Victorian wrought-iron fence in front of
                             no outline round the iron, so the gaps stay clear at @50. idle (4 frames,
                             500ms): a white glint along the top rail on frame 2
 iron-fence-3        176x36  3 lanes: the same fence, a lane wider
-leaf-pile           48x48   1 lane, a raked dome of autumn leaves cel shaded orange, lit amber and
-                            shaded rust, its rim ragged with gold, amber and rust leaves and a few more
-                            over its face, a red maple leaf on top; idle (4 frames,
-                            400ms): the maple leaf lifts 1px and turns over on frame 2
+leaf-pile           48x48   1 lane, a raked dome of autumn leaves cel shaded brick, lit crimson and
+                            shaded dbrick, its rim ragged with red, brown and dbrick leaves and a few
+                            more over its face, a red maple leaf on top; no gold or orange, so it never
+                            reads as a tip coin; idle (4 frames, 400ms): the maple leaf lifts 1px and
+                            turns over on frame 2
 little-free-library 48x48   1 lane, a little free library: a turquoise cabinet shaped like a tiny
                             house under a brick-shingled gable with a cream bargeboard and finial,
                             its cream-framed glass door showing two shelves of bright book spines,
@@ -472,8 +473,12 @@ SIZE, ROW = obstacles.SIZE, obstacles.ROW
 # the light) to the darkest (its lower right).
 LEAF_COLOURS = (("gold", "amber"), ("amber", "ochre"), ("orange", "rust"), ("ochre", "brown"), ("rust", "dbrick"),
                 ("brown", "dbrown"))
-# The heap's leaves: (fill, shade) on its lit upper left, its orange middle and its rust lower right.
+# The fallen log's leaves: (fill, shade), lit, middle and shaded.
 PILE_COLOURS = (("gold", "amber"), ("amber", "ochre"), ("rust", "dbrick"))
+# The heap's leaves: (fill, shade) on its lit upper left, its brown middle and its dark lower right.
+HEAP_COLOURS = (("red", "dred"), ("brown", "dbrown"), ("dbrick", "walnut"))
+# The heap's dome under its leaves: base, lower-right shade and upper-left light.
+HEAP_CEL = ("brick", "dbrick", "dred")
 # The rows of leaves along the heap's rim, RIM_STEP apart, and the ones over its face: (left column, top row,
 # tone).
 RIM_STEP = 3
@@ -509,7 +514,7 @@ def maple(g, cx, bottom, lift, flip):
 
 
 def pile_leaves():
-    """(x, y, colour index into PILE_COLOURS) for every leaf drawn on the heap, back rows first: the two at each
+    """(x, y, colour index into HEAP_COLOURS) for every leaf drawn on the heap, back rows first: the two at each
     row's ends, their tips on the dome's rim so it is ragged all round, then a few over its face, each in the
     tone of the band it lies on."""
     out = []
@@ -524,15 +529,17 @@ def pile_leaves():
 
 
 def leaf_pile(lift=0):
-    """A raked heap of autumn leaves: a low dome cel shaded orange, lit amber on its upper left and shaded rust
-    on its lower right, a few big leaves along its rim standing proud so its edge is ragged with their tips and
-    a few more over its face, each lit on its upper half; a red maple leaf lies on top, its edge lit red rather
-    than pink so it never reads as a heart. lift raises the maple leaf 1 drawn pixel and turns it over."""
+    """A raked heap of autumn leaves in reds, crimson and browns, with no gold or orange so it never reads as
+    a tip coin: a low dome cel shaded brick, lit crimson on its upper left and shaded dbrick on its lower right,
+    a few big leaves along its rim standing proud so its edge is ragged with their tips (red down the lit left
+    side, brown on the upper right, dbrick on the lower right) and a few more over its face, each lit on
+    its upper half; a red maple leaf lies on top, its edge lit red rather than pink so it never reads as a
+    heart. lift raises the maple leaf 1 drawn pixel and turns it over."""
     g = edged(Grid(SIZE, SIZE))
     rx, ry = PILE_R
-    g.cel(PILE_X, PILE_Y, rx - 2, ry - 2, "orange", "rust", "amber")
+    g.cel(PILE_X, PILE_Y, rx - 2, ry - 2, *HEAP_CEL)
     for x, y, k in pile_leaves():
-        lens(g, x, y, *PILE_COLOURS[k])
+        lens(g, x, y, *HEAP_COLOURS[k])
     maple(g, 20, 23.7, lift, lift)
     return lit(g, dict(dred=("red", None)))
 
