@@ -17,10 +17,10 @@ export const QUIPS = {
     upset: ["Oh. That's okay. We'll work through it.", "Hm. Let's not dwell on it."],
   },
   buddy: {
-    fired: ["I'll run him home. Bye.", "This is where we split."],
-    happier: ["Good form! Keep it up!", "That's a personal best!"],
-    parting: ["He already did 10K. He's fine.", "Warm-up's done. Keep that form tight!"],
-    upset: ["Eh, bad lap. Shake it off.", "Just a cramp. Back to your pace."],
+    fired: ["You're off my lawn. For good.", "That's it. Mowed down."],
+    happier: ["Nice and tidy, like a fresh cut.", "Now that's a clean edge!"],
+    parting: ["He loves fresh grass. Let him sniff.", "Keep him off the flower beds."],
+    upset: ["That's a patchy job.", "Weeds everywhere. Ugh."],
   },
   duchess: {
     fired: ["You're unfollowed. And fired!", "Blocked! Worst day ever."],

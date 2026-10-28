@@ -32,7 +32,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
   - **Clare** (Biscuit): psychology student, quiet and friendly, gentle observations, a little shy
   - **Eve** (Duchess): social media influencer, everything is content (feed, trending, followers)
   - **Gadget** (Penny): nervous but kind, double-checks everything, apologizes even when firing you
-  - **Jason** (Buddy): laid-back runner, fitness talk (form, personal bests, shake it off)
+  - **Jason** (Buddy): lawn care pro, laid-back, yard talk (mowing, edging, weeds)
   - **Aunt Judy** (Sequoia): tennis star, older and athletic, tennis talk (aces, faults, match point)
   - **Kiwi** (Archie): unflappable grandmother, "dear" and "pet", offers cookies and tea
   - **Ralph** (Kilo): retired pilot, big and gruff, few words, flying talk (turbulence, landings, mayday)
