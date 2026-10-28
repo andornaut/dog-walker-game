@@ -31,6 +31,8 @@ import {
   pixelFontMetrics,
   type PixelTextStyle,
   placePixelText,
+  setPixelText,
+  withProbe,
 } from "../ui/phaser/pixelText";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import { addFaceRows, addFramedOwnerFace, fitFaceRows, measureRuns } from "./faceTextView";
@@ -183,9 +185,10 @@ function ownerLead(scene: Scene, owner: OwnerLead, name: string, lead: OwnerLead
 
 // The width of the columns text inks in style, measured on the font it is drawn in.
 function inkWidth(scene: Scene, text: string, style: PixelTextStyle): number {
-  const probe = addPixelText(scene, 0, 0, text, style).setVisible(false);
-  const ink = inkSpan(probe);
-  probe.destroy();
+  const ink = withProbe(scene, style, (probe) => {
+    setPixelText(probe, text);
+    return inkSpan(probe);
+  });
   return ink.right - ink.left;
 }
 

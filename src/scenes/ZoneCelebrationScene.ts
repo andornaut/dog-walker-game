@@ -19,7 +19,13 @@ import { keyNumbersShown } from "../input/keyNumbers";
 import { addDisplayText } from "../ui/phaser/displayText";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import { addPixelText, fitPixelText, pixelFontMetrics, setPixelText } from "../ui/phaser/pixelText";
+import {
+  addPixelText,
+  fitPixelText,
+  pixelFontMetrics,
+  setPixelText,
+  withProbe,
+} from "../ui/phaser/pixelText";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { addConfetti } from "./badges";
 import { closeOverlay, listenOutsideTap, type OverlayData } from "./overlay";
@@ -151,21 +157,21 @@ export class ZoneCelebrationScene extends Scene {
     whole.setX(left);
     // Each amount is drawn again in forest over its place in the line, measured from the
     // line's start through the amount, since a trailing space has no width.
-    const probe = addPixelText(this, 0, 0, "", BODY).setVisible(false);
-    const widthOf = (shown: string) => {
-      setPixelText(probe, shown);
-      return probe.width;
-    };
-    let before = "";
-    for (const part of text.earnings) {
-      if (part.kind === "money") {
-        const x = left + widthOf(before + part.text) - widthOf(part.text);
-        const amount = addPixelText(this, x, 0, part.text, { ...BODY, colour: PALETTE.forest });
-        atLineTop(amount, zoneDone.earningsY);
+    withProbe(this, BODY, (probe) => {
+      const widthOf = (shown: string) => {
+        setPixelText(probe, shown);
+        return probe.width;
+      };
+      let before = "";
+      for (const part of text.earnings) {
+        if (part.kind === "money") {
+          const x = left + widthOf(before + part.text) - widthOf(part.text);
+          const amount = addPixelText(this, x, 0, part.text, { ...BODY, colour: PALETTE.forest });
+          atLineTop(amount, zoneDone.earningsY);
+        }
+        before += part.text;
       }
-      before += part.text;
-    }
-    probe.destroy();
+    });
   }
 
   // The walker's line in a speech bubble whose tail points up at them, a dotted rule, and
@@ -177,9 +183,10 @@ export class ZoneCelebrationScene extends Scene {
     if (this.textures.exists(ART.tailUp)) {
       this.add.image(tail.x, tail.y, ART.tailUp).setOrigin(0);
     }
-    const probe = addPixelText(this, 0, 0, text.greeting, BODY).setVisible(false);
-    const { lines, style } = fitPixelText(probe, GREETING_FIT, 0, 0);
-    probe.destroy();
+    const { lines, style } = withProbe(this, BODY, (probe) => {
+      setPixelText(probe, text.greeting);
+      return fitPixelText(probe, GREETING_FIT, 0, 0);
+    });
     const tops = greetingLineTops(pixelFontMetrics(this, "body"), style.scale, lines.length);
     lines.forEach((line, i) => {
       const label = addPixelText(this, centreX, 0, line, {

@@ -55,6 +55,7 @@ import {
   pixelFontMetrics,
   setFittedText,
   setPixelText,
+  withProbe,
 } from "../ui/phaser/pixelText";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { DISABLED_COLOURS, GREYED } from "../ui/selection";
@@ -639,14 +640,9 @@ export class CardScene extends Scene {
     // the effect still fits over it; the effect at 2x where it fits the card, else at 1x. Holding
     // the card shows both larger.
     const fires = entry.option?.fires ?? [];
-    const probe = addPixelText(this, 0, 0, "", { colour: PALETTE.plum });
-    const shown = smallCardText(
-      gameData,
-      pixelFontMetrics(this, "body"),
-      labelInkWidth(probe),
-      entry.option,
+    const shown = withProbe(this, { colour: PALETTE.plum }, (probe) =>
+      smallCardText(gameData, pixelFontMetrics(this, "body"), labelInkWidth(probe), entry.option),
     );
-    probe.destroy();
     if (shown.warning !== null) {
       const warning = this.centred(centreX, 0, "", grey ? PALETTE[GREYED.text] : PALETTE.darkRed);
       setFittedText(warning, shown.warning, centreX, y + shown.box.warningY);

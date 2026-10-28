@@ -14,7 +14,12 @@ import {
 } from "../home/badgesView";
 import type { Rect } from "../lib/rect";
 import { PALETTE } from "../ui/phaser/palette";
-import { addPixelText, labelInkWidth, type PixelTextStyle } from "../ui/phaser/pixelText";
+import {
+  addPixelText,
+  labelInkWidth,
+  type PixelTextStyle,
+  withProbe,
+} from "../ui/phaser/pixelText";
 import { playTag, playTagOnce } from "./sprites";
 import { addPanel, tagFrame, TEXT_SCALE } from "./uiKit";
 
@@ -156,10 +161,7 @@ function rowNames(
   slotWidth: number,
   names: readonly string[],
 ): BadgeRowNames {
-  const probe = addPixelText(scene, 0, 0, "", style).setVisible(false);
-  const set = badgeRowNames(labelInkWidth(probe), slotWidth, names);
-  probe.destroy();
-  return set;
+  return withProbe(scene, style, (probe) => badgeRowNames(labelInkWidth(probe), slotWidth, names));
 }
 
 // The owners cheering: their happy faces, hopping now and then unless motion is reduced.

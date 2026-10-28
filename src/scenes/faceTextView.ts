@@ -19,6 +19,7 @@ import {
   type PixelTextStyle,
   scalePixelText,
   setPixelText,
+  withProbe,
 } from "../ui/phaser/pixelText";
 import type { TextFitStyle } from "../ui/textFit";
 import { addNamePills } from "./effectNameColours";
@@ -36,15 +37,14 @@ export function measureRuns<T>(
   style: PixelTextStyle,
   measure: (width: (fit: TextFitStyle, text: string) => number) => T,
 ): T {
-  const probe = addPixelText(scene, 0, 0, "", style).setVisible(false);
-  const measured = measure((fit, text) => {
-    setPixelText(probe, text);
-    probe.setLetterSpacing(fit.letterSpacing);
-    scalePixelText(probe, fit.scale, 0, 0);
-    return probe.width;
-  });
-  probe.destroy();
-  return measured;
+  return withProbe(scene, style, (probe) =>
+    measure((fit, text) => {
+      setPixelText(probe, text);
+      probe.setLetterSpacing(fit.letterSpacing);
+      scalePixelText(probe, fit.scale, 0, 0);
+      return probe.width;
+    }),
+  );
 }
 
 // The line's rows in the first of styles that fits room, as fittingFaceRows sets them, measured

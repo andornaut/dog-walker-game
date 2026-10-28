@@ -123,6 +123,7 @@ import {
   placePixelText,
   scalePixelText,
   setPixelText,
+  withProbe,
 } from "../ui/phaser/pixelText";
 import { BUTTON_COLOURS, GREYED, pictureBox, type SelectLook } from "../ui/selection";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
@@ -1400,11 +1401,6 @@ export class StartScene extends Scene {
       this.quips,
     );
     const notice = storageNotice(gameData.homeText, storageState(this));
-    const probe = this.text(root, 0, 0, "", PALETTE.plum).setVisible(false);
-    const measure = (line: string) => {
-      setPixelText(probe, line);
-      return probe.width;
-    };
     // The speaking owner's name, at 1x, sets their column's width.
     const ownerName = speech.owner === null ? undefined : gameData.dogs[speech.owner].owner.name;
     const nameLabel =
@@ -1417,8 +1413,17 @@ export class StartScene extends Scene {
     const paragraphs = [...notice, ...speech.paragraphs].map((paragraph) =>
       withNamePills(gameData, paragraph),
     );
-    const { faced, lines } = bubbleLines(measure, SPEECH.lines, column, paragraphs);
-    probe.destroy();
+    const { faced, lines } = withProbe(
+      this,
+      { colour: PALETTE.plum, scale: TEXT_SCALE },
+      (probe) => {
+        const measure = (line: string) => {
+          setPixelText(probe, line);
+          return probe.width;
+        };
+        return bubbleLines(measure, SPEECH.lines, column, paragraphs);
+      },
+    );
     const top = GATE.y + SPEECH.top;
     // The bubble goes under the words, which set its size.
     const bubble = this.add.container(0, 0);

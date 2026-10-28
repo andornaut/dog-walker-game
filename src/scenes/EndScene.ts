@@ -45,6 +45,8 @@ import {
   inkSpan,
   type LabelToFit,
   pixelFontMetrics,
+  setPixelText,
+  withProbe,
 } from "../ui/phaser/pixelText";
 import { TEXT_FIT_STYLES, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 import { addBadgeCelebration, addBurst, addCheeringFace, NEW_BEST_BURST } from "./badges";
@@ -142,9 +144,14 @@ export class EndScene extends Scene {
     // A closing line wraps onto a second line at 2x while the panel has room for it.
     const quipFit = { room: QUIP_TEXT_ROOM, styles: WRAPPING_TEXT_FIT_STYLES };
     const wanted = closing.map((line) => {
-      const probe = text(0, 0, line.text, PALETTE.plum);
-      const { lines: shown } = fitPixelText(probe, quipFit, 0, 0);
-      probe.destroy();
+      const { lines: shown } = withProbe(
+        this,
+        { colour: PALETTE.plum, scale: END_TEXT_SCALE },
+        (probe) => {
+          setPixelText(probe, line.text);
+          return fitPixelText(probe, quipFit, 0, 0);
+        },
+      );
       return { fired: line.fired, lines: shown.length };
     });
     const quipLines = grantedQuipLines(body, lines.length, wanted);

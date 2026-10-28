@@ -180,14 +180,26 @@ export function wrapPixelText(
   maxWidth: number,
   text: string,
 ): string[] {
+  return withProbe(scene, style, (probe) => {
+    const width = (line: string) => {
+      setPixelText(probe, line);
+      return probe.width;
+    };
+    return wrapWords(width, maxWidth, text);
+  });
+}
+
+// What measure reads off a hidden label in style, made for it and destroyed after: text is
+// measured on the font it is drawn in.
+export function withProbe<T>(
+  scene: Scene,
+  style: PixelTextStyle,
+  measure: (probe: GameObjects.BitmapText) => T,
+): T {
   const probe = addPixelText(scene, 0, 0, "", style).setVisible(false);
-  const width = (line: string) => {
-    setPixelText(probe, line);
-    return probe.width;
-  };
-  const lines = wrapWords(width, maxWidth, text);
+  const measured = measure(probe);
   probe.destroy();
-  return lines;
+  return measured;
 }
 
 // Moves a label made by addPixelText, keeping y the top of its capitals and, for a left-aligned

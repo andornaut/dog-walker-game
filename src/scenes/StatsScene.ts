@@ -61,6 +61,7 @@ import {
   inkSpan,
   pixelFontMetrics,
   setPixelText,
+  withProbe,
   wrapPixelText,
 } from "../ui/phaser/pixelText";
 import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
@@ -432,17 +433,16 @@ export class StatsScene extends Scene {
     const badges = this.badges();
     this.text(LEFT, WALL.headingY, gameData.menuText.stats.badges, { font: "title" });
     this.text(RIGHT, WALL.headingY, earnedText(gameData, badges), { originX: 1 });
-    const probe = addPixelText(this, 0, 0, "", { colour: PALETTE.plum, scale: TEXT_SCALE });
-    probe.setVisible(false);
-    const inkWidth = (line: string) => {
-      setPixelText(probe, line);
-      const ink = inkSpan(probe);
-      return ink.right - ink.left;
-    };
-    const cells = badges.map((badge) =>
-      wallCell(WALL_TEXT, inkWidth, badge, badgeProgress(gameData, save, badge)),
-    );
-    probe.destroy();
+    const cells = withProbe(this, { colour: PALETTE.plum, scale: TEXT_SCALE }, (probe) => {
+      const inkWidth = (line: string) => {
+        setPixelText(probe, line);
+        const ink = inkSpan(probe);
+        return ink.right - ink.left;
+      };
+      return badges.map((badge) =>
+        wallCell(WALL_TEXT, inkWidth, badge, badgeProgress(gameData, save, badge)),
+      );
+    });
     // Each row as tall as its badge or its text, whichever is taller.
     this.wallRows = wallRects(
       WALL,
