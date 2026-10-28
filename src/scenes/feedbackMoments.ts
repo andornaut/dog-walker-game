@@ -110,7 +110,7 @@ export class HudFeedback {
   private inFlight = 0;
   private readonly payoutLabels = new Set<GameObjects.Container>();
   // The firing moments' faces and plates on screen.
-  private firingParts = new Set<Rect>();
+  private readonly firingParts = new Set<Rect>();
   // Fired lines' bubbles on screen, and lines waiting for room beside them.
   // Each bubble's cover takes in its tail.
   private lines: {
