@@ -3,13 +3,23 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DebuffId, MinorObstacleId } from "../data/types";
 import { itemAt } from "../lib/arrays";
+import { bumpCash, tipValue } from "../rules/run";
+import { cents } from "../rules/units";
+import type { WalkStep } from "../runner/walk";
 import { TALLY_IDS } from "../save/schema";
 import { packDogs, packOrder } from "../state/pack";
 import type { PackDogs, RunState } from "../state/runState";
 import { defined } from "../testing/defined";
+import { testState } from "../testing/runState";
 import { IDEAL_SKILL, simConfig } from "../testing/sim";
 import { badgeCounters } from "./report";
-import { type RunResult, type SimConfig, simulateRun } from "./simulate";
+import {
+  type DebuffCosts,
+  noteDebuffCosts,
+  type RunResult,
+  type SimConfig,
+  simulateRun,
+} from "./simulate";
 import { type Skill, SKILL_PRESETS } from "./skills";
 
 const TRIO: PackDogs = ["duchess", "biscuit", "kilo"];
@@ -216,5 +226,65 @@ describe("badgeCounters", { timeout: 30_000 }, () => {
   it("gives no Walk bonus share for a pack under the most dogs", () => {
     const facts = results.map((result) => result.facts);
     expect(badgeCounters(gameData, RISKY.length - 1, facts).fullPackBonusShare).toBeNull();
+  });
+});
+
+describe("noteDebuffCosts", () => {
+  const DEBUFFS = Object.keys(gameData.debuffs) as DebuffId[];
+  const held = (debuff: DebuffId) => [{ debuff, secondsLeft: 20, untilZone: 0 }];
+  const zeros = (): DebuffCosts =>
+    Object.fromEntries(
+      DEBUFFS.map((debuff) => [debuff, { bumpsWhile: 0, centsLost: 0 }]),
+    ) as DebuffCosts;
+  // A walking step's tip and bumps, each priced by the rules on state, one bump landed and one
+  // dodged.
+  const step = (state: RunState) => {
+    const item = {} as WalkStep["bumps"][number]["item"];
+    return {
+      bumps: [
+        { cash: bumpCash(gameData, state), change: null, dodged: false, dog: "duchess", item },
+        { cash: null, change: null, dodged: true, dog: "duchess", item },
+      ] as const satisfies WalkStep["bumps"],
+      tips: [tipValue(gameData, state)],
+      walk: { run: state },
+    };
+  };
+  const plain = testState({ duchess: 3 }, { money: cents(5000) });
+  const costsWhile = (debuff: DebuffId) => {
+    const state = { ...plain, debuffs: held(debuff) };
+    const costs = zeros();
+    noteDebuffCosts(gameData, costs, state, step(state));
+    return { costs, state };
+  };
+
+  // What the debuff took: what the tip would pay without it less what it paid, and the cash the
+  // bump cost.
+  it.each(DEBUFFS)("counts the landed bump while %s lasts, and the cash it took", (debuff) => {
+    const { costs, state } = costsWhile(debuff);
+    const lost =
+      tipValue(gameData, plain).amount -
+      tipValue(gameData, state).amount -
+      (bumpCash(gameData, state)?.amount ?? 0);
+
+    expect(costs).toEqual({ ...zeros(), [debuff]: { bumpsWhile: 1, centsLost: lost } });
+  });
+
+  it("finds some debuff that takes cash, so the comparisons are not all of zeros", () => {
+    expect(DEBUFFS.some((debuff) => costsWhile(debuff).costs[debuff].centsLost > 0)).toBe(true);
+  });
+
+  // Whether the run held the debuff before and after the step, and the bumps counted toward it:
+  // one that starts in the step, or ran out as it began, counts none.
+  it.each([
+    [true, true, 1],
+    [false, true, 0],
+    [true, false, 0],
+  ] as const)("held before %s and after %s counts %i bumps", (before, after, counted) => {
+    const debuff = itemAt(DEBUFFS, 0);
+    const costs = zeros();
+    const at = (holds: boolean) => ({ ...plain, debuffs: holds ? held(debuff) : [] });
+    noteDebuffCosts(gameData, costs, at(before), step(at(after)));
+
+    expect(costs[debuff].bumpsWhile).toBe(counted);
   });
 });

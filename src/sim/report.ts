@@ -78,6 +78,11 @@ export interface MatrixRow extends BadgeCounters {
   // Of the obstacle hits, minor ones and movers included, those that came right after a pull.
   readonly afterPullShare: number | null;
   readonly bumpShare: number | null;
+  // Each debuff's cost per walk: the landed bumps while it lasted, and the cents it took from
+  // tips and bumps (DebuffCost in simulate.ts).
+  readonly debuffCosts: Readonly<
+    Record<DebuffId, { readonly meanBumpsWhile: number; readonly meanCentsLost: number }>
+  >;
   readonly delivery: readonly ZoneDelivery[];
   readonly finishedShare: number;
   // The share of walks with at least one firing.
@@ -347,6 +352,15 @@ function summarizeCell(
     ),
     afterPullShare: hits === 0 ? null : afterPull / hits,
     bumpShare: touchedShare(countsOf(inCategory("minor"))),
+    debuffCosts: Object.fromEntries(
+      (Object.keys(data.debuffs) as DebuffId[]).map((debuff) => [
+        debuff,
+        {
+          meanBumpsWhile: mean(results.map((result) => result.debuffCosts[debuff].bumpsWhile)),
+          meanCentsLost: mean(results.map((result) => result.debuffCosts[debuff].centsLost)),
+        },
+      ]),
+    ) as MatrixRow["debuffCosts"],
     delivery: sumDeliveries(results.flatMap((result) => result.deliveries)),
     finishedShare: mean(results.map((result) => (result.finished ? 1 : 0))),
     firedShare: mean(results.map((result) => (result.firings.length > 0 ? 1 : 0))),
@@ -415,15 +429,17 @@ function measured(share: number | null): string {
   return share === null ? "-" : `${(share * 100).toFixed(1)}%`;
 }
 
+// The columns that name a row's cell, left-aligned at the start of every table of rows.
+const CELL_HEADERS = ["Policy", "Route", "Player", "Gear", "Pack", "Walker"] as const;
+
+function cellNames(row: MatrixRow): string[] {
+  return [row.policy, row.route, row.player, row.gear, row.pack, row.walker];
+}
+
 // A row's cells as text, in MATRIX_HEADERS order. Player is the skill preset; Hit, Bump and
 // Lucky are measured.
 export const MATRIX_HEADERS = [
-  "Policy",
-  "Route",
-  "Player",
-  "Gear",
-  "Pack",
-  "Walker",
+  ...CELL_HEADERS,
   "Hit",
   "Bump",
   "Forced",
@@ -446,12 +462,7 @@ export const MATRIX_HEADERS = [
 
 export function rowCells(row: MatrixRow): string[] {
   return [
-    row.policy,
-    row.route,
-    row.player,
-    row.gear,
-    row.pack,
-    row.walker,
+    ...cellNames(row),
     measured(row.hitShare),
     measured(row.bumpShare),
     measured(row.afterPullShare),
@@ -498,7 +509,7 @@ function textTable(
 }
 
 export function formatTable(rows: readonly MatrixRow[]): string {
-  return textTable(6, MATRIX_HEADERS, rows.map(rowCells));
+  return textTable(CELL_HEADERS.length, MATRIX_HEADERS, rows.map(rowCells));
 }
 
 // The measured hit rate of each obstacle kind, one column per kind, then of each mover.
@@ -512,26 +523,32 @@ export function formatKindTable(
     ...new Set(rows.flatMap((row) => Object.keys(row.moverHitShares) as WalkItemKind[])),
   ].sort();
   return textTable(
-    6,
-    [
-      "Policy",
-      "Route",
-      "Player",
-      "Gear",
-      "Pack",
-      "Walker",
-      ...kinds,
-      ...movers.map((kind) => `moving ${kind}`),
-    ],
+    CELL_HEADERS.length,
+    [...CELL_HEADERS, ...kinds, ...movers.map((kind) => `moving ${kind}`)],
     rows.map((row) => [
-      row.policy,
-      row.route,
-      row.player,
-      row.gear,
-      row.pack,
-      row.walker,
+      ...cellNames(row),
       ...kinds.map((kind) => measured(row.kindHitShares[kind] ?? null)),
       ...movers.map((mover) => measured(row.moverHitShares[mover] ?? null)),
+    ]),
+  );
+}
+
+// What each debuff cost per walk: for each debuff, the landed bumps while it lasted and the
+// dollars it took.
+export function formatDebuffCostTable(
+  data: Pick<GameData, "debuffs">,
+  rows: readonly MatrixRow[],
+): string {
+  const debuffs = Object.keys(data.debuffs) as DebuffId[];
+  return textTable(
+    CELL_HEADERS.length,
+    [...CELL_HEADERS, ...debuffs.flatMap((debuff) => [`${debuff} bumps`, `${debuff} lost`])],
+    rows.map((row) => [
+      ...cellNames(row),
+      ...debuffs.flatMap((debuff) => {
+        const cost = row.debuffCosts[debuff];
+        return [cost.meanBumpsWhile.toFixed(2), dollars(cost.meanCentsLost)];
+      }),
     ]),
   );
 }

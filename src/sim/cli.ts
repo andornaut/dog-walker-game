@@ -7,9 +7,10 @@ import { isMainThread, parentPort, Worker, workerData } from "node:worker_thread
 import { gameData } from "../data";
 import type { GearId, WalkerId } from "../data/types";
 import { itemAt } from "../lib/arrays";
-import { DEFAULT_ROUTE_POLICY, POLICY_IDS, ROUTE_POLICY_IDS } from "./policies";
+import { DEFAULT_ROUTE_POLICY, MIXED_PAY_SHARE, POLICY_IDS, ROUTE_POLICY_IDS } from "./policies";
 import {
   DEFAULT_MATRIX,
+  formatDebuffCostTable,
   formatDeliveryKindTable,
   formatDeliveryTable,
   formatKindTable,
@@ -62,6 +63,17 @@ const USAGE = [
   "            (default: groups)",
   "  --out     also write the matrix and rows as JSON to this file",
   "",
+  "Card policies (a safe option leaves no owner whose meter falls at 1 heart or less):",
+  "  heartsUnlessLow  the free option, unless it is not safe: then the cheapest safe money option",
+  "  alwaysHearts     always the free option",
+  "  alwaysPay        the cheapest money option whenever one is affordable",
+  `  mixed            as heartsUnlessLow, but pays ${MIXED_PAY_SHARE * 100}% of the time when both are safe`,
+  "  debuffs          a safe option that gives a debuff whenever one is offered, else as mixed",
+  "  noDebuffs        no option that gives a debuff while a safe hearts or money option is",
+  "                   offered: as mixed among those, else as mixed among them all",
+  "The free option keeps the most money, then the most hearts, so it is a debuff option over",
+  "one that costs hearts.",
+  "",
   "Skill presets:",
   ...presetLines,
   "",
@@ -70,6 +82,10 @@ const USAGE = [
   "collected per run, Drops the gear drops that reached the pack per run and Grabs those",
   "grabbed, Zones zones finished per run. A second table gives the hit rate of each",
   "obstacle kind that stands still, then of each mover.",
+  "",
+  "The debuff table gives, per walk, each debuff's landed bumps while it lasted (bumps) and the",
+  "dollars it took (lost): its share of each tip's pay, such as Stinky's, and the cash bumps",
+  "cost while it made them cost cash, such as Spotlight's.",
   "",
   "The delivery table compares each zone's plan with the road it placed, by walk position (Pos)",
   "and zone, summed over every row: Plans is the zones planned, and each group column the mean",
@@ -237,7 +253,8 @@ async function main(): Promise<void> {
   const seconds = (performance.now() - started) / 1000;
   const { matrix, out, runs, seed } = options;
   process.stdout.write(`${formatTable(rows)}\n\nHit rate by obstacle kind\n`);
-  process.stdout.write(`${formatKindTable(gameData, rows)}\n\nDelivery by zone\n`);
+  process.stdout.write(`${formatKindTable(gameData, rows)}\n\nDebuff costs per walk\n`);
+  process.stdout.write(`${formatDebuffCostTable(gameData, rows)}\n\nDelivery by zone\n`);
   process.stdout.write(`${formatDeliveryTable(rows)}\n`);
   if (options.delivery === "kinds") {
     process.stdout.write(`\nDelivery by kind\n${formatDeliveryKindTable(rows)}\n`);

@@ -5,8 +5,10 @@ import { DOGS } from "../data/dogs";
 import type { DogId, ZoneId } from "../data/types";
 import { itemAt } from "../lib/arrays";
 import type { PackDogs } from "../state/runState";
+import { POLICY_IDS } from "./policies";
 import {
   DEFAULT_MATRIX,
+  formatDebuffCostTable,
   formatDeliveryKindTable,
   formatDeliveryTable,
   formatKindTable,
@@ -18,6 +20,7 @@ import {
   rowCells,
   simulateMatrix,
 } from "./report";
+import { SKILL_PRESET_IDS } from "./skills";
 
 // These tests cover how report.ts seeds, orders and summarizes runs, not the runs
 // themselves (simulate.test.ts does). A real run costs over a hundred milliseconds, so a stand-in
@@ -43,6 +46,10 @@ vi.mock("./simulate", async (importOriginal) => {
       badges: [],
       cardsSeen: Math.floor(random() * 10),
       choices: [],
+      // Each debuff lasted through 1 bump and took $2.
+      debuffCosts: Object.fromEntries(
+        Object.keys(data.debuffs).map((debuff) => [debuff, { bumpsWhile: 1, centsLost: 200 }]),
+      ) as ReturnType<typeof actual.simulateRun>["debuffCosts"],
       // Each run plans its first zone: 2 tips asked for and 1 placed.
       deliveries: [
         zoneDelivery(data, 1, data.world.zones[0]?.id as ZoneId, {
@@ -102,7 +109,9 @@ describe("simulateMatrix", () => {
   it("covers every policy, skill preset and pack of the default matrix", () => {
     const cells = matrixCells(DEFAULT_MATRIX);
 
-    expect(cells).toHaveLength(4 * 3 * 8);
+    expect(cells).toHaveLength(
+      POLICY_IDS.length * SKILL_PRESET_IDS.length * DEFAULT_MATRIX.packs.length,
+    );
     expect(
       new Set(
         cells.map(({ pack, player, policy }) => `${policy} ${JSON.stringify(player)} ${pack.name}`),
@@ -249,6 +258,21 @@ describe("simulateMatrix", () => {
     const paid = rows.map((row) => itemAt(rowCells(row), MATRIX_HEADERS.indexOf("Paid")));
     expect(new Set(paid)).toEqual(new Set(["-"]));
     expect(formatKindTable(gameData, rows).split("\n")).toHaveLength(rows.length + 1);
+    expect(formatDebuffCostTable(gameData, rows).split("\n")).toHaveLength(rows.length + 1);
+  });
+
+  it("gives each debuff's mean bumps while it lasted and cents it took, in dollars in the table", () => {
+    const [row] = simulateMatrix(gameData, 3, 2, SMALL);
+    const debuffs = Object.keys(gameData.debuffs);
+
+    expect(Object.values(row?.debuffCosts ?? {})).toEqual(
+      debuffs.map(() => ({ meanBumpsWhile: 1, meanCentsLost: 200 })),
+    );
+    const [header, line] = formatDebuffCostTable(gameData, row === undefined ? [] : [row]).split(
+      "\n",
+    );
+    const lost = header?.split(/ {2,}/).indexOf(`${debuffs[0]} lost`) ?? -1;
+    expect(line?.trim().split(/ {2,}/)[lost]).toBe("$2");
   });
 
   it("sums every run's zone plans, and gives each group as placed/planned per plan", () => {

@@ -8,14 +8,19 @@ import type { RunState } from "../state/runState";
 // less, then pay the cheapest affordable money option. alwaysHearts: always a free option.
 // alwaysPay: the cheapest money option whenever one is affordable. mixed: as heartsUnlessLow,
 // but while a free option is safe and a safe money option is affordable, pay at MIXED_PAY_SHARE,
-// drawn from the policy's stream.
-export type PolicyId = "alwaysHearts" | "alwaysPay" | "heartsUnlessLow" | "mixed";
+// drawn from the policy's stream. debuffs: a safe debuff option whenever one is offered, else
+// as mixed. noDebuffs: as mixed among the options that give no debuff while one of them is
+// safe, else as mixed among them all.
+export type PolicyId =
+  "alwaysHearts" | "alwaysPay" | "debuffs" | "heartsUnlessLow" | "mixed" | "noDebuffs";
 
 export const POLICY_IDS: readonly PolicyId[] = [
   "heartsUnlessLow",
   "alwaysHearts",
   "alwaysPay",
   "mixed",
+  "debuffs",
+  "noDebuffs",
 ];
 
 // The share of safe choices the mixed policy pays for.
@@ -52,6 +57,8 @@ export const LOW_HEARTS = 1;
 interface OptionPreview {
   readonly choice: Choice;
   readonly cost: Cents;
+  // The pack gets a debuff.
+  readonly debuffs: boolean;
   // An owner whose meter falls ends at LOW_HEARTS or less, or fires you.
   readonly endangers: boolean;
   // An owner loses hearts, or a perk forgives the loss, or the pack gets a debuff.
@@ -68,9 +75,11 @@ function previewOptions(data: ChoiceData, state: RunState, card: CardView): Opti
       const outcome = chooseOption(data, state, card, option.index);
       const debuffsGot = (run: RunState) =>
         Object.values(run.debuffsGot).reduce((sum, count) => sum + count, 0);
+      const debuffs = debuffsGot(outcome.state) > debuffsGot(state);
       return {
         choice: option.index,
         cost: option.cost,
+        debuffs,
         endangers:
           outcome.fired.length > 0 ||
           outcome.heartChanges.some(
@@ -79,7 +88,7 @@ function previewOptions(data: ChoiceData, state: RunState, card: CardView): Opti
         harms:
           outcome.heartChanges.some(
             (change) => change.after < change.before || heartsForgiven(change) > 0,
-          ) || debuffsGot(outcome.state) > debuffsGot(state),
+          ) || debuffs,
         heartsGained: outcome.heartChanges.reduce(
           (sum, change) => sum + change.after - change.before,
           0,
@@ -114,6 +123,8 @@ const mostMoney = (preview: OptionPreview) => preview.moneyDelta;
 const isFree = (preview: OptionPreview) => preview.cost === 0;
 const isPaid = (preview: OptionPreview) => preview.cost > 0;
 const isSafe = (preview: OptionPreview) => !preview.endangers;
+const givesDebuff = (preview: OptionPreview) => preview.debuffs;
+const givesNoDebuff = (preview: OptionPreview) => !preview.debuffs;
 
 // The free option that keeps the most money, then the most hearts.
 function freePick(previews: readonly OptionPreview[]): OptionPreview | undefined {
@@ -150,18 +161,36 @@ function mixed(random: Random, previews: readonly OptionPreview[]): OptionPrevie
   return chance(random, MIXED_PAY_SHARE) ? paid : free;
 }
 
+// The safe debuff option that keeps the most money, then the most hearts, whenever one is on the
+// card; otherwise as mixed.
+function debuffs(random: Random, previews: readonly OptionPreview[]): OptionPreview | undefined {
+  return (
+    best(previews.filter(givesDebuff).filter(isSafe), [mostMoney, mostHearts]) ??
+    mixed(random, previews)
+  );
+}
+
+// As mixed among the hearts and money options, those that give no debuff, while one of them is
+// safe; otherwise as mixed among every option.
+function noDebuffs(random: Random, previews: readonly OptionPreview[]): OptionPreview | undefined {
+  const others = previews.filter(givesNoDebuff);
+  return mixed(random, others.some(isSafe) ? others : previews);
+}
+
 type Policy = (random: Random, previews: readonly OptionPreview[]) => OptionPreview | undefined;
 
 const POLICIES: Readonly<Record<PolicyId, Policy>> = {
   alwaysHearts: (_, previews) => freePick(previews),
   alwaysPay: (_, previews) => alwaysPay(previews),
+  debuffs,
   heartsUnlessLow: (_, previews) => heartsUnlessLow(previews),
   mixed,
+  noDebuffs,
 };
 
 // An encounter card's choice. Every policy takes Hall pass's Skip, when offered, in place of a
 // pick that costs hearts or a debuff, and keeps it for such a card otherwise. Only the mixed
-// policy draws from random.
+// policy, and the debuffs and noDebuffs policies when they play as mixed, draw from random.
 export function chooseCardOption(
   data: ChoiceData,
   random: Random,
