@@ -71,7 +71,7 @@ Every piece is very readable, clean and not busy, judged at the size it's shown:
 - Character shading is cel: per material a light, a base and a shade, the shade a crescent along the lower-right rim that follows the form (`Grid.cel`), never a diagonal plane or per-pixel texture. Markings are a few flat patches. A face seen from the front stays clean: flat skin with a 1px shadow down its near (right) edge beside the eyes, never across the jaw or mouth (`face_disc`).
 - Effects (`fx-`) take a fixed 1px rim: plum, navy for water (`fx-splash`). `fx-heart-gain` and `fx-heart-loss` take `ui-fires`' 1px ink line inside a 1px white rim; `fx-dust` and `fx-tap` have no rim. Hazard warnings are outlined in ink.
 - Ground decals have no outline and no shadow.
-- Icons come in two kinds. Chrome glyphs on `ui-icon-button` (`icon-close`, `icon-help`, `icon-home`, `icon-logbook`, `icon-pause`, `icon-play`, `icon-settings`, `icon-sound`) are two flat tones with no outline. Content icons (`icon-gear-*`, `icon-trait-*`, `icon-zone-*` and the like) take `icon_edge`: two ramp steps darker, then on down the ramp until the outline holds 3:1 on cream and tan. A picture that fills its frame keeps a 1px clear ring for the outline.
+- Icons come in two kinds. Chrome glyphs on `ui-icon-button` (`icon-close`, `icon-help`, `icon-home`, `icon-logbook`, `icon-pause`, `icon-play`, `icon-settings`, `icon-sound`) are two flat tones with no outline. Content icons (`icon-gear-*`, `icon-trait-*`, `icon-zone-*`, `item-*`, the badges' rings and the like) take `icon_edge`: two ramp steps darker, then on down the ramp until the outline holds 3:1 on cream and tan. A picture that fills its frame keeps a 1px clear ring for the outline.
 - A gear item drawn at several sizes (`item-<gear>` at 32, `icon-gear-<gear>` at 16, `icon-gear-<gear>-20` at 20) keeps the same colours at each.
 - Sprites carry no shadow; the game draws one in the road's darker ramp colour. The bouncing ball carries its own.
 
@@ -248,7 +248,7 @@ After zones 1 to 3, over the road view dimmed as under a card: the walker cheers
 `badge-<achievement>` medals are 32×32: a ring in the tier colour around a cream face with the goal's emblem (`art/tools/badges.py`). No two badges share a motif, so all 40 read apart at 1× on the badge wall's cream panel. An emblem shows only what is in the game.
 
 - Tiers: firsts bronze, mastery silver, collection gold, legend purple with gold studs, silly pink. Legend is the one hardest badge, Legend of the Leash. Silly is the joke tier, earned by mishaps and running gags; pink marks a joke, never a rank.
-- Every ring is a base, a shade on its lower right, a light on its upper left and twelve rivets in the shade.
+- Every ring is a base, a shade on its lower right, a light on its upper left and twelve rivets in the shade. The face is flat cream with a 1px tan crescent along its lower right, so the emblem stands on one quiet colour.
 - `locked` is in the neutral greys: an ndslate ring (ink shade, nslate light), an ngrey face and the emblem a two-tone ink and ndslate silhouette under a small amber padlock, so a locked badge never reads as silver.
 
 ## Animation

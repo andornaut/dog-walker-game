@@ -4,7 +4,8 @@
 badge-<achievement>: 32x32 medals, rimmed by category (firsts bronze, mastery
 silver, collection gold, legend purple with gold studs for the one hardest badge,
 silly pink), each with its own emblem for its goal: no two share a motif, so each
-reads apart from the rest at 1x on the badge wall.
+reads apart from the rest at 1x on the badge wall. The ring's outline takes icon_edge, so it holds
+3:1 on the wall's cream; the face is flat cream with a 1px tan crescent along its lower right.
 Tags: earned (in colour) and locked (in the neutral greys of locked UI: an
 ndslate ring, an ngrey face, the emblem as a two-tone ink and ndslate silhouette,
 a small padlock), dark enough that it never reads as silver. Where an emblem's edge holds under 3:1 against the cream and tan
@@ -33,7 +34,7 @@ import random
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import HEART, K, Grid, bitmap, contrast, main  # noqa: E402
+from pixel import HEART, K, Grid, bitmap, contrast, icon_edge, main  # noqa: E402
 from road import SQUIRREL_FUR  # noqa: E402
 
 RIMS = {"firsts": ("ochre", "rust", "tan"), "mastery": ("lgrey", "grey", "white"),
@@ -321,8 +322,6 @@ def _(g):
             for x, ch in enumerate(row):
                 if ch == "x":
                     g.p(cx - 4 + x, cy - 4 + y, "dbrown")
-    for x, y in ((22, 19), (23, 20), (8, 9), (16, 7), (25, 17)):
-        g.p(x, y, "brown")
 
 
 # A dog side on at full stretch, ears streaming back: B body, S belly and legs, E ear, N nose, I eye, T tail.
@@ -390,7 +389,7 @@ BONE_HEART = ["r.r", "rrd", ".d."]
 
 @icon("snack-attack")
 def _(g):
-    """A pile of the treat pickup's white bones in their crumbs, each with its red heart."""
+    """A pile of the treat pickup's white bones, each with its red heart."""
     for x0, y0 in ((6, 18), (16, 18), (11, 11)):
         bitmap(g, x0, y0, BONE, {"x": "white"})
         for y, row in enumerate(BONE):
@@ -398,8 +397,6 @@ def _(g):
                 if ch == "x" and (y == len(BONE) - 1 or BONE[y + 1][x] != "x"):
                     g.p(x0 + x, y0 + y, "lgrey")
         bitmap(g, x0 + 4, y0 + 2, BONE_HEART, {"r": "red", "d": "dred"})
-    for x, y in ((22, 12), (24, 15), (8, 15), (6, 25), (11, 26), (20, 26), (25, 25)):
-        g.p(x, y, "brown")
 
 
 # ---------- the second set of badges ----------
@@ -671,8 +668,8 @@ def _(g):
 
 @icon("sugar-rush")
 def _(g):
-    """A dropped cone tipped on its side, its waffle in an ochre and rust grid, its pink scoop rolled out
-    onto a melting splat, speed lines streaking over it where the pack zoomed off."""
+    """A dropped cone tipped on its side, its waffle an ochre cone crossed by rust lines 4px apart, its pink
+    scoop rolled out onto a melting splat, speed lines streaking over it where the pack zoomed off."""
     g.ell(20, 22, 6.5, 1.6, "mauve")
     for x, h in ((16, 2), (24, 1)):
         g.rect(x, 23, 1, h, "mauve")
@@ -681,10 +678,8 @@ def _(g):
     for y in range(32):
         for x in range(32):
             if cone.px[y][x]:
-                g.p(x, y, "rust" if (x + y) % 3 == 0 or (x - y) % 3 == 0 else "ochre")
+                g.p(x, y, "rust" if (x + y) % 4 == 0 or (x - y) % 4 == 0 else "ochre")
     g.ell(19.5, 16, 4.5, 4.5, "pink", "mauve", "white")
-    for x, y in ((19, 13), (22, 16), (18, 18)):
-        g.p(x, y, "red")
     for y, x0, w in ((8, 8, 7), (10, 6, 5)):
         g.rect(x0, y, w, 1, "sky")
 
@@ -770,16 +765,27 @@ BADGES = {
 }
 
 
+def face(g):
+    """The medal's flat cream face, r 11, with a 1px tan crescent along its lower-right rim where the ring's
+    lip shades it, so the emblem stands on one quiet colour."""
+    for y in range(32):
+        for x in range(32):
+            if math.hypot(x + 0.5 - 16, y + 0.5 - 16) <= 11:
+                g.p(x, y, "tan" if math.hypot(x + 1.5 - 16, y + 1.5 - 16) > 11 else "cream")
+
+
 def badge(name, locked=False):
     rim, rim_sh, rim_li = RIMS[BADGES[name]]
     g = Grid(32, 32)
+    # the ring's outline holds 3:1 on the badge wall's cream panel, its white and yellow lights included
+    g.edge = icon_edge
     g.ell(16, 16, 14.5, 14.5, rim, rim_sh, rim_li)
     # twelve studs round the ring, the right and bottom ones held 1px inside its outer edge (column and row
     # 29) as the left and top ones are, so none breaks the rim
     for a in range(0, 360, 30):
         x, y = (min(int(16 + f(math.radians(a)) * 13), 28) for f in (math.cos, math.sin))
         g.p(x, y, STUDS.get(BADGES[name], rim_sh))
-    g.ell(16, 16, 11, 11, "cream", "tan")
+    face(g)
     disc = Grid(32, 32)
     disc.ell(16, 16, 11, 11, "cream")
     art = Grid(32, 32)
