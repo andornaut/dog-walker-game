@@ -9,6 +9,7 @@ import { hasLeftRoad, laneAt, type MoverPath, moverPlace, moverY } from "../runn
 import { moverOutcomes } from "../runner/outcomes";
 import { contactWindow, type PullEvent, type Pulls } from "../runner/pulls";
 import {
+  isObstacleCategory,
   isPullObstacle,
   itemCategory,
   laneMoveSeconds,
@@ -542,7 +543,7 @@ function botView(
     const category = itemCategory(data, item.kind);
     if (item.mover !== undefined) {
       const paths = pathsRead(bot, road, item);
-      if (category === "minor" || category === "obstacle") {
+      if (isObstacleCategory(category)) {
         hazards.push(...moverHazards(road, horizon, paths, item));
       } else {
         prizes.push(...moverPrizes(road, horizon, PRIZE_VALUES[category], paths, item));
@@ -554,7 +555,7 @@ function botView(
       continue;
     }
     const lanes = itemLanes(item);
-    if (category === "minor" || category === "obstacle") {
+    if (isObstacleCategory(category)) {
       hazards.push({ from: start - MARGIN_SECONDS, lanes, to: end + MARGIN_SECONDS });
     } else {
       const reach =

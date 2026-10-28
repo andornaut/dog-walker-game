@@ -323,13 +323,17 @@ export function footprintOf(
 
 type ObstacleKind = EncounterId | MinorObstacleId;
 
+// Whether a category is an obstacle's, minor or not.
+export function isObstacleCategory(category: ItemCategory): category is "minor" | "obstacle" {
+  return category === "minor" || category === "obstacle";
+}
+
 // Obstacles, minor or not, which hit as they are drawn.
 export function isObstacle(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   kind: WalkItemKind,
 ): kind is ObstacleKind {
-  const category = itemCategory(data, kind);
-  return category === "minor" || category === "obstacle";
+  return isObstacleCategory(itemCategory(data, kind));
 }
 
 // How an obstacle that is an encounter resolves, or null for anything else.
