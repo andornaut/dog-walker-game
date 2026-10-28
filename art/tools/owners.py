@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Draw the owners' and walkers' faces and build their Aseprite sources and exports.
 
-face-owner-<dog>: 32x32, chibi, front view, in Endesga 32 with an ink outer line closed under the
+face-owner-<dog>: 32x32, chibi, front view, in the house palette with an ink outer line closed under the
 bust, cel shaded, the face flat with a 1px shadow down its near edge. Tags: happy, neutral, upset,
 fired (angry, shown as the owner fires you) and worried (at 1 heart, while their dog's card pulses).
 Each owner's job shows in their hair and accessories, and their temperament in how far the
-expressions go.
+expressions go. Left and right are the viewer's.
 
 face-owner-<dog>-20: 20x20, the same owner and tags for the walk's dog card. The hair, clothes and props
 are the 32x32 drawing rasterized at 20x20 by minis.Mini, with its own ink line; the expression is drawn
@@ -208,10 +208,10 @@ def ryan(mood):
 
 def ralph(mood):
     """Retired pilot, fussy: big and gruff, broad shoulders and a strong stubbled jaw, greying sandy-blonde hair
-    pulled back tight into a low ponytail behind his right shoulder, heavy brown brows, a dark leather flight
+    pulled back tight into a low ponytail behind the left shoulder, heavy brown brows, a dark leather flight
     jacket with a cream fleece collar over a white shirt, and gold wings pinned on the chest."""
     g = face()
-    # the ponytail behind the head, hanging from the nape down behind the right shoulder, with a dbrown tie
+    # the ponytail behind the head, hanging from the nape down behind the left shoulder, with a dbrown tie
     for x, y, r, c in ((8, 20.5, 1.8, "tan"), (6.8, 23, 1.7, "tan"), (5.6, 25.5, 1.4, "tan"),
                        (4.8, 27.5, 1, "brown")):
         g.ell(x, y, r, r + 0.3, c)
@@ -308,7 +308,7 @@ def clare(mood):
     g.rect(22, 11, 2, 8, "plum")
     for x, y, h in ((11, 7, 2), (15, 6, 2)):
         g.rect(x, y, 1, h, "brown")
-    # the pink clip above her right temple
+    # the pink clip above the right temple
     g.rect(20, 9, 3, 1, "pink")
     g.p(21, 10, "mauve")
     expression(g, mood, feat="ink", blush="rust", lashes=True, whites=True)
@@ -401,7 +401,7 @@ def jason(mood):
     olive work polo with a moss collar, its placket open at the neck, and an orange logo on the chest."""
     g = face()
     base(g, "skin2", "brown", "olive", "dolive")
-    # the polo's collar points either side of the placket, and the logo on the left of the chest
+    # the polo's collar points either side of the placket, and the logo on the right of the chest
     g.tri((11, 26), (16, 27), (13, 29), "moss")
     g.tri((21, 26), (16, 27), (19, 29), "moss")
     g.rect(16, 28, 1, 3, "dolive")
@@ -415,7 +415,7 @@ def jason(mood):
         g.rect(22, 12, 3, 5, "plum")
         g.rect(7, 12, 1, 3, "brown")
     # the cap: a low crown hugging the head, a button on top, a seam either side and a moss leaf on its front
-    # panel, over a flat bill, a darker band across the brow that juts out past the head to his right
+    # panel, over a flat bill, a darker band across the brow that juts out past the head on the left
     g.cel(16, 10.5, 8.5, 4.5, "orange", "rust", "amber")
     g.rect(15, 6, 2, 1, "rust")
     g.p(11, 8, "rust")

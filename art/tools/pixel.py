@@ -219,8 +219,8 @@ def edged(g, edge=road_edge, close=False):
 
 
 def hairline(g, hair, skin, line):
-    """Recolour line every hair pixel with skin directly below it: the hair's lower edge, where a fill close to
-    the skin's tone would otherwise run into the face. On a minis.Mini it is 1px of the drawn grid."""
+    """Recolour to line every hair pixel with skin directly below it: the hair's lower edge, where a fill close
+    to the skin's tone would otherwise run into the face. On a minis.Mini it is 1px of the drawn grid."""
     px = raster(g)
     hair, skin = K[hair], K[skin]
     edge = [(x, y) for y in range(px.h - 1) for x in range(px.w) if px.px[y][x] == hair and px.px[y + 1][x] == skin]

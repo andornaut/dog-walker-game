@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Draw the owners standing, full body, and build their Aseprite sources and exports.
 
-owner-<dog>: 32x48, chibi, front view, in Endesga 32 with the road outline and
-the lit rim, like the forced-stop people in road.py. Each owner's hair, skin
+owner-<dog>: 32x48, chibi, front view, in the house palette with the road outline
+and the lit rim, like the forced-stop people in road.py. Each owner's hair, skin
 and clothes match their face-owner-<dog> portrait in owners.py, and their job
 shows in a prop held in the left hand. They stand at the gate on the
 start screen before the first walk and wave the pack home on the end screen.
 Tags: idle (2 frames at 400ms: they breathe, the body 1px higher on the second
 with the feet planted) and wave (2 frames at 300ms: the right arm raised, the
-hand swinging out and back).
+hand swinging out and back). Left and right are the viewer's.
 
 Usage:
   people.py preview OUT.png   every frame on the zone roads, scaled up
@@ -184,7 +184,7 @@ def ryan_top(wave):
 
 def ralph_top(wave):
     """Ralph, retired pilot, fussy: big and gruff, a strong stubbled jaw, greying sandy-blonde hair pulled back
-    tight into a low ponytail behind his right shoulder, heavy brown brows, a dark leather flight jacket with a
+    tight into a low ponytail behind the left shoulder, heavy brown brows, a dark leather flight jacket with a
     cream fleece collar and gold wings, open over a white shirt and a round belly, slate trousers, and a red
     model plane held nose up on his left fist."""
     def top(g, b):
@@ -202,7 +202,7 @@ def ralph_top(wave):
         g.rect(18, 27 + b, 5, 1, "amber")
         g.p(20, 27 + b, "yellow")
         g.p(20, 28 + b, "amber")
-        # the ponytail behind the head, hanging from the nape down behind the right shoulder, with a dbrown tie
+        # the ponytail behind the head, hanging from the nape down behind the left shoulder, with a dbrown tie
         for x, y, r, c in ((7.8, 16.5, 1.5, "tan"), (6.6, 18.7, 1.4, "tan"), (5.5, 20.7, 1.1, "brown")):
             g.ell(x, y + b, r, r + 0.3, c)
         g.p(6, 18 + b, "lgrey")
@@ -472,7 +472,7 @@ def jason_top(wave):
         g.rect(19, 33 + b, 3, 4, "stone")
         g.rect(16, 34 + b, 1, 3, "stone")
         torso(g, b, "olive", "dolive")
-        # the polo's collar points either side of the placket, and the logo on the left of the chest
+        # the polo's collar points either side of the placket, and the logo on the right of the chest
         g.tri((12, 21 + b), (16, 21 + b), (14, 24 + b), "moss")
         g.tri((16, 21 + b), (20, 21 + b), (18, 24 + b), "moss")
         g.rect(16, 23 + b, 1, 3, "dolive")
@@ -497,7 +497,7 @@ def jason_top(wave):
         g.rect(22, 9 + b, 3, 4, "plum")
         g.rect(7, 9 + b, 1, 3, "brown")
         # the cap: a low crown hugging the head, a button on top and a moss leaf on its front panel, over a flat
-        # bill, a darker band across the brow that juts out past the head to his right, as on his face
+        # bill, a darker band across the brow that juts out past the head on the left, as on his face
         g.cel(16, 7.5 + b, 8.5, 4, "orange", "rust", "amber")
         g.rect(15, 3 + b, 2, 1, "rust")
         g.rect(15, 5 + b, 2, 2, "moss")
