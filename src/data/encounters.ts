@@ -106,7 +106,7 @@ export const ENCOUNTERS = {
   },
   greenBin: {
     hitLabel: "SPLAT!",
-    hitWord: "SQUISH!",
+    hitWord: "GLOP!",
     kind: "obstacle",
     name: "Green bin spill",
     resolution: {
