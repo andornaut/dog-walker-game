@@ -355,21 +355,22 @@ export class RunMoments {
     this.sayQuips(step.fired.map((dog): QuipCue => ({ dog, moment: "fired" })));
     this.fired(step.fired, step.walk.run);
     // A lucky find's money changes hands at its pickup; a gain's label pops by the cash
-    // (changeLabels), and its popup and strip line show the find.
+    // (changeLabels), and its popup over the pickup and its strip line show the find.
     for (const { encounter, item, outcome } of step.instants) {
       const changes = outcomeChanges(outcome);
-      this.addChanges(this.itemPoint(item, pack), changes);
-      showInstantPopup(this.scene, encounter, this.deps.still());
+      const at = this.itemPoint(item, pack);
+      this.addChanges(at, changes);
+      showInstantPopup(this.scene, encounter, at, this.deps.still());
       this.say(luckyLine(gameData, encounter, changes));
       this.afterOutcome(outcome);
       this.hint({ kind: "luckyFind" });
     }
-    // A gear drop pops its art over the road and glints the found well, whose icon it takes.
-    for (const { gear, replaced } of step.found) {
-      showGearPopup(this.scene, gear, this.deps.still());
+    // A gear drop pops its art over the pickup and glints the found well, whose icon it takes.
+    for (const { gear, item, replaced } of step.found) {
+      showGearPopup(this.scene, gear, this.itemPoint(item, pack), this.deps.still());
       this.say(gearFoundLine(gameData, gear, replaced));
-      const item: EffectItem = { found: true, gear, kind: "gear" };
-      this.scene.events.emit(BUFF_GLINT_EVENT, item);
+      const well: EffectItem = { found: true, gear, kind: "gear" };
+      this.scene.events.emit(BUFF_GLINT_EVENT, well);
     }
     for (const hit of step.encounterHits) {
       const { kind } = gameData.encounters[hit.encounter];

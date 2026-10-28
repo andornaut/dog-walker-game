@@ -43,3 +43,19 @@ export function ringRects(thickness: number, rect: Rect): Rect[] {
     { height, width: thickness, x: x + width - thickness, y },
   ];
 }
+
+// A rect size big, centred on x with its bottom at bottom, moved the least to lie inside bounds
+// (its top-left inside them where it is bigger than they are).
+export function rectAboveIn(
+  bounds: Rect,
+  at: { bottom: number; x: number },
+  size: Pick<Rect, "height" | "width">,
+): Rect {
+  const keep = (start: number, length: number, from: number, room: number) =>
+    Math.max(from, Math.min(start, from + room - length));
+  return {
+    ...size,
+    x: keep(Math.round(at.x - size.width / 2), size.width, bounds.x, bounds.width),
+    y: keep(at.bottom - size.height, size.height, bounds.y, bounds.height),
+  };
+}

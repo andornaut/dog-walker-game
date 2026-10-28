@@ -2,8 +2,10 @@ import type { GameObjects, Scene } from "phaser";
 
 import { gearIconKey } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
+import { SCREEN_CONFIG } from "../../data/screen";
 import type { EncounterId, GearId } from "../../data/types";
 import { zoneBannerHeading } from "../../hud/zoneCelebration";
+import { type Point, rectAboveIn } from "../../lib/rect";
 import { currentZone } from "../../rules/route";
 import type { RunState } from "../../state/runState";
 import { addDisplayText } from "../../ui/phaser/displayText";
@@ -11,10 +13,11 @@ import { fillRect } from "../../ui/phaser/draw";
 import { PALETTE } from "../../ui/phaser/palette";
 import { addPixelText } from "../../ui/phaser/pixelText";
 import { fadeAway } from "../uiKit";
-import { DEPTH, LAYOUT, PROJECTION } from "./stage";
+import { DEPTH, LAYOUT } from "./stage";
 
-// An instant lucky find's art pops up over the road, then floats up and fades.
-const POPUP = { artY: 120, fadeMs: 1800, rise: 16 };
+// A pickup's art pops up over where it was grabbed, its bottom lift pixels over that point, then
+// floats rise pixels up as it fades.
+const POPUP = { fadeMs: 1800, lift: 4, rise: 16 };
 const GEAR_POPUP_SCALE = 2;
 const BANNER = { holdMs: 1800, key: "ui-zone-banner", slideMs: 300, width: 248, y: 70 };
 
@@ -23,34 +26,52 @@ export function zoneBannerMs(still: boolean): number {
   return (still ? 0 : BANNER.slideMs) + BANNER.holdMs + BANNER.slideMs;
 }
 
-// An instant lucky find opens no card: its art pops up over the road, then floats up and
-// fades while the walk goes on. With reduced motion it fades in place.
-export function showInstantPopup(scene: Scene, encounter: EncounterId, still: boolean): void {
+// An instant lucky find opens no card: its art pops up over where it was grabbed, at, then
+// floats up and fades while the walk goes on. With reduced motion it fades in place.
+export function showInstantPopup(
+  scene: Scene,
+  encounter: EncounterId,
+  at: Point,
+  still: boolean,
+): void {
   const { resolution } = gameData.encounters[encounter];
   if (resolution.kind !== "instant" || !scene.textures.exists(resolution.art)) {
     return;
   }
-  popUpArt(scene, resolution.art, 1, still);
+  popUpArt(scene, { at, key: resolution.art, scale: 1 }, still);
 }
 
 // A gear drop grabbed pops up as a lucky find does: the item's shop art at 2x, as the explain
 // card draws it.
-export function showGearPopup(scene: Scene, gear: GearId, still: boolean): void {
+export function showGearPopup(scene: Scene, gear: GearId, at: Point, still: boolean): void {
   const key = gearIconKey(gear);
   if (!scene.textures.exists(key)) {
     return;
   }
-  popUpArt(scene, key, GEAR_POPUP_SCALE, still);
+  popUpArt(scene, { at, key, scale: GEAR_POPUP_SCALE }, still);
 }
 
-// Art at scale over the road's centre, floating up as it fades, or fading in place when still.
-function popUpArt(scene: Scene, key: string, scale: number, still: boolean): void {
-  const art = scene.add
-    .image(PROJECTION.centreX, LAYOUT.road.y + POPUP.artY, key)
-    .setOrigin(0.5, 0)
-    .setScale(scale)
+// Art at scale centred over at, its bottom POPUP.lift over it, kept on screen as it floats up as
+// it fades, or as it fades in place when still.
+function popUpArt(
+  scene: Scene,
+  art: { at: Point; key: string; scale: number },
+  still: boolean,
+): void {
+  const rise = still ? 0 : POPUP.rise;
+  const image = scene.add
+    .image(0, 0, art.key)
+    .setOrigin(0)
+    .setScale(art.scale)
     .setDepth(DEPTH.popup);
-  fadeAway(scene, [art], { ms: POPUP.fadeMs, rise: still ? 0 : POPUP.rise });
+  const { height, width } = SCREEN_CONFIG;
+  const place = rectAboveIn(
+    { height: height - rise, width, x: 0, y: rise },
+    { bottom: Math.round(art.at.y) - POPUP.lift, x: art.at.x },
+    { height: image.displayHeight, width: image.displayWidth },
+  );
+  image.setPosition(place.x, place.y);
+  fadeAway(scene, [image], { ms: POPUP.fadeMs, rise });
 }
 
 // The zone banner's heading ("Toronto, neighbourhood 2") and the zone's name, slid in over

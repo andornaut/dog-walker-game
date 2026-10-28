@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { containsPoint, insetRect, rectsOverlap } from "./rect";
+import { containsPoint, insetRect, rectAboveIn, rectsOverlap } from "./rect";
 
 describe("containsPoint", () => {
   const rect = { height: 20, width: 10, x: 5, y: 40 };
@@ -42,6 +42,30 @@ describe("insetRect", () => {
       width: 70,
       x: 5,
       y: 45,
+    });
+  });
+});
+
+describe("rectAboveIn", () => {
+  const bounds = { height: 100, width: 60, x: 10, y: 20 };
+  const size = { height: 10, width: 20 };
+
+  it.each([
+    ["centred over the point", { bottom: 60, x: 40 }, { x: 30, y: 50 }],
+    ["moved in from the left edge", { bottom: 60, x: 12 }, { x: 10, y: 50 }],
+    ["moved in from the right edge", { bottom: 60, x: 68 }, { x: 50, y: 50 }],
+    ["moved down from the top edge", { bottom: 25, x: 40 }, { x: 30, y: 20 }],
+    ["moved up from the bottom edge", { bottom: 130, x: 40 }, { x: 30, y: 110 }],
+  ])("lies %s", (_, at, place) => {
+    expect(rectAboveIn(bounds, at, size)).toEqual({ ...size, ...place });
+  });
+
+  it("keeps its top-left inside bounds smaller than it", () => {
+    expect(rectAboveIn(bounds, { bottom: 60, x: 40 }, { height: 200, width: 100 })).toEqual({
+      height: 200,
+      width: 100,
+      x: 10,
+      y: 20,
     });
   });
 });
