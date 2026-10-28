@@ -1,0 +1,96 @@
+{ "frames": {
+   "keg-dolly-worker 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 160
+   },
+   "keg-dolly-worker 1.aseprite": {
+    "frame": { "x": 48, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 160
+   },
+   "keg-dolly-worker 2.aseprite": {
+    "frame": { "x": 96, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 160
+   },
+   "keg-dolly-worker 3.aseprite": {
+    "frame": { "x": 144, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 160
+   },
+   "keg-dolly-worker 4.aseprite": {
+    "frame": { "x": 192, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 400
+   },
+   "keg-dolly-worker 5.aseprite": {
+    "frame": { "x": 240, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 400
+   },
+   "keg-dolly-worker 6.aseprite": {
+    "frame": { "x": 288, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 200
+   },
+   "keg-dolly-worker 7.aseprite": {
+    "frame": { "x": 336, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 200
+   },
+   "keg-dolly-worker 8.aseprite": {
+    "frame": { "x": 384, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 200
+   },
+   "keg-dolly-worker 9.aseprite": {
+    "frame": { "x": 432, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 200
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "keg-dolly-worker.png",
+  "format": "RGBA8888",
+  "size": { "w": 480, "h": 72 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "push", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "idle", "from": 4, "to": 5, "direction": "forward" },
+   { "name": "cue", "from": 6, "to": 9, "direction": "forward" }
+  ]
+ }
+}

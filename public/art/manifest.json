@@ -6413,6 +6413,87 @@
       }
     },
     {
+      "key": "keg-dolly-worker",
+      "png": "sprites/keg-dolly-worker.png",
+      "json": "sprites/keg-dolly-worker.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "keg-dolly-worker@50",
+      "png": "sprites/keg-dolly-worker@50.png",
+      "json": "sprites/keg-dolly-worker@50.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "keg-dolly-worker@56",
+      "png": "sprites/keg-dolly-worker@56.png",
+      "json": "sprites/keg-dolly-worker@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "keg-dolly-worker@62",
+      "png": "sprites/keg-dolly-worker@62.png",
+      "json": "sprites/keg-dolly-worker@62.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "keg-dolly-worker@69",
+      "png": "sprites/keg-dolly-worker@69.png",
+      "json": "sprites/keg-dolly-worker@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "keg-dolly-worker@75",
+      "png": "sprites/keg-dolly-worker@75.png",
+      "json": "sprites/keg-dolly-worker@75.json",
+      "anchor": {
+        "feetY": 51,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "keg-dolly-worker@81",
+      "png": "sprites/keg-dolly-worker@81.png",
+      "json": "sprites/keg-dolly-worker@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "keg-dolly-worker@88",
+      "png": "sprites/keg-dolly-worker@88.png",
+      "json": "sprites/keg-dolly-worker@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "keg-dolly-worker@94",
+      "png": "sprites/keg-dolly-worker@94.png",
+      "json": "sprites/keg-dolly-worker@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 41
+      }
+    },
+    {
       "key": "kid-on-bike",
       "png": "sprites/kid-on-bike.png",
       "json": "sprites/kid-on-bike.json",
