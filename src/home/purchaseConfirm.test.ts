@@ -93,14 +93,11 @@ describe("answerPurchase", () => {
   });
 });
 
+// One key of each answer: the keyBindings tests check every confirm and pause key.
 describe("keyAnswer", () => {
   it.each([
     ["Enter", "buy"],
-    [" ", "buy"],
     ["Escape", "cancel"],
-    ["p", "cancel"],
-    ["P", "cancel"],
-    ["ArrowLeft", undefined],
     ["b", undefined],
   ] as const)("answers %j with %j", (key, choice) => {
     expect(keyAnswer(key)).toBe(choice);
