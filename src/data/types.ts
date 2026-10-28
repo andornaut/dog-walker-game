@@ -63,7 +63,7 @@ type CardOptionIdOf<Id extends EncounterId> = (typeof ENCOUNTERS)[Id]["resolutio
   : never;
 
 // An option on an encounter's card, by its encounter and its id.
-export type OptionPick = {
+type OptionPick = {
   [Id in EncounterId]: [CardOptionIdOf<Id>] extends [never]
     ? never
     : { readonly encounter: Id; readonly option: CardOptionIdOf<Id> };
@@ -336,30 +336,30 @@ export interface MoveCount {
 
 // A dart's tilt, drawn per dart from min to max: above 0 it comes down the road faster than the
 // road, below 0 slower, at 0 with it.
-export interface Tilt {
+interface Tilt {
   readonly max: number;
   readonly min: number;
 }
 
 // How an obstacle moves when it comes as a mover, its first move after a cue
 // seconds.moverWarningSeconds long and each later one with no cue unless its kind cues each, and
-// only while the mover is
-// still ahead of the pack's rows. A stepper's or hopper's later moves run back to back. approach:
-// steps steps toward the pack, each to the spot a lane to either side, a row down or diagonally
-// down that is nearest the pack as the step is chosen, seconds.moverStepSeconds each; the first's
-// cue seconds.approachFirstDelayMin to approachFirstDelayMax after it is wholly on the road, each
-// later one, with no cue of its own, once the step before has ended and the road left between it
-// and the pack is multipliers.approachSecondRoadShareMin to Max of the road's length. dart: across
-// the road at counts.dartLanesPerSecond, coming down it at 1 + tilt of the road's speed meanwhile,
-// its tilt drawn per dart from its range cut to the steepest the zone's pace leaves a start for,
-// setting off multipliers.dartStartRoadShareMin to Max of the road ahead of the pack, drawn per
-// dart and never so low that the pack has less than seconds.pathReactionMargin after its cue (above
-// Max for a steep enough tilt), nor so high that its cue is off the road; one that has crossed by
-// the time it reaches the pack's rows passes harmlessly. A dart turns back at turnBackShare of its
-// kind, drawn per dart: with no cue, once it has crossed multipliers.dartTurnAtShareMin to Max of
-// the road, drawn per dart, it crosses the whole road back the other way at its tilt. A dart stops
-// at stopShare of its kind instead, drawn with the same draw, the two shares adding up to at most
-// 1: with no cue, it stops in the lane counts.dartStopLanesMin to Max lanes from the edge it enters
+// only while the mover is still ahead of the pack's rows. A stepper's or hopper's later moves run
+// back to back. approach: steps steps toward the pack, each to the spot a lane to either side, a
+// row down or diagonally down that is nearest the pack as the step is chosen,
+// seconds.moverStepSeconds each; the first's cue seconds.approachFirstDelayMin to
+// approachFirstDelayMax after it is wholly on the road, each later one, with no cue of its own,
+// once the step before has ended and the road left between it and the pack is
+// multipliers.approachSecondRoadShareMin to Max of the road's length. dart: across the road at
+// counts.dartLanesPerSecond, coming down it at 1 + tilt of the road's speed meanwhile, its tilt
+// drawn per dart from its range cut to the steepest the zone's pace leaves a start for, setting off
+// multipliers.dartStartRoadShareMin to Max of the road ahead of the pack, drawn per dart and never
+// so low that the pack has less than seconds.pathReactionMargin after its cue (above Max for a
+// steep enough tilt), nor so high that its cue is off the road; one that has crossed by the time it
+// reaches the pack's rows passes harmlessly. A dart turns back at turnBackShare of its kind, drawn
+// per dart: with no cue, once it has crossed multipliers.dartTurnAtShareMin to Max of the road,
+// drawn per dart, it crosses the whole road back the other way at its tilt. A dart stops at
+// stopShare of its kind instead, drawn with the same draw, the two shares adding up to at most 1:
+// with no cue, it stops in the lane counts.dartStopLanesMin to Max lanes from the edge it enters
 // from, drawn per dart, and stands there, coming down the road with it, until it scrolls off; past
 // the road's far edge, it crosses instead. A dart that stops never turns back. inLane: down its
 // lane at factor of the road's speed, above 1 toward the pack, below 1 away. hop: times jumps, each
@@ -371,24 +371,23 @@ export interface Tilt {
 // across the road, and at most most rows up the road. step: steps spots, each a lane to either side
 // or a row toward or away, seconds.moverStepSeconds each.
 // bounce: hops hops a lane to one side and then back, strictly left and right in turn, the first
-// either way, seconds.moverHopSeconds each, each after a cue pauseSeconds long (the sign
-// spinner's spin). dive: across the road at speed of counts.dartLanesPerSecond, tilted as a
-// dart is, landing a lane short of the lane counts.dartStopLanesMin to Max lanes from the edge it
-// enters from, drawn per dive, then sliding that last lane at slide of its speed and staying down
-// there, coming down the road with it; it never turns back and never stops on the verge. follow:
-// steps steps a lane to either side as one block, seconds.moverStepSeconds each, each after a cue
-// pauseSeconds long (the leader's signal). stopAndGo: stops + 1 pushes down its lane at factor of
-// the road's speed, goSeconds each, standing still on the road for stopSeconds between them, each
-// push after a cue. stopAndGoAcross: across the road level with it at speed of
-// counts.dartLanesPerSecond, set off as a dart is, standing still on the road for stopSeconds once
-// with its lanes in the middle of the road, cued again before it sets off once more; it never turns
-// back or stops for good. sway: times times a step a lane to one side and back, rocking between two
-// lanes, seconds.moverStepSeconds each, pausing pauseSeconds after every step. merge: down its
-// lane at factor of the road's speed, as an in-lane mover, then once its travel down the road is
-// mergeAt of the way to the pack's rows, after a cue, a lane to one side with room over
-// mergeSeconds, and on down that lane; it merges once, and never once it has reached the pack's
-// rows. A cue at least
-// seconds.moverWarningSeconds long precedes each move that has one.
+// either way, seconds.moverHopSeconds each, each after a cue pauseSeconds long (the sign spinner's
+// spin). dive: across the road at speed of counts.dartLanesPerSecond, tilted as a dart is, landing
+// a lane short of the lane counts.dartStopLanesMin to Max lanes from the edge it enters from, drawn
+// per dive, then sliding that last lane at slide of its speed and staying down there, coming down
+// the road with it; it never turns back and never stops on the verge. follow: steps steps a lane to
+// either side as one block, seconds.moverStepSeconds each, each after a cue pauseSeconds long (the
+// leader's signal). stopAndGo: stops + 1 pushes down its lane at factor of the road's speed,
+// goSeconds each, standing still on the road for stopSeconds between them, each push after a cue.
+// stopAndGoAcross: across the road level with it at speed of counts.dartLanesPerSecond, set off as
+// a dart is, standing still on the road for stopSeconds once with its lanes in the middle of the
+// road, cued again before it sets off once more; it never turns back or stops for good. sway: times
+// times a step a lane to one side and back, rocking between two lanes, seconds.moverStepSeconds
+// each, pausing pauseSeconds after every step. merge: down its lane at factor of the road's speed,
+// as an in-lane mover, then once its travel down the road is mergeAt of the way to the pack's rows,
+// after a cue, a lane to one side with room over mergeSeconds, and on down that lane; it merges
+// once, and never once it has reached the pack's rows. A cue at least seconds.moverWarningSeconds
+// long precedes each move that has one.
 // The archetypes: dash and swoop are dart (a swoop has a tilt or a turn back), wander is step,
 // stalk is approach, cruise is inLane, stop-and-go is stopAndGo down a lane and stopAndGoAcross
 // across the road, and hop, bounce, dive, follow (follow the leader), merge and sway are their own
@@ -434,6 +433,9 @@ export type Movement =
   | { readonly kind: "sway"; readonly pauseSeconds: number; readonly times: MoveCount };
 export type MovementKind = Movement["kind"];
 
+// The zones a neighbourhood-only obstacle appears in, by id, at least one.
+type NeighbourhoodZones = readonly [string, ...string[]];
+
 // "obstacle": hit by accident. A card obstacle opens a card for the whole pack, with hitLabel
 // shown large as it hits; a contact obstacle applies its effects as it is touched; a pull
 // obstacle does nothing when touched. An obstacle the pack is immune to is harmless. "lucky": a
@@ -442,9 +444,6 @@ export type MovementKind = Movement["kind"];
 // as it moves, never something the pack steers around. hitWord is the comic word drawn in
 // font-comic over its hit burst: A to Z, ! ? - and space. An obstacle with zones appears only
 // in those zones: weighted in each and 0 in every other.
-// The zones a neighbourhood-only obstacle appears in, by id, at least one.
-type NeighbourhoodZones = readonly [string, ...string[]];
-
 export type Encounter = {
   readonly name: string;
 } & (
@@ -511,8 +510,6 @@ export interface Gear {
 // most one dog per owned slot.
 export type DogSlot = Unlock;
 
-// "start": walks from the first run; "finishZone": unlocked the first time any walk finishes
-// its zone-th zone, counting from 1.
 // A walker walks from the start, or unlocks the first time a walk finishes zone.
 type WalkerUnlock =
   { readonly unlock: "finishZone"; readonly zone: ZoneId } | { readonly unlock: "start" };
@@ -608,10 +605,10 @@ export interface World {
   readonly zones: readonly [Zone, ...Zone[]];
 }
 
-// One page of the "How to walk" help screen, shown in list order.
 // The help pages' pictures of the walk screen, each drawn by the game.
 export type HelpPictureId = "cards" | "lanes" | "owners" | "pickups" | "pulls" | "zones";
 
+// One page of the "How to walk" help screen, shown in list order.
 export interface HelpPage {
   // The picture the page shows.
   readonly art: HelpPictureId;
@@ -1017,7 +1014,6 @@ export interface MenuText {
 // What makes an owner speak: a choice that raised or lowered their hearts, firing you, or
 // the player picking their dog on the home screen.
 export type QuipMoment = "fired" | "happier" | "parting" | "upset";
-// One owner's lines, two per moment.
 // Two or more lines per moment, one drawn at random.
 export type Quips = Readonly<Record<QuipMoment, readonly [string, string, ...string[]]>>;
 
