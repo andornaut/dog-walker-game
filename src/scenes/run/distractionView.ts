@@ -5,7 +5,7 @@ import { IDLE_TAG } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import { project } from "../../layout/projection";
 import { itemAt } from "../../lib/arrays";
-import { getOrInsert } from "../../lib/maps";
+import { getOrInsertComputed } from "../../lib/maps";
 import type { Random } from "../../lib/random";
 import { ROADSIDE } from "../../road/roadsideProps";
 import { currentZone, previousZone } from "../../rules/route";
@@ -87,7 +87,11 @@ export class DistractionView {
   private show(distraction: Distraction, halted: boolean): void {
     const { scene } = this;
     const { key } = distraction;
-    const sprite = getOrInsert(this.sprites, distraction, () => scene.add.sprite(0, 0, key));
+    const sprite = getOrInsertComputed(
+      distraction,
+      () => scene.add.sprite(0, 0, key),
+      this.sprites,
+    );
     const { place } = this;
     const x = laneX(place.lanePosition);
     const placed = project(PROJECTION, { distance: PROJECTION.footY - place.y, x });

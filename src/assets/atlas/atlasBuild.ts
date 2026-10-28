@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 
 import { PNG } from "pngjs";
 
-import { getOrInsert } from "../../lib/maps";
+import { getOrInsertComputed } from "../../lib/maps";
 import { type AssetManifest, parseManifest } from "../manifest";
 import {
   atlasGroupOf,
@@ -73,7 +73,11 @@ export function compactFrames(
       .update(`${from.width}x${from.height}`)
       .update(cell.data)
       .digest("hex");
-    const first = getOrInsert(firsts, id, () => ({ from, ...(trimmed ? { bounds: whole } : {}) }));
+    const first = getOrInsertComputed(
+      id,
+      () => ({ from, ...(trimmed ? { bounds: whole } : {}) }),
+      firsts,
+    );
     return {
       ...frame,
       ...first,

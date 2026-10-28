@@ -13,7 +13,7 @@ import {
   solidStrip,
   STRIP,
 } from "../../layout/roadRaster";
-import { getOrInsert } from "../../lib/maps";
+import { getOrInsertComputed } from "../../lib/maps";
 import type { Rect } from "../../lib/rect";
 import { previousZone } from "../../rules/route";
 import type { Walk } from "../../runner/walk";
@@ -34,19 +34,23 @@ export class RoadArt {
   }
 
   look(zone: Zone, key: string): RoadLook {
-    return getOrInsert(this.looks, key, () => {
-      const image = this.imagePixels(key);
-      const fits = image?.width === STRIP.width && image.height === STRIP.height;
-      const strip = fits ? image : solidStrip(colourFromHex(zone.roadColour));
-      return roadLook(zone.id as RoadLook["zone"], strip);
-    });
+    return getOrInsertComputed(
+      key,
+      () => {
+        const image = this.imagePixels(key);
+        const fits = image?.width === STRIP.width && image.height === STRIP.height;
+        const strip = fits ? image : solidStrip(colourFromHex(zone.roadColour));
+        return roadLook(zone.id as RoadLook["zone"], strip);
+      },
+      this.looks,
+    );
   }
 
   // The backdrop's bottom rows, where the road's junction and approach are drawn over it,
   // across the road's view.
   approach(zone: Zone): Uint32Array | null {
     const key = backdropKey(zone);
-    return getOrInsert(this.approaches, key, () => this.approachRows(key));
+    return getOrInsertComputed(key, () => this.approachRows(key), this.approaches);
   }
 
   private approachRows(key: string): Uint32Array | null {

@@ -1,4 +1,4 @@
-import { getOrInsert } from "../lib/maps";
+import { getOrInsertComputed } from "../lib/maps";
 import { readBitmapFont } from "../tools/fontFile";
 import { type BitmapFontFile, type FontMetrics, fontMetrics, leftBearing } from "../ui/fontMetrics";
 import { inkWithPills, type LaidChar, pillGlyphAdvances } from "../ui/namePills";
@@ -21,18 +21,22 @@ const GAME_GLYPHS = new Map<string, BitmapFontFile["glyphs"]>();
 // A font's glyphs as the game holds them: its .fnt's, and a blank glyph for each pill character,
 // a copy of its space with the pill's advance, as addPillGlyphs adds them.
 export function gameGlyphs(font: string): BitmapFontFile["glyphs"] {
-  return getOrInsert(GAME_GLYPHS, font, () => {
-    const { glyphs } = readBitmapFont(font);
-    const space = glyphs.get(" ");
-    const pills =
-      space === undefined
-        ? []
-        : [...pillGlyphAdvances(space.advance)].map(([char, advance]): [string, typeof space] => [
-            char,
-            { ...space, advance },
-          ]);
-    return new Map([...glyphs, ...pills]);
-  });
+  return getOrInsertComputed(
+    font,
+    () => {
+      const { glyphs } = readBitmapFont(font);
+      const space = glyphs.get(" ");
+      const pills =
+        space === undefined
+          ? []
+          : [...pillGlyphAdvances(space.advance)].map(([char, advance]): [string, typeof space] => [
+              char,
+              { ...space, advance },
+            ]);
+      return new Map([...glyphs, ...pills]);
+    },
+    GAME_GLYPHS,
+  );
 }
 
 // A font's rows, from its .fnt.

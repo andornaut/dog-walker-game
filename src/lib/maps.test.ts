@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { getOrInsert } from "./maps";
+import { getOrInsertComputed } from "./maps";
 
-describe("getOrInsert", () => {
+describe("getOrInsertComputed", () => {
   it("makes a key's value once and returns the stored one after", () => {
     const store = new Map<string, number[]>();
     let made = 0;
@@ -10,9 +10,9 @@ describe("getOrInsert", () => {
       made += 1;
       return [made];
     };
-    const first = getOrInsert(store, "a", make);
-    expect(getOrInsert(store, "a", make)).toBe(first);
-    expect(getOrInsert(store, "b", make)).toEqual([2]);
+    const first = getOrInsertComputed("a", make, store);
+    expect(getOrInsertComputed("a", make, store)).toBe(first);
+    expect(getOrInsertComputed("b", make, store)).toEqual([2]);
     expect(made).toBe(2);
   });
 });

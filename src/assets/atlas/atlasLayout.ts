@@ -2,7 +2,7 @@ import * as v from "valibot";
 
 import { LOADING_ART } from "../../layout/loadingScreen";
 import { itemAt } from "../../lib/arrays";
-import { getOrInsert } from "../../lib/maps";
+import { getOrInsertComputed } from "../../lib/maps";
 import type { Point, Rect } from "../../lib/rect";
 import { splitDepthKey } from "../depthSteps";
 import { isPlainObject, parseOrThrow, record } from "../jsonSchema";
@@ -211,7 +211,7 @@ function packable(texture: SourceTexture): Packable {
   const slots = texture.frames.map((frame) => {
     const { height, width, x, y } = frame.from;
     const id = `${x},${y},${width},${height}`;
-    return getOrInsert(index, id, () => firsts.push(frame) - 1);
+    return getOrInsertComputed(id, () => firsts.push(frame) - 1, index);
   });
   return { firsts, slots, texture };
 }

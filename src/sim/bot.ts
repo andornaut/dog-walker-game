@@ -1,7 +1,7 @@
 import type { DogId } from "../data/types";
 import { type LaneDirection, laneMask } from "../layout/lanes";
 import { type RoadProjection, screenXAt } from "../layout/projection";
-import { getOrInsert } from "../lib/maps";
+import { getOrInsertComputed } from "../lib/maps";
 import { chance, type Random } from "../lib/random";
 import type { LanedBox, ScaledBox } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
@@ -281,9 +281,9 @@ function scrollContacts(
 ): readonly ScrollContact[] {
   const { height, kind, laneSpan } = item;
   const key = `${kind} ${height} ${laneSpan}`;
-  const byPath = getOrInsert(SCROLL_CONTACTS, geometry, () => new WeakMap());
-  const bySize = getOrInsert(byPath, path, () => new Map());
-  return getOrInsert(bySize, key, () => sampleContacts(road, geometry, item, path));
+  const byPath = getOrInsertComputed(geometry, () => new WeakMap(), SCROLL_CONTACTS);
+  const bySize = getOrInsertComputed(path, () => new Map(), byPath);
+  return getOrInsertComputed(key, () => sampleContacts(road, geometry, item, path), bySize);
 }
 
 // The contacts scrollContacts holds for a mover on path, sampled every MOVER_SAMPLE_SCROLL of
@@ -373,7 +373,7 @@ function pathsAhead(path: MoverPath): readonly MoverPath[] {
   if ((path.motion !== "approach" && path.motion !== "shy") || path.pending.length === 0) {
     return [path];
   }
-  return getOrInsert(OUTCOMES, path, () => moverOutcomes(path));
+  return getOrInsertComputed(path, () => moverOutcomes(path), OUTCOMES);
 }
 
 // The hazards a mover makes on any of paths, one per lane and stretch it touches the pack in, each

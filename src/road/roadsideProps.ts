@@ -2,7 +2,7 @@ import table from "../../shared/roadside.json";
 import { project, type RoadProjection } from "../layout/projection";
 import { STRIP } from "../layout/roadRaster";
 import { itemAt } from "../lib/arrays";
-import { getOrInsert } from "../lib/maps";
+import { getOrInsertComputed } from "../lib/maps";
 
 // The roadside props: houses, fences, trees and yard props standing on the lawns beyond the
 // sidewalks, and curb props (hydrants, bins, planters, bike racks, newspaper boxes) standing on
@@ -123,12 +123,16 @@ function mod(value: number, by: number): number {
 const DZ_REACH = new Map<RoadsideZone, { far: number; near: number }>();
 
 function dzReach(zone: RoadsideZone): { far: number; near: number } {
-  return getOrInsert(DZ_REACH, zone, () => {
-    const dzs = [...zone.lots, ...zone.gaps, ...(zone.curb?.groups ?? [])]
-      .flat()
-      .map(({ dz }) => dz);
-    return { far: Math.max(0, ...dzs), near: Math.min(0, ...dzs) };
-  });
+  return getOrInsertComputed(
+    zone,
+    () => {
+      const dzs = [...zone.lots, ...zone.gaps, ...(zone.curb?.groups ?? [])]
+        .flat()
+        .map(({ dz }) => dz);
+      return { far: Math.max(0, ...dzs), near: Math.min(0, ...dzs) };
+    },
+    DZ_REACH,
+  );
 }
 
 type RoadsideVisit = (prop: RoadsideProp, sign: RoadsideSign, z: number) => void;

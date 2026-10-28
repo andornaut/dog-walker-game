@@ -1,6 +1,6 @@
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import { formationOrder } from "../layout/packFormation";
-import { getOrInsert } from "../lib/maps";
+import { getOrInsertComputed } from "../lib/maps";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
 import type { RoadGeometry } from "./walk";
@@ -15,5 +15,5 @@ const GEOMETRIES = new Map<string, RoadGeometry>();
 export function screenRoadGeometry(run: Pick<RunState, "pack" | "walker">): RoadGeometry {
   const pack = { dogs: formationOrder(packDogs(run)), walker: run.walker };
   const key = `${pack.walker} ${pack.dogs.join(" ")}`;
-  return getOrInsert(GEOMETRIES, key, () => walkGeometry(LANE_COUNT, pack, VIEW, ROAD));
+  return getOrInsertComputed(key, () => walkGeometry(LANE_COUNT, pack, VIEW, ROAD), GEOMETRIES);
 }

@@ -16,7 +16,7 @@ import { hasObstacleArt, obstacleParts, obstacleSilhouette } from "../layout/obs
 import { formationOrder, PART_INSET } from "../layout/packFormation";
 import { itemAt } from "../lib/arrays";
 import { assertNever } from "../lib/assertNever";
-import { getOrInsert } from "../lib/maps";
+import { getOrInsertComputed } from "../lib/maps";
 import {
   chance,
   chanceRound,
@@ -1023,16 +1023,20 @@ export function obstacleOnRoad(
   moving: boolean,
   tags: readonly string[] = [],
 ): readonly PlacedPart[] {
-  const byKind = getOrInsert(PLACED_PARTS, data, () => new Map());
+  const byKind = getOrInsertComputed(data, () => new Map(), PLACED_PARTS);
   const key = `${geometry.cell.length} ${kind} ${moving} ${tags.join(",")}`;
-  return getOrInsert(byKind, key, () => {
-    const { lanes } = footprintOf(data, kind);
-    return obstacleParts(data, hasObstacleArt, kind, moving).map(({ behind, dx, key: art }) => ({
-      behind,
-      dx,
-      silhouette: obstacleSilhouette(geometry.cell.length, lanes, art, tags),
-    }));
-  });
+  return getOrInsertComputed(
+    key,
+    () => {
+      const { lanes } = footprintOf(data, kind);
+      return obstacleParts(data, hasObstacleArt, kind, moving).map(({ behind, dx, key: art }) => ({
+        behind,
+        dx,
+        silhouette: obstacleSilhouette(geometry.cell.length, lanes, art, tags),
+      }));
+    },
+    byKind,
+  );
 }
 
 // By lens, then the pack band's bottom, then the parts.
@@ -1053,9 +1057,13 @@ export function itemHeight(
   }
   const parts = obstacleOnRoad(data, geometry, kind, moving);
   const { bottom } = geometry.packBand;
-  const byBottom = getOrInsert(EXIT_LENGTHS, geometry.lens, () => new Map());
-  const lengths = getOrInsert(byBottom, bottom, () => new Map());
-  return getOrInsert(lengths, parts, () => exitLength(geometry.lens, PART_INSET, parts, bottom));
+  const byBottom = getOrInsertComputed(geometry.lens, () => new Map(), EXIT_LENGTHS);
+  const lengths = getOrInsertComputed(bottom, () => new Map(), byBottom);
+  return getOrInsertComputed(
+    parts,
+    () => exitLength(geometry.lens, PART_INSET, parts, bottom),
+    lengths,
+  );
 }
 
 // The planner's inset at each end of a footprint row: whatever lane-blocking obstacle stands in
