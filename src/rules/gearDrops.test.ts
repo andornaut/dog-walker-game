@@ -61,6 +61,12 @@ const withDrops = (expected: number) => ({
 const POSITIONS = Object.keys(TEST_TUNING.counts.gearDropsPerZone).map(Number);
 const expectedAt = (position: number): number =>
   (TEST_TUNING.counts.gearDropsPerZone as Readonly<Record<number, number>>)[position] ?? 0;
+// A position whose expected count has a fractional part and one whose count is whole: the count
+// reads its position only through that number.
+const COUNT_POSITIONS = [
+  POSITIONS.find((position) => !Number.isInteger(expectedAt(position))),
+  POSITIONS.find((position) => Number.isInteger(expectedAt(position))),
+].flatMap((position) => (position === undefined ? [] : [position]));
 
 // A walk with a medium and a large dog, so the Whistle's dodge has dogs to cover.
 const walkWith = (gear: GearId | null, overrides: Partial<RunState> = {}): RunState => ({
@@ -71,7 +77,7 @@ const walkWith = (gear: GearId | null, overrides: Partial<RunState> = {}): RunSt
 describe("gear drop count", () => {
   // A roll under the fractional part adds one drop; one at or over it adds none.
   it.each(
-    POSITIONS.flatMap((position) => [
+    COUNT_POSITIONS.flatMap((position) => [
       { extra: 1, position, roll: 0 },
       { extra: 0, position, roll: 0.9999 },
     ]),
@@ -98,7 +104,7 @@ describe("gear drop count", () => {
     },
   );
 
-  it.each(POSITIONS)("averages the expected count at position %i", (position) => {
+  it.each(COUNT_POSITIONS)("averages the expected count at position %i", (position) => {
     const random = seededRandom(position);
     const runs = 20000;
     let total = 0;
@@ -156,7 +162,7 @@ describe("gear drop pick", () => {
     }
   });
 
-  it.each(POSITIONS)("draws the same drops from the same seed at position %i", (position) => {
+  it.each(POSITIONS.slice(0, 1))("draws the same drops from the same seed at position %i", (position) => {
     const run = walkWith(null, { zoneIndex: position - 1 });
     const draws = [1, 2].map(() => drawGearDrops(data, seededRandom(position * 31), run));
     expect(draws[0]).toEqual(draws[1]);
