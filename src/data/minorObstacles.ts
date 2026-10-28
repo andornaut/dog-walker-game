@@ -201,7 +201,7 @@ export const MINOR_OBSTACLES = {
     movement: { factor: 1.2, kind: "inLane" },
     name: "Pedicab",
     shape: { lanes: 1, rows: 2 },
-    zones: ["homeStretch"],
+    zones: ["homeStretch", "street"],
   },
   picnicBlanket: { name: "Picnic blanket", shape: { lanes: 2, rows: 1 }, zones: ["park"] },
   pigeons: {
