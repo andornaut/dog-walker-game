@@ -19,6 +19,7 @@ import {
   drawFramedRect,
   drawPixelRows,
   drawRing,
+  fillCutRect,
   fillRect,
 } from "../ui/phaser/draw";
 import { disabledTextureKey } from "../ui/phaser/greyTextures";
@@ -151,8 +152,7 @@ export function addPanel(
 // leaves out its corner pixels, following the panel's rounded corners.
 export function addRimmedPanel(scene: Scene, rect: Rect): void {
   const rim = scene.add.graphics();
-  fillRect(rim, PALETTE.tan, { ...rect, height: rect.height + 2, y: rect.y - 1 });
-  fillRect(rim, PALETTE.tan, { ...rect, width: rect.width + 2, x: rect.x - 1 });
+  fillCutRect(rim, PALETTE.tan, insetRect(-1, rect), 1);
   addPanel(scene, rect);
 }
 

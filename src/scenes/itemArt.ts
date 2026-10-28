@@ -6,7 +6,7 @@ import type { DetailPicture } from "../home/detail";
 import type { Purchase } from "../home/home";
 import type { Rect } from "../lib/rect";
 import type { Badge } from "../ui/interaction";
-import { fillRect } from "../ui/phaser/draw";
+import { fillCutRect, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
 import { PLATE_LOOKS, type PlateKind } from "../ui/selection";
@@ -97,8 +97,7 @@ export function addPlate(
   const g = scene.add.graphics();
   const face = { height: height - 2, width: width - 2, x: left + 1, y: top + 1 };
   // Square corners cut by a pixel.
-  fillRect(g, colours.edge, { height, width: width - 2, x: left + 1, y: top });
-  fillRect(g, colours.edge, { height: height - 2, width, x: left, y: top + 1 });
+  fillCutRect(g, colours.edge, { height, width, x: left, y: top }, 1);
   fillRect(g, colours.face, face);
   // The face's top and bottom rows, lit and shaded where the plate says.
   if (colours.lit !== undefined) {

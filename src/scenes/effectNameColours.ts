@@ -1,6 +1,7 @@
 import type { GameObjects } from "phaser";
 
 import { type EffectNameKind, pillKind } from "../hud/effectNames";
+import { fillCutRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { labelPills } from "../ui/phaser/pixelText";
 
@@ -22,19 +23,6 @@ export const EFFECT_PILLS: Readonly<
 export function pillColours(kind: EffectNameKind): { name: number; pill: number } {
   const { name, pill } = EFFECT_PILLS[kind];
   return { name: PALETTE[name], pill: PALETTE[pill] };
-}
-
-// rect filled with its four corner pixels, at scale, left out.
-function fillPill(
-  g: GameObjects.Graphics,
-  colour: number,
-  rect: { height: number; width: number; x: number; y: number },
-  scale: number,
-): void {
-  g.fillStyle(colour);
-  g.fillRect(rect.x + scale, rect.y, rect.width - 2 * scale, rect.height);
-  g.fillRect(rect.x, rect.y + scale, scale, rect.height - 2 * scale);
-  g.fillRect(rect.x + rect.width - scale, rect.y + scale, scale, rect.height - 2 * scale);
 }
 
 // A disabled item's pills, such as on a card the player cannot afford: neutral, the name left in
@@ -62,11 +50,11 @@ export function addNamePills(
         continue;
       }
       if (grey) {
-        fillPill(g, PALETTE[GREY_PILL], rect, label.scaleX);
+        fillCutRect(g, PALETTE[GREY_PILL], rect, label.scaleX);
         continue;
       }
       const colours = pillColours(kind);
-      fillPill(g, colours.pill, rect, label.scaleX);
+      fillCutRect(g, colours.pill, rect, label.scaleX);
       name.forEach((i) => label.setCharacterTint(i, 1, undefined, colours.name));
     }
     const parent = label.parentContainer;

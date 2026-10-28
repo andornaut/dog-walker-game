@@ -21,6 +21,17 @@ export function fillRect(graphics: GameObjects.Graphics, colour: number, rect: R
   graphics.fillStyle(colour).fillRect(rect.x, rect.y, rect.width, rect.height);
 }
 
+// rect filled with a square cut pixels wide left out at each corner.
+export function fillCutRect(
+  graphics: GameObjects.Graphics,
+  colour: number,
+  rect: Rect,
+  cut: number,
+): void {
+  fillRect(graphics, colour, { ...rect, width: rect.width - 2 * cut, x: rect.x + cut });
+  fillRect(graphics, colour, { ...rect, height: rect.height - 2 * cut, y: rect.y + cut });
+}
+
 // A ring of the given thickness just inside rect's edge.
 export function drawRing(
   g: GameObjects.Graphics,
