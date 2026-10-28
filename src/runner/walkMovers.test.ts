@@ -67,8 +67,11 @@ const moverAt = (kind: WalkItem["kind"], path: MoverPath, since: number): WalkIt
   mover: { path, since },
 });
 
-// The seeds the planned-spawn sweep samples: more seeds cover more plans and take longer.
-const SWEEP_SEEDS = [1, 2];
+// A search for a kind's planned movers plans its zones a seed at a time from seed 1 and stops once
+// it has found enough of them, so a kind its zones weigh low takes more seeds rather than failing,
+// and fails only when the most seeds a search plans turn up none.
+const SEARCH_ENOUGH = 8;
+const SEARCH_SEEDS_MOST = 40;
 
 describe("movers", { timeout: 120_000 }, () => {
   const OBSTACLE_KINDS = [...OBSTACLE_IDS, ...MINOR_OBSTACLE_IDS] as WalkItem["kind"][];
@@ -272,7 +275,7 @@ describe("movers", { timeout: 120_000 }, () => {
     mover: MoverPath | undefined;
     speed: number;
   };
-  // Every spawn planned in a zone at a walk position on a seed, planned once for every sweep.
+  // Every spawn planned in a zone at a walk position on a seed, planned once for every search.
   const spawnPlans = new Map<string, readonly Planned[]>();
   const spawnsOf = (zone: ZoneId, zoneIndex: number, seed: number): readonly Planned[] => {
     const key = `${zone} ${zoneIndex} ${seed}`;
@@ -294,53 +297,30 @@ describe("movers", { timeout: 120_000 }, () => {
     [0, WORLD.walkLength - 1].flatMap((zoneIndex) =>
       seeds.flatMap((seed) => spawnsOf(zone, zoneIndex, seed)),
     );
-  const plannedSpawns = () => ZONE_IDS.flatMap((zone) => planIn(zone, SWEEP_SEEDS));
-  const plannedMovers = () =>
-    plannedSpawns().flatMap(({ kind, mover, speed }) =>
-      mover === undefined ? [] : [{ kind, mover, speed }],
-    );
-  it.each(counted)("moves each $kind within its range of times across seeds", ({ kind, range }) => {
-    const { delays, lengths } = drawMover(plannerStreams(1));
-    expect(range.max).toBeLessThanOrEqual(Math.min(delays.length, lengths.length));
-    const paths = plannedMovers().filter((planned) => planned.kind === kind);
-    expect(paths.length).toBeGreaterThan(0);
-    const stalked = new Set<number>();
-    for (const { mover } of paths) {
-      if (mover.motion === "approach") {
-        expect(mover.rows).toBeGreaterThanOrEqual(range.min);
-        expect(mover.rows).toBeLessThanOrEqual(range.max);
-        expect(mover.pending).toHaveLength(mover.rows);
-        stalked.add(mover.rows);
-      } else if (mover.motion === "steps") {
-        expect(mover.steps.length).toBeGreaterThanOrEqual(1);
-        expect(mover.steps.length).toBeLessThanOrEqual(range.max);
-      }
+  // The spawns planned in zones that match, planned a seed at a time from seed 1 until found holds
+  // of them or the search has planned its most seeds.
+  const searchSpawns = (
+    zones: readonly ZoneId[],
+    matches: (spawn: Planned) => boolean,
+    found: (spawns: readonly Planned[]) => boolean,
+  ): Planned[] => {
+    const spawns: Planned[] = [];
+    for (let seed = 1; seed <= SEARCH_SEEDS_MOST && !found(spawns); seed++) {
+      spawns.push(...zones.flatMap((zone) => planIn(zone, [seed])).filter(matches));
     }
-    if (stalked.size > 0) {
-      expect([...stalked].sort()).toEqual(
-        Array.from({ length: range.max - range.min + 1 }, (_, i) => range.min + i),
-      );
-    }
-  });
-
-  // A lucky find that walks about is planned as a prize, blocking no lane, and like every
-  // stepper shows the wander mark before its first step alone.
-  const walkingLucky = LUCKY_IDS.filter((kind) => movementOf(kind) !== null);
-  it.each(walkingLucky)("plans a walking %s as a prize, cueing its first step only", (kind) => {
-    expect(blocksLane(REAL, kind)).toBe(false);
-    const paths = plannedMovers().filter((planned) => planned.kind === kind);
-    expect(paths.length).toBeGreaterThan(0);
-    for (const { mover } of paths) {
-      const steps = mover.motion === "steps" ? mover.steps : [];
-      expect(steps.length).toBeGreaterThan(0);
-      expect(steps.map(({ uncued }) => uncued === true)).toEqual(steps.map((_, i) => i > 0));
-      const cues = steps.map(({ at }) => moverTell(mover, at - 1e-6)?.kind ?? null);
-      expect(cues).toEqual(steps.map((_, i) => (i === 0 ? "wander" : null)));
-    }
-  });
-
-  // The zones that plan a kind: those that weigh it above 0, of its own zones if it has any.
+    expect(
+      spawns.length,
+      `none planned in ${SEARCH_SEEDS_MOST} seeds of ${zones.join(", ") || "no zone"}`,
+    ).toBeGreaterThan(0);
+    return spawns;
+  };
+  const enough = (spawns: readonly Planned[]) => spawns.length >= SEARCH_ENOUGH;
+  // The zones that plan a kind: every zone for a lucky find, which each zone's quota places, and
+  // otherwise those that weigh it above 0, of its own zones if it has any.
   const zonesOf = (kind: WalkItem["kind"]): ZoneId[] => {
+    if ((LUCKY_IDS as readonly string[]).includes(kind)) {
+      return ZONE_IDS;
+    }
     const minor = Object.hasOwn(MINOR_OBSTACLES, kind);
     const entry = minor
       ? everyMover.minorObstacles[kind as MinorObstacleId]
@@ -356,6 +336,57 @@ describe("movers", { timeout: 120_000 }, () => {
       })
       .map(({ id }) => id as ZoneId);
   };
+  // A kind's spawns planned in the zones that draw it, searched until found holds of them.
+  const spawnsOfKind = (kind: WalkItem["kind"], found = enough) =>
+    searchSpawns(zonesOf(kind), (spawn) => spawn.kind === kind, found);
+  // A kind's movers planned in the zones that draw it, searched until found holds of them.
+  type PlannedMover = Planned & { mover: MoverPath };
+  const isMover = (spawn: Planned): spawn is PlannedMover => spawn.mover !== undefined;
+  const moversOf = (kind: WalkItem["kind"], found = enough): PlannedMover[] =>
+    searchSpawns(zonesOf(kind), (spawn) => spawn.kind === kind && isMover(spawn), found).filter(
+      isMover,
+    );
+  // The counts of steps a kind's stalkers among spawns plan.
+  const stalkedRows = (spawns: readonly Planned[]) =>
+    new Set(spawns.flatMap(({ mover }) => (mover?.motion === "approach" ? [mover.rows] : [])));
+  it.each(counted)("moves each $kind within its range of times across seeds", ({ kind, range }) => {
+    const { delays, lengths } = drawMover(plannerStreams(1));
+    expect(range.max).toBeLessThanOrEqual(Math.min(delays.length, lengths.length));
+    const everyCount = Array.from({ length: range.max - range.min + 1 }, (_, i) => range.min + i);
+    const stalks = movementOf(kind)?.kind === "approach";
+    const paths = moversOf(
+      kind,
+      (spawns) =>
+        enough(spawns) && (!stalks || everyCount.every((rows) => stalkedRows(spawns).has(rows))),
+    );
+    for (const { mover } of paths) {
+      if (mover.motion === "approach") {
+        expect(mover.rows).toBeGreaterThanOrEqual(range.min);
+        expect(mover.rows).toBeLessThanOrEqual(range.max);
+        expect(mover.pending).toHaveLength(mover.rows);
+      } else if (mover.motion === "steps") {
+        expect(mover.steps.length).toBeGreaterThanOrEqual(1);
+        expect(mover.steps.length).toBeLessThanOrEqual(range.max);
+      }
+    }
+    if (stalks) {
+      expect([...stalkedRows(paths)].sort((a, b) => a - b)).toEqual(everyCount);
+    }
+  });
+
+  // A lucky find that walks about is planned as a prize, blocking no lane, and like every
+  // stepper shows the wander mark before its first step alone.
+  const walkingLucky = LUCKY_IDS.filter((kind) => movementOf(kind) !== null);
+  it.each(walkingLucky)("plans a walking %s as a prize, cueing its first step only", (kind) => {
+    expect(blocksLane(REAL, kind)).toBe(false);
+    for (const { mover } of moversOf(kind)) {
+      const steps = mover.motion === "steps" ? mover.steps : [];
+      expect(steps.length).toBeGreaterThan(0);
+      expect(steps.map(({ uncued }) => uncued === true)).toEqual(steps.map((_, i) => i > 0));
+      const cues = steps.map(({ at }) => moverTell(mover, at - 1e-6)?.kind ?? null);
+      expect(cues).toEqual(steps.map((_, i) => (i === 0 ? "wander" : null)));
+    }
+  });
 
   // A kind some zone draws whose movement is a pattern (bounce, dive, follow, merge, stopAndGo,
   // stopAndGoAcross, sway),
@@ -389,16 +420,8 @@ describe("movers", { timeout: 120_000 }, () => {
   ).filter(
     (kind, i, kinds) => kinds.findIndex((other) => patternKey(other) === patternKey(kind)) === i,
   );
-  // A kind's movers planned in the zones that draw it, on more seeds than the sweep's, so a kind
-  // weighed low still comes up.
-  const PATTERN_SEEDS = [1, 2, 3, 4];
-  const pathsOf = (kind: WalkItem["kind"]) => {
-    const planned = zonesOf(kind)
-      .flatMap((zone) => planIn(zone, PATTERN_SEEDS))
-      .flatMap((spawn) => (spawn.kind === kind && spawn.mover !== undefined ? [spawn.mover] : []));
-    expect(planned.length).toBeGreaterThan(0);
-    return planned;
-  };
+  // A kind's movers planned in the zones that draw it, searched until enough come up.
+  const pathsOf = (kind: WalkItem["kind"]) => moversOf(kind).map(({ mover }) => mover);
 
   // A stepping pattern moves at least once and at most its most, each step a lane to one side
   // (back the way it came, for a bounce or a sway, so it rocks between two lanes), or in its lane
@@ -527,9 +550,7 @@ describe("movers", { timeout: 120_000 }, () => {
   );
   it.each(movingPull)("plans a moving %s as a prize that moves", (kind) => {
     expect(blocksLane(REAL, kind)).toBe(false);
-    const spawns = plannedSpawns().filter((planned) => planned.kind === kind);
-    expect(spawns.length).toBeGreaterThan(0);
-    expect(spawns.filter(({ mover }) => mover === undefined)).toEqual([]);
+    expect(spawnsOfKind(kind).filter(({ mover }) => mover === undefined)).toEqual([]);
   });
 
   // The friendly neighbour in the pack's lane as her row reaches the pack: showing her cue before
@@ -623,21 +644,12 @@ describe("movers", { timeout: 120_000 }, () => {
   const edgeKinds = blocking.filter(
     (kind, i) => blocking.findIndex((other) => edgeKey(other) === edgeKey(kind)) === i,
   );
-  // Each kind is planned in its zones one seed at a time until it has started against both edges,
-  // so a kind that a zone's weights plan less often takes more seeds rather than failing.
-  const EDGE_SEEDS_MOST = 20;
+  // Each kind is searched until it has started against both edges.
   it.each(edgeKinds)("starts a %s against each edge of the road on some seed", (kind) => {
     const edges = [0, LANE_COUNT - footprintOf(everyMover, kind).lanes];
-    const zones = zonesOf(kind);
-    const lanes = new Set<number>();
-    for (let seed = 1; seed <= EDGE_SEEDS_MOST && !edges.every((lane) => lanes.has(lane)); seed++) {
-      for (const spawn of zones.flatMap((zone) => planIn(zone, [seed]))) {
-        if (spawn.kind === kind) {
-          lanes.add(spawn.lane);
-        }
-      }
-    }
-    expect([...lanes]).toEqual(expect.arrayContaining(edges));
+    const lanesOf = (spawns: readonly Planned[]) => new Set(spawns.map(({ lane }) => lane));
+    const spawns = spawnsOfKind(kind, (found) => edges.every((lane) => lanesOf(found).has(lane)));
+    expect([...lanesOf(spawns)]).toEqual(expect.arrayContaining(edges));
   });
 
   // A stalker wider than a lane never fits a lane to either side, so from a middle lane it
@@ -647,19 +659,24 @@ describe("movers", { timeout: 120_000 }, () => {
   );
   it.each(wideStalkers)("reaches a %s either way from a middle lane across seeds", (kind) => {
     const { lanes: width } = footprintOf(everyMover, kind);
-    const ways = new Set<string>();
-    for (const { mover } of plannedMovers().filter((planned) => planned.kind === kind)) {
-      if (mover.motion !== "approach" || mover.lane < 1 || mover.lane > LANE_COUNT - width - 1) {
-        continue;
+    // The ways the stalkers among spawns reach from a middle lane.
+    const waysOf = (spawns: readonly Planned[]) => {
+      const ways = new Set<string>();
+      for (const { mover } of spawns) {
+        if (mover?.motion !== "approach" || mover.lane < 1 || mover.lane > LANE_COUNT - width - 1) {
+          continue;
+        }
+        if (mover.reach.first < mover.lane) {
+          ways.add("left");
+        }
+        if (mover.reach.first + mover.reach.count - 1 > mover.lane) {
+          ways.add("right");
+        }
       }
-      if (mover.reach.first < mover.lane) {
-        ways.add("left");
-      }
-      if (mover.reach.first + mover.reach.count - 1 > mover.lane) {
-        ways.add("right");
-      }
-    }
-    expect([...ways].sort()).toEqual(["left", "right"]);
+      return [...ways].sort();
+    };
+    const movers = moversOf(kind, (found) => waysOf(found).length === 2);
+    expect(waysOf(movers)).toEqual(["left", "right"]);
   });
 
   // Each step, hop and stalker's step lasts its kind's length at a factor drawn per move within
@@ -673,19 +690,29 @@ describe("movers", { timeout: 120_000 }, () => {
     "draws each $movement's length within the jitter either way",
     ({ movement, seconds: moveSeconds }) => {
       const jitter = read(TUNING, "seconds", "moverMoveSecondsJitter");
-      const factors = plannedMovers().flatMap(({ mover, speed }) => {
-        if (mover.movement !== movement) {
-          return [];
-        }
-        const lengths =
-          mover.motion === "approach" || mover.motion === "shy"
-            ? mover.lengths
-            : mover.motion === "steps"
-              ? mover.steps.map(({ length }) => length)
-              : [];
-        return lengths.map((length) => length / (moveSeconds * speed));
-      });
-      expect(factors.length).toBeGreaterThan(0);
+      // Each move's length over its kind's length, of the movers among spawns.
+      const factorsOf = (spawns: readonly Planned[]) =>
+        spawns.flatMap(({ mover, speed }) => {
+          const lengths =
+            mover?.motion === "approach" || mover?.motion === "shy"
+              ? mover.lengths
+              : mover?.motion === "steps"
+                ? mover.steps.map(({ length }) => length)
+                : [];
+          return lengths.map((length) => length / (moveSeconds * speed));
+        });
+      // Searched until enough movers have come up and their draws fall either side of 1.
+      const spread = (spawns: readonly Planned[]) => {
+        const drawn = factorsOf(spawns);
+        return drawn.some((factor) => factor < 1) && drawn.some((factor) => factor > 1);
+      };
+      const factors = factorsOf(
+        searchSpawns(
+          ZONE_IDS,
+          (spawn) => spawn.mover?.movement === movement,
+          (found) => enough(found) && spread(found),
+        ),
+      );
       expect(Math.min(...factors)).toBeGreaterThanOrEqual(1 - jitter - 1e-9);
       expect(Math.max(...factors)).toBeLessThanOrEqual(1 + jitter + 1e-9);
       expect(Math.min(...factors)).toBeLessThan(1);
