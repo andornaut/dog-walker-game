@@ -15,10 +15,20 @@ capybara            a brown capybara side on: a barrel body on short legs and no
                     chew, rest, an ear flick, a blink. walk (4 frames, 160ms): a slow step, the
                     diagonal legs swapping and the body bobbing 1px on the passing frames
 
-A mover, laid out and drawn as the card obstacles are, side view facing right; the game mirrors
-it for a crossing to the left, as it does hazards.py's squirrel-dash, whose tags, frame counts
-and durations it keeps:
-hen                 a Riverdale Farm hen got loose, a Rhode Island Red: a plump rust body lit
+Movers, laid out and drawn as the card obstacles are, side views facing right; the game mirrors
+them for a crossing to the left, as it does hazards.py's squirrel-dash. The hen keeps
+squirrel-dash's tags, frame counts and durations, and the ferrets keep animals.py's chase-cat's,
+the cat's dart:
+ferrets             96x48, 2 lanes: two ferrets bounding across together nose to tail, a cream
+                    champagne behind and a little up the road, a sable ahead and nearer: long low
+                    bodies arched along the spine, short dark legs, tapering dark tails, a mask
+                    band across each face round a dark eye patch and a pink nose. idle (2 frames,
+                    300ms): standing at the road's edge on all four paws under a gentle arch, then
+                    the sable's head lifting to sniff the air and the champagne's tail flicking up.
+                    run (4 frames, 80ms): the bound, the back arched high with the paws gathered,
+                    the hind paws pushing off, stretched long in flight, the front paws landing,
+                    the champagne a frame behind the sable
+hen                a Riverdale Farm hen got loose, a Rhode Island Red: a plump rust body lit
                     ochre, a short plum tail cocked up, dbrown wings with a brick band, a red
                     comb and wattle, an amber beak and yellow legs, a little taller than
                     squirrel-dash. idle (2 frames, 400ms): standing at the road's edge, neck up,
@@ -114,7 +124,7 @@ import scene as sn  # noqa: E402
 import sounds  # noqa: E402
 from minis import STEPS  # noqa: E402
 from pixel import ZONE_ROADS, Grid, build as build_sprites, depth_settled, edged, to_image  # noqa: E402
-from pixel import raster, scale_of  # noqa: E402
+from pixel import K, raster, road_edge, scale_of  # noqa: E402
 from pixel import preview as sheet  # noqa: E402
 from road import lit  # noqa: E402
 
@@ -341,6 +351,95 @@ def hen(bob=0, wing="fold", near=(16, 27 + 1 / 3), far=(13 + 1 / 3, 27 + 1 / 3),
     g.rect(hx + 0.2, hy - 0.8, 2 * u, 2 * u, "ink")
     g.p(hx + 0.2, hy - 0.8, "white")
     return lit(g)
+
+
+# ---------- ferrets ----------
+
+# The pair's coats: a sable, dbrown shaded plum with plum legs and tail and a cream mask band, and a champagne,
+# cream shaded tan with clay legs and tail and a white mask band. Each mask's eye patch is its legs' colour.
+SABLE = dict(coat="dbrown", shade="plum", leg="plum", far="walnut", band="cream", patch="plum")
+CHAMPAGNE = dict(coat="cream", shade="tan", leg="clay", far="tan", band="white", patch="clay")
+# The frame, in design units: two ferrets nose to tail across 2 lanes, 96x48 at full size.
+FERRETS_W = 64
+# Each ferret's bound, one tuple per frame, in design units from its rump column and its ground row: hip and
+# shoulder (x, y), the back's arch above the line between them, the front and hind paws (x, y of the paw's
+# bottom) and the tail's lift. A design unit is 1.5px at full size, so thirds land on whole pixels.
+FERRET_BOUND = (
+    ((7, -6), (16, -6), 6, (17, 0), (13, 0), 0),                                 # gathered, the back arched
+    ((6, -6 - 1 / 3), (19, -7), 3 + 1 / 3, (23, -1 / 3), (6, 0), -1 / 3),          # hind push off
+    ((5, -7 - 2 / 3), (20, -8), 1 + 1 / 3, (25, -2), (1, -2), 2 / 3),               # flight, stretched long
+    ((6, -7), (18, -6 - 2 / 3), 3 + 1 / 3, (21, 0), (10, -1 - 1 / 3), 0),          # front lands
+)
+# Waiting at the road's edge: standing on all four paws under a gentle arch, the near ferret's head lifting to
+# sniff the air and the far one's tail flicking up.
+FERRET_STAND = ((7, -6), (17, -6 - 1 / 3), 3 + 1 / 3, (18, 0), (7, 0), 0)
+# The pair: (rump column, ground row) of the far ferret, behind and a little up the road, then the near one.
+FERRET_SPOTS = ((4, 28), (33, 29 + 1 / 3))
+
+
+def ferret(g, x0, gy, c, bound, sniff=0, flick=0):
+    """One ferret bounding right, side on, its rump at column x0 and its paws on row gy: a long low body arched
+    along its spine, short legs, a tapering tail and a small wedge head with round ears, a mask band across the
+    face and a pink nose. bound is a FERRET_BOUND tuple, sniff lifts the head (in design units) and flick the
+    tail."""
+    (hx, hy), (sx, sy), arch, (fx, fy), (bx, by), tail = bound
+    hx, sx, fx, bx = x0 + hx, x0 + sx, x0 + fx, x0 + bx
+    hy, sy, fy, by = gy + hy, gy + sy, gy + fy, gy + by
+    r = 2 + 1 / 3
+    mx, my = (hx + sx) / 2, (hy + sy) / 2 - 2 * arch
+
+    def spine(t):
+        return ((1 - t) ** 2 * hx + 2 * t * (1 - t) * mx + t * t * sx,
+                (1 - t) ** 2 * hy + 2 * t * (1 - t) * my + t * t * sy)
+
+    def leg(top, paw, col):
+        bar(g, top, (paw[0], paw[1] - 1), 2, col)
+        g.rect(paw[0] - 1, paw[1] - 4 / 3, 2 + 2 / 3, 4 / 3, col)
+
+    # far legs, a step behind the near ones
+    leg((sx - 1, sy + 1), (fx - 2, fy), c["far"])
+    leg((hx + 1, hy + 1), (bx + 2, by), c["far"])
+    # the tail, tapering back from the rump
+    tx, ty = hx - 8, hy + 1 + tail + flick
+    bar(g, (hx - 1, hy - 0.5), (tx + 4, ty - 0.5), 3, c["leg"])
+    bar(g, (tx + 4, ty - 0.5), (tx, ty), 2, c["leg"])
+    # the body along the spine: shade, then the coat a little up and left, so the shade is a crescent below
+    steps = [k / 12 for k in range(13)]
+    for t in steps:
+        x, y = spine(t)
+        g.ell(x, y, r, r, c["shade"])
+    for t in steps:
+        x, y = spine(t)
+        g.ell(x - 1 / 3, y - 2 / 3, r - 2 / 3, r - 2 / 3, c["coat"])
+    # near legs
+    leg((sx + 1 / 3, sy + 1), (fx, fy), c["leg"])
+    leg((hx + 1, hy + 1), (bx, by), c["leg"])
+    # the head: a wedge reaching forward from the shoulder, a round ear behind the eye, the mask band over
+    # the brow and muzzle and the dark patch round the eye, the pink nose at the tip
+    ex, ey = sx + 4 + 1 / 3, sy - 1 - sniff
+    g.ell(ex - 2 - 1 / 3, ey - 1 - 2 / 3, 1 + 2 / 3, 1 + 2 / 3, c["shade"])
+    g.ell(ex, ey, 3, 2 + 1 / 3, c["coat"])
+    g.tri((ex + 1, ey - 2), (ex + 5 + 1 / 3, ey + 1), (ex + 1, ey + 2 + 1 / 3), c["coat"])
+    g.tri((ex - 2, ey - 2), (ex + 5 + 1 / 3, ey + 1), (ex - 2, ey + 2), c["band"])
+    g.rect(ex - 1 / 3, ey - 1, 2 + 2 / 3, 2, c["patch"])
+    g.rect(ex + 1 / 3, ey - 1, 4 / 3, 4 / 3, "walnut")
+    g.rect(ex + 4, ey + 1 / 3, 4 / 3, 4 / 3, "pink")
+
+
+def ferrets(near=FERRET_STAND, far=FERRET_STAND, sniff=0):
+    """A pair of ferrets bounding across the road together, side view facing right: a champagne behind and
+    up the road, a sable ahead and nearer, nose to tail, so the pair reads as one. near and far are each
+    one's FERRET_BOUND pose; sniff lifts the sable's head and flicks the champagne's tail."""
+    g = edged(Grid(FERRETS_W, 32), lambda c: road_edge(K["cream"] if c == K["white"] else c))
+    (fx, fy), (nx, ny) = FERRET_SPOTS
+    ferret(g, fx, fy, CHAMPAGNE, far, flick=-sniff)
+    ferret(g, nx, ny, SABLE, near, sniff=sniff)
+    return lit(g)
+
+
+# The run, 4 frames, the far ferret a frame behind the near one; and the stand at the road's edge, 2 frames.
+FERRETS_RUN = tuple(dict(near=FERRET_BOUND[k], far=FERRET_BOUND[k - 1]) for k in range(4))
+FERRETS_IDLE = (dict(), dict(sniff=1 + 1 / 3))
 
 
 # ---------- minor obstacles ----------
@@ -984,6 +1083,8 @@ def road_sprites(suffix, step):
     yield f"capybara{suffix}", [("idle", frames(a, capybara, CAPYBARA_IDLE), 300),
                                 ("walk", frames(a, capybara, CAPYBARA_WALK), CAPYBARA_WALK_MS)]
     yield f"hen{suffix}", [("idle", frames(a, hen, HEN_IDLE), 400), ("run", frames(a, hen, HEN_RUN), 80)]
+    yield f"ferrets{suffix}", [("idle", frames(a, ferrets, FERRETS_IDLE), 300),
+                               ("run", frames(a, ferrets, FERRETS_RUN), 80)]
     for key, draw, (args, ms) in (("fallen-log", fallen_log, FALLEN_LOG_IDLE),
                                   ("leaf-pile", leaf_pile, LEAF_PILE_IDLE),
                                   ("little-free-library", little_free_library, LIBRARY_IDLE),
@@ -996,7 +1097,7 @@ def road_sprites(suffix, step):
 # Where each road sprite's .aseprite source goes: the card obstacles with the encounters, the rest with the
 # obstacles.
 SOURCES = {"capybara": "art/encounters", "porch-cat": "art/encounters", "fallen-log": "art/obstacles",
-           "hen": "art/obstacles", "leaf-pile": "art/obstacles", "little-free-library": "art/obstacles",
+           "ferrets": "art/obstacles", "hen": "art/obstacles", "leaf-pile": "art/obstacles", "little-free-library": "art/obstacles",
            "picnic-blanket": "art/obstacles", "porch-steps": "art/obstacles"}
 
 

@@ -5190,6 +5190,87 @@
       }
     },
     {
+      "key": "ferrets",
+      "png": "sprites/ferrets.png",
+      "json": "sprites/ferrets.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 88
+      }
+    },
+    {
+      "key": "ferrets@50",
+      "png": "sprites/ferrets@50.png",
+      "json": "sprites/ferrets@50.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "ferrets@56",
+      "png": "sprites/ferrets@56.png",
+      "json": "sprites/ferrets@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 49
+      }
+    },
+    {
+      "key": "ferrets@62",
+      "png": "sprites/ferrets@62.png",
+      "json": "sprites/ferrets@62.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 55
+      }
+    },
+    {
+      "key": "ferrets@69",
+      "png": "sprites/ferrets@69.png",
+      "json": "sprites/ferrets@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 61
+      }
+    },
+    {
+      "key": "ferrets@75",
+      "png": "sprites/ferrets@75.png",
+      "json": "sprites/ferrets@75.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 66
+      }
+    },
+    {
+      "key": "ferrets@81",
+      "png": "sprites/ferrets@81.png",
+      "json": "sprites/ferrets@81.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 71
+      }
+    },
+    {
+      "key": "ferrets@88",
+      "png": "sprites/ferrets@88.png",
+      "json": "sprites/ferrets@88.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 76
+      }
+    },
+    {
+      "key": "ferrets@94",
+      "png": "sprites/ferrets@94.png",
+      "json": "sprites/ferrets@94.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 82
+      }
+    },
+    {
       "key": "food-cart-vendor",
       "png": "sprites/food-cart-vendor.png",
       "json": "sprites/food-cart-vendor.json",

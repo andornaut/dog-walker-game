@@ -1,0 +1,63 @@
+{ "frames": {
+   "ferrets@69 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 66, "h": 33 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 66, "h": 33 },
+    "sourceSize": { "w": 66, "h": 33 },
+    "duration": 300
+   },
+   "ferrets@69 1.aseprite": {
+    "frame": { "x": 66, "y": 0, "w": 66, "h": 33 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 66, "h": 33 },
+    "sourceSize": { "w": 66, "h": 33 },
+    "duration": 300
+   },
+   "ferrets@69 2.aseprite": {
+    "frame": { "x": 132, "y": 0, "w": 66, "h": 33 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 66, "h": 33 },
+    "sourceSize": { "w": 66, "h": 33 },
+    "duration": 80
+   },
+   "ferrets@69 3.aseprite": {
+    "frame": { "x": 198, "y": 0, "w": 66, "h": 33 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 66, "h": 33 },
+    "sourceSize": { "w": 66, "h": 33 },
+    "duration": 80
+   },
+   "ferrets@69 4.aseprite": {
+    "frame": { "x": 264, "y": 0, "w": 66, "h": 33 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 66, "h": 33 },
+    "sourceSize": { "w": 66, "h": 33 },
+    "duration": 80
+   },
+   "ferrets@69 5.aseprite": {
+    "frame": { "x": 330, "y": 0, "w": 66, "h": 33 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 66, "h": 33 },
+    "sourceSize": { "w": 66, "h": 33 },
+    "duration": 80
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ferrets@69.png",
+  "format": "RGBA8888",
+  "size": { "w": 396, "h": 33 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" },
+   { "name": "run", "from": 2, "to": 5, "direction": "forward" }
+  ]
+ }
+}
