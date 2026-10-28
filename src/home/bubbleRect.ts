@@ -21,23 +21,13 @@ export function bubbleRect(
 }
 
 // The bubble's lines: each paragraph in turn wrapped at spaces to room as width measures a line,
-// each starting on a new line. A paragraph that would run past most lines is left out whole,
-// with those after it, so no paragraph is cut short.
+// each starting on a new line, however many lines they take: the bubble grows to hold them.
 export function speechLines(
   width: (line: string) => number,
   room: number,
-  most: number,
   paragraphs: readonly string[],
 ): string[] {
-  const lines: string[] = [];
-  for (const paragraph of paragraphs) {
-    const wrapped = wrapWords(width, room, paragraph);
-    if (lines.length + wrapped.length > most) {
-      break;
-    }
-    lines.push(...wrapped);
-  }
-  return lines;
+  return paragraphs.flatMap((paragraph) => wrapWords(width, room, paragraph));
 }
 
 // The owner's column beside their parting line: their face's width or their name's ink,
@@ -47,25 +37,15 @@ export function ownerColumn(nameInk: number): number {
 }
 
 // The bubble's lines, as speechLines wraps them, beside an owner's column column wide when the
-// last paragraph is their parting line (else null). The owner shows (faced) only where every
-// paragraph fits beside the column; else their line is left out and the rest take the bubble's
-// whole width.
+// last paragraph is their parting line (faced), the text then wrapping roomCut narrower than
+// the column; else (column null) across the bubble's whole width.
 export function bubbleLines(
   width: (line: string) => number,
-  most: number,
   column: number | null,
   paragraphs: readonly string[],
 ): { faced: boolean; lines: string[] } {
-  if (column !== null) {
-    const room = SPEECH_ROOM - column - OWNER.roomCut;
-    const lines = speechLines(width, room, most, paragraphs);
-    const whole = paragraphs.flatMap((paragraph) => wrapWords(width, room, paragraph));
-    if (lines.length === whole.length) {
-      return { faced: true, lines };
-    }
-  }
-  const said = column === null ? paragraphs : paragraphs.slice(0, -1);
-  return { faced: false, lines: speechLines(width, SPEECH_ROOM, most, said) };
+  const room = column === null ? SPEECH_ROOM : SPEECH_ROOM - column - OWNER.roomCut;
+  return { faced: column !== null, lines: speechLines(width, room, paragraphs) };
 }
 
 // The bubble's size for lines lines of text whose widest line is widest, beside an owner's

@@ -20,10 +20,9 @@ import {
   ownerPlace,
   speechLines,
 } from "./bubbleRect";
-import { dogInfo, gearInfo, type Purchase } from "./home";
+import { dogInfo, gearInfo } from "./home";
 import { HOME_LAYOUT, SPEECH_ROOM } from "./homeLayout";
-import { messageLine } from "./homeLines";
-import { homeLine } from "./homeText";
+import { walkerSays } from "./homeLines";
 import { tapWalker } from "./walkers";
 
 const { board } = HOME_LAYOUT.petShop;
@@ -65,15 +64,13 @@ describe("the walker's speech", () => {
   const walkers = keysOf(gameData.walkers);
   const none: Owned = { dogSlots: [], dogs: [], gear: [], walkers: [] };
   const all: Owned = { dogSlots: gameData.dogSlots.map((_, i) => i + 1), dogs, gear, walkers };
-  const bought = (purchase: Purchase, name: string) =>
-    messageLine(text, { kind: "bought", name, purchase }) ?? "";
   // As the bubble says them, each effect's name in its pill.
   const said = (parts: string[], owner: DogId | null = null) => ({
     owner,
     parts: parts.map((part) => withNamePills(gameData, part)),
   });
   const messages = [
-    ...Object.values(text.bubble),
+    ...keysOf(text.bubble).flatMap((line) => walkers.map((walker) => walkerSays(gameData, line, walker))),
     text.noticePackFull,
     text.noticeSoundOff,
     text.noticeSoundOn,
@@ -85,25 +82,9 @@ describe("the walker's speech", () => {
         return tap.kind === "drop" ? [] : [tap.text];
       }),
     ]),
-    ...dogs.map(
-      (dog) =>
-        messageLine(text, {
-          amount: cents(9_999_900),
-          kind: "cantAfford",
-          name: gameData.dogs[dog].name,
-        }) ?? "",
-    ),
-    ...gear.map((item) => bought({ gear: item, kind: "gear" }, gameData.shopGear[item].name)),
-    bought(
-      { kind: "dogSlot", slot: gameData.dogSlots.length },
-      homeLine(text, "dogSlotName", { slot: String(gameData.dogSlots.length) }),
-    ),
   ].map((message) => said([message]));
   const parting = dogs.flatMap((dog) =>
-    gameData.quips[dog].parting.flatMap((quip) => [
-      said([quip], dog),
-      said([bought({ dog, kind: "dog" }, gameData.dogs[dog].name), quip], dog),
-    ]),
+    gameData.quips[dog].parting.map((quip) => said([quip], dog)),
   );
   const speeches = [...messages, ...parting].flatMap(({ owner, parts }) => [
     said(parts, owner),
@@ -125,18 +106,15 @@ describe("the walker's speech", () => {
   it("says every speech inside its bubble, beside its owner, clear of the board", () => {
     const offenders = speeches.filter(({ owner, parts }) => {
       const column = owner === null ? null : ownerColumn(nameInk(owner));
-      const { faced, lines } = bubbleLines(width, HOME_LAYOUT.speech.lines, column, parts);
-      // Only a bought dog's parting line may be left out, after the warning and its message.
-      const dropped = parts.length === 3 && !faced;
-      const kept = dropped ? parts.slice(0, 2) : parts;
+      const { faced, lines } = bubbleLines(width, column, parts);
       const room = faced && column !== null ? SPEECH_ROOM - column - 4 : SPEECH_ROOM;
-      const whole = kept.flatMap((part) => wrapWords(width, room, part));
+      const whole = parts.flatMap((part) => wrapWords(width, room, part));
       const widest = Math.ceil(Math.max(...lines.map(width)));
       const size = bubbleSize(body, lines.length, widest, faced ? column : null);
       const rect = bubbleRect(board, HOME_LAYOUT.speech, { x: walkerAtGate.x, y: top }, size);
       const bubbleFits =
         lines.join("\n") === whole.join("\n") &&
-        (owner === null || faced || dropped) &&
+        (owner === null || faced) &&
         widest <= room &&
         !rectsOverlap(rect, board) &&
         rect.x >= HOME_LAYOUT.speech.margin;
@@ -165,7 +143,7 @@ describe("the walker's speech", () => {
     "centres %s's owner's face over their name, the text centred down the bubble",
     (dog) => {
       const column = ownerColumn(nameInk(dog));
-      const lines = bubbleLines(width, HOME_LAYOUT.speech.lines, column, [
+      const lines = bubbleLines(width, column, [
         gameData.quips[dog].parting[0] ?? "",
       ]);
       const size = bubbleSize(body, lines.lines.length, 100, column);
@@ -180,10 +158,12 @@ describe("the walker's speech", () => {
 });
 
 describe("speechLines", () => {
-  it("starts each paragraph on a new line, wraps at spaces and leaves out one past the last line", () => {
-    const chars = (line: string) => line.length;
-    expect(speechLines(chars, 3, 3, ["ab", "cd"])).toEqual(["ab", "cd"]);
-    expect(speechLines(chars, 3, 3, ["ab cd ef"])).toEqual(["ab", "cd", "ef"]);
-    expect(speechLines(chars, 3, 3, ["ab cd", "ef gh"])).toEqual(["ab", "cd"]);
+  const chars = (line: string) => line.length;
+  it.each([
+    [["ab", "cd"], ["ab", "cd"]],
+    [["ab cd ef"], ["ab", "cd", "ef"]],
+    [["ab cd", "ef gh", "ij kl"], ["ab", "cd", "ef", "gh", "ij", "kl"]],
+  ])("starts each paragraph of %j on a new line and wraps at spaces, leaving none out", (paragraphs, lines) => {
+    expect(speechLines(chars, 3, paragraphs)).toEqual(lines);
   });
 });

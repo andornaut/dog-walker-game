@@ -1430,7 +1430,7 @@ export class StartScene extends Scene {
         setPixelText(probe, line);
         return probe.width;
       };
-      return bubbleLines(measure, SPEECH.lines, column, paragraphs);
+      return bubbleLines(measure, column, paragraphs);
     });
     const top = GATE.y + SPEECH.top;
     // The bubble goes under the words, which set its size.

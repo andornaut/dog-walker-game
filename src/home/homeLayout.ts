@@ -225,10 +225,11 @@ export const HOME_LAYOUT = {
     priceColour: "forest",
     scale: 1,
   },
-  // The walker's speech bubble, its top speech.top under the gate scene's: up to lines lines
-  // of 2x body text a line of the font apart, padX in from its sides, the first line's
-  // capitals padTop under its top and the last line's lowest ink padBottom over its bottom. It
-  // keeps clearance clear of the Pet shop's board and margin inside the screen's left edge.
+  // The walker's speech bubble, its top speech.top under the gate scene's, growing down to hold
+  // every line it says of 2x body text a line of the font apart, padX in from its sides, the
+  // first line's capitals padTop under its top and the last line's lowest ink padBottom over its
+  // bottom. It keeps clearance clear of the Pet shop's board and margin inside the screen's left
+  // edge.
   // An owner's parting line has the owner's column at its right, inset from the bubble's right
   // edge and gap right of the text, as wide as the owner's size square face or their name's
   // 1x ink, whichever is wider: the face, framed in 1px of ink over tan, centred in it top
@@ -237,7 +238,6 @@ export const HOME_LAYOUT = {
   // foot taller than the face, with the text centred down it.
   speech: {
     clearance: 2,
-    lines: 4,
     margin: GAP / 2,
     owner: { foot: 18, gap: 6, inset: 3, nameGap: 3, roomCut: 4, size: 32, top: 4 },
     padBottom: 3,
