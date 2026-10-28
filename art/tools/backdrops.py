@@ -13,13 +13,13 @@ its items spawn: only the verge's ground.
 Rows, in band rows (0 to 157): the sky is one flat colour above row 45 (CALM), under the message
 strip (band rows 6 to 57 while a message shows), but any neighbourhood's skyline may rise above
 it (Cabbagetown's old trees, chapel spire, far downtown towers and stars; High Park's oaks,
-ridge and clouds; the Distillery District's chimney stack, water tower and condo towers; and
-Yonge Street's skyline, moon and stars); the far side's ground row
-115 (BASE), the far sidewalk 119 to 122, the far curb 123 to 124, the cross street 125 to 133
-with its centre line on row 129, the near curb 134 to 135 (none where the cross street has
-none), the near sidewalk 136 to 138, and the stub from row 139 (STUB, the approach) to the
-bottom row, 157, which continues the game's road (the 320-wide strip on columns 100 to 259,
-lane dividers on 132, 164, 195 and 227, verge outside). The two sidewalks' middles run from
+ridge and clouds; the Distillery District's chimney stack, water tower and condo towers; The
+Beaches' high clouds and tall trees; and Yonge Street's skyline, moon and stars); the far side's
+ground row 115 (BASE), the far sidewalk 119 to 122, the far curb 123 to 124, the cross street
+125 to 133 with its centre line on row 129, the near curb 134 to 135 (none where the cross
+street has none), the near sidewalk 136 to 138, and the stub from row 139 (STUB, the approach)
+to the bottom row, 157, which continues the game's road (the 320-wide strip on columns 100 to
+259, lane dividers on 132, 164, 195 and 227, verge outside). The two sidewalks' middles run from
 (87, 157) to (94, 138) and from (273, 157) to (266, 138) (python3 art/tools/backdrops.py camera
 prints them for the current constants).
 
@@ -339,8 +339,8 @@ BASE = STUB - 24               # the far side's ground row: the houses stand on 
 # message strip (band rows 6 to 57 while a message shows) lie over it, so each neighbourhood's main read stays
 # below it. Any neighbourhood's skyline may rise above it, reading half covered while a message shows:
 # Cabbagetown's old trees, chapel spire, far downtown towers and stars; High Park's oaks, ridge and clouds;
-# the Distillery District's chimney stack, water tower and condo towers; and Yonge Street's skyline, moon and
-# stars.
+# the Distillery District's chimney stack, water tower and condo towers; The Beaches' high clouds and tall
+# trees; and Yonge Street's skyline, moon and stars.
 CALM = BASE - 70
 
 
@@ -1702,11 +1702,12 @@ def umbrella(cv, cx, base, a, b):
 
 def rc_harris(cv, x0, base):
     """The R.C. Harris Water Treatment Plant on its lawn at the east end of the beach, standing on row
-    base: buff brick Art Deco halls under hipped copper roofs, the middle hall raised over its wings,
-    tall arched windows, a stone plinth."""
-    cv.fill(x0 - 6, base - 1, W - x0 + 6, 4, "moss")
-    cv.fill(x0 - 6, base + 2, W - x0 + 6, 1, "olive")
-    for x, w, wall_h, roof_h in ((x0, 22, 11, 4), (x0 + 22, 26, 19, 6), (x0 + 48, 24, 11, 4)):
+    base: buff brick Art Deco halls under hipped copper roofs, the grand middle hall raised high over
+    its wings, tall arched windows under a tan string course, a stone plinth and the main doors in a
+    stone surround."""
+    cv.fill(x0 - 8, base - 1, W - x0 + 8, 4, "moss")
+    cv.fill(x0 - 8, base + 2, W - x0 + 8, 1, "olive")
+    for x, w, wall_h, roof_h in ((x0, 18, 16, 5), (x0 + 18, 34, 30, 8), (x0 + 52, 20, 16, 5)):
         top = base - wall_h
         cv.fill(x, top, w, wall_h, "cream")
         cv.fill(x + w - 2, top, 2, wall_h, "tan")
@@ -1715,11 +1716,15 @@ def rc_harris(cv, x0, base):
             cv.fill(x - 1 + k, top - 1 - k, w + 2 - 2 * k, 1, "turquoise" if k else "dturq")
         cv.fill(x - 1 + roof_h - 1, top - roof_h, 2, 1, "foam")
         for wx in range(x + 3, x + w - 4, 4):
-            cv.fill(wx, top + 3, 2, wall_h - 6, "dlake")
-            cv.fill(wx, top + 3, 2, 1, "cream")
-            cv.fill(wx, top + 4, 1, 1, "foam")
-    cv.fill(x0 + 33, base - 8, 4, 6, "walnut")
-    cv.fill(x0 + 31, base - 9, 8, 1, "tan")
+            cv.fill(wx, top + 4, 2, wall_h - 8, "dlake")
+            cv.fill(wx, top + 4, 2, 1, "cream")
+            cv.fill(wx, top + 5, 1, 1, "foam")
+        cv.fill(x, top + 1, w - 2, 1, "tan")
+    door = x0 + 33
+    cv.fill(door - 1, base - 12, 6, 10, "walnut")
+    cv.fill(door - 3, base - 13, 10, 1, "stone")
+    cv.fill(door - 3, base - 13, 1, 11, "stone")
+    cv.fill(door + 6, base - 13, 1, 11, "stone")
 
 
 def shade_tree(cv, cx, cy, r, base, leaf, shade, lit, trunk="dbrown", girth=4):
@@ -1822,8 +1827,11 @@ def volleyball(cv, x, base):
 
 def beaches():
     cv = sn.Canvas(W, H)
-    # a warm yellow late afternoon over the lake, small clouds and gulls
+    # a warm yellow late afternoon over the lake: two high summer cumulus in the gold, small clouds
+    # low over the water, and gulls
     sky(cv, "gold", "yellow", clouds=((58, BASE - 58, 26, 4), (CX + 70, BASE - 60, 30, 4)))
+    cloud(cv, 86, 34, 64, 11, 11)
+    cloud(cv, 232, 22, 40, 7, 12)
     birds(cv, ((100, BASE - 50), (112, BASE - 46), (232, BASE - 52)))
     # Lake Ontario out to the horizon: dark far water, then lake and shallows, foam lines, sails
     for py in range(BASE - 40, BASE - 12):
@@ -1843,14 +1851,15 @@ def beaches():
     for px in range(W):
         if hashed(px, BASE - 11, 5):
             cv.fill(px, BASE - 11, 1, 1, "foam")
-    # big shade trees: two in Kew-Balmy Beach park behind the plant, a maple and a willow by the
-    # boardwalk at the west end
-    shade_tree(cv, 338, BASE - 42, 12, BASE - 8, "canopy", "pine", "green")
-    shade_tree(cv, 310, BASE - 36, 9, BASE - 8, "green", "dgreen", "lime")
+    # tall shade trees that frame the lake: two in Kew-Balmy Beach park behind the plant, the nearer
+    # one in olive so it sits back, and a maple and a willow by the boardwalk at the west end, their
+    # crowns rising under the message strip
+    shade_tree(cv, 352, BASE - 70, 16, BASE - 10, "canopy", "pine", "green")
+    shade_tree(cv, 318, BASE - 62, 13, BASE - 10, "olive", "dolive", "moss")
     leuty(cv, CX + 96, BASE - 2)
-    rc_harris(cv, CX + 116, BASE - 9)
-    shade_tree(cv, 6, BASE - 44, 16, BASE, "green", "dgreen", "lime", girth=5)
-    willow(cv, 44, BASE - 30, 14, BASE)
+    rc_harris(cv, CX + 114, BASE - 9)
+    shade_tree(cv, 8, BASE - 66, 22, BASE, "green", "dgreen", "lime", girth=6)
+    willow(cv, 50, BASE - 36, 17, BASE)
     for cx, a, b in ((CX - 100, "ttc", "white"), (CX + 30, "gold", "dlake")):
         umbrella(cv, cx, BASE - 1, a, b)
     volleyball(cv, CX - 82, BASE - 1)
