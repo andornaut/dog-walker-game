@@ -270,7 +270,6 @@ function everyStripLine(): (FaceText & Pick<MessageLine, "names">)[] {
       line("fired", { dog, owner }),
       line("secondChance", { owner }),
       line("spareTreatUsed", { owner }),
-      line("lowHearts", { owner }),
       line("pull", { dog }),
       line("treat", { dog, hearts: "10", owner }),
       ...obstacles.flatMap((obstacle) => [

@@ -10,7 +10,6 @@ import type { ActiveDebuff, EffectSource, RunState } from "../state/runState";
 import { debuffNameMarks } from "./effectNames";
 import { faceSentenceList, type FaceText, fillFaceLine, ownerFaceText } from "./faceText";
 import type { MessageIcon, MessageLine } from "./messageStrip";
-import { MOMENTS } from "./moments";
 import { STRIP_LINE_FIELDS } from "./runText";
 
 // The message strip's lines for what just happened on the road, from the walk's events.
@@ -32,7 +31,6 @@ export function stripLine<K extends StripKey>(
 // on a heart loss, happy on a gain, neutral otherwise.
 export const STRIP_OWNER_MOODS = {
   fired: "upset",
-  lowHearts: "upset",
   luckyNeighbourGain: "happy",
   plainHit: "upset",
   secondChance: "neutral",
@@ -159,17 +157,6 @@ export function spareTreatUsedLine(data: StripData, change: HeartChange): Messag
     icon: spareTreatIcon(spareTreatGiver(change)),
     ...ownerLine(data, "spareTreatUsed", change.dog, {}),
   };
-}
-
-// Each walking owner a change left on their last heart.
-export function lowHeartsLines(data: StripData, changes: readonly Change[]): MessageLine[] {
-  return changes.flatMap((change): MessageLine[] =>
-    change.kind === "hearts" &&
-    change.after === MOMENTS.lowHearts &&
-    change.before > MOMENTS.lowHearts
-      ? [{ icon: "lastHeart", ...ownerLine(data, "lowHearts", change.dog, {}) }]
-      : [],
-  );
 }
 
 export function firedLine(data: StripData, dog: DogId): MessageLine {

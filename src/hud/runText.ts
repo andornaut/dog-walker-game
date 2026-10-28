@@ -12,7 +12,6 @@ export const STRIP_LINE_FIELDS = {
   gearFound: ["gear"],
   gearSwapped: ["gear", "old"],
   largeDog: ["dog", "speed"],
-  lowHearts: ["owner"],
   luckyNeighbour: ["gains", "hearts"],
   luckyNeighbourGain: ["dog", "hearts", "owner"],
   luckyWallet: ["amount"],
@@ -23,6 +22,17 @@ export const STRIP_LINE_FIELDS = {
   spareTreatUsed: ["owner"],
   treat: ["dog", "hearts", "owner"],
 } as const;
+
+// CLEANUP (added 2026-10-28): strip lines the walk no longer says, whose names the text may use
+// until gameplay drops them from the data; then delete this table and its paths in
+// UNSAID_RUN_TEXT.
+const UNSAID_STRIP_FIELDS = {
+  lowHearts: ["owner"],
+} as const;
+
+// CLEANUP (added 2026-10-28): the paths of the walk text lines no code says, for the text tests
+// to pass over until gameplay drops them from the data; then delete this list.
+export const UNSAID_RUN_TEXT: readonly string[] = ["strip.lowHearts"];
 
 // The {name}s each walk text line may use, by group; a line left out uses none. A line is
 // filled with fillLine(RUN_TEXT_FIELDS.<group>, gameData.runText.<group>, key, fields).
@@ -52,6 +62,7 @@ export const RUN_TEXT_FIELDS = {
   seconds: ["seconds"],
   strip: {
     ...STRIP_LINE_FIELDS,
+    ...UNSAID_STRIP_FIELDS,
     debuffStart: {
       muddy: ["seconds", "slower"],
       spotlight: ["cash", "seconds"],

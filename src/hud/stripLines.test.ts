@@ -17,7 +17,6 @@ import {
   forgivenLines,
   fullPackLine,
   gearFoundLine,
-  lowHeartsLines,
   luckyLine,
   pullLine,
   STRIP_OWNER_MOODS,
@@ -102,12 +101,6 @@ describe("the strip's other lines", () => {
         fillNames(strip.treat, { dog: kilo.name, hearts: "1", owner }),
       ],
       ["nothing for a treat at the max", treatLine(gameData, hearts(3, 3)), null],
-      [
-        "the last heart",
-        lowHeartsLines(gameData, [hearts(2, 1)])[0]?.text,
-        fillNames(strip.lowHearts, { owner }),
-      ],
-      ["no last heart already on one", lowHeartsLines(gameData, [hearts(1, 1)]), []],
       [
         "a firing",
         firedLine(gameData, "kilo").text,

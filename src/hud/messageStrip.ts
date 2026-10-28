@@ -25,7 +25,6 @@ export const MESSAGE_ICONS = {
   bump: "icon-bump",
   fired: "icon-fired",
   hint: "icon-hint",
-  lastHeart: "icon-last-heart",
   lucky: "icon-lucky",
   muddy: "icon-muddy",
   pull: "icon-trait-chaser",

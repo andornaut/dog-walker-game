@@ -32,7 +32,6 @@ import {
   forgivenLines,
   fullPackLine,
   gearFoundLine,
-  lowHeartsLines,
   luckyLine,
   pullLine,
   spareTreatSavedLine,
@@ -324,10 +323,6 @@ export class RunMoments {
       );
       this.hint({ kind: "minorBump" });
     }
-    this.sayLowHearts(
-      step.bumps.flatMap(({ change }) => (change === null ? [] : [change])),
-      step.spareTreat,
-    );
     this.spareTreatSpent(step.spareTreat, step.walk.run);
     // A contact obstacle, such as a puddle, plays its own hit sound, a splash at the touching
     // dog's feet, its edge flash and the bump's flash, with a plain obstacle's stop; the walker
@@ -387,23 +382,12 @@ export class RunMoments {
     debuffLines(gameData, debuffChanges(before, after)).forEach((line) => this.say(line));
   }
 
-  // The owners' quips at a choice or find, the spare treat it spent, the firings it brought
-  // about, and the owners it left on their last heart.
+  // The owners' quips at a choice or find, the spare treat it spent and the firings it brought
+  // about.
   afterOutcome(outcome: ChoiceOutcome): void {
     this.sayQuips(outcome.quips);
-    this.sayLowHearts(outcome.heartChanges, outcome.spareTreat);
     this.spareTreatSpent(outcome.spareTreat, outcome.state);
     this.fired(outcome.fired, outcome.state);
-  }
-
-  // The owners changes left on their last heart, after the spare treat given back with them.
-  private sayLowHearts(changes: readonly Change[], spare: HeartChange | null): void {
-    const given = changes.map((change) =>
-      spare !== null && change.kind === "hearts" && change.dog === spare.dog
-        ? { ...change, after: spare.after }
-        : change,
-    );
-    lowHeartsLines(gameData, given).forEach((line) => this.say(line));
   }
 
   // A spare treat given back: its strip line, and the treat flying from its gear's well to the

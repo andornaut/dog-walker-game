@@ -924,7 +924,9 @@ export interface RunText {
     readonly gearSwapped: string;
     // At a walk's start, for each large dog in the pack, which slows lane changes.
     readonly largeDog: string;
-    readonly lowHearts: string;
+    // CLEANUP (added 2026-10-28): no code says this line; delete this field once gameplay has
+    // dropped it from the data.
+    readonly lowHearts?: string;
     // The friendly neighbour's line: {hearts} is the total the neighbour shares, and {gains}
     // each owner's actual gain, as luckyNeighbourGain says it, in formation order and joined as
     // sentenceList joins names ("" when every owner was already at their max).
