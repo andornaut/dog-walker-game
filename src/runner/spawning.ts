@@ -196,14 +196,9 @@ function stepLength(plan: SpawnPlan<string>): number {
   return plan.scrollSpeed * plan.stepSeconds;
 }
 
-// The scroll a lane move covers: it lasts whole walk steps.
-function laneMoveLength(plan: SpawnPlan<string>): number {
-  return Math.ceil(plan.laneMoveSeconds / plan.stepSeconds - ROUNDING) * stepLength(plan);
-}
-
-// The scroll the slowest lane move covers, for the path's lane changes: it lasts whole walk steps.
-function pathMoveLength(plan: SpawnPlan<string>): number {
-  return Math.ceil(plan.pathLaneMoveSeconds / plan.stepSeconds - ROUNDING) * stepLength(plan);
+// The scroll a lane move seconds long covers: it lasts whole walk steps.
+function laneMoveLength(plan: SpawnPlan<string>, seconds: number): number {
+  return Math.ceil(seconds / plan.stepSeconds - ROUNDING) * stepLength(plan);
 }
 
 // The scroll the reaction margin covers.
@@ -217,7 +212,8 @@ export function rowSpacing(plan: SpawnPlan<string>): number {
   if (plan.laneMoveSeconds <= 0) {
     return plan.minSpacing;
   }
-  const oneMove = blockingLength(plan, 1) + stepLength(plan) + laneMoveLength(plan);
+  const oneMove =
+    blockingLength(plan, 1) + stepLength(plan) + laneMoveLength(plan, plan.laneMoveSeconds);
   return Math.max(plan.minSpacing, Math.ceil(oneMove - ROUNDING));
 }
 
@@ -266,7 +262,11 @@ interface BlockingPlace {
 // pack's hit boxes, the lane moves at the slowest the pack may make them (pathLaneMoveSeconds) and
 // the reaction margin, so the pack visibly fits between them.
 export function packGap(plan: SpawnPlan<string>, changes: number): number {
-  return plan.packHitLength + changes * pathMoveLength(plan) + reactionLength(plan);
+  return (
+    plan.packHitLength +
+    changes * laneMoveLength(plan, plan.pathLaneMoveSeconds) +
+    reactionLength(plan)
+  );
 }
 
 // A change of lane on the path, from the lane it holds on one row to the next row's lane: at is
