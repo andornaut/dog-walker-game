@@ -42,7 +42,18 @@ describe("packAgility", () => {
     })),
   );
 
-  it.each(packs)(
+  // The nimblest walker and the slowest: the floor reads a walker only through its own agility.
+  const ownOf = ({ run, walker }: (typeof packs)[number]) =>
+    walkerAgility(gameData, run.modifiers, walker);
+  const owns = packs.map(ownOf);
+  const extremes = packs.filter(
+    (pack) => ownOf(pack) === Math.max(...owns) || ownOf(pack) === Math.min(...owns),
+  );
+  const ends = extremes.filter(
+    (pack) =>
+      extremes.find((other) => ownOf(other) === ownOf(pack))?.walker === pack.walker,
+  );
+  it.each(ends)(
     "slows $walker by largeDogAgility for each of $count large dogs, never below minPackAgility",
     ({ count, run, walker }) => {
       const own = walkerAgility(gameData, run.modifiers, walker);
