@@ -29,7 +29,7 @@ busker              48x72   Yonge Street; a fixed busker facing the player,
                             nodding 1px on the beat
 strolling-busker    48x72   Kensington Market; a guitarist walking, a stepper facing the player as the
                             tourist is: a violet felt hat with a pink band and a red feather, shaggy
-                            dark brown hair to the jaw, a lime shirt with violet paisley drops, brown
+                            dark brown hair to the jaw, a plain lime shirt, brown
                             trousers, a cherry-red guitar with a cream rosette slung on a leather
                             strap, played as he walks (no case, unlike the busker); walk (4 frames,
                             100ms): road.PERSON_WALK, the strumming hand down on each lifted foot and
@@ -70,8 +70,8 @@ segway-rider        48x72   Distillery District, 1 lane; a Segway tour rider com
                             1px bob over frames 1 and 2, the tread falling down both tires 1px a frame
                             and the pennant's tip fluttering up, level, down, level
 gardener            48x72   Cabbagetown; a slow rider coming down a lane at the player, walking behind
-                            a green wheelbarrow heaped with autumn leaves (reds, oranges and browns, no
-                            gold or amber): an olive canvas sun hat with a wide brim, white hair, a
+                            a green wheelbarrow heaped with autumn leaves (a rust heap lit orange, big red
+                            and orange leaves on it, no gold or amber): an olive canvas sun hat with a wide brim, white hair, a
                             chambray shirt with rolled sleeves, a tan canvas apron, lime gardening gloves
                             on the grips, jeans and brown work boots; the barrow's black tire edge-on in
                             a grey fork in front, its stands under the tray's back corners; push (4
@@ -82,8 +82,8 @@ gardener            48x72   Cabbagetown; a slow rider coming down a lane at the 
                             the barrow before a restart, tipped, halfway, level, then braced to push
 ranger-cart         48x72   High Park, 1 lane; a park ranger's small utility cart, a stop-and-go mover
                             riding its lane at the player, facing it as pedicab does: a white roof on
-                            two posts with an amber light on top, a fan rake's head over the roof from
-                            the bed, a kraft paper bag of leaves behind the passenger seat, the ranger
+                            two posts with an amber light on top, a kraft paper bag of leaves behind
+                            the passenger seat, the ranger
                             at the wheel in an olive uniform with a gold badge and a tan flat-brimmed
                             campaign hat, a green cowl with two headlights and a white plate, a black
                             bumper and the front tires under green fenders; push (4 frames, 100ms):
@@ -163,8 +163,8 @@ carriage            112x72  Distillery District, 2 lanes; a horse-drawn tour car
                             blinkers, a dred brow band and a black collar with brass hames, white
                             feathering over its hooves; behind it the driver on the box in a black top
                             hat and a red coat, the reins in cream gloves, two passengers on the dred
-                            back seat, the black lacquered body with brass rails, red pinstripes and
-                            brass lamps, and four red-spoked wheels at the sides (laid out on 112/1.5 x
+                            back seat, the black lacquered body with brass rails and brass lamps, and
+                            four red wheels of four spokes at the sides (laid out on 112/1.5 x
                             48 as the couple is); push (4 frames, 150ms): the horse walking, a front
                             hoof lifted, the head nodding, the spokes turning; idle (4 frames, 400ms):
                             the rest pose, the head dipping with an ear turned back, the tail swishing
@@ -499,7 +499,7 @@ STROLLING_RIM = {**LIT, "violet": ("lilac", None), "green": ("lime", None)}
 
 def strolling_top(strum=0, nod=0, flourish=None, note_at=None):
     """The strolling busker's top for road.person: shaggy dark brown hair to the jaw under a violet felt hat with a pink band and
-    a red feather, a lime shirt with violet paisley drops, a cherry-red guitar slung on a leather strap, the
+    a red feather, a plain lime shirt, a cherry-red guitar slung on a leather strap, the
     fretting hand on its neck (screen right) and the strumming hand over the sound hole (strum lowers it),
     or thrown up, down or out in the flourish. In a walk frame the swing of the free arms becomes the strum."""
     def top(g, b, arms=0):
@@ -511,13 +511,10 @@ def strolling_top(strum=0, nod=0, flourish=None, note_at=None):
         g.rect(8, 19 + h, 2, 1, "dbrown")
         g.rect(22, 19 + h, 2, 1, "dbrown")
         g.rect(12, 18 + h, 8, 4, "skin1")
-        # the lime shirt, lit down its left side, a few violet paisley drops, an open neck
+        # the lime shirt, lit down its left side, an open neck
         g.rect(9, 21 + b, 14, 12, "lime")
         g.rect(20, 21 + b, 3, 12, "green")
         g.rect(9, 22 + b, 1, 10, "yellow")
-        for x, y in ((11, 22), (19, 23), (10, 31), (21, 31)):
-            g.rect(x, y + b, 2, 2, "violet")
-            g.p(x + 1, y + 1 + b, "lilac")
         g.rect(14, 21 + b, 4, 1, "skin1")
         g.rect(15, 22 + b, 2, 1, "skin1")
         # the fretting arm (screen right): the sleeve out to the elbow, the hand up on the neck
@@ -919,12 +916,12 @@ GARDENER_IDLE = tuple(dict(tilt="2", bob=b) for b in road.BREATH)
 # Righting the barrow before a restart: tipped, halfway, level, then braced to push.
 GARDENER_CUE = (dict(tilt="2"), dict(tilt="1"), dict(tilt="0"), dict(tilt="0", bob=-1))
 GARDENER_CUE_MS = 200
-# The leaves heaped in the tray, autumn reds, oranges and browns with no gold or amber, which read as coins:
-# laid in rows LEAF_STEP apart, each leaf the next colour round, so no two neighbours match, nudged up or down
-# a little and one in seven left out so the heap's own rust shows between them and the rows never read as
-# brickwork.
-GARDENER_LEAVES = ("red", "orange", "brown", "ochre", "dred", "rust", "orange", "red", "ochre")
-LEAF_STEP = 1.6
+# The leaves on the heap in the tray, red and orange with no gold or amber, which read as coins: (column from
+# the heap's centre, depth down the heap as a fraction of its height, colour), each 3.5 by 2, so they hold 2px
+# at the smallest step. The lower ones show as the barrow tips forward.
+GARDENER_LEAVES = ((-8, 0.1, "orange"), (-2.5, 0, "red"), (3.5, 0.05, "orange"), (8, 0.15, "red"),
+                   (-5, 0.33, "red"), (1, 0.33, "orange"), (6.5, 0.45, "orange"), (-8.5, 0.55, "red"),
+                   (-1.5, 0.6, "red"))
 GARDENER_RIM = {**LIT, "olive": ("moss", None), "dolive": ("olive", None), "dgreen": ("green", None),
                 "lime": ("lime", None)}
 
@@ -966,15 +963,9 @@ def gardener(lf=0, rf=0, bob=0, roll="0", tilt="0"):
         limb(g, x0, 22.5 + b, x1, grip, 3, ((0.45, "sky"), (0.8, "skin1"), (1, "lime")))
     # the leaves heaped above the tray, more of the heap showing as it tips forward
     hy, hr = 29 - 1.2 * t, 4.5 + 0.8 * t
-    g.cel(16, hy, 11.5, hr, "rust", "dbrick", "ochre")
-    for j in range(math.ceil((2 * hr - 1) / LEAF_STEP)):
-        y = hy - hr - 0.4 + j * LEAF_STEP
-        half = 11.5 * math.sqrt(max(0, 1 - ((y + 0.75 - hy) / hr) ** 2))
-        for i in range(int((2 * half - 1) // 3.2) + 1):
-            x = 16 - half + 0.3 + (j % 2) * 1.6 + i * 3.2
-            if x + 2.5 <= 16 + half + 0.5 and (i * 3 + j * 5) % 7:
-                g.rect(x, y + (i * 5 + j * 7) % 3 * 0.4, 2.5, 1.5,
-                       GARDENER_LEAVES[(i * 4 + j * 3) % len(GARDENER_LEAVES)])
+    g.cel(16, hy, 11.5, hr, "rust", "dbrick", "orange")
+    for dx, dy, c in GARDENER_LEAVES:
+        g.rect(16 + dx - 1.75, hy - hr + dy * 2 * hr, 3.5, 2, c)
     # the tray's front face, a green steel trapezoid lit along its lip; tipped, it shows less of itself and a
     # leaf or two slides over the lip
     lip = 29 + t
@@ -1036,8 +1027,7 @@ def ranger_cart(roll=None, light=0, look=0, point=0):
     """A park ranger's small utility cart coming down its lane at the pack, facing the player, laid out on
     32x48 and drawn at road.SCALE as the pedicab is: a white roof on two posts with an amber light on top, the
     ranger at the wheel on the cart's left (screen right) in an olive uniform and a tan flat-brimmed campaign
-    hat, a kraft paper bag of leaves standing in the bed behind the passenger seat and a fan rake's head over
-    the roof, the green cowl with two headlights and a white plate with its number in blue, a black bumper
+    hat, a kraft paper bag of leaves standing in the bed behind the passenger seat, the green cowl with two headlights and a white plate with its number in blue, a black bumper
     and the front tires under their fenders. roll (0 to 3) is a drive frame: the tread falls down the tires (still
     at rest) and the body dips 1px onto them on frames 1 and 2. light lights the amber beacon, look turns the
     ranger's eyes (-1 screen left, 1 right) and point raises his free hand pointing ahead (2 a pixel higher)."""
@@ -1052,12 +1042,6 @@ def ranger_cart(roll=None, light=0, look=0, point=0):
     wheels = [row[:] for row in px.px]
     px.px = [[None] * px.w for _ in range(px.h)]
     dip = 1 if roll in (1, 2) else 0
-    # the rake standing in the bed, its fan head over the roof's left end: grey tines spreading from the
-    # handle's top, a clay handle down into the roof
-    g.tri((5, 4.5), (0.5, 0), (9.5, 0), "grey")
-    for k in range(4):
-        g.rect(2 + 2 * k, 0, 1, 1.5 + k % 2, None)
-    g.rect(4.5, 3, 1, 2, "clay")
     # the amber light on the roof: a dome on a black base, lit yellow with a white core and two rays
     g.rect(13.5, 4, 5, 1, "ink")
     if light:
@@ -1394,9 +1378,8 @@ def food_cart_vendor(lf=0, rf=0, bob=0, wipe=None, bell=None, tread=0):
     g.rect(9, 30.5, 13, 4, "dslate")
     for k in range(4):
         g.rect(10 + k, 33.5 - k, 2, 1, "ochre")
-    g.p(13, 30.5, "cream")
-    # three lines of writing; a smaller board, too short to keep them apart, two
-    for y, w in ((31, 6), (32.5, 4), (34, 5)) if scale_of(g) >= 1.3 else ((31, 6), (33.5, 5)):
+    # two lines of writing at full size; a smaller board, too short to keep them apart, none
+    for y, w in ((31, 6), (33.5, 5)) if scale_of(g) >= 1.3 else ():
         g.rect(15, y, w, 0.67, "cream")
     # the awning: poles up from the cart's front corners, the canopy striped turquoise and cream, lit along
     # the top, its right in shade, a scallop under each stripe
@@ -1977,8 +1960,8 @@ def strand(g, pts, c):
 
 def carriage_wheel(g, cx, cy, rx, ry, roll):
     """A spoked wheel at the carriage's side, turned nearly edge-on: an iron tire round a deep red felloe and
-    eight red spokes (four on a small wheel) out from a brass hub, open between them, turning a quarter of a
-    spoke's spacing a frame (roll, 0 to 3) so the loop is seamless."""
+    four red spokes out from a brass hub, open between them, turning a quarter of a spoke's spacing a frame
+    (roll, 0 to 3) so the loop is seamless."""
     s, px = scale_of(g), raster(g)
     sy = getattr(g, "sy", s)
     x0, y0, ax, ay = cx * s, cy * sy, rx * s, ry * sy
@@ -1990,31 +1973,26 @@ def carriage_wheel(g, cx, cy, rx, ry, roll):
         for x in range(px.w):
             if inside(x, y, 0) and not inside(x, y, 2):
                 px.p(x, y, "red" if inside(x, y, 1.1) else "ink")
-    # a wheel under 5px across its half width keeps four spokes, which still turn a seamless quarter
-    n = 4 if ax >= 5 else 2
+    n = 2
     for k in range(n):
         a = math.pi / n * (k + roll / 4)
         dx, dy = (rx - 1) * math.cos(a), (ry - 1) * math.sin(a)
         strand(g, [(cx - dx, cy - dy), (cx + dx, cy + dy)], "red")
     g.rect(cx - 1, cy - 1.5, 2, 3, "amber")
-    g.p(cx - 1, cy - 1.5, "yellow")
 
 
 def carriage_side(g, x, flip):
     """One side of the carriage body, x its outer edge and flip -1 for the screen-right side: a black lacquered
-    panel under a brass rail with a red pinstripe, and a brass carriage lamp on its post."""
+    panel under a brass rail, and a brass carriage lamp on its post."""
     def at(v, w=1):
         return x + v if flip == 1 else x - v - w
 
     g.rect(at(0, 18), 22, 18, 11, "navy")
     g.rect(at(0, 18), 22, 18, 1, "amber")
-    g.rect(at(1, 16), 24, 16, 1, "dred")
-    g.rect(at(1, 16), 31, 16, 1, "dred")
     # the lamp: a post up from the rail, a brass case, cream glass, a brass cap
     g.rect(at(2.5, 1), 17, 1, 5, "ink")
     g.rect(at(1, 4), 12, 4, 5.5, "amber")
     g.rect(at(1.5, 3), 13, 3, 3.5, "cream")
-    g.p(at(1.5), 13, "white")
     g.rect(at(0.5, 5), 11, 5, 1, "orange")
 
 
