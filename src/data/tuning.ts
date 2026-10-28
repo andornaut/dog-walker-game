@@ -14,7 +14,7 @@ export const TUNING = {
     dartStopLanesMin: 2,
     // About this many distraction movers step on and off each zone's edge lanes as scenery,
     // spread through it.
-    distractionsPerZone: 10,
+    distractionsPerZone: 13,
     // The gear drops a neighbourhood places on average, by its position in the walk from 1: the
     // whole part always, and one more at the fractional part's chance.
     gearDropsPerZone: { 1: 0.5, 2: 0.8, 3: 1.2, 4: 1.5 },
