@@ -1,10 +1,11 @@
 import {
   laneAt,
   type MoverPath,
-  type MoverStep,
-  nextLength,
+  type RoadPoint,
+  staysInReach,
   type StepShape,
   stepsTaken,
+  takeMove,
 } from "./movers";
 
 // A shy hopper hops away from the pack as the pack draws near. Its first hop is chosen as its cue
@@ -36,12 +37,8 @@ export function shyChoices(path: ShyPath): StepShape[] {
     return [];
   }
   const lane = path.lane + lanes;
-  const { count, first } = path.reach;
   return path.shapes.filter(
-    (shape) =>
-      lane + shape.lanes >= first &&
-      lane + shape.lanes < first + count &&
-      rows + shape.travel >= -path.rise,
+    (shape) => staysInReach(path.reach, lane, shape) && rows + shape.travel >= -path.rise,
   );
 }
 
@@ -55,29 +52,19 @@ export function takeHop(path: ShyPath, shape: StepShape | null): ShyPath {
   if (shape === null) {
     return { ...path, pending: [] };
   }
-  const step: MoverStep = {
-    at,
-    lanes: shape.lanes,
-    length: nextLength(path),
-    travel: shape.travel * path.burst,
-    ...(path.steps.length > 0 ? { uncued: true } : {}),
-  };
-  return { ...path, pending: path.pending.slice(1), steps: [...path.steps, step] };
+  return takeMove(at, path.steps.length > 0, shape, path);
 }
 
-// Where the pack is as a hop is chosen: its centre in road pixels, x across from the road's left
-// edge and y down the screen, and the lanes it is in or moving into.
-export interface PackPlace {
+// Where the pack is as a hop is chosen: its centre, and the lanes it is in or moving into.
+export interface PackPlace extends RoadPoint {
   readonly lanes: readonly number[];
-  readonly x: number;
-  readonly y: number;
 }
 
 // The hop away from the pack: centre is the hopper's centre now, and a hop moves it a cell per
 // lane across and burst per row along the road.
 export function awayHop(
   cellLength: number,
-  centre: { readonly x: number; readonly y: number },
+  centre: RoadPoint,
   pack: PackPlace,
   choices: readonly StepShape[],
   burst: number,

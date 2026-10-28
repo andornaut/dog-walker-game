@@ -292,7 +292,7 @@ export function stepsTaken(path: {
 }
 
 // How long a stalker's or shy hopper's next move lasts: its entry in lengths, by the moves taken.
-export function nextLength(path: {
+function nextLength(path: {
   readonly lengths: readonly number[];
   readonly steps: readonly MoverStep[];
 }): number {
@@ -301,6 +301,37 @@ export function nextLength(path: {
     throw new Error("A stalker or shy hopper has a length for each of its moves");
   }
   return length;
+}
+
+// Whether a stalker or shy hopper in lane, making a move of shape, stays within its reach.
+export function staysInReach(reach: LaneSpan, lane: number, shape: StepShape): boolean {
+  return lane + shape.lanes >= reach.first && lane + shape.lanes < reach.first + reach.count;
+}
+
+// A stalker's or shy hopper's path with its next pending move taken as shape, at a scroll of at
+// since it spawned, uncued when it has no cue of its own: a cell per lane across and burst per row.
+export function takeMove<
+  Path extends {
+    readonly burst: number;
+    readonly lengths: readonly number[];
+    readonly pending: readonly unknown[];
+    readonly steps: readonly MoverStep[];
+  },
+>(at: number, uncued: boolean, shape: StepShape, path: Path): Path {
+  const step: MoverStep = {
+    at,
+    lanes: shape.lanes,
+    length: nextLength(path),
+    travel: shape.travel * path.burst,
+    ...(uncued ? { uncued: true } : {}),
+  };
+  return { ...path, pending: path.pending.slice(1), steps: [...path.steps, step] };
+}
+
+// A point on the road, in road pixels: x across from the road's left edge, y down the screen.
+export interface RoadPoint {
+  readonly x: number;
+  readonly y: number;
 }
 
 // How far through a step a mover is, from 0 before it to 1 after it.

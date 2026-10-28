@@ -1,4 +1,11 @@
-import { type MoverPath, type MoverStep, nextLength, type StepShape, stepsTaken } from "./movers";
+import {
+  type MoverPath,
+  type RoadPoint,
+  staysInReach,
+  type StepShape,
+  stepsTaken,
+  takeMove,
+} from "./movers";
 
 // A stalker steps toward the pack while it is still ahead of it. Its first step is chosen as its
 // cue begins; a later step has no cue of its own and is chosen as it starts. Each is chosen from
@@ -48,12 +55,8 @@ export function approachChoices(path: ApproachPath): StepShape[] {
     return [];
   }
   const lane = path.lane + lanes;
-  const { count, first } = path.reach;
   return APPROACH_STEPS.filter(
-    (shape) =>
-      lane + shape.lanes >= first &&
-      lane + shape.lanes < first + count &&
-      rows + shape.travel <= path.rows,
+    (shape) => staysInReach(path.reach, lane, shape) && rows + shape.travel <= path.rows,
   );
 }
 
@@ -67,20 +70,7 @@ export function takeStep(path: ApproachPath, shape: StepShape | null): ApproachP
   if (shape === null) {
     return { ...path, pending: [] };
   }
-  const step: MoverStep = {
-    at,
-    lanes: shape.lanes,
-    length: nextLength(path),
-    travel: shape.travel * path.burst,
-    ...(path.pending[0]?.kind === "near" ? { uncued: true } : {}),
-  };
-  return { ...path, pending: path.pending.slice(1), steps: [...path.steps, step] };
-}
-
-// A point on the road, in road pixels: x across from the road's left edge, y down the screen.
-interface RoadPoint {
-  readonly x: number;
-  readonly y: number;
+  return takeMove(at, path.pending[0]?.kind === "near", shape, path);
 }
 
 // The step that brings it nearest the pack: centre is the stalker's centre now, and the step
