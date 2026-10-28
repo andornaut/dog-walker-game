@@ -1401,9 +1401,9 @@ def ice_cream_truck(f=0, roll=None):
     The rear doors split down the middle, each with a window; a pink drip stripe runs across them; tall red
     tail lights sit at the outer corners, amber blinkers under them; then the plate, the bumper and both rear
     wheels. A mirror pokes out on the left and the serving hatch's striped awning on the right. f swaps the
-    lit blinker and the music note. roll (0 to 3) is a drive frame: tread lines climb the tires, the body dips
-    1px onto them on frames 1 and 2, the cone sign rocks on its post the other way, and a note floats up beside
-    it. The road outline and the lit rim."""
+    lit blinker and the white music note. roll (0 to 3) is a drive frame: tread lines climb the tires, the
+    body dips 1px onto them on frames 1 and 2, the cone sign rocks on its post the other way, and a note floats
+    up beside it. The road outline and the lit rim."""
     import obstacles  # obstacles imports this module
 
     g = edged(Grid(56, 50))
@@ -1418,20 +1418,18 @@ def ice_cream_truck(f=0, roll=None):
     px.px = [[None] * px.w for _ in range(px.h)]
     dip = 1 if roll in (1, 2) else 0
     rock = -dip if roll is not None else 0
-    # the cone sign on the roof: a tall waffle cone, hatched brown, under a pink scoop with a cherry
+    # the cone sign on the roof: a tall waffle cone, lit tan and shaded ochre, under a pink scoop with a cherry
     g.tri((23.5, 5.5 + rock), (32.5, 5.5 + rock), (28, 12.5 + rock), "tan")
     g.tri((28, 5.5 + rock), (32.5, 5.5 + rock), (28, 12.5 + rock), "ochre")
-    for x, y in ((25.5, 6.5), (28.5, 7), (27, 8.5), (29.5, 9), (28, 10.5)):
-        g.p(x, y + rock, "brown")
     g.ell(28, 4 + rock, 4.6, 2.6, "pink", "mauve", "white")
     g.rect(28, 0.5 + rock, 1.5, 1.5, "red")
     # the music note: left of the sign at rest (f 0) or right (f 1); driving, it floats up a row a frame
     nx, ny = (12, 4) if f == 0 else (41, 3)
     if roll is not None:
         nx, ny = (12, 5 - roll) if roll < 2 else (41, 7 - roll)
-    g.rect(nx + 2, ny, 1, 6, "plum")
-    g.rect(nx + 2, ny, 3, 1, "plum")
-    g.rect(nx, ny + 5, 2, 2, "plum")
+    g.rect(nx + 2, ny, 1, 6, "white")
+    g.rect(nx + 2, ny, 3, 1, "white")
+    g.rect(nx, ny + 5, 3, 2, "white")
     # the roof edge, then the box: lit along the top and the left, shaded down the right
     g.rect(5, 12, 46, 2, "lgrey")
     g.rect(5, 12, 46, 1, "white")
@@ -1453,8 +1451,8 @@ def ice_cream_truck(f=0, roll=None):
     # the drip stripe: a pink band with drips hanging from it
     g.rect(3, 30, 50, 3, "pink")
     g.rect(3, 32, 50, 1, "mauve")
-    for x in range(6, 50, 5):
-        g.rect(x, 33, 1, 1 + (x // 5) % 2, "pink")
+    for i, x in enumerate(range(6, 50, 8)):
+        g.rect(x, 33, 2, 1 + i % 2, "pink")
     # tail lights up the outer corners, blinkers under them, the plate between
     for x in (4, 48):
         g.rect(x, 15, 4, 14, "red")
