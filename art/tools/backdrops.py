@@ -13,7 +13,8 @@ its items spawn: only the verge's ground.
 Rows, in band rows (0 to 157): the sky is one flat colour above row 45 (CALM), under the message
 strip (band rows 6 to 57 while a message shows), but any neighbourhood's skyline may rise above
 it (Cabbagetown's old trees, chapel spire, far downtown towers and stars; High Park's oaks,
-ridge and clouds; and Yonge Street's skyline, moon and stars); the far side's ground row
+ridge and clouds; the Distillery District's chimney stack, water tower and condo towers; and
+Yonge Street's skyline, moon and stars); the far side's ground row
 115 (BASE), the far sidewalk 119 to 122, the far curb 123 to 124, the cross street 125 to 133
 with its centre line on row 129, the near curb 134 to 135 (none where the cross street has
 none), the near sidewalk 136 to 138, and the stub from row 139 (STUB, the approach) to the
@@ -338,7 +339,8 @@ BASE = STUB - 24               # the far side's ground row: the houses stand on 
 # message strip (band rows 6 to 57 while a message shows) lie over it, so each neighbourhood's main read stays
 # below it. Any neighbourhood's skyline may rise above it, reading half covered while a message shows:
 # Cabbagetown's old trees, chapel spire, far downtown towers and stars; High Park's oaks, ridge and clouds;
-# and Yonge Street's skyline, moon and stars.
+# the Distillery District's chimney stack, water tower and condo towers; and Yonge Street's skyline, moon and
+# stars.
 CALM = BASE - 70
 
 
@@ -1147,23 +1149,45 @@ def warehouse(cv, x, w, top, base, wall, trim="stone", glass="gold", rows=2):
             cv.fill(wx + 3, wy + 2, 1, 7, trim)
 
 
-def chimney(cv, x, top, w=10):
-    """The Boiler House's brick chimney stack standing on row BASE: its right 3 columns in shade, a dbrick
-    cap and a band below it."""
-    cv.fill(x, top, w, BASE - top, "brick")
-    cv.fill(x + w - 3, top, 3, BASE - top, "dbrick")
-    cv.fill(x - 1, top - 1, w + 2, 2, "dbrick")
-    cv.fill(x - 1, top + 6, w + 2, 1, "dbrick")
+def chimney(cv, x, top, w=12):
+    """The Gooderham & Worts chimney stack standing on row BASE: brick stepping in a column a side at 30
+    and 62 rows below its top, its right 3 columns in shade, a dbrick cap, a band below it and another
+    at the lower step."""
+    steps = ((top, w - 4), (top + 30, w - 2), (top + 62, w))
+    for k, (y0, sw) in enumerate(steps):
+        y1 = steps[k + 1][0] if k + 1 < len(steps) else BASE
+        x0 = x + (w - sw) // 2
+        cv.fill(x0, y0, sw, y1 - y0, "brick")
+        cv.fill(x0 + sw - 3, y0, 3, y1 - y0, "dbrick")
+    cv.fill(x + 1, top - 2, w - 2, 3, "dbrick")
+    cv.fill(x + 1, top + 7, w - 2, 1, "dbrick")
+    cv.fill(x, top + 62, w, 1, "dbrick")
 
 
-def water_tower(cv, tx, low):
-    """A bark wooden water tank on two dstone legs whose feet stand on row low, under a stepped walnut cap."""
-    for lx in (tx - 6, tx + 5):
-        cv.fill(lx, low - 16, 2, 16, "dstone")
-    cv.fill(tx - 9, low - 28, 20, 12, "bark")
-    cv.fill(tx + 7, low - 28, 4, 12, "walnut")
+def water_tower(cv, tx, low, legs=13):
+    """A rooftop water tower whose feet stand on row low: two dstone legs legs rows tall, X-braced, under
+    a bark wooden tank on a walnut ledge and a stepped walnut cap."""
+    tank = low - legs
+    for lx in (tx - 7, tx + 6):
+        cv.fill(lx, tank, 2, legs, "dstone")
+    cv.line(tx - 6, tank + 2, tx + 6, low - 4, "dstone")
+    cv.line(tx + 6, tank + 2, tx - 6, low - 4, "dstone")
+    cv.fill(tx - 9, tank - 12, 20, 12, "bark")
+    cv.fill(tx + 7, tank - 12, 4, 12, "walnut")
+    cv.fill(tx - 10, tank - 1, 22, 1, "walnut")
     for k in range(4):
-        cv.fill(tx - 7 + 2 * k, low - 29 - k, 16 - 4 * k, 1, "walnut")
+        cv.fill(tx - 7 + 2 * k, tank - 13 - k, 16 - 4 * k, 1, "walnut")
+
+
+def condo(cv, x, w, top, body="skin2", shade="brown", glint="tan"):
+    """A far glass condo tower from row top down to row BASE, dim in the haze: a flat body, its right
+    quarter in shade, a 2-row crown, and floor lines every 4 rows a step lighter across the lit part."""
+    sw = max(3, w // 4)
+    cv.fill(x, top, w, BASE - top, body)
+    cv.fill(x + w - sw, top, sw, BASE - top, shade)
+    for y in range(top + 5, BASE, 4):
+        cv.fill(x + 2, y, w - sw - 4, 1, glint)
+    cv.fill(x + 2, top - 2, w - 4, 2, shade)
 
 
 def sign_board(cv, mid, y, text, board, letters):
@@ -1362,9 +1386,13 @@ def distillery():
     # square's far side, gulls
     sunset(cv, DISTILLERY_SKY, BASE - 36)
     sun(cv, CX + 4, BASE - 49, 12, "yellow", BASE - 37)
-    birds(cv, ((48, BASE - 62), (62, BASE - 58), (296, BASE - 64)))
-    chimney(cv, CX - 120, BASE - 66)
-    water_tower(cv, CX + 140, BASE - 30)
+    # glass condo towers rising behind the old brick either side of the sun, the chimney stack, and the
+    # water tower on the right warehouse's roof
+    for x, w, top in ((132, 22, 22), (206, 26, 10), (236, 18, 32)):
+        condo(cv, x, w, top)
+    birds(cv, ((30, BASE - 64), (84, BASE - 60), (290, BASE - 76)))
+    chimney(cv, CX - 121, 12)
+    water_tower(cv, CX + 142, BASE - 46)
     # round the square: the gallery and an old limestone mill on the left, the long low warehouse across
     # it under the DISTILLERY sign, the theatre and another warehouse on the right
     gallery(cv, -10, 80, BASE - 44, BASE)
@@ -1372,7 +1400,7 @@ def distillery():
     warehouse(cv, CX - 54, 108, BASE - 36, BASE, "brick", "stone", rows=0)
     sign_board(cv, CX, BASE - 30, "DISTILLERY", "dbrick", "cream")
     theatre(cv, CX + 54, 80, BASE - 50, BASE)
-    warehouse(cv, CX + 134, 56, BASE - 40, BASE, "brick", "stone")
+    warehouse(cv, CX + 134, 56, BASE - 46, BASE, "brick", "stone", rows=3)
     # the square's paving, café tables under umbrellas, Still Dancing, the LOVE sign, lamps and passers-by
     def paving(px, py):
         return "brick" if hashed(px, py, 19) else "brown"

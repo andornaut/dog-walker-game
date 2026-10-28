@@ -900,6 +900,12 @@ def distillery_view():
                  walk="brown", lawn=paving, walk_fleck="brick")
     bd.bands(a, 0, 13, bd.DISTILLERY_SKY, w=AW)
     bd.sun(a, 38, 9, 5, "yellow", 12)
+    # the condo towers behind the old brick either side of the sun, dim in the haze
+    for x, w, top in ((23, 7, 3), (47, 8, 0)):
+        a.fill(x, top, w, FAR_Y - top, "skin2")
+        a.fill(x + w - 2, top, 2, FAR_Y - top, "brown")
+        for y in range(top + 2, FAR_Y, 3):
+            a.fill(x + 1, y, w - 4, 1, "tan")
     a.fill(2, 0, 5, FAR_Y, "brick")
     a.fill(5, 0, 2, FAR_Y, "dbrick")
     # the gallery, the low warehouse across the square under its sign, the theatre's lit lobby and marquee
