@@ -1453,9 +1453,16 @@ def fan(g, pts, c):
 
 def arrow_sign(g, turn, b):
     """The arrow sign turned turn degrees: a red board with a yellow face inset, the face shaded amber along
-    its lower and right edges against the red."""
+    its lower and right edges against the red. Drawn under 1x, the face is its shaft alone, so the head
+    stays a solid red point: an inset head that small rasterizes as a bar across the shaft and reads as a
+    cross."""
     fan(g, turned(SIGN_BOARD, turn, b), "red")
-    fan(g, turned(SIGN_FACE, turn, b), "yellow")
+    if scale_of(g) >= 1:
+        fan(g, turned(SIGN_FACE, turn, b), "yellow")
+    else:
+        t0, s0, s1, t1 = turned(SIGN_FACE[:2] + SIGN_FACE[-2:], turn, b)
+        g.tri(t0, s0, s1, "yellow")
+        g.tri(t0, s1, t1, "yellow")
     px = raster(g)
     yellow, red = K["yellow"], K["red"]
     shade = [(x, y) for y in range(px.h) for x in range(px.w) if px.px[y][x] == yellow
