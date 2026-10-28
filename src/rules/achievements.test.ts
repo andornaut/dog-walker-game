@@ -5,6 +5,7 @@ import type { AchievementCondition, DogId, TallyId, ZoneId } from "../data/types
 import { keysOf } from "../lib/records";
 import { type SaveDocument } from "../save/schema";
 import { runFactsFor, saveFor } from "../testing/achievements";
+import { defined } from "../testing/defined";
 import { testState } from "../testing/runState";
 import { newPlayerSave, veteranSave } from "../testing/saves";
 import {
@@ -407,7 +408,18 @@ const RUN_KINDS: readonly AchievementCondition["kind"][] = [
 ];
 
 describe("newlyEarned", () => {
-  it.each(ALL_IDS)("earns %s from the least its goal asks for, and only once", (id) => {
+  // The first badge of each set of condition kinds: each kind's threshold is checked above, and
+  // every badge together below.
+  const kindsOf = (id: string) =>
+    defined(gameData.achievements.find((each) => each.id === id))
+      .conditions.map(({ kind }) => kind)
+      .sort()
+      .join();
+  const sampleIds = ALL_IDS.filter(
+    (id, i) => ALL_IDS.findIndex((other) => kindsOf(other) === kindsOf(id)) === i,
+  );
+
+  it.each(sampleIds)("earns %s from the least its goal asks for, and only once", (id) => {
     const after = saveFor(gameData, [id], newPlayerSave);
     const run = runFactsFor(gameData, [id]);
     expect(newlyEarned(gameData, newPlayerSave, after, run)).toContain(id);
