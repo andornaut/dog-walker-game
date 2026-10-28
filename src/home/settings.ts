@@ -3,7 +3,8 @@ import { clamp01 } from "../lib/numbers";
 import type { Rect } from "../lib/rect";
 import type { Settings } from "../save/schema";
 import { type CloseControl, closeControl } from "../ui/closeControl";
-import { textFitStylesOnLines } from "../ui/textFit";
+import { type FontMetrics, inkRowsOfLines } from "../ui/fontMetrics";
+import { TEXT_SCALE, textFitStylesOnLines } from "../ui/textFit";
 import { cardBand, HOME_LAYOUT } from "./homeLayout";
 
 // The settings screen moves a volume in 5% steps, from 0 to 1.
@@ -64,86 +65,149 @@ export function soundVolumes(settings: Settings): { music: number; sfx: number }
 
 export type SettingsRowKind = "button" | "slider" | "switch";
 
+// A row as the layout needs it: its kind and, for a switch or button row, how many lines its
+// note wraps onto.
+export type SettingsRowShape =
+  { kind: "button" | "switch"; noteLines: number } | { kind: "slider" };
+
+export interface SettingsRowLayout {
+  // The switch's or the button's face, or null on a slider row.
+  control: Rect | null;
+  // The note's first line's capitals' top, or null on a slider row.
+  noteY: number | null;
+  rect: Rect;
+}
+
 export interface SettingsLayout {
   // The title band across the card's top, the title's capitals centred on it.
   band: Rect;
   close: CloseControl;
   panel: Rect;
   // The rows, top to bottom.
-  rows: Rect[];
+  rows: SettingsRowLayout[];
   // A tan rule along the top of every row after the first, SEPARATOR_INSET in from its sides.
   separators: Rect[];
   title: { x: number; y: number };
   track: SliderTrack & { dy: number; height: number };
 }
 
-// Offsets from a row's top-left corner. Every text is at 2x. A button row has its 16x16 icon
-// and its title-font label centred down it. A slider row has its 16x16 icon, its title-font
-// label and its percentage over the track. A switch row has its icon and label over its note,
-// wrapped to noteWidth in up to two body-font lines a linePitch apart, with the switch centred
-// down the row's right side.
+// The fonts a settings row's height and its note's place follow.
+export interface SettingsFonts {
+  body: FontMetrics;
+  title: FontMetrics;
+}
+
+// Offsets from a row's top-left corner, every text at 2x. Each row has its 16x16 icon 3px above
+// its title-font label's capitals. A switch or button row has its note under them in body text,
+// labelGap rows under the label's capitals, from the icon's column, wrapped onto up to
+// note.lines lines, and inkFoot rows under the note's lowest ink. Its control sits pad in from
+// the row's right, centred down from the label's capitals to the note's lowest ink. A slider row
+// is slider.height tall, with its percentage on the label's line, ending pad in from the row's
+// right, and its track under them, pad in from either side.
 export const SETTINGS_ROW = {
-  button: { iconDy: 14, labelDy: 17 },
-  height: { button: 44, slider: 44, switch: 62 },
-  labelDx: 26,
-  slider: { iconDy: 5, labelDy: 8 },
-  switch: {
-    iconDy: 5,
-    labelDy: 8,
-    linePitch: 20,
-    noteDy: 24,
-    // The most lines a note wraps to.
-    noteLines: 2,
-    noteWidth: 156,
-    scale: 2,
-    switch: { dx: 192, dy: 23, height: 16, width: 32 },
-  },
+  button: { height: 24, width: 52 },
+  // Between a note's room and the control beside it.
+  controlGap: 10,
+  icon: { dx: 6, dy: 9 },
+  inkFoot: 14,
+  label: { dx: 26, dy: 12 },
+  labelGap: 10,
+  note: { dx: 6, lines: 2 },
+  pad: 8,
+  slider: { height: 56 },
+  switch: { height: 16, width: 32 },
+  track: { dy: 30, height: 10, knobWidth: 10 },
+  width: 328,
 } as const;
 
-// A switch row's note: up to noteLines lines at 2x within noteWidth, its glyphs closer or at
-// 1x where they would not fit.
-export const SWITCH_NOTE_FIT = {
-  room: SETTINGS_ROW.switch.noteWidth,
-  styles: textFitStylesOnLines(SETTINGS_ROW.switch.noteLines),
-};
+// The room a switch or button row's note wraps in: from the icon's column to controlGap short
+// of its control.
+export function noteRoom(kind: "button" | "switch"): number {
+  const { controlGap, note, pad, width } = SETTINGS_ROW;
+  return width - pad - SETTINGS_ROW[kind].width - controlGap - note.dx;
+}
 
-const PANEL = { width: 248 };
+// The notes, fitted alike: up to note.lines lines at 2x with the glyphs' own spacing, closer or
+// at 1x only where they would not fit.
+export const SETTINGS_NOTE_STYLES = textFitStylesOnLines(SETTINGS_ROW.note.lines);
+
+// The note's first line's capitals' top, from the row's top: labelGap clear rows under the
+// label's capitals.
+export function noteDy(title: FontMetrics): number {
+  const { label, labelGap } = SETTINGS_ROW;
+  return label.dy + title.capHeight * TEXT_SCALE + labelGap;
+}
+
+const PANEL = { width: 344 };
 // The rows start under the band; the panel ends this far under the last.
 const ROWS_TOP = 38;
-const PANEL_FOOT = 14;
+const PANEL_FOOT = 6;
 const SEPARATOR_INSET = 4;
 
-// The rows, by kind, on a card centred on the screen, under its title band with the close
-// control in it. Settings covers the screen wherever it opens from.
+// The note's lowest ink, from the row's top.
+function noteInkBottom(fonts: SettingsFonts, noteLines: number): number {
+  return noteDy(fonts.title) + inkRowsOfLines(fonts.body, noteLines) * TEXT_SCALE;
+}
+
+function rowHeight(fonts: SettingsFonts, shape: SettingsRowShape): number {
+  return shape.kind === "slider"
+    ? SETTINGS_ROW.slider.height
+    : noteInkBottom(fonts, shape.noteLines) + SETTINGS_ROW.inkFoot;
+}
+
+// A switch or button row's control, right-aligned and centred down from the label's capitals to
+// the note's lowest ink.
+function rowControl(fonts: SettingsFonts, row: Rect, shape: SettingsRowShape): Rect | null {
+  if (shape.kind === "slider") {
+    return null;
+  }
+  const size = SETTINGS_ROW[shape.kind];
+  const middle = Math.floor((SETTINGS_ROW.label.dy + noteInkBottom(fonts, shape.noteLines)) / 2);
+  return {
+    ...size,
+    x: row.x + row.width - SETTINGS_ROW.pad - size.width,
+    y: row.y + middle - size.height / 2,
+  };
+}
+
+// The rows on a card centred on the screen, under its title band with the close control in it.
+// Settings covers the screen wherever it opens from.
 export function settingsLayout(
+  fonts: SettingsFonts,
   screen: { height: number; width: number },
-  kinds: readonly SettingsRowKind[],
+  shapes: readonly SettingsRowShape[],
 ): SettingsLayout {
-  const rowsHeight = kinds.reduce((sum, kind) => sum + SETTINGS_ROW.height[kind], 0);
-  const height = ROWS_TOP + rowsHeight + PANEL_FOOT;
+  const heights = shapes.map((shape) => rowHeight(fonts, shape));
+  const height = ROWS_TOP + heights.reduce((sum, rows) => sum + rows, 0) + PANEL_FOOT;
   const x = Math.round((screen.width - PANEL.width) / 2);
   const y = Math.round((screen.height - height) / 2);
+  const rowX = x + (PANEL.width - SETTINGS_ROW.width) / 2;
   let rowY = y + ROWS_TOP;
-  const rows = kinds.map((kind) => {
-    const row = { height: SETTINGS_ROW.height[kind], width: 232, x: x + 8, y: rowY };
-    rowY += row.height;
-    return row;
+  const rows = shapes.map((shape, i) => {
+    const rect = { height: heights[i] ?? 0, width: SETTINGS_ROW.width, x: rowX, y: rowY };
+    rowY += rect.height;
+    return {
+      control: rowControl(fonts, rect, shape),
+      noteY: shape.kind === "slider" ? null : rect.y + noteDy(fonts.title),
+      rect,
+    };
   });
   const panel = { ...PANEL, height, x, y };
   const band = cardBand(panel);
+  const { pad, track } = SETTINGS_ROW;
   return {
     band,
     close: closeControl(panel),
     panel,
     rows,
-    separators: rows.slice(1).map((row) => ({
+    separators: rows.slice(1).map(({ rect }) => ({
       height: 1,
-      width: row.width - 2 * SEPARATOR_INSET,
-      x: row.x + SEPARATOR_INSET,
-      y: row.y,
+      width: rect.width - 2 * SEPARATOR_INSET,
+      x: rect.x + SEPARATOR_INSET,
+      y: rect.y,
     })),
     title: { x: x + PANEL.width / 2, y: band.y + HOME_LAYOUT.card.band.titleY },
-    track: { dy: 26, height: 10, knobWidth: 10, width: 216, x: x + 16 },
+    track: { ...track, width: SETTINGS_ROW.width - 2 * pad, x: rowX + pad },
   };
 }
 
@@ -152,8 +216,10 @@ export function settingsLayout(
 // icon-share, centred on the first line's capitals (icon.dy from their top), then the steps in
 // body text, wrapped to up to lines lines a linePitch apart.
 export const INSTALL_STEPS = {
+  foot: 14,
   icon: { dy: -2, gap: 6, size: 16 },
-  linePitch: SETTINGS_ROW.switch.linePitch,
+  // The body's line pitch at 2x.
+  linePitch: 20,
   lines: 3,
   pad: HOME_LAYOUT.card.pad,
   stepsDy: 4,
@@ -182,7 +248,7 @@ export function installStepsLayout(
   screen: { height: number; width: number },
   lines: number,
 ): InstallStepsLayout {
-  const height = ROWS_TOP + lines * INSTALL_STEPS.linePitch + PANEL_FOOT;
+  const height = ROWS_TOP + lines * INSTALL_STEPS.linePitch + INSTALL_STEPS.foot;
   const card = {
     height,
     width: INSTALL_STEPS.width,

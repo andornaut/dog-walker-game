@@ -2263,82 +2263,129 @@
     "settings": {
       "band": {
         "height": 24,
-        "width": 236,
-        "x": 62,
-        "y": 154
+        "width": 332,
+        "x": 14,
+        "y": 108
       },
       "close": {
         "hit": {
           "height": 44,
           "width": 44,
-          "x": 260,
-          "y": 148
+          "x": 308,
+          "y": 102
         },
-        "x": 276,
-        "y": 156
+        "x": 324,
+        "y": 110
       },
       "panel": {
-        "width": 248,
-        "height": 264,
-        "x": 56,
-        "y": 148
+        "width": 344,
+        "height": 356,
+        "x": 8,
+        "y": 102
       },
       "rows": [
         {
-          "height": 62,
-          "width": 232,
-          "x": 64,
-          "y": 186
+          "control": {
+            "height": 16,
+            "width": 32,
+            "x": 304,
+            "y": 161
+          },
+          "noteY": 172,
+          "rect": {
+            "height": 60,
+            "width": 328,
+            "x": 16,
+            "y": 140
+          }
         },
         {
-          "height": 44,
-          "width": 232,
-          "x": 64,
-          "y": 248
+          "control": null,
+          "noteY": null,
+          "rect": {
+            "height": 56,
+            "width": 328,
+            "x": 16,
+            "y": 200
+          }
         },
         {
-          "height": 44,
-          "width": 232,
-          "x": 64,
-          "y": 292
+          "control": null,
+          "noteY": null,
+          "rect": {
+            "height": 56,
+            "width": 328,
+            "x": 16,
+            "y": 256
+          }
         },
         {
-          "height": 62,
-          "width": 232,
-          "x": 64,
-          "y": 336
+          "control": {
+            "height": 16,
+            "width": 32,
+            "x": 304,
+            "y": 343
+          },
+          "noteY": 344,
+          "rect": {
+            "height": 80,
+            "width": 328,
+            "x": 16,
+            "y": 312
+          }
+        },
+        {
+          "control": {
+            "height": 24,
+            "width": 52,
+            "x": 284,
+            "y": 409
+          },
+          "noteY": 424,
+          "rect": {
+            "height": 60,
+            "width": 328,
+            "x": 16,
+            "y": 392
+          }
         }
       ],
       "separators": [
         {
           "height": 1,
-          "width": 224,
-          "x": 68,
-          "y": 248
+          "width": 320,
+          "x": 20,
+          "y": 200
         },
         {
           "height": 1,
-          "width": 224,
-          "x": 68,
-          "y": 292
+          "width": 320,
+          "x": 20,
+          "y": 256
         },
         {
           "height": 1,
-          "width": 224,
-          "x": 68,
-          "y": 336
+          "width": 320,
+          "x": 20,
+          "y": 312
+        },
+        {
+          "height": 1,
+          "width": 320,
+          "x": 20,
+          "y": 392
         }
       ],
       "title": {
         "x": 180,
-        "y": 161
+        "y": 115
       },
       "track": {
-        "dy": 26,
+        "dy": 30,
         "height": 10,
         "knobWidth": 10,
-        "width": 216,
-        "x": 72
+        "width": 312,
+        "x": 24
       }
     },
     "shop": {

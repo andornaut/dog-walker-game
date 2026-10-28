@@ -11,7 +11,7 @@ import type { GameData } from "../data/types";
 import { dotRects, HELP_LAYOUT } from "../help/helpLayout";
 import { END_LAYOUT } from "../home/endLayout";
 import { HOME_LAYOUT } from "../home/homeLayout";
-import { settingsLayout } from "../home/settings";
+import { settingsLayout, type SettingsRowShape } from "../home/settings";
 import { SHOP_LAYOUT, shopTabRects } from "../home/shopLayout";
 import { STATS_LAYOUT, statsTabRects } from "../home/statsLayout";
 import { CELEBRATION_LAYOUT } from "../hud/celebrationLayout";
@@ -95,6 +95,16 @@ function ownerLead(body: FontMetrics, slot: LeadSlot, line: Rect) {
   const lead = ownerLeadLayout(body, slot, 0);
   return { ...lead, panel: ownerLeadPanel(line, lead) };
 }
+
+// SettingsScene's rows with the install row: sound, music, effects, reduced motion and install,
+// each note on the lines the shipped notes wrap to (src/home/settings.test.ts checks them).
+export const SETTINGS_EXPORT_ROWS: readonly SettingsRowShape[] = [
+  { kind: "switch", noteLines: 1 },
+  { kind: "slider" },
+  { kind: "slider" },
+  { kind: "switch", noteLines: 2 },
+  { kind: "button", noteLines: 1 },
+];
 
 // A top-bar button with where its icon sits.
 function withIcon(button: BarButton) {
@@ -237,8 +247,11 @@ export function layoutExport(
           noteLines: PAUSE_NOTE_LINES,
         }),
       },
-      // SettingsScene's rows: sound, music, effects and reduced motion.
-      settings: settingsLayout(SCREEN_CONFIG, ["switch", "slider", "slider", "switch"]),
+      settings: settingsLayout(
+        { body, title: fontMetrics(readBitmapFont("font-title")) },
+        SCREEN_CONFIG,
+        SETTINGS_EXPORT_ROWS,
+      ),
       shop: { ...SHOP_LAYOUT, tabRects: shopTabRects() },
       stats: { ...STATS_LAYOUT, tabRects: statsTabRects() },
     },

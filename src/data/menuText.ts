@@ -49,7 +49,9 @@ export const MENU_TEXT = {
   },
   settings: {
     effects: "Effects",
-    install: "Install app",
+    install: "Install",
+    installButton: "Get",
+    installNote: "Full screen, offline",
     installSteps: "Tap Share, then Add to Home Screen.",
     installStepsTitle: "Add to Home Screen",
     motion: "Reduced motion",

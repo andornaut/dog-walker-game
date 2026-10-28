@@ -1006,8 +1006,11 @@ export interface MenuText {
   };
   readonly settings: {
     readonly effects: string;
-    // The row that installs the game, shown until it is installed.
+    // The row that installs the game, shown until it is installed: its label, its note and its
+    // button's label.
     readonly install: string;
+    readonly installButton: string;
+    readonly installNote: string;
     // The panel the row opens on iOS, where the browser has no install prompt.
     readonly installSteps: string;
     readonly installStepsTitle: string;

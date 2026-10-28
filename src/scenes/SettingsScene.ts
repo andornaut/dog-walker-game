@@ -11,11 +11,14 @@ import {
   type InstallStepsLayout,
   installStepsLayout,
   knobX,
+  noteRoom,
+  SETTINGS_NOTE_STYLES,
   SETTINGS_ROW,
+  type SettingsFonts,
   type SettingsLayout,
   settingsLayout,
+  type SettingsRowShape,
   setVolumeSteps,
-  SWITCH_NOTE_FIT,
   VOLUME_STEPS,
   type VolumeKey,
   volumePercent,
@@ -38,12 +41,14 @@ import {
   addPixelText,
   fitPixelText,
   fitPixelTextsAlike,
+  labelInkWidth,
   type LabelToFit,
+  pixelFontMetrics,
   setPixelText,
   withProbe,
 } from "../ui/phaser/pixelText";
 import { GREYED } from "../ui/selection";
-import { TEXT_SCALE } from "../ui/textFit";
+import { fittingTextsAlike, TEXT_SCALE } from "../ui/textFit";
 import { addDetailCard } from "./homePanels";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenOutsideTap, onBackPressed, type OverlayData } from "./overlay";
@@ -54,6 +59,7 @@ import { listenTargetPress, sameByValue } from "./targetPress";
 import {
   addBodyText,
   addCloseButton,
+  addMenuButton,
   addNineSlice,
   addScreenBackdrop,
   addSelectTile,
@@ -70,11 +76,19 @@ type SwitchKey = "muted" | "reducedMotion";
 type SettingsWord = Exclude<keyof MenuText["settings"], "volume">;
 
 // Each row carries a 16x16 -panel icon with on and off tags, and the menuText.settings keys
-// of its label and note.
+// of its label, its note and its button's label.
 type Row =
-  | { icon: string; key: "install"; kind: "button"; label: SettingsWord }
+  | {
+      button: SettingsWord;
+      icon: string;
+      key: "install";
+      kind: "button";
+      label: SettingsWord;
+      note: SettingsWord;
+    }
   | { icon: string; key: SwitchKey; kind: "switch"; label: SettingsWord; note: SettingsWord }
   | { icon: string; key: VolumeKey; kind: "slider"; label: SettingsWord };
+type NotedRow = Extract<Row, { note: SettingsWord }>;
 
 type Target =
   | { kind: "close" }
@@ -103,17 +117,16 @@ const SETTING_ROWS: readonly Row[] = [
 ];
 // Under them while the game can be installed (offersInstall).
 const INSTALL_ROW: Row = {
+  button: "installButton",
   icon: "icon-install-panel",
   key: "install",
   kind: "button",
   label: "install",
+  note: "installNote",
 };
 // iOS's Share glyph, before the install steps.
 const SHARE_ICON = "icon-share";
-const ICON_DX = 6;
-const { labelDx: LABEL_DX } = SETTINGS_ROW;
-const SWITCH_ROW = SETTINGS_ROW.switch;
-const SWITCH = SWITCH_ROW.switch;
+const { icon: ICON, label: LABEL, note: NOTE } = SETTINGS_ROW;
 const KNOB_HEIGHT = 16;
 // The ring stays inside the panel's 8px margin.
 const FOCUS_OUTSET = 3;
@@ -130,22 +143,57 @@ function stepsLines(scene: Scene, steps: string): number {
   }).lines.length;
 }
 
+function hasNote(row: Row): row is NotedRow {
+  return row.kind !== "slider";
+}
+
+// Each row's shape: every note fitted alike in its room, as render sets them, decides how many
+// lines it takes.
+function rowShapes(scene: Scene, rows: readonly Row[]): SettingsRowShape[] {
+  const words = gameData.menuText.settings;
+  const noted = rows.filter(hasNote);
+  const fitted = withProbe(scene, BODY_TEXT, (probe) =>
+    fittingTextsAlike(
+      SETTINGS_NOTE_STYLES,
+      noted.map((row) => ({
+        inkWidth: labelInkWidth(probe),
+        room: noteRoom(row.kind),
+        text: words[row.note],
+      })),
+    ),
+  );
+  return rows.map((row) =>
+    hasNote(row)
+      ? { kind: row.kind, noteLines: fitted[noted.indexOf(row)]?.lines.length ?? 1 }
+      : { kind: row.kind },
+  );
+}
+
+const NO_FONT = { capHeight: 0, capTop: 0, inkBottom: 0, lineHeight: 0 };
+const NO_FONTS: SettingsFonts = { body: NO_FONT, title: NO_FONT };
+
+function settingsFonts(scene: Scene): SettingsFonts {
+  return { body: pixelFontMetrics(scene, "body"), title: pixelFontMetrics(scene, "title") };
+}
+
 // A switch is on when its setting is: sound is on while not muted.
 function switchOn(key: SwitchKey, settings: Settings): boolean {
   return key === "muted" ? !settings.muted : settings.reducedMotion;
 }
 
 // Sound on or off, music and effects volume, reduced motion and, until the game is installed
-// where it can be, Install app, reachable from the home screen and the pause menu. Every change
+// where it can be, Install, reachable from the home screen and the pause menu. Every change
 // is saved and applied at once. A switch row is normal and shows its setting in its switch; a
-// tap dips the row, then flips it. Install app dips, then opens the browser's install prompt
-// or, on iOS, a card with the Share, then Add to Home Screen steps over the settings. Up and
+// tap dips the row, then flips it. A tap anywhere on the Install row, its Get button included,
+// dips it, then opens the browser's install prompt or, on iOS, a card with the Share, then Add
+// to Home Screen steps over the settings. Up and
 // Down move the keyboard's focus through the rows and the close control; Enter or Space presses
 // the focused row, and on a slider the left and right keys, Home and End set the volume.
 export class SettingsScene extends Scene {
   private dragging: VolumeKey | undefined;
   private focus: Focus | null = null;
-  private layout: SettingsLayout = settingsLayout(SCREEN_CONFIG, []);
+  // No rows until create measures their notes, so no font is read.
+  private layout: SettingsLayout = settingsLayout(NO_FONTS, SCREEN_CONFIG, []);
   private pressed: Target | undefined;
   private resumeKey: SceneKey | undefined;
   private rows: readonly Row[] = SETTING_ROWS;
@@ -159,10 +207,7 @@ export class SettingsScene extends Scene {
   create(data?: OverlayData): void {
     this.resumeKey = data?.resume;
     this.rows = settingsRows(offersInstall(installState()));
-    this.layout = settingsLayout(
-      SCREEN_CONFIG,
-      this.rows.map((row) => row.kind),
-    );
+    this.layout = settingsLayout(settingsFonts(this), SCREEN_CONFIG, rowShapes(this, this.rows));
     this.dragging = undefined;
     this.focus = null;
     this.pressed = undefined;
@@ -268,7 +313,7 @@ export class SettingsScene extends Scene {
     }
   }
 
-  // Enter or Space flips a focused switch, presses Install app, and closes from the close
+  // Enter or Space flips a focused switch, presses Install, and closes from the close
   // control or with nothing focused.
   private confirm(focusedRow: Row | undefined): void {
     if (focusedRow?.kind === "switch") {
@@ -336,7 +381,7 @@ export class SettingsScene extends Scene {
   }
 
   private rowRect(index: number): Rect {
-    return itemAt(this.layout.rows, index);
+    return itemAt(this.layout.rows, index).rect;
   }
 
   private targetAt(x: number, y: number): Target | undefined {
@@ -404,16 +449,14 @@ export class SettingsScene extends Scene {
     const rows = this.add.container(0, 0);
     const notes: LabelToFit[] = [];
     for (const row of this.rows) {
-      if (row.kind === "switch") {
-        notes.push(this.drawSwitchRow(rows, row, settings));
-      } else if (row.kind === "button") {
-        this.drawButtonRow(rows, row, settings);
+      if (hasNote(row)) {
+        notes.push(this.drawNotedRow(rows, row, settings));
       } else {
         this.drawSlider(row, settings);
       }
     }
-    // Every switch row's note at the largest size that fits them all.
-    fitPixelTextsAlike(SWITCH_NOTE_FIT.styles, notes);
+    // Every row's note at the largest size that fits them all, as rowShapes measured them.
+    fitPixelTextsAlike(SETTINGS_NOTE_STYLES, notes);
     // Over the rows, since a switch row's face covers its top row.
     const separators = this.add.graphics();
     this.layout.separators.forEach((rect) => fillRect(separators, PALETTE.tan, rect));
@@ -453,81 +496,65 @@ export class SettingsScene extends Scene {
     );
   }
 
-  // Install app: a normal row that dips while pressed, its icon and label centred down it.
-  private drawButtonRow(
+  // A switch or install row: a normal row that dips while pressed, with its icon, label and note,
+  // and its switch or button. A switch row shows its setting in its icon and switch. The note is
+  // left for render to fit with the others'. Returns the note.
+  private drawNotedRow(
     parent: GameObjects.Container,
-    row: Extract<Row, { kind: "button" }>,
-    settings: Settings,
-  ): void {
-    const rect = this.rowRect(this.rowIndex(row.key));
-    const tile = addSelectTile(this, parent, rect, {
-      edge: false,
-      reducedMotion: settings.reducedMotion,
-      state: "normal",
-      tile: false,
-    });
-    if (this.pressed?.kind === "install") {
-      tile.container.y += FEEDBACK.pressDipPx;
-    }
-    const { iconDy, labelDy } = SETTINGS_ROW.button;
-    const icon = addTagImage(this, row.icon, "on", rect.x + ICON_DX, rect.y + iconDy);
-    const label = addPixelText(
-      this,
-      rect.x + LABEL_DX,
-      rect.y + labelDy,
-      gameData.menuText.settings[row.label],
-      { colour: PALETTE[tile.look.text], font: "title", scale: TEXT_SCALE },
-    );
-    tile.content.add(icon === undefined ? [label] : [icon, label]);
-  }
-
-  // A switch row, its note left for render to fit with the others'. Returns the note.
-  private drawSwitchRow(
-    parent: GameObjects.Container,
-    row: Extract<Row, { kind: "switch" }>,
+    row: NotedRow,
     settings: Settings,
   ): LabelToFit {
-    const rect = this.rowRect(this.rowIndex(row.key));
-    const on = switchOn(row.key, settings);
-    // The row is normal; whether it is on shows in its switch.
+    const index = this.rowIndex(row.key);
+    const { control, noteY, rect } = itemAt(this.layout.rows, index);
+    const on = row.kind === "button" || switchOn(row.key, settings);
     const tile = addSelectTile(this, parent, rect, {
       edge: false,
       reducedMotion: settings.reducedMotion,
       state: "normal",
       tile: false,
     });
-    if (this.pressed?.kind === "switch" && this.pressed.key === row.key) {
+    const pressed =
+      row.kind === "button"
+        ? this.pressed?.kind === "install"
+        : this.pressed?.kind === "switch" && this.pressed.key === row.key;
+    if (pressed) {
       tile.container.y += FEEDBACK.pressDipPx;
     }
     const { x, y } = rect;
-    const icon = addTagImage(this, row.icon, on ? "on" : "off", x + ICON_DX, y + SWITCH_ROW.iconDy);
+    const icon = addTagImage(this, row.icon, on ? "on" : "off", x + ICON.dx, y + ICON.dy);
     const words = gameData.menuText.settings;
-    const label = addPixelText(this, x + LABEL_DX, y + SWITCH_ROW.labelDy, words[row.label], {
+    const label = addPixelText(this, x + LABEL.dx, y + LABEL.dy, words[row.label], {
       colour: PALETTE[tile.look.text],
       font: "title",
       scale: TEXT_SCALE,
     });
-    const noteAt = { x: x + LABEL_DX, y: y + SWITCH_ROW.noteDy };
+    const noteAt = { x: x + NOTE.dx, y: noteY ?? y };
     const note = addPixelText(this, noteAt.x, noteAt.y, words[row.note], {
       colour: PALETTE.darkBrown,
-      scale: SWITCH_ROW.scale,
+      scale: TEXT_SCALE,
     });
-    const noteFit = { label: note, room: SWITCH_NOTE_FIT.room, ...noteAt };
     tile.content.add(icon === undefined ? [label, note] : [icon, label, note]);
-    const switchX = x + SWITCH.dx;
-    const switchY = y + SWITCH.dy;
-    const image = addTagImage(this, "ui-switch", on ? "on" : "off", switchX, switchY);
+    const noteFit = { label: note, room: noteRoom(row.kind), ...noteAt };
+    if (control === null) {
+      return noteFit;
+    }
+    if (row.kind === "button") {
+      addMenuButton(
+        this,
+        control,
+        words[row.button],
+        { available: true, primary: false, secondary: true },
+        tile.content,
+      );
+      return noteFit;
+    }
+    const image = addTagImage(this, "ui-switch", on ? "on" : "off", control.x, control.y);
     if (image !== undefined) {
       tile.content.add(image);
       return noteFit;
     }
     const g = this.add.graphics();
-    fillRect(g, on ? PALETTE.forest : PALETTE.slate, {
-      height: SWITCH.height,
-      width: SWITCH.width,
-      x: switchX,
-      y: switchY,
-    });
+    fillRect(g, on ? PALETTE.forest : PALETTE.slate, control);
     tile.content.add(g);
     return noteFit;
   }
@@ -540,15 +567,14 @@ export class SettingsScene extends Scene {
     const active = tileState({ ...PLAIN_ITEM, available: !settings.muted }) !== "disabled";
     const steps = volumeSteps(settings[key]);
     const ink = active ? PALETTE.plum : PALETTE[GREYED.text];
-    const { iconDy, labelDy } = SETTINGS_ROW.slider;
-    addTagImage(this, row.icon, active && steps > 0 ? "on" : "off", x + ICON_DX, y + iconDy);
+    addTagImage(this, row.icon, active && steps > 0 ? "on" : "off", x + ICON.dx, y + ICON.dy);
     const words = gameData.menuText.settings;
     const label = { colour: ink, font: "title", scale: TEXT_SCALE } as const;
-    addPixelText(this, x + LABEL_DX, y + labelDy, words[row.label], label);
+    addPixelText(this, x + LABEL.dx, y + LABEL.dy, words[row.label], label);
     addPixelText(
       this,
       slider.x + slider.width,
-      y + labelDy,
+      y + LABEL.dy,
       active
         ? fillLine(MENU_TEXT_FIELDS.settings, words, "volume", {
             percent: String(volumePercent(steps)),
