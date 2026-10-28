@@ -12,6 +12,7 @@ import type {
   ZoneId,
 } from "../data/types";
 import { fillNames } from "../lib/lines";
+import { type Random, randomInt } from "../lib/random";
 import { packDogs } from "../state/pack";
 import type { CardSource, EffectSource, RunState } from "../state/runState";
 import { countOptionPick } from "./achievements";
@@ -124,11 +125,7 @@ export interface QuipCue {
 }
 
 // One of the owner's lines for the cue, drawn at random.
-export function quipLine(
-  data: Pick<GameData, "quips">,
-  random: () => number,
-  cue: QuipCue,
-): string {
+export function quipLine(data: Pick<GameData, "quips">, random: Random, cue: QuipCue): string {
   const lines = data.quips[cue.dog][cue.moment];
   return lines[Math.floor(random() * lines.length)] ?? lines[0];
 }
@@ -418,7 +415,7 @@ export function openCard(source: CardSource, state: RunState): RunState {
 // trade-off: a second trade-off drawn is set aside and another card drawn instead.
 export function offerUpgrades(
   data: Pick<GameData, "upgrades">,
-  random: () => number,
+  random: Random,
   count: number,
   state: Pick<RunState, "upgradesPicked">,
 ): UpgradeId[] {
@@ -428,7 +425,7 @@ export function offerUpgrades(
   const isTradeOff = (id: UpgradeId) => data.upgrades[id].kind === "tradeOff";
   const offered: UpgradeId[] = [];
   while (offered.length < count && pool.length > 0) {
-    const [picked] = pool.splice(Math.floor(random() * pool.length), 1);
+    const [picked] = pool.splice(randomInt(random, 0, pool.length), 1);
     if (picked !== undefined && !(isTradeOff(picked) && offered.some(isTradeOff))) {
       offered.push(picked);
     }
@@ -444,7 +441,7 @@ export function offerUpgrades(
 // upgrades.
 export function offerFork(
   data: Pick<GameData, "upgrades" | "world">,
-  random: { readonly forks: () => number; readonly upgrades: () => number },
+  random: { readonly forks: Random; readonly upgrades: Random },
   state: RunState,
 ): ForkSource {
   const paths = forkPaths(data, random.forks, state.route);

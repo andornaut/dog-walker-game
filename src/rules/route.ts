@@ -1,5 +1,6 @@
 import type { GameData, Zone, ZoneId } from "../data/types";
 import { itemAt } from "../lib/arrays";
+import { type Random, randomPick } from "../lib/random";
 import type { RunState } from "../state/runState";
 
 export type RouteData = Pick<GameData, "world">;
@@ -74,11 +75,7 @@ export function unwalkedZones(data: RouteData, route: readonly ZoneId[]): ZoneId
 // Up to three unwalked zones drawn at random, sorted easiest on the left to hardest on the
 // right. The world's last zone ends every walk: the fork before the last zone leads only
 // there, and no earlier fork offers it.
-export function forkPaths(
-  data: RouteData,
-  random: () => number,
-  route: readonly ZoneId[],
-): ZoneId[] {
+export function forkPaths(data: RouteData, random: Random, route: readonly ZoneId[]): ZoneId[] {
   const last = data.world.lastZone as ZoneId;
   if (route.length >= walkLength(data) - 1) {
     return [last];
@@ -87,7 +84,7 @@ export function forkPaths(
   const drawn = new Set<ZoneId>();
   while (drawn.size < Math.min(PATH_SIDES.length, pool.length)) {
     const left = pool.filter((zone) => !drawn.has(zone));
-    drawn.add(itemAt(left, Math.floor(random() * left.length)));
+    drawn.add(randomPick(random, left));
   }
   return pool.filter((zone) => drawn.has(zone));
 }
