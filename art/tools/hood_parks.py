@@ -35,6 +35,12 @@ porch-steps         48x48   1 lane, three brick steps with stone treads in a fro
                             tall white newel posts under ball caps either side,
                             a jack-o'-lantern with a dark carved face on the top step;
                             idle (4 frames, 400ms): its candle dims on frame 2 and flares on frame 3
+little-free-library 48x48   1 lane, a little free library: a turquoise cabinet shaped like a tiny
+                            house under a brick-shingled gable with a cream bargeboard and finial,
+                            its cream-framed glass door showing two shelves of bright book spines,
+                            on a cream post set in a wooden planter of leaves; idle (4 frames,
+                            400ms): a glint crosses the glass, its left half on frame 2 and its
+                            right half on frame 3
 picnic-blanket      112x36  2 lanes, a red and white checked blanket on the road with a wicker basket
                             on it, a baguette leaning out of the basket, a lemonade jug and two
                             apples; idle (4 frames, 450ms): the blanket's near right corner lifts
@@ -456,6 +462,76 @@ def porch_steps(flicker=0):
     g.rect(17.5, 13.5, 5, 1.5, "plum")
     g.rect(18.5, 13.5, 3, 1, glow)
     return lit(g)
+
+
+# The library's idle: rest, rest, a glint crossing the glass door's left half, then its right half.
+LIBRARY_IDLE = (0, 0, 1, 2), 400
+# The book spines on each shelf, left to right: (colour, top row). Each is 2 layout pixels wide.
+UPPER_BOOKS = (("ttc", 15), ("gold", 16), ("sky", 15), ("cream", 16), ("green", 15), ("mauve", 16),
+               ("orange", 15), ("lilac", 16), ("azure", 15))
+LOWER_BOOKS = (("amber", 21), ("cobalt", 20), ("pink", 21), ("lime", 20), ("ttc", 21), ("cream", 20),
+               ("sky", 21), ("gold", 20), ("green", 21))
+
+
+def little_free_library(glint=0):
+    """A little free library: a turquoise cabinet shaped like a tiny house, a front elevation, its pitched
+    roof's gable edged in brick shingles over a cream bargeboard, an open book painted in the gable, a finial at
+    the peak. Its cream-framed glass
+    door shows two shelves of book spines in bright colours on a dark teal back, a gold knob at its right. It
+    stands on a cream post with brackets under its sill, the post set in a small wooden planter of leaves.
+    glint 1 and 2 run a white glint across the glass, left then right, 2px wide down to obstacles.TEXTURE_MIN;
+    at rest a short glint sits in its top left corner."""
+    g = edged(Grid(SIZE, SIZE))
+    # the planter: a wooden box lit tan along its cap, shaded down its right, leaves heaped round the post
+    g.rect(12, 32, 16, 6, "brown")
+    g.rect(12, 31, 16, 2, "tan")
+    g.rect(26, 33, 2, 5, "dbrown")
+    g.rect(13, 35, 13, 1, "dbrown")
+    for x, y in ((14.5, 30.5), (25, 30.5), (17, 29.8), (23, 29.8)):
+        g.cel(x, y, 2.4, 1.8, "green", "dgreen")
+    # the post, cream shaded tan at its right, and the brackets under the sill
+    g.rect(18, 25, 4, 7, "cream")
+    g.rect(21, 25, 1, 7, "tan")
+    g.tri((15, 25), (18, 25), (18, 28), "cream")
+    g.tri((22, 25), (25, 25), (22, 28), "tan")
+    # the cabinet: turquoise, its right side in shade, on a cream sill
+    g.rect(8, 12, 24, 13, "turquoise")
+    g.rect(29, 12, 3, 13, "dturq")
+    g.rect(7, 24, 26, 2, "cream")
+    g.rect(7, 25, 26, 1, "tan")
+    # the door: a cream frame round the glass, the books on two shelves inside on a dark teal back
+    g.rect(10, 13, 19, 11, "cream")
+    g.rect(11, 14, 17, 9, "teal")
+    for books in (UPPER_BOOKS, LOWER_BOOKS):
+        for i, (c, top) in enumerate(books):
+            x = 11 + i * 2
+            bottom = 19 if books is UPPER_BOOKS else 23
+            g.rect(x, top, min(2, 28 - x), bottom - top, c)
+    g.rect(11, 19, 17, 1, "brown")
+    g.rect(27, 17, 1, 2, "gold")
+    # the glint on the glass: a short diagonal at rest in the top left corner, crossing the door when it runs
+    u = obstacles.unit(g)[0]
+    x0 = (12, 15, 21)[glint]
+    for k in range(4 if glint else 2):
+        for w in ((0, u) if glint and scale_of(g) >= obstacles.TEXTURE_MIN else (0,)):
+            g.rect(x0 + k * u + w, 18 - k * u - (1 if glint else 2), u, u, "white")
+    # the roof: a gable edged in brick shingles over a cream bargeboard, lit along its left slope
+    g.tri((4, 13), (20, 2), (36, 13), "brick")
+    g.tri((20, 2), (36, 13), (20, 13), "dbrick")
+    g.tri((9, 12.5), (20, 5), (31, 12.5), "cream")
+    g.tri((11, 12.5), (20, 6.5), (29, 12.5), "turquoise")
+    g.tri((20, 6.5), (29, 12.5), (20, 12.5), "dturq")
+    for k in range(4):
+        t = (k + 0.5) / 4
+        g.rect(4 + 16 * t - 0.5, 13 - 11 * t + 1, 1, 1, "dbrick")
+        g.rect(36 - 16 * t, 13 - 11 * t + 1, 1, 1, "walnut")
+    g.rect(4, 12, 32, 1, "dbrick")
+    # an open book painted cream in the gable, and the finial at the peak
+    g.tri((16.5, 9.5), (20, 10.5), (20, 12), "cream")
+    g.tri((23.5, 9.5), (20, 10.5), (20, 12), "cream")
+    g.rect(19.5, 10.5, 1, 1.5, "tan")
+    g.rect(19, 1, 2, 2, "cream")
+    return lit(g, dict(brick=("clay", None), dbrick=("brick", None), dturq=("turquoise", None)))
 
 
 # The blanket's idle: rest, rest, the near right corner lifted, rest.
@@ -938,6 +1014,7 @@ def road_sprites(suffix, step):
     yield f"hen{suffix}", [("idle", frames(a, hen, HEN_IDLE), 400), ("run", frames(a, hen, HEN_RUN), 80)]
     for key, draw, (args, ms) in (("leaf-pile", leaf_pile, LEAF_PILE_IDLE),
                                   ("porch-steps", porch_steps, PORCH_STEPS_IDLE),
+                                  ("little-free-library", little_free_library, LIBRARY_IDLE),
                                   ("picnic-blanket", picnic_blanket, PICNIC_IDLE),
                                   ("fallen-log", fallen_log, FALLEN_LOG_IDLE)):
         yield f"{key}{suffix}", [("idle", [minis.small(sys.modules[__name__], o, draw, f).outlined() for f in args],
@@ -947,8 +1024,8 @@ def road_sprites(suffix, step):
 # Where each road sprite's .aseprite source goes: the card obstacles with the encounters, the rest with the
 # obstacles.
 SOURCES = {"porch-cat": "art/encounters", "capybara": "art/encounters", "fallen-log": "art/obstacles",
-           "hen": "art/obstacles", "leaf-pile": "art/obstacles", "porch-steps": "art/obstacles",
-           "picnic-blanket": "art/obstacles"}
+           "hen": "art/obstacles", "leaf-pile": "art/obstacles", "little-free-library": "art/obstacles",
+           "porch-steps": "art/obstacles", "picnic-blanket": "art/obstacles"}
 
 
 def sprites():

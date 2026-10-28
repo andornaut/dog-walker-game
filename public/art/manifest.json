@@ -6413,6 +6413,87 @@
       }
     },
     {
+      "key": "little-free-library",
+      "png": "sprites/little-free-library.png",
+      "json": "sprites/little-free-library.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 40
+      }
+    },
+    {
+      "key": "little-free-library@50",
+      "png": "sprites/little-free-library@50.png",
+      "json": "sprites/little-free-library@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "little-free-library@56",
+      "png": "sprites/little-free-library@56.png",
+      "json": "sprites/little-free-library@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "little-free-library@62",
+      "png": "sprites/little-free-library@62.png",
+      "json": "sprites/little-free-library@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "little-free-library@69",
+      "png": "sprites/little-free-library@69.png",
+      "json": "sprites/little-free-library@69.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "little-free-library@75",
+      "png": "sprites/little-free-library@75.png",
+      "json": "sprites/little-free-library@75.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "little-free-library@81",
+      "png": "sprites/little-free-library@81.png",
+      "json": "sprites/little-free-library@81.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "little-free-library@88",
+      "png": "sprites/little-free-library@88.png",
+      "json": "sprites/little-free-library@88.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "little-free-library@94",
+      "png": "sprites/little-free-library@94.png",
+      "json": "sprites/little-free-library@94.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 38
+      }
+    },
+    {
       "key": "loose-dog",
       "png": "sprites/loose-dog.png",
       "json": "sprites/loose-dog.json",
