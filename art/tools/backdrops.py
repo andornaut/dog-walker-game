@@ -11,7 +11,7 @@ no static scenery on the near corners or the stub's verges, where the game's roa
 its items spawn: only the verge's ground.
 
 Rows, in band rows (0 to 157): the sky is one flat colour above row 45 (CALM), under the
-message strip (Yonge Street's CN Tower, moon and stars rise above it); the far side's ground row
+message strip (Yonge Street's skyline, moon and stars rise above it); the far side's ground row
 115 (BASE), the far sidewalk 119 to 122, the far curb 123 to 124, the cross street 125 to 133
 with its centre line on row 129, the near curb 134 to 135 (none where the cross street has
 none), the near sidewalk 136 to 138, and the stub from row 139 (STUB, the approach) to the
@@ -1796,9 +1796,9 @@ def cn_tower(cv, cx, base, top, sky_pod, pod):
     """The CN Tower at night, the tallest thing on the skyline, centred on column cx, in an ink outline, lgrey
     lit white on its left and grey in shade on its right: the antenna, 2 columns wide, from its tip on row top,
     with a red light at its tip and another halfway down; the SkyPod from row sky_pod with a ring of lit
-    windows; a 5-column shaft on to the main pod from row pod, a saucer 31 wide under a white cap with two
+    windows; a 5-column shaft on to the main pod from row pod, a saucer 35 wide under a white cap with two
     rings of lit 2x2 windows, gold over amber and cream, its underside in shade; then the shaft tapering out
-    to 11 columns down to row base."""
+    to 13 columns down to row base."""
     rows = {}
     for y in range(top, sky_pod):
         rows[y] = (0, 1)
@@ -1806,12 +1806,12 @@ def cn_tower(cv, cx, base, top, sky_pod, pod):
         rows[sky_pod + k] = (half, half)
     for y in range(sky_pod + 6, pod):
         rows[y] = (2, 2)
-    saucer = (5, 9, 12, 14, 15, 15, 15, 15, 14, 12, 9, 7, 5, 4)
+    saucer = (6, 10, 13, 15, 17, 17, 17, 17, 16, 14, 11, 8, 6, 4)
     for k, half in enumerate(saucer):
         rows[pod + k] = (half, half)
     low = pod + len(saucer)
     for y in range(low, base):
-        half = 3 + (y - low) * 3 // max(1, base - low)
+        half = 3 + (y - low) * 4 // max(1, base - low)
         rows[y] = (half, half)
     inside = {(x, y) for y, (left, right) in rows.items() for x in range(cx - left, cx + right + 1)}
     for x, y in inside:
@@ -1830,11 +1830,11 @@ def cn_tower(cv, cx, base, top, sky_pod, pod):
         cv.fill(x, sky_pod + 2, 2, 2, ("cream", "gold")[k % 2])
     # the main pod: a white cap, a ring of gold and amber windows at its widest, a ring of cream below it,
     # the underside in shade
-    cv.fill(cx - 11, pod + 2, 23, 1, "white")
-    for k, x in enumerate(range(cx - 14, cx + 14, 3)):
+    cv.fill(cx - 12, pod + 2, 25, 1, "white")
+    for k, x in enumerate(range(cx - 16, cx + 16, 3)):
         cv.fill(x, pod + 4, 2, 2, ("gold", "amber")[k % 2])
-    cv.fill(cx - 15, pod + 6, 31, 1, "grey")
-    for x in range(cx - 13, cx + 13, 3):
+    cv.fill(cx - 17, pod + 6, 35, 1, "grey")
+    for x in range(cx - 15, cx + 15, 3):
         cv.fill(x, pod + 7, 2, 2, "cream")
     for k, half in enumerate(saucer[9:]):
         cv.fill(cx - half, pod + 9 + k, 2 * half + 1, 1, "grey")
@@ -2011,11 +2011,13 @@ def word_art(text, col):
 
 
 def dundas_screens(cv, x, w, top):
-    """The Yonge-Dundas tower, a wall of screens on shale: the giant LIVE! screen at 2x on cobalt over
-    blue and, under it, three ads (EAT on red, a paw print on turquoise, NEW on hot pink)."""
+    """The Yonge-Dundas tower: shale from row top with runs of lit windows over its wall of screens, low
+    enough to show while a message is up: the giant LIVE! screen at 2x on cobalt over blue from row 62
+    and, under it, three ads (EAT on red, a paw print on turquoise, NEW on hot pink)."""
     cv.fill(x, top, w, BASE - top, "shale")
     outline_box(cv, x, top, w, BASE - top + 1, "ink")
-    sx, sw, sy, sh = x + 3, w - 6, top + 3, 17
+    lit(cv, x + 2, x + w - 3, top + 3, 59, "dundas", 0.5, ("gold", "amber"))
+    sx, sw, sy, sh = x + 3, w - 6, 62, 17
     screen(cv, sx, sy, sw, sh, "cobalt")
     cv.fill(sx, sy + sh - 6, sw, 6, "blue")
     word(cv, "LIVE!", x + w / 2, sy, "gold", 2)
@@ -2242,44 +2244,38 @@ def yonge():
     for x, y in ((8, 6), (62, 2), (108, 9), (150, 4), (196, 11), (232, 3), (288, 22), (318, 4), (352, 12)):
         cv.fill(x, y, 1, 1, "white")
     full_moon(cv, 304, 14, 5)
-    # downtown seen from far off: the CN Tower by far the tallest, its antenna from row 3 and its pods
-    # below the message strip's rows (6 to 57) from row 58, so the main pod shows while a message is up;
-    # every other tower tops out at row 60 or lower, below the strip. Far back, dark towers in navy and
-    # dslate with runs of windows lit
-    skyline(cv, ((-2, 16, 72, "navy"), (44, 20, 84, "dslate"), (66, 18, 86, "navy"), (114, 22, 70, "navy"),
-                 (150, 18, 66, "dslate"), (170, 20, 68, "navy"), (196, 16, 66, "dslate"), (214, 14, 64, "navy"),
-                 (228, 18, 66, "navy"),
-                 (268, 16, 70, "dslate"), (300, 18, 66, "navy"), (322, 16, 68, "dslate"), (342, 20, 70, "navy")))
-    for cx, top, h in ((122, 70, 4), (156, 66, 4), (178, 68, 4), (220, 64, 3), (348, 70, 4)):
+    # downtown seen from far off, its towers stepping up toward the top third, the CN Tower over them all
+    # at its real proportions: the antenna's red light on row 3, the SkyPod a fifth of the way down, the
+    # main pod two fifths, and the shaft tapering down to the street. The message strip covers the band's
+    # top rows while a message shows, so the screens and signs stay below row 57. Far back, dark towers in
+    # navy and dslate with runs of windows lit, those either side of the tower's pod kept low
+    skyline(cv, ((-2, 16, 30, "navy"), (40, 14, 62, "dslate"), (78, 16, 52, "navy"), (114, 22, 26, "navy"),
+                 (150, 18, 16, "dslate"), (170, 20, 30, "navy"), (196, 16, 24, "dslate"), (214, 14, 18, "navy"),
+                 (228, 18, 28, "navy"),
+                 (268, 16, 36, "dslate"), (300, 18, 30, "navy"), (322, 16, 22, "dslate"), (342, 20, 34, "navy")))
+    for cx, top, h in ((122, 26, 6), (156, 16, 5), (178, 30, 6), (220, 18, 4), (348, 34, 6)):
         mast(cv, cx, top - h, h)
-    # behind the SkyDome, lit towers and the CN Tower down behind the dome's left flank; a low dark block
-    # between the shaft and the dome keeps the two light shapes apart; then the SkyDome, large, in front
-    glass_tower(cv, 14, 30, 68, 7)
-    scotia(cv, 80, 24, 74)
-    dominion(cv, 102, 22, 80, 5)
-    glass_tower(cv, 126, 22, 76, 8, "dslate")
-    cn_tower(cv, 61, BASE, 3, 30, 58)
-    cv.fill(48, 71, 26, BASE - 71, "coal")
-    outline_box(cv, 48, 71, 26, BASE - 70, "ink")
-    cv.fill(49, 72, 24, 1, "ash")
-    lit(cv, 51, 72, 74, 80, "dome-block", 0.45, ("amber", "ochre"))
-    skydome(cv, 44, 94, BASE - 26, 20)
+    # the SkyDome off to the tower's right, its foot behind the Eaton Centre; lit towers behind it; then the
+    # CN Tower, its shaft clear down to the street
+    skydome(cv, 84, 70, BASE - 32, 16)
+    glass_tower(cv, 10, 30, 36, 7)
+    scotia(cv, 96, 24, 30)
+    dominion(cv, 120, 22, 40, 5)
+    glass_tower(cv, -4, 16, 22, 4)
+    cn_tower(cv, 61, BASE, 3, 24, 46)
     # the nearer towers: dark glass on the left and up to the SkyDome's lower half; then, down to
     # the street, the Yonge-Dundas screens, the Royal Bank Plaza's gold pair, First Canadian Place, a TD
     # Centre tower and glass under a turquoise crown, the street's glow on their feet and most with neon
     # over a lit street level; in front, the Eaton Centre under its sign, a HOTEL sign down the left
-    # tower, screens on the glass, the TD tower and the crowned tower, and the theatre: the SHOW blade
+    # tower, screens on the glass, the TD tower and the crowned tower, and the theatre: the ELGIN blade
     # over a marquee in front of the Royal Bank pair
-    glass_tower(cv, -4, 18, 64, 4)
-    glass_tower(cv, 44, 30, BASE - 30, 5, "dslate")
-    glass_tower(cv, 74, 14, BASE - 40, 6)
-    dundas_screens(cv, CX - 32, 64, 62)
-    royal_bank(cv, 210, 20, 70)
-    royal_bank(cv, 230, 14, 80)
-    first_canadian(cv, 246, 22, 64)
-    dominion(cv, 270, 34, 66, 1)
-    glass_tower(cv, 332, 32, 68, 3)
-    crown(cv, 332, 32, 68, "turquoise", "turquoise", steps=3)
+    dundas_screens(cv, CX - 32, 64, 34)
+    royal_bank(cv, 210, 20, 30)
+    royal_bank(cv, 230, 14, 50)
+    first_canadian(cv, 246, 22, 20)
+    dominion(cv, 270, 34, 28, 1)
+    glass_tower(cv, 332, 32, 32, 3)
+    crown(cv, 332, 32, 32, "turquoise", "turquoise", steps=3)
     uplight(cv, BASE - 24, BASE - 18)
     uplight(cv, BASE - 21, BASE - 18)
     fronts = ((-4, 18, None), (14, 30, ("CAFE", "turquoise")), (44, 30, None), (74, 14, None),
@@ -2292,8 +2288,8 @@ def yonge():
     screen(cv, 14, 72, 30, 18, "turquoise", word_art("WOOF!", "white"))
     screen(cv, 274, 70, 26, 18, "azure", paw_art)
     screen(cv, 334, 72, 26, 18, "hot", word_art("SALE", "white"))
-    elgin(cv, 236, BASE - 25 - 34, BASE - 25, "SHOW", step=7)
-    marquee(cv, 208, 40, "ELGIN", "red")
+    elgin(cv, 236, BASE - 25 - 41, BASE - 25, step=7)
+    marquee(cv, 208, 40, "SHOW", "red")
     # the subway entrance sign
     sx = 64
     cv.fill(sx, BASE - 4, 2, FAR_WALK - BASE + 4, "coal")
