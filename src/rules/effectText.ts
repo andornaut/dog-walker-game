@@ -245,7 +245,7 @@ function phrasesText(words: EffectWords, phrases: readonly Phrase[]): string {
 }
 
 // The one-line effect an item shows, built from its effects and the live tuning, for no
-// dogs in particular: "−1 ♥ each (−2 Fancy)".
+// dogs in particular: "−1♥ each".
 export function effectText(data: TextData, effects: readonly Effect[]): string {
   return phrasesText(
     data.homeText.effect,
