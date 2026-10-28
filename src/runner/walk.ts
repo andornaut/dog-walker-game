@@ -630,6 +630,20 @@ function patternMotion(
   }
 }
 
+// Where every crosser may set off: the reaction margin the pack keeps, and the share of the road
+// ahead of the pack it starts from.
+function crossStart(
+  tuning: GameData["tuning"],
+): Pick<Extract<MoverMotion, { kind: "cross" }>, "reactionSeconds" | "startRoadShare"> {
+  return {
+    reactionSeconds: read(tuning, "seconds", "pathReactionMargin"),
+    startRoadShare: [
+      read(tuning, "multipliers", "dartStartRoadShareMin"),
+      read(tuning, "multipliers", "dartStartRoadShareMax"),
+    ],
+  };
+}
+
 // How a mover moves, by its movement and the tuning. A stepper's steps are drawn here, as many as
 // its most, the first min from the spawns stream and any more from the movers stream; it may take
 // the first steps of them, or of their mirror image, as many as its drawn count. A bounce, a
@@ -653,11 +667,7 @@ export function moverSpec(
       kind: "cross",
       lanesPerSecond: read(tuning, "counts", "dartLanesPerSecond") * movement.speed,
       pauseSeconds: movement.stopSeconds,
-      reactionSeconds: read(tuning, "seconds", "pathReactionMargin"),
-      startRoadShare: [
-        read(tuning, "multipliers", "dartStartRoadShareMin"),
-        read(tuning, "multipliers", "dartStartRoadShareMax"),
-      ],
+      ...crossStart(tuning),
       stopLanes: { max: 1, min: 1 },
       stopShare: 0,
       tilt: [0, 0],
@@ -670,11 +680,7 @@ export function moverSpec(
     motion = {
       kind: "cross",
       lanesPerSecond: read(tuning, "counts", "dartLanesPerSecond") * (dive ? movement.speed : 1),
-      reactionSeconds: read(tuning, "seconds", "pathReactionMargin"),
-      startRoadShare: [
-        read(tuning, "multipliers", "dartStartRoadShareMin"),
-        read(tuning, "multipliers", "dartStartRoadShareMax"),
-      ],
+      ...crossStart(tuning),
       stopLanes: {
         max: read(tuning, "counts", "dartStopLanesMax"),
         min: read(tuning, "counts", "dartStopLanesMin"),
