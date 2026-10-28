@@ -23,7 +23,7 @@ import {
 } from "../assets/spriteKeys";
 import { HOME_CUES, SOUND_KEYS } from "../audio/sound";
 import { gameData } from "../data";
-import type { DogId, EncounterId } from "../data/types";
+import type { EncounterId } from "../data/types";
 import { devRunLoadout, namesRunSetup } from "../dev/devStart";
 import { pageRunSetup } from "../dev/pageRunSetup";
 import {
@@ -35,6 +35,7 @@ import {
   stepFraction,
 } from "../layout/loadingScreen";
 import { itemAt } from "../lib/arrays";
+import { keysOf } from "../lib/records";
 import { browserSoundFormat, startWakeLock, unlockAudioOnFirstGesture } from "../pwa";
 import { addFilledRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
@@ -69,7 +70,7 @@ function placeholderSizes(): Map<string, Size> {
     ["treat", box(short, short, PALETTE.tan)],
     [gameData.walkers[gameData.defaultWalker].spriteKey, box(side, tallest, PALETTE.blue)],
   ]);
-  for (const dog of Object.keys(gameData.dogs) as DogId[]) {
+  for (const dog of keysOf(gameData.dogs)) {
     const dogSide = DOG_FRAME_SIDES[gameData.dogs[dog].size];
     sizes.set(dogSpriteKey(gameData, dog), box(dogSide, dogSide, PALETTE.slate));
     sizes.set(dogFaceKey(gameData, dog), box(32, 32, PALETTE.slate));
@@ -83,7 +84,7 @@ function placeholderSizes(): Map<string, Size> {
     "thief",
     "weddingShoot",
   ];
-  for (const encounter of Object.keys(gameData.encounters) as EncounterId[]) {
+  for (const encounter of keysOf(gameData.encounters)) {
     const height = encounter === "puddle" ? short : tall.includes(encounter) ? tallest : side;
     const colour = gameData.encounters[encounter].kind === "lucky" ? PALETTE.green : PALETTE.mauve;
     sizes.set(encounterSpriteKey(encounter), box(side, height, colour));

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { WalkerId } from "../data/types";
 import { fillNames } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import { agilityPercent, perkEffect } from "../rules/effectText";
 import { newPlayerSave } from "../testing/saves";
 import { type ItemTile, itemTileLook, type TileState } from "../ui/interaction";
@@ -54,7 +55,7 @@ const locked = (walker: WalkerId) => {
     zone: gameData.world.zones.find(({ id }) => id === goal)?.name ?? "",
   });
 };
-const WALKER_IDS = Object.keys(gameData.walkers) as WalkerId[];
+const WALKER_IDS = keysOf(gameData.walkers);
 
 describe("tapWalker", () => {
   it("drops the picked walker, picks an owned one and names a locked one's goal", () => {

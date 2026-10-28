@@ -17,6 +17,7 @@ import type { EncounterId, GearId, HintTrigger, MinorObstacleId } from "../../da
 import { moverHintTriggers } from "../../hud/hintTriggers";
 import { obstacleParts } from "../../layout/obstacleArt";
 import { itemAt } from "../../lib/arrays";
+import { keysOf } from "../../lib/records";
 import { struckBy, type StruckItem, struckNow } from "../../road/struckScenery";
 import { moverTell } from "../../runner/movers";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
@@ -92,7 +93,7 @@ export function ensureRoadPlaceholders(scene: Scene): void {
     const art = minorObstacleSpriteKey(id as MinorObstacleId);
     add(art, obstacle.shape.lanes);
   }
-  for (const gear of Object.keys(gameData.shopGear) as GearId[]) {
+  for (const gear of keysOf(gameData.shopGear)) {
     add(gearDropSpriteKey(gear), 1);
   }
   const skunk = gameData.encounters.skunk;

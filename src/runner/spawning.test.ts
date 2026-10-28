@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { itemAt } from "../lib/arrays";
+import { keysOf } from "../lib/records";
 import { type Contact, lanesReachedAtEnd, pathShortfalls } from "../testing/avoidable";
 import { plannerStreams } from "../testing/movers";
 import { type MoverPath, moverPlace, type MoverSpec, sweptLanes } from "./movers";
@@ -979,7 +980,7 @@ describe("planSpawns", () => {
     const placed = seeds.map((seed) => planSpawns(plannerStreams(seed), swapping));
     const total = (other: Kind) =>
       placed.reduce((sum, { events }) => sum + countOf(other, events), 0);
-    const swapped = Object.keys(swaps) as Kind[];
+    const swapped = keysOf(swaps);
     placed.forEach((planned, i) => {
       expectPathPassable(swapping, planned, `seed ${itemAt(seeds, i)}`);
       expect(countOf("tip", planned.events)).toBe(9);

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import manifestJson from "../../public/art/manifest.json";
 import { parseManifest } from "../assets/manifest";
 import { badgeKey, kebabCase } from "../assets/spriteKeys";
+import { keysOf } from "../lib/records";
 import { maxHearts, startHearts } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import { forkPaths } from "../rules/route";
@@ -14,7 +15,6 @@ import { gameData } from ".";
 import { SCREEN_CONFIG } from "./screen";
 import type {
   CardOption,
-  DogId,
   Effect,
   Encounter,
   EncounterId,
@@ -121,9 +121,7 @@ describe("cards", () => {
     const instant = Object.entries(encounters).flatMap(([id, encounter]) =>
       encounter.resolution.kind === "instant" ? [id] : [],
     );
-    const lucky = (Object.keys(encounters) as EncounterId[]).filter(
-      (id) => encounters[id].kind === "lucky",
-    );
+    const lucky = keysOf(encounters).filter((id) => encounters[id].kind === "lucky");
     expect(instant.sort()).toEqual(lucky.sort());
     for (const effect of instantEffects.flat()) {
       expect(effect.kind === "money" ? effect.change : "gain").toBe("gain");
@@ -324,7 +322,7 @@ describe("run, world and walkers", () => {
   });
 
   it("gives every owner two distinct lines for every moment", () => {
-    for (const id of Object.keys(dogs) as DogId[]) {
+    for (const id of keysOf(dogs)) {
       for (const moment of QUIP_MOMENTS) {
         const lines = quips[id][moment];
         expect(lines, `${id} ${moment}`).toHaveLength(2);

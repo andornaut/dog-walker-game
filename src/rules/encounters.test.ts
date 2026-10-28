@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ENCOUNTERS } from "../data/encounters";
 import type { DogId, EncounterId } from "../data/types";
+import { keysOf } from "../lib/records";
 import type { RunState } from "../state/runState";
 import { testState } from "../testing/runState";
 import { affectedDogs, hitLabel, opensCard } from "./encounters";
@@ -22,7 +23,7 @@ describe("affectedDogs", () => {
 
 describe("hitLabel", () => {
   it("labels each encounter from its data", () => {
-    for (const id of Object.keys(ENCOUNTERS) as EncounterId[]) {
+    for (const id of keysOf(ENCOUNTERS)) {
       const encounter = ENCOUNTERS[id];
       expect(hitLabel(encounter)).toBe("hitLabel" in encounter ? encounter.hitLabel : null);
     }

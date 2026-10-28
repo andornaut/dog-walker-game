@@ -1,5 +1,6 @@
 import type { DogId, GameData, GearId, Size } from "../data/types";
 import { fillLine, signedText } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import { quipLine } from "../rules/choices";
 import { sizeHearts } from "../rules/dogs";
 import { effectClause, SIZE_NAMES } from "../rules/effectText";
@@ -126,7 +127,7 @@ export function cheapestFirst<Id>(cost: (id: Id) => Cents, ids: readonly Id[]): 
 // or not, ties in data order (the order of shopGear's keys).
 export function gearByPrice(data: Pick<GameData, "shopGear" | "tuning">): GearId[] {
   const listPrice = (gear: GearId) => price(data.tuning, data.shopGear[gear].price);
-  return cheapestFirst(listPrice, Object.keys(data.shopGear) as GearId[]);
+  return cheapestFirst(listPrice, keysOf(data.shopGear));
 }
 
 // The start screen's dog rows by size, smallest first.
@@ -137,7 +138,7 @@ export const ROSTER_SIZES: readonly Size[] = ["small", "medium", "large"];
 // a starting dog sits in the middle of its row.
 export function rosterRows(data: Pick<GameData, "dogs" | "tuning">): DogId[][] {
   const listPrice = (dog: DogId) => unlockPrice(data.tuning, data.dogs[dog]);
-  const dogs = Object.keys(data.dogs) as DogId[];
+  const dogs = keysOf(data.dogs);
   return ROSTER_SIZES.map((size) => {
     const row = dogs.filter((dog) => data.dogs[dog].size === size);
     const starters = row.filter((dog) => data.dogs[dog].unlock === "start");

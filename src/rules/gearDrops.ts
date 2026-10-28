@@ -1,5 +1,6 @@
 import type { GameData, GearId, LiveTuning } from "../data/types";
 import { chanceRound, type Random, weightedPick } from "../lib/random";
+import { keysOf } from "../lib/records";
 import { mapPack } from "../state/pack";
 import type { EffectSource, ModifierSource, RunState } from "../state/runState";
 import { ownerMaxHearts } from "./dogs";
@@ -29,7 +30,7 @@ export function gearDropCount(tuning: LiveTuning, random: Random, zoneIndex: num
 // The gear items a drop may be, each weighted by 1 over its price, so a cheaper item drops more
 // often: every item but those in excluded, in the data's order.
 export function gearDropWeights(data: DropData, excluded: readonly GearId[]): [GearId, number][] {
-  return (Object.keys(data.shopGear) as GearId[])
+  return keysOf(data.shopGear)
     .filter((gear) => !excluded.includes(gear))
     .map((gear): [GearId, number] => [gear, 1 / price(data.tuning, data.shopGear[gear].price)]);
 }

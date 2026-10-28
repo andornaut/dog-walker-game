@@ -4,9 +4,9 @@ import { gameData } from "../data";
 import { ENCOUNTERS } from "../data/encounters";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
-import type { DogId } from "../data/types";
 import { screenYAt } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
+import { keysOf } from "../lib/records";
 import { testState } from "../testing/runState";
 import { hitDog, itemBox, pickupDog } from "./collision";
 import { stillInLane } from "./laneMotion";
@@ -22,8 +22,8 @@ const ROAD_VIEW_BOTTOM = LAYOUT.roadView.y + LAYOUT.roadView.height;
 const SCROLL_STEP = 0.25;
 
 const KINDS: readonly WalkItemKind[] = [
-  ...(Object.keys(ENCOUNTERS) as WalkItemKind[]),
-  ...(Object.keys(MINOR_OBSTACLES) as WalkItemKind[]),
+  ...keysOf(ENCOUNTERS),
+  ...keysOf(MINOR_OBSTACLES),
   "tip",
   "treat",
 ];
@@ -36,7 +36,9 @@ describe("screenRoadGeometry", () => {
   it("hits every item only while its far edge is drawn in view, not below any pack", () => {
     for (const [kind, dogs] of CASES) {
       const slots = Object.fromEntries(
-        (Object.keys(gameData.dogs) as DogId[]).slice(0, dogs).map((dog) => [dog, 3]),
+        keysOf(gameData.dogs)
+          .slice(0, dogs)
+          .map((dog) => [dog, 3]),
       );
       const run = testState(slots);
       const geometry = screenRoadGeometry(run);

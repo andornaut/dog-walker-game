@@ -25,6 +25,7 @@ import {
   shuffled,
   weightedPick,
 } from "../lib/random";
+import { keysOf } from "../lib/records";
 import { countBump, countLandedBump, countTally } from "../rules/achievements";
 import { type HeartChange, modifierCauses, type MoneyChange, negatedCauses } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
@@ -453,7 +454,7 @@ export function walkScrollSpeed(
 
 // The entries of a zone's weights above 0, in the data's order.
 function positiveWeights<Id extends string>(weights: Readonly<Record<Id, number>>): [Id, number][] {
-  return (Object.keys(weights) as Id[])
+  return keysOf(weights)
     .map((id): [Id, number] => [id, weights[id]])
     .filter(([, weight]) => weight > 0);
 }

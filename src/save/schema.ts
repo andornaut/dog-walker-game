@@ -11,6 +11,7 @@ import type {
   WalkerId,
   ZoneId,
 } from "../data/types";
+import { keysOf } from "../lib/records";
 import type { RunCounters } from "../rules/achievements";
 import { type Cents, cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
@@ -27,7 +28,7 @@ const TALLIES: Readonly<Record<TallyId, true>> = {
   treats: true,
   walletsFound: true,
 };
-export const TALLY_IDS = Object.keys(TALLIES) as TallyId[];
+export const TALLY_IDS = keysOf(TALLIES);
 
 // The most dogs a run can take.
 export const MAX_RUN_DOGS = 3;

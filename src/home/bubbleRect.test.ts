@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { DogId, GearId, WalkerId } from "../data/types";
+import type { DogId } from "../data/types";
 import { withNamePills } from "../hud/effectNames";
 import { wrapWords } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import { insetRect, rectsOverlap } from "../lib/rect";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
@@ -59,9 +60,9 @@ describe("bubbleRect", () => {
 describe("the walker's speech", () => {
   const text = gameData.homeText;
   const body = fontFileMetrics("font-body");
-  const dogs = Object.keys(gameData.dogs) as DogId[];
-  const gear = Object.keys(gameData.shopGear) as GearId[];
-  const walkers = Object.keys(gameData.walkers) as WalkerId[];
+  const dogs = keysOf(gameData.dogs);
+  const gear = keysOf(gameData.shopGear);
+  const walkers = keysOf(gameData.walkers);
   const none: Owned = { dogSlots: [], dogs: [], gear: [], walkers: [] };
   const all: Owned = { dogSlots: gameData.dogSlots.map((_, i) => i + 1), dogs, gear, walkers };
   const bought = (purchase: Purchase, name: string) =>

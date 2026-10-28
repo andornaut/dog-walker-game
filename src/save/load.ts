@@ -15,6 +15,7 @@ import type {
   ZoneId,
 } from "../data/types";
 import { clamp01 } from "../lib/numbers";
+import { keysOf } from "../lib/records";
 import { startingDogSlots } from "../rules/shop";
 import {
   createDefaultSave,
@@ -57,10 +58,6 @@ type LoadResult =
   | { raw: string; reason: string; save: SaveDocument; status: "corrupt" }
   | { reason: string; save: SaveDocument; status: "newer" }
   | { save: SaveDocument; status: "loaded" | "new" };
-
-function keysOf<Id extends string>(record: Readonly<Record<Id, unknown>>): Id[] {
-  return Object.keys(record) as Id[];
-}
 
 type SaveData = Pick<
   GameData,

@@ -11,6 +11,7 @@ import type {
 } from "../data/types";
 import { DEFAULT_WALKER } from "../data/walkers";
 import { itemAt } from "../lib/arrays";
+import { keysOf } from "../lib/records";
 import {
   type AchievementData,
   conditionHolds,
@@ -232,8 +233,8 @@ export function badgeCounters(
   const share = (condition: AchievementCondition) =>
     mean(facts.map((walk) => (conditionHolds(data, null, walk, condition) ? 1 : 0)));
   const meanOf = (count: (walk: RunFacts) => number) => mean(facts.map(count));
-  const debuffs = Object.keys(data.debuffs) as DebuffId[];
-  const kinds = Object.keys(data.minorObstacles) as MinorObstacleId[];
+  const debuffs = keysOf(data.debuffs);
+  const kinds = keysOf(data.minorObstacles);
   return {
     allCleanShare: share({ count: "all", kind: "cleanZones" }),
     cleanZoneShare: share({ count: 1, kind: "cleanZones" }),
@@ -250,7 +251,7 @@ export function badgeCounters(
       kinds.map((kind) => [kind, meanOf((walk) => walk.bumpsByKind[kind] ?? 0)]),
     ) as BadgeCounters["meanBumpsByKind"],
     meanOptionPicks: Object.fromEntries(
-      (Object.keys(data.encounters) as EncounterId[]).flatMap((encounter) => {
+      keysOf(data.encounters).flatMap((encounter) => {
         const { resolution } = data.encounters[encounter];
         if (resolution.kind !== "card") {
           return [];
@@ -356,7 +357,7 @@ function summarizeCell(
     afterPullShare: hits === 0 ? null : afterPull / hits,
     bumpShare: touchedShare(countsOf(inCategory("minor"))),
     debuffCosts: Object.fromEntries(
-      (Object.keys(data.debuffs) as DebuffId[]).map((debuff) => [
+      keysOf(data.debuffs).map((debuff) => [
         debuff,
         {
           meanBumpsWhile: mean(results.map((result) => result.debuffCosts[debuff].bumpsWhile)),
@@ -392,7 +393,7 @@ function summarizeCell(
         ? null
         : choices.filter((choice) => choice.cost > 0).length / choices.length,
     moverHitShares: Object.fromEntries(
-      [...new Set(results.flatMap((result) => Object.keys(result.movers) as WalkItemKind[]))]
+      [...new Set(results.flatMap((result) => keysOf(result.movers)))]
         .filter((mover) => obstacles.includes(mover))
         .sort()
         .map((mover) => [mover, touchedShare(countsOf((entry) => entry.mover === mover))]),
@@ -526,9 +527,7 @@ export function formatKindTable(
 ): string {
   const kinds = obstacleKinds(data);
   // Every kind any row met as a mover, after the kinds standing still.
-  const movers = [
-    ...new Set(rows.flatMap((row) => Object.keys(row.moverHitShares) as WalkItemKind[])),
-  ].sort();
+  const movers = [...new Set(rows.flatMap((row) => keysOf(row.moverHitShares)))].sort();
   return textTable(
     CELL_HEADERS.length,
     [...CELL_HEADERS, ...kinds, ...movers.map((kind) => `moving ${kind}`)],
@@ -547,7 +546,7 @@ export function formatDebuffCostTable(
   data: Pick<GameData, "debuffs">,
   rows: readonly MatrixRow[],
 ): string {
-  const debuffs = Object.keys(data.debuffs) as DebuffId[];
+  const debuffs = keysOf(data.debuffs);
   return textTable(
     CELL_HEADERS.length,
     [

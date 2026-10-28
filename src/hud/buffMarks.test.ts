@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { EncounterId } from "../data/types";
 import { fillNames } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import { amountText, gearSourceName } from "../rules/causes";
 import { cardFor, chooseOption, openCard, type OptionView } from "../rules/choices";
 import { baseMoneyCost } from "../rules/effects";
@@ -280,7 +281,7 @@ describe("a card cost Fanny pack cuts", () => {
     const { resolution } = gameData.encounters[id];
     return resolution.kind === "card" ? (resolution.options[index]?.effects ?? []) : [];
   };
-  const paid = (Object.keys(gameData.encounters) as EncounterId[]).flatMap((id) => {
+  const paid = keysOf(gameData.encounters).flatMap((id) => {
     const { resolution } = gameData.encounters[id];
     return resolution.kind === "card"
       ? resolution.options.flatMap((option, index) =>

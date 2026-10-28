@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { EncounterId, GameData, MinorObstacleId, Movement, ZoneId } from "../data/types";
+import type { GameData, Movement, ZoneId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { PART_INSET } from "../layout/packFormation";
 import { itemAt } from "../lib/arrays";
 import { seededRandom } from "../lib/random";
+import { keysOf } from "../lib/records";
 import { read } from "../rules/units";
 import { hitDog } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
@@ -271,11 +272,11 @@ describe("a moving prize", () => {
 describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
   const route = gameData.world.zones.map(({ id }) => id as ZoneId);
   const entries: { kind: WalkItemKind; movement: Movement; shape: MoverFootprint }[] = [
-    ...(Object.keys(gameData.minorObstacles) as MinorObstacleId[]).map((kind) => {
+    ...keysOf(gameData.minorObstacles).map((kind) => {
       const { movement, shape } = gameData.minorObstacles[kind];
       return { kind: kind as WalkItemKind, movement, shape };
     }),
-    ...(Object.keys(gameData.encounters) as EncounterId[]).flatMap((kind) => {
+    ...keysOf(gameData.encounters).flatMap((kind) => {
       const entry = gameData.encounters[kind];
       return entry.kind === "obstacle"
         ? [{ kind: kind as WalkItemKind, movement: entry.movement, shape: entry.shape }]
@@ -687,7 +688,7 @@ describe("a steering bot whose pack drifts", () => {
     geometry,
     speed: walkScrollSpeed(gameData, run),
   };
-  const [kind] = (Object.keys(gameData.minorObstacles) as MinorObstacleId[]).filter((id) => {
+  const [kind] = keysOf(gameData.minorObstacles).filter((id) => {
     const { movement, shape } = gameData.minorObstacles[id];
     return movement === undefined && shape.lanes * shape.rows === 1;
   });

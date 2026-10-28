@@ -1,5 +1,6 @@
-import type { DebuffId, GameData, HelpPage } from "../data/types";
+import type { GameData, HelpPage } from "../data/types";
 import { fillNames } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import { dodgeInText, formatDollars } from "../rules/effectText";
 import { read, readTable } from "../rules/units";
 
@@ -30,7 +31,7 @@ export function helpBodyValues(data: GameData): Readonly<Record<HelpBodyField, s
   const { tuning, world } = data;
   const hearts = (size: "large" | "medium" | "small") =>
     String(readTable(tuning, "hearts", "maxBySize", size));
-  const seconds = (Object.keys(data.debuffs) as DebuffId[]).map((debuff) =>
+  const seconds = keysOf(data.debuffs).map((debuff) =>
     read(tuning, "seconds", data.debuffs[debuff].seconds),
   );
   const shortest = Math.min(...seconds);

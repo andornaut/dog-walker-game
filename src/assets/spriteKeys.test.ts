@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import manifest from "../../public/art/manifest.json";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { SHOP_GEAR } from "../data/shop";
-import type { GearId, MinorObstacleId } from "../data/types";
 import { WORLD } from "../data/world";
+import { keysOf } from "../lib/records";
 import { undrawn } from "../testing/undrawnArt";
 import { animationKey, animationSpecs } from "./asepriteAnimations";
 import {
@@ -92,11 +92,11 @@ describe("key names", () => {
 describe("the art manifest", () => {
   it("has the art every gear item, minor obstacle and zone names, and the mover cues' tags", () => {
     const missing = [
-      ...(Object.keys(SHOP_GEAR) as GearId[]).map(gearIconKey).filter((key) => !images.has(key)),
+      ...keysOf(SHOP_GEAR)
+        .map(gearIconKey)
+        .filter((key) => !images.has(key)),
       ...[
-        ...(Object.keys(MINOR_OBSTACLES) as MinorObstacleId[]).map((id) =>
-          minorObstacleSpriteKey(id),
-        ),
+        ...keysOf(MINOR_OBSTACLES).map((id) => minorObstacleSpriteKey(id)),
         SKUNK_CLOUD_KEY,
         CARD_FRAME_KEY,
       ].filter((key) => !spriteKeys.has(key) && !undrawn((art) => spriteKeys.has(art), key)),

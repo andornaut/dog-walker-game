@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { DebuffId } from "../data/types";
+import { keysOf } from "../lib/records";
 import { cardEffectText, type CardTextContext } from "../rules/effectText";
 import { cents } from "../rules/units";
 import { PILL_CLOSE, PILL_SPACE, pillIndex } from "../ui/namePills";
@@ -33,7 +33,7 @@ const BUFF_NAMES = [gameData.shopGear, gameData.upgrades, gameData.walkerPerks].
 );
 
 describe("effectNameMarks", () => {
-  it.each(Object.keys(gameData.debuffs) as DebuffId[])(
+  it.each(keysOf(gameData.debuffs))(
     "marks %s's name in a card's stake, after the option's other changes",
     (debuff) => {
       const text = cardEffectText(gameData, CONTEXT, [
@@ -70,7 +70,7 @@ function opened(text: string): { kind: string | undefined; rest: string } {
 }
 
 const NAMES = [
-  ...(Object.keys(gameData.debuffs) as DebuffId[]).map((kind) => ({
+  ...keysOf(gameData.debuffs).map((kind) => ({
     kind,
     name: gameData.debuffs[kind].name,
   })),

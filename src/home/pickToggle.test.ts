@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, GearId, WalkerId } from "../data/types";
+import { keysOf } from "../lib/records";
 import type { Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
 import { tapDog, tapGear, togglePick } from "./home";
@@ -9,9 +10,9 @@ import { homeSections, type SectionId, startReady } from "./sections";
 import { tapWalker } from "./walkers";
 
 const data = { ...gameData, tuning: TEST_TUNING };
-const [dog] = Object.keys(gameData.dogs) as DogId[];
-const [gear] = Object.keys(gameData.shopGear) as GearId[];
-const [walker] = Object.keys(gameData.walkers) as WalkerId[];
+const [dog] = keysOf(gameData.dogs);
+const [gear] = keysOf(gameData.shopGear);
+const [walker] = keysOf(gameData.walkers);
 if (dog === undefined || gear === undefined || walker === undefined) {
   throw new Error("The data needs a dog, a gear item and a walker");
 }

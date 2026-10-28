@@ -12,6 +12,7 @@ import type {
 } from "../data/types";
 import { WORLD } from "../data/world";
 import { seededRandom } from "../lib/random";
+import { keysOf } from "../lib/records";
 import { read } from "../rules/units";
 import { newRun, type PackDogs } from "../state/runState";
 import { type HopMovement, hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
@@ -568,7 +569,7 @@ describe("movers", { timeout: 120_000 }, () => {
   // A ball that has ended its move standing on a tip, both at the pack. The tip is a plain grab
   // however the pack reaches it; the ball hits only the pack that touches it, in its lane, and
   // not one that grabs the tip a lane over by Long reach.
-  const longReach = (Object.keys(data.walkers) as (keyof typeof data.walkers)[]).find(
+  const longReach = keysOf(data.walkers).find(
     (walker) => data.walkers[walker].perk === "longReach",
   );
   it.each([

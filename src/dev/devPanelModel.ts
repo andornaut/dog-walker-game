@@ -1,7 +1,8 @@
 // The dev panel's logic, free of the DOM: the cheats, the save edits and the session keys it
 // shares with the game.
-import type { DogId, GameData, GearId, WalkerId, ZoneId } from "../data/types";
+import type { GameData, ZoneId } from "../data/types";
 import { assertNever } from "../lib/assertNever";
+import { keysOf } from "../lib/records";
 import { firstZoneId, type RouteData } from "../rules/route";
 import { addCents, type Cents, cents } from "../rules/units";
 import { MAX_RUN_DOGS, type SaveDocument } from "../save/schema";
@@ -154,9 +155,9 @@ function unlockAll(
     ...save,
     owned: {
       dogSlots: data.dogSlots.slice(0, MAX_RUN_DOGS).map((_, i) => i + 1),
-      dogs: withAll(Object.keys(data.dogs) as DogId[], owned.dogs),
-      gear: withAll(Object.keys(data.shopGear) as GearId[], owned.gear),
-      walkers: withAll(Object.keys(data.walkers) as WalkerId[], owned.walkers),
+      dogs: withAll(keysOf(data.dogs), owned.dogs),
+      gear: withAll(keysOf(data.shopGear), owned.gear),
+      walkers: withAll(keysOf(data.walkers), owned.walkers),
     },
   };
 }

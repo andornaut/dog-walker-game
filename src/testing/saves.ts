@@ -1,6 +1,7 @@
 // Shared save fixtures, with real dog, gear, hint and walker ids.
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
+import { keysOf } from "../lib/records";
 import type { RunCounters } from "../rules/achievements";
 import { cents } from "../rules/units";
 import type { AwardContext } from "../save/achievements";
@@ -9,7 +10,7 @@ import { SAVE_VERSION, type SaveDocument } from "../save/schema";
 import type { SaveStorage } from "../save/storage";
 
 // The dogs every player owns from the start, as the data marks them.
-export const STARTER_DOGS: readonly DogId[] = (Object.keys(gameData.dogs) as DogId[]).filter(
+export const STARTER_DOGS: readonly DogId[] = keysOf(gameData.dogs).filter(
   (id) => gameData.dogs[id].unlock === "start",
 );
 

@@ -7,12 +7,13 @@ import { spriteSource } from "../assets/atlas/atlasLayout";
 import { depthVariantKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
-import type { DogId, EncounterId, MinorObstacleId, WalkerId } from "../data/types";
+import type { DogId, EncounterId, MinorObstacleId } from "../data/types";
 import { type DepthArt, depthDraw } from "../layout/depthScale";
 import { obstacleParts } from "../layout/obstacleArt";
 import { everyPack, PART_INSET } from "../layout/packFormation";
 import { project, SCALE_STEPS, screenYAt } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
+import { keysOf } from "../lib/records";
 import { testState } from "../testing/runState";
 import { undrawn } from "../testing/undrawnArt";
 import { hitDog, type ScaledBox } from "./collision";
@@ -190,7 +191,7 @@ describe("an obstacle's hit length", () => {
 describe("a pack settled in a lane", () => {
   // Every walker with every pack, against every obstacle beside its lane, the obstacle's near
   // edge anywhere from the pack's top to past the walker's feet.
-  const WALKERS = Object.keys(gameData.walkers) as WalkerId[];
+  const WALKERS = keysOf(gameData.walkers);
   const PACKS = everyPack();
   it("never touches an obstacle in another lane, walked by any walker", () => {
     for (const walker of WALKERS) {

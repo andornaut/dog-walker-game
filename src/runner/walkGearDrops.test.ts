@@ -4,6 +4,7 @@ import { LANE_COUNT } from "../data/screen";
 import { SHOP_GEAR } from "../data/shop";
 import type { GearId } from "../data/types";
 import { WORLD } from "../data/world";
+import { keysOf } from "../lib/records";
 import { gearDropCount, gearInEffect } from "../rules/gearDrops";
 import { plannerStreams } from "../testing/movers";
 import { GAME_ROAD, inZone, REAL, realRun } from "../testing/planner";
@@ -11,7 +12,7 @@ import { atPack, inLane, step, walkWith } from "../testing/walk";
 import { spacedStretch } from "./stretches";
 import { isGearDrop, planZone, spawnQuotas, startRoad, type Walk, zoneLength } from "./walk";
 
-const GEAR = Object.keys(SHOP_GEAR) as GearId[];
+const GEAR = keysOf(SHOP_GEAR);
 const POSITIONS = Array.from({ length: WORLD.walkLength }, (_, position) => position);
 // The seeds the quota draws sample, and the fewer the planner's placements do, each zone's plan
 // taking a few hundred milliseconds.

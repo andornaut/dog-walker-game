@@ -1,4 +1,5 @@
-import type { DogId, GameData, GearId } from "../data/types";
+import type { GameData } from "../data/types";
+import { keysOf } from "../lib/records";
 import { type Cents, cents } from "../rules/units";
 import type { LastWalk, Owned } from "../save/schema";
 import { isAffordable, type Purchase } from "./home";
@@ -8,8 +9,8 @@ type ShopData = Pick<GameData, "dogSlots" | "dogs" | "shopGear" | "tuning">;
 // Everything the home screen sells: each dog, gear item and dog slot.
 export function purchases(data: ShopData): Purchase[] {
   return [
-    ...(Object.keys(data.dogs) as DogId[]).map((dog): Purchase => ({ dog, kind: "dog" })),
-    ...(Object.keys(data.shopGear) as GearId[]).map((gear): Purchase => ({ gear, kind: "gear" })),
+    ...keysOf(data.dogs).map((dog): Purchase => ({ dog, kind: "dog" })),
+    ...keysOf(data.shopGear).map((gear): Purchase => ({ gear, kind: "gear" })),
     ...data.dogSlots.map((_, i): Purchase => ({ kind: "dogSlot", slot: i + 1 })),
   ];
 }

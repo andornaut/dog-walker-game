@@ -1,4 +1,5 @@
 import type { Effect, GameData, Modifier, Walker, WalkerId, ZoneId } from "../data/types";
+import { keysOf } from "../lib/records";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { isLarge } from "./dogs";
@@ -82,7 +83,7 @@ export function newWalkers(
   owned: readonly WalkerId[],
   finished: readonly ZoneId[],
 ): WalkerId[] {
-  return (Object.keys(data.walkers) as WalkerId[]).filter((id) => {
+  return keysOf(data.walkers).filter((id) => {
     const goal = walkerGoal(data.walkers[id]);
     return !owned.includes(id) && (goal === null || finished.includes(goal));
   });

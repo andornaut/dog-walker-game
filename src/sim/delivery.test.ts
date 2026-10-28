@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { EncounterId, MinorObstacleId, MovementKind, ZoneId } from "../data/types";
+import { keysOf } from "../lib/records";
 import type { WalkItemKind } from "../runner/walk";
 import { defined } from "../testing/defined";
 import {
@@ -20,7 +21,7 @@ const [FIRST_ZONE, SECOND_ZONE] = gameData.world.zones.map(({ id }) => id as Zon
 
 // A minor obstacle that moves as movement, or stands still with null.
 function minorMoving(movement: MovementKind | null): MinorObstacleId {
-  const kinds = Object.keys(gameData.minorObstacles) as MinorObstacleId[];
+  const kinds = keysOf(gameData.minorObstacles);
   return defined(
     kinds.find((kind) => {
       const entry = gameData.minorObstacles[kind];
@@ -32,7 +33,7 @@ function minorMoving(movement: MovementKind | null): MinorObstacleId {
 
 // An encounter of a kind, an obstacle by how it resolves.
 function encounter(kind: "lucky" | "obstacle", resolution?: string): EncounterId {
-  const ids = Object.keys(gameData.encounters) as EncounterId[];
+  const ids = keysOf(gameData.encounters);
   return defined(
     ids.find((id) => {
       const entry = gameData.encounters[id];

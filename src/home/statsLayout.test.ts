@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { DogId } from "../data/types";
 import { scrollMax } from "../input/listScroll";
 import { fillLine, wrapWords } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import type { Rect } from "../lib/rect";
 import { cents, read } from "../rules/units";
 import { bodyTextWidth } from "../testing/bodyFont";
@@ -183,10 +183,7 @@ describe("the Dogs tab's blocks", () => {
 // blocks: the first heading level with the first block, and each later heading the blocks' gap
 // under the previous section's last row's pitch.
 describe("the Walks tab's sections", () => {
-  const fullPack = (Object.keys(gameData.dogs) as DogId[]).slice(
-    0,
-    read(gameData.tuning, "counts", "packSizeMax"),
-  );
+  const fullPack = keysOf(gameData.dogs).slice(0, read(gameData.tuning, "counts", "packSizeMax"));
   const bestWalk = { dogs: fullPack, earnedCents: cents(999_900), zonesFinished: 4 };
   const { outcomes, overall } = overallRows(gameData, { ...save.stats, bestWalk });
   const sections = [
@@ -236,7 +233,7 @@ describe("the scrollbar", () => {
 // scrolled to its end, its last row's ink is in the view; the Walks tab fits without
 // scrolling.
 describe("each tab's scroll", () => {
-  const dogIds = Object.keys(gameData.dogs) as DogId[];
+  const dogIds = keysOf(gameData.dogs);
   const dogCount = dogIds.length;
   const lastRow = wallRows.at(-1) ?? wall;
   const lastCell = wallCells.at(-1);

@@ -6,8 +6,8 @@ import { parseManifest } from "../assets/manifest";
 import { depthVariantKey, dogSpriteKey, standsOnGround } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
-import type { DogId } from "../data/types";
 import { itemAt } from "../lib/arrays";
+import { keysOf } from "../lib/records";
 import { walkProjection } from "../runner/walkGeometry";
 import { type DepthArt, depthDraw } from "./depthScale";
 import { PACK_DEPTH } from "./packFormation";
@@ -122,7 +122,7 @@ describe("depthDraw", () => {
   });
 
   it("draws every pack dog's full-size art unscaled, at every step", () => {
-    const dogs = (Object.keys(gameData.dogs) as DogId[]).map((dog) => dogSpriteKey(gameData, dog));
+    const dogs = keysOf(gameData.dogs).map((dog) => dogSpriteKey(gameData, dog));
     expect(dogs.length).toBeGreaterThan(0);
     for (const arts of stepSets(dogs)) {
       const drawn = depthDraw(arts, PACK_DEPTH);

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import manifest from "../../public/art/manifest.json";
 import { gameData } from "../data";
-import type { GearId, UpgradeId, WalkerPerkId } from "../data/types";
+import { keysOf } from "../lib/records";
 import { activeModifier, testState } from "../testing/runState";
 import { effectIconKey, type EffectItem, effectItems, walkerEffectItems } from "./effectIcons";
 
@@ -43,19 +43,17 @@ describe("effectIconKey", () => {
   it("names an icon for every upgrade, gear item and perk, and the manifest has the upgrades' and gear's", () => {
     const keys = new Set(manifest.images.map((image) => image.key));
     const shipped: EffectItem[] = [
-      ...(Object.keys(gameData.upgrades) as UpgradeId[]).map((upgrade): EffectItem => ({
+      ...keysOf(gameData.upgrades).map((upgrade): EffectItem => ({
         kind: "upgrade",
         upgrade,
       })),
-      ...(Object.keys(gameData.shopGear) as GearId[]).map((gear): EffectItem => ({
+      ...keysOf(gameData.shopGear).map((gear): EffectItem => ({
         gear,
         kind: "gear",
       })),
     ];
     expect(shipped.map(effectIconKey).filter((key) => !keys.has(key))).toEqual([]);
-    const perks = (Object.keys(gameData.walkerPerks) as WalkerPerkId[]).map((perk) =>
-      effectIconKey({ kind: "perk", perk }),
-    );
+    const perks = keysOf(gameData.walkerPerks).map((perk) => effectIconKey({ kind: "perk", perk }));
     expect(new Set(perks).size).toBe(perks.length);
   });
 });

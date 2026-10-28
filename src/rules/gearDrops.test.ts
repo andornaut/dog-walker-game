@@ -11,6 +11,7 @@ import type { GearId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import { fillNames } from "../lib/lines";
 import { seededRandom } from "../lib/random";
+import { keysOf } from "../lib/records";
 import { mapPack } from "../state/pack";
 import { type CardSource, newRun, type RunState } from "../state/runState";
 import { heartsByDog } from "../testing/runState";
@@ -46,7 +47,7 @@ const data = {
   world: TEST_WORLD,
 };
 
-const GEAR = Object.keys(SHOP_GEAR) as GearId[];
+const GEAR = keysOf(SHOP_GEAR);
 const [FIRST, SECOND] = GEAR as [GearId, GearId];
 // The tuning with every walk position placing expected drops on average.
 const withDrops = (expected: number) => ({

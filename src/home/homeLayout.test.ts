@@ -4,9 +4,10 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { DogId, GearId, WalkerId } from "../data/types";
+import type { WalkerId } from "../data/types";
 import { cashLeft, WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
 import { wrapWords } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
 import { unlockPrice } from "../rules/shop";
 import { cents } from "../rules/units";
@@ -392,9 +393,9 @@ const fitsScreen = (height: number) =>
 // Every dog's, gear item's and walker's detail card, owned or not, wraps its rows on the body font
 // and stays on screen.
 describe("a detail card", () => {
-  const dogs = Object.keys(gameData.dogs) as DogId[];
-  const gear = Object.keys(gameData.shopGear) as GearId[];
-  const walkers = Object.keys(gameData.walkers) as WalkerId[];
+  const dogs = keysOf(gameData.dogs);
+  const gear = keysOf(gameData.shopGear);
+  const walkers = keysOf(gameData.walkers);
   const none: Owned = { dogSlots: [], dogs: [], gear: [], walkers: [] };
   const all: Owned = { dogSlots: gameData.dogSlots.map((_, i) => i + 1), dogs, gear, walkers };
   const loadout = { dogs: [], gear: gear[0] ?? null };
@@ -464,7 +465,7 @@ describe("the dog slot sign", () => {
   const yardSign = { height: logoPng.readUInt32BE(20), width: logoPng.readUInt32BE(16), ...logo };
   const clear: readonly [string, Rect][] = [
     ["the yard sign", yardSign],
-    ...(Object.keys(gameData.walkers) as WalkerId[]).map((walker): [string, Rect] => [
+    ...keysOf(gameData.walkers).map((walker): [string, Rect] => [
       `walker ${walker}`,
       walkerBox(walker),
     ]),

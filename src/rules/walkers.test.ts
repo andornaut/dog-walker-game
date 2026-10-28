@@ -2,12 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, WalkerId, ZoneId } from "../data/types";
+import { keysOf } from "../lib/records";
 import { newRun } from "../state/runState";
 import { isLarge } from "./dogs";
 import { read } from "./units";
 import { newWalkers, packAgility, slowestPackAgility, walkerAgility } from "./walkers";
 
-const WALKER_IDS = Object.keys(gameData.walkers) as WalkerId[];
+const WALKER_IDS = keysOf(gameData.walkers);
 
 describe("walkerAgility", () => {
   it("adds Running shoes' agility to a walker's", () => {
@@ -24,7 +25,7 @@ describe("walkerAgility", () => {
 });
 
 describe("packAgility", () => {
-  const dogIds = Object.keys(gameData.dogs) as DogId[];
+  const dogIds = keysOf(gameData.dogs);
   const large = dogIds.filter((dog) => isLarge(gameData.dogs[dog]));
   const smaller = dogIds.filter((dog) => !isLarge(gameData.dogs[dog]));
   const perLarge = read(gameData.tuning, "multipliers", "largeDogAgility");

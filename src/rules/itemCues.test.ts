@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { EncounterId, MinorObstacleId } from "../data/types";
+import { keysOf } from "../lib/records";
 import { bobOffset, itemBobs } from "./itemCues";
 
 describe("itemBobs", () => {
   it("bobs only pickups and lucky finds", () => {
-    const encounters = Object.keys(gameData.encounters) as EncounterId[];
-    const kinds = [...encounters, ...(Object.keys(gameData.minorObstacles) as MinorObstacleId[])];
+    const encounters = keysOf(gameData.encounters);
+    const kinds = [...encounters, ...keysOf(gameData.minorObstacles)];
     const lucky = encounters.filter((id) => gameData.encounters[id].kind === "lucky");
     expect(kinds.filter((kind) => itemBobs(gameData, kind))).toEqual(lucky);
     expect([itemBobs(gameData, "tip"), itemBobs(gameData, "treat")]).toEqual([true, true]);

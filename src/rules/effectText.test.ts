@@ -5,16 +5,10 @@ import { DEBUFFS } from "../data/debuffs";
 import { ENCOUNTERS } from "../data/encounters";
 import { HOME_TEXT } from "../data/homeText";
 import { TUNING } from "../data/tuning";
-import type {
-  Effect,
-  GearId,
-  MoneyKey,
-  MultiplierKey,
-  WalkerPerk,
-  WalkerPerkId,
-} from "../data/types";
+import type { Effect, GearId, MoneyKey, MultiplierKey, WalkerPerk } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import { fillNames, placeholders } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import { TEST_TUNING } from "../testing/tuning";
 import {
   agilityPercent,
@@ -231,7 +225,7 @@ describe("gearShort", () => {
       .filter((modifier) => modifier.operation === "add" && modifier.stat === "agility")
       .reduce((sum, modifier) => sum + modifierValue(TEST_TUNING, modifier), 0);
 
-  it.each(Object.keys(gameData.shopGear) as GearId[])(
+  it.each(keysOf(gameData.shopGear))(
     "fills %s's shop line's {percent} with the agility it adds, leaving no names",
     (gear) => {
       const { short } = gameData.shopGear[gear];
@@ -246,7 +240,7 @@ describe("gearShort", () => {
 });
 
 describe("perkEffect", () => {
-  const perks = Object.keys(gameData.walkerPerks) as WalkerPerkId[];
+  const perks = keysOf(gameData.walkerPerks);
 
   it.each(perks)(
     "fills %s's effect line's {percent} from the multiplier it names, one of its own",

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { AchievementCondition, DogId, TallyId, WalkerId, ZoneId } from "../data/types";
+import type { AchievementCondition, DogId, TallyId, ZoneId } from "../data/types";
+import { keysOf } from "../lib/records";
 import { type SaveDocument } from "../save/schema";
 import { runFactsFor, saveFor } from "../testing/achievements";
 import { testState } from "../testing/runState";
@@ -40,8 +41,8 @@ const facts = (changes: Partial<RunFacts> = {}): RunFacts => ({
 const holdsForRun = (condition: AchievementCondition, run: Partial<RunFacts>) =>
   conditionHolds(gameData, newPlayerSave, facts(run), condition);
 
-const ALL_DOGS = Object.keys(gameData.dogs) as (keyof typeof gameData.dogs)[];
-const ALL_GEAR = Object.keys(gameData.shopGear) as (keyof typeof gameData.shopGear)[];
+const ALL_DOGS = keysOf(gameData.dogs);
+const ALL_GEAR = keysOf(gameData.shopGear);
 const ALL_ZONES = gameData.world.zones.map(({ id }) => id as ZoneId);
 
 function withStats(stats: Partial<SaveDocument["stats"]>): SaveDocument {
@@ -172,7 +173,7 @@ describe("profile conditions", () => {
   const lifetime = { dollars: 200, kind: "lifetimeEarnings" } as const;
   const firedBy = (dogs: readonly DogId[]) =>
     Object.fromEntries(dogs.map((dog) => [dog, { timesFired: 1, walks: 1, zonesFinished: 0 }]));
-  const ALL_WALKERS = Object.keys(gameData.walkers) as WalkerId[];
+  const ALL_WALKERS = keysOf(gameData.walkers);
   const veteran = veteranSave();
 
   const cases: [string, AchievementCondition, SaveDocument | null, boolean][] = [

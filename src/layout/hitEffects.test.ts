@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { MinorObstacleId } from "../data/types";
+import { keysOf } from "../lib/records";
 import {
   dogReaction,
   type FlashCue,
@@ -23,7 +24,7 @@ const struck = (kind: HitKind, obstacle: MinorObstacleId | null): StruckDog => (
   obstacle,
   top: TOP,
 });
-const STANDING_HAZARD = (Object.keys(gameData.minorObstacles) as MinorObstacleId[]).find(
+const STANDING_HAZARD = keysOf(gameData.minorObstacles).find(
   (id) => "movement" in gameData.minorObstacles[id] && OBSTACLE_HITS[id] === undefined,
 );
 

@@ -1,5 +1,6 @@
 import type { GameData, WalkerId } from "../data/types";
 import { fillLine } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import { agilityPercent, perkEffect } from "../rules/effectText";
 import { walkerGoal } from "../rules/walkers";
 import type { Owned, SaveDocument } from "../save/schema";
@@ -31,7 +32,7 @@ export function walkerOrder(data: Pick<GameData, "walkers" | "world">): WalkerId
     const zone = walkerGoal(data.walkers[walker]);
     return zone === null ? -1 : ids.indexOf(zone);
   };
-  return (Object.keys(data.walkers) as WalkerId[]).sort((a, b) => goal(a) - goal(b));
+  return keysOf(data.walkers).sort((a, b) => goal(a) - goal(b));
 }
 
 // A walker's tile on the home screen: the walker in use is picked, another owned one is

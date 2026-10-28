@@ -1,5 +1,6 @@
-import type { DogId, GameData } from "../data/types";
+import type { GameData } from "../data/types";
 import { fillLine } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import { capitalize, gearShort } from "../rules/effectText";
 import { unlockPrice } from "../rules/shop";
 import type { Cents } from "../rules/units";
@@ -111,7 +112,7 @@ export function slotRows(data: ShopData, owned: Owned): ShopRow[] {
 // gearRows lists gear, each with its size and hearts. A starting dog lists at no cost, so it
 // leads. A dog for sale shows its price on the row's plate.
 export function dogRows(data: ShopData, owned: Owned): ShopRow[] {
-  const dogs = Object.keys(data.dogs) as DogId[];
+  const dogs = keysOf(data.dogs);
   return cheapestFirst((dog) => unlockPrice(data.tuning, data.dogs[dog]), dogs).map((dog) => {
     const purchase: Purchase = { dog, kind: "dog" };
     return {

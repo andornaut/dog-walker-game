@@ -8,7 +8,7 @@ import { parseManifest } from "../assets/manifest";
 import * as spriteKeys from "../assets/spriteKeys";
 import { type BaseCue, HOME_CUES, SOUND_KEYS } from "../audio/sound";
 import { gameData } from "../data";
-import type { DogId, GearId, WalkerId } from "../data/types";
+import { keysOf } from "../lib/records";
 import { ownerSpriteKey } from "./ownerFigure";
 
 // Boot loads only the loadsFirst art and the HOME_CUES sounds before the home screen shows.
@@ -60,9 +60,9 @@ const drawing = reachable().filter((path) => DRAWING.some((prefix) => path.start
 const manifest = parseManifest(shippedManifest);
 const artKeys = new Set([...manifest.images, ...manifest.sprites].map(({ key }) => key));
 
-const dogs = Object.keys(gameData.dogs) as DogId[];
-const gear = Object.keys(gameData.shopGear) as GearId[];
-const walkers = Object.keys(gameData.walkers) as WalkerId[];
+const dogs = keysOf(gameData.dogs);
+const gear = keysOf(gameData.shopGear);
+const walkers = keysOf(gameData.walkers);
 
 // Every art key that starts with prefix.
 const keysStarting = (prefix: string) => () => [...artKeys].filter((key) => key.startsWith(prefix));

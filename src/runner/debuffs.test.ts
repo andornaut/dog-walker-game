@@ -4,6 +4,7 @@ import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
+import { keysOf } from "../lib/records";
 import { applyEffects } from "../rules/effects";
 import { read } from "../rules/units";
 import type { ActiveDebuff, RunState } from "../state/runState";
@@ -13,13 +14,15 @@ import { walkGeometry, walkProjection } from "./walkGeometry";
 
 const data = gameData;
 const { tuning } = data;
-const DEBUFF_IDS = Object.keys(data.debuffs) as DebuffId[];
+const DEBUFF_IDS = keysOf(data.debuffs);
 const PACK = Object.fromEntries(
-  (Object.keys(data.dogs) as DogId[]).slice(0, 2).map((dog) => [dog, 5]),
+  keysOf(data.dogs)
+    .slice(0, 2)
+    .map((dog) => [dog, 5]),
 );
 const GEOMETRY = (() => {
   const road = screenLayout(SCREEN_CONFIG).road;
-  const pack = { dogs: Object.keys(PACK) as DogId[], walker: data.defaultWalker };
+  const pack = { dogs: keysOf<DogId>(PACK), walker: data.defaultWalker };
   return walkGeometry(LANE_COUNT, pack, walkProjection(ROAD_CAMERA, road), road);
 })();
 const STEP = 1 / 60;

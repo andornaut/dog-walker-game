@@ -4,6 +4,7 @@ import { DOGS } from "../data/dogs";
 import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
 import type { DogId, Modifier, Size } from "../data/types";
+import { keysOf } from "../lib/records";
 import { PACK_PLACES, placeName } from "../testing/packPlaces";
 import { testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
@@ -47,7 +48,7 @@ describe("faceMood", () => {
   // Every size, with and without the Lucky collar, in a pack of every size: its max is one the
   // table above covers.
   it("gives every owner a max within the owner cap", () => {
-    const outside = (Object.keys(TUNING.hearts.maxBySize) as Size[]).flatMap((size) =>
+    const outside = keysOf(TUNING.hearts.maxBySize).flatMap((size) =>
       GEAR.flatMap(([gear, modifiers]) =>
         PACK_PLACES.filter(
           (place) => !maxes.includes(maxHearts(TUNING, modifiers, place, { size })),
@@ -60,8 +61,7 @@ describe("faceMood", () => {
 
 describe("treatRecipient", () => {
   const data = { dogs: DOGS, tuning: TEST_TUNING };
-  const ofSize = (size: Size) =>
-    (Object.keys(DOGS) as DogId[]).filter((dog) => DOGS[dog].size === size);
+  const ofSize = (size: Size) => keysOf(DOGS).filter((dog) => DOGS[dog].size === size);
   const max = (order: readonly DogId[], dog: DogId) =>
     maxHearts(TEST_TUNING, [], packPlace(order, dog), DOGS[dog]);
   const [first, second, third] = ofSize("medium") as [DogId, DogId, DogId];

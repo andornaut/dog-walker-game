@@ -12,6 +12,7 @@ import { CROSS_STREET } from "../layout/crossStreet";
 import { scaleAtY } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
 import { randomStream } from "../lib/random";
+import { keysOf } from "../lib/records";
 import { walkProjection } from "../runner/walkGeometry";
 import {
   AMBIENT_LIMIT,
@@ -34,7 +35,7 @@ const LAYOUT = screenLayout(SCREEN_CONFIG);
 const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
 const STAGE: AmbientStage = { band: LAYOUT.backdrop, projection: PROJECTION };
 const FRAME_SECONDS = 1 / 60;
-const ZONES = Object.keys(gameData.ambient) as ZoneId[];
+const ZONES = keysOf(gameData.ambient);
 const SPEED = gameData.tuning.pixels.roadScrollSpeed;
 const BAND_ROWS: readonly number[] = Object.values(CROSS_STREET);
 // Every feet row a sky mover can fly on.

@@ -13,6 +13,7 @@ import type {
 } from "../data/types";
 import { fillNames } from "../lib/lines";
 import { type Random, randomInt, randomPick } from "../lib/random";
+import { keysOf } from "../lib/records";
 import { packDogs, walkingAmong } from "../state/pack";
 import type { CardSource, EffectSource, RunState } from "../state/runState";
 import { countOptionPick } from "./achievements";
@@ -414,9 +415,7 @@ export function offerUpgrades(
   count: number,
   state: Pick<RunState, "upgradesPicked">,
 ): UpgradeId[] {
-  const pool = (Object.keys(data.upgrades) as UpgradeId[]).filter(
-    (id) => !state.upgradesPicked.includes(id),
-  );
+  const pool = keysOf(data.upgrades).filter((id) => !state.upgradesPicked.includes(id));
   const isTradeOff = (id: UpgradeId) => data.upgrades[id].kind === "tradeOff";
   const offered: UpgradeId[] = [];
   while (offered.length < count && pool.length > 0) {

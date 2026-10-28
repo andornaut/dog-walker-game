@@ -9,7 +9,6 @@ import { LANE_COUNT } from "../data/screen";
 import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
 import type {
-  DogId,
   Effect,
   EncounterId,
   GearId,
@@ -34,6 +33,7 @@ import {
 import type { LaneDirection } from "../layout/lanes";
 import { itemAt } from "../lib/arrays";
 import { seededRandom } from "../lib/random";
+import { keysOf } from "../lib/records";
 import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { causeLabel } from "../rules/causes";
 import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices";
@@ -357,7 +357,7 @@ describe("planZone", { timeout: 60_000 }, () => {
 
   // A walker's perk tipSpawns factors scale the zone's tips, rounded as Rush hour's are; a
   // walker without one plans the zone's own count.
-  it.each(Object.keys(WALKERS) as WalkerId[])(
+  it.each(keysOf(WALKERS))(
     "plans %s's tips in every zone at every walk position, scaled by its perk",
     (walker) => {
       const factor = modifiersOf(WALKER_PERKS[WALKERS[walker].perk].effects)
@@ -494,7 +494,7 @@ describe("planZone", { timeout: 60_000 }, () => {
 
   it("shows each row of the game's road in time to cross the whole road for it, in every zone, at every pace", () => {
     const acrossRoad = (LANE_COUNT - 1) * slowestLaneMove;
-    for (const walker of Object.keys(WALKERS) as WalkerId[]) {
+    for (const walker of keysOf(WALKERS)) {
       for (const zone of ZONE_IDS) {
         const zoned = inZone(realRun(REAL, walker), zone, latestIndex(zone));
         const lookAhead = GAME_ROAD.sightLength / walkScrollSpeed(REAL, zoned);
@@ -648,9 +648,7 @@ describe("stepWalk", () => {
   });
 
   // Long reach grabs a tip or a treat its lanes reach past the pack's own, and no further.
-  const longReach = (Object.keys(WALKERS) as WalkerId[]).find(
-    (walker) => WALKERS[walker].perk === "longReach",
-  );
+  const longReach = keysOf(WALKERS).find((walker) => WALKERS[walker].perk === "longReach");
   it.each([
     [0, 3, false],
     [1, 3, true],
@@ -690,7 +688,7 @@ describe("stepWalk", () => {
   // A tip counts toward the tips tally, and each lucky find toward the tally its data names.
   const tallied: [WalkItem["kind"], TallyId][] = [
     ["tip", "tips"],
-    ...(Object.keys(ENCOUNTERS) as EncounterId[]).flatMap((id): [EncounterId, TallyId][] => {
+    ...keysOf(ENCOUNTERS).flatMap((id): [EncounterId, TallyId][] => {
       const { resolution } = ENCOUNTERS[id];
       return resolution.kind === "instant" ? [[id, resolution.tally]] : [];
     }),
@@ -790,7 +788,7 @@ describe("stepWalk", () => {
   // A Muddy pack's lane move lasts 1 / muddyLaneSlow times as long, whatever walks it: every
   // walker, Running shoes or not, and a large dog's slowing included.
   it.each(
-    (Object.keys(WALKERS) as WalkerId[]).flatMap((walker) =>
+    keysOf(WALKERS).flatMap((walker) =>
       ([["biscuit"], ["kilo", "penny"]] as const).map((dogs) => ({ dogs, walker })),
     ),
   )("slows $walker's lane moves with $dogs while Muddy", ({ dogs, walker }) => {
@@ -877,7 +875,7 @@ describe("stepWalk", () => {
     "dodges a hit on a $size dog with gear $gear at $chance",
     ({ chance, gear, size }) => {
       const dodging = { ...data, tuning: { ...tuning, probability } };
-      const dog = (Object.keys(DOGS) as DogId[]).find((id) => DOGS[id].size === size) ?? "kilo";
+      const dog = keysOf(DOGS).find((id) => DOGS[id].size === size) ?? "kilo";
       const walk: Walk = {
         road: { ...startRoad(5), items: [atPack("cone")], nextItemId: 1 },
         run: newRun(dodging, 3, { dogs: [dog], gear, walker: "casey" }),
@@ -1034,9 +1032,7 @@ describe("stepWalk", () => {
 
   // A lucky find touches the pack's outline as a pickup does, so one reaching a pixel into the
   // outline's top is found, though it is above every dog's and the walker's rectangle.
-  const LUCKY = (Object.keys(ENCOUNTERS) as EncounterId[]).filter(
-    (kind) => ENCOUNTERS[kind].kind === "lucky",
-  );
+  const LUCKY = keysOf(ENCOUNTERS).filter((kind) => ENCOUNTERS[kind].kind === "lucky");
   const { outline } = geometry.packParts;
   it("finds a pickup or lucky find only once it reaches into the pack's outline", () => {
     for (const { found, into, kind } of LUCKY.flatMap((kind) => [
@@ -1115,7 +1111,7 @@ describe("stepWalk's modified values", () => {
     counts: { ...live.counts, longReachLanes: TUNING.counts.longReachLanes },
   }));
   const walkerWith = (perk: keyof typeof WALKER_PERKS): WalkerId => {
-    const walker = (Object.keys(WALKERS) as WalkerId[]).find((id) => WALKERS[id].perk === perk);
+    const walker = keysOf(WALKERS).find((id) => WALKERS[id].perk === perk);
     if (walker === undefined) {
       throw new Error(`No walker has ${perk}`);
     }
@@ -1555,9 +1551,7 @@ describe("hit stop", () => {
 
 describe("walkScrollSpeed", () => {
   it("walks every walker on the same road at the same speed", () => {
-    const speeds = (Object.keys(WALKERS) as WalkerId[]).map((walker) =>
-      walkScrollSpeed(REAL, realRun(REAL, walker)),
-    );
+    const speeds = keysOf(WALKERS).map((walker) => walkScrollSpeed(REAL, realRun(REAL, walker)));
     expect(new Set(speeds).size).toBe(1);
   });
 });

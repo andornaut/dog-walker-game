@@ -35,16 +35,7 @@ import {
 import { musicKeysOf } from "../audio/music";
 import { hitCue, SOUND_KEYS, soundKeysOf } from "../audio/sound";
 import { gameData } from "../data";
-import type {
-  DebuffId,
-  DogId,
-  EncounterId,
-  GearId,
-  MinorObstacleId,
-  UpgradeId,
-  WalkerPerkId,
-  ZoneId,
-} from "../data/types";
+import type { EncounterId, ZoneId } from "../data/types";
 import { helpPicture, TOUCH_DRAG } from "../help/helpPictures";
 import { badgeWall } from "../home/badgesView";
 import { HOME_LAYOUT } from "../home/homeLayout";
@@ -54,6 +45,7 @@ import { MESSAGE_ICONS } from "../hud/messageStrip";
 import { cardOwnerMood } from "../hud/moments";
 import { DOG_REACTIONS, HIT_ART } from "../layout/hitEffects";
 import { SCALE_STEPS } from "../layout/projection";
+import { keysOf } from "../lib/records";
 import { cardFor } from "../rules/choices";
 import { hitLabel } from "../rules/encounters";
 import { faceMood } from "../rules/treats";
@@ -105,13 +97,13 @@ function missingImages(keys: readonly string[]): string[] {
 
 // The keys of a record typed over a union, so a new member is a compile error until listed.
 function members<K extends string>(record: Readonly<Record<K, true>>): K[] {
-  return Object.keys(record) as K[];
+  return keysOf(record);
 }
 
-const DEBUFFS = Object.keys(gameData.debuffs) as DebuffId[];
-const DOGS = Object.keys(gameData.dogs) as DogId[];
-const ENCOUNTERS = Object.keys(gameData.encounters) as EncounterId[];
-const MINOR_OBSTACLES = Object.keys(gameData.minorObstacles) as MinorObstacleId[];
+const DEBUFFS = keysOf(gameData.debuffs);
+const DOGS = keysOf(gameData.dogs);
+const ENCOUNTERS = keysOf(gameData.encounters);
+const MINOR_OBSTACLES = keysOf(gameData.minorObstacles);
 const PULL_TAGS = members<PullPose["tag"]>({ pull: true, tell: true });
 // Every depth step below full size.
 const SMALLER_STEPS = SCALE_STEPS.filter((step) => step < 1);
@@ -236,30 +228,26 @@ describe("image art", () => {
       [
         "an effect icon for every upgrade, gear item and walker perk",
         () => [
-          ...(Object.keys(gameData.upgrades) as UpgradeId[]).map((upgrade) =>
+          ...keysOf(gameData.upgrades).map((upgrade) =>
             effectIconKey({ kind: "upgrade", upgrade }),
           ),
-          ...(Object.keys(gameData.shopGear) as GearId[]).map((gear) =>
-            effectIconKey({ gear, kind: "gear" }),
-          ),
-          ...(Object.keys(gameData.walkerPerks) as WalkerPerkId[]).map((perk) =>
-            effectIconKey({ kind: "perk", perk }),
-          ),
+          ...keysOf(gameData.shopGear).map((gear) => effectIconKey({ gear, kind: "gear" })),
+          ...keysOf(gameData.walkerPerks).map((perk) => effectIconKey({ kind: "perk", perk })),
         ],
       ],
       [
         "a 20x20 walk bar icon for every perk, gear item and upgrade",
         () =>
           [
-            ...(Object.keys(gameData.walkerPerks) as WalkerPerkId[]).map((perk): EffectItem => ({
+            ...keysOf(gameData.walkerPerks).map((perk): EffectItem => ({
               kind: "perk",
               perk,
             })),
-            ...(Object.keys(gameData.shopGear) as GearId[]).map((gear): EffectItem => ({
+            ...keysOf(gameData.shopGear).map((gear): EffectItem => ({
               gear,
               kind: "gear",
             })),
-            ...(Object.keys(gameData.upgrades) as UpgradeId[]).map((upgrade): EffectItem => ({
+            ...keysOf(gameData.upgrades).map((upgrade): EffectItem => ({
               kind: "upgrade",
               upgrade,
             })),
@@ -432,7 +420,7 @@ describe("road object art", () => {
   });
 
   it("names a gear drop sprite with an idle tag for every gear item, at every depth step", () => {
-    const keys = (Object.keys(gameData.shopGear) as GearId[]).map(gearDropSpriteKey);
+    const keys = keysOf(gameData.shopGear).map(gearDropSpriteKey);
     const missing = keys.flatMap((key) =>
       SCALE_STEPS.map((step) => depthVariantKey(key, step) ?? key).filter(
         (variant) => !sprites.has(variant) || !tagsOf(variant).includes("idle"),

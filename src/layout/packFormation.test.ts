@@ -9,6 +9,7 @@ import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { DogId, Size, WalkerId } from "../data/types";
 import { itemAt } from "../lib/arrays";
+import { keysOf } from "../lib/records";
 import { walkProjection } from "../runner/walkGeometry";
 import { laneCentreXs } from "./lanes";
 import {
@@ -39,8 +40,8 @@ const ROAD = screenLayout(SCREEN_CONFIG).road;
 // The game's projection, its feet on the walker's feet line.
 const PROJECTION = walkProjection(ROAD_CAMERA, ROAD);
 const LANE_XS = laneCentreXs(LANE_COUNT, ROAD);
-const WALKERS = Object.keys(WALKER_SILHOUETTES) as WalkerId[];
-const DOGS = Object.keys(DOG_SILHOUETTES) as DogId[];
+const WALKERS = keysOf(WALKER_SILHOUETTES);
+const DOGS = keysOf(DOG_SILHOUETTES);
 const PACKS = everyPack();
 
 const walkerKey = (walker: WalkerId) => gameData.walkers[walker].spriteKey;
@@ -161,7 +162,7 @@ describe("silhouettes", () => {
 describe("formationOrder", () => {
   // The biggest first, ties in roster order, whatever order the dogs were picked in.
   it("orders the biggest first, ties in roster order", () => {
-    const roster = Object.keys(gameData.dogs) as DogId[];
+    const roster = keysOf(gameData.dogs);
     const small = roster.filter((dog) => gameData.dogs[dog].size === "small");
     const large = roster.find((dog) => gameData.dogs[dog].size === "large") as DogId;
     const picked: DogId[] = [...small].reverse().concat(large);
@@ -309,7 +310,7 @@ describe("the parts' hit rectangles", () => {
     small: "duchess",
   };
   const CASES = PACK_SLOTS.flatMap((slots) =>
-    (Object.keys(SIZE_DOGS) as Size[]).flatMap((size) =>
+    keysOf(SIZE_DOGS).flatMap((size) =>
       slots.map((slot, i) => [slots.length, slot, size, i] as const),
     ),
   );

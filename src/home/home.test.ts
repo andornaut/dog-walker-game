@@ -9,6 +9,7 @@ import { QUIPS } from "../data/quips";
 import { SHOP_GEAR } from "../data/shop";
 import type { DogId, GearId, LiveTuning } from "../data/types";
 import { WORLD } from "../data/world";
+import { keysOf } from "../lib/records";
 import { price, unlockPrice } from "../rules/shop";
 import { cents, read, readTable } from "../rules/units";
 import type { Owned } from "../save/schema";
@@ -173,7 +174,7 @@ describe("packCapacity", () => {
 });
 
 describe("gearByPrice", () => {
-  const dataOrder = Object.keys(SHOP_GEAR) as GearId[];
+  const dataOrder = keysOf(SHOP_GEAR);
   const priceKey = (gear: GearId) => SHOP_GEAR[gear].price;
   const listPrice = (tuning: LiveTuning, gear: GearId) => price(tuning, priceKey(gear));
   const withGearPrices = (pick: (gear: GearId) => number): LiveTuning => ({
@@ -227,7 +228,7 @@ describe("gearByPrice", () => {
 });
 
 describe("rosterRows", () => {
-  const dataOrder = Object.keys(DOGS) as DogId[];
+  const dataOrder = keysOf(DOGS);
   const listPrice = (tuning: LiveTuning, dog: DogId) => unlockPrice(tuning, DOGS[dog]);
   const shopPrices = dataOrder.flatMap((dog) =>
     DOGS[dog].unlock === "start" ? [] : [DOGS[dog].price],

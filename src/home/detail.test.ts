@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId, Size, WalkerId } from "../data/types";
 import { fillNames } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import { sizeHearts } from "../rules/dogs";
 import {
   capitalize,
@@ -31,7 +32,7 @@ const owned: Owned = {
 };
 
 describe("dogDetail", () => {
-  const dogIds = Object.keys(data.dogs) as DogId[];
+  const dogIds = keysOf(data.dogs);
   const firstDog = (size: Size): DogId => {
     const id = dogIds.find((dog) => data.dogs[dog].size === size);
     if (id === undefined) {
@@ -100,7 +101,7 @@ describe("gearDetail", () => {
 });
 
 describe("walkerDetail", () => {
-  const walkerIds = Object.keys(data.walkers) as WalkerId[];
+  const walkerIds = keysOf(data.walkers);
   const walkerOwned = (ids: WalkerId[]) => ({ walkers: ids });
 
   it("gives every walker's name, description and owned status, or its unlock goal when locked", () => {

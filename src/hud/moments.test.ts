@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { DogId } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
+import { keysOf } from "../lib/records";
 import type { Rect } from "../lib/rect";
 import { maxHearts } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
@@ -367,7 +367,7 @@ describe("curvePoint", () => {
 
 const BODY = fontFileMetrics("font-body");
 const SLOTS = screenLayout(SCREEN_CONFIG).dogSlots;
-const DOGS = Object.keys(gameData.dogs) as DogId[];
+const DOGS = keysOf(gameData.dogs);
 const boxAt = (style: TextFitStyle) => inlineFaceBox(BODY, style.scale);
 
 // Every owner's low-hearts line, over every card, fits on one line led by the owner's face on

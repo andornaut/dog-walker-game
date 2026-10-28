@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { DogId } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
+import { keysOf } from "../lib/records";
 import { type Rect, rectsOverlap } from "../lib/rect";
 import { firedByText } from "../rules/causes";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
@@ -76,9 +76,7 @@ describe("a heart change's label", () => {
         ...(resolution.kind === "card" ? resolution.options.map((option) => option.name) : []),
       ]),
     ];
-    const firedBy = (Object.keys(gameData.dogs) as DogId[]).map((dog) =>
-      firedByText(gameData, dog),
-    );
+    const firedBy = keysOf(gameData.dogs).map((dog) => firedByText(gameData, dog));
     // A heart change names any source or the owner who fires you, over its card.
     const hearts = [...sources, ...firedBy].map((name) => `−10♥ ${name}`);
     const cases = lanes.heartLabels

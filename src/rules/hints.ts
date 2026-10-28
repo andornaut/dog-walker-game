@@ -1,4 +1,5 @@
 import type { GameData, HintId, HintTrigger } from "../data/types";
+import { keysOf } from "../lib/records";
 
 function matches(trigger: HintTrigger, event: HintTrigger): boolean {
   if (trigger.kind === "encounter") {
@@ -21,7 +22,7 @@ export function hintFor(
   shownHintIds: readonly HintId[],
   event: HintTrigger,
 ): { readonly id: HintId; readonly text: string } | null {
-  const id = (Object.keys(data.hints) as HintId[]).find(
+  const id = keysOf(data.hints).find(
     (candidate) =>
       !shownHintIds.includes(candidate) && matches(data.hints[candidate].trigger, event),
   );

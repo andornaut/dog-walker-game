@@ -5,6 +5,7 @@ import type { DogId, EncounterId } from "../data/types";
 import { largeBodyText } from "../hud/cardText";
 import { boxStyles, CARD_LAYOUT } from "../layout/cardLayout";
 import { fillNames } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import type { CardSource } from "../state/runState";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { activeModifier, testState } from "../testing/runState";
@@ -128,7 +129,7 @@ describe("a card's text for the dogs it catches", () => {
     const styles = boxStyles(fontFileMetrics("font-body"), effect.height);
 
     it("fits every forgiven loss in a card's effect", () => {
-      for (const dog of Object.keys(gameData.dogs) as DogId[]) {
+      for (const dog of keysOf(gameData.dogs)) {
         const fitted = fitInFont("font-body", styles, effect.width, plainMarks(forgiven(dog)));
         expect(fitted.widest).toBeLessThanOrEqual(effect.width);
         expect(fitted.lines.length).toBeLessThanOrEqual(fitted.style.lines ?? 1);

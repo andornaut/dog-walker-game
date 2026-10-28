@@ -4,9 +4,10 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { DebuffId, DogId, GearId, QuipMoment } from "../data/types";
+import type { QuipMoment } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
 import { fillNames } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import { type Rect } from "../lib/rect";
 import { bodyRunWidth } from "../testing/bodyFont";
 import { defined } from "../testing/defined";
@@ -172,7 +173,7 @@ function pngSize(key: string): { height: number; width: number } {
 
 describe("messageIconKey", () => {
   it("leads every kind of line with a 16x16 icon", () => {
-    const wrong = (Object.keys(MESSAGE_ICONS) as MessageIcon[]).filter((icon) => {
+    const wrong = keysOf(MESSAGE_ICONS).filter((icon) => {
       const { height, width } = pngSize(messageIconKey(icon));
       return height !== 16 || width !== 16;
     });
@@ -223,7 +224,7 @@ function everyStripLine(): (FaceText & Pick<MessageLine, "names">)[] {
   const { strip } = gameData.runText;
   const line = (key: keyof typeof STRIP_LINE_FIELDS, fields: Record<string, FaceText | string>) =>
     fillFaceText(strip[key], fields);
-  const dogs = (Object.keys(gameData.dogs) as DogId[]).map((id) => ({
+  const dogs = keysOf(gameData.dogs).map((id) => ({
     dog: gameData.dogs[id].name,
     owner: ownerFaceText(gameData, "neutral", id),
   }));
@@ -234,7 +235,7 @@ function everyStripLine(): (FaceText & Pick<MessageLine, "names">)[] {
   // The friendly neighbour's gains for the three owners whose gains say the most.
   const longestGains = faceSentenceList(
     gameData.homeText.sentenceList,
-    (Object.keys(gameData.dogs) as DogId[])
+    keysOf(gameData.dogs)
       .map((id) =>
         fillFaceText(strip.luckyNeighbourGain, {
           dog: gameData.dogs[id].name,
@@ -249,13 +250,13 @@ function everyStripLine(): (FaceText & Pick<MessageLine, "names">)[] {
     ...Object.values(gameData.hints).map(({ text }) => ({ text })),
     ...gameData.achievements.map(({ name }) => line("achievement", { name })),
     // Each debuff's start line at the largest amounts, its lead in its pill as debuffLines marks it.
-    ...(Object.keys(gameData.debuffs) as DebuffId[]).map((debuff) => {
+    ...keysOf(gameData.debuffs).map((debuff) => {
       const started = [{ debuff, secondsLeft: 99, untilZone: 0 }];
       const [said] = debuffLines(gameData, { ended: [], started });
       const fields = { cash: amount, seconds: "99", slower: "100%" };
       return { names: said?.names ?? [], text: fillNames(strip.debuffStart[debuff], fields) };
     }),
-    ...(Object.keys(gameData.shopGear) as GearId[]).map((gear) =>
+    ...keysOf(gameData.shopGear).map((gear) =>
       line("effectStart", {
         effect: effectLine(gameData, { gear, kind: "gear" }),
         name: gameData.shopGear[gear].name,
@@ -325,7 +326,7 @@ describe("the strip's lines", () => {
 // Owners' quips on the strip: every owner's name's ink at 1x, and each place a line can be,
 // with the panel a line of its own text would have: the strip on one row and on two, and the
 // one-row strip under the debuff bars.
-const OWNER_NAMES = (Object.keys(gameData.dogs) as DogId[]).map((dog) => {
+const OWNER_NAMES = keysOf(gameData.dogs).map((dog) => {
   const { name } = gameData.dogs[dog].owner;
   return [dog, name, inkWidth("font-body", { letterSpacing: 0, scale: 1 }, name)] as const;
 });

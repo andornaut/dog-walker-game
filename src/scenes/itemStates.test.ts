@@ -3,11 +3,12 @@ import { isDeepStrictEqual } from "node:util";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { DogId, GearId, WalkerId } from "../data/types";
+import type { DogId } from "../data/types";
 import { type DetailCard, dogDetail, walkerDetail } from "../home/detail";
 import { dollarText, isAffordable, type Purchase, purchasePrice } from "../home/home";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { walkerTile } from "../home/walkers";
+import { keysOf } from "../lib/records";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
@@ -17,10 +18,10 @@ import { fittingText, type TextFitStyle, WRAPPING_TEXT_FIT_STYLES } from "../ui/
 import { PLATE_PAD } from "./itemArt";
 
 const OWNED: Owned = { dogSlots: [1], dogs: [], gear: [], walkers: [] };
-const DOGS = Object.keys(gameData.dogs) as DogId[];
-const GEAR = Object.keys(gameData.shopGear) as GearId[];
+const DOGS = keysOf(gameData.dogs);
+const GEAR = keysOf(gameData.shopGear);
 const SHOP_DOGS = DOGS.filter((dog) => gameData.dogs[dog].unlock === "shop");
-const WALKERS = Object.keys(gameData.walkers) as WalkerId[];
+const WALKERS = keysOf(gameData.walkers);
 
 type StateName = "affordable" | "locked" | "owned" | "short";
 

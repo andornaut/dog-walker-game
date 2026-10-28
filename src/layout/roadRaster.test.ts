@@ -8,6 +8,7 @@ import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
 import { itemAt } from "../lib/arrays";
+import { keysOf } from "../lib/records";
 import {
   crossesLine,
   dotColour,
@@ -76,7 +77,7 @@ describe("the verge beside the road", () => {
     roadRaster(projection, approach.y, { ...view, height: 1, y: BAND_BOTTOM_Y }).rows,
     0,
   );
-  const ZONES = Object.keys(VERGES) as ZoneId[];
+  const ZONES = keysOf(VERGES);
   const zoneWhere = (test: (verge: Verge) => boolean): ZoneId => {
     const zone = ZONES.find((id) => test(VERGES[id]));
     if (zone === undefined) {
@@ -534,7 +535,7 @@ describe("drawRoad", () => {
   // The backdrops paint seams, dots and marks on their approach verges, standing still. The
   // raster draws its own there, moving with the road, so the backdrop's never show beside them.
   const zoneWith = (test: (verge: Verge) => boolean): ZoneId => {
-    const zone = (Object.keys(VERGES) as ZoneId[]).find((id) => test(VERGES[id]));
+    const zone = keysOf(VERGES).find((id) => test(VERGES[id]));
     if (zone === undefined) {
       throw new Error("No zone's verge fits");
     }

@@ -1,4 +1,5 @@
 import type { DogId, GameData } from "../data/types";
+import { keysOf } from "../lib/records";
 import type { SaveStats } from "../save/schema";
 
 // A starter owner waiting at the gate, and whether their dog still waits with them: a dog
@@ -18,7 +19,7 @@ export function porchOwners(
   if (stats.lastWalk !== null) {
     return [];
   }
-  return (Object.keys(data.dogs) as DogId[])
+  return keysOf(data.dogs)
     .filter((dog) => data.dogs[dog].unlock === "start")
     .map((dog) => ({ dog, withDog: !picked.includes(dog) }));
 }

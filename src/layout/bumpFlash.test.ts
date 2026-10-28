@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { EncounterId, MinorObstacleId } from "../data/types";
+import { keysOf } from "../lib/records";
 import type { Rect } from "../lib/rect";
 import {
   BUMP_FLASH,
@@ -13,10 +13,10 @@ import {
   MINOR_FLASH_COLOURS,
 } from "./bumpFlash";
 
-const MINOR_OBSTACLES = Object.keys(gameData.minorObstacles) as MinorObstacleId[];
+const MINOR_OBSTACLES = keysOf(gameData.minorObstacles);
 // Every encounter a pack bumps into: an obstacle that opens a card or applies on contact, not a
 // pull obstacle such as the squirrel.
-const BUMPED_ENCOUNTERS = (Object.keys(gameData.encounters) as EncounterId[]).filter((id) => {
+const BUMPED_ENCOUNTERS = keysOf(gameData.encounters).filter((id) => {
   const encounter = gameData.encounters[id];
   return encounter.kind === "obstacle" && encounter.resolution.kind !== "pull";
 });

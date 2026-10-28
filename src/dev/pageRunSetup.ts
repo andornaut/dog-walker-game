@@ -1,5 +1,6 @@
 import { gameData } from "../data";
 import type { DogId, GameData, GearId, WalkerId } from "../data/types";
+import { keysOf } from "../lib/records";
 import { walkLength } from "../rules/route";
 import { MAX_RUN_DOGS } from "../save/schema";
 import { homeRunSetup, stripDevParams } from "./devStart";
@@ -11,11 +12,11 @@ export function runSetupLimitsFor(
   data: Pick<GameData, "dogs" | "shopGear" | "walkers" | "world">,
 ): RunSetupLimits<DogId, GearId, WalkerId> {
   return {
-    dogIds: Object.keys(data.dogs) as DogId[],
-    gearIds: Object.keys(data.shopGear) as GearId[],
+    dogIds: keysOf(data.dogs),
+    gearIds: keysOf(data.shopGear),
     maxPackSize: MAX_RUN_DOGS,
     speed: SPEED_LIMITS,
-    walkerIds: Object.keys(data.walkers) as WalkerId[],
+    walkerIds: keysOf(data.walkers),
     zoneCount: walkLength(data),
     zoneIds: data.world.zones.map(({ id }) => id),
   };

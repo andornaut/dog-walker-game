@@ -5,6 +5,7 @@ import shippedManifest from "../../public/art/manifest.json";
 import { kebabCase, shownArtKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import type { EncounterId } from "../data/types";
+import { keysOf } from "../lib/records";
 import { hitWord } from "../rules/encounters";
 import { burstWordPlace, COMIC_WORDS, type ComicGlyph, comicWordWidth } from "./comicWords";
 
@@ -21,7 +22,7 @@ const widthOf = (word: string) => comicWordWidth((char) => glyphs.get(char), wor
 const LINE_HEIGHT = Number(/lineHeight="(\d+)"/.exec(comicFont)?.[1]);
 
 const sprites = new Set(shippedManifest.sprites.map(({ key }) => key));
-const bursts = (Object.keys(gameData.encounters) as EncounterId[]).filter((id) =>
+const bursts = keysOf(gameData.encounters).filter((id) =>
   sprites.has(shownArtKey(`fx-hit-${kebabCase(id)}`)),
 );
 

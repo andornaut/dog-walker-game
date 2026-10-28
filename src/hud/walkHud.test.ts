@@ -10,6 +10,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
 import { dollarAmountText } from "../home/home";
 import { screenLayout } from "../layout/screenLayout";
+import { keysOf } from "../lib/records";
 import { type Point, type Rect, rectsOverlap } from "../lib/rect";
 import { maxHearts } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
@@ -66,9 +67,7 @@ const inkRight = (line: string) =>
   fontInk("font-body", { letterSpacing: 0, scale: 1 }, plainMarks(line)).right;
 
 // Every dog's owner's name, by dog.
-const owners = (Object.keys(gameData.dogs) as DogId[]).map(
-  (dog) => [dog, gameData.dogs[dog].owner.name] as const,
-);
+const owners = keysOf(gameData.dogs).map((dog) => [dog, gameData.dogs[dog].owner.name] as const);
 
 // An image's size, from its PNG header, and a frame of a sprite's from its sheet's data.
 function pngSize(path: string): { height: number; width: number } {

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { WalkerId, ZoneId } from "../data/types";
 import { fillNames } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import type { Change, MoneyChange } from "../rules/causes";
 import { agilityPercent } from "../rules/effectText";
 import { cents, type Hearts } from "../rules/units";
@@ -107,7 +108,7 @@ describe("celebrationText", () => {
   });
 
   // Every walker, at the base lane-change speed or not.
-  it.each(Object.keys(gameData.walkers) as WalkerId[])(
+  it.each(keysOf(gameData.walkers))(
     "names new walker %s, with its own agility against the base, if not at it, and perk icon",
     (walker) => {
       const shown = celebrationText(gameData, { kind: "newWalker", walker });

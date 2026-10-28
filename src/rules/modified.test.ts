@@ -17,6 +17,7 @@ import type {
   WalkerPerkId,
 } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
+import { keysOf } from "../lib/records";
 import {
   type CardSource,
   type EffectSource,
@@ -63,9 +64,7 @@ const data = {
 };
 
 function walkerWith(perk: WalkerPerkId): WalkerId {
-  const walker = (Object.keys(data.walkers) as WalkerId[]).find(
-    (id) => data.walkers[id].perk === perk,
-  );
+  const walker = keysOf(data.walkers).find((id) => data.walkers[id].perk === perk);
   if (walker === undefined) {
     throw new Error(`No walker has ${perk}`);
   }

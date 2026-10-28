@@ -3,16 +3,15 @@ import "./main.css";
 import { badgeKey } from "../assets/spriteKeys";
 import { gameData, onGameDataChange } from "../data";
 import type {
-  DogId,
   GameData,
   HintTrigger,
   Modifier,
   PackSize,
   QuipMoment,
   Unlock,
-  WalkerId,
   Zone,
 } from "../data/types";
+import { keysOf } from "../lib/records";
 import { achievementConditionText } from "../rules/achievements";
 import { maxHearts, sizeHearts } from "../rules/dogs";
 import {
@@ -197,7 +196,7 @@ function quipsSection(data: GameData): Section {
     groupedColumns: 2,
     headers: ["Dog", "Owner", "Moment", "Lines"],
     note: "Parting lines show when the player picks the dog on the home screen.",
-    rows: (Object.keys(data.dogs) as DogId[]).flatMap((id) => {
+    rows: keysOf(data.dogs).flatMap((id) => {
       const dog = data.dogs[id];
       return QUIP_MOMENTS.map((moment, i) => [
         i === 0 ? dog.name : "",
@@ -300,7 +299,7 @@ function walkersSection(data: GameData): Section {
     note:
       "A new player starts with the default walker. The others unlock the first time a walk " +
       "finishes their zone.",
-    rows: (Object.keys(data.walkers) as WalkerId[]).map((id) => {
+    rows: keysOf(data.walkers).map((id) => {
       const walker = data.walkers[id];
       const name = id === data.defaultWalker ? `${walker.name} (default)` : walker.name;
       return [

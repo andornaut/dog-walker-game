@@ -3,20 +3,13 @@
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { TUNING } from "../data/tuning";
-import type {
-  EncounterId,
-  MinorObstacleId,
-  ObstacleEncounterId,
-  WalkerId,
-  World,
-  Zone,
-  ZoneId,
-} from "../data/types";
+import type { WalkerId, World, Zone, ZoneId } from "../data/types";
 import { DEFAULT_WALKER, WALKERS } from "../data/walkers";
 import { WORLD } from "../data/world";
 import { type PackSprites, PART_INSET } from "../layout/packFormation";
 import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
+import { keysOf } from "../lib/records";
 import { read } from "../rules/units";
 import { slowestDebuffedAgility, slowestPackAgility } from "../rules/walkers";
 import { approachOutcomes } from "../runner/approach";
@@ -80,15 +73,15 @@ export function raised<Id extends string>(
   weights: Readonly<Record<Id, number>>,
   ids: readonly Id[],
 ): Record<Id, number> {
-  const entries = (Object.keys(weights) as Id[]).map((id) => [
+  const entries = keysOf(weights).map((id) => [
     id,
     ids.includes(id) ? weights[id] + 1 : weights[id],
   ]);
   return Object.fromEntries(entries) as Record<Id, number>;
 }
-export const OBSTACLE_IDS = Object.keys(WORLD.zones[0].weights.obstacles) as ObstacleEncounterId[];
-export const MINOR_OBSTACLE_IDS = Object.keys(MINOR_OBSTACLES) as MinorObstacleId[];
-export const LUCKY_IDS = Object.keys(TUNING.counts.luckyFindsPerZone) as EncounterId[];
+export const OBSTACLE_IDS = keysOf(WORLD.zones[0].weights.obstacles);
+export const MINOR_OBSTACLE_IDS = keysOf(MINOR_OBSTACLES);
+export const LUCKY_IDS = keysOf(TUNING.counts.luckyFindsPerZone);
 // The run in zone, walked at position zoneIndex.
 export const inZone = (run: RunState, zone: ZoneId, zoneIndex: number): RunState => ({
   ...run,
@@ -108,7 +101,7 @@ export const walkwayOf = (tuned: Real, road: RoadGeometry, run: RunState) => ({
   zoneLength: zoneLength(tuned) + road.sightLength,
 });
 // The walker whose pace scrolls the road fastest.
-export const FASTEST_WALKER = (Object.keys(WALKERS) as WalkerId[]).reduce((fastest, walker) => {
+export const FASTEST_WALKER = keysOf(WALKERS).reduce((fastest, walker) => {
   const speed = (id: WalkerId) => walkScrollSpeed(REAL, realRun(REAL, id));
   return speed(walker) > speed(fastest) ? walker : fastest;
 });
@@ -119,7 +112,7 @@ export const LANE_MOVE_WALKERS = (() => {
     const run = realRun(REAL, walker);
     return laneMoveSeconds(REAL, run) * walkScrollSpeed(REAL, run);
   };
-  const walkers = (Object.keys(WALKERS) as WalkerId[]).sort((a, b) => road(a) - road(b));
+  const walkers = keysOf(WALKERS).sort((a, b) => road(a) - road(b));
   return [itemAt(walkers, 0), itemAt(walkers, walkers.length - 1)];
 })();
 // The greatest common divisor: the row spacing, of distances on rows, some of them negative.

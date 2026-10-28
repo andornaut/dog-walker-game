@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
 import { placeholders } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import type { HeartChange } from "../rules/causes";
 import type { FaceMood } from "../rules/treats";
 import { clampHearts } from "../rules/units";
@@ -160,9 +161,7 @@ describe("the walk's lines that name an owner", () => {
 });
 
 describe("faceRows", () => {
-  const spaced = (Object.keys(gameData.dogs) as DogId[]).filter((dog) =>
-    gameData.dogs[dog].owner.name.includes(" "),
-  );
+  const spaced = keysOf(gameData.dogs).filter((dog) => gameData.dogs[dog].owner.name.includes(" "));
 
   it.each(spaced)("keeps %s's owner's name whole on its row, however narrow", (dog) => {
     const line = fillFaceText("Hi {owner} again", { owner: ownerFaceText(gameData, "happy", dog) });

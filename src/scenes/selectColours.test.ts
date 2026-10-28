@@ -5,6 +5,7 @@ import { gameData } from "../data";
 import { BADGE_TEXT_COLOURS } from "../home/badgesView";
 import { STATS_LAYOUT } from "../home/statsLayout";
 import type { EffectNameKind } from "../hud/effectNames";
+import { keysOf } from "../lib/records";
 import { NEUTRAL_RAMP, PALETTE } from "../ui/phaser/palette";
 import {
   BUTTON_COLOURS,
@@ -12,7 +13,6 @@ import {
   GREYED,
   pictureBox,
   PLATE_LOOKS,
-  type PlateKind,
   selectLook,
 } from "../ui/selection";
 import { DEBUFF_COLOURS } from "./debuffColours";
@@ -50,7 +50,7 @@ describe("interaction-state colours", () => {
       ["a normal tile's label", PALETTE[normal.text], PALETTE[normal.face], TEXT],
       ["a selected tile's label", PALETTE[selected.text], PALETTE[selected.face], TEXT],
       ["a disabled tile's label", PALETTE[disabled.text], PALETTE[disabled.face], EXEMPT],
-      ...(Object.keys(PLATE_LOOKS) as PlateKind[]).map((kind): [string, number, number, number] => [
+      ...keysOf(PLATE_LOOKS).map((kind): [string, number, number, number] => [
         `a ${kind} plate's text`,
         PALETTE[PLATE_LOOKS[kind].text],
         PALETTE[PLATE_LOOKS[kind].face],

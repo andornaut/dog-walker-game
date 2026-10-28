@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { MinorObstacleId, Movement } from "../data/types";
+import { keysOf } from "../lib/records";
 import type { MoverPath } from "../runner/movers";
 import { screenRoadGeometry } from "../runner/screenGeometry";
 import { type WalkItem, type WalkItemKind, walkScrollSpeed } from "../runner/walk";
@@ -17,7 +18,7 @@ const road = {
 
 // The first minor obstacle that moves as wanted has it.
 function kindMoving(wanted: (movement: Movement) => boolean): WalkItemKind {
-  const kind = (Object.keys(gameData.minorObstacles) as MinorObstacleId[]).find((id) => {
+  const kind = keysOf(gameData.minorObstacles).find((id) => {
     const { movement } = gameData.minorObstacles[id];
     return movement !== undefined && wanted(movement);
   });

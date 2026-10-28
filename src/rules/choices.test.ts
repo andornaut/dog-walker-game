@@ -9,6 +9,7 @@ import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
 import type { CardOption, DogId, Effect, EncounterId, UpgradeId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
+import { keysOf } from "../lib/records";
 import { type CardSource, newRun, type RunState } from "../state/runState";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
@@ -95,7 +96,7 @@ describe("cardFor", () => {
 
   it("keeps every card's free option enabled with no money", () => {
     const state = testState({ duchess: 5, kilo: 5, pierre: 5 });
-    const cardEncounters = (Object.keys(ENCOUNTERS) as EncounterId[]).filter(
+    const cardEncounters = keysOf(ENCOUNTERS).filter(
       (id) => ENCOUNTERS[id].resolution.kind === "card",
     );
     const sources = cardEncounters.map((id) => encounter(id, ["duchess", "kilo", "pierre"]));
@@ -137,7 +138,7 @@ describe("cardFor", () => {
 describe("hasPlaque", () => {
   const pack: DogId[] = ["duchess", "kilo", "pierre"];
   const state = testState({ duchess: 5, kilo: 5, pierre: 5 }, { money: cents(1_000_000) });
-  const rows = (Object.keys(ENCOUNTERS) as EncounterId[]).flatMap((id) => {
+  const rows = keysOf(ENCOUNTERS).flatMap((id) => {
     const { resolution } = ENCOUNTERS[id];
     return resolution.kind === "card"
       ? resolution.options.map(({ effects, name }, index) => ({
@@ -191,9 +192,7 @@ describe("applyInstantEncounter", () => {
   // Each lucky find, caught by the whole pack, below max, with an owner at max and with an owner
   // fired: each owner it raised a heart for says one happier line, and no other owner says one.
   // Found money is the walker's, so no owner gains it.
-  const luckyFinds = (Object.keys(ENCOUNTERS) as EncounterId[]).filter(
-    (id) => ENCOUNTERS[id].kind === "lucky",
-  );
+  const luckyFinds = keysOf(ENCOUNTERS).filter((id) => ENCOUNTERS[id].kind === "lucky");
   const low = testState({ duchess: 1, kilo: 1, snowball: 1 });
   const kiloFull = startHearts(TEST_TUNING, [], placeInPack(low, "kilo"), DOGS.kilo);
   const packs: [string, RunState][] = [
@@ -259,7 +258,7 @@ describe("chooseOption", () => {
   const lost = heartsOf("skunk");
 
   // Every option of every card in the data, by its encounter, index and id.
-  const picked = (Object.keys(ENCOUNTERS) as EncounterId[]).flatMap((id) => {
+  const picked = keysOf(ENCOUNTERS).flatMap((id) => {
     const { resolution } = ENCOUNTERS[id];
     const options: readonly CardOption[] = resolution.kind === "card" ? resolution.options : [];
     return options.map((option, index) => ({ id, index, option: option.id }));
@@ -279,7 +278,7 @@ describe("chooseOption", () => {
   );
 
   // Every card option in the data that applies a debuff, whichever debuff and card it is.
-  const debuffOptions = (Object.keys(ENCOUNTERS) as EncounterId[]).flatMap((id) => {
+  const debuffOptions = keysOf(ENCOUNTERS).flatMap((id) => {
     const { resolution } = ENCOUNTERS[id];
     const options: readonly CardOption[] = resolution.kind === "card" ? resolution.options : [];
     return options.flatMap((option, index) => {
@@ -305,7 +304,7 @@ describe("chooseOption", () => {
   );
 
   // Every card option in the data that costs the lead dog's owner hearts.
-  const leadOptions = (Object.keys(ENCOUNTERS) as EncounterId[]).flatMap((id) => {
+  const leadOptions = keysOf(ENCOUNTERS).flatMap((id) => {
     const { resolution } = ENCOUNTERS[id];
     const options: readonly CardOption[] = resolution.kind === "card" ? resolution.options : [];
     return options.flatMap((option, index) =>
@@ -403,7 +402,7 @@ describe("chooseOption", () => {
 
 describe("offerUpgrades", () => {
   it("never offers an upgrade already picked", () => {
-    const all = Object.keys(UPGRADES) as UpgradeId[];
+    const all = keysOf(UPGRADES);
     const picked = testState({ kilo: 5 }, { upgradesPicked: all.slice(0, 2) });
     for (let draw = 0; draw < 1; draw += 0.1) {
       const offer = offerUpgrades(data, () => draw, 3, picked);
@@ -413,7 +412,7 @@ describe("offerUpgrades", () => {
   });
 
   it("offers the only ones left when the rest are picked, and fails with fewer", () => {
-    const all = Object.keys(UPGRADES) as UpgradeId[];
+    const all = keysOf(UPGRADES);
     const left = testState({ kilo: 5 }, { upgradesPicked: all.slice(0, all.length - 3) });
     expect([...offerUpgrades(data, () => 0.5, 3, left)].sort()).toEqual(all.slice(-3).sort());
     const fewer = testState({ kilo: 5 }, { upgradesPicked: all.slice(0, all.length - 2) });

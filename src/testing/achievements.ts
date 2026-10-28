@@ -1,14 +1,7 @@
 import { ACHIEVEMENTS } from "../data/achievements";
-import type {
-  AchievementCondition,
-  AchievementId,
-  DogId,
-  GearId,
-  Threshold,
-  WalkerId,
-  ZoneId,
-} from "../data/types";
+import type { AchievementCondition, AchievementId, DogId, Threshold, ZoneId } from "../data/types";
 import { assertNever } from "../lib/assertNever";
+import { keysOf } from "../lib/records";
 import { type AchievementData, picksOf, type RunFacts } from "../rules/achievements";
 import { walkLength } from "../rules/route";
 import { type Cents, cents, dollarsToCents } from "../rules/units";
@@ -46,7 +39,7 @@ function conditionsOf(
 }
 
 function dogIds(data: Pick<AchievementData, "dogs">): DogId[] {
-  return Object.keys(data.dogs) as DogId[];
+  return keysOf(data.dogs);
 }
 
 // The first size dogs in data order: a pack of that size.
@@ -198,7 +191,7 @@ function raiseSave(
         stats: {
           ...stats,
           walkersFinishedWith: enough(
-            Object.keys(data.walkers) as WalkerId[],
+            keysOf(data.walkers),
             condition.count,
             stats.walkersFinishedWith,
           ),
@@ -236,7 +229,7 @@ function raiseSave(
         ...save,
         owned: {
           ...owned,
-          gear: enough(Object.keys(data.shopGear) as GearId[], condition.count, owned.gear),
+          gear: enough(keysOf(data.shopGear), condition.count, owned.gear),
         },
       };
     case "noFiringStreak":
@@ -279,7 +272,7 @@ function raiseSave(
         ...save,
         owned: {
           ...owned,
-          walkers: enough(Object.keys(data.walkers) as WalkerId[], condition.count, owned.walkers),
+          walkers: enough(keysOf(data.walkers), condition.count, owned.walkers),
         },
       };
     case "zonesEverFinished":

@@ -13,6 +13,7 @@ import { WORLD } from "../data/world";
 import { recordInput, replayInputs, startInputLog } from "../dev/inputLog";
 import type { LaneDirection } from "../layout/lanes";
 import { seededRandom } from "../lib/random";
+import { keysOf } from "../lib/records";
 import { mapPack } from "../state/pack";
 import { newRun, type PackDogs } from "../state/runState";
 import { plannerStreams } from "../testing/movers";
@@ -184,7 +185,7 @@ describe("what a dog pulls toward", () => {
   });
 
   it("has every dog strain toward a squirrel", () => {
-    for (const dog of Object.keys(DOGS) as (keyof typeof DOGS)[]) {
+    for (const dog of keysOf(DOGS)) {
       expect(after(walkWith([dog], [item("squirrel", 0, 4)]), 0.5).tells).toEqual([
         { direction: 1, dog, kind: "squirrel" },
       ]);

@@ -1,4 +1,5 @@
 import type { DebuffId, GameData } from "../data/types";
+import { keysOf } from "../lib/records";
 import { inPill } from "../ui/namePills";
 import type { FaceText } from "./faceText";
 
@@ -15,7 +16,7 @@ const PILL_INDEX: Readonly<Record<EffectNameKind, number>> = {
   zoomies: 4,
 };
 
-const EFFECT_NAME_KINDS = Object.keys(PILL_INDEX) as EffectNameKind[];
+const EFFECT_NAME_KINDS = keysOf(PILL_INDEX);
 
 // The kind of the index-th pill, or undefined for none.
 export function pillKind(index: number): EffectNameKind | undefined {
@@ -39,7 +40,7 @@ function effectNames(data: NameData): { kind: EffectNameKind; name: string }[] {
       name,
     })),
   );
-  const debuffs = (Object.keys(data.debuffs) as DebuffId[]).map((kind) => ({
+  const debuffs = keysOf(data.debuffs).map((kind) => ({
     kind,
     name: data.debuffs[kind].name,
   }));

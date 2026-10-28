@@ -4,6 +4,7 @@ import { gameData } from "../data";
 import type { DogId, LiveTuning } from "../data/types";
 import { scrollMax } from "../input/listScroll";
 import { fillNames } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import { sizeHearts } from "../rules/dogs";
 import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { startingDogSlots, unlockPrice } from "../rules/shop";
@@ -53,9 +54,7 @@ import {
 
 const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
-const starters = (Object.keys(data.dogs) as DogId[]).filter(
-  (dog) => data.dogs[dog].unlock === "start",
-);
+const starters = keysOf(data.dogs).filter((dog) => data.dogs[dog].unlock === "start");
 const starting = startingDogSlots(data);
 const owned: Owned = { dogSlots: starting, dogs: starters, gear: [], walkers: [] };
 // Every slot by number, counting from 1.
@@ -149,7 +148,7 @@ describe("gearRows and dogRows", () => {
     expect(rows.find(({ id }) => id === "gear:fannyPack")?.price).toBeNull();
   });
 
-  const allDogs = Object.keys(data.dogs) as DogId[];
+  const allDogs = keysOf(data.dogs);
   const forSale = allDogs.filter((dog) => !starters.includes(dog));
   const dogOf = (row: ShopRow): DogId => (row.purchase.kind === "dog" ? row.purchase.dog : "kilo");
 
@@ -240,8 +239,8 @@ describe("shopAffordable", () => {
   it("holds while the bank covers anything, and fails once everything is owned", () => {
     const everything: Owned = {
       dogSlots: allSlots,
-      dogs: Object.keys(data.dogs) as DogId[],
-      gear: Object.keys(data.shopGear) as Owned["gear"],
+      dogs: keysOf(data.dogs),
+      gear: keysOf(data.shopGear),
       walkers: [],
     };
     expect(shopAffordable(data, owned, dollars(600))).toBe(true);
@@ -255,8 +254,8 @@ describe("shopAffordable", () => {
 describe("ownedCountNote", () => {
   const everything: Owned = {
     dogSlots: allSlots,
-    dogs: Object.keys(data.dogs) as DogId[],
-    gear: Object.keys(data.shopGear) as Owned["gear"],
+    dogs: keysOf(data.dogs),
+    gear: keysOf(data.shopGear),
     walkers: [],
   };
   const titles = {
@@ -330,8 +329,8 @@ describe("a shop row's text", () => {
       : advances("font-body", dollarText(row.price)) + 6;
   const everything: Owned = {
     dogSlots: allSlots,
-    dogs: Object.keys(gameData.dogs) as DogId[],
-    gear: Object.keys(gameData.shopGear) as Owned["gear"],
+    dogs: keysOf(gameData.dogs),
+    gear: keysOf(gameData.shopGear),
     walkers: [],
   };
   const rows = [owned, everything].flatMap((have) => [
@@ -423,8 +422,8 @@ describe("the shop's list", () => {
   const listBottom = rect.y + rect.height;
   const everything: Owned = {
     dogSlots: allSlots,
-    dogs: Object.keys(data.dogs) as DogId[],
-    gear: Object.keys(data.shopGear) as Owned["gear"],
+    dogs: keysOf(data.dogs),
+    gear: keysOf(data.shopGear),
     walkers: [],
   };
   const lists = [

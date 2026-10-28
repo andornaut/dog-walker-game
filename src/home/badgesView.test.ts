@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { badgeKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import type { AchievementCondition, DogId, WalkerId, ZoneId } from "../data/types";
+import type { AchievementCondition, ZoneId } from "../data/types";
 import { assertNever } from "../lib/assertNever";
 import { fillNames, wrapWords } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import { cents, dollarsToCents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { inkWidth } from "../testing/fontInk";
@@ -38,8 +39,8 @@ const COUNTED_KINDS = [
   "zonesEverFinished",
 ] as const satisfies readonly AchievementCondition["kind"][];
 type Counted = Extract<AchievementCondition, { kind: (typeof COUNTED_KINDS)[number] }>;
-const ALL_DOGS = Object.keys(gameData.dogs) as DogId[];
-const ALL_WALKERS = Object.keys(gameData.walkers) as WalkerId[];
+const ALL_DOGS = keysOf(gameData.dogs);
+const ALL_WALKERS = keysOf(gameData.walkers);
 const ALL_ZONES = gameData.world.zones.map(({ id }) => id as ZoneId);
 // How many a counted condition needs: dollars, or its count, where "all" is every dog (or its
 // owner), walker or zone in the data.

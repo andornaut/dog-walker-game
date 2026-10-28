@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { HINTS } from "../data/hints";
 import type { HintId } from "../data/types";
+import { keysOf } from "../lib/records";
 import { hintFor, hintJumpsQueue } from "./hints";
 
 const data = { hints: HINTS };
@@ -10,7 +11,7 @@ describe("hintJumpsQueue", () => {
   const lowHearts = hintFor(data, [], { kind: "firedOwner" })?.id;
 
   it("jumps the queue only as the low-hearts hint", () => {
-    for (const id of Object.keys(HINTS) as HintId[]) {
+    for (const id of keysOf(HINTS)) {
       expect(hintJumpsQueue(data, id)).toBe(id === lowHearts);
     }
   });

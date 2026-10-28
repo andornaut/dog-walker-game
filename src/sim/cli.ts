@@ -5,8 +5,9 @@ import { availableParallelism } from "node:os";
 import { isMainThread, parentPort, Worker, workerData } from "node:worker_threads";
 
 import { gameData } from "../data";
-import type { GearId, WalkerId } from "../data/types";
+import type { GearId } from "../data/types";
 import { itemAt } from "../lib/arrays";
+import { keysOf } from "../lib/records";
 import { DEFAULT_ROUTE_POLICY, MIXED_PAY_SHARE, POLICY_IDS, ROUTE_POLICY_IDS } from "./policies";
 import {
   DEFAULT_MATRIX,
@@ -25,7 +26,7 @@ import { BOT_SIGHTS } from "./sight";
 import { SKILL_PRESET_IDS, SKILL_PRESETS } from "./skills";
 
 const DEFAULT_RUNS = 1000;
-const WALKER_IDS = Object.keys(gameData.walkers) as WalkerId[];
+const WALKER_IDS = keysOf(gameData.walkers);
 const DEFAULT_SEED = 1;
 
 const presetLines = SKILL_PRESET_IDS.map((id) => {
@@ -137,7 +138,7 @@ function parseIds<Id extends string>(flag: string, ids: readonly Id[], text: str
 }
 
 function parseGears(text: string): (GearId | null)[] {
-  const ids = Object.keys(gameData.shopGear) as GearId[];
+  const ids = keysOf(gameData.shopGear);
   return text.split(",").map((id) => {
     const gear = id === "none" ? null : ids.find((candidate) => candidate === id);
     if (gear === undefined) {

@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import type { Scene, Textures } from "phaser";
 import { describe, expect, it } from "vitest";
 
+import { keysOf } from "../../lib/records";
 import { sheetFromRows } from "../../testing/sheetImage";
 import { compactFrames, drawPage } from "../atlas/atlasBuild";
 import { layoutAtlases } from "../atlas/atlasLayout";
@@ -210,7 +211,7 @@ describe("a trimmed atlas frame", () => {
     [false, true],
     [true, true],
   ];
-  const draws = (Object.keys(FRAMES) as (keyof typeof FRAMES)[]).flatMap((frame) =>
+  const draws = keysOf(FRAMES).flatMap((frame) =>
     origins.flatMap((origin) =>
       flips.flatMap(([flipX, flipY]) =>
         (flipY ? [0] : [0, 3, 9, 10]).flatMap((clipRows) =>
@@ -223,7 +224,7 @@ describe("a trimmed atlas frame", () => {
   // Clipping 3 rows leaves some of either frame's pixels; 9 or 10 leave none.
   it("draws each frame as the whole frame does, at every origin, flip, clip and scale", () => {
     const packed = new Map(
-      (Object.keys(FRAMES) as (keyof typeof FRAMES)[]).map((frame) => [
+      keysOf(FRAMES).map((frame) => [
         frame,
         { trimmed: packedFrame(FRAMES[frame], true), whole: packedFrame(FRAMES[frame], false) },
       ]),

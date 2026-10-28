@@ -2,6 +2,7 @@ import { DOGS } from "../data/dogs";
 import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
 import type { DogId, Size, WalkerId } from "../data/types";
 import { itemAt } from "../lib/arrays";
+import { keysOf } from "../lib/records";
 import { packOrder } from "../state/pack";
 import { distanceAtY, type RoadProjection, scaleAt } from "./projection";
 
@@ -91,7 +92,7 @@ export const PACK_FEET = {
   } as Readonly<Record<string, number>>,
 } as const;
 
-const ROSTER = Object.keys(DOGS) as DogId[];
+const ROSTER = keysOf(DOGS);
 
 // The pack's dogs in formation order, by the roster's sizes (packOrder).
 export function formationOrder(dogs: readonly DogId[]): DogId[] {
@@ -263,7 +264,7 @@ export function everyPack(): DogId[][] {
 export function tallestPackLength(projection: Lens): number {
   const packs = everyPack();
   return Math.max(
-    ...(Object.keys(WALKER_SILHOUETTES) as WalkerId[]).flatMap((walker) =>
+    ...keysOf(WALKER_SILHOUETTES).flatMap((walker) =>
       packs.map((dogs) => {
         const box = packOutline(packOnRoad(projection, 0, { dogs, walker }));
         return box.bottom - box.top;

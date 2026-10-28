@@ -1,5 +1,6 @@
 import type { DogId, GameData } from "../data/types";
 import { fillLine } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import type { DogStats, Owned, SaveStats } from "../save/schema";
 import { statsPage, ZERO_DOG_STATS } from "../save/stats";
 import { dollarText } from "./home";
@@ -60,7 +61,7 @@ export function dogRows(
   owned: Pick<Owned, "dogs">,
   stats: SaveStats,
 ): DogStatsRow[] {
-  return (Object.keys(data.dogs) as DogId[]).flatMap((dog) => {
+  return keysOf(data.dogs).flatMap((dog) => {
     const walked = stats.dogs[dog];
     if (walked === undefined && !owned.dogs.includes(dog)) {
       return [];

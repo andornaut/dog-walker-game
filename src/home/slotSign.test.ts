@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { DogId, LiveTuning } from "../data/types";
+import type { LiveTuning } from "../data/types";
+import { keysOf } from "../lib/records";
 import { startingDogSlots } from "../rules/shop";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
@@ -11,9 +12,7 @@ import { type ShopRow, shopRowId, slotRows } from "./shop";
 import { slotSign, slotSignPurchase } from "./slotSign";
 
 const starting = startingDogSlots(gameData);
-const dogs = (Object.keys(gameData.dogs) as DogId[]).filter(
-  (dog) => gameData.dogs[dog].unlock === "start",
-);
+const dogs = keysOf(gameData.dogs).filter((dog) => gameData.dogs[dog].unlock === "start");
 const forSale = gameData.dogSlots.map((_, i) => i + 1).filter((slot) => !starting.includes(slot));
 // Every set of slots a player can own, named: the starting ones and any of the others.
 const slotSets = forSale.reduce<number[][]>(

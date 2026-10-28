@@ -1,16 +1,10 @@
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
-import type {
-  DogId,
-  EncounterId,
-  GameData,
-  HelpPictureId,
-  MinorObstacleId,
-  UpgradeId,
-} from "../data/types";
+import type { DogId, EncounterId, GameData, HelpPictureId, MinorObstacleId } from "../data/types";
 import { cardRowIn } from "../layout/cardLayout";
 import { laneCentreXs } from "../layout/lanes";
 import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
+import { keysOf } from "../lib/records";
 import type { Point, Rect } from "../lib/rect";
 import type { Change } from "../rules/causes";
 import { cardFor, type CardView, forkCard, MAX_CARD_OPTIONS } from "../rules/choices";
@@ -353,7 +347,7 @@ function zones(data: GameData): HelpPicture {
   const { dogs, lane } = HELP_SCENES.zones;
   const run = startRun(data, dogs);
   const paths = forkPaths(data, () => 0, run.route);
-  const upgrades = (Object.keys(data.upgrades) as UpgradeId[]).slice(0, paths.length);
+  const upgrades = keysOf(data.upgrades).slice(0, paths.length);
   return {
     ...STILL,
     card: forkCard(data, run, { kind: "fork", paths, upgrades }),

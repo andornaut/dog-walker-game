@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { Debuff, DebuffId, GearId } from "../data/types";
 import { fillNames } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import type { HeartChange, MoneyChange } from "../rules/causes";
 import { formatDollars, sentenceList } from "../rules/effectText";
 import { cents, clampHearts, read } from "../rules/units";
@@ -221,7 +222,7 @@ describe("debuffLines", () => {
   };
 
   it("announces every debuff starting and ending", () => {
-    for (const debuff of Object.keys(gameData.debuffs) as DebuffId[]) {
+    for (const debuff of keysOf(gameData.debuffs)) {
       const on = { debuffs: [active(debuff, 20)] };
       const off = { debuffs: [] };
       const slower = debuff === "muddy" ? muddySlower : "0%";
@@ -235,7 +236,7 @@ describe("debuffLines", () => {
     }
   });
 
-  it.each(Object.keys(gameData.debuffs) as DebuffId[])(
+  it.each(keysOf(gameData.debuffs))(
     "marks %s's name, and only its name, in its start line",
     (debuff) => {
       const [line] = debuffLines(gameData, { ended: [], started: [active(debuff, 20)] });
@@ -259,7 +260,7 @@ describe("debuffLines", () => {
 });
 
 describe("gear found line", () => {
-  const GEAR = Object.keys(gameData.shopGear) as GearId[];
+  const GEAR = keysOf(gameData.shopGear);
   const name = (gear: GearId) => gameData.shopGear[gear].name;
   const { gearFound, gearSwapped } = gameData.runText.strip;
   // A first find, and a find that replaces the item found before it.

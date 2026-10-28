@@ -1,8 +1,9 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { DebuffId, MinorObstacleId } from "../data/types";
+import type { DebuffId } from "../data/types";
 import { itemAt } from "../lib/arrays";
+import { keysOf } from "../lib/records";
 import { bumpCash, tipValue } from "../rules/run";
 import { cents } from "../rules/units";
 import type { WalkStep } from "../runner/walk";
@@ -180,17 +181,12 @@ describe("badgeCounters", { timeout: 30_000 }, () => {
     expect(counters().meanTallies[tally]).toBe(sessionMean((run) => run.tallies[tally] ?? 0));
   });
 
-  it.each(Object.keys(gameData.minorObstacles) as MinorObstacleId[])(
-    "gives the mean landed bumps by %s per walk",
-    (kind) => {
-      expect(counters().meanBumpsByKind[kind]).toBe(
-        sessionMean((run) => run.bumpsByKind[kind] ?? 0),
-      );
-    },
-  );
+  it.each(keysOf(gameData.minorObstacles))("gives the mean landed bumps by %s per walk", (kind) => {
+    expect(counters().meanBumpsByKind[kind]).toBe(sessionMean((run) => run.bumpsByKind[kind] ?? 0));
+  });
 
   // Of 2 walks, the 90th percentile is the higher.
-  it.each(Object.keys(gameData.debuffs) as DebuffId[])(
+  it.each(keysOf(gameData.debuffs))(
     "gives the mean and 90th percentile times %s was got in a walk",
     (debuff) => {
       const got = results.map((result) => result.run.debuffsGot[debuff] ?? 0);
@@ -230,7 +226,7 @@ describe("badgeCounters", { timeout: 30_000 }, () => {
 });
 
 describe("noteDebuffCosts", () => {
-  const DEBUFFS = Object.keys(gameData.debuffs) as DebuffId[];
+  const DEBUFFS = keysOf(gameData.debuffs);
   const held = (debuff: DebuffId) => [{ debuff, secondsLeft: 20, untilZone: 0 }];
   const zeros = (): DebuffCosts =>
     Object.fromEntries(
