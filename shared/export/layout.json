@@ -2669,73 +2669,73 @@
       {
         "height": 43,
         "width": 23,
-        "x": 79,
+        "x": 86,
         "y": 5
       },
       {
         "height": 43,
         "width": 22,
-        "x": 102,
+        "x": 109,
         "y": 5
       },
       {
         "height": 43,
         "width": 22,
-        "x": 124,
+        "x": 131,
         "y": 5
       },
       {
         "height": 43,
         "width": 22,
-        "x": 146,
+        "x": 153,
         "y": 5
       },
       {
         "height": 43,
         "width": 22,
-        "x": 168,
+        "x": 175,
         "y": 5
       },
       {
         "height": 43,
-        "width": 34,
-        "x": 190,
+        "width": 27,
+        "x": 197,
         "y": 5
       }
     ],
     "effectWells": [
       {
-        "x": 80,
+        "x": 87,
         "y": 20,
         "height": 22,
         "width": 22
       },
       {
-        "x": 102,
+        "x": 109,
         "y": 20,
         "height": 22,
         "width": 22
       },
       {
-        "x": 124,
+        "x": 131,
         "y": 20,
         "height": 22,
         "width": 22
       },
       {
-        "x": 146,
+        "x": 153,
         "y": 20,
         "height": 22,
         "width": 22
       },
       {
-        "x": 168,
+        "x": 175,
         "y": 20,
         "height": 22,
         "width": 22
       },
       {
-        "x": 190,
+        "x": 197,
         "y": 20,
         "height": 22,
         "width": 22
@@ -2744,8 +2744,8 @@
     "zoneWell": {
       "height": 12,
       "width": 132,
-      "x": 80,
-      "y": 5
+      "y": 5,
+      "x": 87
     },
     "debuffBar": {
       "fill": {
@@ -2831,25 +2831,25 @@
         "iconSize": 20,
         "pitch": 22,
         "size": 22,
-        "x": 80,
-        "y": 20
+        "y": 20,
+        "x": 87
       },
       "minHitWidth": 34,
       "zone": {
         "name": {
-          "x": 83,
+          "x": 90,
           "y": 8
         },
         "progress": {
-          "right": 207,
+          "right": 214,
           "y": 8
         },
         "textGap": 4,
         "well": {
           "height": 12,
           "width": 132,
-          "x": 80,
-          "y": 5
+          "y": 5,
+          "x": 87
         }
       }
     }

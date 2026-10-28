@@ -7,6 +7,7 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
 import { dollarAmountText } from "../home/home";
+import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { keysOf } from "../lib/records";
 import { type Point, type Rect, rectsOverlap } from "../lib/rect";
 import { cents, pixels } from "../lib/units";
@@ -35,6 +36,7 @@ import {
   debuffFillWidth,
   DOG_CARD,
   EFFECT_WELLS,
+  evenGapLeft,
   type ExplainShown,
   type ExplainTarget,
   explainTargetAt,
@@ -163,6 +165,36 @@ describe("the walk bar", () => {
   it("ends the neighbourhood well before the first button's hit area", () => {
     const first = BAR.buttons[WALK_BAR_BUTTONS[0]].hit;
     expect(BAR.zoneWell.x + BAR.zoneWell.width).toBeLessThanOrEqual(first.x);
+  });
+
+  it("sets the neighbourhood column as far from the cash well as from the first button's face", () => {
+    const cash = { ...WALK_BAR.cash.well, x: topBar.x + WALK_BAR.cash.well.x };
+    const column = [BAR.zoneWell, ...BAR.effectWells];
+    const columnLeft = Math.min(...column.map((rect) => rect.x));
+    const columnRight = Math.max(...column.map((rect) => rect.x + rect.width));
+    const left = columnLeft - (cash.x + cash.width);
+    const right = BAR.buttons[WALK_BAR_BUTTONS[0]].face.x - columnRight;
+    expect(left).toBeGreaterThan(0);
+    expect(right - left).toBeGreaterThanOrEqual(0);
+    expect(right - left).toBeLessThanOrEqual(1);
+  });
+
+  it.each(WALK_BAR_BUTTONS)("gives %s a hit area the bar's full height, a tap tall", (id) => {
+    const { hit } = BAR.buttons[id];
+    expect(hit.height).toBe(topBar.height);
+    expect(hit.height).toBeGreaterThanOrEqual(MIN_TAP_SIZE);
+    expect(hit.width).toBeGreaterThanOrEqual(WALK_BAR.minHitWidth);
+  });
+});
+
+describe("evenGapLeft", () => {
+  // Left and right are the first columns past the sections on either side.
+  it.each<[string, number, number, number, number]>([
+    ["an even leftover", 10, 30, 10, 15],
+    ["an odd leftover, its extra column on the right", 10, 31, 10, 15],
+    ["no leftover", 10, 20, 10, 10],
+  ])("splits %s evenly", (_name, left, right, width, expected) => {
+    expect(evenGapLeft(left, right, width)).toBe(expected);
   });
 });
 

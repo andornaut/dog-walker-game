@@ -23,6 +23,42 @@ export type WalkBarButtonId = (typeof WALK_BAR_BUTTONS)[number];
 // The cash well's ink columns, which the home top bar's bank well shares.
 const CASH_INK = { left: 5, right: 73 } as const;
 
+// The most effects a walk can have, one well each: the walker's perk, the Pocket's gear, the
+// found gear and an upgrade from each fork.
+export const EFFECT_WELLS = maxEffects(gameData);
+
+// The left edge of a section width wide set between left and right (the first column past the
+// section before it and the first of the section after it) with an equal gap on either side,
+// an odd leftover column going to the gap on its right.
+export function evenGapLeft(left: number, right: number, width: number): number {
+  return left + Math.floor((right - left - width) / 2);
+}
+
+// The walk bar's three sections, left to right: the cash well, the neighbourhood column (its
+// well over the effect wells) and the buttons. The cash well and the buttons keep their places
+// at the bar's ends, and the neighbourhood column sits evenly between the cash well's right
+// edge and the first button's face.
+const CASH_WELL = { height: 37, width: 70, x: 5, y: 5 } as const;
+const BUTTONS = {
+  help: { faceX: 231, hitWidth: 34, hitX: 224 },
+  pause: { faceX: 333, hitWidth: 34, hitX: 326 },
+  settings: { faceX: 299, hitWidth: 34, hitX: 292 },
+  sound: { faceX: 265, hitWidth: 34, hitX: 258 },
+} as const satisfies Readonly<
+  Record<WalkBarButtonId, { faceX: number; hitWidth: number; hitX: number }>
+>;
+const EFFECT_ROW = { holdInset: 1, icon: 1, iconSize: 20, pitch: 22, size: 22, y: 20 } as const;
+const ZONE_WELL = { height: 12, width: 132, y: 5 } as const;
+const NEIGHBOURHOOD_WIDTH = Math.max(
+  ZONE_WELL.width,
+  (EFFECT_WELLS - 1) * EFFECT_ROW.pitch + EFFECT_ROW.size,
+);
+const NEIGHBOURHOOD_X = evenGapLeft(
+  CASH_WELL.x + CASH_WELL.width,
+  BUTTONS[WALK_BAR_BUTTONS[0]].faceX,
+  NEIGHBOURHOOD_WIDTH,
+);
+
 // The walk bar as ui-walk-bar draws it, in bar pixels; every position the HUD uses comes from
 // this table. buttons: each button's face x and its hit area's x and width, the hit areas the
 // bar's full height and minHitWidth wide or more (narrower than a 44px square, so four fit beside
@@ -35,29 +71,26 @@ const CASH_INK = { left: 5, right: 73 } as const;
 // effects: a well of size at pitch from x along y for every effect a walk can have
 // (EFFECT_WELLS), each icon iconSize at icon,icon in its well; the holds run side by side from
 // holdInset left of the first well up to the first button, each from its well's left edge, down
-// to the bar's bottom.
+// to the bar's bottom. The neighbourhood well and the effect wells start on the neighbourhood
+// column's left edge, the name 3 columns in and the count ending 5 columns before the well's
+// right edge.
 export const WALK_BAR = {
   buttonFace: { size: 20, y: 14 },
-  buttons: {
-    help: { faceX: 231, hitWidth: 34, hitX: 224 },
-    pause: { faceX: 333, hitWidth: 34, hitX: 326 },
-    settings: { faceX: 299, hitWidth: 34, hitX: 292 },
-    sound: { faceX: 265, hitWidth: 34, hitX: 258 },
-  } satisfies Readonly<Record<WalkBarButtonId, { faceX: number; hitWidth: number; hitX: number }>>,
+  buttons: BUTTONS,
   cash: {
     capsBottom: 30,
     ink: CASH_INK,
     room: 69,
     scales: [3, 2, 1],
-    well: { height: 37, width: 70, x: 5, y: 5 },
+    well: CASH_WELL,
   },
-  effects: { holdInset: 1, icon: 1, iconSize: 20, pitch: 22, size: 22, x: 80, y: 20 },
+  effects: { ...EFFECT_ROW, x: NEIGHBOURHOOD_X },
   minHitWidth: 34,
   zone: {
-    name: { x: 83, y: 8 },
-    progress: { right: 207, y: 8 },
+    name: { x: NEIGHBOURHOOD_X + 3, y: 8 },
+    progress: { right: NEIGHBOURHOOD_X + ZONE_WELL.width - 5, y: 8 },
     textGap: 4,
-    well: { height: 12, width: 132, x: 80, y: 5 },
+    well: { ...ZONE_WELL, x: NEIGHBOURHOOD_X },
   },
 } as const;
 
@@ -69,10 +102,6 @@ export function zoneProgressText(
   const total = String(walkLength(data));
   return fillNames(data.runText.zoneProgress, { n: String(zoneIndex + 1), total });
 }
-
-// The most effects a walk can have, one well each: the walker's perk, the Pocket's gear, the
-// found gear and an upgrade from each fork.
-export const EFFECT_WELLS = maxEffects(gameData);
 
 // The title font's capitals are this many rows tall at 1x.
 export const TITLE_CAP_ROWS = 5;
