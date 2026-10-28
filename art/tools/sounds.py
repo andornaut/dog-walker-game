@@ -22,6 +22,8 @@ music-walk         28.77s 12 bars at about 100 BPM in C, loops seamlessly: squar
                           triangle walking bass, thin square arpeggio, soft kick and tick
 music-distillery-district 35.53s 16 bars swung at about 108 BPM in F, loops seamlessly: muted
                           square lead with vibrato, triangle walking bass, rolled seventh chords, brushes
+music-high-park    30.72s 24 bars of 6/8 at about 94 BPM in F, loops seamlessly: breathy triangle
+                          flute, narrow-pulse oboe, triangle harp and bass, birdsong trills, wooden tick
 
 Each sound ships as mono 44.1kHz Ogg Vorbis plus AAC (.m4a), since iOS Safari
 cannot play Ogg.
