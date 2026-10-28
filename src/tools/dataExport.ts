@@ -5,7 +5,7 @@ import { gameDataExport } from "./gameDataExport";
 import { layoutExport } from "./layoutExport";
 
 // Where npm run export:data writes, relative to the repository root.
-const DATA_EXPORT_DIR = "shared/export";
+export const DATA_EXPORT_DIR = "shared/export";
 
 // Each export file's path from the repository root, and its text.
 export function dataExportFiles(data: GameData): Map<string, string> {
