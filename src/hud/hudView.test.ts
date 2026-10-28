@@ -64,21 +64,21 @@ describe("changeLabels", () => {
       {
         amount: 200,
         gain: true,
-        target: { kind: "cash" },
+        target: { kind: "cash", others: [gameData.upgrades.bigTipper.name] },
         text: `+$2 ${causes.tip}, ${gameData.upgrades.bigTipper.name}`,
       },
     ]);
   });
 
   it.each([
-    ["a tip", [{ amount: 100, kind: "tip" }], { kind: "cash" }],
+    ["a tip", [{ amount: 100, kind: "tip" }], { kind: "cash", others: [] }],
     [
       "a tip Stinky zeroed",
       [
         { amount: 100, kind: "tip" },
         { amount: -100, kind: "modifier", source: { debuff: "stinky", kind: "debuff" } },
       ],
-      { kind: "cash" },
+      { kind: "cash", others: [gameData.debuffs.stinky.name] },
     ],
     ["a bump", [{ amount: -1000, kind: "bump" }], { from: AT, kind: "bank" }],
     [

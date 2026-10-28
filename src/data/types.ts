@@ -784,13 +784,15 @@ export interface RunText {
     readonly upgradeDurationShort: { readonly [D in UpgradeDuration]: string };
   };
   // What a change's floating label names a base cause by (the Walk bonus, a bump, a
-  // zone's pay, a tip or a treat), and atMax for a meter held at its max.
+  // zone's pay, a tip or a treat), tips for one label adding up several tips, and atMax for a
+  // meter held at its max.
   readonly causes: {
     readonly atMax: string;
     readonly bonus: string;
     readonly bump: string;
     readonly pay: string;
     readonly tip: string;
+    readonly tips: string;
     readonly treat: string;
   };
   // The comic words drawn in font-comic (A to Z, ! ? - and space): bark in place of a dog's

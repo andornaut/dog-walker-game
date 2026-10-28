@@ -29,11 +29,12 @@ import type { MessageLine } from "../hud/messageStrip";
 import { cardOwnerMood, curvePoint, FORGIVEN_EVENT, type ForgivenCue } from "../hud/moments";
 import {
   cashChipPlace,
-  cashSlot,
+  mergeTips,
   MONEY_LABEL,
   moneyChipPlace,
   moneyFlightPath,
   stackOrders,
+  type TipTally,
 } from "../hud/moneyLabels";
 import { stripLine } from "../hud/stripLines";
 import {
@@ -140,6 +141,19 @@ const BAR = walkBarLayout(LAYOUT.topBar);
 
 const LABEL = { ms: 1100 };
 
+// A change label's parts on screen, and its chip's rect.
+interface ChangeChip {
+  parts: (GameObjects.Graphics | GameObjects.BitmapText)[];
+  rect: Rect;
+}
+
+// The tip label showing by the cash before it goes in: its tally, its chip, and the money it
+// keeps off the counter until it lands.
+interface ShowingTip extends TipTally {
+  chip: ChangeChip;
+  held: number;
+}
+
 // A change label's text as drawn: the name of a debuff that zeroed it, as Stinky's in "+$0
 // Stinky", in the debuff's pill.
 function changeLabelText(label: ChangeLabel): string {
@@ -204,8 +218,6 @@ export type HudSceneData = { picture: { source: HudWalk; view: ScenePicture } } 
 // pop-ins and the message strip's ageing hold.
 export class HudScene extends Scene {
   private cards: CardView[] = [];
-  // The slots of the tip labels showing in the column under the cash.
-  private cashSlots: number[] = [];
   private debuffBars: DebuffBarView[] = [];
   private debuffFills: GameObjects.Graphics | undefined;
   private dollar: GameObjects.BitmapText | undefined;
@@ -229,6 +241,7 @@ export class HudScene extends Scene {
   private soundHolder: GameObjects.Container | undefined;
   private picture: HudWalk | undefined;
   private run: HudRun | undefined;
+  private tip: ShowingTip | undefined;
   private zoneFill: GameObjects.Graphics | undefined;
   private zoneFillWidth: number | undefined;
   private zoneLabel: GameObjects.BitmapText | undefined;
@@ -252,9 +265,9 @@ export class HudScene extends Scene {
       showAsPicture(this, picture.view);
     }
     this.drawn = {};
-    this.cashSlots = [];
     this.debuffBars = [];
     this.effectParts = [];
+    this.tip = undefined;
     this.explained = NOT_EXPLAINED;
     this.messages = new MessageStrip();
     this.moneyInFlight = 0;
@@ -852,12 +865,7 @@ export class HudScene extends Scene {
     });
     for (const label of labels) {
       if (label.target.kind === "cash") {
-        const slot = cashSlot(this.cashSlots);
-        this.cashSlots.push(slot);
-        const free = () => {
-          this.cashSlots = this.cashSlots.filter((taken) => taken !== slot);
-        };
-        this.showMoneyLabel(label, (shown) => cashChipPlace(body, slot, shown), free);
+        this.showTipLabel(label);
       }
     }
     const pops = heartPops({ lanes: this.lanes().heartLabels, run }, labels, (slot) => {
@@ -905,45 +913,89 @@ export class HudScene extends Scene {
   }
 
   // A money change pops on its chip where place puts it and holds as a heart's pop does; then it
-  // flies along a heart's arc into the cash, which counts it as it lands, and calls done. Reduced
-  // motion keeps the pop and fades it in place, as a heart lands without flying, then calls done.
+  // goes into the cash (sendMoneyLabel). Reduced motion keeps the pop and fades it at once.
   private showMoneyLabel(
     label: ChangeLabel,
     place: (shown: { lines: number; scale: number; width: number }) => { chip: Rect; text: Point },
-    done: () => void = () => undefined,
   ): void {
     const chip = this.addChangeChip(label, MONEY_LABEL.room, place);
+    const held = this.holdOffCounter(label.amount);
     if (this.walk().reducedMotion()) {
-      this.labels.join(fadeAway(this, chip.parts, { ms: LABEL.ms, rise: 0 }, done));
+      this.sendMoneyLabel(chip, held);
       return;
     }
-    const { amount } = label;
-    this.moneyInFlight += amount;
+    this.labels.after(this, MONEY_LABEL.holdMs, () => this.sendMoneyLabel(chip, held));
+  }
+
+  // A tip's label pops by the cash and holds as a heart's pop does, then goes into the cash
+  // (sendMoneyLabel); with reduced motion it fades after the hold. A tip grabbed while one shows
+  // adds up with it on one chip and restarts the hold (mergeTips); one that cannot, as a Stinky
+  // "+$0" beside a paying tip, sends the showing label in now and takes its place.
+  private showTipLabel(label: ChangeLabel): void {
+    const showing = this.tip;
+    const merged = showing === undefined ? undefined : mergeTips(gameData, showing, label);
+    if (showing !== undefined) {
+      if (merged === undefined) {
+        this.sendMoneyLabel(showing.chip, showing.held);
+      } else {
+        showing.chip.parts.forEach((part) => part.destroy());
+      }
+    }
+    const tally = merged ?? { count: 1, label };
+    const body = pixelFontMetrics(this, "body");
+    const chip = this.addChangeChip(tally.label, MONEY_LABEL.room, (shown) =>
+      cashChipPlace(body, shown),
+    );
+    const before = merged === undefined ? 0 : (showing?.held ?? 0);
+    const held = before + this.holdOffCounter(label.amount);
+    const tip = { ...tally, chip, held };
+    this.tip = tip;
+    this.labels.after(this, MONEY_LABEL.holdMs, () => {
+      if (this.tip === tip) {
+        this.tip = undefined;
+        this.sendMoneyLabel(chip, held);
+      }
+    });
+  }
+
+  // The money a label keeps off the counter until it lands, of amount: all of it, or none with
+  // reduced motion, where the counter counts it at once.
+  private holdOffCounter(amount: number): number {
+    const held = this.walk().reducedMotion() ? 0 : amount;
+    this.moneyInFlight += held;
+    return held;
+  }
+
+  // A money label's chip flies along a heart's arc into the cash, which counts held as it lands.
+  // Reduced motion fades it in place, as a heart lands without flying.
+  private sendMoneyLabel(chip: ChangeChip, held: number): void {
+    if (this.walk().reducedMotion()) {
+      this.moneyInFlight -= held;
+      this.labels.join(fadeAway(this, chip.parts, { ms: LABEL.ms, rise: 0 }));
+      return;
+    }
     const land = () => {
-      this.moneyInFlight -= amount;
+      this.moneyInFlight -= held;
       chip.parts.forEach((part) => part.destroy());
-      done();
     };
     const path = moneyFlightPath(chip.rect);
-    this.labels.after(this, MONEY_LABEL.holdMs, () => {
-      const bases = chip.parts.map(({ x, y }) => ({ x, y }));
-      const progress = { t: 0 };
-      this.labels.tween(this, {
-        duration: FEEDBACK.heart.flyMs,
-        ease: "Sine.easeIn",
-        onComplete: land,
-        onUpdate: () => {
-          const point = curvePoint(path.from, path.control, path.to, progress.t);
-          const dx = Math.round(point.x) - path.from.x;
-          const dy = Math.round(point.y) - path.from.y;
-          chip.parts.forEach((part, i) => {
-            const base = bases[i] ?? part;
-            part.setPosition(base.x + dx, base.y + dy);
-          });
-        },
-        t: 1,
-        targets: progress,
-      });
+    const bases = chip.parts.map(({ x, y }) => ({ x, y }));
+    const progress = { t: 0 };
+    this.labels.tween(this, {
+      duration: FEEDBACK.heart.flyMs,
+      ease: "Sine.easeIn",
+      onComplete: land,
+      onUpdate: () => {
+        const point = curvePoint(path.from, path.control, path.to, progress.t);
+        const dx = Math.round(point.x) - path.from.x;
+        const dy = Math.round(point.y) - path.from.y;
+        chip.parts.forEach((part, i) => {
+          const base = bases[i] ?? part;
+          part.setPosition(base.x + dx, base.y + dy);
+        });
+      },
+      t: 1,
+      targets: progress,
     });
   }
 
@@ -964,10 +1016,7 @@ export class HudScene extends Scene {
     label: ChangeLabel,
     room: number,
     place: (shown: { lines: number; scale: number; width: number }) => { chip: Rect; text: Point },
-  ): {
-    parts: (GameObjects.Graphics | GameObjects.BitmapText)[];
-    rect: Rect;
-  } {
+  ): ChangeChip {
     const colour =
       label.amount === 0 ? PALETTE.grey : label.gain ? PALETTE.forest : PALETTE.darkRed;
     const text = addPixelText(this, 0, 0, changeLabelText(label), { colour, scale: 2 });

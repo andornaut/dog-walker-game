@@ -23,6 +23,7 @@ export const RUN_TEXT = {
     bump: "bump",
     pay: "pay",
     tip: "tip",
+    tips: "tips",
     treat: "treat",
   },
   comicWords: { bark: "WOOF!", dodge: "DODGE!" },

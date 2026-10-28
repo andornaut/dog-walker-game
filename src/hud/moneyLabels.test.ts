@@ -4,20 +4,24 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "../layout/screenLayout";
 import { rectsOverlap } from "../lib/rect";
-import { amountText } from "../rules/causes";
+import { amountText, causeLabel } from "../rules/causes";
 import { payFor } from "../rules/run";
+import { cents } from "../rules/units";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { inkRowsOfLines } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { CHANGE_CHIP, CHANGE_LABEL_STYLES } from "./hudLanes";
+import type { ChangeLabel } from "./hudView";
+import { MESSAGE_STRIP } from "./messageStrip";
 import { curvePoint, TOP_BAR_POINTS } from "./moments";
 import {
   cashChipPlace,
-  cashSlot,
+  mergeTips,
   MONEY_LABEL,
   moneyChipPlace,
   moneyFlightPath,
   stackOrders,
+  tipLabelText,
 } from "./moneyLabels";
 import { WALK_BAR, walkBarLayout } from "./walkHud";
 
@@ -66,19 +70,7 @@ describe("moneyChipPlace", () => {
   });
 });
 
-describe("cashSlot", () => {
-  it.each([
-    ["the top slot in an empty column", [], 0],
-    ["the slot under a label", [0], 1],
-    ["the slot under the lowest label, past a freed slot", [1], 2],
-    ["the slot under the lowest of several labels", [2, 0, 1], 3],
-  ])("takes %s", (_name, taken, slot) => {
-    expect(cashSlot(taken)).toBe(slot);
-  });
-});
-
 describe("cashChipPlace", () => {
-  const { gap } = MONEY_LABEL;
   const { bank } = TOP_BAR_POINTS;
   const bar = walkBarLayout(TOP_BAR);
   const otherParts = [
@@ -86,30 +78,131 @@ describe("cashChipPlace", () => {
     ...bar.effectWells,
     ...Object.values(bar.buttons).map(({ hit }) => hit),
   ];
-  const styles = CHANGE_LABEL_STYLES.map(({ lines, scale }) => ({
-    lines: lines ?? 1,
-    scale,
-    width: MONEY_LABEL.room,
-  }));
-  const slots = [0, 1, 2];
-  it.each(slots.flatMap((slot) => styles.map((text) => [slot, text] as const)))(
-    "pops slot %i's widest %j chip under the cash's capitals, centred, clear of the bar's other parts",
-    (slot, text) => {
-      const { chip } = cashChipPlace(BODY, slot, text);
+  const stripTop = TOP_BAR.y + TOP_BAR.height + MESSAGE_STRIP.gap;
+  it.each(
+    CHANGE_LABEL_STYLES.map(({ lines, scale }) => ({
+      lines: lines ?? 1,
+      scale,
+      width: MONEY_LABEL.room,
+    })),
+  )(
+    "pops the widest $lines-line chip at $scale x under the cash, clear of the bar's wells and the strip",
+    (text) => {
+      const { chip } = cashChipPlace(BODY, text);
       expect(Math.abs(chip.x + chip.width / 2 - bank.x)).toBeLessThanOrEqual(1);
-      expect(chip.y).toBeGreaterThan(WALK_BAR.cash.capsBottom + gap);
+      expect(chip.y).toBeGreaterThan(WALK_BAR.cash.capsBottom);
+      expect(chip.y + chip.height).toBeLessThanOrEqual(stripTop);
       expect(otherParts.filter((part) => rectsOverlap(part, chip))).toEqual([]);
     },
   );
+});
 
-  it.each(
-    slots.flatMap((slot) =>
-      styles.flatMap((above) => styles.map((below) => [slot, above, below] as const)),
-    ),
-  )("stacks slot %i's %j chip clear over the next slot's %j chip", (slot, above, below) => {
-    const upper = cashChipPlace(BODY, slot, above).chip;
-    const lower = cashChipPlace(BODY, slot + 1, below).chip;
-    expect(lower.y - (upper.y + upper.height)).toBeGreaterThanOrEqual(gap);
+describe("tipLabelText", () => {
+  const { stinky } = gameData.debuffs;
+  const tipper = gameData.upgrades.bigTipper.name;
+  it.each([
+    [
+      "one tip",
+      [{ amount: 100, kind: "tip" }],
+      { amount: 100, count: 1, others: [], zeroed: false },
+    ],
+    [
+      "one Big tipper tip",
+      [
+        { amount: 100, kind: "tip" },
+        { amount: 100, kind: "modifier", source: { kind: "upgrade", upgrade: "bigTipper" } },
+      ],
+      { amount: 200, count: 1, others: [tipper], zeroed: false },
+    ],
+    [
+      "one tip Stinky zeroed",
+      [
+        { amount: 100, kind: "tip" },
+        { amount: -100, kind: "modifier", source: { debuff: "stinky", kind: "debuff" } },
+      ],
+      { amount: 0, count: 1, others: [stinky.name], zeroed: true },
+    ],
+  ] as const)("reads %s as its change's label", (_name, causes, tips) => {
+    const change = { amount: cents(tips.amount), causes, dog: null, kind: "money" } as const;
+    expect(tipLabelText(gameData, tips)).toBe(causeLabel(gameData, change));
+  });
+
+  const { tips } = gameData.runText.causes;
+  it.each([
+    ["two tips", { amount: 200, count: 2, others: [], zeroed: false }, `+$2 ${tips}`],
+    [
+      "three Big tipper tips",
+      { amount: 600, count: 3, others: [tipper], zeroed: false },
+      `+$6 ${tips}, ${tipper}`,
+    ],
+    [
+      "two tips Stinky zeroed",
+      { amount: 0, count: 2, others: [stinky.name], zeroed: true },
+      `+$0 ${stinky.name}`,
+    ],
+  ])("reads %s as one label", (_name, tally, text) => {
+    expect(tipLabelText(gameData, tally)).toBe(text);
+  });
+});
+
+describe("mergeTips", () => {
+  const tipper = gameData.upgrades.bigTipper.name;
+  const { stinky } = gameData.debuffs;
+  const { tips } = gameData.runText.causes;
+  const tip = (amount: number, others: string[] = []): ChangeLabel => ({
+    amount,
+    gain: amount > 0,
+    target: { kind: "cash", others },
+    text: tipLabelText(gameData, { amount, count: 1, others, zeroed: false }),
+  });
+  const zeroed: ChangeLabel = {
+    amount: 0,
+    gain: false,
+    target: { kind: "cash", others: [stinky.name] },
+    text: `+$0 ${stinky.name}`,
+    zeroedBy: "stinky",
+  };
+  const bump: ChangeLabel = {
+    amount: -1000,
+    gain: false,
+    target: { from: { x: 0, y: 0 }, kind: "bank" },
+    text: "−$10 bump",
+  };
+  it.each([
+    [
+      "two tips",
+      { count: 1, label: tip(100) },
+      tip(100),
+      { amount: 200, count: 2, others: [], text: `+$2 ${tips}` },
+    ],
+    [
+      "a third tip, one Big tipper changed",
+      { count: 2, label: { ...tip(200), text: `+$2 ${tips}` } },
+      tip(200, [tipper]),
+      { amount: 400, count: 3, others: [tipper], text: `+$4 ${tips}, ${tipper}` },
+    ],
+    [
+      "two Stinky tips",
+      { count: 1, label: zeroed },
+      zeroed,
+      { amount: 0, count: 2, others: [stinky.name], text: `+$0 ${stinky.name}` },
+    ],
+  ])("adds up %s on one label", (_name, showing, next, merged) => {
+    const result = mergeTips(gameData, showing, next);
+    expect(result?.count).toBe(merged.count);
+    expect(result?.label).toMatchObject({
+      amount: merged.amount,
+      target: { kind: "cash", others: merged.others },
+      text: merged.text,
+    });
+  });
+
+  it.each([
+    ["a Stinky tip into a paying one", { count: 1, label: tip(100) }, zeroed],
+    ["a paying tip into a Stinky one", { count: 1, label: zeroed }, tip(100)],
+    ["a bump into a tip", { count: 1, label: tip(100) }, bump],
+  ])("keeps %s apart", (_name, showing, next) => {
+    expect(mergeTips(gameData, showing, next)).toBeUndefined();
   });
 });
 
@@ -125,8 +218,7 @@ describe("moneyFlightPath", () => {
       "the road's right edge",
       moneyChipPlace(BODY, SCREEN_WIDTH, { x: road.x + road.width, y: ROAD_MIDDLE.y }, 0, ONE_LINE),
     ],
-    ["the cash's top slot", cashChipPlace(BODY, 0, ONE_LINE)],
-    ["the cash's third slot", cashChipPlace(BODY, 2, ONE_LINE)],
+    ["by the cash", cashChipPlace(BODY, ONE_LINE)],
   ])("flies a chip from %s into the cash, on screen", (_name, { chip }) => {
     const path = moneyFlightPath(chip);
     const at = (t: number) => curvePoint(path.from, path.control, path.to, t);
@@ -163,7 +255,8 @@ describe("a money change's label", () => {
   const money = [
     ...sources.map((name) => `+$999 ${name}`),
     `${amountText("money", payFor(gameData.tuning))} ${gameData.runText.causes.pay}`,
-    ...modifiers.map((name) => `+$99 tip, ${name}`),
+    ...modifiers.map((name) => `+$99 ${gameData.runText.causes.tip}, ${name}`),
+    ...modifiers.map((name) => `+$99 ${gameData.runText.causes.tips}, ${name}`),
   ];
   it("fits every money change", () => {
     const misfits = [...new Set(money)].filter((text) => {
