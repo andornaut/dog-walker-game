@@ -323,9 +323,12 @@ DIVIDERS = tuple(x - CX for x in LAYOUT["lanes"]["dividers"])   # lane divider l
 # opens into. These rows are drawn flat rather than to the projection, which would spread the
 # cross street over most of the band; across, they keep the projection's scale per row, so
 # lines along the street (curbs, slab seams) still lean toward the road's centre line.
-# The stub is the band's part of the approach region, where the game's road raster starts.
+# The stub is the band's part of the approach region. The near curb and sidewalk are the junction
+# region's rows above it, where the game's road raster starts, drawing only the road surface between
+# the near corners, so the corners stay the backdrop's.
 STUB = LAYOUT["regions"]["approach"]["y"] - BAR
-FAR_WALK, FAR_CURB, CROSS, NEAR_CURB = STUB - 20, STUB - 16, STUB - 14, STUB - 5
+NEAR_CURB = LAYOUT["regions"]["junction"]["y"] - BAR
+FAR_WALK, FAR_CURB, CROSS = STUB - 20, STUB - 16, STUB - 14
 LINE = STUB - 10               # the cross street's centre line
 CORNER = 5                     # the near corners' curb radius, in pixels
 BASE = STUB - 24               # the far side's ground row: the houses stand on it
