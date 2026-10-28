@@ -64,6 +64,9 @@ fx-hit-wedding-shoot 77x77  play (8 frames, 70ms): a lilac impact star, then a c
 fx-hit-fish-crates  77x77   play (8 frames, 70ms): a shallow impact star, then a fish leaping up out
                             of a splash, flipping as it arcs over and falls, ice chips and drops
                             thrown out either side
+fx-hit-green-bin    77x77   play (8 frames, 70ms): a green impact star, then a comic splat of olive slop
+                            swelling and shrinking, drops flying off its arms, the banana peel flung up
+                            out of it tumbling over, scraps thrown out either side
 sfx-hit-cheese-crates 0.40s a soft wooden thunk, a squish, then a rising plop that sags as it settles
 sfx-hit-wedding-shoot 0.58s a flash charging up, the shutter's double click, then a triangle
                             "ding dong" of wedding bells
@@ -1046,8 +1049,73 @@ def hit_cheese_crates(step):
     return g
 
 
+# The splat's arms: (angle in degrees, 0 to the right and clockwise, reach and width as shares of its radius).
+SPLAT_ARMS = ((200, 1.0, 0.3), (250, 0.8, 0.26), (300, 1.05, 0.28), (345, 0.85, 0.3), (30, 0.95, 0.26),
+              (85, 0.7, 0.3), (135, 0.9, 0.28))
+# The scraps thrown out of the splat: (x speed, y speed, colour) in design units a frame.
+SCRAPS = ((-10, -7, "clay"), (10, -8, "green"), (-13, -2, "cream"), (13, -3, "clay"), (-5, -11, "green"),
+          (6, -11, "clay"))
+
+
+def flying_peel(g, cx, cy, angle):
+    """The banana peel in the air round design point cx, cy, turned angle degrees clockwise: a bark stem over a
+    yellow neck, a flap splayed out either side and cream inside showing between them."""
+    a = math.radians(angle)
+
+    def turned(pts, c):
+        poly(g, [(cx + x * math.cos(a) - y * math.sin(a), cy + x * math.sin(a) + y * math.cos(a)) for x, y in pts], c)
+
+    turned([(-2.5, -3), (-9, 5), (-4.5, 6.5), (0, 0)], "yellow")
+    turned([(2.5, -3), (0, 0), (4.5, 6.5), (9, 5)], "yellow")
+    turned([(-3, -7), (3, -7), (3, -1), (-3, -1)], "yellow")
+    turned([(-2.5, -1.5), (2.5, -1.5), (0, 7.5)], "cream")
+    turned([(-1.6, -11), (1.6, -11), (1.6, -7), (-1.6, -7)], "bark")
+
+
+def hit_green_bin(step):
+    """A green impact star, then a comic splat of olive compost slop swelling out, a moss shine on its upper
+    left and its round-ended arms reaching out, drops flying off every other arm as it shrinks; the banana
+    peel flung up out of it, tumbling over as it rises and falls, and scraps (clay, a green lettuce leaf, a
+    cream eggshell) thrown out either side."""
+    g = hits.Grid(64, 64)
+    cx, cy = 32, 40
+    if step == 0:
+        hits.impact(g, "green", cx, cy - 2)
+        return hits.rim(g)
+    r = (0, 9, 13, 14, 13, 11, 9, 7)[step]
+
+    def splat(p):
+        p.ell(cx, cy, r * 0.62, r * 0.55, "olive")
+        for deg, reach, w in SPLAT_ARMS:
+            a = math.radians(deg)
+            ex, ey = cx + math.cos(a) * r * reach, cy + math.sin(a) * r * reach
+            nx, ny = -math.sin(a) * r * w, math.cos(a) * r * w
+            poly(p, [(cx + nx, cy + ny), (cx - nx, cy - ny), (ex - nx * 0.3, ey - ny * 0.3),
+                     (ex + nx * 0.3, ey + ny * 0.3)], "olive")
+            p.ell(ex, ey, r * w * 0.55 + 0.6, r * w * 0.55 + 0.6, "olive")
+        p.ell(cx - r * 0.18, cy - r * 0.18, r * 0.3, r * 0.22, "moss")
+
+    hits.piece(g, splat)
+    if step >= 3:
+        for i, (deg, reach, w) in enumerate(SPLAT_ARMS[::2]):
+            a = math.radians(deg)
+            d = r * reach + 2.5 + (step - 2) * 3
+            x, y = cx + math.cos(a) * d, cy + math.sin(a) * d + (step - 2) ** 2 * 0.6
+            if 3 <= x < 60 and 3 <= y < 60:
+                hits.piece(g, lambda p: p.ell(x, y, 1.7, 1.7, "olive"))
+    t = step - 0.5
+    for i, (vx, vy, c) in enumerate(SCRAPS):
+        x, y = cx + vx * t * 0.85, cy - 4 + vy * t * 0.85 + 1.3 * t * t
+        if 3 <= x < 60 and 3 <= y < 60:
+            hits.piece(g, lambda p: p.rect(x, y, 3.5, 2.5, c) if i % 2 else p.rect(x, y, 2.5, 3.5, c))
+    px_ = (0, 31, 30, 29, 28, 27, 26, 25)[step]
+    py = (0, 32, 19, 12, 10, 12, 17, 24)[step]
+    hits.piece(g, lambda p: flying_peel(p, px_, py, (0, -20, -60, -110, -160, -210, -250, -290)[step]))
+    return g
+
+
 HIT_BURSTS = {"fx-hit-wedding-shoot": (hit_wedding_shoot, 8), "fx-hit-fish-crates": (hit_fish_crates, 8),
-              f"fx-hit-{CHEESE}": (hit_cheese_crates, 8)}
+              f"fx-hit-{CHEESE}": (hit_cheese_crates, 8), f"fx-hit-{BIN}": (hit_green_bin, 8)}
 
 
 def burst_sprites():

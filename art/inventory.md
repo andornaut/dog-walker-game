@@ -116,20 +116,20 @@ Road sprites have depth variants `<key>@94`, `@88`, `@81`, `@75`, `@69`, `@62`, 
 
 ## Effects
 
-| Key                     | Type   | Size             | Tags              | Note                                                                                                                                             |
-| ----------------------- | ------ | ---------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `fx-bark`               | sprite | 16×16            | `pop`             | Pull tell                                                                                                                                        |
-| `fx-bump`               | sprite | 48×48            | `play`            | Impact star on a plain hit                                                                                                                       |
-| `fx-bump-big`           | sprite | 64×64            | `play`            | A mover's hit                                                                                                                                    |
-| `fx-debris-<material>`  | sprite | 48×48            | `play`            | Leaves (hedge), litter (trash can); over the bump                                                                                                |
-| `fx-dodge`              | sprite | 48×48            | `play`            | A dog dodges a hit (small dogs always; medium and large ones with the Whistle); mirrored for a sidestep left                                     |
-| `fx-heart-gain`         | sprite | 32×32            | `pop`, `fly`      | Pink heart over a dog on +♥                                                                                                                      |
-| `fx-heart-loss`         | sprite | 32×32            | `pop`, `fly`      | Broken heart over a dog on −♥                                                                                                                    |
-| `fx-hit-<encounter>`    | sprite | 77×77            | `play`            | capybara, cheese-crates, dropped-cone, fish-crates, other-dog, porch-cat, promo-team, skunk, thief, wedding-shoot; the comic word is set over it |
-| `fx-sparkle`            | sprite | 16×16            | `play`            | Pickup collected                                                                                                                                 |
-| `fx-splash`             | sprite | 64×48            | `play`            | Puddle                                                                                                                                           |
-| `ui-hit-flash-<colour>` | sprite | 16×64            | `play`            | amber, mauve, orange, pink, sky; left edge strip, mirrored for right                                                                             |
-| `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`, `lucky` | Stretched to 176×32                                                                                                                              |
+| Key                     | Type   | Size             | Tags              | Note                                                                                                                                                        |
+| ----------------------- | ------ | ---------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fx-bark`               | sprite | 16×16            | `pop`             | Pull tell                                                                                                                                                   |
+| `fx-bump`               | sprite | 48×48            | `play`            | Impact star on a plain hit                                                                                                                                  |
+| `fx-bump-big`           | sprite | 64×64            | `play`            | A mover's hit                                                                                                                                               |
+| `fx-debris-<material>`  | sprite | 48×48            | `play`            | Leaves (hedge), litter (trash can); over the bump                                                                                                           |
+| `fx-dodge`              | sprite | 48×48            | `play`            | A dog dodges a hit (small dogs always; medium and large ones with the Whistle); mirrored for a sidestep left                                                |
+| `fx-heart-gain`         | sprite | 32×32            | `pop`, `fly`      | Pink heart over a dog on +♥                                                                                                                                 |
+| `fx-heart-loss`         | sprite | 32×32            | `pop`, `fly`      | Broken heart over a dog on −♥                                                                                                                               |
+| `fx-hit-<encounter>`    | sprite | 77×77            | `play`            | capybara, cheese-crates, dropped-cone, fish-crates, green-bin, other-dog, porch-cat, promo-team, skunk, thief, wedding-shoot; the comic word is set over it |
+| `fx-sparkle`            | sprite | 16×16            | `play`            | Pickup collected                                                                                                                                            |
+| `fx-splash`             | sprite | 64×48            | `play`            | Puddle                                                                                                                                                      |
+| `ui-hit-flash-<colour>` | sprite | 16×64            | `play`            | amber, mauve, orange, pink, sky; left edge strip, mirrored for right                                                                                        |
+| `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`, `lucky` | Stretched to 176×32                                                                                                                                         |
 
 ## Pulls and firing
 

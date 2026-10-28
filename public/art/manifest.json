@@ -5523,6 +5523,11 @@
       "json": "sprites/fx-hit-fish-crates.json"
     },
     {
+      "key": "fx-hit-green-bin",
+      "png": "sprites/fx-hit-green-bin.png",
+      "json": "sprites/fx-hit-green-bin.json"
+    },
+    {
       "key": "fx-hit-other-dog",
       "png": "sprites/fx-hit-other-dog.png",
       "json": "sprites/fx-hit-other-dog.json"
