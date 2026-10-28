@@ -1,6 +1,13 @@
 import type { DogId, Modifier } from "../data/types";
-import { cents, clampHearts, pixels } from "../rules/units";
-import type { ActiveModifier, ModifierSource, Pack, PackSlot, RunState } from "../state/runState";
+import { clampHearts } from "../rules/units";
+import {
+  type ActiveModifier,
+  blankRun,
+  type ModifierSource,
+  type Pack,
+  type PackSlot,
+  type RunState,
+} from "../state/runState";
 
 // A run state for tests: one pack slot per entry, walking at the given hearts or fired
 // in zone 0, the default walker without its effects, and everything else empty.
@@ -17,31 +24,12 @@ export function testState(
     throw new Error(`A pack has 1 to 3 dogs, not ${pack.length}`);
   }
   return {
-    bumpsByKind: {},
-    bumpsByZone: [],
-    cardsThisZone: 0,
-    debuffs: [],
-    debuffsGot: {},
-    dodges: [],
-    firstZone: 0,
-    foundGear: null,
-    gear: null,
-    heartsForgiven: 0,
-    immunities: [],
-    modifiers: [],
-    money: cents(0),
-    optionPicks: {},
-    pack: pack as readonly PackSlot[] as Pack,
-    phase: { kind: "walking" },
-    route: ["street"],
-    skipPass: null,
-    skipUsed: false,
-    startMoney: cents(0),
-    tallies: {},
-    upgradesPicked: [],
-    walker: "casey",
-    zoneDistance: pixels(0),
-    zoneIndex: 0,
+    ...blankRun({
+      gear: null,
+      pack: pack as readonly PackSlot[] as Pack,
+      route: ["street"],
+      walker: "casey",
+    }),
     ...overrides,
   };
 }

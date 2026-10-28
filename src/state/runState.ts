@@ -153,6 +153,39 @@ export interface Loadout {
   readonly walker: WalkerId;
 }
 
+// A run at its start with nothing on it yet but its gear, pack, route and walker: no money, no
+// effects, nothing counted, walking zone 0 from its start.
+export function blankRun(start: Pick<RunState, "gear" | "pack" | "route" | "walker">): RunState {
+  const { gear, pack, route, walker } = start;
+  return {
+    bumpsByKind: {},
+    bumpsByZone: [],
+    cardsThisZone: 0,
+    debuffs: [],
+    debuffsGot: {},
+    dodges: [],
+    firstZone: 0,
+    foundGear: null,
+    gear,
+    heartsForgiven: 0,
+    immunities: [],
+    modifiers: [],
+    money: cents(0),
+    optionPicks: {},
+    pack,
+    phase: { kind: "walking" },
+    route,
+    skipPass: null,
+    skipUsed: false,
+    startMoney: cents(0),
+    tallies: {},
+    upgradesPicked: [],
+    walker,
+    zoneDistance: pixels(0),
+    zoneIndex: 0,
+  };
+}
+
 // A run's opening state, in the world's first zone: the walker's effects and the gear's applied,
 // then each owner's starting hearts, full for the pack's size, and the starting money. Throws for a
 // dog listed twice or more dogs than the player has slots.
@@ -181,33 +214,12 @@ export function newRun(
       order,
     );
   const { walker } = loadout;
-  const empty: RunState = {
-    bumpsByKind: {},
-    bumpsByZone: [],
-    cardsThisZone: 0,
-    debuffs: [],
-    debuffsGot: {},
-    dodges: [],
-    firstZone: 0,
-    foundGear: null,
+  const empty = blankRun({
     gear: loadout.gear,
-    heartsForgiven: 0,
-    immunities: [],
-    modifiers: [],
-    money: cents(0),
-    optionPicks: {},
     pack: packWith([]),
-    phase: { kind: "walking" },
     route: [firstZoneId(data)],
-    skipPass: null,
-    skipUsed: false,
-    startMoney: cents(0),
-    tallies: {},
-    upgradesPicked: [],
     walker,
-    zoneDistance: pixels(0),
-    zoneIndex: 0,
-  };
+  });
   const applyFrom = (source: EffectSource, effects: readonly Effect[], state: RunState) =>
     applyEffects(data, { affected: [], source }, effects, state);
   const walked = applyFrom({ kind: "walker", walker }, walkerEffects(data, walker), empty);
