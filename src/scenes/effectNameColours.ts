@@ -25,7 +25,7 @@ export function pillColours(kind: EffectNameKind): { name: number; pill: number 
 }
 
 // rect filled with its four corner pixels, at scale, left out.
-export function fillPill(
+function fillPill(
   g: GameObjects.Graphics,
   colour: number,
   rect: { height: number; width: number; x: number; y: number },

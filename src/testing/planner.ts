@@ -134,7 +134,7 @@ export const gcdOf = (values: readonly number[]): number =>
   }, 0);
 // The length the planner gives a spawn's hit box: its rows less the planned inset at each end,
 // which covers its drawn hit box (itemHeight) whatever obstacle it is.
-export const plannedHeight = (
+const plannedHeight = (
   tuned: Real,
   road: RoadGeometry,
   zone: ZoneId,
@@ -149,7 +149,7 @@ export const packHitLength = (road: RoadGeometry): number => road.tallestPackBan
 // How the pack-fit check measures a spawn: planned, at the planner's hit length for its
 // footprint and the tallest pack's outline; or drawn, at its kind's drawn hit length and the
 // tallest pack's hit boxes.
-export type Sizing = "drawn" | "planned";
+type Sizing = "drawn" | "planned";
 // A spawn's hit length and the pack's length, as sizing measures them.
 const sized = (
   sizing: Sizing,

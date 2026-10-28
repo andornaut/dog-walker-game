@@ -55,7 +55,7 @@ export interface LaidChar {
 }
 
 // A pill as laid out: its kind, its line, its columns and the characters of its name.
-export interface LaidPill {
+interface LaidPill {
   readonly index: number;
   readonly left: number;
   readonly line: number;

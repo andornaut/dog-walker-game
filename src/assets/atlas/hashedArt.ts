@@ -19,7 +19,7 @@ const HASH_LENGTH = 8;
 // Every file under /art/ a build's game loads: the art manifest, the atlas manifest and its
 // pages, both files of each font and each sound (the page plays one format), and the files of
 // the images and sprites the atlas leaves out. Sorted, each once.
-export function gameArtPaths(manifest: AssetManifest, atlas: AtlasManifest): string[] {
+function gameArtPaths(manifest: AssetManifest, atlas: AtlasManifest): string[] {
   const atlased = new Set(atlas.textures.map(({ key }) => key));
   const own = ({ key }: { key: string }) => !atlased.has(key);
   const paths = [

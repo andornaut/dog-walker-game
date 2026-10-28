@@ -171,7 +171,7 @@ const CURB_CLEAR = 2;
 
 // The band of the sidewalk or paving that curb props stand in, from and to across, or null for
 // a verge with no room for one.
-export interface CurbBand {
+interface CurbBand {
   readonly from: number;
   readonly to: number;
 }

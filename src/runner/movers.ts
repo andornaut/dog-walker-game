@@ -793,7 +793,7 @@ export interface MoverDraws {
 }
 
 // How many move delays and lengths each mover draws: as many as the most moves any kind makes.
-export const MOVE_DRAWS = 6;
+const MOVE_DRAWS = 6;
 
 const EVEN_DRAWS: MoverDraws = {
   count: 0,
@@ -851,7 +851,7 @@ export function drawMover(streams: PlannerStreams): MoverDraws {
 // turnBackShare + stopShare it stops, in a lane at the low 1 - vergeShare of that stretch and on
 // the far verge at the rest; and otherwise it crosses. The turn-back and stop shares add up to at
 // most 1. One draw decides all of it, so the verge share takes no draw of its own.
-export type DartOutcome = "cross" | "stop" | "turn" | "verge";
+type DartOutcome = "cross" | "stop" | "turn" | "verge";
 
 export function dartOutcome(
   motion: Pick<
@@ -1265,7 +1265,7 @@ function standingPlacements(
 // The step count a draw from 0 up to 1 picks: one of the lengths of the sequences within the
 // motion's count, each as likely. Where every count in the range has sequences, as a stepper's and
 // a hopper's do, it is drawnCount's.
-export function drawnStepCount(
+function drawnStepCount(
   motion: Pick<Extract<MoverMotion, { kind: "steps" }>, "count" | "sequences">,
   draw: number,
 ): number {
@@ -1488,7 +1488,7 @@ function shyPlacements(
 export const DART_LIFTS = [0.25, 0.5, 0.75, 1] as const;
 
 // The even draws from 0 to 1 a dart with no room at its own draws retries its tilt and speed at.
-export const DART_RETRY_DRAWS = [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1] as const;
+const DART_RETRY_DRAWS = [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1] as const;
 
 // The draws a dart with no room at its own retries at, each its own draws with one changed: its
 // tilt at each of DART_RETRY_DRAWS, then its speed at each, nearest its own draw first, the lower

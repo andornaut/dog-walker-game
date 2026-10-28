@@ -19,7 +19,7 @@ export interface FacetValue {
 }
 
 // A facet with the values its column offers and, among them, the selected ones.
-export interface FacetState extends Facet {
+interface FacetState extends Facet {
   readonly active: ReadonlySet<string>;
   readonly values: readonly FacetValue[];
 }

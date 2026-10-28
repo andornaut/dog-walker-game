@@ -210,8 +210,8 @@ export function rowSpacing(plan: SpawnPlan<string>): number {
 // The guaranteed path holds each lane for at least PATH_HOLD_ROWS rows, then changes lane with
 // PATH_CHANGE_CHANCE at each row, by PATH_MOST_LANES or fewer.
 export const PATH_HOLD_ROWS = 2;
-export const PATH_CHANGE_CHANCE = 0.5;
-export const PATH_MOST_LANES = 2;
+const PATH_CHANGE_CHANCE = 0.5;
+const PATH_MOST_LANES = 2;
 
 // The most lanes the path changes by at once: as many as the pack fits past (packGap) on the road
 // between one-row spawns two rows apart, with the row between them clear, at least one and no
@@ -391,7 +391,7 @@ export function moverMayTake(
 
 // A spot where a mover may end a move and stand: the distance a spawn level with it has, and its
 // leftmost lane.
-export interface MoverRest {
+interface MoverRest {
   distance: number;
   lane: number;
 }

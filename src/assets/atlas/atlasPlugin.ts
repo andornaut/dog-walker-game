@@ -15,7 +15,7 @@ import { ART_FILES_MODULE, hashGameArt } from "./hashedArt";
 // Vite's prefix for a module id that names no file.
 const RESOLVED_ART_FILES_MODULE = `\0${ART_FILES_MODULE}`;
 
-export interface AtlasPluginApi {
+interface AtlasPluginApi {
   // The build's ArtFileMap, once buildStart has run.
   artFiles(): ArtFileMap;
 }

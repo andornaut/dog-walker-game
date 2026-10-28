@@ -154,7 +154,7 @@ export interface Road {
 }
 
 // A spawn quota as counted: its kind, how many, and how they move, or null standing still.
-export interface PlannedCount {
+interface PlannedCount {
   readonly count: number;
   readonly kind: WalkItemKind;
   readonly movement: MovementKind | null;

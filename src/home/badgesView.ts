@@ -221,7 +221,7 @@ export function badgeNameTops(lines: number, top: number): number[] {
 
 // A strip's names at 2x, wrapped at spaces onto up to nameLines lines, then with their glyphs a
 // screen pixel closer; never smaller.
-export const BADGE_NAME_STYLES: readonly TextFitStyle[] = [
+const BADGE_NAME_STYLES: readonly TextFitStyle[] = [
   { letterSpacing: 0, lines: BADGE_STRIP.nameLines, scale: 2 },
   { letterSpacing: -0.5, lines: BADGE_STRIP.nameLines, scale: 2 },
 ];

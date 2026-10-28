@@ -95,7 +95,7 @@ export function slotProps(
 }
 
 // The curb props a side's slot n holds; none for a zone with no curb.
-export function curbSlotProps(
+function curbSlotProps(
   zone: RoadsideZone,
   side: "left" | "right",
   n: number,

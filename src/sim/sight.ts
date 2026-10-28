@@ -32,7 +32,7 @@ export const BOT_SIGHTS: readonly BotSight[] = ["foresight", "sight"];
 const TILT_STEP = 0.25;
 
 // The road as a sight reading needs it: speed is the scroll speed in pixels per second.
-export interface SightRoad {
+interface SightRoad {
   readonly data: WalkData;
   readonly geometry: Pick<RoadGeometry, "cell" | "laneCount">;
   readonly speed: number;

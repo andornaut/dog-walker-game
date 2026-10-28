@@ -222,7 +222,7 @@ function forgivenCause(
 }
 
 // One owner's part of a hearts effect: the dog and the hearts its owner gets or loses.
-export interface HeartsShare {
+interface HeartsShare {
   readonly dog: DogId;
   readonly hearts: number;
 }

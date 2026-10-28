@@ -56,7 +56,7 @@ export interface Distraction {
 }
 
 // The zone the distractions were planned for, by its index in the walk, and its distractions.
-export interface DistractionState {
+interface DistractionState {
   distractions: Distraction[];
   zoneIndex: number | null;
 }
@@ -277,7 +277,7 @@ function overlaps(a: Box, b: Box): boolean {
 // The flat x spans of the roadside props whose footprints take in a zone distance's row, as
 // placeRoadside draws them: the zone's own past its start strip, and the zone before it's short of
 // the strip.
-export function propsOnRow(
+function propsOnRow(
   stage: Pick<DistractionStage, "centreX" | "roadside" | "width">,
   frame: Pick<DistractionFrame, "geometry" | "previousArt" | "zone">,
   data: Pick<GameData, "tuning">,

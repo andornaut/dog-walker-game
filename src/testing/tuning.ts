@@ -3,7 +3,7 @@ import type { LiveTuning } from "../data/types";
 
 // tuning with every walker's perk changing nothing, so a test that is not about walkers walks
 // with any of them alike.
-export function withNeutralWalkers(tuning: LiveTuning): LiveTuning {
+function withNeutralWalkers(tuning: LiveTuning): LiveTuning {
   return {
     ...tuning,
     counts: { ...tuning.counts, longReachLanes: 0 },

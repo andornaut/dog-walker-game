@@ -122,7 +122,7 @@ export interface MatrixRow extends BadgeCounters {
 
 // The counters the badges read, per walk, each judged by the achievements' own condition.
 // Shares are of walks, from 0 to 1.
-export interface BadgeCounters {
+interface BadgeCounters {
   // Every zone of the walk walked and finished without a landed bump.
   readonly allCleanShare: number;
   // At least one zone walked and finished without a landed bump.

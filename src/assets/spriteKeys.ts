@@ -224,7 +224,7 @@ export const IDLE_TAG = "idle";
 // A mover's poses, each played over its other tags while it holds, where its sprite has it: cue
 // while its cue shows (a tour guide's flag dip, a sign spinner's spin), dive while a diver
 // slides its last lane, and merge while a merging rider moves across.
-export type MoverPose = "cue" | "dive" | "merge";
+type MoverPose = "cue" | "dive" | "merge";
 
 // A standing road item plays the first of these tags its sprite has: its own motion while the
 // walk goes on, and standing still while a card or the pause menu holds the walk. The movement

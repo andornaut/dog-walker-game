@@ -55,7 +55,7 @@ export interface ZoneDelivery {
 
 type DeliveryData = Pick<GameData, "encounters" | "minorObstacles">;
 
-export function deliveryGroup(
+function deliveryGroup(
   data: DeliveryData,
   kind: WalkItemKind,
   movement: MovementKind | null,

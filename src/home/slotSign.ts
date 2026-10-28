@@ -19,7 +19,7 @@ export function slotSignPurchase(
 // The dog slot sign beside the Pet shop: its two lines (the call to buy over its slot's price,
 // as the shop shows prices) and whether the bank covers that slot. Null once every slot is
 // owned.
-export interface SlotSign {
+interface SlotSign {
   readonly affordable: boolean;
   readonly lines: readonly [string, string];
 }

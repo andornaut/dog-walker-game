@@ -15,7 +15,7 @@ const PILL_INDEX: Readonly<Record<EffectNameKind, number>> = {
   zoomies: 4,
 };
 
-export const EFFECT_NAME_KINDS = Object.keys(PILL_INDEX) as EffectNameKind[];
+const EFFECT_NAME_KINDS = Object.keys(PILL_INDEX) as EffectNameKind[];
 
 // The kind of the index-th pill, or undefined for none.
 export function pillKind(index: number): EffectNameKind | undefined {

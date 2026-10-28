@@ -42,7 +42,7 @@ export function lifetimeEarnedNet(
 }
 
 // Every dog's walks added up: a run with 3 dogs walks 3.
-export function dogsWalked(stats: Pick<SaveStats, "dogs">): number {
+function dogsWalked(stats: Pick<SaveStats, "dogs">): number {
   return Object.values(stats.dogs).reduce((total, { walks }) => total + walks, 0);
 }
 

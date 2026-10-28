@@ -50,7 +50,7 @@ type ExplainRun = Pick<
 >;
 
 // What the home screen's Details read of the save: what is owned, the bank and the totals.
-export interface ExplainSave {
+interface ExplainSave {
   readonly bankCents: Cents;
   readonly owned: Owned;
   readonly stats: Pick<SaveStats, "dogs">;
@@ -58,7 +58,7 @@ export interface ExplainSave {
 
 // The detail card a held element opens, laid out as the home screen's dog or walker card (its
 // rows under the picture) or gear card (its rows beside it).
-export interface ExplainDetail {
+interface ExplainDetail {
   readonly card: DetailCard;
   readonly kind: "dog" | "gear" | "walker";
   readonly picture: DetailPicture;

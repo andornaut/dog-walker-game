@@ -9,8 +9,8 @@ import type { PrecacheManifest } from "./precacheList";
 // network-only: anything else, left to the browser.
 export type FetchStrategy = "cache-first" | "network-first" | "network-only";
 
-export const ART_BASE_URL = "/art";
-export const ART_MANIFEST_URL = `${ART_BASE_URL}/manifest.json`;
+const ART_BASE_URL = "/art";
+const ART_MANIFEST_URL = `${ART_BASE_URL}/manifest.json`;
 
 const ALWAYS_REVALIDATED_URLS: ReadonlySet<string> = new Set([
   ART_MANIFEST_URL,
