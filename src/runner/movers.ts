@@ -29,7 +29,10 @@ export interface MoverStep {
 // and crosses the whole road back the other way. With stopAfter, once it has crossed that many
 // lanes it stops, with no cue, and stands there, coming down the road with it. With both null it
 // crosses once. With slide (a dive), it crosses its last lane before its stop at slide of its
-// speed, sliding to its stop.
+// speed, sliding to its stop. With span, it is that many lanes wide, its lane position its
+// leftmost lane's. With pause (a stop-and-go across), once it has crossed after lanes it stands
+// for length of scroll, coming down the road with it, its cue showing again for cue before it sets
+// off once more; a paused crosser keeps a tilt of 0.
 // ride (inLane, merge): its cue is at the top of its lanes, where it enters once the cue ends,
 // coming down them at speedMultiplier of the road's speed. With merge, it moves lanes across over
 // length of scroll from at, its cue showing for cue before that.
@@ -55,7 +58,9 @@ export type MoverPath = {
       readonly idle: number;
       readonly lanesPerPixel: number;
       readonly motion: "cross";
+      readonly pause?: CrossPause;
       readonly slide?: number;
+      readonly span?: number;
       readonly stopAfter: number | null;
       readonly tilt: number;
       readonly turnAfter: number | null;
@@ -138,6 +143,7 @@ export interface MoverOnRoad {
 interface MoverPlace {
   readonly lanePosition: number;
   readonly solid: boolean;
+  readonly span?: number;
   readonly travel: number;
 }
 
@@ -149,12 +155,47 @@ export function laneAt(lanePosition: number): number {
 // rider its own lanes; a stepper or stalker every lane of its footprint, laneSpan, as it stands.
 export function drawnLanes(laneSpan: number, path: MoverPath): number {
   if (path.motion === "cross") {
-    return 1;
+    return crossSpan(path);
   }
   return path.motion === "ride" ? path.lanes : laneSpan;
 }
 
 type CrossPath = Extract<MoverPath, { motion: "cross" }>;
+
+// A crosser's stop partway across: after lanes crossed, length of scroll standing, the last cue of
+// it showing its cue.
+export interface CrossPause {
+  readonly after: number;
+  readonly cue: number;
+  readonly length: number;
+}
+
+// The scroll since setting off at which a crosser's pause starts, or Infinity with none.
+function pauseStart(path: CrossPath): number {
+  return path.pause === undefined ? Infinity : path.pause.after / path.lanesPerPixel;
+}
+
+// The scroll a crosser has spent crossing, moved scroll after setting off: less the time it has
+// stood in its pause.
+function crossingMoved(path: CrossPath, moved: number): number {
+  const start = pauseStart(path);
+  const length = path.pause?.length ?? 0;
+  return moved <= start ? moved : Math.max(start, moved - length);
+}
+
+// Whether a crosser is standing in its pause, since scroll after its cue appeared.
+export function isPausing(path: MoverPath, since: number): boolean {
+  if (path.motion !== "cross" || path.pause === undefined) {
+    return false;
+  }
+  const moved = since - path.warning - pauseStart(path);
+  return moved >= 0 && moved < path.pause.length;
+}
+
+// How many lanes wide a crosser is.
+function crossSpan(path: CrossPath): number {
+  return path.span ?? 1;
+}
 
 // The lanes a diving crosser crosses at its full speed: up to a lane short of its stop, where it
 // lands and slides the rest; null for a crosser that does not slide.
@@ -168,7 +209,7 @@ function landingLanes(path: CrossPath): number | null {
 // setting off: out to its turn, if it has one, and back from there; a diver at its full speed to
 // where it lands, and at its slide's from there.
 function crossedLanes(path: CrossPath, moved: number): number {
-  const across = path.lanesPerPixel * Math.max(0, moved);
+  const across = path.lanesPerPixel * crossingMoved(path, Math.max(0, moved));
   const landing = landingLanes(path);
   if (landing !== null && across > landing) {
     return landing + (across - landing) * (path.slide ?? 1);
@@ -221,9 +262,15 @@ export function turnedBack(path: CrossPath, since: number): boolean {
   );
 }
 
-// A crosser enters on the road's edge.
-function crossStart(laneCount: number, direction: LaneDirection): number {
-  return direction === 1 ? -0.5 : laneCount - 0.5;
+// A crosser enters on the road's edge: its leftmost lane's position, span lanes wide.
+function crossStart(laneCount: number, direction: LaneDirection, span: number): number {
+  return direction === 1 ? 0.5 - span : laneCount - 0.5;
+}
+
+// The lanes a crosser span lanes wide crosses from setting off to being half a lane past the far
+// edge, out of sight.
+function crossLength(laneCount: number, span: number): number {
+  return laneCount + span - 0.5;
 }
 
 // Where a stalker's or shy hopper's steps taken leave it: lanes across from its start, and rows
@@ -274,11 +321,12 @@ export function moverPlace(laneCount: number, path: MoverPath, since: number): M
     }
     return { lanePosition, solid: true, travel };
   }
-  const start = crossStart(laneCount, path.direction);
+  const start = crossStart(laneCount, path.direction, crossSpan(path));
   const crossing = Math.min(Math.max(0, moved), crossingScroll(path));
   return {
     lanePosition: start + path.direction * crossedLanes(path, crossing),
     solid: moved >= 0,
+    ...(path.span === undefined ? {} : { span: path.span }),
     travel:
       path.enterTravel + (moved < 0 ? moved : crossing * (1 + path.tilt) + (moved - crossing)),
   };
@@ -295,9 +343,11 @@ export type MoverTell =
 
 export function moverTell(path: MoverPath, since: number): MoverTell | null {
   if (path.motion === "cross") {
-    return since >= path.idle && since < path.warning
-      ? { direction: path.direction, kind: "across" }
-      : null;
+    const restart = path.warning + pauseStart(path) + (path.pause?.length ?? 0);
+    const cued =
+      (since >= path.idle && since < path.warning) ||
+      (since >= restart - (path.pause?.cue ?? 0) && since < restart);
+    return cued ? { direction: path.direction, kind: "across" } : null;
   }
   if (path.motion === "ride") {
     if (since < path.warning) {
@@ -330,7 +380,7 @@ export function cuedStep(
 // from its stop on.
 export function inMotion(path: MoverPath, since: number): boolean {
   if (path.motion === "cross") {
-    return since >= path.warning && !hasStopped(path, since);
+    return since >= path.warning && !hasStopped(path, since) && !isPausing(path, since);
   }
   if (path.motion === "ride") {
     return since >= path.warning;
@@ -354,10 +404,10 @@ export function facesLeft(path: MoverPath, since: number): boolean {
   return (sideways.at(-1)?.lanes ?? 0) < 0;
 }
 
-// A crosser has left once it is half a lane past the far edge, out of sight. One that stops
-// never leaves sideways: it scrolls off the road's bottom.
+// A crosser has left once it is half a lane past the far edge, out of sight, its far lane for one
+// several lanes wide. One that stops never leaves sideways: it scrolls off the road's bottom.
 export function hasLeftRoad(laneCount: number, place: MoverPlace): boolean {
-  return place.lanePosition < -1 || place.lanePosition > laneCount;
+  return place.lanePosition + (place.span ?? 1) - 1 < -1 || place.lanePosition > laneCount;
 }
 
 export type MoverItem<Kind extends string = string> = RoadItem<Kind> & {
@@ -541,7 +591,8 @@ export function sweptLanes(
   const places = [moving, to, ...(turn !== null && turn > moving && turn < to ? [turn] : [])].map(
     at,
   );
-  return laneSpan(laneCount, Math.min(...places), Math.max(...places), inset);
+  const low = Math.min(...places);
+  return laneSpan(laneCount, low, Math.max(...places) + crossSpan(path) - 1, inset);
 }
 
 // The footprint a mover keeps: lanes across and rows along the road.
@@ -643,7 +694,8 @@ interface ShyHops {
 // draw (dartOutcome), it stops: at vergeShare of those on the far verge, DART_VERGE_LANES past the
 // road's far edge, out of play, and at the rest in the lane stopLanes lanes from the edge it
 // enters from, drawn per mover, standing there. With slide (a dive), it crosses its last lane
-// before that stop at slide of its speed.
+// before that stop at slide of its speed. With pauseSeconds (a stop-and-go across), it stands that
+// long once in the middle of the road, cued again before it sets off once more.
 // ride: down its lane at speedMultiplier of the road's speed, above 1 toward the pack, below 1
 // away. With merge, once its travel down the road is at of the way to the pack's rows it moves a
 // lane to one side over seconds, after a cue. steps: one of the sequences as long as its count,
@@ -668,6 +720,7 @@ export type MoverMotion =
   | {
       readonly kind: "cross";
       readonly lanesPerSecond: number;
+      readonly pauseSeconds?: number;
       readonly reactionSeconds: number;
       readonly startRoadShare: readonly [number, number];
       readonly stopLanes: MoveCount;
@@ -938,6 +991,21 @@ function crossPlacements(
   // Whether it is planned as one that crosses: it never stands on the road. One that stops on the
   // verge is out of play once off the road, so it is.
   const crosses = stopAfter === null || stopAfter > laneCount;
+  // Its width, and its pause, in the middle of the road, standing with its lanes centred.
+  const span = spec.footprint.lanes;
+  const pause =
+    motion.pauseSeconds === undefined
+      ? {}
+      : {
+          pause: {
+            after: (laneCount + span - 1) / 2,
+            cue: warning,
+            length: motion.pauseSeconds * scrollSpeed,
+          },
+        };
+  if (motion.pauseSeconds !== undefined && tilt !== 0) {
+    throw new Error("A crosser that pauses must cross level with the road");
+  }
   // Its path but for the side it enters from, which none of the distances below depend on.
   const along = {
     direction: 1,
@@ -946,9 +1014,11 @@ function crossPlacements(
     lanesPerPixel,
     motion: "cross",
     movement: spec.movement,
+    ...pause,
     ...(motion.slide !== undefined && stopAfter !== null && !crosses
       ? { slide: motion.slide }
       : {}),
+    ...(span === 1 ? {} : { span }),
     stopAfter,
     tilt,
     turnAfter,
@@ -973,9 +1043,12 @@ function crossPlacements(
   // that stops leaves only off the road's bottom.
   const reaches = crosses ? ahead / (1 + tilt) : scrollTo(sightLength);
   const offRoad = scrollTo(roadLength + cellLength);
-  const moving = crosses
-    ? Math.min(((turnAfter === null ? laneCount : 2 * turnAfter) + 0.5) / lanesPerPixel, offRoad)
-    : offRoad;
+  // The scroll from setting off to having crossed lanes lanes, standing in its pause on the way.
+  const crossed = (lanes: number) =>
+    lanes / lanesPerPixel +
+    ("pause" in pause && lanes > pause.pause.after ? pause.pause.length : 0);
+  const across = turnAfter === null ? crossLength(laneCount, span) - 0.5 : 2 * turnAfter;
+  const moving = crosses ? Math.min(crossed(across + 0.5), offRoad) : offRoad;
   // It shows as its row comes on screen, or at the road's top where it starts farther up the road
   // than its row: waiting idle at its edge until its cue, warning before it sets off.
   const shown = Math.max(warning, Math.min(enterTravel, sightLength - reaches));
@@ -983,7 +1056,7 @@ function crossPlacements(
   // Its hit box's inset at each side, in lanes, and the scroll from setting off to its hit box
   // leaving the road, which one that stops never does.
   const inset = geometry.laneInset / cellLength;
-  const touching = ((turnAfter === null ? laneCount : 2 * turnAfter) + 0.5 - inset) / lanesPerPixel;
+  const touching = crossed(across + 0.5 - inset);
   const contact = crosses
     ? Math.max(0, Math.min(window / (1 + tilt), touching - reaches))
     : scrollTo(sightLength + window) - reaches;
@@ -1015,7 +1088,7 @@ function crossPlacements(
     return {
       appears,
       cells: blockCells(firstRow, lastRow - firstRow + 1, 0, laneCount),
-      lane: direction === 1 ? 0 : laneCount - 1,
+      lane: direction === 1 ? 0 : laneCount - span,
       lanes,
       path,
       rows,

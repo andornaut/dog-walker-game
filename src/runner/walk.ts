@@ -620,7 +620,8 @@ function patternMotion(
 // the first steps of them, or of their mirror image, as many as its drawn count. A bounce, a
 // follower, a stop-and-go and a sway draw nothing here (patternMotion). A dive is a dart that
 // always stops in a lane, never on the verge, sliding its last lane. A merge is a rider that
-// changes lane once. A hopper may make
+// changes lane once. A stop-and-go across is a dart as wide as its footprint that never stops for
+// good or turns back, pausing once in the middle of the road. A hopper may make
 // any hops it can, as many as its drawn count, of up to HOP_SEQUENCES_MOST ways for each count,
 // drawn here from the movers stream where there are more. The planner takes whichever way keeps
 // the road passable, drawing among those from the zone's seed.
@@ -632,7 +633,24 @@ export function moverSpec(
 ): MoverSpec {
   const { tuning } = data;
   let motion: MoverMotion;
-  if (movement.kind === "dart" || movement.kind === "dive") {
+  if (movement.kind === "stopAndGoAcross") {
+    motion = {
+      kind: "cross",
+      lanesPerSecond: read(tuning, "counts", "dartLanesPerSecond") * movement.speed,
+      pauseSeconds: movement.stopSeconds,
+      reactionSeconds: read(tuning, "seconds", "pathReactionMargin"),
+      startRoadShare: [
+        read(tuning, "multipliers", "dartStartRoadShareMin"),
+        read(tuning, "multipliers", "dartStartRoadShareMax"),
+      ],
+      stopLanes: { max: 1, min: 1 },
+      stopShare: 0,
+      tilt: [0, 0],
+      turnAtShare: [0, 0],
+      turnBackShare: 0,
+      vergeShare: 0,
+    };
+  } else if (movement.kind === "dart" || movement.kind === "dive") {
     const dive = movement.kind === "dive";
     motion = {
       kind: "cross",

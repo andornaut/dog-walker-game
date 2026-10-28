@@ -286,6 +286,12 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
     zones: ["street", "homeStretch"],
   },
+  touristTrain: {
+    movement: { kind: "stopAndGoAcross", speed: 0.55, stopSeconds: 1 },
+    name: "Tourist train",
+    shape: { lanes: 3, rows: 1 },
+    zones: ["park"],
+  },
   trashCan: { name: "Trash can", shape: { lanes: 1, rows: 1 } },
   ttcBus: {
     movement: { factor: 0.6, kind: "inLane" },

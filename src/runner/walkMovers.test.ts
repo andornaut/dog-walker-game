@@ -36,6 +36,8 @@ import {
   drawMover,
   hopShapes,
   inMotion,
+  isPausing,
+  laneAt,
   type MoverPath,
   moverPlace,
   type MoverStep,
@@ -353,7 +355,7 @@ describe("movers", { timeout: 120_000 }, () => {
   };
 
   // Each kind some zone draws whose movement is a pattern (bounce, dive, follow, merge, stopAndGo,
-  // sway),
+  // stopAndGoAcross, sway),
   // planned across seeds at the first zone's pace and the last's with every mover moving, as the
   // passability sweep plans it: its most moves, whether it cues each move, and its lanes.
   const patternOf = (movement: Movement | null) => {
@@ -375,7 +377,8 @@ describe("movers", { timeout: 120_000 }, () => {
       zonesOf(kind).length > 0 &&
       (patternOf(movementOf(kind)) !== null ||
         movementOf(kind)?.kind === "dive" ||
-        movementOf(kind)?.kind === "merge"),
+        movementOf(kind)?.kind === "merge" ||
+        movementOf(kind)?.kind === "stopAndGoAcross"),
   );
   // A kind's movers planned in the zones that draw it, on more seeds than the sweep's, so a kind
   // weighed low still comes up.
@@ -392,12 +395,30 @@ describe("movers", { timeout: 120_000 }, () => {
   // (back the way it came, for a bounce or a sway, so it rocks between two lanes), or in its lane
   // only for a stop-and-go, at its kind's speed; it stays on the road. A dive always lands and
   // slides into a lane, never turning back or stopping on the verge. A merge rides its lane and
-  // merges a lane to one side on the road, wholly before it reaches the pack's rows.
+  // merges a lane to one side on the road, wholly before it reaches the pack's rows. A stop-and-go
+  // across crosses level with the road as wide as its footprint, never turning back or stopping for
+  // good, and stands once with its lanes centred on the road.
   it.each(patterned)("moves each %s in its pattern, within its lanes", (kind) => {
     const movement = movementOf(kind);
     const pattern = patternOf(movement);
     const span = footprintOf(REAL, kind).lanes;
     for (const mover of pathsOf(kind)) {
+      if (mover.motion === "cross" && movement?.kind === "stopAndGoAcross") {
+        const { pause } = mover;
+        expect(pause).toBeDefined();
+        expect([mover.span, mover.tilt, mover.turnAfter, mover.stopAfter]).toEqual([
+          span,
+          0,
+          null,
+          null,
+        ]);
+        const halfway = mover.warning + (pause?.after ?? 0) / mover.lanesPerPixel + 1;
+        expect(isPausing(mover, halfway)).toBe(true);
+        expect(laneAt(moverPlace(LANE_COUNT, mover, halfway).lanePosition)).toBe(
+          (LANE_COUNT - span) / 2,
+        );
+        continue;
+      }
       if (mover.motion === "cross") {
         expect(movement?.kind).toBe("dive");
         expect(mover.slide).toBe(movement?.kind === "dive" ? movement.slide : undefined);
@@ -442,7 +463,8 @@ describe("movers", { timeout: 120_000 }, () => {
     }
   });
 
-  // Its first move is cued: a dive's arrow before it sets off, a merge's arrow down its lane
+  // Its first move is cued: a dive's arrow before it sets off, a stop-and-go across's before it
+  // sets off and again before it sets off from its stop, a merge's arrow down its lane
   // before it enters and its wander mark before it merges, and a stepping pattern's wander mark
   // before its first step and, where its kind cues each, before every step.
   it.each(patterned)("cues each %s's first move, and each later one its kind cues", (kind) => {
@@ -450,6 +472,12 @@ describe("movers", { timeout: 120_000 }, () => {
     for (const mover of pathsOf(kind)) {
       if (mover.motion === "cross") {
         expect(moverTell(mover, mover.warning - 1e-6)?.kind).toBe("across");
+        const { pause } = mover;
+        if (pause !== undefined) {
+          const restart = mover.warning + pause.after / mover.lanesPerPixel + pause.length;
+          expect(moverTell(mover, restart - pause.cue - 1e-6)).toBeNull();
+          expect(moverTell(mover, restart - 1e-6)?.kind).toBe("across");
+        }
         continue;
       }
       if (mover.motion === "ride") {

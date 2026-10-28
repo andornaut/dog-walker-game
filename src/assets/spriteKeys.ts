@@ -214,6 +214,7 @@ export const MOVING_TAGS: Readonly<Record<MovementKind, readonly string[]>> = {
   merge: ["drive", "ride", "run", "walk", "pull-out"],
   step: ["walk", "run"],
   stopAndGo: ["push", "walk", "ride", "drive"],
+  stopAndGoAcross: ["push", "drive", "ride", "walk"],
   sway: ["walk", "run"],
 };
 export const IDLE_TAG = "idle";

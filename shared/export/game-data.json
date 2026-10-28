@@ -2331,6 +2331,23 @@
       "spriteKey": "tourist"
     },
     {
+      "id": "touristTrain",
+      "movement": {
+        "kind": "stopAndGoAcross",
+        "speed": 0.55,
+        "stopSeconds": 1
+      },
+      "name": "Tourist train",
+      "shape": {
+        "lanes": 3,
+        "rows": 1
+      },
+      "zones": [
+        "park"
+      ],
+      "spriteKey": "tourist-train"
+    },
+    {
       "id": "trashCan",
       "name": "Trash can",
       "shape": {
@@ -2791,6 +2808,7 @@
           "taxi": 0,
           "tourGroup": 0,
           "tourist": 0,
+          "touristTrain": 0,
           "trashCan": 3.5,
           "ttcBus": 0,
           "velvetRope": 0,
@@ -2864,7 +2882,7 @@
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
           "jogger": 5,
-          "kidOnBike": 2,
+          "kidOnBike": 0,
           "leafPile": 0,
           "lifeguardChair": 0,
           "mailCarrier": 0,
@@ -2890,6 +2908,7 @@
           "taxi": 0,
           "tourGroup": 0,
           "tourist": 0,
+          "touristTrain": 2,
           "trashCan": 8,
           "ttcBus": 0,
           "velvetRope": 0,
@@ -2989,6 +3008,7 @@
           "taxi": 0,
           "tourGroup": 2,
           "tourist": 2,
+          "touristTrain": 0,
           "trashCan": 3,
           "ttcBus": 0,
           "velvetRope": 3,
@@ -3088,6 +3108,7 @@
           "taxi": 0,
           "tourGroup": 0,
           "tourist": 0,
+          "touristTrain": 0,
           "trashCan": 3.75,
           "ttcBus": 0,
           "velvetRope": 0,
@@ -3187,6 +3208,7 @@
           "taxi": 0,
           "tourGroup": 0,
           "tourist": 0,
+          "touristTrain": 0,
           "trashCan": 3.75,
           "ttcBus": 0,
           "velvetRope": 0,
@@ -3286,6 +3308,7 @@
           "taxi": 3,
           "tourGroup": 0,
           "tourist": 7.12,
+          "touristTrain": 0,
           "trashCan": 6,
           "ttcBus": 2,
           "velvetRope": 0,

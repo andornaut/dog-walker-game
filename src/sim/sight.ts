@@ -5,6 +5,7 @@ import {
   cuedStep,
   hasStopped,
   hopShapes,
+  isPausing,
   isSliding,
   type MoverPath,
   type MoverStep,
@@ -66,6 +67,9 @@ export function moverShows(path: MoverPath, since: number): string {
     if (isSliding(path, since)) {
       return "sliding";
     }
+    if (isPausing(path, since)) {
+      return "paused";
+    }
     return hasStopped(path, since) ? "stopped" : "crossing";
   }
   if (path.motion === "ride") {
@@ -77,6 +81,16 @@ export function moverShows(path: MoverPath, since: number): string {
   }
   const { cued, started } = stepsSeen(path, since);
   return `${started.length} ${cued === undefined ? "" : "cued"}`;
+}
+
+// Whether a crosser's pause has begun, since scroll after its cue appeared: it is standing in it
+// or has stood.
+function pausedYet(path: MoverPath, since: number): boolean {
+  return (
+    path.motion === "cross" &&
+    path.pause !== undefined &&
+    since - path.warning >= path.pause.after / path.lanesPerPixel
+  );
 }
 
 // The scroll a dart waiting at its edge is read as waiting for: longer than any road.
@@ -117,14 +131,19 @@ export function sightPaths(road: SightRoad, since: number, item: WalkItem): read
   const { tuning } = road.data;
   const movement = movementOf(road.data, item.kind);
   if (path.motion === "cross") {
+    // A pause shows once it has begun; a dart reads as crossing on until it does.
+    const { pause, ...unpaused } = path;
+    const paused = since >= path.warning && pause !== undefined && pausedYet(path, since);
+    const seen: MoverPath = paused ? path : unpaused;
     if (since >= path.warning) {
       const turnAfter = turnedBack(path, since) ? path.turnAfter : null;
       const stopAfter = hasStopped(path, since) || isSliding(path, since) ? path.stopAfter : null;
       return turnAfter === path.turnAfter && stopAfter === path.stopAfter
-        ? [path]
-        : [{ ...path, stopAfter, turnAfter }];
+        ? [seen]
+        : [{ ...seen, stopAfter, turnAfter }];
     }
-    const speed = movement?.kind === "dive" ? movement.speed : 1;
+    const speed =
+      movement?.kind === "dive" || movement?.kind === "stopAndGoAcross" ? movement.speed : 1;
     const lanesPerPixel = (read(tuning, "counts", "dartLanesPerSecond") * speed) / road.speed;
     const tilts =
       movement?.kind === "dart" || movement?.kind === "dive"
@@ -148,7 +167,7 @@ export function sightPaths(road: SightRoad, since: number, item: WalkItem): read
       ];
     }
     return tilts.map((tilt) => ({
-      ...path,
+      ...unpaused,
       lanesPerPixel,
       stopAfter: null,
       tilt,
