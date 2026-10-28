@@ -25,7 +25,7 @@ rollerblader        48x72   minor rider, 1 lane, coming down its lane at the pac
                             hair, on white inline skates with yellow wheels. ride (4 frames, 100ms): a
                             skating stride, each foot pushing out to its side in turn, lifted 1px, the
                             body swaying 1px toward the gliding foot, the wheels' tread rolling 1px a frame
-volleyball-net-2    112x36  minor, 2 lanes, The Beaches' barrier-2: a beach volleyball net in front
+volleyball-net-2    112x36  minor, 2 lanes: a beach volleyball net in front
                             elevation, strung between white posts held by guy ropes, a white top band edged
                             azure over coal mesh with clear holes, white bands down its ends and along its
                             foot, a red and white striped antenna over each end, a rippled drift of sand
@@ -33,7 +33,7 @@ volleyball-net-2    112x36  minor, 2 lanes, The Beaches' barrier-2: a beach voll
                             @69 and smaller, where it would be a square chip). idle (4 frames, 450ms): on
                             frame 2 a breeze lifts the net's foot 1px in the middle and bends the antenna
                             tips out 1px
-volleyball-net-3    176x36  minor, 3 lanes, The Beaches' barrier-3: the same net, a lane wider
+volleyball-net-3    176x36  minor, 3 lanes: the same net, a lane wider
 
 Yonge Street:
 promo-team          48x72   card obstacle (Big screen promo): a street team promoter in a turquoise
@@ -75,8 +75,8 @@ with the original's tags, frames and durations, drawn on a minis.Mini with its o
 and the riders are laid out on 32x48 and drawn at road.SCALE (1.5) as road.py's are, the minor
 obstacles in layout pixels at obstacles.SCALE (1.2) as obstacles.py's, the bus at obstacles.CAR_SCALE
 (56 columns, rows 1.2x) as the streetcar. All take the road outline (pixel.road_edge) and road.LIT's
-rim on their dark colours; the volleyball nets' whites take obstacles.white_keyline's plum, as the
-barriers' do, and their mesh holes stay clear, unoutlined.
+rim on their dark colours; the volleyball nets' whites take obstacles.white_keyline's plum, and their
+mesh holes stay clear, unoutlined.
 
 Hits (77x77, play: 8 frames, 70ms, laid out on 64x64 as hits.py's), each opening on hits.impact:
 fx-hit-dropped-cone the impact star in pink, then the strawberry scoop shoots up off a pink splat,

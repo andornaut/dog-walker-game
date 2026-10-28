@@ -11,8 +11,6 @@ by distance with its base on the road line.
 cone                48x48   1 lane, a glint runs down its highlight
 trash-can           48x48   1 lane, the lid's handle rattles up 1px
 bench               112x36  2 lanes, backrest and seat edge on short legs; a leaf on the seat stirs
-barrier-2           112x36  2 lanes, a striped rail and plank on short legs; lamps blink
-barrier-3           176x36  3 lanes, lamps blink
 hedge               176x36  3 lanes, a low hedge with a rounded, clumped top; leaves rustle 1px at three
                             spots in turn
 parked-car          56x42   1 lane by 3 rows of footprint, a minivan from straight behind, drawn at the
@@ -211,33 +209,8 @@ def hedge(w=span(3), rustle=()):
 
 
 def white_keyline(c):
-    """road_edge, but white rails take a plum keyline (6.5:1 or more on the light roads) for road_edge's dslate."""
+    """road_edge, but white takes a plum keyline (6.5:1 or more on the light roads) for road_edge's dslate."""
     return K["plum"] if c == K["white"] else road_edge(c)
-
-
-def barrier(lanes, f):
-    """Front elevation, squat: a striped rail over a striped plank on short legs, a lamp on each top
-    corner; f swaps which lamp is lit. The rail is 10 rows and the plank 6, each in 2-row stairs, striped
-    10px orange every 20px and leaning right 2px a stair; the bottom stair of each is its shaded lower
-    edge."""
-    w = span(lanes)
-    g = edged(Grid(w, ROW), white_keyline)
-    for x in (5, w - 10):
-        g.rect(x, 5, 5, 24, "grey")
-        g.rect(x + 3, 5, 2, 24, "slate")
-        g.rect(x - 2, 26, 9, 3, "dslate")
-        g.rect(x - 2, 26, 9, 1, "slate")
-    for top, stairs in ((5, 5), (19, 3)):
-        for k in range(stairs):
-            base, stripe = ("lgrey", "rust") if k == stairs - 1 else ("white", "orange")
-            y = top + 2 * k
-            g.rect(1, y, w - 2, 2, base)
-            for x in range(-10 - 2 * k, int(w) - 1, 20):
-                g.rect(max(x, 1), y, min(x + 10, w - 1) - max(x, 1), 2, stripe)
-    for i, x in enumerate((7.5, w - 7.5)):
-        on = (i == 0) == bool(f)
-        g.ell(x, 4, 3, 3, "amber" if on else "orange", "orange", "yellow" if on else None)
-    return g
 
 
 def parked_car(hazard=False, roll=None, blink=True):
@@ -686,8 +659,6 @@ def sprites():
     yield "trash-can", idle(trash_can, TRASH_CAN_IDLE)
     yield "bench", idle(bench, BENCH_IDLE)
     yield "hedge", idle(lambda r: hedge(rustle=r), HEDGE_IDLE)
-    for lanes in (2, 3):
-        yield f"barrier-{lanes}", [("idle", [drawn(SCALE, barrier, lanes, f).outlined() for f in (0, 1)], 500)]
     args, ms = PULL_OUT
     drive, drive_ms = DRIVE
     yield "parked-car", idle(parked_car, PARKED_CAR_IDLE, CAR_SCALE) + [
