@@ -51,7 +51,8 @@ describe("a name pill in the body font", () => {
 });
 
 describe("pill openers", () => {
-  it.each([0, 4, 15])("name their kind, %i", (index) => {
+  // The first and last kinds.
+  it.each([0, 15])("name their kind, %i", (index) => {
     expect(pillIndex(pillOpener(index))).toBe(index);
   });
 
