@@ -121,8 +121,6 @@ import road  # noqa: E402
 from hazards import CYCLIST_RIDE, sway_rows  # noqa: E402
 from minis import STEPS, scaled, snap  # noqa: E402
 from obstacles import treads, unit  # noqa: E402
-from obstacles import treads  # noqa: E402
-from pixel import K  # noqa: E402
 from road import LIT, SCALE, face_disc, lean, rim, stair, swung  # noqa: E402
 
 # ---------- tourist: facing the player, a stepper like the mail carrier ----------
