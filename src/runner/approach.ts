@@ -1,6 +1,7 @@
 import {
   type MoverPath,
   type RoadPoint,
+  SIDESTEPS,
   staysInReach,
   type StepShape,
   stepsTaken,
@@ -21,8 +22,7 @@ const APPROACH_STEPS: readonly StepShape[] = [
   { lanes: 0, travel: 1 },
   { lanes: -1, travel: 1 },
   { lanes: 1, travel: 1 },
-  { lanes: -1, travel: 0 },
-  { lanes: 1, travel: 0 },
+  ...SIDESTEPS,
 ];
 
 // The scroll since it spawned at which its next pending step starts, or null with none.

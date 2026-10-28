@@ -548,8 +548,7 @@ export function movementOf(
 
 // A step: a lane to either side, or a row toward the pack or away.
 export const STEP_SHAPES: readonly StepShape[] = [
-  { lanes: -1, travel: 0 },
-  { lanes: 1, travel: 0 },
+  ...SIDESTEPS,
   { lanes: 0, travel: 1 },
   { lanes: 0, travel: -1 },
 ];
