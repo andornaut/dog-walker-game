@@ -865,11 +865,20 @@ def high_park_view():
     # the cross path's middle worn skin1 in broken runs, as the backdrop's, with no line painted on it
     a = ZoneView("high-park", trail, dark, "skin1", (9, 13), curb=None, walk=None, lawn=dark)
     a.sky("azure", "sky")
-    bd.cloud(a, 54, 5, 16, 3, 2)
+    # the far ridge in dturq, then the canopy, a tall oak over it on the right
+    for x in range(AW):
+        top = 6 + round(2 * (0.5 + 0.5 * math.sin(x * 0.6) * math.cos(x * 0.23)))
+        a.fill(x, top, 1, 15 - top, "dturq")
     a.treeline(15, ("fir", "pine"), 0, 2, 6)
     a.fill(0, 15, AW, FAR_Y - 15, "pine")
+    # the oak: a broad flat-bottomed crown, olive on its lit upper left, pine underneath
+    a.fill(68, 8, 2, 10, "bark")
+    for py in range(1, 10):
+        for px in range(61, AW):
+            u, v = (px + 0.5 - 69) / 7.5, (py + 0.5 - 6) / 4.5
+            if u * u + v * v <= 1 and py < 9:
+                a.fill(px, py, 1, 1, "pine" if v > 0.3 else "olive" if u + v < -0.6 else "canopy")
     bd.tree(a, 4, 9, "pink", "mauve", r=6, base=18, girth=2)
-    bd.tree(a, 71, 10, "canopy", "pine", r=5, base=18, girth=2)
     for x in (11, 62):
         a.fill(x, 1, 2, FAR_Y - 1, "bark")
     a.fill(13, 2, 49, 17, "pine")

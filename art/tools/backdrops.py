@@ -12,8 +12,8 @@ its items spawn: only the verge's ground.
 
 Rows, in band rows (0 to 157): the sky is one flat colour above row 45 (CALM), under the message
 strip (band rows 6 to 57 while a message shows), but any neighbourhood's skyline may rise above
-it (Cabbagetown's old trees, chapel spire, far downtown towers and stars; and Yonge Street's
-skyline, moon and stars); the far side's ground row
+it (Cabbagetown's old trees, chapel spire, far downtown towers and stars; High Park's oaks,
+ridge and clouds; and Yonge Street's skyline, moon and stars); the far side's ground row
 115 (BASE), the far sidewalk 119 to 122, the far curb 123 to 124, the cross street 125 to 133
 with its centre line on row 129, the near curb 134 to 135 (none where the cross street has
 none), the near sidewalk 136 to 138, and the stub from row 139 (STUB, the approach) to the
@@ -75,7 +75,7 @@ def word(cv, s, mid, y, col, scale=1):
 
 def sky(cv, top="cyan", low="sky", clouds=()):
     """The sky: top, flat, down to row CALM, then low, with clouds given as (x, base row, width,
-    puff): puff is the tallest lobe's radius, and a cloud's top stays below CALM."""
+    puff): puff is the tallest lobe's radius."""
     cv.fill(0, 0, W, FAR_WALK, low)
     cv.fill(0, 0, W, CALM, top)
     for i in range(0, W, 5):
@@ -337,8 +337,8 @@ BASE = STUB - 24               # the far side's ground row: the houses stand on 
 # The sky above row CALM, 70 rows over the far side's ground row, is one flat colour: the debuff bars and the
 # message strip (band rows 6 to 57 while a message shows) lie over it, so each neighbourhood's main read stays
 # below it. Any neighbourhood's skyline may rise above it, reading half covered while a message shows:
-# Cabbagetown's old trees, chapel spire, far downtown towers and stars; and Yonge Street's skyline, moon and
-# stars.
+# Cabbagetown's old trees, chapel spire, far downtown towers and stars; High Park's oaks, ridge and clouds;
+# and Yonge Street's skyline, moon and stars.
 CALM = BASE - 70
 
 
@@ -972,13 +972,67 @@ def hot_dog_cart(cv, cx, base):
         cv.fill(x, base - 2, 1, 1, "ash")
 
 
+def ridge(cv, top, bottom, col, seed, amp=6, r=4):
+    """A far wooded ridge in col: round treetops of radius about r along a rolling crest from row
+    top (amp rows lower at its dips), filled down to row bottom."""
+    rnd = random.Random(f"ridge-{seed}")
+    crest = [top + amp * (0.5 + 0.5 * math.sin(x * 0.011 + seed) * math.cos(x * 0.027 + seed * 2.1))
+             for x in range(W)]
+    tops = [bottom] * W
+    cx = -r
+    while cx < W + r:
+        rr = r + rnd.choice((-1, 0, 0, 1))
+        cy = crest[min(W - 1, max(0, round(cx)))] + rr
+        for x in range(max(0, round(cx - rr)), min(W, round(cx + rr) + 1)):
+            d = (x + 0.5 - cx) / rr
+            if abs(d) <= 1:
+                tops[x] = min(tops[x], round(cy - rr * math.sqrt(1 - d * d)))
+        cx += rr * 1.5
+    for x in range(W):
+        cv.fill(x, tops[x], 1, bottom - tops[x], col)
+
+
+def oak(cv, cx, top, w, base, seed, lit="canopy", shade="pine", hi="olive", trunk="bark"):
+    """A tall black oak of the savannah: a trunk on row base forking under a broad, ragged crown w
+    wide of flat-bottomed lobes, its top on row top; hi on the lit upper left, shade on the lower
+    right and along each lobe's underside."""
+    rnd = random.Random(f"oak-{seed}")
+    h = round(w * 0.62)
+    lobes = []
+    for i in range(6):
+        lx = cx + (i - 2.5) / 2.5 * w * 0.36 + rnd.uniform(-2, 2)
+        ly = top + h * 0.5 + abs(i - 2.5) * h * 0.08 + rnd.uniform(-2, 2)
+        lobes.append((lx, ly, w * rnd.uniform(0.2, 0.26), h * rnd.uniform(0.32, 0.4)))
+    lobes.append((cx + rnd.uniform(-3, 3), top + h * 0.36, w * 0.24, h * 0.36))
+    under = top + h
+    cv.fill(cx - 2, under - 6, 4, base - under + 6, trunk)
+    for k in range(8):
+        cv.fill(cx - 3 - k, under - 2 - k, 2, 2, trunk)
+        cv.fill(cx + 2 + k, under - 3 - k, 2, 2, trunk)
+    for py in range(top - 2, under + 2):
+        for px in range(round(cx - w / 2) - 3, round(cx + w / 2) + 4):
+            inside = [(lx, ly, rx, ry) for lx, ly, rx, ry in lobes
+                      if ((px + 0.5 - lx) / rx) ** 2 + ((py + 0.5 - ly) / ry) ** 2 <= 1 and py < ly + ry * 0.6]
+            if not inside:
+                continue
+            lx, ly, rx, ry = min(inside, key=lambda q: q[1])
+            u, v = (px + 0.5 - lx) / rx, (py + 0.5 - ly) / ry
+            c = shade if v > 0.25 or u + v > 0.9 else hi if u + v < -0.75 and v < -0.2 else lit
+            cv.fill(px, py, 1, 1, c)
+
+
 def high_park():
     cv = sn.Canvas(W, H)
-    # a deep clear blue, two white clouds over the canopy
-    sky(cv, "azure", "sky", clouds=((6, BASE - 52, 46, 8), (CX + 70, BASE - 58, 40, 6)))
-    # the park's dense canopy runs back over the hills: dark green rises and a fir tree line
-    hills(cv, BASE - 50, BASE - 18, "pine", "canopy", 0.4, 8)
+    # a deep clear blue, two white clouds high over the oaks
+    sky(cv, "azure", "sky", clouds=((CX - 70, 30, 46, 8), (CX + 62, 22, 40, 6)))
+    # a far wooded ridge, dturq in the haze, then the park's dense canopy over the near hills:
+    # dark green rises and a fir tree line
+    ridge(cv, BASE - 70, BASE - 40, "dturq", 1.3, amp=12, r=5)
+    hills(cv, BASE - 54, BASE - 18, "pine", "canopy", 0.4, 8)
     treeline(cv, BASE - 34, ("fir", "pine"), 0.9, 3, 8)
+    # the black oaks of the savannah stand tall over the canopy at the band's edges and by the pond
+    for cx, top, w, seed in ((40, BASE - 92, 64, 1), (CX + 150, BASE - 86, 58, 2), (112, BASE - 72, 36, 3)):
+        oak(cv, cx, top, w, BASE - 26, seed)
     patches = [(60, BASE - 26, 30, 2), (CX + 40, BASE - 24, 24, 2), (CX - 50, BASE - 12, 26, 3),
                (CX - 24, BASE - 10, 20, 2), (CX + 100, BASE - 5, 30, 3), (CX + 128, BASE - 2, 18, 3),
                (40, BASE + 6, 24, 2)]
