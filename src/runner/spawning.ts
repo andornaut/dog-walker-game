@@ -319,6 +319,11 @@ export function packFitsOnPath(
   return true;
 }
 
+// Adds the lanes of mask to masks' entry at row.
+function addLanes(masks: Int32Array, row: number, mask: number): void {
+  masks[row] = (masks[row] ?? 0) | mask;
+}
+
 // The mask of count lanes from first on.
 function laneRun(first: number, count: number): number {
   return ((1 << count) - 1) << first;
@@ -640,7 +645,7 @@ export function planSpawns<Kind extends string>(
   const leavesRoom = (cells: number) => cellsLeft - cells >= reserved;
   const takeCells = (row: number, mask: number) => {
     cellsLeft -= laneTotal(mask & ~(taken[row] ?? 0));
-    taken[row] = (taken[row] ?? 0) | mask;
+    addLanes(taken, row, mask);
   };
 
   // Every block kept: its first row, the last row whose window and the last whose gap it
@@ -672,13 +677,13 @@ export function planSpawns<Kind extends string>(
     const sweptBefore = dart ? dartBefore : wallBefore;
     for (let row = cell.row; row <= lastRow; row++) {
       blockedBefore[row] = blocked[row] ?? 0;
-      blocked[row] = (blocked[row] ?? 0) | covered;
+      addLanes(blocked, row, covered);
       sweptBefore[row] = swept[row] ?? 0;
-      swept[row] = (swept[row] ?? 0) | covered;
+      addLanes(swept, row, covered);
     }
     for (let row = cell.row; row <= lastGap; row++) {
       gapBefore[row] = gapBlocked[row] ?? 0;
-      gapBlocked[row] = (gapBlocked[row] ?? 0) | covered;
+      addLanes(gapBlocked, row, covered);
     }
     let ok = true;
     for (let row = cell.row; ok && row <= lastRow; row++) {
@@ -835,11 +840,11 @@ export function planSpawns<Kind extends string>(
     take: (dart: boolean, lane: number, row: number) => {
       if (row >= 0 && row < rows.length) {
         takeCells(row, laneRun(lane, 1));
-        moverHeld[row] = (moverHeld[row] ?? 0) | laneRun(lane, 1);
+        addLanes(moverHeld, row, laneRun(lane, 1));
         if (dart) {
-          dartHeld[row] = (dartHeld[row] ?? 0) | laneRun(lane, 1);
+          addLanes(dartHeld, row, laneRun(lane, 1));
         } else {
-          otherMoverHeld[row] = (otherMoverHeld[row] ?? 0) | laneRun(lane, 1);
+          addLanes(otherMoverHeld, row, laneRun(lane, 1));
         }
       }
     },
@@ -891,7 +896,7 @@ export function planSpawns<Kind extends string>(
     take: (dart: boolean, lane: number, row: number) => {
       moverGrid.take(dart, lane, row);
       if (row >= 0 && row < rows.length) {
-        prizeHeld[row] = (prizeHeld[row] ?? 0) | laneRun(lane, 1);
+        addLanes(prizeHeld, row, laneRun(lane, 1));
       }
     },
   };
@@ -926,7 +931,7 @@ export function planSpawns<Kind extends string>(
         const covered = laneRun(rest.lane, footprint.lanes) & lanes;
         rows.forEach((row, i) => {
           if (row > rest.distance - hitLength(plan, 1) && row < rest.distance + length) {
-            restHeld[i] = (restHeld[i] ?? 0) | covered;
+            addLanes(restHeld, i, covered);
           }
         });
       }
@@ -1045,7 +1050,7 @@ export function planSpawns<Kind extends string>(
     const covered = laneRun(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= lastRow; row++) {
       takeCells(row, covered);
-      heldByStanding[row] = (heldByStanding[row] ?? 0) | covered;
+      addLanes(heldByStanding, row, covered);
     }
     const event = { distance: itemAt(rows, cell.row), kind: quota.kind, lane: cell.lane };
     if (quota.blocksLane) {
@@ -1167,10 +1172,10 @@ export function planSpawns<Kind extends string>(
     gapBlocked.fill(0, first, last + 1);
     for (const block of blocks) {
       for (let row = Math.max(first, block.row); row <= Math.min(last, block.lastRow); row++) {
-        blocked[row] = (blocked[row] ?? 0) | block.covered;
+        addLanes(blocked, row, block.covered);
       }
       for (let row = Math.max(first, block.row); row <= Math.min(last, block.lastGap); row++) {
-        gapBlocked[row] = (gapBlocked[row] ?? 0) | block.covered;
+        addLanes(gapBlocked, row, block.covered);
       }
     }
   };
