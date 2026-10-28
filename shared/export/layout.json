@@ -2670,56 +2670,56 @@
     "effectHolds": [
       {
         "height": 43,
-        "width": 23,
-        "x": 86,
+        "width": 25,
+        "x": 80,
         "y": 5
       },
       {
         "height": 43,
-        "width": 22,
-        "x": 109,
+        "width": 24,
+        "x": 105,
         "y": 5
       },
       {
         "height": 43,
-        "width": 22,
-        "x": 131,
+        "width": 24,
+        "x": 129,
         "y": 5
       },
       {
         "height": 43,
-        "width": 22,
+        "width": 24,
         "x": 153,
         "y": 5
       },
       {
         "height": 43,
-        "width": 22,
-        "x": 175,
+        "width": 24,
+        "x": 177,
         "y": 5
       },
       {
         "height": 43,
-        "width": 27,
-        "x": 197,
+        "width": 23,
+        "x": 201,
         "y": 5
       }
     ],
     "effectWells": [
       {
-        "x": 87,
+        "x": 81,
         "y": 20,
         "height": 22,
         "width": 22
       },
       {
-        "x": 109,
+        "x": 105,
         "y": 20,
         "height": 22,
         "width": 22
       },
       {
-        "x": 131,
+        "x": 129,
         "y": 20,
         "height": 22,
         "width": 22
@@ -2731,13 +2731,13 @@
         "width": 22
       },
       {
-        "x": 175,
+        "x": 177,
         "y": 20,
         "height": 22,
         "width": 22
       },
       {
-        "x": 197,
+        "x": 201,
         "y": 20,
         "height": 22,
         "width": 22
@@ -2745,8 +2745,8 @@
     ],
     "zoneWell": {
       "height": 12,
-      "width": 140,
-      "x": 83,
+      "width": 144,
+      "x": 81,
       "y": 5
     },
     "debuffBar": {
@@ -2831,10 +2831,10 @@
         "holdInset": 1,
         "icon": 1,
         "iconSize": 20,
-        "pitch": 22,
         "size": 22,
         "y": 20,
-        "x": 87
+        "pitch": 24,
+        "x": 81
       },
       "minHitWidth": 34,
       "zone": {
@@ -2849,8 +2849,8 @@
         "textGap": 4,
         "well": {
           "height": 12,
-          "width": 140,
-          "x": 83,
+          "width": 144,
+          "x": 81,
           "y": 5
         }
       }

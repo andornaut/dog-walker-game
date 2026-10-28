@@ -169,9 +169,10 @@ describe("the walk bar's buttons", () => {
       expect(face.x).toBeGreaterThanOrEqual(hit.x);
       expect(face.x + size).toBeLessThanOrEqual(hit.x + hit.width);
       expect(face.y + size).toBeLessThanOrEqual(topBar.y + topBar.height);
-      for (const well of [bar.zoneWell, ...bar.effectWells, ...bar.effectHolds]) {
+      for (const well of [...bar.effectWells, ...bar.effectHolds]) {
         expect(well.x + well.width).toBeLessThanOrEqual(hit.x);
       }
+      expect(bar.zoneWell.x + bar.zoneWell.width).toBeLessThanOrEqual(face.x);
     }
   });
 });

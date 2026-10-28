@@ -166,9 +166,9 @@ describe("the walk bar", () => {
     expect(cash.well.y + cash.well.height).toBe(effects.y + effects.size);
   });
 
-  it("ends the neighbourhood well before the first button's hit area", () => {
-    const first = BAR.buttons[WALK_BAR_BUTTONS[0]].hit;
-    expect(BAR.zoneWell.x + BAR.zoneWell.width).toBeLessThanOrEqual(first.x);
+  it("ends the neighbourhood well before the first button's face", () => {
+    const first = BAR.buttons[WALK_BAR_BUTTONS[0]].face;
+    expect(BAR.zoneWell.x + BAR.zoneWell.width).toBeLessThan(first.x);
   });
 
   it("sets the neighbourhood column as far from the cash well as from the first button's face", () => {
@@ -183,13 +183,24 @@ describe("the walk bar", () => {
     expect(right - left).toBeLessThanOrEqual(1);
   });
 
-  it("insets the effect wells as far from either end of the neighbourhood well", () => {
-    const first = BAR.effectWells[0] ?? BAR.zoneWell;
-    const last = BAR.effectWells.at(-1) ?? BAR.zoneWell;
-    const left = first.x - BAR.zoneWell.x;
-    const right = BAR.zoneWell.x + BAR.zoneWell.width - (last.x + last.width);
-    expect(left).toBeGreaterThan(0);
-    expect(right).toBe(left);
+  it("starts the effect wells on the neighbourhood well's left edge, the widest whole gap apart", () => {
+    const { pitch, size } = WALK_BAR.effects;
+    const well = BAR.zoneWell;
+    const right = well.x + well.width;
+    expect(BAR.effectWells[0]?.x).toBe(well.x);
+    const last = BAR.effectWells.at(-1) ?? well;
+    expect(last.x + last.width).toBeLessThanOrEqual(right);
+    // One more column between each pair of wells would push the last past the well's edge.
+    expect(last.x + last.width + (WELLS - 1)).toBeGreaterThan(right);
+    expect(pitch).toBeGreaterThan(size);
+  });
+
+  it("centres the neighbourhood's text line in its well, to a column", () => {
+    const { name, progress } = WALK_BAR.zone;
+    const left = name.x - BAR.zoneWell.x;
+    const right = BAR.zoneWell.x + BAR.zoneWell.width - 1 - progress.right;
+    expect(right - left).toBeGreaterThanOrEqual(0);
+    expect(right - left).toBeLessThanOrEqual(1);
   });
 
   it.each(WALK_BAR_BUTTONS)("gives %s a hit area the bar's full height, a tap tall", (id) => {

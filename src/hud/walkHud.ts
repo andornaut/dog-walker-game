@@ -37,9 +37,10 @@ export function evenGapLeft(left: number, right: number, width: number): number 
 // The walk bar's three sections, left to right: the cash well, the neighbourhood column (its
 // well over the effect wells) and the buttons. The cash well and the buttons keep their places
 // at the bar's ends, and the neighbourhood column sits evenly between the cash well's right
-// edge and the first button's face. The column is its contents (the neighbourhood's text line,
-// ZONE_LINE.width wide, over the effect wells side by side) with NEIGHBOURHOOD_PADDING columns
-// either side, which the neighbourhood well spans.
+// edge and the first button's face. The column is the wider of the neighbourhood's text line
+// (ZONE_LINE.width) and the effect wells edge to edge, with NEIGHBOURHOOD_PADDING columns either
+// side; the neighbourhood well spans it, its text line centred in it. The effect wells run from
+// the column's left edge, the widest whole gap apart that keeps the last inside the column.
 const CASH_WELL = { height: 37, width: 70, x: 5, y: 5 } as const;
 const BUTTONS = {
   help: { faceX: 231, hitWidth: 34, hitX: 224 },
@@ -49,12 +50,15 @@ const BUTTONS = {
 } as const satisfies Readonly<
   Record<WalkBarButtonId, { faceX: number; hitWidth: number; hitX: number }>
 >;
-const EFFECT_ROW = { holdInset: 1, icon: 1, iconSize: 20, pitch: 22, size: 22, y: 20 } as const;
+const EFFECT_ROW = { holdInset: 1, icon: 1, iconSize: 20, size: 22, y: 20 } as const;
 const ZONE_LINE = { height: 12, width: 132, y: 5 } as const;
-const NEIGHBOURHOOD_PADDING = 4;
+const NEIGHBOURHOOD_PADDING = 6;
 const NEIGHBOURHOOD_WIDTH =
-  Math.max(ZONE_LINE.width, (EFFECT_WELLS - 1) * EFFECT_ROW.pitch + EFFECT_ROW.size) +
-  2 * NEIGHBOURHOOD_PADDING;
+  Math.max(ZONE_LINE.width, EFFECT_WELLS * EFFECT_ROW.size) + 2 * NEIGHBOURHOOD_PADDING;
+const EFFECT_GAP =
+  EFFECT_WELLS > 1
+    ? Math.floor((NEIGHBOURHOOD_WIDTH - EFFECT_WELLS * EFFECT_ROW.size) / (EFFECT_WELLS - 1))
+    : 0;
 const NEIGHBOURHOOD_X = evenGapLeft(
   CASH_WELL.x + CASH_WELL.width,
   BUTTONS[WALK_BAR_BUTTONS[0]].faceX,
@@ -73,9 +77,8 @@ const NEIGHBOURHOOD_X = evenGapLeft(
 // effects: a well of size at pitch from x along y for every effect a walk can have
 // (EFFECT_WELLS), each icon iconSize at icon,icon in its well; the holds run side by side from
 // holdInset left of the first well up to the first button, each from its well's left edge, down
-// to the bar's bottom. The neighbourhood well spans the neighbourhood column, and the effect
-// wells start the column's padding in from its left edge; the name starts 3 columns past the
-// padding, and the count ends 5 columns before it on the right.
+// to the bar's bottom, a gap between wells going to the hold on its left. The name starts 3
+// columns into the text line, and the count ends 5 columns before its right edge.
 export const WALK_BAR = {
   buttonFace: { size: 20, y: 14 },
   buttons: BUTTONS,
@@ -86,7 +89,7 @@ export const WALK_BAR = {
     scales: [3, 2, 1],
     well: CASH_WELL,
   },
-  effects: { ...EFFECT_ROW, x: NEIGHBOURHOOD_X + NEIGHBOURHOOD_PADDING },
+  effects: { ...EFFECT_ROW, pitch: EFFECT_ROW.size + EFFECT_GAP, x: NEIGHBOURHOOD_X },
   minHitWidth: 34,
   zone: {
     name: { x: NEIGHBOURHOOD_X + NEIGHBOURHOOD_PADDING + 3, y: 8 },
