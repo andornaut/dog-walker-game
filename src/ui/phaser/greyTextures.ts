@@ -1,7 +1,7 @@
 import type { Scene } from "phaser";
 
-import { NEUTRAL_RAMP } from "../../ui/phaser/palette";
-import { remapToGrey } from "../greyRamp";
+import { remapToGrey } from "../../assets/greyRamp";
+import { NEUTRAL_RAMP } from "./palette";
 
 // A copy of a texture with remap applied to its pixels, made once and kept under
 // key-suffix, with the same frames. Returns the original key when the copy cannot be made.

@@ -1,7 +1,6 @@
 import type { GameObjects, Scene, Tweens } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
-import { disabledTextureKey } from "../assets/phaser/greyTextures";
 import { SCREEN_LAYOUT } from "../data/screen";
 import { FEEDBACK, loopFrame } from "../home/feedback";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
@@ -16,6 +15,7 @@ import {
 } from "../ui/interaction";
 import { MARK_OFFSET } from "../ui/mark";
 import { CREAM_PANEL_COLOURS, drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
+import { disabledTextureKey } from "../ui/phaser/greyTextures";
 import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,

@@ -45,7 +45,6 @@ const CONTEXTS = {
     "state/runState",
     "tools/artManifest",
     "tools/files",
-    "ui/phaser/palette",
   ],
   lib: [],
   road: [

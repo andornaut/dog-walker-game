@@ -1,7 +1,6 @@
 import { type GameObjects, Scene } from "phaser";
 
 import { SKIP_CARD_ART } from "../assets/cardArt";
-import { greyTextureKey } from "../assets/phaser/greyTextures";
 import {
   CARD_FRAME_KEY,
   cardFrameTag,
@@ -44,6 +43,7 @@ import { rectIndexAt } from "../ui/grid";
 import { PLAIN_ITEM, tileState } from "../ui/interaction";
 import { addDisplayText, hasDisplayFont } from "../ui/phaser/displayText";
 import { drawRing, fillRect } from "../ui/phaser/draw";
+import { greyTextureKey } from "../ui/phaser/greyTextures";
 import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
