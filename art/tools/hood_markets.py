@@ -49,6 +49,14 @@ produce-crates      48x48   minor, 1 lane: a pyramid of three wooden produce cra
 clothing-rack       48x48   minor, 1 lane: a rolling rack of vintage clothes on chrome uprights and
                             casters: a mustard corduroy jacket, a plain lilac dress, a denim jacket
                             and a striped tee. idle (4 frames, 450ms): the dress sways 1px on frame 2
+market-stall-2      112x36  minor, 2 lanes, Kensington Market's barrier-2: a flea market's folding tables,
+                            one per lane, under a faded teal and cream striped awning with a scalloped
+                            hem on thin coal poles; each clay table stands on crossed legs, laid with
+                            chunky goods: a crate of records with a black record stood up (lilac label,
+                            left out at @69 and smaller, where it would fill the disc), folded clothes,
+                            book spines, glass jars and a lidded box. idle (2 frames, 500ms): the hem's
+                            middle half lifts 1px on frame 1
+market-stall-3      176x36  minor, 3 lanes, Kensington Market's barrier-3: the same stall, a table wider
 cargo-bike          48x72   minor mover, 1 lane by 2 rows: a cargo bike riding down a lane at the pack,
                             facing it: a wooden box of sunflowers and pink tulips out front over a
                             small front wheel with a lit headlamp on its fork, its rider behind in a
@@ -791,6 +799,133 @@ def clothing_rack(sway=0):
 RACK_IDLE = (0, 0, 1, 0), 450
 
 
+# ---------- the market stall ----------
+
+# Below this scale the record is too small to hold its 2px label and stay a black disc, so it is drawn plain.
+LABEL_MIN = 0.85
+
+
+def records(g, x, y):
+    """A bark crate of record sleeves 8 wide, its top at layout row y, the sleeves' tops showing over it in
+    lilac, cream and dlake, and beside it a black record stood on its edge, its lilac label in the middle, 2
+    drawn pixels square (left out below LABEL_MIN)."""
+    for i, c in enumerate(("lilac", "cream", "dlake")):
+        g.rect(x + 0.5 + i * 2.5, y + 0.5 - (i % 2) * 0.5, 2.5, 3, c)
+    g.rect(x, y + 2.5, 8, 4.5, "bark")
+    g.rect(x, y + 2.5, 8, 1, "clay")
+    g.cel(x + 11.5, y + 3.5, 3.5, 3.5, "coal")
+    px, s = raster(g), scale_of(g)
+    if s >= LABEL_MIN:
+        px.rect(math.floor((x + 11.5) * s) - 1, math.floor((y + 3.5) * getattr(g, "sy", s)) - 1, 2, 2, "lilac")
+
+
+def folded(g, x, y):
+    """A stack of folded clothes 8 wide, its top at layout row y: lilac over cream over a dlake sweater,
+    each fold a step longer than the one above."""
+    for k, (c, sh) in enumerate((("lilac", "violet"), ("cream", "driftwood"), ("dlake", "dslate"))):
+        g.rect(x + 1 - k * 0.5, y + k * 2.4, 7 + k, 2.4, c)
+        g.rect(x + 7 + k * 0.5, y + k * 2.4, 1, 2.4, sh)
+
+
+def jars(g, x, y):
+    """Two glass jars, 3 wide and 5 tall under bark lids, their tops at layout row y."""
+    for k in range(2):
+        jx = x + k * 4
+        g.rect(jx, y + 1, 3, 4.5, "haze")
+        g.rect(jx + 2, y + 1, 1, 4.5, "stone")
+        g.rect(jx, y, 3, 1.2, "bark")
+
+
+def books(g, x, y):
+    """Three book spines standing in a row, 2.5 wide and 6 or 7 tall, their feet on layout row y + 7."""
+    for k, (c, h) in enumerate((("brick", 7), ("dlake", 6), ("cream", 7))):
+        g.rect(x + k * 2.5, y + 7 - h, 2.5, h, c)
+
+
+def box(g, x, y):
+    """A small lidded cardboard box 7 wide, its lid at layout row y + 2."""
+    g.rect(x, y + 3, 7, 4, "clay")
+    g.rect(x - 0.5, y + 2, 8, 1.5, "driftwood")
+    g.rect(x + 6, y + 3, 1, 4, "bark")
+
+
+# The goods on each table, left to right, as (draw, layout width), as many as fit: table k starts the list at
+# 2k (wrapping), so no two tables match.
+GOODS = ((records, 15), (folded, 10), (books, 10), (jars, 9), (box, 9))
+
+
+def market_stall(lanes, flap=0):
+    """Front elevation across lanes lanes, laid out in obstacles.py's pixels (obstacles.span(lanes) by
+    obstacles.ROW): a flea market's row of folding tables, one per lane, under a striped awning on thin coal
+    poles. The awning runs the whole width in faded dturq and cream stripes, its sloped top over a valance
+    with a scalloped hem; under it each table's clay top, lit driftwood and shaded bark, stands on crossed
+    coal legs, laid with chunky goods: a crate of records with a black record propped up (lilac label),
+    folded clothes, book spines, glass jars and a lidded box. flap lifts the hem's middle half 1 drawn
+    pixel."""
+    w = ob.span(lanes)
+    g = edged(Grid(w, ob.ROW))
+    px, s = raster(g), scale_of(g)
+    sy = getattr(g, "sy", s)
+
+    def X(v):
+        return math.floor(v * s + 0.5)
+
+    def Y(v):
+        return math.floor(v * sy + 0.5)
+
+    poles = [2] + [w * k / lanes - 1 for k in range(1, lanes)] + [w - 4]
+    # the poles, coal lit ash down their left
+    for x in poles:
+        g.rect(x, 6, 2, 23.5, "coal")
+        g.rect(x, 6, 1, 23.5, "ash")
+    # the tables, one between each pair of poles: crossed legs under a clay top, the goods laid on it
+    for k in range(lanes):
+        a, b = poles[k] + 3, poles[k + 1] - 1
+        for lx in (a + 3, b - 8):
+            for t in range(10):
+                f = t / 9
+                g.rect(lx + 5 * f, 21 + 7.6 * f, 1.4, 1.4, "coal")
+                g.rect(lx + 5 - 5 * f, 21 + 7.6 * f, 1.4, 1.4, "coal")
+        x = a + 2
+        goods = GOODS[2 * k % len(GOODS):] + GOODS
+        room = b - a - 3
+        for draw, gw in goods:
+            if gw > room:
+                break
+            draw(g, x, 11)
+            x += gw
+            room -= gw
+        g.rect(a, 18, b - a, 1, "driftwood")
+        g.rect(a, 19, b - a, 2.5, "clay")
+        g.rect(a, 21, b - a, 1, "bark")
+    # the awning: a sloped top over a valance of stripes 6 layout pixels wide, scalloped along its hem
+    left, right = 0.5, w - 0.5
+    g.tri((left + 3, 0.5), (right - 3, 0.5), (left, 3.5), "dturq")
+    g.tri((right - 3, 0.5), (right, 3.5), (left, 3.5), "dturq")
+    x0, x1 = X(left), X(right)
+    top, hem = Y(3.5), Y(7.5)
+    stripe = max(4, X(6))
+    lift = x0 + (x1 - x0) // 4, x1 - (x1 - x0) // 4
+    for x in range(x0, x1):
+        n = (x - x0) // stripe
+        c = "cream" if n % 2 else "dturq"
+        for y in range(Y(0.5), top):
+            if px.px[y][x]:
+                px.p(x, y, "driftwood" if n % 2 else "dturq")
+        # the scallop: each stripe's hem rounds down to a tab in its middle
+        t = ((x - x0) % stripe + 0.5) / stripe
+        tab = round(Y(1.5) * (1 - (2 * t - 1) ** 2))
+        up = 1 if flap and lift[0] <= x < lift[1] else 0
+        for y in range(top, hem + tab - up):
+            px.p(x, y, c)
+    px.rect(x0, top, x1 - x0, 1, "teal")
+    return lit(g, dict(coal=("ash", None), bark=("clay", None), clay=("driftwood", None), dturq=("turquoise", None),
+                       dlake=("lake", None), teal=("dturq", None), brick=("clay", None)))
+
+
+STALL_IDLE = (0, 1), 500
+
+
 # ---------- the cargo bike ----------
 
 # The flowers in the box: (centre column, row, petals, their shade, centre or None). Sunflowers with a dbrown
@@ -898,6 +1033,9 @@ def road_sprites(s=1):
     yield "produce-crates", [("idle", frames(o, produce_crates, [dict(leaf=a) for a in args]), ms)]
     args, ms = RACK_IDLE
     yield "clothing-rack", [("idle", frames(o, clothing_rack, [dict(sway=a) for a in args]), ms)]
+    args, ms = STALL_IDLE
+    for lanes in (2, 3):
+        yield f"market-stall-{lanes}", [("idle", [drawn(o, market_stall, lanes, a).outlined() for a in args], ms)]
     poses, ms = CARGO_RIDE
     yield "cargo-bike", [("ride", frames(p, cargo_bike, poses), ms)]
 
