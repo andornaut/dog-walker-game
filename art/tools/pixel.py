@@ -76,6 +76,11 @@ def contrast(a, b):
     return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
 
 
+# The Kensington Market murals' diagonal colour bands, shared by the backdrop, its zone card and the mural
+# wall prop.
+MURAL = ("dred", "ochre", "olive", "dturq", "violet", "mauve")
+
+
 def dk(c):
     """The colour one ramp step darker than c, a K name or hex."""
     return DARKER[K.get(c, c)]

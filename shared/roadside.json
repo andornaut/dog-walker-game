@@ -233,7 +233,13 @@
             "dz": 0
           }
         ],
-        [],
+        [
+          {
+            "key": "roadside-cafe-patio",
+            "across": 249,
+            "dz": 0
+          }
+        ],
         [],
         [
           {
@@ -242,7 +248,43 @@
             "dz": 0
           }
         ],
+        [
+          {
+            "key": "roadside-mural-wall",
+            "across": 276,
+            "dz": 0
+          }
+        ],
         [],
+        [
+          {
+            "key": "roadside-tree-maple",
+            "across": 277,
+            "dz": 0
+          }
+        ],
+        [
+          {
+            "key": "roadside-cafe-patio",
+            "across": 249,
+            "dz": 0
+          }
+        ],
+        [],
+        [
+          {
+            "key": "roadside-garden-car",
+            "across": 270,
+            "dz": 0
+          }
+        ],
+        [
+          {
+            "key": "roadside-mural-wall",
+            "across": 276,
+            "dz": 0
+          }
+        ],
         []
       ],
       "sides": {

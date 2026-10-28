@@ -68,9 +68,8 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from backdrops import MURAL  # noqa: E402
 from minis import STEPS, Mini, scaled  # noqa: E402
-from pixel import K, dk, edged, main, raster, scale_of  # noqa: E402
+from pixel import MURAL, K, dk, edged, main, raster, scale_of  # noqa: E402
 
 SCALE = 1.5
 GROUNDS = (K["green"], K["dgreen"], K["dslate"])
@@ -933,9 +932,10 @@ def gap(*props):
 # dz is road px from the slot's z, nearer negative. Each table is sparse: an empty lot and six gaps,
 # a prop in gaps 0 and 3, so each side has a prop every 6 slots (840 px): the neighbourhood's tree or
 # street furniture in gap 0, then its own prop in gap 3. The right side's gapStart of 2 puts its props
-# 3 slots after the left's, so they alternate sides, one every 420 px. The Beaches runs twelve gaps: the
-# Leuty in gaps 0 and 6, dune grass in 3, the ice cream stand in 9, and beach umbrellas and chairs in
-# gaps 1, 4, 7 and 10, so one prop stands every 210 px. Each neighbourhood's character comes from its backdrop,
+# 3 slots after the left's, so they alternate sides, one every 420 px. Kensington Market and The Beaches
+# run twelve gaps, so one prop stands every 210 px. Kensington: maples in gaps 0 and 6, the fruit stand in
+# 3, the Garden Car in 9, café patios in 1 and 7 and mural walls in 4 and 10. The Beaches: the Leuty in
+# gaps 0 and 6, dune grass in 3, the ice cream stand in 9, and beach umbrellas and chairs in 1, 4, 7 and 10. Each neighbourhood's character comes from its backdrop,
 # verges and road, not from its roadside.
 SIDES = dict(
     left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=1),
@@ -959,7 +959,13 @@ PLACEMENT = {
     "cabbagetown": sparse(("tree-maple", 220, 0), ("gas-lamp", 213, 0)),
     "high-park": sparse(("tree-oak", 220, 0), ("hot-dog-stand", 216, 0)),
     "distillery-district": sparse(("gas-lamp", 213, 0), ("love-lock", 216, 0)),
-    "kensington-market": sparse(("tree-maple", 220, 0), ("fruit-stand", 216, 0)),
+    "kensington-market": sparse(("tree-maple", 220, 0), ("fruit-stand", 216, 0), {
+        1: (("cafe-patio", 213, 0),),
+        4: (("mural-wall", 216, 0),),
+        7: (("cafe-patio", 213, 0),),
+        9: (("garden-car", 216, 0),),
+        10: (("mural-wall", 216, 0),),
+    }),
     "the-beaches": sparse(("leuty", 220, 0), ("dune-grass", 213, 0), {
         1: (("beach-umbrella-blue", 225, 0), ("beach-chair-blue", 220, -12)),
         4: (("beach-umbrella-coral", 213, 0),),

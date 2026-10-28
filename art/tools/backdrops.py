@@ -44,7 +44,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 import fonts  # noqa: E402
 import scene as sn  # noqa: E402
-from pixel import dk  # noqa: E402
+from pixel import MURAL, dk  # noqa: E402
 from roads import LANE_PAINT  # noqa: E402
 
 # ---------- the band and the camera ----------
@@ -1299,9 +1299,6 @@ def market_house(cv, cx, w, wall, roof, awn, sign, board, letters, base=BASE, tr
     for i in range(x - 1, x + w + 1, 3):
         cv.fill(i, top + 21, 2, 1, trim)
     shopfront(cv, x, w, base - 33, base, wall, awn, sign, board, letters, glass="lake", stripe="cream")
-
-
-MURAL = ("dred", "ochre", "olive", "dturq", "violet", "mauve")
 
 
 def mural(cv, x0, top, base, flip):
