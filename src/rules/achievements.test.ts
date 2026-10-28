@@ -20,7 +20,7 @@ import {
   type RunFacts,
 } from "./achievements";
 import { applyEffects } from "./effects";
-import { cents } from "./units";
+import { cents, dollarsToCents } from "./units";
 
 const facts = (changes: Partial<RunFacts> = {}): RunFacts => ({
   bumpsByKind: {},
@@ -367,6 +367,30 @@ describe("profile conditions", () => {
       )
       .map(([name]) => name);
     expect(wrong).toEqual([]);
+  });
+
+  // Earnings are counted in cents and a lifetime goal in whole dollars, so each goal in the data
+  // holds from its dollars exactly, net of starting cash, and not a cent before.
+  const lifetimeGoals = gameData.achievements.flatMap(({ conditions, id }) =>
+    conditions.flatMap((condition) =>
+      condition.kind === "lifetimeEarnings" ? [{ condition, id }] : [],
+    ),
+  );
+  it.each(lifetimeGoals)("holds $id from its whole dollars", ({ condition }) => {
+    const start = 1_000;
+    const holdsAt = (net: number) =>
+      conditionHolds(
+        gameData,
+        withStats({ lifetimeCents: cents(start + net), lifetimeStartCents: cents(start) }),
+        null,
+        condition,
+      );
+    const goal = dollarsToCents(condition.dollars);
+    expect([Number.isInteger(condition.dollars), holdsAt(goal - 1), holdsAt(goal)]).toEqual([
+      true,
+      false,
+      true,
+    ]);
   });
 });
 

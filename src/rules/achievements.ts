@@ -180,33 +180,46 @@ function firedByOwners(stats: Pick<SaveStats, "dogs">): number {
 }
 
 // Run conditions need the run's facts, so they never hold for a purchase (facts null); profile
-// conditions need the save, so they never hold without one (save null).
+// conditions need the save, so they never hold without one (save null). A condition that counts
+// across walks holds once its progress is complete (acrossWalksProgress).
 export function conditionHolds(
   data: AchievementData,
   save: Pick<SaveDocument, "owned" | "stats"> | null,
   facts: RunFacts | null,
   condition: AchievementCondition,
 ): boolean {
+  const progress = save === null ? null : acrossWalksProgress(data, save, condition);
+  if (progress !== null) {
+    return progress.have >= progress.need;
+  }
   const zones = walkLength(data);
   const dogs = Object.keys(data.dogs).length;
   const walkers = Object.keys(data.walkers).length;
   switch (condition.kind) {
+    // Counted across walks: here only without a save.
     case "bumps":
-      return save !== null && landedBumps(save.stats, condition.kinds) >= condition.count;
+    case "dogsFinishedWith":
+    case "firedByOwners":
+    case "lifetimeEarnings":
+    case "noFiringStreak":
+    case "optionPicks":
+    case "tally":
+    case "timesFired":
+    case "walkersFinishedWith":
+    case "walksFinished":
+    case "walksPlayed":
+    case "zonesEverFinished":
+      return false;
     case "cleanZones":
       return facts !== null && cleanZones(facts) >= needed(zones, condition.count);
     case "debuffsGot":
       return facts !== null && (facts.debuffsGot[condition.debuff] ?? 0) >= condition.count;
-    case "dogsFinishedWith":
-      return save !== null && save.stats.dogsFinishedWith.length >= needed(dogs, condition.count);
     case "dogsOwned":
       return save !== null && save.owned.dogs.length >= needed(dogs, condition.count);
     case "earnings":
       return facts !== null && earnedNet(facts) >= dollarsToCents(condition.dollars);
     case "finishOnLastHeart":
       return facts !== null && finishedWalk(facts, zones) && facts.lastHeartOwners > 0;
-    case "firedByOwners":
-      return save !== null && firedByOwners(save.stats) >= needed(dogs, condition.count);
     case "fullPackBonus":
       return (
         facts !== null &&
@@ -219,36 +232,10 @@ export function conditionHolds(
         save !== null &&
         save.owned.gear.length >= needed(Object.keys(data.shopGear).length, condition.count)
       );
-    case "lifetimeEarnings":
-      return save !== null && lifetimeEarnedNet(save.stats) >= dollarsToCents(condition.dollars);
-    case "noFiringStreak":
-      return save !== null && save.stats.noFiringStreak >= condition.count;
-    case "optionPicks":
-      return (
-        save !== null &&
-        picksOf(save.stats.optionPicks, condition.encounter, condition.option) >= condition.count
-      );
     case "packSize":
       return facts !== null && facts.packSize >= condition.count;
-    case "tally":
-      return save !== null && (save.stats.tallies[condition.tally] ?? 0) >= condition.count;
-    case "timesFired":
-      return save !== null && save.stats.timesFired >= condition.count;
-    case "walkersFinishedWith":
-      return (
-        save !== null && save.stats.walkersFinishedWith.length >= needed(walkers, condition.count)
-      );
     case "walkersUnlocked":
       return save !== null && save.owned.walkers.length >= needed(walkers, condition.count);
-    case "walksFinished":
-      return save !== null && walksFinished(save.stats) >= condition.count;
-    case "walksPlayed":
-      return save !== null && walksPlayed(save.stats) >= condition.count;
-    case "zonesEverFinished":
-      return (
-        save !== null &&
-        save.stats.zonesEverFinished.length >= needed(data.world.zones.length, condition.count)
-      );
     case "zonesFinished":
       return facts !== null && zonesWalked(facts) >= needed(zones, condition.count);
     default:
