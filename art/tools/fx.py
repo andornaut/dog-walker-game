@@ -21,8 +21,9 @@ fx-splash        64x48  play (8 frames, 60ms)  a puddle: a crown of five water j
                                                one ripple; its ground point, row 40, goes on
                                                the dog's feet
 fx-sparkle       16x16  play (4 frames, 60ms)  twinkle where a treat or tip is collected
-fx-new-best      96x48  play (8 frames, 70ms)  rays, sparkles and stars bursting from
-                                               behind the ui-new-best ribbon (centred on it)
+fx-new-best      96x48  play (8 frames, 70ms)  rays, sparkles and stars in yellow, amber and
+                                               white bursting from behind the ui-new-best
+                                               ribbon (centred on it), each part in its own rim
 
 The comic lettering (LETTERS, word), which fonts.py exports as font-comic, is built like the
 sign logo: flat yellow letters, 7 rows with 2px stems, in a 1px ink ring that fills the
@@ -330,42 +331,56 @@ RIBBON = (12, 14)
 # Sparkles thrown out from behind the ribbon, slowing as they go: (x, y on the ribbon's edge, full
 # throw dx, dy, first frame, colour). They keep inside the frame's bands above, below and beside it.
 SPARKS = ((20, 14, -6, -9, 0, "white"), (40, 14, -3, -10, 1, "yellow"), (58, 14, 4, -11, 0, "white"),
-          (76, 14, 8, -8, 2, "cyan"), (26, 34, -6, 9, 1, "yellow"), (50, 34, 1, 10, 0, "white"),
-          (70, 34, 6, 9, 2, "pink"), (12, 21, -10, -5, 0, "yellow"), (84, 20, 10, -6, 1, "white"),
-          (12, 30, -9, 6, 2, "cyan"), (84, 30, 10, 5, 0, "yellow"), (50, 14, 0, -8, 3, "white"))
+          (26, 34, -6, 9, 1, "yellow"), (50, 34, 1, 10, 0, "white"), (12, 21, -10, -5, 0, "yellow"),
+          (84, 20, 10, -6, 1, "white"), (12, 30, -9, 6, 2, "white"), (84, 30, 10, 5, 0, "yellow"))
 # Stars that pop out over the ribbon's edges and arc out under a little gravity: (x, y, dx, dy per frame,
 # first frame).
 STARS = ((30, 14, -2, -2.6, 0), (66, 14, 2.2, -2.8, 1), (48, 14, 0.3, -2.4, 3), (24, 34, -2.4, 1, 1),
-         (72, 34, 2.4, 0.8, 2), (8, 24, -0.6, -2, 2), (88, 24, 0.6, -2, 0))
+         (72, 34, 2.4, 0.8, 2))
+
+
+def over(dst, src):
+    """Rim src on its own and lay it over dst, so overlapping parts keep their outlines apart."""
+    rim(src)
+    for y, row in enumerate(src.px):
+        for x, c in enumerate(row):
+            if c:
+                dst.px[y][x] = c
 
 
 def new_best(step):
     """96x48: a starburst behind the new-best ribbon, rays first, then sparkles and stars popping out
-    and fading. Everything carries the plum rim for the cream panel and the yellow end of the sunset,
-    and the ribbon's own area is left clear so the burst comes from behind it."""
+    and fading, in yellow, amber and white only. Each part carries its own plum rim, for the cream panel and
+    the yellow end of the sunset, laid over the ones behind it, and the ribbon's own area is left clear so
+    the burst comes from behind it."""
     g = Grid(96, 48)
     cx, cy = 48, 24
     if step < 4:
         # rays that slide outward, stretched across so they clear the wide ribbon
         r0, r1 = (6, 11, 17, 23)[step], (15, 21, 25, 27)[step]
-        for i in range(16):
-            a = math.radians(i * 22.5 + 11)
+        part = Grid(96, 48)
+        for i in range(12):
+            a = math.radians(i * 30 + 15)
             for k in range(r0 * 2, r1 * 2):
-                g.p(cx + math.cos(a) * k * 0.85, cy + math.sin(a) * k / 2, "white" if step == 0 else "yellow")
+                part.p(cx + math.cos(a) * k * 0.85, cy + math.sin(a) * k / 2, "white" if step == 0 else "yellow")
+        over(g, part)
     for x, y, dx, dy, first, col in SPARKS:
         t = step - first
         if 0 <= t < 5:
             k = 1 - 0.5 ** (t + 1)
-            star4(g, round(x + dx * k), round(y + dy * k), (1, 3, 2, 2, 1)[t], col)
+            part = Grid(96, 48)
+            star4(part, round(x + dx * k), round(y + dy * k), (2, 3, 3, 2, 2)[t], col)
+            over(g, part)
     for x, y, dx, dy, first in STARS:
         t = step - first
         if 0 <= t < 5:
             x, y, r = x + dx * (t + 1), y + dy * (t + 1) + 0.3 * t * t, (4, 5, 5, 4, 3)[t]
-            burst(g, x, y, r, r * 0.45, 5, "amber")
+            part = Grid(96, 48)
+            burst(part, x, y, r, r * 0.45, 5, "amber")
             if r > 3:
-                burst(g, x, y, r - 2, (r - 2) * 0.45, 5, "yellow")
-                g.p(x, y, "white")
-    rim(g)
+                burst(part, x, y, r - 2, (r - 2) * 0.45, 5, "yellow")
+                part.p(x, y, "white")
+            over(g, part)
     rx, ry = RIBBON
     g.rect(rx + 5, ry + 1, 62, 17, None)
     g.rect(rx, ry + 3, 72, 15, None)
