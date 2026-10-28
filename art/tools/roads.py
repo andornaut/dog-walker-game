@@ -128,7 +128,7 @@ def kensington_lines(g):
             wrect(g, x + 2, y + 1, 1, 10, dk(c))
 
 
-# fallen leaves (never amber or orange, which read as coins): a pointed blade, lit (f) on
+# fallen leaves (never gold, amber or orange, which read as the tip coin): a pointed blade, lit (f) on
 # the upper left of a dark vein (v) that runs on out as the stem and shaded (s) below it, so each
 # reads as a leaf and not a round fleck
 _TILTED = ("..fff", ".ffvf", "ffvss", "fvss.", "v....")
@@ -190,13 +190,13 @@ def cracks(g, rnd, runs, col):
 
 
 def cabbagetown_ground(g):
-    """Pale asphalt with sparse 2px slate grit, a few cracks and leaves, and granite gutters in stone, their
+    """Pale asphalt with sparse 2px slate grit, a few cracks and green leaves, and granite gutters in stone, their
     joints every 32 rows. No grit lighter than the asphalt: light flecks shimmer like rain as the road scrolls."""
     rnd = random.Random("road-cabbagetown")
     g.rect(0, 0, W, H, "grey")
     grit(g, rnd, 30, ("slate", "slate", "dslate"))
     cracks(g, rnd, ((43, 12, 10), (100, 40, 12), (160, 62, 9), (224, 50, 14), (286, 30, 8)), "dslate")
-    leaves(g, rnd, 4, 10, W - 10, (("moss", "olive", "dolive"), ("gold", "ochre", "rust")))
+    leaves(g, rnd, 4, 10, W - 10, (("moss", "olive", "dolive"),))
     for x0, edge in ((0, 4), (W - 4, W - 5)):
         g.rect(x0, 0, 4, H, "stone")
         g.rect(edge, 0, 1, H, "slate")
