@@ -5006,6 +5006,87 @@
       "json": "sprites/fx-treat-pop.json"
     },
     {
+      "key": "gardener",
+      "png": "sprites/gardener.png",
+      "json": "sprites/gardener.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 47
+      }
+    },
+    {
+      "key": "gardener@50",
+      "png": "sprites/gardener@50.png",
+      "json": "sprites/gardener@50.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "gardener@56",
+      "png": "sprites/gardener@56.png",
+      "json": "sprites/gardener@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "gardener@62",
+      "png": "sprites/gardener@62.png",
+      "json": "sprites/gardener@62.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "gardener@69",
+      "png": "sprites/gardener@69.png",
+      "json": "sprites/gardener@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "gardener@75",
+      "png": "sprites/gardener@75.png",
+      "json": "sprites/gardener@75.json",
+      "anchor": {
+        "feetY": 51,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "gardener@81",
+      "png": "sprites/gardener@81.png",
+      "json": "sprites/gardener@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "gardener@88",
+      "png": "sprites/gardener@88.png",
+      "json": "sprites/gardener@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 41
+      }
+    },
+    {
+      "key": "gardener@94",
+      "png": "sprites/gardener@94.png",
+      "json": "sprites/gardener@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 44
+      }
+    },
+    {
       "key": "goose",
       "png": "sprites/goose.png",
       "json": "sprites/goose.json",

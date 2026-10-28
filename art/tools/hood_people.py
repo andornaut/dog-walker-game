@@ -32,6 +32,17 @@ delivery-cyclist    48x72   Kensington Market and Yonge Street; a fast rider com
                             band; a black helmet, a violet jacket, jeans, a black bike with a
                             white headlamp and a phone on the bars; ride (4 frames, 90ms):
                             hazards.CYCLIST_RIDE's pedalling and 1px sway
+gardener            48x72   Cabbagetown; a slow rider coming down a lane at the player, walking behind
+                            a green wheelbarrow heaped with autumn leaves (reds, oranges and browns, no
+                            gold or amber): an olive canvas sun hat with a wide brim, white hair, a
+                            chambray shirt with rolled sleeves, a tan canvas apron, lime gardening gloves
+                            on the grips, jeans and brown work boots; the barrow's black tire edge-on in
+                            a grey fork in front, its stands under the tray's back corners; push (4
+                            frames, 160ms, the stroller's pace): road.PERSON_WALK, the barrow rolling
+                            steadily, the tire's tread rolling 1px a frame; idle (2 frames, 400ms):
+                            road.BREATH with the barrow tipped forward onto its nose, the handles up at
+                            the chest and a leaf or two over the lip; cue (4 frames, 200ms): righting
+                            the barrow before a restart, tipped, halfway, level, then braced to push
 
 Each has depth variants at every step in minis.STEPS (@94 to @50), redrawn at the
 step on a Mini at road.SCALE x the step, with the original's tags, frame counts
@@ -45,6 +56,7 @@ Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
+import math
 import os
 import sys
 
@@ -404,6 +416,117 @@ def delivery_at(s, lf=36, rf=41, sway=0):
     return g
 
 
+# ---------- gardener: facing the player, pushing a wheelbarrow of leaves at it ----------
+
+# Pushing: road.PERSON_WALK's stride at the stroller's pace, the barrow rolling steadily in front, its tire's
+# tread marks rolling 1 drawn pixel down a frame. 4 frames at 160ms.
+GARDENER_PUSH = tuple(dict({k: v for k, v in q.items() if k != "arms"}, roll=str(n))
+                      for n, q in enumerate(road.PERSON_WALK))
+GARDENER_PUSH_MS = 160
+# Stopped: the barrow tipped forward onto its nose, the handles up at the chest, breathing.
+GARDENER_IDLE = tuple(dict(tilt="2", bob=b) for b in road.BREATH)
+# Righting the barrow before a restart: tipped, halfway, level, then braced to push.
+GARDENER_CUE = (dict(tilt="2"), dict(tilt="1"), dict(tilt="0"), dict(tilt="0", bob=-1))
+GARDENER_CUE_MS = 200
+# The leaves heaped in the tray, autumn reds, oranges and browns with no gold or amber, which read as coins:
+# laid in rows LEAF_STEP apart, each leaf the next colour round, so no two neighbours match, nudged up or down
+# a little and one in seven left out so the heap's own rust shows between them and the rows never read as
+# brickwork.
+GARDENER_LEAVES = ("red", "orange", "brown", "ochre", "dred", "rust", "orange", "red", "ochre")
+LEAF_STEP = 1.6
+GARDENER_RIM = {**LIT, "olive": ("moss", None), "dolive": ("olive", None), "dgreen": ("green", None),
+                "lime": ("lime", None)}
+
+
+def limb(g, x0, y0, x1, y1, w, parts):
+    """An arm reaching from (x0, y0) to (x1, y1), w square at each step: parts are (share, colour) along it
+    from the shoulder."""
+    n = max(1, round(max(abs(x1 - x0), abs(y1 - y0)) * 2))
+    for i in range(n + 1):
+        f = i / n
+        c = next(c for share, c in parts if f <= share + 1e-9)
+        g.rect(x0 + (x1 - x0) * f - w / 2, y0 + (y1 - y0) * f - w / 2, w, w, c)
+
+
+def gardener(lf=0, rf=0, bob=0, roll="0", tilt="0"):
+    """The gardener facing the player, walking behind the wheelbarrow as it rolls at the player. tilt 1 and
+    2 tip the barrow forward onto its nose, the handles rising; roll moves the tire's tread down a pixel."""
+    g = edged(Grid(32, 48))
+    b, t, r = bob, int(tilt), int(roll)
+    # legs walking behind the barrow: jeans and brown work boots
+    for x, f in ((11, lf), (17, rf)):
+        g.rect(x, 33 + b, 4, 10 + f - b, "blue")
+        g.rect(x + 3, 33 + b, 1, 10 + f - b, "navy")
+        g.rect(x, 43 + f, 4, 2, "brown")
+        g.rect(x, 44 + f, 4, 1, "dbrown")
+    # the canvas apron to the knee, its straps over the shoulders, a pocket on the bib
+    g.rect(9, 21 + b, 14, 17 - b, "tan")
+    g.rect(20, 21 + b, 3, 17 - b, "brown")
+    g.rect(9, 21 + b, 1, 16, "cream")
+    g.rect(13, 23 + b, 6, 3, "brown")
+    for x in (10, 20):
+        g.rect(x, 20 + b, 2, 2, "brown")
+    # the chambray shirt at the shoulders, the sleeves rolled, the forearms out to the handles, green
+    # gardening gloves on the grips
+    grip = 29.5 - 2.5 * t
+    g.rect(8, 20 + b, 16, 2, "sky")
+    g.rect(14, 20 + b, 4, 1, "skin1")
+    for x0, x1 in ((7.5, 3), (24.5, 29)):
+        limb(g, x0, 22.5 + b, x1, grip, 3, ((0.45, "sky"), (0.8, "skin1"), (1, "lime")))
+    # the leaves heaped above the tray, more of the heap showing as it tips forward
+    hy, hr = 29 - 1.2 * t, 4.5 + 0.8 * t
+    g.cel(16, hy, 11.5, hr, "rust", "dbrick", "ochre")
+    for j in range(math.ceil((2 * hr - 1) / LEAF_STEP)):
+        y = hy - hr - 0.4 + j * LEAF_STEP
+        half = 11.5 * math.sqrt(max(0, 1 - ((y + 0.75 - hy) / hr) ** 2))
+        for i in range(int((2 * half - 1) // 3.2) + 1):
+            x = 16 - half + 0.3 + (j % 2) * 1.6 + i * 3.2
+            if x + 2.5 <= 16 + half + 0.5 and (i * 3 + j * 5) % 7:
+                g.rect(x, y + (i * 5 + j * 7) % 3 * 0.4, 2.5, 1.5,
+                       GARDENER_LEAVES[(i * 4 + j * 3) % len(GARDENER_LEAVES)])
+    # the tray's front face, a green steel trapezoid lit along its lip; tipped, it shows less of itself and a
+    # leaf or two slides over the lip
+    lip = 29 + t
+    g.tri((4, lip), (28, lip), (24, 37), "dgreen")
+    g.tri((4, lip), (8, 37), (24, 37), "dgreen")
+    g.tri((25, lip), (28, lip), (24, 37), "forest")
+    g.rect(4, lip, 24, 1.5, "green")
+    for k in range(t):
+        g.rect(11 + 8 * k, lip + 1.5 + k, 2.5, 1.5, ("orange", "red")[k])
+    # the handles' grips at the tray's back corners, the gloved hands on them
+    for x in (1, 28.5):
+        g.rect(x, grip + 0.5, 2.5, 1.5, "brown")
+        g.rect(x + 0.5, grip - 0.5, 2, 2.5, "lime")
+    # the stands under the tray's back corners, off the road as it tips
+    for x in (8.5, 22):
+        g.rect(x, 36.5, 1.5, 4.5 - t, "slate")
+    # the wheel in front: a black tire edge-on in a grey fork, its tread rolling
+    g.rect(13, 36.5, 1, 4.5, "lgrey")
+    g.rect(18, 36.5, 1, 4.5, "lgrey")
+    g.blob(16, 40.5, 2.5, 4.5, "ink")
+    g.rect(13, 40, 1, 1, "grey")
+    g.rect(18, 40, 1, 1, "grey")
+    px, s = raster(g), scale_of(g)
+    top, bottom = math.floor(36 * s + 0.5), math.floor(45 * s + 0.5)
+    mid = math.floor(16 * s + 0.5)
+    for y in range(top + 2, bottom - 1):
+        if (y - top - r) % 4 == 0 and px.px[y][mid]:
+            px.rect(mid - 1, y, 2, 1, "slate")
+    # head: the face, white hair at the sides, an olive canvas sun hat with a wide brim
+    face_disc(g, 16, 12.5 + b, 8, 8, "skin1", "skin2")
+    g.rect(8.5, 11 + b, 1.5, 4, "white")
+    g.rect(22, 11 + b, 1.5, 4, "lgrey")
+    g.cel(16, 7 + b, 6.5, 4.5, "olive", "dolive", "moss")
+    g.rect(9.5, 9 + b, 13, 1, "dolive")
+    g.rect(4, 10 + b, 24, 2, "olive")
+    g.rect(4, 11 + b, 24, 1, "dolive")
+    g.rect(4, 10 + b, 6, 1, "moss")
+    road.face_front(g, 16, 14 + b)
+    g.p(10, 17 + b, "pink")
+    g.p(22, 17 + b, "pink")
+    return rim(g, GARDENER_RIM)
+
+
 # ---------- every sprite at a depth step ----------
 
 def posed(q, p):
@@ -430,6 +553,9 @@ def steps(suffix, s):
     yield f"busker{suffix}", [("idle", [person(busker, q) for q in BUSKER_IDLE], BUSKER_IDLE_MS)]
     yield f"delivery-cyclist{suffix}", [("ride", [delivery_at(s, **q).outlined() for q in DELIVERY_RIDE],
                                          DELIVERY_RIDE_MS)]
+    yield f"gardener{suffix}", [("push", [own(gardener, q) for q in GARDENER_PUSH], GARDENER_PUSH_MS),
+                                ("idle", [own(gardener, q) for q in GARDENER_IDLE], road.BREATH_MS),
+                                ("cue", [own(gardener, q) for q in GARDENER_CUE], GARDENER_CUE_MS)]
 
 
 def sprites():

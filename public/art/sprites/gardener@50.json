@@ -1,0 +1,96 @@
+{ "frames": {
+   "gardener@50 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
+    "duration": 160
+   },
+   "gardener@50 1.aseprite": {
+    "frame": { "x": 24, "y": 0, "w": 24, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
+    "duration": 160
+   },
+   "gardener@50 2.aseprite": {
+    "frame": { "x": 48, "y": 0, "w": 24, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
+    "duration": 160
+   },
+   "gardener@50 3.aseprite": {
+    "frame": { "x": 72, "y": 0, "w": 24, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
+    "duration": 160
+   },
+   "gardener@50 4.aseprite": {
+    "frame": { "x": 96, "y": 0, "w": 24, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
+    "duration": 400
+   },
+   "gardener@50 5.aseprite": {
+    "frame": { "x": 120, "y": 0, "w": 24, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
+    "duration": 400
+   },
+   "gardener@50 6.aseprite": {
+    "frame": { "x": 144, "y": 0, "w": 24, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
+    "duration": 200
+   },
+   "gardener@50 7.aseprite": {
+    "frame": { "x": 168, "y": 0, "w": 24, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
+    "duration": 200
+   },
+   "gardener@50 8.aseprite": {
+    "frame": { "x": 192, "y": 0, "w": 24, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
+    "duration": 200
+   },
+   "gardener@50 9.aseprite": {
+    "frame": { "x": 216, "y": 0, "w": 24, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
+    "duration": 200
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "gardener@50.png",
+  "format": "RGBA8888",
+  "size": { "w": 240, "h": 36 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "push", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "idle", "from": 4, "to": 5, "direction": "forward" },
+   { "name": "cue", "from": 6, "to": 9, "direction": "forward" }
+  ]
+ }
+}
