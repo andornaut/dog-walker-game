@@ -7,6 +7,9 @@ import {
   CELEBRATION_LAYOUT as LAYOUT,
   GREETING_FIT,
   greetingLineTops,
+  infoItems,
+  laidInfoLine,
+  newWalkerRows,
 } from "../hud/celebrationLayout";
 import {
   type CelebrationText,
@@ -102,14 +105,13 @@ export class ZoneCelebrationScene extends Scene {
     });
     if (text.kind === "zoneDone") {
       this.addPlate(text);
-      this.addButton(version, text.button, finish);
+      this.addButton(version.button, text.button, finish);
       // A tap anywhere else on the dim, or on the page beside the game, moves on too.
       const area = { covered: [version.button], dim: LAYOUT.dim };
       listenOutsideTap(this, () => area, finish);
       return;
     }
-    this.addBubble(text);
-    this.addButton(version, text.button, finish);
+    this.addButton(this.addBubble(text), text.button, finish);
   }
 
   // The title in font-display at 2x, or smaller where it would not fit the screen, and the
@@ -178,19 +180,23 @@ export class ZoneCelebrationScene extends Scene {
   }
 
   // The walker's line in a speech bubble whose tail points up at them, a dotted rule, and
-  // their agility and perk under it.
-  private addBubble(text: NewWalkerText): void {
+  // their agility over their perk under it, the bubble sized to its lines. Returns the button's
+  // place under the bubble.
+  private addBubble(text: NewWalkerText): typeof LAYOUT.newWalker.button {
     const { centreX, newWalker } = LAYOUT;
-    const { bubble, greeting, rule, tail } = newWalker;
-    addPanel(this, bubble, "ui-quip");
-    if (this.textures.exists(ART.tailUp)) {
-      this.add.image(tail.x, tail.y, ART.tailUp).setOrigin(0);
-    }
-    const { lines, style } = withProbe(this, BODY_TEXT, (probe) => {
+    const { greeting, tail } = newWalker;
+    const fitted = withProbe(this, BODY_TEXT, (probe) => {
       setPixelText(probe, text.greeting);
       return fitPixelText(probe, GREETING_FIT, 0, 0);
     });
-    const tops = greetingLineTops(pixelFontMetrics(this, "body"), style.scale, lines.length);
+    const { lines, style } = fitted;
+    const body = pixelFontMetrics(this, "body");
+    const rows = newWalkerRows(body, text.info.length, fitted);
+    addPanel(this, rows.bubble, "ui-quip");
+    if (this.textures.exists(ART.tailUp)) {
+      this.add.image(tail.x, tail.y, ART.tailUp).setOrigin(0);
+    }
+    const tops = greetingLineTops(body, style.scale, lines.length);
     lines.forEach((line, i) => {
       const label = addPixelText(this, centreX, 0, line, {
         ...BODY_TEXT,
@@ -199,45 +205,40 @@ export class ZoneCelebrationScene extends Scene {
       });
       atLineTop(label.setLetterSpacing(style.letterSpacing), tops[i] ?? greeting.top);
     });
+    const { rule } = rows;
     const dots = this.add.graphics();
     for (let x = rule.fromX; x <= rule.toX; x += rule.step) {
       fillRect(dots, PALETTE.tan, { height: 1, width: 1, x, y: rule.y });
     }
-    this.addInfo(text.info);
+    text.info.forEach((parts, i) => {
+      const row = rows.info[i];
+      if (row !== undefined) {
+        this.addInfoLine(row, parts);
+      }
+    });
+    return rows.button;
   }
 
-  // The agility and perk row, centred: each word after its icon, if it has one; the gaps from
-  // the layout.
-  private addInfo(parts: readonly LinePart[]): void {
-    const { centreX, newWalker } = LAYOUT;
-    const { iconGap, iconY, itemGap, y } = newWalker.info;
-    const items = parts.flatMap((part) => {
-      const word = part.text.trim();
-      const label =
-        word === ""
-          ? []
-          : [{ gap: itemGap, item: atLineTop(addPixelText(this, 0, 0, word, BODY_TEXT), y) }];
-      if (part.kind !== "icon" || !this.textures.exists(part.icon)) {
-        return label;
-      }
-      return [{ gap: iconGap, item: this.add.image(0, iconY, part.icon).setOrigin(0) }, ...label];
-    });
-    const last = items.at(-1);
-    const total = items.reduce(
-      (sum, entry) => sum + entry.item.displayWidth + (entry === last ? 0 : entry.gap),
-      0,
+  // An info line, centred: each word after its icon, if it has one; the gaps from the layout.
+  private addInfoLine(row: { iconY: number; y: number }, parts: readonly LinePart[]): void {
+    const items = infoItems(parts).filter(
+      (item) => item.kind === "text" || this.textures.exists(item.icon),
     );
-    let x = Math.round(centreX - total / 2);
-    for (const { gap, item } of items) {
-      item.setX(x);
-      x += item.displayWidth + gap;
-    }
+    const objects: (GameObjects.BitmapText | GameObjects.Image)[] = items.map((item) =>
+      item.kind === "text"
+        ? atLineTop(addPixelText(this, 0, 0, item.text, BODY_TEXT), row.y)
+        : this.add.image(0, row.iconY, item.icon).setOrigin(0),
+    );
+    const widths = new Map(items.map((item, i) => [item, objects[i]?.displayWidth ?? 0]));
+    const laid = laidInfoLine((item) => widths.get(item) ?? 0, items);
+    const left = Math.round(LAYOUT.centreX - laid.width / 2);
+    objects.forEach((object, i) => object.setX(left + (laid.xs[i] ?? 0)));
   }
 
   // The version's button, with the key that presses it in its left end once a key has been
   // pressed.
-  private addButton(version: Version, label: string, onTap: () => void): void {
-    const button = addMenuButton(this, version.button, label, {
+  private addButton(place: Version["button"], label: string, onTap: () => void): void {
+    const button = addMenuButton(this, place, label, {
       available: true,
       primary: true,
       ...(keyNumbersShown() ? { keyNumber: "1" } : {}),

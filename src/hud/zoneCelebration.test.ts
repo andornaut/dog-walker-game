@@ -129,12 +129,13 @@ describe("celebrationText", () => {
       }
       const percent = agilityPercent(agility);
       const perkName = gameData.walkerPerks[perk].name;
+      const perkLine = fillNames(text.newWalker.perk, { perk: perkName });
       const filled =
         percent === null
-          ? fillNames(text.newWalker.infoBase, { perk: perkName })
-          : fillNames(text.newWalker.info, { agility: percent, perk: perkName });
-      expect(shown.info.map((part) => part.text).join("")).toBe(filled);
-      expect(shown.info.filter((part) => part.kind === "icon")).toEqual([
+          ? [perkLine]
+          : [fillNames(text.newWalker.agility, { agility: percent }), perkLine];
+      expect(shown.info.map((line) => line.map((part) => part.text).join(""))).toEqual(filled);
+      expect(shown.info.flat().filter((part) => part.kind === "icon")).toEqual([
         { icon: perkIconKey(perk), kind: "icon", text: perkName },
       ]);
     },

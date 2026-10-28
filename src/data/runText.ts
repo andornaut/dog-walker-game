@@ -54,9 +54,9 @@ export const RUN_TEXT = {
   lead: "Lead",
   lowHearts: "{owner} has 1♥ left!",
   newWalker: {
+    agility: "{agility} lane change speed",
     button: "Welcome!",
-    info: "{agility} lane change speed · {perk}",
-    infoBase: "{perk}",
+    perk: "{perk}",
     subtitle: "{walker} joins you!",
     title: "New walker!",
   },

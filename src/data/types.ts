@@ -890,12 +890,12 @@ export interface RunText {
   readonly seconds: string;
   // The zone celebration as a walker joins, the first time a walk finishes the zone that
   // unlocks them: its headline (a big title of about 14 characters over a subtitle of about
-  // 28), their agility and perk under their greeting (their perk alone in infoBase for a walker
-  // at the base lane-change speed), and the button.
+  // 28), their agility over their perk under their greeting (no agility line for a walker at
+  // the base lane-change speed), and the button.
   readonly newWalker: {
+    readonly agility: string;
     readonly button: string;
-    readonly info: string;
-    readonly infoBase: string;
+    readonly perk: string;
     readonly subtitle: string;
     readonly title: string;
   };

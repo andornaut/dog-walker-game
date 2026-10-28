@@ -88,9 +88,9 @@ export type CelebrationText =
   | {
       readonly button: string;
       readonly greeting: string;
-      // The walker's own agility against the base, left out at the base, and their perk after its
-      // icon.
-      readonly info: readonly LinePart[];
+      // The info lines, each centred: the walker's own agility against the base, left out at the
+      // base, over their perk after its icon.
+      readonly info: readonly (readonly LinePart[])[];
       readonly kind: "newWalker";
       readonly subtitle: string;
       readonly title: string;
@@ -137,10 +137,11 @@ export function celebrationText(
     text: data.walkerPerks[perk].name,
   };
   // A walker at the base lane-change speed shows their perk alone.
+  const perkLine = lineParts(words.perk, { perk: perkPart });
   const info =
     percent === null
-      ? lineParts(words.infoBase, { perk: perkPart })
-      : lineParts(words.info, { agility: { kind: "text", text: percent }, perk: perkPart });
+      ? [perkLine]
+      : [lineParts(words.agility, { agility: { kind: "text", text: percent } }), perkLine];
   return {
     button: words.button,
     greeting: data.walkers[celebration.walker].greeting,

@@ -45,8 +45,8 @@ export const RUN_TEXT_FIELDS = {
   },
   lowHearts: ["owner"],
   newWalker: {
-    info: ["agility", "perk"],
-    infoBase: ["perk"],
+    agility: ["agility"],
+    perk: ["perk"],
     subtitle: ["walker"],
   },
   seconds: ["seconds"],

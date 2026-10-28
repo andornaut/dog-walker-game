@@ -1329,7 +1329,7 @@
           "y": 166
         },
         "bubble": {
-          "height": 76,
+          "height": 96,
           "width": 312,
           "x": 24,
           "y": 316
@@ -1338,7 +1338,7 @@
           "height": 44,
           "width": 264,
           "x": 48,
-          "y": 400
+          "y": 420
         },
         "greeting": {
           "lines": 2,
@@ -1346,10 +1346,14 @@
           "top": 320
         },
         "info": {
+          "iconDrop": 1,
           "iconGap": 4,
-          "iconY": 367,
           "itemGap": 10,
-          "y": 366
+          "maxWidth": 296,
+          "y": [
+            366,
+            386
+          ]
         },
         "rule": {
           "fromX": 36,
