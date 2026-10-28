@@ -446,7 +446,7 @@ describe("the dog cards", () => {
     );
   });
 
-  it.each([DOG_CARD.hearts.perRow, mostHearts])(
+  it.each([...new Set([DOG_CARD.hearts.perRow, mostHearts])])(
     "keeps every heart of %i inside the card, under the owner's photo and clear of LEAD",
     (max) => {
       const hit = heartRects(max).filter(
