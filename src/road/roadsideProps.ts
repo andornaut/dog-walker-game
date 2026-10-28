@@ -48,8 +48,7 @@ export interface RoadsideCurb {
 }
 
 // shadowColour is the ground shadow under the zone's free-standing props, a hex RGB string: its
-// ground one ramp step darker.
-// A zone with no curb has no curb props.
+// ground one ramp step darker. A zone with no curb has no curb props.
 export interface RoadsideZone {
   readonly curb?: RoadsideCurb;
   readonly gaps: readonly (readonly RoadsideProp[])[];

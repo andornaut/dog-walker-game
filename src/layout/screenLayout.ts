@@ -17,18 +17,18 @@ export interface ScreenConfig {
   zoneProgressHeight: number;
 }
 
-// The whole screen (screen), and top to bottom, each across the full width: the walk bar
-// (topBar), the backdrop band, the road, the row of dog cards and the neighbourhood's progress
-// line (zoneProgress) on the screen's last zoneProgressHeight rows. dogSlots are the cards,
-// dogCardHeight tall on the row's bottom rows. roadView is the road as drawn, verges included;
-// road is its lanes, centred in it, which the walk, the lanes and the projection use. approach
-// is the band's bottom rows, where the backdrop paints the road's approach to its cross street:
-// the moving road surface is drawn over them, beside the backdrop's own verges. junction is the
-// rows over the approach up to the cross street, where the road passes between the near corners:
-// the moving road surface is drawn over them, and the corners stay the backdrop's. rasterView is
-// the junction, the approach and roadView together, which the road raster draws. walkView is the backdrop
-// band and roadView together, everything between the walk bar and the dog cards, which a card
-// or the pause menu dims.
+// The whole screen (screen), and top to bottom, each across the full width: the walk bar (topBar),
+// the backdrop band, the road, the row of dog cards and the neighbourhood's progress line
+// (zoneProgress) on the screen's last zoneProgressHeight rows. dogSlots are the cards,
+// dogCardHeight tall on the row's bottom rows. roadView is the road as drawn, verges included; road
+// is its lanes, centred in it, which the walk, the lanes and the projection use. approach is the
+// band's bottom rows, where the backdrop paints the road's approach to its cross street: the moving
+// road surface is drawn over them, beside the backdrop's own verges. junction is the rows over the
+// approach up to the cross street, where the road passes between the near corners: the moving road
+// surface is drawn over them, and the corners stay the backdrop's. rasterView is the junction, the
+// approach and roadView together, which the road raster draws. walkView is the backdrop band and
+// roadView together, everything between the walk bar and the dog cards, which a card or the pause
+// menu dims.
 export interface ScreenLayout {
   approach: Rect;
   backdrop: Rect;

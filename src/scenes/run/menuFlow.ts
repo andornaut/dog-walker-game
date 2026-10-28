@@ -25,9 +25,9 @@ interface MenuFlowHost {
 // explanation's detail card, which the input holds.
 type MenuPause = Omit<RunPause, "hitStop" | "hold">;
 
-// What pauses the walk over the run scene: a card, the zone celebration, the pause menu or the
-// Home question, and the page out of view or focus. pause()
-// reports all of them, and walkPaused decides from it, so each new one pauses the walk.
+// What pauses the walk over the run scene: a card, the zone celebration, the pause menu or the Home
+// question, and the page out of view or focus. pause() reports all of them, and walkPaused decides
+// from it, so each new one pauses the walk.
 export class MenuFlow {
   private blurred = false;
   private cardView: CardView | undefined;

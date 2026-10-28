@@ -8,12 +8,11 @@ import type { SaveContext } from "./load";
 import type { Checkpoint, SaveDocument, Settings } from "./schema";
 import type { SaveStore, StoreLoadResult } from "./storage";
 
-// "unavailable" once storage could not be read, or while the last write failed: play goes on
-// with the save in memory, and the home screen says progress won't be saved. A later write
-// that succeeds makes it "available" again; a failed read lasts the session, since the store
-// then writes nothing. "newer" when a later version of
-// the game wrote the stored save: play goes on with the save in memory, nothing is written for
-// the session, and the home screen says to reload.
+// "unavailable" once storage could not be read, or while the last write failed: play goes on with
+// the save in memory, and the home screen says progress won't be saved. A later write that succeeds
+// makes it "available" again; a failed read lasts the session, since the store then writes nothing.
+// "newer" when a later version of the game wrote the stored save: play goes on with the save in
+// memory, nothing is written for the session, and the home screen says to reload.
 export type StorageState = "available" | "newer" | "unavailable";
 
 // What the end screen shows beyond the saved stats: the achievements the run earned, whether

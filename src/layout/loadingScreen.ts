@@ -22,9 +22,9 @@ export const LOADING_WALKER = {
 };
 
 // Boot loads what the home screen needs over the network, then processes it: each sprite's
-// animations and metrics, the placeholders and the fallback font. The rest loads behind the
-// home screen, off the bar. Each phase fills its share of the
-// bar in proportion to measured boots, where processing takes under a tenth of the time.
+// animations and metrics, the placeholders and the fallback font. The rest loads behind the home
+// screen, off the bar. Each phase fills its share of the bar in proportion to measured boots, where
+// processing takes under a tenth of the time.
 type BootPhase = "network" | "processing";
 
 const PHASES: Readonly<Record<BootPhase, { from: number; to: number }>> = {

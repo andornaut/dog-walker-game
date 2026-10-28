@@ -46,11 +46,10 @@ interface GeneratedFilesPluginOptions {
 }
 
 // On the dev server, keeps the committed generated files in step as their sources change:
-// public/art/manifest.json with the art files, and shared/export/ with src/, shared/'s tables
-// and the fonts' .fnt files, which the export reads. The game's modules
-// load through the server, never into this config, so editing a value file still updates the
-// game without a restart. A build writes the art manifest in atlasPlugin and shared/export/ in
-// npm's prebuild step.
+// public/art/manifest.json with the art files, and shared/export/ with src/, shared/'s tables and
+// the fonts' .fnt files, which the export reads. The game's modules load through the server, never
+// into this config, so editing a value file still updates the game without a restart. A build
+// writes the art manifest in atlasPlugin and shared/export/ in npm's prebuild step.
 export function generatedFilesPlugin({ repoRoot }: GeneratedFilesPluginOptions): Plugin {
   return {
     apply: (_config, { command, mode }) => command === "serve" && mode !== "test",

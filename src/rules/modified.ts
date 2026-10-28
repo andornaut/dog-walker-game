@@ -59,9 +59,8 @@ export function modifierCausesOf(change: Change): ModifierCause[] {
   return change.causes.filter((cause): cause is ModifierCause => cause.kind === "modifier");
 }
 
-// A heart or money change's modified value: before is the sum of its causes that are no
-// modifier or limit, such as its base. Null when no modifier
-// changed it.
+// A heart or money change's modified value: before is the sum of its causes that are no modifier or
+// limit, such as its base. Null when no modifier changed it.
 export function changeModified(change: Change): ModifiedValue | null {
   const by = modifierCausesOf(change);
   const before = change.causes.reduce(

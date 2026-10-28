@@ -24,11 +24,10 @@ const NO_ART: readonly string[] = [];
 // this much to their depth, so they stay under the road.
 const BAND_ROW_DEPTH = 1 / 10000;
 
-// The ambient movers' sprites, one per slot, made once and reused. With reduced motion none
-// is shown. A mover on the cross street is drawn at its row's scale over the backdrop, and one
-// in the sky at full size;
-// one beside the road stands through the projection like the road's sprites, cut off at the
-// juncture.
+// The ambient movers' sprites, one per slot, made once and reused. With reduced motion none is
+// shown. A mover on the cross street is drawn at its row's scale over the backdrop, and one in the
+// sky at full size; one beside the road stands through the projection like the road's sprites, cut
+// off at the juncture.
 export class AmbientView {
   private readonly arts = new Map<string, readonly string[]>();
   private readonly deps: AmbientDeps;

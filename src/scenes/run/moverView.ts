@@ -72,21 +72,20 @@ export function moverBodyKey(scene: Scene, kind: EncounterId | MinorObstacleId):
   return moverBodyArt(gameData, (key) => scene.textures.exists(key), kind);
 }
 
-// Each position is the frame's blended one, rounded to whole pixels, and the body is cut off at
-// the juncture; a cue shows only once wholly below it. A mover stands on the road through the
+// Each position is the frame's blended one, rounded to whole pixels, and the body is cut off at the
+// juncture; a cue shows only once wholly below it. A mover stands on the road through the
 // projection, across the middle of the lanes it is drawn over (drawnLanes), while it is solid,
 // sized by showAtDepth on its body part's feet, mirrored while it faces left (facesLeft), playing
 // the tag moverBodyTag picks, in its cue, dive or merge pose while it holds one (the cue and the
 // dive played once through, not looped), or prizeMoverTag for a lucky find. Before a dart or
-// in-lane move only its cue shows, at 1x, each part only while its art is loaded:
-// a sign at the road's edge on its row with the arrow pointing across, or a sign at the top of
-// its lanes with the arrow pointing down or up. A crosser with an idle tag also stands at the
-// edge, playing it, while it waits there before its cue and during its cue. A crosser that has
-// stopped plays its idle tag if it has one, and otherwise stands on the first frame of the tag it
-// would play. A stepper stands on the road throughout, with the wander mark over it before each
-// step. A lucky find shows no cue. Its other sprites,
-// after the wander mark, such as a skunk's cloud, go with its body wherever it shows, standing
-// as an obstacle's do.
+// in-lane move only its cue shows, at 1x, each part only while its art is loaded: a sign at the
+// road's edge on its row with the arrow pointing across, or a sign at the top of its lanes with the
+// arrow pointing down or up. A crosser with an idle tag also stands at the edge, playing it, while
+// it waits there before its cue and during its cue. A crosser that has stopped plays its idle tag
+// if it has one, and otherwise stands on the first frame of the tag it would play. A stepper stands
+// on the road throughout, with the wander mark over it before each step. A lucky find shows no cue.
+// Its other sprites, after the wander mark, such as a skunk's cloud, go with its body wherever it
+// shows, standing as an obstacle's do.
 export function drawMover(
   item: MoverItemView,
   view: ItemView,
