@@ -306,14 +306,19 @@ describe("run, world and walkers", () => {
     expect(offenders).toEqual([]);
   });
 
-  // So the neighbourhoods stay distinct, no mover or plain obstacle appears in more than 3.
-  it.each(Object.keys(minorObstacles))("weighs %s above 0 in at most 3 zones", (id) => {
-    const weighted = world.zones.flatMap((each) =>
-      ((each.weights.minorObstacles as Readonly<Record<string, number>>)[id] ?? 0) > 0
-        ? [each.id]
-        : [],
-    );
-    expect(weighted.length, weighted.join(", ")).toBeLessThanOrEqual(3);
+  // So the neighbourhoods stay distinct, no mover or plain obstacle appears in more than 3. One
+  // test lists every obstacle over the limit, with the zones that weigh it.
+  it("weighs every mover and plain obstacle above 0 in at most 3 zones", () => {
+    const over = Object.keys(minorObstacles).flatMap((id) => {
+      const weighted = world.zones.flatMap((each) =>
+        ((each.weights.minorObstacles as Readonly<Record<string, number>>)[id] ?? 0) > 0
+          ? [each.id]
+          : [],
+      );
+      return weighted.length > 3 ? [`${id}: ${weighted.join(", ")}`] : [];
+    });
+    expect(Object.keys(minorObstacles).length).toBeGreaterThan(0);
+    expect(over).toEqual([]);
   });
 
   // Every zone weighs obstacles that never move at each width, 1, 2 and 3 lanes, so a fixed one
