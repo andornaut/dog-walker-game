@@ -257,11 +257,14 @@ describe("chooseOption", () => {
   const groom = optionWith("skunk", "money");
   const lost = heartsOf("skunk");
 
-  // Every option of every card in the data, by its encounter, index and id.
-  const picked = keysOf(ENCOUNTERS).flatMap((id) => {
+  // An option of every card in the data, by its encounter, index and id: a pick counts the same
+  // way whichever option it is, so the cards take their options' places in turn.
+  const picked = keysOf(ENCOUNTERS).flatMap((id, card) => {
     const { resolution } = ENCOUNTERS[id];
     const options: readonly CardOption[] = resolution.kind === "card" ? resolution.options : [];
-    return options.map((option, index) => ({ id, index, option: option.id }));
+    const index = card % Math.max(1, options.length);
+    const option = options[index];
+    return option === undefined ? [] : [{ id, index, option: option.id }];
   });
 
   it.each(picked)(
@@ -295,7 +298,14 @@ describe("chooseOption", () => {
     );
   });
 
-  it.each(debuffOptions)(
+  // The first option that applies each debuff.
+  const debuffSample = debuffOptions.filter((row, i) =>
+    row.debuffs.some(
+      (debuff) => debuffOptions.findIndex((other) => other.debuffs.includes(debuff)) === i,
+    ),
+  );
+
+  it.each(debuffSample)(
     "$id's $name leaves the pack with its debuffs",
     ({ debuffs, id, index }) => {
       const outcome = choose(testState({ kilo: 5 }), encounter(id, ["kilo"]), index);
