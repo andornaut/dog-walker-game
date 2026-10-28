@@ -98,7 +98,7 @@ export const HOME_TEXT = {
     tabs: { dogs: "Dogs", gear: "Gear" },
     title: "Pet shop",
   },
-  slotBought: "{slot} is open. Room for one more dog!",
+  slotBought: "{slot} is open.",
   slotSign: "Walk more dogs!",
   startLoading: "Grabbing leashes...",
   startWalk: "Start walk",

@@ -4,7 +4,7 @@ import type { Hint } from "./types";
 
 export const HINTS = {
   card: {
-    text: "Each option shows its cost. Hold one for details.",
+    text: "Hold an option for details.",
     trigger: { kind: "card" },
   },
   drag: {
@@ -16,7 +16,7 @@ export const HINTS = {
     trigger: { kind: "firedOwner" },
   },
   fork: {
-    text: "Pick a path: each brings an upgrade.",
+    text: "Easiest path left, hardest right.",
     trigger: { kind: "fork" },
   },
   homeButton: {
@@ -56,7 +56,7 @@ export const HINTS = {
     trigger: { kind: "pullLanded" },
   },
   tip: {
-    text: "Each tip is $1. Grab all you can!",
+    text: "Tips are cash on top of pay.",
     trigger: { kind: "tip" },
   },
   treat: {

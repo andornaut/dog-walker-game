@@ -18,8 +18,8 @@ export const HELP_PAGES = [
   {
     art: "pickups",
     body:
-      "Tips are {tip} each, on top of each dog's pay, so grab what you can. " +
-      "A dog that reaches a treat cheers its owner: +{treatHearts}♥. " +
+      "Tips are {tip} each, on top of each dog's pay. " +
+      "A treat gives its dog's owner +{treatHearts}♥. " +
       "Aim for a lost wallet or a friendly neighbour, and grab dropped gear: " +
       "it works for the rest of the walk.",
     title: "Tips, treats and finds",
@@ -46,7 +46,7 @@ export const HELP_PAGES = [
   {
     art: "pulls",
     body:
-      "Every dog loves squirrels. Touching one does nothing, but a bubble and a line to it mean a dog is straining. " +
+      "Touching a squirrel does nothing, but a bubble and a line to it mean a dog is straining. " +
       "Steer away and the pull is off; wait and the pack lurches one lane toward it. " +
       "A pull never drags you into a bump too close to dodge.",
     title: "Watch for pulls",

@@ -38,7 +38,7 @@ export const RUN_TEXT = {
   },
   fired: "FIRED!",
   firedBy: "{owner} fired you!",
-  forgiven: "♥ Oopsie! All good",
+  forgiven: "Forgiven!",
   foundGear: "{gear} (found)",
   fullPackHome: "Walk bonus! +{amount}",
   homeQuestion: {
