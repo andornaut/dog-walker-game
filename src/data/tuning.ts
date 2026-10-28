@@ -108,8 +108,8 @@ export const TUNING = {
     },
     // The Big screen promo's Buy the merch.
     promoMerch: 20,
-    // What a bump costs while Spotlight lasts, instead of hearts.
-    spotlightBump: 10,
+    // What a bump costs in cash while Spotlight lasts, on top of its hearts.
+    spotlightBump: 20,
     // The cash every walk starts with, before gear.
     startPurse: 0,
     thiefLetGo: 20,
@@ -160,9 +160,9 @@ export const TUNING = {
     // Each in-lane mover's speed is its kind's times a factor drawn per mover up to this far from
     // 1 either way.
     moverSpeedJitter: 0.25,
-    // How fast the pack changes lanes while Muddy, as a factor of its speed: 0.5 makes each lane
-    // change take twice as long.
-    muddyLaneSlow: 0.5,
+    // How fast the pack changes lanes while Muddy, as a factor of its speed: 0.33 makes each lane
+    // change take about three times as long.
+    muddyLaneSlow: 0.33,
     // How long a debuff lasts while Ada's Quick recovery walks.
     quickRecoveryDebuffFactor: 0.5,
     // Running shoes add this much to the walker's agility.

@@ -10,7 +10,7 @@
         "id": "capybara",
         "kind": "encounter"
       },
-      "text": "Muddy: lane changes 50% slower for 30s",
+      "text": "Muddy: lane changes 67% slower for 30s",
       "title": "Escaped capybara"
     },
     {
@@ -88,7 +88,7 @@
         "id": "droppedCone",
         "kind": "encounter"
       },
-      "text": "Muddy: lane changes 50% slower for 30s",
+      "text": "Muddy: lane changes 67% slower for 30s",
       "title": "Dropped ice cream"
     },
     {
@@ -231,7 +231,7 @@
         "id": "promoTeam",
         "kind": "encounter"
       },
-      "text": "Spotlight: bumps also cost $10 for 30s",
+      "text": "Spotlight: bumps also cost $20 for 30s",
       "title": "Big screen promo"
     },
     {
@@ -348,7 +348,7 @@
         "id": "weddingShoot",
         "kind": "encounter"
       },
-      "text": "Spotlight: bumps also cost $10 for 30s",
+      "text": "Spotlight: bumps also cost $20 for 30s",
       "title": "Wedding photo shoot"
     },
     {
@@ -2801,7 +2801,7 @@
         "whistle": 3000
       },
       "promoMerch": 20,
-      "spotlightBump": 10,
+      "spotlightBump": 20,
       "startPurse": 0,
       "thiefLetGo": 20,
       "tip": 1,
@@ -2824,7 +2824,7 @@
       "largeDogAgility": -0.1,
       "minPackAgility": 0.9,
       "moverSpeedJitter": 0.25,
-      "muddyLaneSlow": 0.5,
+      "muddyLaneSlow": 0.33,
       "quickRecoveryDebuffFactor": 0.5,
       "runningShoesAgility": 0.5,
       "rushHourObstacles": 1.5,
@@ -3147,7 +3147,7 @@
           "porchCat": 1,
           "promoTeam": 0,
           "puddle": 1,
-          "skunk": 2.2,
+          "skunk": 1.8,
           "squirrel": 1,
           "thief": 0,
           "weddingShoot": 0
@@ -3260,7 +3260,7 @@
           "porchCat": 0,
           "promoTeam": 0,
           "puddle": 2,
-          "skunk": 2.2,
+          "skunk": 1.8,
           "squirrel": 1,
           "thief": 0,
           "weddingShoot": 0
@@ -3486,7 +3486,7 @@
           "porchCat": 0,
           "promoTeam": 0,
           "puddle": 1,
-          "skunk": 2.2,
+          "skunk": 1.8,
           "squirrel": 1,
           "thief": 2.2,
           "weddingShoot": 0
@@ -3599,7 +3599,7 @@
           "porchCat": 0,
           "promoTeam": 0,
           "puddle": 3,
-          "skunk": 2.2,
+          "skunk": 1.8,
           "squirrel": 1,
           "thief": 1.1,
           "weddingShoot": 1.5
