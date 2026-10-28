@@ -30,6 +30,9 @@ roadside-ice-cream-stand 90x126   a foam beach kiosk under a flat turquoise roof
 roadside-leuty           96x156   the Leuty Lifeguard Station on driftwood stilts
 roadside-love-lock       78x90    the Distillery's red steel heart of padlocks on a post
 roadside-mural-wall      120x96   a Kensington brick wall between piers, painted with a dog's face and tags
+roadside-shopfront-*     108x96   a Kensington vintage shop: a painted wall, a sign board, a striped awning and a
+                                  window onto a rail of second-hand clothes; ochre (red awning, forest sign) or
+                                  violet (dturq awning, navy sign)
 roadside-street-lamp     60x180   a downtown street light, an arm each way, lit gold beneath
 roadside-transit-stop    42x150   a TTC stop pole with its sign and a timetable box
 roadside-tree-maple      114x156  a street maple in lobes over a trunk
@@ -39,10 +42,12 @@ curb-bike-ring           24x48    Toronto's post-and-ring bike stand
 curb-bollard             18x39    a cast-iron heritage bollard with a gold collar
 curb-hydrant             27x39    a red Toronto hydrant under a silver cap
 curb-life-ring           27x51    a lifebuoy on a driftwood post
+curb-mailbox             30x54    a red Canada Post letter box under a dome, tagged in lime and white
 curb-news-box            27x45    a cobalt newspaper box on legs
 curb-pay-station         21x51    a pay-and-display machine under a P sign
 curb-rope-posts          36x30    two driftwood posts with a rope between
 curb-urn                 33x42    a cast-iron garden urn heaped with geraniums
+curb-utility-box         36x48    a traffic signal cabinet painted in mural bands under a pink heart
 
 Every prop has one tag, `idle`: one frame of 1000ms, no motion. The ground row is the last opaque
 row; the frame keeps a clear ring for the outline. Outlines are road_edge; there is no light rim
@@ -492,6 +497,59 @@ def mural_wall():
     return w, h, draw
 
 
+def shopfront(wall, awning, sign, rail):
+    """A Kensington vintage shop seen from the street: a painted wall under a walnut coping, a sign board
+    lettered in cream, a striped awning with a scalloped hem, a display window onto a rail of second-hand
+    clothes on hangers (shirts and dresses in the rail's colours, behind the glass) and a glazed door with an
+    OPEN card, on a stone step. The clothes hang inside the window, never out on the sidewalk like the
+    clothing rack, and no one stands in it."""
+    w, h = 72, 64
+
+    def draw(g, f=0):
+        base = h - 2
+        walls(g, 4, 64, 6, base - 2, wall)
+        g.rect(3, 3, 66, 3, "walnut")
+        g.rect(3, 3, 66, 1, "bark")
+        g.rect(8, 9, 56, 8, sign)
+        g.rect(8, 16, 56, 1, dk(sign))
+        for i, x in enumerate(range(12, 60, 4)):
+            g.rect(x, 11, 2, 4 if i % 4 else 3, "cream")
+        for x in range(6, 66, 6):
+            g.rect(x, 19, 3, 7, awning)
+            g.rect(x + 3, 19, 3, 7, "cream")
+            g.ell(x + 1.5, 26, 1.5, 1.5, awning)
+            g.ell(x + 4.5, 26, 1.5, 1.5, "cream")
+        g.rect(6, 19, 60, 1, dk(awning))
+        # the window: glass with a glint, the rail and its clothes, a cream sill
+        g.rect(7, 29, 38, base - 33, "coal")
+        g.rect(8, 30, 36, base - 35, "dlake")
+        for k in range(6):
+            g.rect(38 - k, 31 + 2 * k, 1, 2, "lake")
+        g.rect(9, 33, 34, 1, "lgrey")
+        for i, (x, c) in enumerate(zip(range(10, 42, 5), rail)):
+            g.rect(x + 1, 34, 1, 2, "lgrey")
+            if i % 2:
+                g.tri((x + 1, 36), (x - 0.5, 49 + i % 3), (x + 4.5, 49 + i % 3), c)
+                g.rect(x + 1, 36, 2, 2, c)
+            else:
+                g.rect(x - 0.5, 36, 5, 2, c)
+                g.rect(x, 36, 4, 9 + (i % 3) * 2, c)
+                g.rect(x + 3, 38, 1, 7 + (i % 3) * 2, dk(c))
+        g.rect(6, base - 5, 40, 2, "cream")
+        g.rect(6, base - 4, 40, 1, "tan")
+        # the door: a coal frame, glass with an OPEN card, a gold knob
+        g.rect(50, 30, 12, base - 32, "coal")
+        g.rect(52, 32, 8, 13, "dlake")
+        g.rect(53, 33, 1, 4, "lake")
+        g.rect(54, 38, 5, 3, "cream")
+        g.rect(55, 39, 3, 1, "red")
+        g.rect(58, 47, 1, 2, "gold")
+        g.rect(2, base - 2, 68, 3, "stone")
+        g.rect(2, base - 2, 68, 1, "lgrey")
+        g.rect(66, base - 2, 4, 3, "dstone")
+    return w, h, draw
+
+
 def leuty():
     """The Leuty Lifeguard Station: a white clapboard house on driftwood stilts under a red hipped roof,
     a windowed lookout on top under its own red cap, the flag up."""
@@ -824,6 +882,70 @@ def life_ring():
     return w, h, draw
 
 
+def utility_box():
+    """A traffic signal cabinet painted by a local artist, as Toronto paints its utility boxes: a grey steel
+    cabinet under an ash lid, its door painted in the mural walls' diagonal bands under a pink heart outlined
+    in white and white tags, a coal lock on its right edge, on a stone footing. Flat-topped and boxy on its
+    footing, unlike the round green trash can."""
+    w, h = 24, 32
+    x0, x1, top = 4, 20, 7
+
+    def bands(x, y):
+        if x0 + 1 <= x < x1 - 3 and top + 2 <= y < h - 6:
+            return MURAL[int((x + y) // 4) % len(MURAL)]
+        return None
+
+    def draw(g, f=0):
+        base = h - 2
+        g.rect(2, base - 2, 20, 3, "stone")
+        g.rect(2, base - 2, 20, 1, "lgrey")
+        g.rect(19, base - 2, 3, 3, "dstone")
+        g.rect(x0, top, x1 - x0, base - 2 - top, "lgrey")
+        g.rect(x1 - 3, top, 3, base - 2 - top, "grey")
+        field(g, bands)
+        for r, tip, c in ((2.6, 21.5, "white"), (1.6, 19.8, "pink")):
+            g.ell(9, 15, r, r, c)
+            g.ell(12, 15, r, r, c)
+            g.tri((9 - r, 15.5), (12 + r, 15.5), (10.5, tip), c)
+        for x, y in ((7, 23), (11, 22)):
+            g.rect(x, y, 3, 1, "white")
+            g.rect(x + 1, y + 1, 1, 2, "white")
+        g.rect(15, 18, 1, 3, "coal")
+        g.rect(x0 - 1, top - 3, x1 - x0 + 2, 3, "ash")
+        g.rect(x0 - 1, top - 3, x1 - x0 + 2, 1, "grey")
+        g.rect(x1 - 1, top - 3, 2, 3, "shale")
+    return w, h, draw
+
+
+def mailbox():
+    """A Canada Post street letter box: a red box under a round dome on a coal plinth, a dark slot under the
+    dome and the white post badge with its red flag, sprayed with a lime tag and a white crown. One box with no
+    window, unlike the newspaper boxes."""
+    w, h = 20, 36
+
+    def draw(g, f=0):
+        base = h - 2
+        g.rect(5, base - 2, 10, 3, "coal")
+        g.rect(5, base - 2, 10, 1, "ash")
+        g.ell(10, 11, 7, 5, "red")
+        g.rect(3, 11, 14, base - 13, "red")
+        g.rect(15, 11, 2, base - 13, "dred")
+        g.rect(5, 7, 4, 1, "pink")
+        g.rect(4, 15, 12, 1, "dred")
+        g.rect(5, 16, 10, 2, "ink")
+        g.ell(10, 22, 3.5, 2.5, "white")
+        g.tri((8, 23), (12, 21), (12, 23.5), "red")
+        # the tags: a lime squiggle low left and a white crown low right, with a lime drip
+        g.rect(5, 27, 4, 1, "lime")
+        g.rect(5, 28, 1, 1, "lime")
+        g.rect(6, 29, 3, 1, "lime")
+        g.rect(8, 30, 1, 1, "lime")
+        g.rect(11, 28, 4, 1, "white")
+        for x in (11, 13, 14):
+            g.rect(x, 27, 1, 1, "white")
+    return w, h, draw
+
+
 def pay_station():
     """A pay-and-display machine: an lgrey cabinet shaded stone, a lit screen, a keypad, a coin slot and a
     ticket slot, under a white P on a forest disc on a post."""
@@ -867,6 +989,12 @@ PROPS = {
     "roadside-love-lock": (love_lock(), (0,), STILL_MS, True),
     "roadside-leuty": (leuty(), (0,), STILL_MS, True),
     "roadside-mural-wall": (mural_wall(), (0,), STILL_MS, True),
+    "roadside-shopfront-ochre": (shopfront("ochre", "red", "forest",
+                                           ("cyan", "lilac", "cream", "pink", "lime", "red", "violet")),
+                                 (0,), STILL_MS, True),
+    "roadside-shopfront-violet": (shopfront("violet", "dturq", "navy",
+                                            ("red", "lime", "pink", "cyan", "ochre", "lilac", "cream")),
+                                  (0,), STILL_MS, True),
     **{f"roadside-beach-umbrella-{c}": (beach_umbrella(c), (0,), STILL_MS, True) for c in BEACH_STRIPES},
     **{f"roadside-beach-chair-{c}": (beach_chair(c), (0,), STILL_MS, True) for c in BEACH_STRIPES},
     "roadside-cafe-patio": (cafe_patio(), (0,), STILL_MS, True),
@@ -875,10 +1003,12 @@ PROPS = {
     "curb-bollard": (bollard(), (0,), STILL_MS, True),
     "curb-hydrant": (hydrant(), (0,), STILL_MS, True),
     "curb-life-ring": (life_ring(), (0,), STILL_MS, True),
+    "curb-mailbox": (mailbox(), (0,), STILL_MS, True),
     "curb-news-box": (news_box(), (0,), STILL_MS, True),
     "curb-pay-station": (pay_station(), (0,), STILL_MS, True),
     "curb-rope-posts": (rope_posts(), (0,), STILL_MS, True),
     "curb-urn": (urn(), (0,), STILL_MS, True),
+    "curb-utility-box": (utility_box(), (0,), STILL_MS, True),
 }
 
 
@@ -936,9 +1066,10 @@ def gap(*props):
 # a prop in gaps 0 and 3, so each side has a prop every 6 slots (840 px): the neighbourhood's tree or
 # street furniture in gap 0, then its own prop in gap 3. The right side's gapStart of 2 puts its props
 # 3 slots after the left's, so they alternate sides, one every 420 px. Kensington Market and The Beaches
-# run twelve gaps, so one prop stands every 210 px. Kensington: maples in gaps 0 and 6, the fruit stand in
-# 3, the Garden Car in 9, café patios in 1 and 7 and mural walls in 4 and 10. The Beaches: the Leuty in
-# gaps 0 and 6, dune grass in 3, the ice cream stand in 9, and beach umbrellas and chairs in 1, 4, 7 and 10.
+# run twelve gaps, so one prop stands every 210 px. Kensington: the violet shopfront in gap 0 and the ochre
+# in 6, the fruit stand in 3, the Garden Car in 9, café patios in 1 and 7 and mural walls in 4 and 10. The
+# Beaches: the Leuty in gaps 0 and 6, dune grass in 3, the ice cream stand in 9, and beach umbrellas and
+# chairs in 1, 4, 7 and 10.
 SIDES = dict(
     left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=1),
     right=dict(offset=1, lotStart=0, lotStride=1, gapStart=2, gapStride=1),
@@ -961,9 +1092,10 @@ PLACEMENT = {
     "cabbagetown": sparse(("tree-maple", 220, 0), ("gas-lamp", 213, 0)),
     "high-park": sparse(("tree-oak", 220, 0), ("hot-dog-stand", 216, 0)),
     "distillery-district": sparse(("gas-lamp", 213, 0), ("love-lock", 216, 0)),
-    "kensington-market": sparse(("tree-maple", 220, 0), ("fruit-stand", 216, 0), {
+    "kensington-market": sparse(("shopfront-violet", 216, 0), ("fruit-stand", 216, 0), {
         1: (("cafe-patio", 213, 0),),
         4: (("mural-wall", 216, 0),),
+        6: (("shopfront-ochre", 216, 0),),
         7: (("cafe-patio", 213, 0),),
         9: (("garden-car", 216, 0),),
         10: (("mural-wall", 216, 0),),
@@ -1013,13 +1145,13 @@ def curb(zone, *names):
 CURB = {
     "cabbagetown": curb("cabbagetown", "hydrant", "urn"),
     "distillery-district": curb("distillery-district", "barrel", "bollard"),
-    "kensington-market": curb("kensington-market", "bike-ring", "news-box"),
+    "kensington-market": curb("kensington-market", "bike-ring", "utility-box", "mailbox"),
     "the-beaches": curb("the-beaches", "rope-posts", "life-ring"),
     "yonge-street": curb("yonge-street", "pay-station", "bike-ring"),
 }
 # Each zone's ground shadow under a free-standing prop: a darker tone of its lawn or paving.
 SHADOWS = {"cabbagetown": "dolive", "high-park": "fir", "distillery-district": "dbrown",
-           "kensington-market": "teal", "the-beaches": "stone", "yonge-street": "navy"}
+           "kensington-market": "slate", "the-beaches": "stone", "yonge-street": "navy"}
 # Props that stand free and take the game's ground shadow.
 SHADOWED = tuple(k for k, v in PROPS.items() if v[3])
 TABLE_JSON = "shared/roadside.json"

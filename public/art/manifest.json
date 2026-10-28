@@ -3172,6 +3172,87 @@
       }
     },
     {
+      "key": "curb-mailbox",
+      "png": "sprites/curb-mailbox.png",
+      "json": "sprites/curb-mailbox.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "curb-mailbox@50",
+      "png": "sprites/curb-mailbox@50.png",
+      "json": "sprites/curb-mailbox@50.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "curb-mailbox@56",
+      "png": "sprites/curb-mailbox@56.png",
+      "json": "sprites/curb-mailbox@56.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 13
+      }
+    },
+    {
+      "key": "curb-mailbox@62",
+      "png": "sprites/curb-mailbox@62.png",
+      "json": "sprites/curb-mailbox@62.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "curb-mailbox@69",
+      "png": "sprites/curb-mailbox@69.png",
+      "json": "sprites/curb-mailbox@69.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "curb-mailbox@75",
+      "png": "sprites/curb-mailbox@75.png",
+      "json": "sprites/curb-mailbox@75.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "curb-mailbox@81",
+      "png": "sprites/curb-mailbox@81.png",
+      "json": "sprites/curb-mailbox@81.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "curb-mailbox@88",
+      "png": "sprites/curb-mailbox@88.png",
+      "json": "sprites/curb-mailbox@88.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "curb-mailbox@94",
+      "png": "sprites/curb-mailbox@94.png",
+      "json": "sprites/curb-mailbox@94.json",
+      "anchor": {
+        "feetY": 50,
+        "opaqueWidth": 22
+      }
+    },
+    {
       "key": "curb-news-box",
       "png": "sprites/curb-news-box.png",
       "json": "sprites/curb-news-box.json",
@@ -3493,6 +3574,87 @@
       "anchor": {
         "feetY": 37,
         "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "curb-utility-box",
+      "png": "sprites/curb-utility-box.png",
+      "json": "sprites/curb-utility-box.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "curb-utility-box@50",
+      "png": "sprites/curb-utility-box@50.png",
+      "json": "sprites/curb-utility-box@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "curb-utility-box@56",
+      "png": "sprites/curb-utility-box@56.png",
+      "json": "sprites/curb-utility-box@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "curb-utility-box@62",
+      "png": "sprites/curb-utility-box@62.png",
+      "json": "sprites/curb-utility-box@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "curb-utility-box@69",
+      "png": "sprites/curb-utility-box@69.png",
+      "json": "sprites/curb-utility-box@69.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "curb-utility-box@75",
+      "png": "sprites/curb-utility-box@75.png",
+      "json": "sprites/curb-utility-box@75.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "curb-utility-box@81",
+      "png": "sprites/curb-utility-box@81.png",
+      "json": "sprites/curb-utility-box@81.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "curb-utility-box@88",
+      "png": "sprites/curb-utility-box@88.png",
+      "json": "sprites/curb-utility-box@88.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "curb-utility-box@94",
+      "png": "sprites/curb-utility-box@94.png",
+      "json": "sprites/curb-utility-box@94.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 30
       }
     },
     {
@@ -9488,6 +9650,168 @@
       "anchor": {
         "feetY": 89,
         "opaqueWidth": 109
+      }
+    },
+    {
+      "key": "roadside-shopfront-ochre",
+      "png": "sprites/roadside-shopfront-ochre.png",
+      "json": "sprites/roadside-shopfront-ochre.json",
+      "anchor": {
+        "feetY": 95,
+        "opaqueWidth": 104
+      }
+    },
+    {
+      "key": "roadside-shopfront-ochre@50",
+      "png": "sprites/roadside-shopfront-ochre@50.png",
+      "json": "sprites/roadside-shopfront-ochre@50.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 52
+      }
+    },
+    {
+      "key": "roadside-shopfront-ochre@56",
+      "png": "sprites/roadside-shopfront-ochre@56.png",
+      "json": "sprites/roadside-shopfront-ochre@56.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 59
+      }
+    },
+    {
+      "key": "roadside-shopfront-ochre@62",
+      "png": "sprites/roadside-shopfront-ochre@62.png",
+      "json": "sprites/roadside-shopfront-ochre@62.json",
+      "anchor": {
+        "feetY": 59,
+        "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "roadside-shopfront-ochre@69",
+      "png": "sprites/roadside-shopfront-ochre@69.png",
+      "json": "sprites/roadside-shopfront-ochre@69.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 72
+      }
+    },
+    {
+      "key": "roadside-shopfront-ochre@75",
+      "png": "sprites/roadside-shopfront-ochre@75.png",
+      "json": "sprites/roadside-shopfront-ochre@75.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 78
+      }
+    },
+    {
+      "key": "roadside-shopfront-ochre@81",
+      "png": "sprites/roadside-shopfront-ochre@81.png",
+      "json": "sprites/roadside-shopfront-ochre@81.json",
+      "anchor": {
+        "feetY": 77,
+        "opaqueWidth": 85
+      }
+    },
+    {
+      "key": "roadside-shopfront-ochre@88",
+      "png": "sprites/roadside-shopfront-ochre@88.png",
+      "json": "sprites/roadside-shopfront-ochre@88.json",
+      "anchor": {
+        "feetY": 83,
+        "opaqueWidth": 91
+      }
+    },
+    {
+      "key": "roadside-shopfront-ochre@94",
+      "png": "sprites/roadside-shopfront-ochre@94.png",
+      "json": "sprites/roadside-shopfront-ochre@94.json",
+      "anchor": {
+        "feetY": 89,
+        "opaqueWidth": 97
+      }
+    },
+    {
+      "key": "roadside-shopfront-violet",
+      "png": "sprites/roadside-shopfront-violet.png",
+      "json": "sprites/roadside-shopfront-violet.json",
+      "anchor": {
+        "feetY": 95,
+        "opaqueWidth": 104
+      }
+    },
+    {
+      "key": "roadside-shopfront-violet@50",
+      "png": "sprites/roadside-shopfront-violet@50.png",
+      "json": "sprites/roadside-shopfront-violet@50.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 52
+      }
+    },
+    {
+      "key": "roadside-shopfront-violet@56",
+      "png": "sprites/roadside-shopfront-violet@56.png",
+      "json": "sprites/roadside-shopfront-violet@56.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 59
+      }
+    },
+    {
+      "key": "roadside-shopfront-violet@62",
+      "png": "sprites/roadside-shopfront-violet@62.png",
+      "json": "sprites/roadside-shopfront-violet@62.json",
+      "anchor": {
+        "feetY": 59,
+        "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "roadside-shopfront-violet@69",
+      "png": "sprites/roadside-shopfront-violet@69.png",
+      "json": "sprites/roadside-shopfront-violet@69.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 72
+      }
+    },
+    {
+      "key": "roadside-shopfront-violet@75",
+      "png": "sprites/roadside-shopfront-violet@75.png",
+      "json": "sprites/roadside-shopfront-violet@75.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 78
+      }
+    },
+    {
+      "key": "roadside-shopfront-violet@81",
+      "png": "sprites/roadside-shopfront-violet@81.png",
+      "json": "sprites/roadside-shopfront-violet@81.json",
+      "anchor": {
+        "feetY": 77,
+        "opaqueWidth": 85
+      }
+    },
+    {
+      "key": "roadside-shopfront-violet@88",
+      "png": "sprites/roadside-shopfront-violet@88.png",
+      "json": "sprites/roadside-shopfront-violet@88.json",
+      "anchor": {
+        "feetY": 83,
+        "opaqueWidth": 91
+      }
+    },
+    {
+      "key": "roadside-shopfront-violet@94",
+      "png": "sprites/roadside-shopfront-violet@94.png",
+      "json": "sprites/roadside-shopfront-violet@94.json",
+      "anchor": {
+        "feetY": 89,
+        "opaqueWidth": 97
       }
     },
     {

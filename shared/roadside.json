@@ -13,6 +13,8 @@
     "roadside-love-lock",
     "roadside-leuty",
     "roadside-mural-wall",
+    "roadside-shopfront-ochre",
+    "roadside-shopfront-violet",
     "roadside-beach-umbrella-blue",
     "roadside-beach-umbrella-coral",
     "roadside-beach-umbrella-green",
@@ -25,10 +27,12 @@
     "curb-bollard",
     "curb-hydrant",
     "curb-life-ring",
+    "curb-mailbox",
     "curb-news-box",
     "curb-pay-station",
     "curb-rope-posts",
-    "curb-urn"
+    "curb-urn",
+    "curb-utility-box"
   ],
   "zones": {
     "cabbagetown": {
@@ -228,8 +232,8 @@
       "gaps": [
         [
           {
-            "key": "roadside-tree-maple",
-            "across": 277,
+            "key": "roadside-shopfront-violet",
+            "across": 270,
             "dz": 0
           }
         ],
@@ -258,8 +262,8 @@
         [],
         [
           {
-            "key": "roadside-tree-maple",
-            "across": 277,
+            "key": "roadside-shopfront-ochre",
+            "across": 270,
             "dz": 0
           }
         ],
@@ -303,7 +307,7 @@
           "gapStride": 1
         }
       },
-      "shadowColour": "193c3e",
+      "shadowColour": "5a6988",
       "curb": {
         "groups": [
           [
@@ -316,7 +320,15 @@
           [],
           [
             {
-              "key": "curb-news-box",
+              "key": "curb-utility-box",
+              "across": 188,
+              "dz": 70
+            }
+          ],
+          [],
+          [
+            {
+              "key": "curb-mailbox",
               "across": 188,
               "dz": 70
             }

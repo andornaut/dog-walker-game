@@ -1,0 +1,22 @@
+{ "frames": {
+   "curb-mailbox@94.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 28, "h": 51 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 51 },
+    "sourceSize": { "w": 28, "h": 51 },
+    "duration": 1000
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "curb-mailbox@94.png",
+  "format": "RGBA8888",
+  "size": { "w": 28, "h": 51 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 0, "direction": "forward" }
+  ]
+ }
+}
