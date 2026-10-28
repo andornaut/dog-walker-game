@@ -461,7 +461,7 @@ SIGN_PAW = [".T.T.T.", ".......", "..PPP..", ".PPPPP.", ".PPPPP."]
 @icon("legend-of-the-leash")
 def _(g):
     """A Toronto street sign named for you: a blue blade with a white rule and a white paw, under its
-    ornamental cap, on a slate pole, a yellow star at its corner."""
+    ornamental cap, on a slate pole."""
     g.rect(15, 17, 2, 10, "slate")
     g.rect(16, 17, 1, 10, "dslate")
     g.rect(12, 26, 8, 1, "dslate")
@@ -473,7 +473,6 @@ def _(g):
     g.rect(11, 7, 10, 2, "navy")
     g.rect(14, 6, 4, 1, "navy")
     g.rect(15, 7, 2, 1, "sky")
-    dizzy_star(g, 24, 7)
 
 
 @icon("marathon")
