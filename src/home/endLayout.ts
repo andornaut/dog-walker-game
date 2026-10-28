@@ -10,7 +10,7 @@ export const END_LAYOUT = {
   badges: { height: 92, width: 344, x: 8, y: 416 },
   breakdown: { amountRight: 196, label: 40, pitch: 18, top: PANEL.y + 42 },
   button: { ...WIDE_BUTTON, y: 512 },
-  logo: { x: 116, y: 8 },
+  logo: { x: 107, y: 2 },
   panel: PANEL,
   // An owner's row, mirroring the home screen's bubble: a speech bubble from x with its tail
   // at the right pointing at the face in its well, and the owner's name in rust at 1x under

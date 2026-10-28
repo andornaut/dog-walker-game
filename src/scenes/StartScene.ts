@@ -227,7 +227,6 @@ const SLOT_SIGN = HOME_LAYOUT.slotSign;
 const POCKET_LINING = HOME_LAYOUT.pocketLining;
 const SECTION_FILL_KEYS = HOME_LAYOUT.sectionFillKeys;
 const POCKET = HOME_LAYOUT.pocket;
-const LOGO = { ...HOME_LAYOUT.logo, key: "logo" };
 const SECTION_RECTS: Readonly<Record<SectionId, Rect>> = HOME_LAYOUT.sections;
 const SECTION_FRAME = HOME_LAYOUT.sectionFrame;
 const BAND_TEXT = HOME_LAYOUT.bandText;
@@ -1047,9 +1046,6 @@ export class StartScene extends Scene {
       fillRect(g, PALETTE.lightGrey, { height: 34, width: SCREEN.width, x: 0, y: 92 });
       fillRect(g, PALETTE.green, { height: 70, width: SCREEN.width, x: 0, y: 126 });
       fillRect(g, PALETTE.tan, { height: 70, width: PATH.width, x: PATH.x, y: 126 });
-    }
-    if (this.textures.exists(LOGO.key)) {
-      this.add.image(LOGO.x, LOGO.y, LOGO.key).setOrigin(0);
     }
     const sign = HOME_LAYOUT.streetSign;
     addPixelText(this, sign.x, sign.y, gameData.homeText.gateSign, {

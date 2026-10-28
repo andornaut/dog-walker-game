@@ -162,7 +162,6 @@ export const HOME_LAYOUT = {
   // side by side to the screen's edge with each face centred in its hit.
   help: topBarButton("sound"),
   logbook: topBarButton("help"),
-  logo: { x: 6, y: 146 },
   mute: topBarButton("settings"),
   path: { width: 32, x: 164 },
   // The Pet shop building on the yard's right lot, which opens the shop; its hit area is its
@@ -299,6 +298,8 @@ export const HOME_LAYOUT = {
     plateY: WALKER_TEXT_Y,
   },
   walkerTiles: WALKER_TILES,
+  // The yard sign's board, baked into screen-home, which the dog slot sign keeps clear of.
+  yardSign: { height: 38, width: 128, x: 6, y: 138 },
 } as const satisfies Readonly<Record<string, unknown>> & {
   dogTiles: GridSpec;
   gateSpots: readonly PackPlacement[];
@@ -309,6 +310,7 @@ export const HOME_LAYOUT = {
   sections: Readonly<Record<SectionId, Rect>>;
   slotSign: { readonly [key: string]: unknown; board: Rect; hit: Rect };
   walkerTiles: GridSpec;
+  yardSign: Rect;
 };
 
 type BankScale = (typeof HOME_LAYOUT.topBar.bank.scales)[number];

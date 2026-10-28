@@ -598,7 +598,7 @@ describe("Start walk's loading label", () => {
 // for every slot's price, pressed or not.
 describe("the dog slot sign", () => {
   const { art, board, hit, key, scale } = HOME_LAYOUT.slotSign;
-  const { gate, logo, petShop, walkerAtGate } = HOME_LAYOUT;
+  const { gate, petShop, walkerAtGate, yardSign } = HOME_LAYOUT;
   const outline = insetRect(-AFFORD_OUTSET, board);
   const file = (path: string) => readFileSync(new URL(`../../public/art/${path}`, import.meta.url));
   // A sprite's frame size, from its sheet's data.
@@ -614,8 +614,6 @@ describe("the dog slot sign", () => {
     const { height, width } = frameSize(gameData.walkers[walker].spriteKey);
     return { height, width, x: walkerAtGate.x - width / 2, y: walkerAtGate.footY - height };
   };
-  const logoPng = file("images/logo.png");
-  const yardSign = { height: logoPng.readUInt32BE(20), width: logoPng.readUInt32BE(16), ...logo };
   const clear: readonly [string, Rect][] = [
     ["the yard sign", yardSign],
     ...keysOf(gameData.walkers).map((walker): [string, Rect] => [
