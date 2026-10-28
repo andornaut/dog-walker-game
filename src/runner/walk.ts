@@ -1,3 +1,4 @@
+import { IDLE_TAG, MOVING_TAGS } from "../assets/spriteKeys";
 import type {
   DogId,
   Encounter,
@@ -75,14 +76,17 @@ import { type LaneMotion, type LaneMotionConfig, laneMotionX, stillInLane } from
 import {
   drawnLanes,
   hasLeftRoad,
+  hasStopped,
   hopSequences,
   hopShapes,
+  isSliding,
   isWarning,
   laneAt,
   moveMovers,
   type MoverFootprint,
   type MoverItem,
   type MoverMotion,
+  type MoverPath,
   moverPlace,
   type MoverSpec,
   type PlannerStreams,
@@ -973,26 +977,28 @@ export function steerWalk(
 
 const PLACED_PARTS = new WeakMap<object, Map<string, readonly PlacedPart[]>>();
 
-// The sprites an obstacle draws, standing or moving, with their silhouettes.
+// The sprites an obstacle draws, standing or moving, with their silhouettes: each over every
+// frame, or, with tags, the pose silhouette of the first of them its sprite has one for.
 export function obstacleOnRoad(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   geometry: Pick<RoadGeometry, "cell">,
   kind: ObstacleKind,
   moving: boolean,
+  tags: readonly string[] = [],
 ): readonly PlacedPart[] {
   let byKind = PLACED_PARTS.get(data);
   if (byKind === undefined) {
     byKind = new Map();
     PLACED_PARTS.set(data, byKind);
   }
-  const key = `${geometry.cell.length} ${kind} ${moving}`;
+  const key = `${geometry.cell.length} ${kind} ${moving} ${tags.join(",")}`;
   let parts = byKind.get(key);
   if (parts === undefined) {
     const { lanes } = footprintOf(data, kind);
     parts = obstacleParts(data, hasObstacleArt, kind, moving).map(({ behind, dx, key: art }) => ({
       behind,
       dx,
-      silhouette: obstacleSilhouette(geometry.cell.length, lanes, art),
+      silhouette: obstacleSilhouette(geometry.cell.length, lanes, art, tags),
     }));
     byKind.set(key, parts);
   }
@@ -1261,9 +1267,19 @@ export function walkItemBox(
   return itemBox(geometry.cell, { ...item, lane: footprintLane(geometry.laneCount, item) });
 }
 
+// The tags a mover's pose may be drawn in, most likely first: its dive while it slides, its idle
+// once it has stopped, and otherwise its movement's.
+function poseTags(path: MoverPath, since: number): readonly string[] {
+  if (isSliding(path, since)) {
+    return ["dive"];
+  }
+  return hasStopped(path, since) ? [IDLE_TAG] : MOVING_TAGS[path.movement];
+}
+
 // The box an obstacle hits the pack's parts with, in the lanes of its footprint: as it is drawn
 // (drawnObstacleBox), from its sprites standing on its near edge across from the middle of the
-// lanes it is drawn over (drawnLanes for a mover).
+// lanes it is drawn over (drawnLanes for a mover), a mover in its pose (poseTags). Its spacing on
+// the road is planned with its silhouette over every frame, which holds every pose's.
 export function obstacleHitBox(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   geometry: Pick<RoadGeometry, "cell" | "itemHeights" | "laneCount" | "lens" | "packBand">,
@@ -1278,7 +1294,8 @@ export function obstacleHitBox(
   const lanes = { left: lane * cell.length, right: (lane + item.laneSpan) * cell.length };
   const { mover } = item;
   const drawn = mover === undefined ? item.laneSpan : drawnLanes(item.laneSpan, mover.path);
-  const parts = obstacleOnRoad(data, geometry, item.kind, mover !== undefined);
+  const tags = mover === undefined ? [] : poseTags(mover.path, mover.since);
+  const parts = obstacleOnRoad(data, geometry, item.kind, mover !== undefined, tags);
   const x = (lane + drawn / 2) * cell.length;
   return { ...drawnObstacleBox(lens, PART_INSET, parts, { feetY, x }), lanes };
 }

@@ -92,6 +92,17 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   "wedding-shoot": { above: 69, left: -53, right: 56 },
 };
 
+// A sprite whose poses differ much in size is hit by its pose's silhouette instead, each over
+// its tag's frames alone, so a mover is hit as its pose is drawn; OBSTACLE_SILHOUETTES still
+// holds its silhouette over every frame, which plans its spacing on the road.
+export const POSE_SILHOUETTES: Readonly<Record<string, Readonly<Record<string, Silhouette>>>> = {
+  "volleyball-player": {
+    dive: { above: 52, left: -24, right: 24 },
+    idle: { above: 31, left: -24, right: 24 },
+    run: { above: 62, left: -16, right: 21 },
+  },
+};
+
 // Whether a sprite is drawn, judged by the table: the art the game loads has a silhouette, so
 // the simulator and the scene pick the same sprites.
 export const hasObstacleArt: HasArt = (key) => Object.hasOwn(OBSTACLE_SILHOUETTES, key);
@@ -167,7 +178,18 @@ export function obstacleParts(
 
 // A sprite's silhouette, or, for art not drawn yet, its placeholder's: ROAD_SPRITE_SIZE tall,
 // and as wide as its lanes less the lane's spare width beside a 1-lane sprite.
-export function obstacleSilhouette(cellLength: number, lanes: number, key: string): Silhouette {
+// With tags, the first of them that has a pose silhouette (POSE_SILHOUETTES) picks it instead.
+export function obstacleSilhouette(
+  cellLength: number,
+  lanes: number,
+  key: string,
+  tags: readonly string[] = [],
+): Silhouette {
+  const poses = POSE_SILHOUETTES[key];
+  const posed = tags.map((tag) => poses?.[tag]).find((pose) => pose !== undefined);
+  if (posed !== undefined) {
+    return posed;
+  }
   const measured = OBSTACLE_SILHOUETTES[key];
   if (measured !== undefined) {
     return measured;
