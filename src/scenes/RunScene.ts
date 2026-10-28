@@ -253,11 +253,7 @@ export class RunScene extends Scene implements HudRun {
       items,
       menus: new MenuFlow(this, {
         dropPress: () => this.world?.input.dropPress(),
-        headHome: () => {
-          if (this.session !== undefined) {
-            this.apply(headHomeSession(this.session));
-          }
-        },
+        headHome: () => this.headHome(),
         homeNote: () =>
           this.session === undefined ? [] : homeQuestionNote(gameData, this.session.walk.run),
         over: () => this.session === undefined || this.session.walk.run.phase.kind === "ended",
@@ -422,6 +418,13 @@ export class RunScene extends Scene implements HudRun {
 
   // Takes the session's next state and plays its events, then ends the walk, or previews the
   // badges earned so far and shows the card it opened.
+  // Ends the walk with what is banked, as the Home answer or a replayed one does.
+  private headHome(): void {
+    if (this.session !== undefined) {
+      this.apply(headHomeSession(this.session));
+    }
+  }
+
   private apply(step: SessionStep): void {
     const before = this.session?.walk.run;
     this.session = step.session;
@@ -558,9 +561,7 @@ export class RunScene extends Scene implements HudRun {
     cardHintTriggers(view.source).forEach((trigger) => showHint(this, trigger));
     const replayed = world.recorder.cardChoice();
     if (replayed === "home") {
-      if (this.session !== undefined) {
-        this.apply(headHomeSession(this.session));
-      }
+      this.headHome();
       return;
     }
     if (replayed !== undefined) {
@@ -649,10 +650,9 @@ export class RunScene extends Scene implements HudRun {
     const before = this.stepBefore ?? session.walk;
     const halted = !this.walking();
     const alpha = stepAlpha(this.stepClock.bankedMs, STEP_MS);
-    const laneCount = screenRoadGeometry(session.walk.run).laneCount;
     const lead = halted
       ? session.walk
-      : leadWalk(gameData, laneCount, alpha * STEP_SECONDS, world.input.queued(), session.walk);
+      : leadWalk(gameData, LANE_COUNT, alpha * STEP_SECONDS, world.input.queued(), session.walk);
     const walk = blendWalk(alpha, before, lead);
     const zone = currentZone(gameData, walk.run);
     const still = this.reducedMotion();
