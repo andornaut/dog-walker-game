@@ -1,6 +1,7 @@
 import * as v from "valibot";
 
 import type { LaneDirection } from "../layout/lanes";
+import { assertNever } from "../lib/assertNever";
 import { parseRunSetup, type RunSetup, type RunSetupLimits, runSetupToQuery } from "./runSetup";
 
 // A log of any other version is rejected.
@@ -102,8 +103,10 @@ function encodeEvent(event: InputEvent): EncodedEvent {
       return [event.timeMs, "c", event.choice];
     case "home":
       return [event.timeMs, "h"];
-    default:
+    case "lane":
       return [event.timeMs, "l", event.direction];
+    default:
+      return assertNever(event);
   }
 }
 
@@ -113,8 +116,10 @@ function decodeEvent(event: EncodedEvent): InputEvent {
       return { choice: event[2], kind: "card", timeMs: event[0] };
     case "h":
       return { kind: "home", timeMs: event[0] };
-    default:
+    case "l":
       return { direction: event[2], kind: "lane", timeMs: event[0] };
+    default:
+      return assertNever(event);
   }
 }
 
