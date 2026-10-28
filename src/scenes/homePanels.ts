@@ -1,11 +1,22 @@
 import type { GameObjects, Scene } from "phaser";
 
+import { ownerCardFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
+import type { DogId } from "../data/types";
 import type { DetailCard, DetailPicture } from "../home/detail";
-import { CARD_TEXT_ROOM, cardBand, detailCardLayout, HOME_LAYOUT } from "../home/homeLayout";
+import {
+  CARD_TEXT_ROOM,
+  cardBand,
+  detailCardLayout,
+  detailOwner,
+  type DetailRow,
+  HOME_LAYOUT,
+  OWNER_ROW,
+} from "../home/homeLayout";
 import { withNamePills } from "../hud/effectNames";
-import { insetRect, type Rect } from "../lib/rect";
+import { DOG_CARD, ownerNameLines } from "../hud/walkHud";
+import { insetRect, type Point, type Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
 import { addDim, drawFramedRect, drawRing } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
@@ -13,12 +24,15 @@ import {
   addPixelText,
   fitPixelText,
   type FontRole,
+  inkSpan,
   pixelFontMetrics,
+  setPixelText,
   wrapPixelText,
 } from "../ui/phaser/pixelText";
 import { AFFORD_OUTSET } from "../ui/selection";
 import { WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 import { addNamePills } from "./effectNameColours";
+import { playFirstTag } from "./sprites";
 import {
   addCloseButton,
   addLoopingFrame,
@@ -148,10 +162,37 @@ export function addDetailWell(scene: Scene, parent: GameObjects.Container, rect:
   parent.add(g);
 }
 
+// The photo and name of dog's owner as the walk's dog card draws them, the photo's top-left at
+// at: the neutral face in its white mat and ink frame, and the name beside it in the body font
+// at the walk card's scale, in the detail card's owner colour.
+function addDetailOwner(scene: Scene, parent: GameObjects.Container, at: Point, dog: DogId): void {
+  const style = { colour: PALETTE[CARD.ownerNameColour], scale: DOG_CARD.owner.scale };
+  const probe = addPixelText(scene, 0, 0, "", style);
+  const rightEdge = (line: string) => {
+    setPixelText(probe, line);
+    return inkSpan(probe).right;
+  };
+  const owner = detailOwner(at, ownerNameLines(rightEdge, gameData.dogs[dog].owner.name));
+  probe.destroy();
+  const g = scene.add.graphics();
+  drawFramedRect(g, { border: PALETTE.ink, fill: PALETTE.white }, owner.photo);
+  parent.add(g);
+  const key = ownerCardFaceKey(gameData, dog);
+  if (scene.textures.exists(key)) {
+    const face = scene.add.sprite(owner.face.x, owner.face.y, key).setOrigin(0);
+    playFirstTag(face, key, ["neutral"]);
+    parent.add(face);
+  }
+  owner.names.forEach((line) =>
+    parent.add(addPixelText(scene, line.x, line.top, line.text, style)),
+  );
+}
+
 // A held dog's, walker's or gear item's detail card over a dim layer, as tall as what it
 // shows. A dog's or walker's card puts its breed and status beside the portrait and its rows
-// below; a gear card puts its effect and status beside the icon. Returns the card's rect, so a
-// tap outside it or on its close control closes it.
+// below, a dog's with its owner's photo and name between its breed and status; a gear card
+// puts its effect and status beside the icon. Returns the card's rect, so a tap outside it or
+// on its close control closes it.
 export function drawDetailCard(
   scene: Scene,
   parent: GameObjects.Container,
@@ -219,16 +260,25 @@ export function drawDetailCard(
     colour: PALETTE.plum,
     value: withNamePills(gameData, value),
   }));
-  const besideRows: Row[] =
-    kind === "gear"
-      ? [...plum, status]
-      : [{ colour: PALETTE.darkBrown, value: card.subtitle }, status];
+  const subtitle: Row = { colour: PALETTE.darkBrown, value: card.subtitle };
+  const owner = card.owner === undefined ? [] : [OWNER_ROW];
+  const besideRows: (Row | typeof OWNER_ROW)[] =
+    kind === "gear" ? [...plum, status] : [subtitle, ...owner, status];
   const belowRows = kind === "gear" ? [] : plum;
+  const counts = (rows: readonly (Row | typeof OWNER_ROW)[], room: number): DetailRow[] =>
+    rows.map((row) => (row === OWNER_ROW ? row : lineCount(row, room)));
   const layout = detailCardLayout(pixelFontMetrics(scene, "body"), {
-    below: belowRows.map((row) => lineCount(row, CARD_TEXT_ROOM.full)),
-    beside: besideRows.map((row) => lineCount(row, CARD_TEXT_ROOM.beside)),
+    below: counts(belowRows, CARD_TEXT_ROOM.full),
+    beside: counts(besideRows, CARD_TEXT_ROOM.beside),
   });
-  draw(besideRows, CARD.besideX, CARD_TEXT_ROOM.beside, layout.beside);
+  besideRows.forEach((row, i) => {
+    const y = layout.beside[i] ?? 0;
+    if (row !== OWNER_ROW) {
+      draw([row], CARD.besideX, CARD_TEXT_ROOM.beside, [y]);
+    } else if (card.owner !== undefined) {
+      addDetailOwner(scene, content, { x: CARD.besideX, y }, card.owner);
+    }
+  });
   draw(belowRows, CARD.pad, CARD_TEXT_ROOM.full, layout.below);
   const rect = centredCard(layout.height);
   drawCardFrame(scene, parent, closePressed, rect, card.title, content);

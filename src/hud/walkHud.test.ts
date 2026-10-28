@@ -39,6 +39,7 @@ import {
   explainTargetAt,
   leadSlot,
   ownerNameLines,
+  ownerPhotoRect,
   ownerTabRect,
   TITLE_CAP_ROWS,
   WALK_BAR,
@@ -385,8 +386,7 @@ describe("the dog cards", () => {
   const card = { ...DOG_CARD.size, x: 0, y: 0 };
   const lead = { ...pngSize("images/ui-lead-tag.png"), ...DOG_CARD.lead };
   const { face } = DOG_CARD.owner;
-  // The owner's photo: its ink frame and white mat, 2px round the face.
-  const ownerPhoto = { height: face.size + 4, width: face.size + 4, x: face.x - 2, y: face.y - 2 };
+  const ownerPhoto = ownerPhotoRect(face);
   const heartRects = (max: number) =>
     cardHearts(max, max).map((cell) => ({ ...HEART_SIZE, x: cell.x, y: cell.y }));
 

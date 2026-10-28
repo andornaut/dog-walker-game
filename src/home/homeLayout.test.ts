@@ -5,7 +5,14 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { WalkerId } from "../data/types";
-import { cashLeft, WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
+import {
+  cashLeft,
+  DOG_CARD,
+  ownerNameLines,
+  ownerPhotoRect,
+  WALK_BAR,
+  WALK_BAR_BUTTONS,
+} from "../hud/walkHud";
 import { wrapWords } from "../lib/lines";
 import { keysOf } from "../lib/records";
 import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
@@ -13,26 +20,36 @@ import { unlockPrice } from "../rules/shop";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
-import { fitInFont, fontFileMetrics, inkWidth, TWO_X_FIT_STYLES } from "../testing/fontInk";
+import {
+  fitInFont,
+  fontFileMetrics,
+  fontInk,
+  inkWidth,
+  TWO_X_FIT_STYLES,
+} from "../testing/fontInk";
 import { inside } from "../testing/rects";
-import { inkRowsFromCapTop } from "../ui/fontMetrics";
+import { inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { gridRects } from "../ui/grid";
 import { MARK_OFFSET } from "../ui/mark";
 import { plainMarks } from "../ui/pixelFont";
 import { AFFORD_OUTSET } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
-import { dogDetail, gearDetail, walkerDetail } from "./detail";
+import { type DetailCard, dogDetail, gearDetail, walkerDetail } from "./detail";
 import { FEEDBACK } from "./feedback";
 import { dollarAmountText, dollarText, shortDollarAmountText } from "./home";
 import {
   BANK_ROOM,
   bankFit,
   CARD_TEXT_ROOM,
+  cardBand,
   detailCardLayout,
+  detailOwner,
+  type DetailRow,
   DOG_TILE_TEXT_ROOM,
   dogTileNameY,
   dogTilePlateY,
   HOME_LAYOUT,
+  OWNER_ROW,
   pocketLining,
   sectionFill,
   slotSignText,
@@ -391,7 +408,8 @@ const fitsScreen = (height: number) =>
   expect(height).toBeLessThanOrEqual(SCREEN_CONFIG.height - 2 * HOME_LAYOUT.gap);
 
 // Every dog's, gear item's and walker's detail card, owned or not, wraps its rows on the body font
-// and stays on screen.
+// and stays on screen. A dog's card sets its owner's photo and name between its breed and status,
+// inside the card's padding, clear of the band, the well, each other and every row of text.
 describe("a detail card", () => {
   const dogs = keysOf(gameData.dogs);
   const gear = keysOf(gameData.shopGear);
@@ -404,19 +422,113 @@ describe("a detail card", () => {
     ...gear.map((item) => ["gear", gearDetail(gameData, owned, cents(0), loadout, item)] as const),
     ...walkers.map((walker) => ["walker", walkerDetail(gameData, owned, walker)] as const),
   ]);
+  const { besideX, pad, well, width } = HOME_LAYOUT.card;
+  // The card's rows as the panel lays them out: each row of text's line count, the owner's row
+  // on a dog's card.
+  const rowsOf = (kind: "dog" | "gear" | "walker", card: DetailCard) => {
+    const text = (room: number) => (row: string) => cardLines(room, row);
+    const beside: DetailRow[] =
+      kind === "gear"
+        ? [...card.lines, card.status].map(text(CARD_TEXT_ROOM.beside))
+        : [
+            text(CARD_TEXT_ROOM.beside)(card.subtitle),
+            ...(card.owner === undefined ? [] : [OWNER_ROW]),
+            text(CARD_TEXT_ROOM.beside)(card.status),
+          ];
+    const below = kind === "gear" ? [] : card.lines.map(text(CARD_TEXT_ROOM.full));
+    return { below, beside };
+  };
+
   it.each(cards.map(([kind, card]) => [card.title, kind, card] as const))(
     "holds %s's card",
     (_, kind, card) => {
-      const gearCard = kind === "gear";
-      const beside = gearCard ? [...card.lines, card.status] : [card.subtitle, card.status];
-      const below = gearCard ? [] : card.lines;
-      const layout = detailCardLayout(BODY, {
-        below: below.map((row) => cardLines(CARD_TEXT_ROOM.full, row)),
-        beside: beside.map((row) => cardLines(CARD_TEXT_ROOM.beside, row)),
-      });
-      fitsScreen(layout.height);
+      fitsScreen(detailCardLayout(BODY, rowsOf(kind, card)).height);
     },
   );
+
+  it.each(cards.map(([kind, card]) => [card.title, kind, card] as const))(
+    "shows %s's owner on a dog's card alone",
+    (_, kind, card) => {
+      expect(card.owner !== undefined).toBe(kind === "dog");
+    },
+  );
+
+  // The columns a line inks in the body font at the walk card's owner scale.
+  const nameInk = (line: string) =>
+    fontInk("font-body", { letterSpacing: 0, scale: DOG_CARD.owner.scale }, plainMarks(line));
+  const dogCards = cards.flatMap(([kind, card]) =>
+    kind === "dog" && card.owner !== undefined
+      ? [[card.title, gameData.dogs[card.owner].owner.name, card] as const]
+      : [],
+  );
+
+  it.each(dogCards)(
+    "sets the photo and name of %s's owner, %s, inside the card, clear of its other parts",
+    (_title, name, card) => {
+      const rows = rowsOf("dog", card);
+      const layout = detailCardLayout(BODY, rows);
+      const ownerIndex = rows.beside.indexOf(OWNER_ROW);
+      const owner = detailOwner(
+        { x: besideX, y: layout.beside[ownerIndex] ?? 0 },
+        ownerNameLines((line) => nameInk(line).right, name),
+      );
+      const names = owner.names.map((line) => ({
+        height: inkRowsFromCapTop(BODY) * DOG_CARD.owner.scale,
+        width: nameInk(line.text).right,
+        x: line.x,
+        y: line.top,
+      }));
+      const band = cardBand({ height: layout.height, width, x: 0, y: 0 });
+      const room = {
+        height: layout.height - pad - (band.y + band.height),
+        width: width - 2 * pad,
+        x: pad,
+        y: band.y + band.height,
+      };
+      // Each row of text's ink, across its room.
+      const textRows = (x: number, roomWidth: number, counts: DetailRow[], tops: number[]) =>
+        counts.flatMap((row, i) =>
+          row === OWNER_ROW
+            ? []
+            : [{ height: inkRowsOfLines(BODY, row) * 2, width: roomWidth, x, y: tops[i] ?? 0 }],
+        );
+      const others: Rect[] = [
+        band,
+        { height: well.size, width: well.size, x: well.x, y: well.y },
+        ...textRows(besideX, CARD_TEXT_ROOM.beside, rows.beside, layout.beside),
+        ...textRows(pad, CARD_TEXT_ROOM.full, rows.below, layout.below),
+      ];
+      const parts = [owner.photo, ...names];
+      expect(parts.filter((part) => !inside(part, room))).toEqual([]);
+      expect(parts.filter((part) => others.some((other) => rectsOverlap(part, other)))).toEqual([]);
+      expect(names.filter((line) => rectsOverlap(line, owner.photo))).toEqual([]);
+    },
+  );
+
+  // A part's offset from the owner's photo.
+  const offset = (photo: Rect, part: { x: number; y: number }) => ({
+    dx: part.x - photo.x,
+    dy: part.y - photo.y,
+  });
+  const walkPhoto = ownerPhotoRect(DOG_CARD.owner.face);
+  const { oneLine, twoLines } = DOG_CARD.owner.tops;
+  it.each([
+    ["one line", [{ text: "Ab", top: oneLine }]],
+    [
+      "two lines",
+      [
+        { text: "Ab", top: twoLines[0] },
+        { text: "Cd", top: twoLines[1] },
+      ],
+    ],
+  ])("sets the face and a name on %s as the walk's dog card does", (_case, lines) => {
+    const owner = detailOwner({ x: besideX, y: 40 }, lines);
+    expect(owner.photo).toEqual({ ...walkPhoto, x: besideX, y: 40 });
+    expect(offset(owner.photo, owner.face)).toEqual(offset(walkPhoto, DOG_CARD.owner.face));
+    expect(owner.names.map((line) => offset(owner.photo, { x: line.x, y: line.top }))).toEqual(
+      lines.map((line) => offset(walkPhoto, { x: DOG_CARD.owner.x, y: line.top })),
+    );
+  });
 });
 
 // Start walk's loading label fits the pressed face's room on one line in the title font, at

@@ -503,7 +503,7 @@ export class HudScene extends Scene {
         originX: 0.5,
       }),
       owner: owner.tops.twoLines.map((top) =>
-        addPixelText(this, x + owner.x, y + top, "", { colour: PALETTE.tan }),
+        addPixelText(this, x + owner.x, y + top, "", { colour: PALETTE.tan, scale: owner.scale }),
       ),
       ownerFace: sprite("treat", owner.face),
     };

@@ -155,7 +155,12 @@
           "x": 47,
           "y": 25
         },
+        "photo": {
+          "frame": 1,
+          "mat": 1
+        },
         "room": 41,
+        "scale": 1,
         "tops": {
           "oneLine": 32,
           "twoLines": [
@@ -1657,6 +1662,7 @@
         },
         "besideDy": 4,
         "besideX": 90,
+        "ownerNameColour": "plum",
         "pad": 12,
         "rowGap": 8,
         "well": {

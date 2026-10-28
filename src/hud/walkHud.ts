@@ -217,8 +217,9 @@ export function zoneProgressLayout(strip: Rect, share: number): ZoneProgressLayo
 // A dog card (ui-dog-card, the size of a slot in the card row). The name is centred on name.x
 // at the largest of its scales that fits name.room, its top by scale. The owner's photo heads
 // the column right of the dog's, their face (face.size square) at owner.face on every card with
-// a dog, a fired dog's included, and their name goes beside it from owner.x within owner.room,
-// on one line or broken onto two (ownerNameLines). The hearts sit under the owner's photo in
+// a dog, a fired dog's included, inside the card art's photo: its white mat and ink frame, each
+// photo's pixels wide, round the face. Their name goes beside it in the body font at scale from
+// owner.x within owner.room, on one line or broken onto two (ownerNameLines). The hearts sit under the owner's photo in
 // rows of perRow, pitch apart. The LEAD tag is pinned across the foot of the front dog's photo,
 // and FIRED is centred on fired.x across a fired dog's empty photo. An owned slot with no dog
 // shows "Empty" centred on empty.x in its outline.
@@ -231,7 +232,9 @@ export const DOG_CARD = {
   name: { room: 108, tops: { 1: 6, 2: 4 }, x: 60 },
   owner: {
     face: { size: 20, x: 47, y: 25 },
+    photo: { frame: 1, mat: 1 },
     room: 41,
+    scale: 1,
     tops: { oneLine: 32, twoLines: [27, 37] },
     x: 72,
   },
@@ -241,13 +244,22 @@ export const DOG_CARD = {
   },
 } as const;
 
-interface CardLine {
+export interface CardLine {
   text: string;
   // The top of the line's capitals, from the card's top.
   top: number;
 }
 
-// The owner's name in the body font at 1x: one line when its right edge, as rightEdge measures a
+// The owner's photo round their face, its top-left at face: the face inside its mat and frame.
+export function ownerPhotoRect(face: Point): Rect {
+  const { photo } = DOG_CARD.owner;
+  const { size } = DOG_CARD.owner.face;
+  const outset = photo.frame + photo.mat;
+  const side = size + 2 * outset;
+  return { height: side, width: side, x: face.x - outset, y: face.y - outset };
+}
+
+// The owner's name in the body font at owner.scale: one line when its right edge, as rightEdge measures a
 // line from its left, fits owner.room, else broken at its first space onto two lines. A name too
 // wide with no space stays on one line.
 export function ownerNameLines(rightEdge: (line: string) => number, name: string): CardLine[] {

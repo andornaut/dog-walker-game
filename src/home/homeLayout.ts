@@ -1,7 +1,13 @@
 import type { DogId } from "../data/types";
-import { WALK_BAR, type WalkBarButtonId } from "../hud/walkHud";
+import {
+  type CardLine,
+  DOG_CARD,
+  ownerPhotoRect,
+  WALK_BAR,
+  type WalkBarButtonId,
+} from "../hud/walkHud";
 import type { PackPlacement } from "../layout/packFormation";
-import type { Rect } from "../lib/rect";
+import type { Point, Rect } from "../lib/rect";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import type { GridSpec } from "../ui/grid";
 import type { TextFitStyle } from "../ui/textFit";
@@ -111,11 +117,14 @@ export const HOME_LAYOUT = {
   // pixels: the paper starts 2px in, the band runs across its top 6px in with the title's caps
   // 7px below the band's top, and the well sits under the band. Rows of 2x body text, each
   // wrapped within the card less pad, rowGap between rows: a detail card's subtitle and status
-  // beside the well from besideX, besideDy under its top.
+  // beside the well from besideX, besideDy under its top. A dog's card puts its owner's photo
+  // and name between them, as the walk's dog card draws them (detailOwner), but with the name
+  // in ownerNameColour: the walk card's tan name sits on navy, and this card's paper is cream.
   card: {
     band: { height: 24, inset: 6, titleY: 7 },
     besideDy: 4,
     besideX: 90,
+    ownerNameColour: "plum",
     pad: 12,
     rowGap: 8,
     well: { picture: 2, size: 68, x: 12, y: 36 },
@@ -342,21 +351,56 @@ export function speechBubbleHeight(body: FontMetrics, lines: number): number {
   return padTop + inkRowsOfLines(body, lines) * 2 + padBottom;
 }
 
-// Rows of 2x body text from top down, each lineCounts[i] lines a line of the body font apart,
-// the next row starting a row's lines and the card's rowGap under the one before: each row's
-// capitals' top, and the last row's lowest ink.
-function cardTextRows(
+// A detail card row: its lines of 2x body text, or OWNER_ROW for the owner's photo and name.
+export const OWNER_ROW = "owner" as const;
+export type DetailRow = number | typeof OWNER_ROW;
+
+// The owner's photo and name as the walk's dog card sets them (DOG_CARD.owner), the photo's
+// top-left at at: the photo, the face inside it, and each line of the name (ownerNameLines)
+// at its capitals' top, as far right of the face and down from it as on the walk card.
+export function detailOwner(
+  at: Point,
+  lines: readonly CardLine[],
+): { face: Point; names: (CardLine & { x: number })[]; photo: Rect } {
+  const { face } = DOG_CARD.owner;
+  const probe = ownerPhotoRect({ x: 0, y: 0 });
+  const faceAt = { x: at.x - probe.x, y: at.y - probe.y };
+  return {
+    face: faceAt,
+    names: lines.map((line) => ({
+      text: line.text,
+      top: faceAt.y + line.top - face.y,
+      x: faceAt.x + DOG_CARD.owner.x - face.x,
+    })),
+    photo: ownerPhotoRect(faceAt),
+  };
+}
+
+// How tall the owner's row is: from the photo's top to whichever reaches lowest, the photo or
+// the name's ink on one line or two.
+export function detailOwnerHeight(body: FontMetrics): number {
+  const { face, scale, tops } = DOG_CARD.owner;
+  const photo = ownerPhotoRect(face);
+  const nameInk = inkRowsFromCapTop(body) * scale;
+  const lowest = Math.max(tops.oneLine, ...tops.twoLines) + nameInk;
+  return Math.max(photo.y + photo.height, lowest) - photo.y;
+}
+
+// Rows from top down, the next starting as far under a row's lowest ink as one line of 2x body
+// text starts under the last (a line of the font and the card's rowGap past its capitals): each
+// row's top (its capitals', or the owner's photo's), and the last row's lowest ink.
+function cardRows(
   body: FontMetrics,
   top: number,
-  lineCounts: readonly number[],
+  rows: readonly DetailRow[],
 ): { bottom: number; tops: number[] } {
-  const pitch = body.lineHeight * 2;
+  const inkGap = body.lineHeight * 2 + HOME_LAYOUT.card.rowGap - inkRowsFromCapTop(body) * 2;
   let y = top;
   let bottom = top;
-  const tops = lineCounts.map((lines) => {
+  const tops = rows.map((row) => {
     const at = y;
-    bottom = at + inkRowsOfLines(body, lines) * 2;
-    y += Math.max(1, lines) * pitch + HOME_LAYOUT.card.rowGap;
+    bottom = at + (row === OWNER_ROW ? detailOwnerHeight(body) : inkRowsOfLines(body, row) * 2);
+    y = bottom + inkGap;
     return at;
   });
   return { bottom, tops };
@@ -375,21 +419,19 @@ export const CARD_TEXT_ROOM = {
   full: HOME_LAYOUT.card.width - 2 * HOME_LAYOUT.card.pad,
 } as const;
 
-// A detail card's rows beside the well and under it, each as many lines as given, and the
-// card's height: padded under whichever reaches lowest, the well or a row's ink.
+// A detail card's rows beside the well and under it, and the card's height. The rows under the
+// well start pad under whichever reaches lowest, the well or the rows beside it, and the card
+// is padded under the lowest of all.
 export function detailCardLayout(
   body: FontMetrics,
-  lineCounts: { below: readonly number[]; beside: readonly number[] },
+  rows: { below: readonly DetailRow[]; beside: readonly DetailRow[] },
 ): { below: number[]; beside: number[]; height: number } {
   const { besideDy, pad, well } = HOME_LAYOUT.card;
-  const beside = cardTextRows(body, well.y + besideDy, lineCounts.beside);
-  const below = cardTextRows(body, well.y + well.size + pad, lineCounts.below);
-  const bottoms = [
-    well.y + well.size,
-    beside.bottom,
-    ...(lineCounts.below.length > 0 ? [below.bottom] : []),
-  ];
-  return { below: below.tops, beside: beside.tops, height: Math.max(...bottoms) + pad };
+  const beside = cardRows(body, well.y + besideDy, rows.beside);
+  const upper = Math.max(well.y + well.size, beside.bottom);
+  const below = cardRows(body, upper + pad, rows.below);
+  const bottom = rows.below.length > 0 ? below.bottom : upper;
+  return { below: below.tops, beside: beside.tops, height: bottom + pad };
 }
 
 // How wide a dog tile's name may be: from its text column to padRight inside its edge.

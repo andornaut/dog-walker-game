@@ -52,21 +52,25 @@ describe("dogDetail", () => {
       id: firstDog("small"),
       row: [fillNames(text.dogSmall, { dodgeIn: dodgeInText(data.tuning, "smallDodgeChance") })],
     },
-  ])("gives $id's breed, size and hearts, its size row, and owner", ({ id, row }) => {
-    const card = dogDetail(data, { ...owned, dogs: [id] }, dollars(0), id);
-    const dog = data.dogs[id];
-    expect(card.title).toBe(dog.name);
-    expect(card.subtitle).toBe(dog.breed);
-    expect(card.lines).toEqual([
-      fillNames(text.dogKind, {
-        hearts: String(sizeHearts(data.tuning, dog)),
-        size: capitalize(SIZE_NAMES[dog.size]),
-      }),
-      ...row,
-      fillNames(text.dogOwner, { owner: dog.owner.name, role: dog.owner.role }),
-    ]);
-    expect(card.status).toBe(text.dogStatus);
-  });
+  ])(
+    "gives $id's breed, size and hearts, its size row, and owner, with their photo",
+    ({ id, row }) => {
+      const card = dogDetail(data, { ...owned, dogs: [id] }, dollars(0), id);
+      const dog = data.dogs[id];
+      expect(card.title).toBe(dog.name);
+      expect(card.subtitle).toBe(dog.breed);
+      expect(card.lines).toEqual([
+        fillNames(text.dogKind, {
+          hearts: String(sizeHearts(data.tuning, dog)),
+          size: capitalize(SIZE_NAMES[dog.size]),
+        }),
+        ...row,
+        fillNames(text.dogOwner, { owner: dog.owner.name, role: dog.owner.role }),
+      ]);
+      expect(card.owner).toBe(id);
+      expect(card.status).toBe(text.dogStatus);
+    },
+  );
 
   const price = purchasePrice(data, owned, { dog: "biscuit", kind: "dog" }) ?? cents(0);
   it.each([

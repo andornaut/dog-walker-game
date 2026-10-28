@@ -30,10 +30,12 @@ type DetailData = Pick<
 
 // What a held dog, walker or gear tile's detail card says, owned or not: a title, a line under
 // it, rows of text, and a status row (the fee or price, owned or equipped, or the goal). locked
-// is true while the item costs more than the bank holds, or the walker is not owned.
+// is true while the item costs more than the bank holds, or the walker is not owned. A dog's
+// card names the dog as owner, for its owner's photo and name.
 export interface DetailCard {
   readonly lines: readonly string[];
   readonly locked: boolean;
+  readonly owner?: DogId;
   readonly status: string;
   readonly subtitle: string;
   readonly title: string;
@@ -91,7 +93,7 @@ function sizeRow(data: DetailData, dog: DogId): readonly string[] {
   }
 }
 
-// A dog's breed, its size and hearts, its size row, and its owner.
+// A dog's breed, its size and hearts, its size row, and its owner, whose photo it shows.
 export function dogDetail(data: DetailData, owned: Owned, bank: Cents, dog: DogId): DetailCard {
   const { breed, name, owner, size } = data.dogs[dog];
   const purchase: Purchase = { dog, kind: "dog" };
@@ -106,6 +108,7 @@ export function dogDetail(data: DetailData, owned: Owned, bank: Cents, dog: DogI
       fillLine(FIELDS, text, "dogOwner", { owner: owner.name, role: owner.role }),
     ],
     locked: isLocked(data, owned, bank, purchase),
+    owner: dog,
     status: priceLine(data, owned, bank, purchase) ?? text.dogStatus,
     subtitle: breed,
     title: name,
