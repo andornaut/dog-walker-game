@@ -1,6 +1,7 @@
 import type { GameObjects, Scene, Types } from "phaser";
 
 import { wrapWords } from "../../lib/lines";
+import { getOrInsert } from "../../lib/maps";
 import type { Rect } from "../../lib/rect";
 import { type FontMetrics, fontMetrics, leftBearing } from "../fontMetrics";
 import { inkWithPills, type LaidChar, laidPills, pillGlyphAdvances, pillRows } from "../namePills";
@@ -128,20 +129,16 @@ export function pixelFontMetrics(scene: Scene, role: FontRole): FontMetrics {
   const { data } = scene.cache.bitmapFont.get(key) as {
     data: Types.GameObjects.BitmapText.BitmapFontData;
   };
-  const known = METRICS.get(data);
-  if (known !== undefined) {
-    return known;
-  }
-  // Phaser keys a font's glyphs by character code.
-  const glyphs = new Map(
-    Object.entries(data.chars).map(([code, glyph]) => [
-      String.fromCodePoint(Number(code)),
-      { height: glyph.height, yOffset: glyph.yOffset },
-    ]),
-  );
-  const metrics = fontMetrics({ glyphs, lineHeight: data.lineHeight });
-  METRICS.set(data, metrics);
-  return metrics;
+  return getOrInsert(METRICS, data, () => {
+    // Phaser keys a font's glyphs by character code.
+    const glyphs = new Map(
+      Object.entries(data.chars).map(([code, glyph]) => [
+        String.fromCodePoint(Number(code)),
+        { height: glyph.height, yOffset: glyph.yOffset },
+      ]),
+    );
+    return fontMetrics({ glyphs, lineHeight: data.lineHeight });
+  });
 }
 
 // Text placed by its origin, at a whole-pixel position. With originY 0, y is the top of

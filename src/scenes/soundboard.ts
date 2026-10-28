@@ -136,13 +136,7 @@ class Soundboard {
 
   // Each loop's sound, added on first play and kept for the next.
   private musicSoundOf(key: string): AdjustableSound {
-    const existing = this.musicSounds.get(key);
-    if (existing !== undefined) {
-      return existing;
-    }
-    const sound = this.game.sound.add(key) as AdjustableSound;
-    this.musicSounds.set(key, sound);
-    return sound;
+    return getOrInsert(this.musicSounds, key, () => this.game.sound.add(key) as AdjustableSound);
   }
 
   // Phaser unlocks Web Audio on the first gesture, but a phone can stop the context again (a
