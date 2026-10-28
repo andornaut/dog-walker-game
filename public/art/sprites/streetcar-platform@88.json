@@ -1,0 +1,30 @@
+{ "frames": {
+   "streetcar-platform@88 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 154, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 154, "h": 32 },
+    "sourceSize": { "w": 154, "h": 32 },
+    "duration": 500
+   },
+   "streetcar-platform@88 1.aseprite": {
+    "frame": { "x": 154, "y": 0, "w": 154, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 154, "h": 32 },
+    "sourceSize": { "w": 154, "h": 32 },
+    "duration": 500
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "streetcar-platform@88.png",
+  "format": "RGBA8888",
+  "size": { "w": 308, "h": 32 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+  ]
+ }
+}

@@ -11768,6 +11768,87 @@
       }
     },
     {
+      "key": "streetcar-platform",
+      "png": "sprites/streetcar-platform.png",
+      "json": "sprites/streetcar-platform.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 176
+      }
+    },
+    {
+      "key": "streetcar-platform@50",
+      "png": "sprites/streetcar-platform@50.png",
+      "json": "sprites/streetcar-platform@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 88
+      }
+    },
+    {
+      "key": "streetcar-platform@56",
+      "png": "sprites/streetcar-platform@56.png",
+      "json": "sprites/streetcar-platform@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 99
+      }
+    },
+    {
+      "key": "streetcar-platform@62",
+      "png": "sprites/streetcar-platform@62.png",
+      "json": "sprites/streetcar-platform@62.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 110
+      }
+    },
+    {
+      "key": "streetcar-platform@69",
+      "png": "sprites/streetcar-platform@69.png",
+      "json": "sprites/streetcar-platform@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 121
+      }
+    },
+    {
+      "key": "streetcar-platform@75",
+      "png": "sprites/streetcar-platform@75.png",
+      "json": "sprites/streetcar-platform@75.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 132
+      }
+    },
+    {
+      "key": "streetcar-platform@81",
+      "png": "sprites/streetcar-platform@81.png",
+      "json": "sprites/streetcar-platform@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 143
+      }
+    },
+    {
+      "key": "streetcar-platform@88",
+      "png": "sprites/streetcar-platform@88.png",
+      "json": "sprites/streetcar-platform@88.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 154
+      }
+    },
+    {
+      "key": "streetcar-platform@94",
+      "png": "sprites/streetcar-platform@94.png",
+      "json": "sprites/streetcar-platform@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 165
+      }
+    },
+    {
       "key": "streetcar@50",
       "png": "sprites/streetcar@50.png",
       "json": "sprites/streetcar@50.json",

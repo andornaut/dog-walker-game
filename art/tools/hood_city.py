@@ -69,14 +69,23 @@ pedicab             48x72   minor rider, 1 lane, coming down its lane at the pac
                             wears a purple tee and a white headband, a lit headlamp on the fork crown.
                             ride (4 frames, 120ms): the pedals going round, the front tire's tread
                             falling 1px a frame
+streetcar-platform  176x36  minor, 3 lanes, Yonge Street's own 3-lane static: a TTC streetcar stop
+                            island in front elevation, a long low concrete platform, grey under an
+                            lgrey top and a white lit curb edge; on it a glass shelter under a ttc red
+                            roof band, white frame posts round navy panes with cyan glints and a lit ad
+                            panel, an azure poster in white, at its left end; a short grey railing at
+                            the platform's left end, its gaps clear, and a TTC stop sign, red round a
+                            white band, on a slate pole at its right. idle (2 frames, 500ms): the ad
+                            panel's light dips to lgrey and cobalt on frame 1
 
 Every key above also has <key>@<step> for each depth step in minis.STEPS, floor(size x scale + 0.5),
 with the original's tags, frames and durations, drawn on a minis.Mini with its own outline. The people
 and the riders are laid out on 32x48 and drawn at road.SCALE (1.5) as road.py's are, the minor
 obstacles in layout pixels at obstacles.SCALE (1.2) as obstacles.py's, the bus at obstacles.CAR_SCALE
 (56 columns, rows 1.2x) as the streetcar. All take the road outline (pixel.road_edge) and road.LIT's
-rim on their dark colours; the volleyball nets' whites take obstacles.white_keyline's plum, and their
-mesh holes stay clear, unoutlined.
+rim on their dark colours; the volleyball nets' and the streetcar platform's whites take
+obstacles.white_keyline's plum, and the nets' mesh holes and the platform's railing gaps stay clear,
+unoutlined.
 
 Hits (77x77, play: 8 frames, 70ms, laid out on 64x64 as hits.py's), each opening on hits.impact:
 fx-hit-dropped-cone the impact star in pink, then the strawberry scoop shoots up off a pink splat,
@@ -720,6 +729,96 @@ def net(s, lanes, breeze):
     return [[None if c == HOLE else c for c in row] for row in frame]
 
 
+# ---------- streetcar platform ----------
+
+# The platform's idle: rest, then the shelter's ad panel light dips on frame 1.
+PLATFORM_IDLE = (0, 1), 500
+
+
+def streetcar_platform(dim=0):
+    """A TTC streetcar stop island in front elevation across 3 lanes, laid out in obstacles.py's pixels
+    (obstacles.span(3) by ROW) and drawn on the drawn grid so every line keeps its width at every step: a long
+    low concrete platform, grey with a white lit curb edge over its lgrey top; on it a glass shelter under a
+    ttc red roof band lit pink, white frame posts round navy panes with cyan glints, a lit ad panel at its
+    left end; a short grey railing at the platform's left end and a TTC stop sign, red round a white band, on
+    a slate pole at its right. dim dips the ad panel's light."""
+    w = obstacles.span(3)
+    g = edged(Grid(w, obstacles.ROW), net_edge)
+    px, s = raster(g), scale_of(g)
+    sy = getattr(g, "sy", s)
+    W, H = px.w, px.h
+
+    def X(v):
+        return math.floor(v * s + 0.5)
+
+    def Y(v):
+        return math.floor(v * sy + 0.5)
+
+    big = s >= 0.85
+    # the platform: an lgrey top under a white lit curb edge, a grey face, slate along its foot and right end
+    top, face = Y(23), Y(25)
+    px.rect(1, top, W - 2, H - top, "grey")
+    px.rect(1, top, W - 2, face - top, "lgrey")
+    px.rect(1, top, W - 2, 1, "white")
+    px.rect(1, H - 1, W - 2, 1, "slate")
+    px.rect(W - 2, face, 1, H - face, "slate")
+    if s >= obstacles.TEXTURE_MIN:
+        for v in (w / 4, w / 2, 3 * w / 4):
+            px.rect(X(v), face, 1, H - face - 1, "slate")
+    # the railing at the left end: two posts and a top and a middle rail, its gaps HOLE until platform()
+    rail_top, post = Y(14), 2 if big else 1
+    r0, r1 = X(4), X(20) + post
+    px.rect(r0, rail_top, r1 - r0, top - rail_top, HOLE)
+    for x in (r0, r1 - post):
+        px.rect(x, rail_top, post, top - rail_top, "grey")
+    for y in (rail_top, Y(18.5)):
+        px.rect(r0, y, r1 - r0, 1, "lgrey")
+    # the shelter: the roof band, the glass under it, the frame round the panes
+    x0, x1 = X(30), X(100)
+    roof0, roof1 = Y(3), Y(8)
+    px.rect(x0 - post, roof0, x1 - x0 + 2 * post, roof1 - roof0, "ttc")
+    px.rect(x0 - post, roof0, x1 - x0 + 2 * post, 1, "pink")
+    foot = top - 1
+    px.rect(x0, roof1, x1 - x0, foot - roof1, "navy")
+    posts = [x0, X(48), X(74), x1 - post]
+    # the ad panel, between the first two posts: lit white round an azure poster, dipped to lgrey and cobalt
+    a0, a1 = posts[0] + post, posts[1]
+    px.rect(a0, roof1, a1 - a0, foot - roof1, "lgrey" if dim else "white")
+    m = 2 if big else 1
+    px.rect(a0 + m, roof1 + m, a1 - a0 - 2 * m, foot - roof1 - 2 * m - (2 if big else 1),
+            "cobalt" if dim else "azure")
+    # the glints, a cyan diagonal streak across each glass pane
+    for p0, p1 in zip(posts[1:], posts[2:]):
+        g0, g1 = p0 + post, p1
+        n = foot - roof1
+        for k in range(n):
+            x = g0 + (g1 - g0) // 3 + (n - 1 - k) // 2 - 1
+            for d in range(2 if big else 1):
+                if g0 <= x + d < g1:
+                    px.p(x + d, roof1 + k, "cyan")
+    for x in posts:
+        px.rect(x, roof1, post, foot - roof1 + 1, "white")
+    px.rect(x0, foot, x1 - x0, 1, "white")
+    # the stop sign pole and its sign: red round a white band with a red bar through it
+    pole = X(122)
+    px.rect(pole, Y(8), post, top - Y(8), "slate")
+    s0, s1, t0, t1 = X(115), X(129) + post, Y(0), Y(9)
+    px.rect(s0, t0, s1 - s0, t1 - t0, "ttc")
+    px.rect(s0, t0, s1 - s0, 1, "pink")
+    # the white band keeps 2 rows of red over and under it, so the sign stays red at the far steps
+    b = 2 if big else 1
+    px.rect(s0 + b, t0 + 2, s1 - s0 - 2 * b, t1 - t0 - 4, "white")
+    if big:
+        px.rect(s0 + b + 1, (t0 + t1) // 2, s1 - s0 - 2 * b - 2, 1, "ttc")
+    return lit(g, dict(ttc=("pink", None)))
+
+
+def platform(s, dim):
+    """streetcar_platform at s, outlined, the railing's gaps cleared."""
+    frame = small(this(), s, streetcar_platform, dim).outlined()
+    return [[None if c == HOLE else c for c in row] for row in frame]
+
+
 # ---------- sandwich board ----------
 
 BOARD_IDLE = (0, 0, 1, 0), 450
@@ -1019,6 +1118,8 @@ def sprites():
         args, ms = NET_IDLE
         for lanes in (2, 3):
             yield f"volleyball-net-{lanes}{suffix}", [("idle", [net(o, lanes, a) for a in args], ms)]
+        args, ms = PLATFORM_IDLE
+        yield f"streetcar-platform{suffix}", [("idle", [platform(o, a) for a in args], ms)]
         args, ms = BUS_IDLE
         yield f"ttc-bus{suffix}", [("idle", [small(me, car, ttc_bus, a).outlined() for a in args], ms),
                                    ("drive", [small(me, car, ttc_bus, roll=r).outlined() for r in drive], 100)]
