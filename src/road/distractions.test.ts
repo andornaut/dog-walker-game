@@ -2,25 +2,19 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import shippedManifest from "../../../public/art/manifest.json";
-import { minorObstacleSpriteKey } from "../../assets/spriteKeys";
-import { gameData } from "../../data";
-import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../../data/screen";
-import type { MinorObstacleId } from "../../data/types";
-import { laneCentreXs } from "../../layout/lanes";
-import { randomStream } from "../../lib/random";
-import {
-  eachRoadsideProp,
-  ROADSIDE,
-  type RoadsideTable,
-  START_STRIP_LENGTH,
-} from "../../road/roadsideProps";
-import { currentZone } from "../../rules/route";
-import { read } from "../../rules/units";
-import { STEP_SECONDS } from "../../runner/fixedStep";
-import { DART_VERGE_LANES } from "../../runner/moverPlanning";
-import { moverPlace } from "../../runner/movers";
-import { screenRoadGeometry } from "../../runner/screenGeometry";
+import shippedManifest from "../../public/art/manifest.json";
+import { minorObstacleSpriteKey } from "../assets/spriteKeys";
+import { gameData } from "../data";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
+import type { MinorObstacleId } from "../data/types";
+import { laneCentreXs } from "../layout/lanes";
+import { randomStream } from "../lib/random";
+import { currentZone } from "../rules/route";
+import { read } from "../rules/units";
+import { STEP_SECONDS } from "../runner/fixedStep";
+import { DART_VERGE_LANES } from "../runner/moverPlanning";
+import { moverPlace } from "../runner/movers";
+import { screenRoadGeometry } from "../runner/screenGeometry";
 import {
   chooseCard,
   runStreams,
@@ -28,12 +22,12 @@ import {
   type SessionEvent,
   startSession,
   stepSession,
-} from "../../runner/session";
-import { startRoad, zoneLength } from "../../runner/walk";
-import { walkProjection } from "../../runner/walkGeometry";
-import { type WalkItem } from "../../runner/walkItems";
-import { newRun } from "../../state/runState";
-import { defined } from "../../testing/defined";
+} from "../runner/session";
+import { startRoad, zoneLength } from "../runner/walk";
+import { walkProjection } from "../runner/walkGeometry";
+import { type WalkItem } from "../runner/walkItems";
+import { newRun } from "../state/runState";
+import { defined } from "../testing/defined";
 import {
   type Distraction,
   type DistractionDeps,
@@ -47,6 +41,12 @@ import {
   startDistractions,
   stepDistractions,
 } from "./distractions";
+import {
+  eachRoadsideProp,
+  ROADSIDE,
+  type RoadsideTable,
+  START_STRIP_LENGTH,
+} from "./roadsideProps";
 
 const LAYOUT = SCREEN_LAYOUT;
 const CENTRE_X = walkProjection(ROAD_CAMERA, LAYOUT.road).centreX;
@@ -68,7 +68,7 @@ const ANCHORS = new Map(shippedManifest.sprites.map(({ anchor, key }) => [key, a
 const TAGS = new Map<string, readonly string[]>();
 const tagsOf = (key: string): readonly string[] => {
   if (!TAGS.has(key)) {
-    const path = new URL(`../../../public/art/sprites/${key}.json`, import.meta.url);
+    const path = new URL(`../../public/art/sprites/${key}.json`, import.meta.url);
     try {
       const json = JSON.parse(readFileSync(path, "utf8")) as {
         meta: { frameTags: { name: string }[] };

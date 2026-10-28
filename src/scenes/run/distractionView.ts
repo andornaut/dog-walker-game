@@ -7,12 +7,6 @@ import { project } from "../../layout/projection";
 import { itemAt } from "../../lib/arrays";
 import { getOrInsertComputed } from "../../lib/maps";
 import type { Random } from "../../lib/random";
-import { ROADSIDE } from "../../road/roadsideProps";
-import { currentZone, previousZone } from "../../rules/route";
-import { screenRoadGeometry } from "../../runner/screenGeometry";
-import type { Walk } from "../../runner/walk";
-import type { WalkItem } from "../../runner/walkItems";
-import { firstTag, playTag, showAtDepth, spriteMetrics } from "../sprites";
 import {
   type Distraction,
   type DistractionDeps,
@@ -20,7 +14,13 @@ import {
   placeDistraction,
   startDistractions,
   stepDistractions,
-} from "./distractions";
+} from "../../road/distractions";
+import { ROADSIDE } from "../../road/roadsideProps";
+import { currentZone, previousZone } from "../../rules/route";
+import { screenRoadGeometry } from "../../runner/screenGeometry";
+import type { Walk } from "../../runner/walk";
+import type { WalkItem } from "../../runner/walkItems";
+import { firstTag, playTag, showAtDepth, spriteMetrics } from "../sprites";
 import { DEPTH, LANE_XS, laneX, PROJECTION, ROW_DEPTH, showOnRoad } from "./stage";
 
 // The tags a distraction moves in, the first its art has: it walks, or hops.

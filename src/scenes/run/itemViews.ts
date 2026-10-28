@@ -19,6 +19,7 @@ import { obstacleParts } from "../../layout/obstacleArt";
 import { itemAt } from "../../lib/arrays";
 import { keysOf } from "../../lib/records";
 import { type KeptScenery, struckBy, struckNow } from "../../road/struckScenery";
+import { goesToVerge, vergeNow } from "../../road/vergeScenery";
 import { moverTell } from "../../runner/movers";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import { type RoadGeometry, type Walk, type WalkStep } from "../../runner/walk";
@@ -30,7 +31,6 @@ import { applyItemCue } from "./itemCueViews";
 import { drawMover, MOVER_CUE_PARTS, moverBodyKey } from "./moverView";
 import { DEPTH, LANE_XS, LAYOUT, PROJECTION, ROW_DEPTH, type Shadow } from "./stage";
 import { type StandFrame, standPart } from "./standPart";
-import { goesToVerge, vergeNow } from "./vergeScenery";
 
 // Road art that may be missing is drawn as a box this tall, as wide as its art: its lanes
 // less the lane's spare width beside a 1-lane sprite.

@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { ROAD_SPRITE_SIZE } from "../../assets/spriteKeys";
-import { LANE_COUNT, SCREEN_CONFIG } from "../../data/screen";
-import { WORLD } from "../../data/world";
-import { curbBand, VERGES } from "../../road/roadside";
-import type { KeptScenery } from "../../road/struckScenery";
-import { DART_VERGE_LANES } from "../../runner/moverPlanning";
-import { type MoverPath, moverPlace } from "../../runner/movers";
+import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
+import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
+import { WORLD } from "../data/world";
+import { DART_VERGE_LANES } from "../runner/moverPlanning";
+import { type MoverPath, moverPlace } from "../runner/movers";
+import { curbBand, VERGES } from "./roadside";
+import type { KeptScenery } from "./struckScenery";
 import { goesToVerge, vergeNow } from "./vergeScenery";
 
 const ROAD = { laneCount: LANE_COUNT, roadBottom: 700, roadTop: 0 };

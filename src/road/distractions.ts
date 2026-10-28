@@ -1,16 +1,16 @@
-import { minorObstacleSpriteKey } from "../../assets/spriteKeys";
-import type { DistractionPattern, GameData, MinorObstacleId, Zone } from "../../data/types";
-import { clamp01 } from "../../lib/numbers";
-import { type Random, weightedPick } from "../../lib/random";
-import { keysOf } from "../../lib/records";
-import { eachRoadsideProp, type RoadsideTable, START_STRIP_LENGTH } from "../../road/roadsideProps";
-import { read, readTable } from "../../rules/units";
-import { type Box, overlaps } from "../../runner/collision";
-import { DART_VERGE_LANES, stopsOnVerge } from "../../runner/moverPlanning";
-import { drawnLanes, hasLeftRoad, type MoverOnRoad, moverPlace, moverY } from "../../runner/movers";
-import type { SpawnEvent } from "../../runner/spawning";
-import { itemHeight, type RoadGeometry, zoneLength } from "../../runner/walk";
-import { footprintOf, type WalkItem, type WalkItemKind } from "../../runner/walkItems";
+import { minorObstacleSpriteKey } from "../assets/spriteKeys";
+import type { DistractionPattern, GameData, MinorObstacleId, Zone } from "../data/types";
+import { clamp01 } from "../lib/numbers";
+import { type Random, weightedPick } from "../lib/random";
+import { keysOf } from "../lib/records";
+import { read, readTable } from "../rules/units";
+import { type Box, overlaps } from "../runner/collision";
+import { DART_VERGE_LANES, stopsOnVerge } from "../runner/moverPlanning";
+import { drawnLanes, hasLeftRoad, type MoverOnRoad, moverPlace, moverY } from "../runner/movers";
+import type { SpawnEvent } from "../runner/spawning";
+import { itemHeight, type RoadGeometry, zoneLength } from "../runner/walk";
+import { footprintOf, type WalkItem, type WalkItemKind } from "../runner/walkItems";
+import { eachRoadsideProp, type RoadsideTable, START_STRIP_LENGTH } from "./roadsideProps";
 
 // The distraction movers: red herrings. They wear the zone's own hazards (distractionKinds), step
 // on and off the road's edges in the top part of the road, and are gone before their row nears the

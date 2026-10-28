@@ -1,8 +1,8 @@
-import type { KeptScenery, RoadPlace } from "../../road/struckScenery";
-import { stopsOnVerge } from "../../runner/moverPlanning";
-import { moverPlace, moverY } from "../../runner/movers";
-import type { RoadGeometry } from "../../runner/walk";
-import type { WalkItem } from "../../runner/walkItems";
+import { stopsOnVerge } from "../runner/moverPlanning";
+import { moverPlace, moverY } from "../runner/movers";
+import type { RoadGeometry } from "../runner/walk";
+import type { WalkItem } from "../runner/walkItems";
+import type { KeptScenery, RoadPlace } from "./struckScenery";
 
 // Whether an item is a dart that stops on the verge. It leaves the walk as it leaves the road, so
 // it collides with nothing from then on, and is kept as scenery (KeptScenery).
