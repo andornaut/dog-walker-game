@@ -68,16 +68,14 @@ import type { ArtLook } from "../ui/interaction";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
-  addPixelText,
   fitPixelText,
   fitPixelTextsAlike,
-  type FontRole,
   type LabelToFit,
   pixelFontMetrics,
   placePixelText,
 } from "../ui/phaser/pixelText";
 import { GREYED, pictureBox, type PlateKind } from "../ui/selection";
-import { TEXT_FIT_STYLES, TEXT_SCALE } from "../ui/textFit";
+import { TEXT_FIT_STYLES } from "../ui/textFit";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { addDetailCard, drawDetailCard } from "./homePanels";
 import {
@@ -102,7 +100,9 @@ import {
 } from "./scrollView";
 import { listenTargetPress, sameByValue, type TargetPressListener } from "./targetPress";
 import {
+  addBodyText,
   addCloseButton,
+  addGraphicsIn,
   addPanel,
   addSelectFrame,
   addSelectTile,
@@ -605,21 +605,6 @@ export class ShopScene extends Scene {
     openOverlay(this, SCENE_KEYS.celebration, data);
   }
 
-  private text(
-    parent: GameObjects.Container,
-    at: { x: number; y: number },
-    value: string,
-    style: { colour?: number; font?: FontRole; originX?: number } = {},
-  ): GameObjects.BitmapText {
-    const label = addPixelText(this, at.x, at.y, value, {
-      colour: PALETTE.plum,
-      scale: TEXT_SCALE,
-      ...style,
-    });
-    parent.add(label);
-    return label;
-  }
-
   private render(): void {
     clearScene(this);
     this.containers = new Map();
@@ -627,7 +612,7 @@ export class ShopScene extends Scene {
     const save = this.save();
     const root = this.add.container(0, 0);
     // The wood under the card, from the top bar down; the home screen's bar shows above it.
-    fillRect(this.graphics(root), PALETTE.darkBrown, {
+    fillRect(addGraphicsIn(this, root), PALETTE.darkBrown, {
       height: SCREEN_CONFIG.height - PANEL.y + 4,
       width: SCREEN_CONFIG.width,
       x: 0,
@@ -676,12 +661,6 @@ export class ShopScene extends Scene {
     });
   }
 
-  private graphics(parent: GameObjects.Container): GameObjects.Graphics {
-    const g = this.add.graphics();
-    parent.add(g);
-    return g;
-  }
-
   // The message on the ui-hint plate across the list's top, in one line fitted to the plate.
   private drawMessage(
     root: GameObjects.Container,
@@ -689,7 +668,7 @@ export class ShopScene extends Scene {
   ): void {
     root.add(addPanel(this, PLATE, "ui-hint"));
     const x = PLATE.x + LAYOUT.message.textDx;
-    const label = this.text(root, { x, y: PLATE.y }, message.text, {
+    const label = addBodyText(this, root, { x, y: PLATE.y }, message.text, {
       colour: message.refused ? PALETTE.darkRed : PALETTE.forest,
     });
     const { style } = fitPixelText(label, SHOP_MESSAGE_FIT, x, PLATE.y);
@@ -701,10 +680,16 @@ export class ShopScene extends Scene {
     const { titleX, titleY } = LAYOUT.band;
     const band = cardBand(PANEL);
     addDetailCard(this, root, PANEL, band);
-    this.text(root, { x: PANEL.x + titleX, y: band.y + titleY }, gameData.homeText.shop.title, {
-      colour: PALETTE.white,
-      font: "title",
-    });
+    addBodyText(
+      this,
+      root,
+      { x: PANEL.x + titleX, y: band.y + titleY },
+      gameData.homeText.shop.title,
+      {
+        colour: PALETTE.white,
+        font: "title",
+      },
+    );
     addCloseButton(this, root, LAYOUT.close, this.pressed?.kind === "close");
   }
 
@@ -725,9 +710,9 @@ export class ShopScene extends Scene {
   }
 
   private heading(root: GameObjects.Container, y: number, title: string, note?: string): void {
-    this.text(root, { x: LAYOUT.headingX, y }, title, { font: "title" });
+    addBodyText(this, root, { x: LAYOUT.headingX, y }, title, { font: "title" });
     if (note !== undefined) {
-      this.text(root, { x: this.frame.headingRight, y }, note, {
+      addBodyText(this, root, { x: this.frame.headingRight, y }, note, {
         colour: PALETTE.darkBrown,
         originX: 1,
       });
@@ -803,7 +788,7 @@ export class ShopScene extends Scene {
       x: rect.x + box.dx,
       y: rect.y + Math.floor((rect.height - box.size) / 2),
     };
-    fillRect(this.graphics(content), PALETTE[pictureBox(view)], boxRect);
+    fillRect(addGraphicsIn(this, content), PALETTE[pictureBox(view)], boxRect);
     this.addArt(content, purchaseArt(row.purchase), view.art, {
       x: boxRect.x + ROW.art,
       y: boxRect.y + ROW.art,
@@ -821,7 +806,7 @@ export class ShopScene extends Scene {
     const room = shopRowTextRoom(rect.width, right - rightLeft);
     // A row with no second line centres its name.
     const nameY = row.line === "" ? mid - 5 : mid - 15;
-    const name = this.text(content, { x: textX, y: nameY }, row.name, { colour: ink });
+    const name = addBodyText(this, content, { x: textX, y: nameY }, row.name, { colour: ink });
     this.rowTexts.names.push({ label: name, room, x: textX, y: nameY });
     this.drawRowLine(content, row, { greyed: view.state === "disabled", mid, room, x: textX });
     if (this.focusId === row.id) {
@@ -856,7 +841,7 @@ export class ShopScene extends Scene {
     const colour = at.greyed ? PALETTE[GREYED.text] : PALETTE.darkBrown;
     if (row.line !== "") {
       const y = at.mid + 3;
-      const line = this.text(parent, { x: at.x, y }, row.line, { colour });
+      const line = addBodyText(this, parent, { x: at.x, y }, row.line, { colour });
       this.rowTexts.lines.push({ label: line, room: at.room, x: at.x, y });
     }
   }
@@ -874,7 +859,7 @@ export class ShopScene extends Scene {
         parent.add(tick);
       }
       const owned = gameData.homeText.shop.owned;
-      const label = this.text(parent, { x: at.right - OWNED_DX, y: at.mid - 4 }, owned, {
+      const label = addBodyText(this, parent, { x: at.right - OWNED_DX, y: at.mid - 4 }, owned, {
         colour: PALETTE.forest,
         font: "title",
         originX: 1,

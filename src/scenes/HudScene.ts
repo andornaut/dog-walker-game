@@ -25,7 +25,7 @@ import {
 } from "../hud/hudLanes";
 import type { ChangeLabel } from "../hud/hudView";
 import type { MessageLine } from "../hud/messageStrip";
-import { cardOwnerMood, curvePoint, FORGIVEN_EVENT, type ForgivenCue } from "../hud/moments";
+import { cardOwnerMood, FORGIVEN_EVENT, type ForgivenCue } from "../hud/moments";
 import {
   cashChipPlace,
   mergeTips,
@@ -97,12 +97,14 @@ import {
   scalePixelText,
   setPixelText,
 } from "../ui/phaser/pixelText";
+import { arcFlight } from "./arcFlight";
 import { addCharm, glintWell } from "./buffCharm";
 import { BumpBorder } from "./bumpBorder";
 import { DEBUFF_COLOURS } from "./debuffColours";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
 import { drawDetailCard } from "./homePanels";
+import { HUD_DEPTH } from "./hudDepth";
 import type { HudRun, HudWalk, RunHudView } from "./hudWalk";
 import { MESSAGE_EVENT, MessageStrip } from "./messageStripView";
 import { listenOnePress } from "./onePress";
@@ -153,15 +155,7 @@ interface ShowingTip {
   label: ChangeLabel;
 }
 
-// The message strip draws under the HUD's other parts, and over a card's or the pause menu's
-// parts when it draws there.
-const MESSAGE_DEPTH = { hud: -1, overlay: 1000 };
-// An explanation's detail card draws over every other part of the HUD but a bump's border, and
-// over the pause menu's panel and the message strip drawn there. A bump's tint draws under
-// every part of the HUD, the message strip included.
-const DETAIL_DEPTH = 2000;
 const NOT_EXPLAINED = { key: "", layer: undefined };
-const BUMP_DEPTH = { border: 3000, tint: MESSAGE_DEPTH.hud - 1 };
 // An owner's tab shows this long on a heart change.
 const HEART_TAB_MS = 1200;
 // A card holds one row of hearts, as many as the most an owner can have.
@@ -312,9 +306,9 @@ export class HudScene extends Scene {
       originX: 1,
     });
     this.dynamic = this.add.graphics();
-    this.debuffFills = this.add.graphics().setDepth(1);
+    this.debuffFills = this.add.graphics().setDepth(HUD_DEPTH.overPart);
     this.cards = dogSlots.map((rect) => this.createCard(rect));
-    const border = new BumpBorder(this, BUMP_DEPTH);
+    const border = new BumpBorder(this);
 
     const run = this.walk();
     const firingRects = () => this.feedback?.firingRects() ?? [];
@@ -520,7 +514,7 @@ export class HudScene extends Scene {
     this.showExplanation(view, overlay);
     this.showDebuffBars(view.run);
     this.showZoneProgress(view.run);
-    const depth = overlay === this ? MESSAGE_DEPTH.hud : MESSAGE_DEPTH.overlay;
+    const depth = overlay === this ? HUD_DEPTH.message : HUD_DEPTH.messageOverlay;
     // The strip's lines wait under an explanation's detail card.
     const aged = held || pause.hold ? 0 : delta;
     this.messages.update(aged, overlay, depth, this.debuffBars.length);
@@ -674,7 +668,7 @@ export class HudScene extends Scene {
       this.explained = { key, layer: undefined };
       return;
     }
-    const layer = overlay.add.container(0, 0).setDepth(DETAIL_DEPTH);
+    const layer = overlay.add.container(0, 0).setDepth(HUD_DEPTH.detail);
     drawDetailCard(overlay, layer, false, detail.card, detail.picture, detail.kind);
     this.explained = { key, layer };
   }
@@ -972,23 +966,18 @@ export class HudScene extends Scene {
     };
     const path = moneyFlightPath(chip.rect);
     const bases = chip.parts.map(({ x, y }) => ({ x, y }));
-    const progress = { t: 0 };
-    this.labels.tween(this, {
-      duration: FEEDBACK.heart.flyMs,
-      ease: "Sine.easeIn",
-      onComplete: land,
-      onUpdate: () => {
-        const point = curvePoint(path.from, path.control, path.to, progress.t);
-        const dx = Math.round(point.x) - path.from.x;
-        const dy = Math.round(point.y) - path.from.y;
+    const flight = { duration: FEEDBACK.heart.flyMs, ease: "Sine.easeIn", onComplete: land };
+    this.labels.tween(
+      this,
+      arcFlight(path, flight, (point) => {
+        const dx = point.x - path.from.x;
+        const dy = point.y - path.from.y;
         chip.parts.forEach((part, i) => {
           const base = bases[i] ?? part;
           part.setPosition(base.x + dx, base.y + dy);
         });
-      },
-      t: 1,
-      targets: progress,
-    });
+      }),
+    );
   }
 
   // A heart change's label in the middle of its card's bottom rows, once its heart has landed,
@@ -1018,7 +1007,7 @@ export class HudScene extends Scene {
     placePixelText(text, placed.text.x - ink.left, placed.text.y);
     const chip = this.add.graphics();
     drawFramedRect(chip, CREAM_PANEL_COLOURS, placed.chip);
-    text.setDepth(1);
+    text.setDepth(HUD_DEPTH.overPart);
     return { parts: [chip, text], rect: placed.chip };
   }
 

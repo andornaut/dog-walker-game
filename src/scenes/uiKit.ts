@@ -3,7 +3,7 @@ import type { GameObjects, Scene, Tweens } from "phaser";
 import { animationKey } from "../assets/asepriteAnimations";
 import { SCREEN_LAYOUT } from "../data/screen";
 import { FEEDBACK, loopFrame } from "../home/feedback";
-import { containsPoint, insetRect, type Rect } from "../lib/rect";
+import { containsPoint, insetRect, type Point, type Rect } from "../lib/rect";
 import type { CloseControl } from "../ui/closeControl";
 import {
   type ArtLook,
@@ -42,6 +42,29 @@ import {
 import { TEXT_SCALE } from "../ui/textFit";
 import { playEffect, playTag } from "./sprites";
 import { listenTargetPress } from "./targetPress";
+
+// Body text at 2x in plum, the screens' default text.
+export const BODY_TEXT = { colour: PALETTE.plum, scale: TEXT_SCALE } as const;
+
+// Text in BODY_TEXT unless style says otherwise, added to parent when there is one.
+export function addBodyText(
+  scene: Scene,
+  parent: GameObjects.Container | undefined,
+  at: Point,
+  value: string,
+  style: Partial<PixelTextStyle> = {},
+): GameObjects.BitmapText {
+  const label = addPixelText(scene, at.x, at.y, value, { ...BODY_TEXT, ...style });
+  parent?.add(label);
+  return label;
+}
+
+// A graphics object added to parent.
+export function addGraphicsIn(scene: Scene, parent: GameObjects.Container): GameObjects.Graphics {
+  const g = scene.add.graphics();
+  parent.add(g);
+  return g;
+}
 
 // Whether key's art is loaded with frames of this size, so art drawn for another layout is
 // left for the drawn stand-in.

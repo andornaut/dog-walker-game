@@ -61,7 +61,15 @@ import {
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 import { firstTag, playTag } from "./sprites";
-import { addMenuButton, addPanel, addScreenBackdrop, addTagImage, listenButtonTap } from "./uiKit";
+import {
+  addBodyText,
+  addMenuButton,
+  addPanel,
+  addScreenBackdrop,
+  addTagImage,
+  BODY_TEXT,
+  listenButtonTap,
+} from "./uiKit";
 
 const END_SCREEN_KEY = "screen-end";
 const LOGO = { ...END_LAYOUT.logo, key: "logo" };
@@ -126,9 +134,9 @@ export class EndScene extends Scene {
       ended === null ? [] : earningsBreakdown(gameData, ended.changes, walk.earnedCents);
     const closing = closingLines(gameData, Math.random, walk);
     const text = (x: number, y: number, value: string, colour: number, originX = 0) =>
-      addPixelText(this, x, y, value, { colour, originX, scale: TEXT_SCALE });
+      addBodyText(this, undefined, { x, y }, value, { colour, originX });
     const title = (x: number, y: number, value: string, colour: number, originX = 0) =>
-      addPixelText(this, x, y, value, { colour, font: "title", originX, scale: TEXT_SCALE });
+      addBodyText(this, undefined, { x, y }, value, { colour, font: "title", originX });
     // A label set in the first of TEXT_FIT_STYLES that fits room.
     const fitted = (label: GameObjects.BitmapText, room: number, x: number, y: number) =>
       fitPixelText(label, { room, styles: TEXT_FIT_STYLES }, x, y);
@@ -136,14 +144,10 @@ export class EndScene extends Scene {
     // A closing line wraps onto a second line at 2x while the panel has room for it.
     const quipFit = { room: QUIP_TEXT_ROOM, styles: WRAPPING_TEXT_FIT_STYLES };
     const wanted = closing.map((line) => {
-      const { lines: shown } = withProbe(
-        this,
-        { colour: PALETTE.plum, scale: TEXT_SCALE },
-        (probe) => {
-          setPixelText(probe, line.text);
-          return fitPixelText(probe, quipFit, 0, 0);
-        },
-      );
+      const { lines: shown } = withProbe(this, BODY_TEXT, (probe) => {
+        setPixelText(probe, line.text);
+        return fitPixelText(probe, quipFit, 0, 0);
+      });
       return { fired: line.fired, lines: shown.length };
     });
     const quipLines = grantedQuipLines(body, lines.length, wanted);

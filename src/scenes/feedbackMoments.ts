@@ -9,7 +9,6 @@ import { type MoneyTick, retarget, tickShown } from "../hud/feedback";
 import type { ChangeLabel } from "../hud/hudView";
 import {
   bowRightControl,
-  curvePoint,
   downTail,
   FIRED_LINE,
   FIRED_LINE_FIT,
@@ -53,7 +52,9 @@ import {
   pixelFontMetrics,
   placePixelText,
 } from "../ui/phaser/pixelText";
+import { arcFlight } from "./arcFlight";
 import { addFaceRows, fitFaceRows } from "./faceTextView";
+import { HUD_DEPTH } from "./hudDepth";
 import type { HudWalk } from "./hudWalk";
 import { onSceneEvent } from "./overlay";
 import { firstTag, playEffect, playTag } from "./sprites";
@@ -61,16 +62,12 @@ import { TimedGroup } from "./timedGroup";
 import { addPanel, artFits, tagFrame } from "./uiKit";
 
 const LAYOUT = SCREEN_LAYOUT;
-// Over the cards, labels and owners' tabs the HUD draws.
-const DEPTH = 50;
 // The owner's 32x32 face is drawn at 2x. The pop shows no face on its first frame, the face
 // at 1x on its second and at 2x from its third.
 const FACE = { scale: 2, size: 32 };
 const POP = { key: "fx-fired-pop", scale: 2, tag: "play" };
 const PLATE = { corner: 8, dropIn: 8, key: "ui-fired-plate" };
-// Each fired line's bubble takes its own depth pair over the moments, panel then text, so two
-// lines up at once never interleave. The tail is 8px wide.
-const LINE_DEPTH = DEPTH + 2;
+// A fired line's bubble's tail is 8px wide.
 const LINE_TAIL_WIDTH = 8;
 // The payout label: a three-slice with 8px caps, its amount's ink from x 9 and capitals from
 // row 3, and 5px after the ink.
@@ -208,17 +205,9 @@ export class HudFeedback {
     ms: number,
     done: () => void,
   ): void {
-    const progress = { t: 0 };
-    this.tween({
-      duration: ms,
-      onComplete: done,
-      onUpdate: () => {
-        const point = curvePoint(path.from, path.control, path.to, progress.t);
-        target.setPosition(Math.round(point.x), Math.round(point.y));
-      },
-      t: 1,
-      targets: progress,
-    });
+    this.tween(
+      arcFlight(path, { duration: ms, onComplete: done }, ({ x, y }) => target.setPosition(x, y)),
+    );
   }
 
   private slotOf(dog: DogId): Rect | undefined {
@@ -330,14 +319,14 @@ export class HudFeedback {
       .sprite(at.x, at.y, POP.key)
       .setOrigin(0)
       .setScale(POP.scale)
-      .setDepth(DEPTH);
+      .setDepth(HUD_DEPTH.moment);
     pop.play({ key: animationKey(POP.key, POP.tag), repeat: 0 });
     return pop;
   }
 
   // The owner's fired face at 2x, else a framed box with their name.
   private addFace(dog: DogId, centre: Point): GameObjects.Container {
-    const container = this.scene.add.container(centre.x, centre.y).setDepth(DEPTH);
+    const container = this.scene.add.container(centre.x, centre.y).setDepth(HUD_DEPTH.moment);
     const key = ownerFaceKey(gameData, dog);
     const size = FACE.size * FACE.scale;
     if (this.scene.textures.exists(key)) {
@@ -364,7 +353,7 @@ export class HudFeedback {
 
   // ui-fired-plate, else the hit label's plate, else a drawn one, with "FIRED!" across it.
   private addPlate(rect: Rect): GameObjects.Container {
-    const container = this.scene.add.container(rect.x, rect.y).setDepth(DEPTH);
+    const container = this.scene.add.container(rect.x, rect.y).setDepth(HUD_DEPTH.moment);
     const { corner } = PLATE;
     const slice = (key: string, frame: number | string | undefined) =>
       this.scene.add
@@ -412,7 +401,7 @@ export class HudFeedback {
     }
     const y = line.at.y - height;
     const rect = { height, width, x, y };
-    let depth = LINE_DEPTH;
+    let depth = HUD_DEPTH.firedLine;
     while (this.lines.some((shown) => shown.depth === depth)) {
       depth += 2;
     }
@@ -503,17 +492,21 @@ export class HudFeedback {
           .nineslice(0, 0, key, tagFrame(this.scene, key, "normal"), width, height, cap, cap, 0, 0)
           .setOrigin(0)
       : addFilledRect(this.scene, PALETTE.cream, { height, width, x: 0, y: 0 });
-    return this.scene.add.container(Math.round(x - width / 2), top, [tag, amount]).setDepth(DEPTH);
+    return this.scene.add
+      .container(Math.round(x - width / 2), top, [tag, amount])
+      .setDepth(HUD_DEPTH.moment);
   }
 
   // fx-coin-fly spinning, else a drawn coin.
   private addCoin(at: Point): GameObjects.Sprite | GameObjects.Rectangle {
     if (this.scene.anims.exists(animationKey(COIN.key, COIN.tag))) {
-      const sprite = this.scene.add.sprite(at.x, at.y, COIN.key).setDepth(DEPTH + 1);
+      const sprite = this.scene.add.sprite(at.x, at.y, COIN.key).setDepth(HUD_DEPTH.moment + 1);
       playTag(sprite, COIN.key, COIN.tag);
       return this.moments.animate(sprite);
     }
-    return this.scene.add.rectangle(at.x, at.y, 10, 10, PALETTE.amber).setDepth(DEPTH + 1);
+    return this.scene.add
+      .rectangle(at.x, at.y, 10, 10, PALETTE.amber)
+      .setDepth(HUD_DEPTH.moment + 1);
   }
 
   // A treat grabbed pops over the dog's face on its card, the owner pops in smiling and the
@@ -529,7 +522,7 @@ export class HudFeedback {
     const { dogFace } = DOG_CARD;
     const at = { x: rect.x + dogFace.x + half, y: rect.y + dogFace.y + half };
     const key = this.scene.textures.exists(TREAT_POP.key) ? TREAT_POP.key : TREAT_POP.fallback;
-    playEffect(this.scene, key, TREAT_POP.tag, at, DEPTH);
+    playEffect(this.scene, key, TREAT_POP.tag, at, HUD_DEPTH.moment);
     this.hooks.popOwner(cue.dog, "happy", smileMs);
     this.hooks.floatLabels(smileMs, cue.labels);
   }
@@ -615,7 +608,9 @@ export class HudFeedback {
     drawFramedRect(box, CREAM_PANEL_COLOURS, { ...place.box, x: 0, y: 0 });
     const at = { capsTop: place.text.y - place.box.y, x: place.text.x - place.box.x };
     const text = addFaceRows(this.scene, at, { box: set.box, fit: set.style, style }, set.rows);
-    const chip = this.scene.add.container(place.box.x, place.box.y, [box, ...text]).setDepth(DEPTH);
+    const chip = this.scene.add
+      .container(place.box.x, place.box.y, [box, ...text])
+      .setDepth(HUD_DEPTH.moment);
     if (!still) {
       this.tween({ duration: MOMENTS.lowCueMs, targets: chip, y: chip.y - LOW_CHIP.rise });
     }

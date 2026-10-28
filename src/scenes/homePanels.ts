@@ -20,33 +20,28 @@ import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,
-  type FontRole,
   pixelFontMetrics,
   wrapPixelText,
 } from "../ui/phaser/pixelText";
 import { AFFORD_OUTSET } from "../ui/selection";
-import { TEXT_SCALE, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
+import { WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 import { addNamePills } from "./effectNameColours";
 import { playFirstTag } from "./sprites";
-import { addCloseButton, addLoopingFrame, addNineSlice, selectOuter, type SliceKey } from "./uiKit";
+import {
+  addBodyText,
+  addCloseButton,
+  addLoopingFrame,
+  addNineSlice,
+  BODY_TEXT,
+  selectOuter,
+  type SliceKey,
+} from "./uiKit";
 
 // The home screen's drawing beyond its tiles: the gold outline on the Pet shop while the
 // player can afford something in it, and the detail card that opens over the screen. Positions
 // inside a piece are the art's, from the style guide.
 
 const SCREEN = SCREEN_LAYOUT.screen;
-
-function text(
-  scene: Scene,
-  parent: GameObjects.Container,
-  at: { x: number; y: number },
-  value: string,
-  style: { colour: number; font?: FontRole; originX?: number },
-): GameObjects.BitmapText {
-  const label = addPixelText(scene, at.x, at.y, value, { scale: TEXT_SCALE, ...style });
-  parent.add(label);
-  return label;
-}
 
 // The ui-afford outline 2px outside rect, playing its glint tag, or holding its first frame
 // with reduced motion; while the art is missing, an amber line in a plum keyline. A selected
@@ -91,7 +86,7 @@ function drawCardFrame(
   addDetailCard(scene, parent, rect, cardBand(rect));
   content.setPosition(rect.x, rect.y);
   parent.add(content);
-  text(scene, content, { x: rect.width / 2, y: inset + titleY }, title, {
+  addBodyText(scene, content, { x: rect.width / 2, y: inset + titleY }, title, {
     colour: PALETTE.white,
     font: "title",
     originX: 0.5,
@@ -179,7 +174,7 @@ function addDetailOwner(
     playFirstTag(face, key, ["neutral"]);
     parent.add(face);
   }
-  text(scene, parent, spot.name, owner.name, { colour: PALETTE[CARD.owner.nameColour] });
+  addBodyText(scene, parent, spot.name, owner.name, { colour: PALETTE[CARD.owner.nameColour] });
   role.forEach((line, i) =>
     parent.add(
       addPixelText(scene, spot.role.x, spot.role.y + i * spot.role.pitch, line, ROLE_STYLE),
@@ -216,9 +211,8 @@ export function drawDetailCard(
   // Rows of text at the tops the card's layout gives them: each wrapped on the font within its
   // room, or a fitted row on one line, its glyphs closer, before it wraps.
   type Row = { colour: number; fit?: boolean; value: string };
-  const style = { colour: PALETTE.plum, scale: TEXT_SCALE };
   const fitted = (row: Row, room: number, x: number, y: number) => {
-    const label = text(scene, content, { x, y }, row.value, { colour: row.colour });
+    const label = addBodyText(scene, content, { x, y }, row.value, { colour: row.colour });
     return {
       label,
       lines: fitPixelText(label, { room, styles: WRAPPING_TEXT_FIT_STYLES }, x, y).lines,
@@ -226,7 +220,7 @@ export function drawDetailCard(
   };
   const lineCount = (row: Row, room: number) => {
     if (row.fit !== true) {
-      return wrapPixelText(scene, style, room, row.value).length;
+      return wrapPixelText(scene, BODY_TEXT, room, row.value).length;
     }
     const probe = fitted(row, room, 0, 0);
     probe.label.destroy();
@@ -238,14 +232,12 @@ export function drawDetailCard(
       const label =
         row.fit === true
           ? fitted(row, room, x, y).label
-          : text(
+          : addBodyText(
               scene,
               content,
               { x, y },
-              wrapPixelText(scene, style, room, row.value).join("\n"),
-              {
-                colour: row.colour,
-              },
+              wrapPixelText(scene, BODY_TEXT, room, row.value).join("\n"),
+              { colour: row.colour },
             );
       addNamePills([label]);
     });

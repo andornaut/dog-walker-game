@@ -27,14 +27,13 @@ import {
   withProbe,
 } from "../ui/phaser/pixelText";
 import { addRampDim } from "../ui/phaser/rampDim";
-import { TEXT_SCALE } from "../ui/textFit";
 import { addConfetti } from "./badges";
 import { closeOverlay, listenOutsideTap, type OverlayData } from "./overlay";
 import { currentSettings, walkerSpriteKey } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 import { playFirstTag } from "./sprites";
-import { addMenuButton, addPanel, listenButtonTap } from "./uiKit";
+import { addMenuButton, addPanel, BODY_TEXT, listenButtonTap } from "./uiKit";
 
 export interface ZoneCelebrationSceneData extends OverlayData {
   celebration: ZoneCelebration;
@@ -48,8 +47,6 @@ export interface ZoneCelebrationSceneData extends OverlayData {
 type NewWalkerText = Extract<CelebrationText, { kind: "newWalker" }>;
 type ZoneDoneText = Extract<CelebrationText, { kind: "zoneDone" }>;
 type Version = typeof LAYOUT.newWalker | typeof LAYOUT.zoneDone;
-
-const BODY = { colour: PALETTE.plum, scale: TEXT_SCALE } as const;
 
 // Places a label made with origin y 0 by the top of its font line.
 function atLineTop<T extends GameObjects.BitmapText>(label: T, top: number): T {
@@ -153,12 +150,12 @@ export class ZoneCelebrationScene extends Scene {
     const { centreX, zoneDone } = LAYOUT;
     addPanel(this, zoneDone.plate);
     const line = text.earnings.map((part) => part.text).join("");
-    const whole = atLineTop(addPixelText(this, 0, 0, line, BODY), zoneDone.earningsY);
+    const whole = atLineTop(addPixelText(this, 0, 0, line, BODY_TEXT), zoneDone.earningsY);
     const left = Math.round(centreX - whole.width / 2);
     whole.setX(left);
     // Each amount is drawn again in forest over its place in the line, measured from the
     // line's start through the amount, since a trailing space has no width.
-    withProbe(this, BODY, (probe) => {
+    withProbe(this, BODY_TEXT, (probe) => {
       const widthOf = (shown: string) => {
         setPixelText(probe, shown);
         return probe.width;
@@ -167,7 +164,10 @@ export class ZoneCelebrationScene extends Scene {
       for (const part of text.earnings) {
         if (part.kind === "money") {
           const x = left + widthOf(before + part.text) - widthOf(part.text);
-          const amount = addPixelText(this, x, 0, part.text, { ...BODY, colour: PALETTE.forest });
+          const amount = addPixelText(this, x, 0, part.text, {
+            ...BODY_TEXT,
+            colour: PALETTE.forest,
+          });
           atLineTop(amount, zoneDone.earningsY);
         }
         before += part.text;
@@ -184,14 +184,14 @@ export class ZoneCelebrationScene extends Scene {
     if (this.textures.exists(ART.tailUp)) {
       this.add.image(tail.x, tail.y, ART.tailUp).setOrigin(0);
     }
-    const { lines, style } = withProbe(this, BODY, (probe) => {
+    const { lines, style } = withProbe(this, BODY_TEXT, (probe) => {
       setPixelText(probe, text.greeting);
       return fitPixelText(probe, GREETING_FIT, 0, 0);
     });
     const tops = greetingLineTops(pixelFontMetrics(this, "body"), style.scale, lines.length);
     lines.forEach((line, i) => {
       const label = addPixelText(this, centreX, 0, line, {
-        ...BODY,
+        ...BODY_TEXT,
         originX: 0.5,
         scale: style.scale,
       });
@@ -214,7 +214,7 @@ export class ZoneCelebrationScene extends Scene {
       const label =
         word === ""
           ? []
-          : [{ gap: itemGap, item: atLineTop(addPixelText(this, 0, 0, word, BODY), y) }];
+          : [{ gap: itemGap, item: atLineTop(addPixelText(this, 0, 0, word, BODY_TEXT), y) }];
       if (part.kind !== "icon" || !this.textures.exists(part.icon)) {
         return label;
       }

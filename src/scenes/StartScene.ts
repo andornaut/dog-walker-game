@@ -180,6 +180,8 @@ import {
 } from "./ShopScene";
 import { playEffect, playTag, spriteMetrics } from "./sprites";
 import {
+  addBodyText,
+  addGraphicsIn,
   addIconButton,
   addNineSlice,
   addPanel,
@@ -187,6 +189,7 @@ import {
   addTagImage,
   addTapBurst,
   addTileSprite,
+  BODY_TEXT,
   BUTTON_PRESS_PX,
   buttonFaces,
   type IconButton,
@@ -746,7 +749,7 @@ export class StartScene extends Scene {
     name: GameObjects.BitmapText | undefined,
   ): void {
     const { face } = place;
-    const g = this.graphics(root);
+    const g = addGraphicsIn(this, root);
     fillRect(g, PALETTE.tan, face);
     const key = ownerFaceKey(gameData, dog);
     if (this.textures.exists(key)) {
@@ -754,7 +757,7 @@ export class StartScene extends Scene {
       playTag(sprite, key, "happy", reduced);
       root.add(sprite);
     }
-    drawRing(this.graphics(root), PALETTE.ink, face, 1);
+    drawRing(addGraphicsIn(this, root), PALETTE.ink, face, 1);
     if (name !== undefined) {
       const ink = inkSpan(name);
       placePixelText(name, place.name.x - (ink.left + ink.right) / 2, place.name.capY);
@@ -1012,9 +1015,7 @@ export class StartScene extends Scene {
     colour: number,
     options: { font?: FontRole; originX?: number; originY?: number; scale?: number } = {},
   ): GameObjects.BitmapText {
-    const label = addPixelText(this, x, y, value, { colour, scale: TEXT_SCALE, ...options });
-    parent.add(label);
-    return label;
+    return addBodyText(this, parent, { x, y }, value, { colour, ...options });
   }
 
   // Fits body labels at TEXT_SCALE alike, in the first of styles that fits them all, each with
@@ -1027,12 +1028,6 @@ export class StartScene extends Scene {
       const scale = fitted[i]?.style.scale ?? TEXT_SCALE;
       placePixelText(label, x, y + Math.floor((capHeight * (TEXT_SCALE - scale)) / 2));
     });
-  }
-
-  private graphics(parent: GameObjects.Container): GameObjects.Graphics {
-    const g = this.add.graphics();
-    parent.add(g);
-    return g;
   }
 
   // The street, yard and porch come from the screen-home art, drawn once; a plain yard
@@ -1069,7 +1064,7 @@ export class StartScene extends Scene {
     const save = this.save();
     this.registry.set(LAST_VISIT_BANK_KEY, save.bankCents);
     this.registry.set(LAST_VISIT_WALKERS_KEY, [...save.owned.walkers]);
-    const g = this.graphics(root);
+    const g = addGraphicsIn(this, root);
     this.drawTopBar(root, g, save);
     this.drawPetShop(root, save);
     this.drawSlotSign(root, save);
@@ -1191,7 +1186,7 @@ export class StartScene extends Scene {
   // gold frame and a lit amber band over an orange rule; neutral is an ink frame and rule
   // round a navy band. The tiles' area is left open.
   private drawSectionFrame(root: GameObjects.Container, rect: Rect, state: SectionState): void {
-    const g = this.graphics(root);
+    const g = addGraphicsIn(this, root);
     const lit = state === "complete";
     const { band, edge } = SECTION_FRAME;
     drawRing(g, PALETTE.ink, rect, 1);
@@ -1425,17 +1420,13 @@ export class StartScene extends Scene {
     const paragraphs = [...notice, ...speech.paragraphs].map((paragraph) =>
       withNamePills(gameData, paragraph),
     );
-    const { faced, lines } = withProbe(
-      this,
-      { colour: PALETTE.plum, scale: TEXT_SCALE },
-      (probe) => {
-        const measure = (line: string) => {
-          setPixelText(probe, line);
-          return probe.width;
-        };
-        return bubbleLines(measure, SPEECH.lines, column, paragraphs);
-      },
-    );
+    const { faced, lines } = withProbe(this, BODY_TEXT, (probe) => {
+      const measure = (line: string) => {
+        setPixelText(probe, line);
+        return probe.width;
+      };
+      return bubbleLines(measure, SPEECH.lines, column, paragraphs);
+    });
     const top = GATE.y + SPEECH.top;
     // The bubble goes under the words, which set its size.
     const bubble = this.add.container(0, 0);
@@ -1481,7 +1472,7 @@ export class StartScene extends Scene {
       const rect = { ...GEAR_BADGE, x: Math.min(clear, PET_SHOP.x - GEAR_BADGE.width) };
       const badge = this.tileView(root, "gateBadge");
       badge.rise = targetId({ gear: this.loadout.gear, kind: "gear" });
-      fillRect(this.graphics(badge.container), PALETTE.plum, rect);
+      fillRect(addGraphicsIn(this, badge.container), PALETTE.plum, rect);
       const at = { x: rect.x + 1, y: rect.y + 1 };
       this.addGearIcon(badge.container, "colour", this.loadout.gear, at, 0.5);
     }
@@ -1527,7 +1518,7 @@ export class StartScene extends Scene {
     const faces = this.addPressFaces(key, art);
     if (faces === undefined) {
       const colours = { border: PALETTE.ink, fill: PALETTE.cream };
-      drawFramedRect(this.graphics(view.container), colours, board);
+      drawFramedRect(addGraphicsIn(this, view.container), colours, board);
     } else {
       view.container.add(faces);
     }
@@ -1645,7 +1636,7 @@ export class StartScene extends Scene {
       );
       const ink = PALETTE[look.text];
       const { badge: badgeAt, face: faceBox, lockedNameY, textX } = DOG_TILE;
-      fillRect(this.graphics(content), PALETTE[pictureBox({ art, state })], {
+      fillRect(addGraphicsIn(this, content), PALETTE[pictureBox({ art, state })], {
         height: faceBox.size + 2,
         width: faceBox.size + 2,
         x: x + faceBox.dx - 1,
@@ -1706,7 +1697,7 @@ export class StartScene extends Scene {
         tile: true,
       });
       const { badge: badgeAt, box, icon: iconAt } = POCKET;
-      fillRect(this.graphics(content), PALETTE[pictureBox({ art, state })], {
+      fillRect(addGraphicsIn(this, content), PALETTE[pictureBox({ art, state })], {
         height: box.size,
         width: box.size,
         x: x + box.dx,
@@ -1779,7 +1770,7 @@ export class StartScene extends Scene {
         },
       );
       const { badge: badgeAt, box, face: faceAt, icons, plateY } = WALKER_TILE;
-      fillRect(this.graphics(content), PALETTE[pictureBox({ art, state })], {
+      fillRect(addGraphicsIn(this, content), PALETTE[pictureBox({ art, state })], {
         height: box.size,
         width: box.size,
         x: x + box.dx,
@@ -1883,6 +1874,6 @@ export class StartScene extends Scene {
     if (rect === undefined) {
       return;
     }
-    drawFocusRing(this.graphics(root), FOCUS_OUTSET, rect);
+    drawFocusRing(addGraphicsIn(this, root), FOCUS_OUTSET, rect);
   }
 }

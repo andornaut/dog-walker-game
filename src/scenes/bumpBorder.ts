@@ -4,6 +4,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { BUMP_FLASH, bumpBorder } from "../layout/bumpFlash";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
+import { HUD_DEPTH } from "./hudDepth";
 
 const SCREEN = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 };
 
@@ -19,10 +20,10 @@ export class BumpBorder {
   private readonly tint: GameObjects.Graphics;
   private timer: Time.TimerEvent | undefined;
 
-  constructor(scene: Scene, depth: { readonly border: number; readonly tint: number }) {
+  constructor(scene: Scene) {
     this.scene = scene;
-    this.graphics = scene.add.graphics().setDepth(depth.border);
-    this.tint = scene.add.graphics().setDepth(depth.tint);
+    this.graphics = scene.add.graphics().setDepth(HUD_DEPTH.bumpBorder);
+    this.tint = scene.add.graphics().setDepth(HUD_DEPTH.bumpTint);
   }
 
   flash(colour: number): void {

@@ -12,19 +12,19 @@ import {
   heartPopText,
 } from "../hud/feedback";
 import type { ChangeLabel } from "../hud/hudView";
-import { arcControl, curvePoint } from "../hud/moments";
+import { arcControl } from "../hud/moments";
 import { insetRect, type Point, type Rect } from "../lib/rect";
 import { slotIndexOf } from "../state/pack";
 import { CREAM_PANEL_COLOURS, drawFramedRect, drawRing } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText } from "../ui/phaser/pixelText";
+import { arcFlight } from "./arcFlight";
 import { FEEDBACK_ART } from "./feedbackArt";
+import { HUD_DEPTH } from "./hudDepth";
 import type { HudWalk } from "./hudWalk";
 import { playEffect, playTag, playTagOnce } from "./sprites";
 import { TimedGroup } from "./timedGroup";
 
-// Over the cards and the HUD's own labels.
-const DEPTH = 60;
 // The number's chip reaches this far past its 5-row capitals on every side.
 const CHIP_PAD = 2;
 // A dog not on the road pops this far over its card.
@@ -106,7 +106,7 @@ export class HeartFeedback {
   forgive(at: Point, perkKey: string): void {
     const { blinkMs, blinks } = FEEDBACK.forgiven;
     const markMs = blinkMs * (2 * blinks - 1);
-    const ring = this.scene.add.graphics().setDepth(DEPTH);
+    const ring = this.scene.add.graphics().setDepth(HUD_DEPTH.heart);
     drawRing(ring, PALETTE.amber, insetRect(-1, { ...HEART_CELL, ...at }), 1);
     const marks: GameObjects.GameObject[] = [ring];
     if (this.scene.textures.exists(perkKey)) {
@@ -116,7 +116,7 @@ export class HeartFeedback {
         this.scene.add
           .image(at.x + HEART_CELL.width + gap, y, perkKey)
           .setOrigin(0)
-          .setDepth(DEPTH),
+          .setDepth(HUD_DEPTH.heart),
       );
     }
     this.group.after(this.scene, markMs, () => marks.forEach((mark) => mark.destroy()));
@@ -125,7 +125,7 @@ export class HeartFeedback {
       SPARKLE.key,
       SPARKLE.tag,
       { x: at.x + 4, y: at.y + 3 },
-      DEPTH,
+      HUD_DEPTH.heart,
     );
     if (sparkle !== undefined) {
       this.group.animate(sparkle);
@@ -134,7 +134,7 @@ export class HeartFeedback {
       return;
     }
     const empty = this.scene.add.sprite(at.x, at.y, FORGIVEN_HEART.key).setOrigin(0);
-    playTag(empty.setDepth(DEPTH), FORGIVEN_HEART.key, FORGIVEN_HEART.tag);
+    playTag(empty.setDepth(HUD_DEPTH.heart), FORGIVEN_HEART.key, FORGIVEN_HEART.tag);
     this.group.animate(empty);
     this.group.every(this.scene, blinkMs, 2 * blinks - 2, () => empty.setVisible(!empty.visible));
     this.group.after(this.scene, markMs, () => empty.destroy());
@@ -171,7 +171,7 @@ export class HeartFeedback {
       this.land(loss, pop);
       return;
     }
-    const heart = this.scene.add.sprite(centre.x, centre.y, art.key).setDepth(DEPTH);
+    const heart = this.scene.add.sprite(centre.x, centre.y, art.key).setDepth(HUD_DEPTH.heart);
     const active: ActivePop = {
       covers,
       land: () => this.land(loss, pop),
@@ -215,7 +215,7 @@ export class HeartFeedback {
       y: at.y - CHIP_PAD,
     };
     drawFramedRect(box, CREAM_PANEL_COLOURS, { ...rect, x: 0, y: 0 });
-    const chip = this.scene.add.container(rect.x, rect.y, [box, text]).setDepth(DEPTH);
+    const chip = this.scene.add.container(rect.x, rect.y, [box, text]).setDepth(HUD_DEPTH.heart);
     return { chip, rect };
   }
 
@@ -229,21 +229,18 @@ export class HeartFeedback {
     this.group.animate(heart.play(animationKey(art.key, art.fly)));
     const { from, to } = path;
     const control = arcControl(from, to, FEEDBACK.heart.peak);
-    const progress = { t: 0 };
-    return this.group.tween(this.scene, {
+    const flight = {
       duration: FEEDBACK.heart.flyMs,
       ease: "Sine.easeIn",
       onComplete: () => {
         heart.destroy();
         done();
       },
-      onUpdate: () => {
-        const point = curvePoint(from, control, to, progress.t);
-        heart.setPosition(Math.round(point.x), Math.round(point.y));
-      },
-      t: 1,
-      targets: progress,
-    });
+    };
+    return this.group.tween(
+      this.scene,
+      arcFlight({ control, from, to }, flight, ({ x, y }) => heart.setPosition(x, y)),
+    );
   }
 
   // The label shows on the card; a lost heart flashes the card's hearts, shaking it with motion.

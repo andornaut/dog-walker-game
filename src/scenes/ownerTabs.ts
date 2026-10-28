@@ -9,14 +9,12 @@ import type { Rect } from "../lib/rect";
 import { drawFramedRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText } from "../ui/phaser/pixelText";
+import { HUD_DEPTH } from "./hudDepth";
 import { playFirstTag } from "./sprites";
 import type { TimedGroup } from "./timedGroup";
 import { fadeAway } from "./uiKit";
 
 const LAYOUT = SCREEN_LAYOUT;
-// Over the cards and their heart-loss flash, under the HUD's moments (depth 50 on), its
-// parts stacked from here.
-const DEPTH = 30;
 const POP_MS = 120;
 const FADE_MS = 400;
 const TAB_KEY = "ui-owner-tab";
@@ -55,7 +53,7 @@ export class OwnerTabs {
     this.clear(at.slot);
     const parts = [this.addTab(tab), this.addFace(at.dog, at.mood, tab)];
     // The face over the tab.
-    parts.forEach((part, i) => (part as Depthed).setDepth(DEPTH + i));
+    parts.forEach((part, i) => (part as Depthed).setDepth(HUD_DEPTH.ownerTab + i));
     this.shown.set(at.slot, parts);
     if (!this.hooks.still()) {
       this.hooks.group.tween(this.scene, {

@@ -56,7 +56,6 @@ import { rectIndexAt } from "../ui/grid";
 import { addDim, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
-  addPixelText,
   type FontRole,
   inkSpan,
   pixelFontMetrics,
@@ -64,7 +63,6 @@ import {
   withProbe,
   wrapPixelText,
 } from "../ui/phaser/pixelText";
-import { TEXT_SCALE } from "../ui/textFit";
 import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
 import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
 import { currentSettings, profileSave } from "./profileStore";
@@ -79,12 +77,14 @@ import {
 } from "./scrollView";
 import { listenTargetPress, sameByValue, type TargetPressListener } from "./targetPress";
 import {
+  addBodyText,
   addCloseButton,
   addPanel,
   addScreenBackdrop,
   addTab,
   addTagImage,
   addTapBurst,
+  BODY_TEXT,
   clearScene,
   tagFrame,
 } from "./uiKit";
@@ -293,15 +293,7 @@ export class StatsScene extends Scene {
     value: string,
     options: { align?: "centre"; colour?: number; font?: FontRole; originX?: number } = {},
   ): GameObjects.BitmapText {
-    const label = addPixelText(this, x, y, value, {
-      ...(options.align === undefined ? {} : { align: options.align }),
-      colour: options.colour ?? PALETTE.plum,
-      font: options.font ?? "body",
-      originX: options.originX ?? 0,
-      scale: TEXT_SCALE,
-    });
-    this.drawingInto?.add(label);
-    return label;
+    return addBodyText(this, this.drawingInto, { x, y }, value, options);
   }
 
   // Each row's label at the left and its value right-aligned at the right, from y.
@@ -433,7 +425,7 @@ export class StatsScene extends Scene {
     const badges = this.badges();
     this.text(LEFT, WALL.headingY, gameData.menuText.stats.badges, { font: "title" });
     this.text(RIGHT, WALL.headingY, earnedText(gameData, badges), { originX: 1 });
-    const cells = withProbe(this, { colour: PALETTE.plum, scale: TEXT_SCALE }, (probe) => {
+    const cells = withProbe(this, BODY_TEXT, (probe) => {
       const inkWidth = (line: string) => {
         setPixelText(probe, line);
         const ink = inkSpan(probe);
@@ -543,7 +535,6 @@ export class StatsScene extends Scene {
 
   // Body text at 2x broken into lines no wider than the open badge's text.
   private wrap(text: string): string[] {
-    const style = { colour: PALETTE.plum, scale: TEXT_SCALE };
-    return wrapPixelText(this, style, DETAIL_TEXT_WIDTH, text);
+    return wrapPixelText(this, BODY_TEXT, DETAIL_TEXT_WIDTH, text);
   }
 }
