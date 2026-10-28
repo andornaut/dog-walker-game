@@ -6,7 +6,7 @@ import type { LanedBox, ScaledBox } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { hasLeftRoad, laneAt, type MoverPath, moverPlace, moverY } from "../runner/movers";
 import { moverOutcomes } from "../runner/outcomes";
-import type { PullEvent, Pulls } from "../runner/pulls";
+import { contactWindow, type PullEvent, type Pulls } from "../runner/pulls";
 import {
   isPullObstacle,
   itemCategory,
@@ -122,17 +122,6 @@ export function newBot(random: Random, sight: BotSight, skill: Skill): Bot {
     target: null,
     tellsAt: new Map(),
   };
-}
-
-// When an item at y, height tall, starts and stops overlapping the pack's band, in seconds from
-// now: from its near edge reaching the band's top until its far edge passes the band's bottom.
-function contactWindow(
-  band: RoadGeometry["packBand"],
-  speed: number,
-  y: number,
-  height: number,
-): { readonly end: number; readonly start: number } {
-  return { end: (band.bottom - y) / speed, start: (band.top - (y + height)) / speed };
 }
 
 // How often a mover's path is sampled, in road pixels of scroll.

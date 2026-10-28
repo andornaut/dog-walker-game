@@ -204,6 +204,17 @@ function currentTarget(geometry: PullGeometry, strain: Strain, walk: Walk): Targ
 // Samples of a mover's path over the reaction horizon.
 const SWEEP_SAMPLES = 24;
 
+// When an item at y, height tall, starts and stops overlapping the pack's band, in seconds from
+// now: from its near edge reaching the band's top until its far edge passes the band's bottom.
+export function contactWindow(
+  band: RoadGeometry["packBand"],
+  speed: number,
+  y: number,
+  height: number,
+): { readonly end: number; readonly start: number } {
+  return { end: (band.bottom - y) / speed, start: (band.top - (y + height)) / speed };
+}
+
 // Whether something the pack must steer around reaches the pack in lane within horizon
 // seconds: an obstacle in the lane, or a mover in it at any moment of its sweep. A stalker with
 // steps still to choose may take any of them, since it chooses each toward where the pack is
@@ -226,8 +237,7 @@ export function laneBlockedWithin(
     const { mover } = item;
     if (mover === undefined) {
       const inLane = lane >= item.lane && lane < item.lane + item.laneSpan;
-      const start = (top - (item.y + item.height)) / speed;
-      const end = (bottom - item.y) / speed;
+      const { end, start } = contactWindow(geometry.packBand, speed, item.y, item.height);
       return inLane && end > 0 && start < horizon;
     }
     const paths = moverOutcomes(mover.path);
