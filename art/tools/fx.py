@@ -26,7 +26,7 @@ fx-new-best      96x48  play (8 frames, 70ms)  rays, sparkles and stars in yello
                                                ribbon (centred on it), each part in its own rim
 
 The comic lettering (LETTERS, word), which fonts.py exports as font-comic, is built like the
-sign logo: flat yellow letters, 7 rows with 2px stems, in a 1px ink ring that fills the
+yard sign's letters: flat yellow letters, 7 rows with 2px stems, in a 1px ink ring that fills the
 counters and the gaps between letters, on a solid dred shadow 2px down and right. Display
 words only, 2 to 7 letters.
 
@@ -118,7 +118,7 @@ def word_size(text):
 
 
 def word(g, text, cx, top, fill="yellow"):
-    """A comic word built like the sign logo: flat letters (yellow, or cream) in a 1px ink ring that also
+    """A comic word built like the yard sign's letters: flat letters (yellow, or cream) in a 1px ink ring that also
     fills the counters and the gaps between letters, on a solid dred shadow offset 2px down and right.
     Centred on column cx, the ring's top on row top."""
     w, _ = word_size(text)

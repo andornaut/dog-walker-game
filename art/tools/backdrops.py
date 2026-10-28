@@ -65,7 +65,7 @@ YH, FOOT, F = CAMERA["horizonY"], CAMERA["footY"], CAMERA["focal"]
 
 
 def word(cv, s, mid, y, col, scale=1):
-    """Sign lettering: the logo's letters at scale in col, a 1px ink outline and a dred shadow
+    """Sign lettering: the yard sign's letters at scale in col, a 1px ink outline and a dred shadow
     (fonts.sign), 8 rows at 1x from the outline's top on row y to the shadow, centred on column mid
     without the shadow."""
     px, _ = fonts.sign(s, scale, col)

@@ -3,7 +3,7 @@
 
 - font-body: Tiny5 at 8px made a row taller, for body text, quips and floating labels.
 - font-title: Silkscreen at 8px, for titles, numbers and buttons.
-- font-display and font-display-cream: the yard sign logo's lettering, for big display words only
+- font-display and font-display-cream: the yard sign's lettering, for big display words only
   (zone names, "WHICH WAY?", "FIRED!", "NEW BEST!", the end screen title, hit labels). Upright blocky
   capitals 5 rows tall drawn at 2x (10px caps), each in a 1px ink outline on a solid dred shadow 2px
   down and right. The colours are baked in: yellow letters in font-display, cream in
@@ -119,9 +119,8 @@ ATLAS_W = 128
 
 # ---------- the sign lettering ----------
 
-# The yard sign logo's letters, 5 rows from the top of the capitals, one cell a row (D, O, G, W, A,
-# L, K, E and R are the logo's own). A glyph with more rows starts RISE[ch] rows above the capitals
-# ($) or runs below them (the comma's tail).
+# The yard sign's letters, 5 rows from the top of the capitals, one cell a row. A glyph with more rows
+# starts RISE[ch] rows above the capitals ($) or runs below them (the comma's tail).
 SIGN = {
     "A": [".###.", "#...#", "#####", "#...#", "#...#"],
     "B": ["####.", "#...#", "####.", "#...#", "####."],
@@ -172,7 +171,7 @@ SIGN = {
 RISE = {"$": 1}
 # The heart keeps its own colour in every colourway.
 FILL = {"♥": "red"}
-# The space's advance at 2x, as the logo spaces its words; half that, rounded up, at 1x.
+# The space's advance at 2x, as the yard sign spaces its words; half that, rounded up, at 1x.
 SPACE = 3.5
 DISPLAY = {"font-display": "yellow", "font-display-cream": "cream"}
 DISPLAY_SCALE = 2

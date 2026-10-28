@@ -28,7 +28,9 @@ reads on them.
   Pocket sections and Start walk. The street sign's board (300,72 54x11, a
   52x9 navy face) sits at the right edge, clear of the walker's speech bubble;
   the game prints homeText.gateSign on it in font-body, white, centred at
-  327,75. The yard's right lot is left for ui-pet-shop. The scene holds no
+  327,75. The yard sign (SIGN_AT 6,138, a 128x38 board on two posts, left of
+  the gate path, where the pack never stands) carries ARCHIE'S over DOG WALKS
+  in the sign letters at 2x, yellow. The yard's right lot is left for ui-pet-shop. The scene holds no
   strong green, so the Pet shop's board and Start walk stand out.
 - screen-stats: evening indoors. A panelled den wall that leaves the top left
   clear for the title (12,12 to 68,22); then, between the title and the close
@@ -136,7 +138,8 @@ from ui import STATES  # noqa: E402
 
 W, H = 360, 560
 LOGO_W, LOGO_H = 145, 41
-LOGO_AT = (6, 146)
+SIGN_W, SIGN_H = 128, 38
+SIGN_AT = (6, 138)
 PET_SHOP_W, PET_SHOP_H = 120, 108
 PET_SHOP_AT = (234, 86)
 # The PET SHOP board in the sprite: ui-button's go state 114x22, its bottom 2 rows over the parapet.
@@ -529,14 +532,20 @@ def home():
         cv.fill(px - 1, 116, 8, 2, "stone")
         cv.fill(px - 1, 116, 8, 1, "lgrey")
         cv.fill(px, 140, 6, 1, "dstone")
-    # the yard sign: blank board (the logo goes over it) on two posts
+    # the yard sign on two posts: ARCHIE'S over DOG WALKS in the sign letters at 2x, yellow
     for px in (16, 120):
         cv.fill(px, 172, 3, 22, "dbrown")
         cv.fill(px - 1, 194, 5, 1, "dstone")
-    board(cv, *LOGO_AT, 128, 30)
+    board(cv, *SIGN_AT, SIGN_W, SIGN_H)
+    top, bottom = (fonts.sign(t, 2, "yellow")[0] for t in ("ARCHIE'S", "DOG WALKS"))
+    y = SIGN_AT[1] + 3
+    for line in (top, bottom):
+        w, h = extent(line)
+        lettering(line, cv, SIGN_AT[0] + (SIGN_W - w) // 2 + 1, y)
+        y += h - 2
     # an urn of mums in the corner, fallen leaves, a water bowl by the path and a ball on the flagstones
     urn(cv, 324, 194)
-    for x, y, col in ((40, 186, "ochre"), (140, 178, "rust"), (212, 172, "brown"), (96, 160, "ochre"),
+    for x, y, col in ((40, 186, "ochre"), (140, 178, "rust"), (212, 172, "brown"), (96, 186, "ochre"),
                       (230, 150, "rust"), (300, 170, "ochre")):
         leaf(cv, x, y, col)
     cv.fill(222, 189, 10, 4, "slate")
@@ -1458,7 +1467,6 @@ def ui(cv, key):
     if key == "screen-home":
         # The gate scene at 40..196, then StartScene's walker, dog and gear rows and Start walk on the deck,
         # which is plain planks so any arrangement of them works.
-        cv.paste(logo().img, *LOGO_AT)
         sn.text(cv, "$385", 26, 15, "cream", 2)
         for x in (216, 268):
             panel(x, 10, 20, 20, "tan")
@@ -1546,7 +1554,6 @@ def shop_preview(out, scale=4):
     scale."""
     tags = [pet_shop(p).img for p in (False, True)]
     home_cv = home()
-    home_cv.img.paste(logo().img, LOGO_AT, logo().img)
     home_cv.img.paste(tags[0], PET_SHOP_AT, tags[0])
     lot = home_cv.img.crop((PET_SHOP_AT[0] - 4, PET_SHOP_AT[1] - 4, PET_SHOP_AT[0] + PET_SHOP_W + 4,
                             PET_SHOP_AT[1] + PET_SHOP_H + 4))
