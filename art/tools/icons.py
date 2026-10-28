@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Draw the shop's gear icons.
 
-item-<id>: 32x32 images in Endesga 32 with coloured outlines, on transparency.
+item-<id>: 32x32 images in Endesga 32 with coloured outlines (icon_edge, so they hold 3:1 on the tiles'
+tan and cream), on transparency.
 The ids are the shop's data ids in kebab case: item-hall-pass is the Hall pass, a
 cream pass card on a lanyard.
 
@@ -22,7 +23,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 import drops  # noqa: E402
 from minis import Mini  # noqa: E402
-from pixel import Grid, bitmap, to_image  # noqa: E402
+from pixel import Grid, bitmap, icon_edge, to_image  # noqa: E402
 
 
 # ---------- gear ----------
@@ -61,8 +62,8 @@ def hall_pass(g):
 
 def running_shoes(g):
     """A low running shoe side on, the toe to the left: a sky upper lit cyan along its top, three white
-    laces, a navy collar, an orange stripe and heel tab, and a white sole with a toe spring on a lugged
-    lgrey outsole."""
+    laces, a navy collar, an orange stripe and heel tab, and a white sole with a toe spring on an lgrey
+    outsole."""
     bitmap(g, 2, 10, [
         "......................oo...",
         "...............ccccccccoo..",
@@ -77,9 +78,8 @@ def running_shoes(g):
         ".sbbbbbbbbbbbbbbbbbbbbbbbbb",
         ".wwwwwwwwwwwwwwwwwwwwwwwwww",
         "..wwwwwwwwwwwwwwwwwwwwwwwww",
-        "...lglglglglglglglglglglgl.",
-    ], {"b": "blue", "c": "cyan", "g": "grey", "l": "lgrey", "n": "navy", "o": "orange", "s": "sky",
-        "w": "white"})
+        "...lllllllllllllllllllllll.",
+    ], {"b": "blue", "c": "cyan", "l": "lgrey", "n": "navy", "o": "orange", "s": "sky", "w": "white"})
 
 
 def lucky_collar(g):
@@ -119,6 +119,7 @@ ICONS = {
 
 def image(draw):
     g = Grid(32, 32)
+    g.edge = icon_edge
     draw(g)
     return to_image(g.outlined())
 
