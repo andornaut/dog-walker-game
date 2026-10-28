@@ -1,14 +1,16 @@
-import type { DogId } from "../data/types";
+import type { DebuffId, DogId } from "../data/types";
 import { type LaneDirection, laneMask } from "../layout/lanes";
 import { type RoadProjection, screenXAt } from "../layout/projection";
 import { getOrInsertComputed } from "../lib/maps";
 import { chance, type Random } from "../lib/random";
 import type { LanedBox, ScaledBox } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
+import { type LaneControl, steerLane } from "../runner/laneControl";
 import { hasLeftRoad, laneAt, type MoverPath, moverPlace, moverY } from "../runner/movers";
 import { moverOutcomes } from "../runner/outcomes";
 import { contactWindow, type PullEvent, type Pulls } from "../runner/pulls";
 import {
+  laneMotionConfig,
   laneMoveSeconds,
   obstacleHitBox,
   pickupReach,
@@ -23,6 +25,7 @@ import {
   itemCategory,
   type WalkItem,
 } from "../runner/walkItems";
+import type { RunState } from "../state/runState";
 import {
   type LaneHazard,
   type LanePrize,
@@ -58,15 +61,33 @@ interface MoverSight {
   readonly seen: Sighting[];
 }
 
+// A Zoomies drift the bot has yet to react to: the clock time it saw the drift at, and the pack's
+// lane control as the bot believes it until it reacts: as it would be without this drift and
+// those after it.
+interface UnseenDrift {
+  readonly at: number;
+  believed: LaneControl;
+}
+
+// A debuff on the pack that slows its lane changes, such as Muddy: the clock time the bot first
+// saw it at, and whether it has reacted to it yet.
+interface SlowingSeen {
+  readonly at: number;
+  perceived: boolean;
+}
+
 // A steering bot's state. clock is the seconds walked this run, hit stops included and cards
-// not. Moves are at clock times. target is the lane the pack headed for when the bot last acted,
-// null before it has. late holds mistimed lane changes still to come; noticeAt,
-// when set, is when the bot notices its mistake, and until then it does not replan. tellsAt is
-// when each leaning dog's tell started. sight is how it reads movers: by foresight, paths holds
-// each mover's path as last seen; by sight, sights holds what each mover has shown.
+// not. Moves are at clock times. target is the lane the pack headed for, as the bot read it, when
+// the bot last acted, null before it has. late holds mistimed lane changes still to come;
+// noticeAt, when set, is when the bot notices its mistake, and until then it does not replan.
+// tellsAt is when each leaning dog's tell started. sight is how it reads movers: by foresight,
+// paths holds each mover's path as last seen; by sight, sights holds what each mover has shown.
+// drifts holds the Zoomies drifts it has yet to react to, oldest first, and slowing the debuffs
+// on the pack that slow its lane changes.
 interface Bot {
   readonly appearedAt: Map<number, number>;
   clock: number;
+  readonly drifts: UnseenDrift[];
   readonly late: PlannedMove[];
   lastInputAt: number;
   noticeAt: number | null;
@@ -82,6 +103,7 @@ interface Bot {
   readonly sight: BotSight;
   readonly sights: Map<number, MoverSight>;
   readonly skill: Skill;
+  readonly slowing: Map<DebuffId, SlowingSeen>;
   target: number | null;
   readonly tellsAt: Map<DogId, number>;
 }
@@ -110,6 +132,7 @@ export function newBot(random: Random, sight: BotSight, skill: Skill): Bot {
   return {
     appearedAt: new Map(),
     clock: 0,
+    drifts: [],
     lastInputAt: -Infinity,
     late: [],
     noticeAt: null,
@@ -123,6 +146,7 @@ export function newBot(random: Random, sight: BotSight, skill: Skill): Bot {
     sight,
     sights: new Map(),
     skill,
+    slowing: new Map(),
     target: null,
     tellsAt: new Map(),
   };
@@ -470,11 +494,66 @@ function observeMover(bot: Bot, id: number, mover: NonNullable<WalkItem["mover"]
   }
 }
 
+// Whether a debuff slows the pack's lane changes, such as Muddy.
+function slowsLanes(data: Pick<WalkData, "debuffs">, debuff: DebuffId): boolean {
+  return data.debuffs[debuff].modifiers.some(({ stat }) => stat === "agility");
+}
+
+// Records when each debuff on the pack that slows its lane changes was first seen, and forgets
+// those that have run out.
+function observeSlowing(bot: Bot, data: Pick<WalkData, "debuffs">, run: RunState): void {
+  for (const debuff of bot.slowing.keys()) {
+    if (!run.debuffs.some((active) => active.debuff === debuff)) {
+      bot.slowing.delete(debuff);
+    }
+  }
+  for (const { debuff } of run.debuffs) {
+    if (!bot.slowing.has(debuff) && slowsLanes(data, debuff)) {
+      bot.slowing.set(debuff, { at: bot.clock, perceived: false });
+    }
+  }
+}
+
+// How long a lane move takes as the bot reads it: at the pack's speed without the debuffs that
+// slow it which the bot has yet to react to, such as a Muddy that has just begun.
+export function laneMoveRead(bot: Bot, data: WalkData, run: RunState): number {
+  const unseen = (debuff: DebuffId) => bot.slowing.get(debuff)?.perceived === false;
+  if (!run.debuffs.some(({ debuff }) => unseen(debuff))) {
+    return laneMoveSeconds(data, run);
+  }
+  return laneMoveSeconds(data, {
+    ...run,
+    debuffs: run.debuffs.filter(({ debuff }) => !unseen(debuff)),
+  });
+}
+
+// A Zoomies drift the pack made in the step just walked, from control, its lane control just
+// before the drift. The bot reacts to it reactionSeconds after it sees it, and until then plans
+// as if the pack had not drifted.
+export function observeDrift(bot: Bot, control: LaneControl): void {
+  bot.drifts.push({ at: bot.clock, believed: control });
+}
+
+// Moves the pack's lane control as the bot believes it, for each drift it has yet to react to,
+// as the walk moves the pack's own: by a lane change, a pull or a walking step.
+export function moveBelieved(bot: Bot, change: (control: LaneControl) => LaneControl): void {
+  for (const drift of bot.drifts) {
+    drift.believed = change(drift.believed);
+  }
+}
+
+// The pack's lane control as the bot reads it: as it would be without the drifts it has yet to
+// react to.
+function controlRead(bot: Bot, walk: Walk): LaneControl {
+  return bot.drifts[0]?.believed ?? walk.road.control;
+}
+
 // Records when each item new on the road came into view, from how far the road has scrolled
 // since, and forgets items that have left. By foresight, a mover whose path has changed, a
 // stalker that has chosen a step, makes the bot replan; by sight, what each mover shows is
-// recorded.
+// recorded. A debuff that slows lane changes is recorded when first seen.
 export function observeRoad(bot: Bot, road: BotRoad, walk: Walk): void {
+  observeSlowing(bot, road.data, walk.run);
   const { items } = walk.road;
   let oldest = Infinity;
   for (const item of items) {
@@ -598,8 +677,9 @@ function wholeSteps(seconds: number): number {
   return Math.ceil(seconds / STEP_SECONDS - SAME_MOMENT) * STEP_SECONDS;
 }
 
+// The bot plans from the lane control and lane move as it reads them (controlRead, laneMoveRead).
 function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
-  const { control } = walk.road;
+  const control = controlRead(bot, walk);
   const { motion } = control;
   const moving = motion.kind === "moving";
   // A pull during a lane change moves the target without turning the pack: it finishes the
@@ -608,7 +688,7 @@ function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
   const turns = moving ? Math.abs(lane - motion.to) : 0;
   const readyAt = moving ? motion.duration - motion.elapsed + turns * motion.duration : 0;
   const settled = readyAt > 0 ? readyAt + WAIT_MARGIN : 0;
-  const moveSeconds = wholeSteps(laneMoveSeconds(road.data, walk.run));
+  const moveSeconds = wholeSteps(laneMoveRead(bot, road.data, walk.run));
   const { laneChangeCooldown, lookAheadSeconds } = bot.skill;
   const view = botView(bot, road, pulls, walk);
   const moves = planLanes(
@@ -638,7 +718,8 @@ function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
   bot.replan = false;
 }
 
-// A lane change that does not take, such as one off the road, makes the bot replan.
+// A lane change that does not take, such as one off the road, makes the bot replan. It moves the
+// lane control the bot believes in too.
 function steer(
   bot: Bot,
   road: BotRoad,
@@ -646,7 +727,11 @@ function steer(
   direction: LaneDirection,
   walk: Walk,
 ): Walk {
-  const steered = steerWalk(road.data, road.geometry.laneCount, direction, walk);
+  const { laneCount } = road.geometry;
+  const steered = steerWalk(road.data, laneCount, direction, walk);
+  moveBelieved(bot, (control) =>
+    steerLane(laneMotionConfig(road.data, laneCount, walk.run), direction, control),
+  );
   lanes.push(direction);
   bot.lastInputAt = bot.clock;
   if (steered.road.control.target === walk.road.control.target) {
@@ -710,10 +795,11 @@ export function observePulls(
   }
 }
 
-// Everything the bot does at its clock time: perceives the items and tells due, notices a
-// mistake, replans when it has something new or the pack heads for a lane it did not steer
-// for, such as after a Zoomies drift, and makes the lane changes due: the lane moves it makes,
-// in order, and the walk they steer. Nothing during a hit stop, which drops lane changes.
+// Everything the bot does at its clock time: perceives the items, tells, Zoomies drifts and
+// debuffs that slow lane changes due, notices a mistake, replans when it has something new or
+// the pack heads for a lane it did not steer for, and makes the lane changes due: the lane moves
+// it makes, in order, and the walk they steer. Nothing during a hit stop, which drops lane
+// changes.
 export function actBot(
   bot: Bot,
   road: BotRoad,
@@ -725,7 +811,21 @@ export function actBot(
     return { lanes, walk };
   }
   const due = bot.clock + SAME_MOMENT;
-  if (bot.target !== null && bot.target !== walk.road.control.target) {
+  const { reactionSeconds } = bot.skill;
+  for (let drift = bot.drifts[0]; drift !== undefined; drift = bot.drifts[0]) {
+    if (drift.at + reactionSeconds > due) {
+      break;
+    }
+    bot.drifts.shift();
+    bot.replan = true;
+  }
+  for (const slowing of bot.slowing.values()) {
+    if (!slowing.perceived && slowing.at + reactionSeconds <= due) {
+      slowing.perceived = true;
+      bot.replan = true;
+    }
+  }
+  if (bot.target !== null && bot.target !== controlRead(bot, walk).target) {
     bot.replan = true;
   }
   let acted = walk;
@@ -770,7 +870,7 @@ export function actBot(
     }
     const move = bot.plan[0];
     if (move === undefined || move.at > due) {
-      bot.target = acted.road.control.target;
+      bot.target = controlRead(bot, acted).target;
       return { lanes, walk: acted };
     }
     bot.plan.shift();

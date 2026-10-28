@@ -15,6 +15,7 @@ import { type CardView, type Choice, type ChoiceData } from "../rules/choices";
 import { currentZoneId } from "../rules/route";
 import { addCents, type Cents, cents } from "../rules/units";
 import { STEP_SECONDS } from "../runner/fixedStep";
+import { advanceLaneControl, pullLane } from "../runner/laneControl";
 import { destinationLane } from "../runner/laneMotion";
 import { hasLeftRoad, moverPlace, moverY } from "../runner/movers";
 import { screenRoadGeometry } from "../runner/screenGeometry";
@@ -28,6 +29,7 @@ import {
   stepSession,
 } from "../runner/session";
 import {
+  laneMotionConfig,
   laneMoveSeconds,
   type RoadGeometry,
   roadScrollSpeed,
@@ -39,7 +41,15 @@ import {
 import { blocksLane, type WalkItemKind } from "../runner/walkItems";
 import { packDogs } from "../state/pack";
 import { newRun, type PackDogs, type RunState } from "../state/runState";
-import { actBot, type BotRoad, newBot, observePulls, observeRoad } from "./bot";
+import {
+  actBot,
+  type BotRoad,
+  moveBelieved,
+  newBot,
+  observeDrift,
+  observePulls,
+  observeRoad,
+} from "./bot";
 import { type ZoneDelivery, zoneDelivery } from "./delivery";
 import { choosePath, pickCardOption, type PolicyId, type RoutePolicyId } from "./policies";
 import type { BotSight } from "./sight";
@@ -343,7 +353,8 @@ function botRoadOf(data: SimData, walk: Walk): BotRoad & { readonly pack: RunSta
 // The bot plays the walk on the game's own session, a step of STEP_SECONDS at a time as the
 // game steps it: its lane moves are the steps' inputs, and the policies choose each
 // card as it opens. The inputs are logged as the game logs them, so the run's seed and log
-// replay it in the game.
+// replay it in the game. A Zoomies drift reaches the bot as the walk makes it, and the pulls and
+// walking that follow move the lane control it believes in until it reacts (observeDrift).
 function playBySkill(data: SimData, seed: number, config: SimConfig, tally: Tally): void {
   const { player } = config;
   const streams = runStreams(seed);
@@ -391,12 +402,37 @@ function playBySkill(data: SimData, seed: number, config: SimConfig, tally: Tall
         case "input":
           tally.inputs.push({ ...event.input, timeMs: event.timeMs });
           break;
+        case "drifted":
+          observeDrift(bot, pulledWalk.road.control);
+          break;
         case "pulled":
+          for (const { direction, moved } of event.step.pulled) {
+            if (moved) {
+              moveBelieved(bot, (control) =>
+                pullLane(
+                  laneMotionConfig(data, road.geometry.laneCount, acted.run),
+                  direction,
+                  control,
+                ),
+              );
+            }
+          }
           observePulls(bot, event.step.tells, event.step.pulled);
           notePulls(data, tally, clock, acted, event.step.pulled);
           pulledWalk = event.step.walk;
           break;
         case "walked": {
+          // The walk holds the pack still through a hit stop.
+          if (walk.road.hitStop === null) {
+            const { run } = pulledWalk;
+            moveBelieved(bot, (control) =>
+              advanceLaneControl(
+                laneMotionConfig(data, road.geometry.laneCount, run),
+                STEP_SECONDS,
+                control,
+              ),
+            );
+          }
           const { afterPull } = tally;
           const pulledFrom =
             afterPull !== null && bot.clock <= afterPull.until ? afterPull.fromLane : null;

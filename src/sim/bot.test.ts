@@ -25,6 +25,7 @@ import { screenRoadGeometry } from "../runner/screenGeometry";
 import { blockingLength } from "../runner/spawning";
 import {
   itemHeight,
+  laneMoveSeconds,
   obstacleHitBox,
   packBoxes,
   startRoad,
@@ -40,10 +41,19 @@ import { hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
 import { testState } from "../testing/runState";
 import { IDEAL_SKILL, simConfig } from "../testing/sim";
 import { mapZones } from "../testing/world";
-import { actBot, type BotRoad, moverHazards, moverPrizes, newBot } from "./bot";
+import {
+  actBot,
+  type BotRoad,
+  laneMoveRead,
+  moverHazards,
+  moverPrizes,
+  newBot,
+  observeDrift,
+  observeRoad,
+} from "./bot";
 import { type BotSight, moverShows, sightPaths } from "./sight";
 import { type RunResult, type SimData, simulateRun } from "./simulate";
-import { type Skill, SKILL_PRESETS } from "./skills";
+import { type Skill, SKILL_PRESET_IDS, SKILL_PRESETS } from "./skills";
 
 // Zones a quarter as long, with a quarter of the spawns, so the road is as busy as the game's
 // and a run is cheap.
@@ -724,6 +734,68 @@ describe("a steering bot whose pack drifts", () => {
         steered.push(...actBot(bot, road, NO_PULLS, drifted).lanes);
       }
       expect(steered).toEqual([]);
+    }
+  });
+
+  // A drift reaches the bot reactionSeconds after it sees it. Drifted into the lane of an
+  // obstacle a second ahead, the bot plans its way out no sooner, and then at once.
+  it.each(SKILL_PRESET_IDS)("reacts to a drift only after its reaction delay, as %s", (id) => {
+    const skill = { ...SKILL_PRESETS[id], errorRate: 0 };
+    const beside: WalkItem = {
+      ...ahead,
+      lane: lane + 1,
+      y: geometry.packBand.top - height - road.speed,
+    };
+    const before: Walk = { road: { ...start, items: [beside] }, run };
+    const bot = newBot(seededRandom(1), "sight", skill);
+    observeRoad(bot, road, before);
+    for (; bot.clock < 1; bot.clock += STEP_SECONDS) {
+      actBot(bot, road, NO_PULLS, before);
+    }
+    expect(bot.plan).toEqual([]);
+    const drifted = steerWalk(gameData, geometry.laneCount, 1, before);
+    observeDrift(bot, before.road.control);
+    const seenAt = bot.clock;
+    let reactedAt: number | null = null;
+    for (; reactedAt === null && bot.clock < seenAt + 2; bot.clock += STEP_SECONDS) {
+      const { lanes } = actBot(bot, road, NO_PULLS, drifted);
+      reactedAt = lanes.length > 0 || bot.plan.length > 0 ? bot.clock : null;
+    }
+
+    expect(reactedAt).toBeGreaterThanOrEqual(seenAt + skill.reactionSeconds - 1e-9);
+    expect(reactedAt).toBeLessThan(seenAt + skill.reactionSeconds + STEP_SECONDS);
+  });
+});
+
+// A Muddy pack changes lanes slower, and the bot plans with its old lane speed until it has
+// reacted to the Muddy beginning, reactionSeconds after it sees it.
+describe("a steering bot whose pack gets Muddy", () => {
+  const run = testState({ biscuit: 3, duchess: 3, snowball: 3 });
+  const muddy = {
+    ...run,
+    debuffs: [{ debuff: "muddy", secondsLeft: 30, untilZone: 0 }] as const,
+  };
+  const geometry = screenRoadGeometry(run);
+  const road: BotRoad = { data: gameData, geometry, speed: walkScrollSpeed(gameData, run) };
+  const walk: Walk = { road: startRoad(geometry.laneCount), run: muddy };
+  const clean = laneMoveSeconds(gameData, run);
+  const slowed = laneMoveSeconds(gameData, muddy);
+
+  it.each(SKILL_PRESET_IDS)("plans with its old lane speed until it reacts, as %s", (id) => {
+    const skill = SKILL_PRESETS[id];
+    const bot = newBot(seededRandom(1), "sight", skill);
+    bot.clock = 5;
+    const read: { readonly at: number; readonly seconds: number }[] = [];
+    for (; bot.clock < 6; bot.clock += STEP_SECONDS) {
+      observeRoad(bot, road, walk);
+      actBot(bot, road, NO_PULLS, walk);
+      read.push({ at: bot.clock - 5, seconds: laneMoveRead(bot, gameData, muddy) });
+    }
+
+    expect(slowed).toBeGreaterThan(clean);
+    expect(read.filter(({ seconds }) => seconds === clean).length).toBeGreaterThan(0);
+    for (const { at, seconds } of read) {
+      expect(seconds).toBe(at < skill.reactionSeconds - 1e-9 ? clean : slowed);
     }
   });
 });
