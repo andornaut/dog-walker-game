@@ -2104,17 +2104,19 @@ def carriage(lf=0, rf=0, bob=0, nod=0, roll=0, ear=0, tail=0, hands=0, slack=0):
     g.cel(C, 30 + b, 9, 2.5, "ink", None, "dslate", power=3)
     for x in (C - 8.5, C + 7.5):
         g.rect(x, 26 + b, 1, 5, "amber")
-    # the head: pricked ears (the left turned back by ear), a broad pale grey brow over big dark eyes, a long
-    # face narrowing to a grey muzzle with dark nostrils, a slate forelock
+    # the head: pricked ears (the left turned back by ear), grey edged dslate so they read against the
+    # driver's white cravat, a broad pale grey brow over big dark eyes, a long face narrowing to a grey muzzle
+    # with dark nostrils, a dslate forelock
     for x, back in ((C - 5, ear), (C + 4, 0)):
-        g.tri((x - 1.5, 17 + h), (x + 2.5, 17 + h), (x + 0.5 - back, 11.5 + h + back), "lgrey")
-        g.rect(x, 14 + h, 1, 3, "slate")
+        g.tri((x - 2, 17.5 + h), (x + 3, 17.5 + h), (x + 0.5 - back, 10.5 + h + back), "dslate")
+        g.tri((x - 1.5, 17 + h), (x + 2.5, 17 + h), (x + 0.5 - back, 11.5 + h + back), "grey")
+        g.rect(x, 14 + h, 1, 3, "dslate")
     g.cel(C, 20 + h, 5.5, 5.5, "lgrey", "grey", "white", power=2.6)
     g.blob(C, 26.5 + h, 4, 4.5, "lgrey", "grey")
     g.cel(C, 29 + h, 3.5, 2, "grey", "slate", power=3)
     g.p(C - 2.5, 29 + h, "dslate")
     g.p(C + 1.5, 29 + h, "dslate")
-    g.rect(C - 1.5, 14.5 + h, 3, 2.5, "slate")
+    g.rect(C - 1.5, 14 + h, 3, 3, "dslate")
     for x in (C - 4, C + 2):
         g.rect(x, 19.5 + h, 2, 2, "ink")
         g.p(x, 19.5 + h, "white")
