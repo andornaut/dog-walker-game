@@ -24,7 +24,7 @@ import { type ZoneCelebration, zoneCelebration } from "../hud/zoneCelebration";
 import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
 import { AmbientView } from "../road/phaser/ambientView";
 import { BackdropView } from "../road/phaser/backdropView";
-import type { CardView, Choice } from "../rules/choices";
+import { type CardView, type Choice, outcomeChanges } from "../rules/choices";
 import { currentZone, currentZoneId, previousZone } from "../rules/route";
 import {
   type FixedStepLimits,
@@ -518,9 +518,8 @@ export class RunScene extends Scene implements HudRun {
         recorder.log({ choice, kind: "card", timeMs });
         world.menus.closeCard();
         const over = overPack(packPoint(this.session?.walk));
-        moments.addChanges(over, [...outcome.heartChanges, ...outcome.moneyChanges]);
+        moments.addChanges(over, outcomeChanges(outcome));
         moments.chosen(outcome);
-        moments.sayQuips(outcome.quips);
         moments.afterOutcome(outcome);
         return;
       }

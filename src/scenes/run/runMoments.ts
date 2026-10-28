@@ -66,7 +66,7 @@ import {
   heartsForgiven,
   type MoneyChange,
 } from "../../rules/causes";
-import { type ChoiceOutcome, type QuipCue, quipLine } from "../../rules/choices";
+import { type ChoiceOutcome, outcomeChanges, type QuipCue, quipLine } from "../../rules/choices";
 import { hitWord } from "../../rules/encounters";
 import { hintFor } from "../../rules/hints";
 import { walkLength } from "../../rules/route";
@@ -343,21 +343,17 @@ export class RunMoments {
       }
       this.flashBump({ encounter, kind: "encounter" });
       this.deps.pack.stumble(still, DOG_REACTIONS.splash);
-      this.addChanges(overPack(pack), [...outcome.heartChanges, ...outcome.moneyChanges]);
-      this.sayQuips(outcome.quips);
+      this.addChanges(overPack(pack), outcomeChanges(outcome));
       this.afterOutcome(outcome);
     }
     this.sayQuips(step.fired.map((dog): QuipCue => ({ dog, moment: "fired" })));
     this.fired(step.fired, step.walk.run);
     // A lucky find's money changes hands at its pickup.
     for (const { encounter, item, outcome } of step.instants) {
-      this.addChanges(this.itemPoint(item, pack), [
-        ...outcome.heartChanges,
-        ...outcome.moneyChanges,
-      ]);
+      const changes = outcomeChanges(outcome);
+      this.addChanges(this.itemPoint(item, pack), changes);
       showInstantPopup(this.scene, encounter, this.deps.still());
-      this.say(luckyLine(gameData, encounter, [...outcome.heartChanges, ...outcome.moneyChanges]));
-      this.sayQuips(outcome.quips);
+      this.say(luckyLine(gameData, encounter, changes));
       this.afterOutcome(outcome);
       this.hint({ kind: "luckyFind" });
     }
@@ -384,8 +380,10 @@ export class RunMoments {
     debuffLines(gameData, debuffChanges(before, after)).forEach((line) => this.say(line));
   }
 
-  // Firings a choice or find brought about, and the owners it left on their last heart.
+  // The owners' quips at a choice or find, the firings it brought about, and the owners it left
+  // on their last heart.
   afterOutcome(outcome: ChoiceOutcome): void {
+    this.sayQuips(outcome.quips);
     this.sayLowHearts(outcome.heartChanges);
     this.fired(outcome.fired, outcome.state);
   }

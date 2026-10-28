@@ -146,6 +146,11 @@ export interface ChoiceOutcome {
   readonly state: RunState;
 }
 
+// Every change an outcome made: its hearts, then its money.
+export function outcomeChanges(outcome: ChoiceOutcome): Change[] {
+  return [...outcome.heartChanges, ...outcome.moneyChanges];
+}
+
 interface SourcedOption {
   readonly option: CardOption;
   readonly source: EffectSource;
