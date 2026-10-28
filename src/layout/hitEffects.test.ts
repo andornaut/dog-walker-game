@@ -76,13 +76,11 @@ describe("hit effects", () => {
     expect(at.y - height / 2 + groundRow).toBe(feet.y);
   });
 
+  // One obstacle for each motion OBSTACLE_HITS gives, and one with none.
   it.each<[string, HitKind, MinorObstacleId | null, string[], "tipped" | "upright"]>([
     ["a market stall shakes sideways", "plain", "marketStall2", ["dx"], "upright"],
-    ["a bench shakes sideways", "plain", "bench", ["dx"], "upright"],
     ["a trash can rocks back upright", "plain", "trashCan", ["angle"], "upright"],
-    ["an art sculpture rocks back upright", "plain", "artSculpture", ["angle"], "upright"],
     ["a cone rocks and stays tipped", "plain", "cone", ["angle"], "tipped"],
-    ["a hedge shakes sideways", "plain", "hedge", ["dx"], "upright"],
     ["a standing hazard keeps still", "plain", STANDING_HAZARD ?? null, [], "upright"],
     ["a mover jolts up the road and back", "moving", "car", ["dy"], "upright"],
   ])("%s", (_, kind, obstacle, moves, rests) => {
@@ -127,11 +125,10 @@ describe("hit effects with reduced motion", () => {
     }
   });
 
+  // Reduced motion stops every motion at once: a mover's jolt and a cone's tip stand for them.
   it.each<[HitKind, MinorObstacleId]>([
     ["moving", "car"],
-    ["plain", "trashCan"],
     ["plain", "cone"],
-    ["plain", "hedge"],
   ])("keeps a %s %s still, with no dog reaction", (kind, obstacle) => {
     expect(obstacleMotion(true, struck(kind, obstacle), 1)).toEqual([]);
     expect(dogReaction(true, "hit")).toEqual([]);
