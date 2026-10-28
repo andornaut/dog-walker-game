@@ -326,7 +326,7 @@ export function packFitsOnPath(
 }
 
 // Adds the lanes of mask to masks' entry at row.
-function addLanes(masks: Int32Array, row: number, mask: number): void {
+function addLanes(row: number, mask: number, masks: Int32Array): void {
   masks[row] = (masks[row] ?? 0) | mask;
 }
 
@@ -648,7 +648,7 @@ export function planSpawns<Kind extends string>(
   const leavesRoom = (cells: number) => cellsLeft - cells >= reserved;
   const takeCells = (row: number, mask: number) => {
     cellsLeft -= laneTotal(mask & ~(taken[row] ?? 0));
-    addLanes(taken, row, mask);
+    addLanes(row, mask, taken);
   };
 
   // Every block kept: its first row, the last row whose window and the last whose gap it
@@ -680,13 +680,13 @@ export function planSpawns<Kind extends string>(
     const sweptBefore = dart ? dartBefore : wallBefore;
     for (let row = cell.row; row <= lastRow; row++) {
       blockedBefore[row] = blocked[row] ?? 0;
-      addLanes(blocked, row, covered);
+      addLanes(row, covered, blocked);
       sweptBefore[row] = swept[row] ?? 0;
-      addLanes(swept, row, covered);
+      addLanes(row, covered, swept);
     }
     for (let row = cell.row; row <= lastGap; row++) {
       gapBefore[row] = gapBlocked[row] ?? 0;
-      addLanes(gapBlocked, row, covered);
+      addLanes(row, covered, gapBlocked);
     }
     let ok = true;
     for (let row = cell.row; ok && row <= lastRow; row++) {
@@ -844,8 +844,8 @@ export function planSpawns<Kind extends string>(
       if (row >= 0 && row < rows.length) {
         const cell = laneMask(lane, 1);
         takeCells(row, cell);
-        addLanes(moverHeld, row, cell);
-        addLanes(dart ? dartHeld : otherMoverHeld, row, cell);
+        addLanes(row, cell, moverHeld);
+        addLanes(row, cell, dart ? dartHeld : otherMoverHeld);
       }
     },
   };
@@ -896,7 +896,7 @@ export function planSpawns<Kind extends string>(
     take: (dart: boolean, lane: number, row: number) => {
       moverGrid.take(dart, lane, row);
       if (row >= 0 && row < rows.length) {
-        addLanes(prizeHeld, row, laneMask(lane, 1));
+        addLanes(row, laneMask(lane, 1), prizeHeld);
       }
     },
   };
@@ -932,7 +932,7 @@ export function planSpawns<Kind extends string>(
         const covered = laneMask(rest.lane, footprint.lanes) & roadLanes;
         rows.forEach((rowDistance, row) => {
           if (rowDistance > rest.distance - oneRowHit && rowDistance < rest.distance + length) {
-            addLanes(restHeld, row, covered);
+            addLanes(row, covered, restHeld);
           }
         });
       }
@@ -1051,7 +1051,7 @@ export function planSpawns<Kind extends string>(
     const covered = laneMask(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= lastRow; row++) {
       takeCells(row, covered);
-      addLanes(heldByStanding, row, covered);
+      addLanes(row, covered, heldByStanding);
     }
     const event = { distance: itemAt(rows, cell.row), kind: quota.kind, lane: cell.lane };
     if (quota.blocksLane) {
@@ -1172,10 +1172,10 @@ export function planSpawns<Kind extends string>(
     gapBlocked.fill(0, first, last + 1);
     for (const block of blocks) {
       for (let row = Math.max(first, block.row); row <= Math.min(last, block.lastRow); row++) {
-        addLanes(blocked, row, block.covered);
+        addLanes(row, block.covered, blocked);
       }
       for (let row = Math.max(first, block.row); row <= Math.min(last, block.lastGap); row++) {
-        addLanes(gapBlocked, row, block.covered);
+        addLanes(row, block.covered, gapBlocked);
       }
     }
   };
