@@ -47,15 +47,12 @@ describe("withSetupStart", () => {
     });
   });
 
-  it("keeps the run's own route from the first zone", () => {
-    expect(withSetupStart(gameData, setup, state).route).toEqual(state.route);
-  });
-
-  it("walks the setup's route up to its zone", () => {
-    const route = ["street", "pawsPromenade", "snoozeCrescent", "park"];
-    expect(withSetupStart(gameData, { ...setup, route, zone: 3 }, state).route).toEqual(
-      route.slice(0, 3),
-    );
+  const route = ["street", "pawsPromenade", "snoozeCrescent", "park"];
+  it.each([
+    ["keeps the run's own route from the first zone", setup, state.route],
+    ["walks the setup's route up to its zone", { ...setup, route, zone: 3 }, route.slice(0, 3)],
+  ])("%s", (_, from, expected) => {
+    expect(withSetupStart(gameData, from, state).route).toEqual(expected);
   });
 
   it("replaces the run's money with the setup's", () => {
