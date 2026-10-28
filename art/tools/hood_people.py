@@ -171,8 +171,8 @@ carriage            112x72  Distillery District, 2 lanes; a horse-drawn tour car
                             out past the right flank; cue (3 frames, 120ms): the driver lifting and
                             flicking the reins, the horse's head coming up
 granny-cart-shopper 48x72   Kensington Market; an older market shopper, a stepper facing the player as
-                            the mail carrier is, pulling a two-wheeled shopping cart beside her (screen
-                            right): a mauve headscarf with white dots tied under the chin, a grey fringe,
+                            the mail carrier is (the game mirrors it for a step left), pulling a
+                            two-wheeled shopping cart beside her (screen right): a mauve headscarf with white dots tied under the chin, a grey fringe,
                             wire glasses, a long camel coat, dark tights and plum shoes, a cream cloth
                             tote with a green band in the other hand; the cart a red and green tartan
                             bag on a grey frame, its tires edge-on either side, a baguette, two leeks
