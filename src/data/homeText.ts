@@ -11,7 +11,7 @@ export const HOME_TEXT = {
     howTo: "Tap to pick. Press and hold anything to learn more.",
     install: "Install the app: full screen, offline.",
     newAffordable: "Something new at the Pet shop!",
-    newWalker: "New walker!",
+    newWalker: "{walker} is ready to walk!",
     noWalker: "Who's walking? Tap a face.",
   },
   cantAfford: "Save {amount} more for {item}.",

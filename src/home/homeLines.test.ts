@@ -18,6 +18,7 @@ import {
   type VisitNews,
   type WalkerLine,
   walkerLineKey,
+  walkerSays,
   walkerUnlockedSince,
 } from "./homeLines";
 
@@ -90,14 +91,28 @@ describe("walkerLineKey", () => {
 
 describe("walkerUnlockedSince", () => {
   it("finds a walker owned now and not at the last visit, and none with no last visit", () => {
-    const cases: readonly [string, WalkerId[] | undefined, WalkerId[], boolean][] = [
-      ["finds a walker owned now and not at the last visit", ["casey"], ["casey", "mrB"], true],
-      ["finds none when the walkers are unchanged", ["casey", "mrB"], ["casey", "mrB"], false],
-      ["finds none with no last visit to compare with", undefined, ["casey", "mrB"], false],
+    const cases: readonly [string, WalkerId[] | undefined, WalkerId[], WalkerId | null][] = [
+      ["finds a walker owned now and not at the last visit", ["casey"], ["casey", "mrB"], "mrB"],
+      ["finds none when the walkers are unchanged", ["casey", "mrB"], ["casey", "mrB"], null],
+      ["finds none with no last visit to compare with", undefined, ["casey", "mrB"], null],
     ];
     for (const [, remembered, owned, expected] of cases) {
       expect(walkerUnlockedSince(remembered, owned)).toBe(expected);
     }
+  });
+});
+
+describe("walkerSays", () => {
+  it.each<[WalkerLine, WalkerId | null, string]>([
+    [
+      "newWalker",
+      "mrB",
+      fillNames(gameData.homeText.bubble.newWalker, { walker: gameData.walkers.mrB.name }),
+    ],
+    ["afterWalk", "mrB", gameData.homeText.bubble.afterWalk],
+    ["howTo", null, gameData.homeText.bubble.howTo],
+  ])("says the %s line, naming a walker who joined, %s", (line, joined, expected) => {
+    expect(walkerSays(gameData, line, joined)).toBe(expected);
   });
 });
 
@@ -170,22 +185,35 @@ describe("bubbleSpeech", () => {
       {
         action: { kind: "bought", name: "Reggie", purchase: { dog: "reggie", kind: "dog" } },
         dogs: [],
-        expected: { owner: "reggie", paragraphs: ["Reggie joined.", "Tag me in everything."] },
+        expected: { owner: "reggie", paragraphs: ["Tag me in everything."] },
         line: "firstVisit",
-        name: "announces a just-bought dog, then lets its owner speak though the dog is not picked",
+        name: "lets a just-bought dog's owner speak though the dog is not picked",
+      },
+      {
+        action: { kind: "bought", name: "Lucky collar", purchase: { gear: "luckyCollar", kind: "gear" } },
+        dogs: [],
+        expected: { owner: null, paragraphs: [text.bubble.afterWalk] },
+        line: "afterWalk",
+        name: "leaves a purchase on the Pet shop's plate",
       },
       {
         action: { amount: dollars(480), kind: "cantAfford", name: "Reggie" },
         dogs: ["kilo"],
-        expected: { owner: null, paragraphs: ["$480 short for Reggie."] },
+        expected: { owner: "kilo", paragraphs: ["He already did 10K."] },
+        line: "afterWalk",
+        name: "leaves a refusal on the Pet shop's plate",
+      },
+      {
+        action: { kind: "notice", text: "Sound off." },
+        dogs: ["kilo"],
+        expected: { owner: null, paragraphs: ["Sound off."] },
         line: "afterWalk",
         name: "puts the last action's message ahead of a picked dog's owner",
       },
     ];
     for (const { action, dogs, expected, line } of cases) {
-      expect(bubbleSpeech(text, line, { action, loadout: { dogs, gear: null } }, quips)).toEqual(
-        expected,
-      );
+      const state = { action, loadout: { dogs, gear: null } };
+      expect(bubbleSpeech(text, text.bubble[line], state, quips)).toEqual(expected);
     }
   });
 });

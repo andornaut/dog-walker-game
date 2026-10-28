@@ -5,8 +5,9 @@ import { modifiersOf } from "../rules/modifiers";
 import type { StorageState } from "../save/profile";
 import { type LastWalk, MAX_RUN_DOGS, type Owned } from "../save/schema";
 import { packOrder } from "../state/pack";
+import { fillLine } from "../lib/lines";
 import { dollarText, type HomeLoadout, packCapacity, type Purchase } from "./home";
-import { homeLine } from "./homeText";
+import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
 
 export type WalkerLine = keyof HomeText["bubble"];
 
@@ -47,13 +48,28 @@ export function walkerLineKey(
   return walks <= HOW_TO_WALKS ? "howTo" : "afterWalk";
 }
 
-// Whether a walker is owned now that was not at the last visit. With no last visit to compare
-// with (a session's first), there is none.
+// A walker owned now that was not at the last visit, or null for none. With no last visit to
+// compare with (a session's first), there is none.
 export function walkerUnlockedSince(
   remembered: readonly WalkerId[] | undefined,
   owned: readonly WalkerId[],
-): boolean {
-  return remembered !== undefined && owned.some((id) => !remembered.includes(id));
+): WalkerId | null {
+  return remembered === undefined ? null : (owned.find((id) => !remembered.includes(id)) ?? null);
+}
+
+// The walker's own line in words: the new walker's names them, joined is the walker unlocked
+// since the last visit.
+export function walkerSays(
+  data: Pick<GameData, "homeText" | "walkers">,
+  line: WalkerLine,
+  joined: WalkerId | null,
+): string {
+  const { bubble } = data.homeText;
+  if (line !== "newWalker" || joined === null) {
+    return bubble[line];
+  }
+  const walker = data.walkers[joined].name;
+  return fillLine(HOME_TEXT_FIELDS.bubble, bubble, "newWalker", { walker });
 }
 
 // The Dogs band's pack count: the dogs picked and the pack's capacity.
@@ -143,32 +159,33 @@ export function storageNotice(text: HomeText, state: StorageState): string[] {
 }
 
 // What the walker's bubble says, as paragraphs that each start on a new line, in priority
-// order: a bought dog's message with its owner's parting line; the last action's message;
-// the parting line of the most recently picked dog still in the pack; the walker's own line.
-// quips holds the owner lines drawn this visit as dogs were picked or bought. owner is the dog
-// whose owner says the last paragraph, or null when the walker or a message has the last word.
+// order: a bought dog's owner's parting line; the last action's message; the parting line of
+// the most recently picked dog still in the pack; the walker's own line, walkerLine. A purchase
+// or a refusal shows on the Pet shop's plate only, never again here. quips holds the owner
+// lines drawn this visit as dogs were picked or bought. owner is the dog whose owner says the
+// last paragraph, or null when the walker or a message has the last word.
 export function bubbleSpeech(
   text: HomeText,
-  walkerLine: WalkerLine,
+  walkerLine: string,
   state: { readonly action: HomeAction; readonly loadout: HomeLoadout },
   quips: ReadonlyMap<DogId, string>,
 ): { owner: DogId | null; paragraphs: string[] } {
   const { action, loadout } = state;
   if (action.kind === "bought" && action.purchase.kind === "dog") {
     const { dog } = action.purchase;
-    const joined = boughtLine(text, action.purchase, action.name);
     const quip = quips.get(dog);
-    return quip === undefined
-      ? { owner: null, paragraphs: [joined] }
-      : { owner: dog, paragraphs: [joined, quip] };
+    if (quip !== undefined) {
+      return { owner: dog, paragraphs: [quip] };
+    }
   }
-  const message = messageLine(text, action);
+  const shops = action.kind === "bought" || action.kind === "cantAfford";
+  const message = shops ? null : messageLine(text, action);
   if (message !== null) {
     return { owner: null, paragraphs: [message] };
   }
   const owner = [...loadout.dogs].reverse().find((dog) => quips.has(dog));
   const quip = owner === undefined ? undefined : quips.get(owner);
   return owner === undefined || quip === undefined
-    ? { owner: null, paragraphs: [text.bubble[walkerLine]] }
+    ? { owner: null, paragraphs: [walkerLine] }
     : { owner, paragraphs: [quip] };
 }

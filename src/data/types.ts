@@ -674,7 +674,7 @@ export interface HomeText {
     // can be installed and is not.
     readonly install: string;
     readonly newAffordable: string;
-    // After a walk that unlocked a walker.
+    // After a walk that unlocked a walker, naming the {walker}.
     readonly newWalker: string;
     readonly noWalker: string;
   };

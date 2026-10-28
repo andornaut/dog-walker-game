@@ -124,7 +124,7 @@ export interface ShopSceneData extends OverlayData {
 // Emitted on game.events after each purchase, so the screen under the shop redraws its bank.
 export const SHOP_CHANGED_EVENT = "shop-changed";
 // Emitted on game.events when the shop closes, with the last purchase or refusal, so the
-// home screen's walker can say it.
+// home screen can greet a bought dog.
 export const SHOP_CLOSED_EVENT = "shop-closed";
 
 export interface ShopClosed {

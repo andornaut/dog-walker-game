@@ -66,6 +66,7 @@ import {
   storageNotice,
   type WalkerLine,
   walkerLineKey,
+  walkerSays,
   walkerUnlockedSince,
 } from "../home/homeLines";
 import { porchOwners } from "../home/porch";
@@ -433,6 +434,8 @@ export class StartScene extends Scene {
     | undefined;
   private views = new Map<string, TileView>();
   private walkerLine: WalkerLine = "firstVisit";
+  // The walker unlocked since the last visit, whom the walker's newWalker line names.
+  private joined: WalkerId | null = null;
 
   constructor() {
     super(SCENE_KEYS.start);
@@ -457,9 +460,10 @@ export class StartScene extends Scene {
     const remembered = this.registry.get(LAST_VISIT_BANK_KEY) as Cents | undefined;
     const before = bankAtLastVisit(remembered, bankCents, stats.lastWalk);
     const walkersBefore = this.registry.get(LAST_VISIT_WALKERS_KEY) as WalkerId[] | undefined;
+    this.joined = walkerUnlockedSince(walkersBefore, owned.walkers);
     const news = {
       affordable: newlyAffordable(gameData, owned, before, bankCents),
-      walker: walkerUnlockedSince(walkersBefore, owned.walkers),
+      walker: this.joined !== null,
     };
     // Once per device, after the first finished walk, in place of the how-to or welcome back.
     const suggestInstall = walksFinished(stats) > 0 && installNudgeDue();
@@ -731,8 +735,8 @@ export class StartScene extends Scene {
     openOverlay(this, SCENE_KEYS.shop, data);
   }
 
-  // The shop's last purchase or refusal goes in the walker's bubble, a bought dog's owner
-  // saying a parting line.
+  // The shop's last purchase or refusal, which its plate has said: a bought dog hops in and its
+  // owner says a parting line in the walker's bubble.
   private shopClosed(closed: ShopClosed): void {
     const { action } = closed;
     if (action.kind === "bought" && action.purchase.kind === "dog") {
@@ -1404,7 +1408,7 @@ export class StartScene extends Scene {
     const state = { action: this.action, loadout: this.loadout };
     const speech = bubbleSpeech(
       gameData.homeText,
-      save.walker === null ? "noWalker" : this.walkerLine,
+      walkerSays(gameData, save.walker === null ? "noWalker" : this.walkerLine, this.joined),
       state,
       this.quips,
     );
