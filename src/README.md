@@ -71,7 +71,7 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 - `src/site/`: tests of the site nav's stylesheet, `public/nav.css`
 - `src/testing/`: helpers shared by the tests
 - `src/tools/`: the art manifest, the data export and the depth preview
-- `src/ui/`: the pixel-art UI kit; `phaser/` draws text, panels and the dimmed ramps
+- `src/ui/`: the pixel-art UI kit; `phaser/` draws text, panels, the dimmed ramps and the grey copies of disabled art
 
 **Boundary:** only `src/main.ts`, `src/scenes/` and the `phaser/` folders may import Phaser or code that does, and only tests may import `src/testing/`. A context listed in `CONTEXTS` (`eslint.config.mjs`) imports only the folders and modules its row lists; `src/lib/` imports nothing from `src/`. No value imports form a cycle (`import-x/no-cycle`); type-only imports are erased, so they may. ESLint enforces all four, so all game logic runs in unit tests without a renderer.
 
