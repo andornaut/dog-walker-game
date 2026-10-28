@@ -1791,11 +1791,12 @@ VOLLEY_IDLE_MS = 400
 # Every pose's joints in design units, side on facing right: the hip, the shoulder and the head's centre, the
 # near and far arms as (elbow, hand) and legs as (knee, foot), the ball's centre (none for no ball) and the sand
 # thrown up as (x, y, r) puffs. A foot on row 43.5 or lower is planted on the road and stays put under a bob.
+# Every limb, ball and puff keeps clear of the frame's sides, so the outline closes round it at every step.
 # front turns the face to the player, as the lying player does to give the thumbs up.
-VOLLEY_LAND = dict(hip=(7, 41), sh=(14, 40.5), head=(20, 35),
-                   near_arm=((20, 43.2), (26.5, 43.5)), far_arm=((20, 42.2), (26, 42.5)))
-VOLLEY_LIE = dict(hip=(6.5, 41.5), sh=(13.5, 40), head=(18, 33.5), front=True,
-                  far_arm=((16, 43), (23, 43)), near_leg=((1, 43.5), (2, 37)), far_leg=((1.5, 43), (4.5, 37)))
+VOLLEY_LAND = dict(hip=(8.5, 41), sh=(15.5, 40.5), head=(21.5, 35),
+                   near_arm=((21.5, 43.2), (28, 43.5)), far_arm=((21.5, 42.2), (27.5, 42.5)))
+VOLLEY_LIE = dict(hip=(8, 41.5), sh=(15, 40), head=(19.5, 33.5), front=True,
+                  far_arm=((17.5, 43), (24.5, 43)), near_leg=((3, 43.5), (3.5, 37)), far_leg=((3.5, 43), (6, 37)))
 VOLLEY_POSES = {
     "run-reach": dict(hip=(15, 31), sh=(17, 22), head=(19.5, 12.5),
                       near_arm=((13, 26.5), (11, 30)), far_arm=((20.5, 26), (23.5, 23)),
@@ -1811,16 +1812,16 @@ VOLLEY_POSES = {
                      near_leg=((19.5, 35), (15, 39)), far_leg=((16.5, 37.5), (16, 44.5))),
     "dive-launch": dict(hip=(10, 33), sh=(16.5, 28.5), head=(21.5, 22),
                         near_arm=((22, 33), (26.5, 37.5)), far_arm=((22.5, 32), (27, 36.5)),
-                        near_leg=((6, 38), (2.5, 43.5)), far_leg=((14, 38), (11, 43.5)), ball=(28, 40.5)),
-    "dive-fly": dict(hip=(7, 37), sh=(13.5, 36.5), head=(19, 31.5),
-                     near_arm=((19.5, 39.5), (25.5, 40)), far_arm=((19.5, 38.5), (25, 39)),
-                     near_leg=((2, 37.5), (1, 32.5)), far_leg=((2.5, 38.5), (2.5, 33.5)), ball=(28, 37)),
-    "dive-land": dict(VOLLEY_LAND, near_leg=((1.5, 43.5), (1, 38)), far_leg=((2, 43), (2.5, 39)), ball=(26, 26),
-                      sand=((30.5, 42.5, 1.5), (30, 39, 1))),
-    "dive-slide": dict(VOLLEY_LAND, near_leg=((1.5, 43.5), (1.5, 37)), far_leg=((2, 43), (3, 38)), ball=(24.5, 15),
-                       sand=((30.5, 40.5, 1.2), (29.5, 36.5, 1.1), (31, 33, 0.8), (27.5, 31.5, 0.7))),
-    "lie": dict(VOLLEY_LIE, near_arm=((16.5, 43.5), (23.5, 43.5))),
-    "lie-thumb": dict(VOLLEY_LIE, near_arm=((27, 43), (29.5, 37)), thumb=True),
+                        near_leg=((6, 38), (2.5, 43.5)), far_leg=((14, 38), (11, 43.5)), ball=(27, 40.5)),
+    "dive-fly": dict(hip=(8.5, 37), sh=(15, 36.5), head=(20.5, 31.5),
+                     near_arm=((21, 39.5), (26, 40)), far_arm=((21, 38.5), (25.5, 39)),
+                     near_leg=((3.5, 37.5), (2.5, 32.5)), far_leg=((4, 38.5), (4, 33.5)), ball=(27, 36)),
+    "dive-land": dict(VOLLEY_LAND, near_leg=((3, 43.5), (2.5, 38)), far_leg=((3.5, 43), (4, 39)), ball=(27, 26),
+                      sand=((30, 42.5, 1.3), (29.5, 39, 1))),
+    "dive-slide": dict(VOLLEY_LAND, near_leg=((3, 43.5), (3, 37)), far_leg=((3.5, 43), (4.5, 38)), ball=(25.5, 15),
+                       sand=((30, 40.5, 1.2), (29.5, 36.5, 1.1), (30.5, 33, 0.8), (27.5, 31.5, 0.7))),
+    "lie": dict(VOLLEY_LIE, near_arm=((18, 43.5), (25, 43.5))),
+    "lie-thumb": dict(VOLLEY_LIE, near_arm=((27, 43), (29, 37)), thumb=True),
 }
 VOLLEY_RIM = {**LIT, "dturq": ("turquoise", None)}
 
