@@ -1,0 +1,22 @@
+{ "frames": {
+   "roadside-beach-chair-coral.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 42, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 36 },
+    "sourceSize": { "w": 42, "h": 36 },
+    "duration": 1000
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "roadside-beach-chair-coral.png",
+  "format": "RGBA8888",
+  "size": { "w": 42, "h": 36 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 0, "direction": "forward" }
+  ]
+ }
+}

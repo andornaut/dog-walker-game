@@ -1,0 +1,22 @@
+{ "frames": {
+   "roadside-beach-chair-blue@62.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 26, "h": 23 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 26, "h": 23 },
+    "sourceSize": { "w": 26, "h": 23 },
+    "duration": 1000
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "roadside-beach-chair-blue@62.png",
+  "format": "RGBA8888",
+  "size": { "w": 26, "h": 23 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 0, "direction": "forward" }
+  ]
+ }
+}

@@ -10,6 +10,12 @@
     "roadside-hot-dog-stand",
     "roadside-love-lock",
     "roadside-leuty",
+    "roadside-beach-umbrella-blue",
+    "roadside-beach-umbrella-coral",
+    "roadside-beach-umbrella-green",
+    "roadside-beach-chair-blue",
+    "roadside-beach-chair-coral",
+    "roadside-beach-chair-green",
     "curb-barrel",
     "curb-bike-ring",
     "curb-bollard",
@@ -296,7 +302,18 @@
             "dz": 0
           }
         ],
-        [],
+        [
+          {
+            "key": "roadside-beach-umbrella-blue",
+            "across": 261,
+            "dz": 0
+          },
+          {
+            "key": "roadside-beach-chair-blue",
+            "across": 241,
+            "dz": -12
+          }
+        ],
         [],
         [
           {
@@ -305,7 +322,48 @@
             "dz": 0
           }
         ],
+        [
+          {
+            "key": "roadside-beach-umbrella-coral",
+            "across": 249,
+            "dz": 0
+          }
+        ],
         [],
+        [
+          {
+            "key": "roadside-leuty",
+            "across": 268,
+            "dz": 0
+          }
+        ],
+        [
+          {
+            "key": "roadside-beach-umbrella-green",
+            "across": 261,
+            "dz": 0
+          },
+          {
+            "key": "roadside-beach-chair-green",
+            "across": 241,
+            "dz": -12
+          }
+        ],
+        [],
+        [
+          {
+            "key": "roadside-dune-grass",
+            "across": 243,
+            "dz": 0
+          }
+        ],
+        [
+          {
+            "key": "roadside-beach-chair-coral",
+            "across": 234,
+            "dz": 0
+          }
+        ],
         []
       ],
       "sides": {

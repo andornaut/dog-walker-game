@@ -14,6 +14,10 @@ every rect, ellipse and triangle scales, 1px lines stay 1px. Design sizes are mu
 every full-size frame is a whole size; depth variants round as the game does (minis.scaled). Full
 size, then every depth step in minis.STEPS (@94 to @50):
 
+roadside-beach-chair-*   42x36    a folding beach chair slung with stripes: blue (azure and white), coral
+                                  (turquoise and pink) or green (green and yellow)
+roadside-beach-umbrella-* 72x72   a beach umbrella planted in the sand, leaning a little left, its panels in the
+                                  same three colourways
 roadside-dune-grass      60x48    a tuft of dune grass, moss and olive blades with gold tips
 roadside-fruit-stand     108x84   a tiered fruit stand under a little striped awning
 roadside-gas-lamp        36x150   a heritage street lamp, its lantern lit gold
@@ -322,6 +326,81 @@ def leuty():
     return w, h, draw
 
 
+# The Beaches' umbrella and chair colourways: each a pair of stripe colours, (first, second).
+BEACH_STRIPES = {"blue": ("azure", "white"), "coral": ("turquoise", "pink"), "green": ("green", "yellow")}
+
+
+def field(g, colour_at):
+    """Paint every pixel whose centre, in design units, colour_at(x, y) gives a colour for (a K name or hex); None leaves it."""
+    px, s = raster(g).px, scale_of(g)
+    for yy, row in enumerate(px):
+        for xx in range(len(row)):
+            c = colour_at((xx + 0.5) / s, (yy + 0.5) / s)
+            if c is not None:
+                row[xx] = K.get(c, c)
+
+
+def beach_umbrella(stripes):
+    """A beach umbrella planted in the sand, leaning a little left: a white pole under a shallow canopy of
+    ten panels in the colourway's two colours, five in view, scalloped between the ribs, the panel on the
+    right shaded a ramp step darker, a white finial on top."""
+    w, h = 48, 48
+    first, second = BEACH_STRIPES[stripes]
+    tilt = math.radians(7)
+    cos, sin = math.cos(tilt), math.sin(tilt)
+    # in the umbrella's own frame: across from the pole and height above the sand, the pole's foot at (28, 47)
+    apex, rim, reach = 39, 28, 20
+    panel = math.pi / 5
+
+    def at(x, y):
+        dx, dy = x - 28, y - 47
+        lx, up = dx * cos - dy * sin, -dx * sin - dy * cos
+        if up > apex + 2 or up < 0:
+            return None
+        if up >= apex and abs(lx) <= 1.5:
+            return "white" if lx < 0.5 else "lgrey"
+        if rim - 3 <= up <= apex and abs(lx) <= reach:
+            half = reach * ((apex - up) / (apex - rim)) ** 0.55 if up > rim else reach
+            phi = math.asin(max(-1, min(1, lx / half))) if half > 0 else 0
+            j = math.floor((phi + math.pi / 2 + panel / 2) / panel)
+            frac = (phi + math.pi / 2 + panel / 2) / panel - j
+            edge = rim - 1.5 * math.cos(phi) - 1.6 * math.sin(math.pi * frac)
+            if abs(lx) <= half and up >= edge:
+                c = first if j % 2 == 0 else second
+                return dk(c) if phi > math.pi / 2 - panel else c
+        if abs(lx) <= 1 and up < rim:
+            return "white" if lx < 0 else "lgrey"
+        return None
+
+    def draw(g, f=0):
+        field(g, at)
+    return w, h, draw
+
+
+def beach_chair(stripes):
+    """A folding beach chair: a tan wooden frame, its back and seat slung with the colourway's stripes, an
+    armrest each side on the front legs and the back legs showing between them, lit from the left."""
+    w, h = 28, 24
+    first, second = BEACH_STRIPES[stripes]
+
+    def draw(g, f=0):
+        base = h - 2
+        for x in (9, 17):
+            g.rect(x, 15, 2, base - 14, "ochre")
+        g.rect(6, 2, 2, 13, "tan")
+        g.rect(20, 2, 2, 13, "ochre")
+        for i, c in enumerate((first, second, first, second)):
+            g.rect(8 + i * 3, 3, 3, 10, c)
+            g.rect(8 + i * 3, 13, 3, 2, dk(c))
+        g.rect(6, 15, 16, 2, "tan")
+        g.rect(20, 15, 2, 2, "ochre")
+        g.rect(4, 11, 2, base - 10, "tan")
+        g.rect(22, 11, 2, base - 10, "ochre")
+        g.rect(3, 10, 6, 2, "tan")
+        g.rect(19, 10, 6, 2, "ochre")
+    return w, h, draw
+
+
 # ---------- the curb props: street furniture on the sidewalk or paving, in design units ----------
 
 
@@ -516,6 +595,8 @@ PROPS = {
     "roadside-hot-dog-stand": (hot_dog_stand(), (0,), STILL_MS, True),
     "roadside-love-lock": (love_lock(), (0,), STILL_MS, True),
     "roadside-leuty": (leuty(), (0,), STILL_MS, True),
+    **{f"roadside-beach-umbrella-{c}": (beach_umbrella(c), (0,), STILL_MS, True) for c in BEACH_STRIPES},
+    **{f"roadside-beach-chair-{c}": (beach_chair(c), (0,), STILL_MS, True) for c in BEACH_STRIPES},
     "curb-barrel": (barrel(), (0,), STILL_MS, True),
     "curb-bike-ring": (bike_ring(), (0,), STILL_MS, True),
     "curb-bollard": (bollard(), (0,), STILL_MS, True),
@@ -581,17 +662,26 @@ def gap(*props):
 # dz is road px from the slot's z, nearer negative. Each table is sparse: an empty lot and six gaps,
 # a prop in gaps 0 and 3, so each side has a prop every 6 slots (840 px): the neighbourhood's tree or
 # street furniture in gap 0, then its own prop in gap 3. The right side's gapStart of 2 puts its props
-# 3 slots after the left's, so they alternate sides, one every 420 px. Each neighbourhood's character
-# comes from its backdrop, verges and road, not from its roadside.
+# 3 slots after the left's, so they alternate sides, one every 420 px. The Beaches runs twelve gaps,
+# the same two props in gaps 0 and 3 and again in 6 and 9, and beach umbrellas and chairs in gaps 1, 4,
+# 7 and 10, so one prop stands every 210 px. Each neighbourhood's character comes from its backdrop,
+# verges and road, not from its roadside.
 SIDES = dict(
     left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=1),
     right=dict(offset=1, lotStart=0, lotStride=1, gapStart=2, gapStride=1),
 )
 
 
-def sparse(tree, own):
-    """A sparse table: tree alone in gap 0 and own alone in gap 3, each a (key, inner edge, dz)."""
-    return dict(slot=140, lots=((),), gaps=(gap(tree), (), (), gap(own), (), ()), sides=SIDES)
+def sparse(tree, own, between=None):
+    """A sparse table: tree alone in gap 0 and own alone in gap 3, each a (key, inner edge, dz). between, if
+    given, maps more gaps to their props, each a tuple of (key, inner edge, dz): the gaps then run to 12,
+    tree and own repeating in gaps 6 and 9."""
+    if between is None:
+        return dict(slot=140, lots=((),), gaps=(gap(tree), (), (), gap(own), (), ()), sides=SIDES)
+    gaps = [gap(tree), (), (), gap(own), (), ()] * 2
+    for i, props in between.items():
+        gaps[i] = gap(*props)
+    return dict(slot=140, lots=((),), gaps=tuple(gaps), sides=SIDES)
 
 
 PLACEMENT = {
@@ -599,7 +689,12 @@ PLACEMENT = {
     "high-park": sparse(("tree-oak", 220, 0), ("hot-dog-stand", 216, 0)),
     "distillery-district": sparse(("gas-lamp", 213, 0), ("love-lock", 216, 0)),
     "kensington-market": sparse(("tree-maple", 220, 0), ("fruit-stand", 216, 0)),
-    "the-beaches": sparse(("leuty", 220, 0), ("dune-grass", 213, 0)),
+    "the-beaches": sparse(("leuty", 220, 0), ("dune-grass", 213, 0), {
+        1: (("beach-umbrella-blue", 225, 0), ("beach-chair-blue", 220, -12)),
+        4: (("beach-umbrella-coral", 213, 0),),
+        7: (("beach-umbrella-green", 225, 0), ("beach-chair-green", 220, -12)),
+        10: (("beach-chair-coral", 213, 0),),
+    }),
     "yonge-street": sparse(("street-lamp", 213, 0), ("transit-stop", 213, 0)),
 }
 
