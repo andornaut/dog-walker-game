@@ -89,7 +89,7 @@ describe("a simulated run", { timeout: 60_000 }, () => {
       gear: "fannyPack",
       pack: "kilo,biscuit",
       policy: "mixed",
-      seed: 6,
+      seed: 1,
       skill: "novice",
       spares: 1,
     },
