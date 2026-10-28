@@ -213,6 +213,19 @@ describe("run, world and walkers", () => {
     expect(tuning.counts.dartStopLanesMin).toBeLessThanOrEqual(tuning.counts.dartStopLanesMax);
   });
 
+  it.each(Object.entries(tuning.probability.distractionPatternOdds))(
+    "gives the %s distraction pattern odds from 0 to 1",
+    (_, odds) => {
+      expect(odds).toBeGreaterThanOrEqual(0);
+      expect(odds).toBeLessThanOrEqual(1);
+    },
+  );
+
+  it("gives the distraction patterns odds adding up to 1", () => {
+    const odds = Object.values(tuning.probability.distractionPatternOdds);
+    expect(odds.reduce((sum, value) => sum + value, 0)).toBeCloseTo(1);
+  });
+
   it("lists the zones from easiest to hardest, each with a difficulty in words", () => {
     const ranks = world.zones.map(({ difficulty }) => difficulty);
     expect([...ranks].sort((a, b) => a - b)).toEqual(ranks);

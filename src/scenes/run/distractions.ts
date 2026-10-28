@@ -1,9 +1,10 @@
 import { minorObstacleSpriteKey } from "../../assets/spriteKeys";
-import type { GameData, MinorObstacleId, Zone } from "../../data/types";
+import type { DistractionPattern, GameData, MinorObstacleId, Zone } from "../../data/types";
 import { clamp01 } from "../../lib/numbers";
-import { type Random, randomPick, weightedPick } from "../../lib/random";
+import { type Random, weightedPick } from "../../lib/random";
+import { keysOf } from "../../lib/records";
 import { eachRoadsideProp, type RoadsideTable, START_STRIP_LENGTH } from "../../road/roadsideProps";
-import { read } from "../../rules/units";
+import { read, readTable } from "../../rules/units";
 import { type Box, overlaps } from "../../runner/collision";
 import { DART_VERGE_LANES, stopsOnVerge } from "../../runner/moverPlanning";
 import { drawnLanes, hasLeftRoad, type MoverOnRoad, moverPlace, moverY } from "../../runner/movers";
@@ -16,11 +17,11 @@ import { footprintOf, type WalkItem, type WalkItemKind } from "../../runner/walk
 // pack. They never hit anything and show no move cue: they block no lane, the walk never reads
 // them, and they draw from a random stream of their own, so a seed plays the same walk with or
 // without them. Each zone has about counts.distractionsPerZone, spread through it, each in one of
-// three patterns: it starts on the verge, steps into the edge lane and steps back off (visit); it
-// waits at the road's edge, half on the verge where a dart waits idle, then leaves (edge); or it
-// starts in the edge lane as its row comes into view and steps off (leave). Each fades out past
-// the verge. Like the road's movers it is measured in road scroll, so it stands still while the
-// road does.
+// three patterns, at probability.distractionPatternOdds: it starts on the verge, steps into the
+// edge lane, lingers there and steps back off (visit); it waits at the road's edge, half on the
+// verge where a dart waits idle, then leaves (edge); or it starts in the edge lane as its row
+// comes into view, lingers and steps off (leave). Each fades out past the verge. Like the road's
+// movers it is measured in road scroll, so it stands still while the road does.
 //
 // None is drawn over a pickup or an obstacle, or stands on a roadside prop's footprint: as its row
 // comes into view, it takes the side it drew if every road item, pending spawn and verge scenery
@@ -28,8 +29,6 @@ import { footprintOf, type WalkItem, type WalkItemKind } from "../../runner/walk
 // the other side, else a row SHIFT_ROWS further up the zone, until past the latest row its stretch
 // allows, where it is skipped. It sorts with the props by row, so a prop nearer the walker stands
 // in front of it.
-
-type DistractionPattern = "edge" | "leave" | "visit";
 
 // One distraction. key is its sprite. row is the zone distance its row comes into view at, the
 // one it waits for until placed. side is the side it tries first, -1 left and 1 right, and placed
@@ -115,20 +114,20 @@ const ROW_MARGIN = 1;
 const PROP_FOOTPRINT = { far: 1, near: 0.5 } as const;
 // A zone with no hazard to wear takes these.
 const AMBIENT_WALKERS = ["ambient-pedestrian", "ambient-pedestrian-back"] as const;
-const PATTERNS: readonly DistractionPattern[] = ["edge", "leave", "visit"];
 // Lanes out from the edge lane's middle to the road's edge, where a dart waits idle before its cue
 // and an edge waiter stands, half on the verge.
 const EDGE_OUT = 0.5;
 
 // Its timeline, as shares of its time on screen. A visit waits on the verge from 0 to a share
-// from waitFrom up to waitSpan more, by its step, steps in over stepIn, stands for stand, then
-// steps out to the verge and fades out by the end. A leave stands in its lane, and an edge waiter
-// at the road's edge, from 0 to a share from waitFrom up to waitSpan more, then steps out and
-// fades over stepOut.
+// from waitFrom up to waitSpan more, by its step, steps in over stepIn, stands for
+// multipliers.distractionVisitLingerShare, then steps out to the verge and fades out by the end.
+// A leave stands in its lane, and an edge waiter at the road's edge, from 0 to a share from
+// waitFrom up to waitSpan more, then steps out and fades over stepOut; a leave's waitFrom is
+// multipliers.distractionLeaveLingerShare.
 const TIMELINE = {
   edge: { stepOut: 0.3, waitFrom: 0.3, waitSpan: 0.3 },
-  leave: { stepOut: 0.35, waitFrom: 0.2, waitSpan: 0.25 },
-  visit: { stand: 0.15, stepIn: 0.25, waitFrom: 0.05, waitSpan: 0.15 },
+  leave: { stepOut: 0.35, waitSpan: 0.25 },
+  visit: { stepIn: 0.2, waitFrom: 0.05, waitSpan: 0.1 },
 } as const;
 
 export function startDistractions(): DistractionState {
@@ -173,7 +172,7 @@ export function distractionKinds(
 
 // The zone's distractions: one in each of distractionsPerZone equal stretches of it, its row
 // drawn in the stretch's first ROW_SHARE, each wearing one of distractionKinds by its weight and
-// taking one of the three patterns evenly. Each takes the same draws whatever is picked.
+// taking one of the three patterns at its odds. Each takes the same draws whatever is picked.
 export function planDistractions(
   deps: Pick<DistractionDeps, "data" | "drawable" | "random">,
   geometry: Pick<RoadGeometry, "cell" | "sightLength">,
@@ -186,10 +185,14 @@ export function planDistractions(
   const stretch = count > 0 ? length / count : 0;
   // Every row is gone from the road before the zone ends.
   const last = length - distractionScroll(data, geometry) - geometry.cell.length;
+  const patterns = keysOf(data.tuning.probability.distractionPatternOdds);
+  const odds = patterns.map((pattern) =>
+    readTable(data.tuning, "probability", "distractionPatternOdds", pattern),
+  );
   const planned: Distraction[] = [];
   for (let i = 0; i < count; i++) {
     const pick = random();
-    const pattern = randomPick(random, PATTERNS);
+    const pattern = weightedPick(random, patterns, odds);
     const side = random() < 0.5 ? -1 : 1;
     const row = stretch * (i + ROW_SHARE * random());
     const step = random();
@@ -305,7 +308,7 @@ function isClear(
   const margin = ROW_MARGIN * geometry.cell.length;
   for (let travel = since; travel <= end + SAMPLE_SCROLL; travel += SAMPLE_SCROLL) {
     const at = Math.min(travel, end);
-    if (!distractionAt(geometry, end, at, placed, place)) {
+    if (!distractionAt(data, geometry, end, at, placed, place)) {
       continue;
     }
     // Its feet sweep from where the last moment checked left them.
@@ -406,12 +409,14 @@ function itemBoxAfter(geometry: RoadGeometry, scroll: number, item: WalkItem): B
 // How far out from its edge lane's middle a distraction is, travel after its row came into view,
 // a share through of its time on screen; whether it is moving, and which way.
 function outAt(
+  data: Pick<GameData, "tuning">,
   distraction: Distraction,
   share: number,
 ): { inward: boolean; moving: boolean; out: number } {
   const ease = (from: number, span: number) => clamp01((share - from) / span);
   if (distraction.pattern === "visit") {
-    const { stand, stepIn, waitFrom, waitSpan } = TIMELINE.visit;
+    const { stepIn, waitFrom, waitSpan } = TIMELINE.visit;
+    const stand = read(data.tuning, "multipliers", "distractionVisitLingerShare");
     const wait = waitFrom + waitSpan * distraction.step;
     const outFrom = wait + stepIn + stand;
     if (share < outFrom) {
@@ -424,7 +429,11 @@ function outAt(
       out: (VERGE_OUT + FADE_OUT) * ease(outFrom, 1 - outFrom),
     };
   }
-  const { stepOut, waitFrom, waitSpan } = TIMELINE[distraction.pattern];
+  const { stepOut, waitSpan } = TIMELINE[distraction.pattern];
+  const waitFrom =
+    distraction.pattern === "leave"
+      ? read(data.tuning, "multipliers", "distractionLeaveLingerShare")
+      : TIMELINE.edge.waitFrom;
   const wait = waitFrom + waitSpan * distraction.step;
   // An edge waiter faces the road while it waits, as a dart does.
   const start = distraction.pattern === "edge" ? EDGE_OUT : 0;
@@ -438,6 +447,7 @@ function outAt(
 // Writes where a placed distraction is drawn travel after its row came into view, or returns
 // false while it is not: before its row is in view, and from when it is gone.
 function distractionAt(
+  data: Pick<GameData, "tuning">,
   geometry: Pick<RoadGeometry, "laneCount" | "roadTop">,
   end: number,
   travel: number,
@@ -448,7 +458,7 @@ function distractionAt(
   if (side === null || travel < 0 || travel >= end || end <= 0) {
     return false;
   }
-  const step = outAt(distraction, travel / end);
+  const step = outAt(data, distraction, travel / end);
   if (step.out >= VERGE_OUT + FADE_OUT) {
     return false;
   }
@@ -472,5 +482,5 @@ export function placeDistraction(
   out: DistractionPlace,
 ): boolean {
   const end = distractionScroll(data, geometry);
-  return distractionAt(geometry, end, zoneDistance - distraction.row, distraction, out);
+  return distractionAt(data, geometry, end, zoneDistance - distraction.row, distraction, out);
 }

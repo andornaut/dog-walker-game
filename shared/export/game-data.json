@@ -2818,6 +2818,8 @@
       "dartTurnAtShareMax": 1,
       "dartTurnAtShareMin": 0.5,
       "distractionEndRoadShare": 0.5,
+      "distractionLeaveLingerShare": 0.3,
+      "distractionVisitLingerShare": 0.35,
       "fannyPackCardCostFactor": 0.5,
       "goodLeashSquirrelPull": 0,
       "keenEyeTipSpawns": 1.5,
@@ -2842,6 +2844,11 @@
     },
     "probability": {
       "dartVergeStopShare": 0.25,
+      "distractionPatternOdds": {
+        "edge": 0.15,
+        "leave": 0.25,
+        "visit": 0.6
+      },
       "shyHopperShare": 0.5,
       "smallDodgeChance": 0.25,
       "whistleDodgeChance": 0.25

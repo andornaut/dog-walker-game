@@ -90,6 +90,10 @@ export type SecondsKey = NumberKeys<LiveTuning["seconds"]>;
 export type PriceKey = keyof LiveTuning["money"]["prices"];
 export type ProbabilityKey = NumberKeys<LiveTuning["probability"]>;
 
+// How a distraction mover steps on and off the road: into an edge lane and back off (visit),
+// from an edge lane off (leave), or from the road's edge away (edge).
+export type DistractionPattern = "edge" | "leave" | "visit";
+
 type Table<Key extends PropertyKey> = Readonly<Record<Key, number>>;
 type OpenGroup = Readonly<Record<string, number | Table<string>>>;
 
@@ -127,10 +131,15 @@ export interface Tuning {
     readonly tip: number;
   };
   readonly multipliers: OpenGroup & {
+    readonly distractionLeaveLingerShare: number;
+    readonly distractionVisitLingerShare: number;
     readonly scrollSpeedGainPerZone: number;
   };
   readonly pixels: OpenGroup & { readonly roadScrollSpeed: number };
-  readonly probability: OpenGroup & { readonly smallDodgeChance: number };
+  readonly probability: OpenGroup & {
+    readonly distractionPatternOdds: Table<DistractionPattern>;
+    readonly smallDodgeChance: number;
+  };
   readonly seconds: OpenGroup & {
     readonly ballBounceSeconds: number;
     readonly firingHoldSeconds: number;

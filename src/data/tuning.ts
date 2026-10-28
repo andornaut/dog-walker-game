@@ -145,6 +145,12 @@ export const TUNING = {
     // A distraction mover is off the road and gone before its row is down to this share of the
     // road ahead of the pack.
     distractionEndRoadShare: 0.5,
+    // A leave distraction stands in its edge lane for at least this share of its time on screen
+    // before it steps off.
+    distractionLeaveLingerShare: 0.3,
+    // A visit distraction, once it has stepped into its edge lane, stands there for this share of
+    // its time on screen before it steps back off.
+    distractionVisitLingerShare: 0.35,
     // Fanny pack scales each card option's cash cost by this; the cost rounds to the dollar.
     fannyPackCardCostFactor: 0.5,
     goodLeashSquirrelPull: 0,
@@ -190,6 +196,10 @@ export const TUNING = {
     // About this share of the darts that stop do so on the far verge, past the road's edge and
     // out of play, rather than in a lane, drawn per dart.
     dartVergeStopShare: 0.25,
+    // Each distraction takes one of its patterns at these odds, drawn per distraction: it steps
+    // into an edge lane and back off (visit), stands in an edge lane and steps off (leave), or
+    // waits at the road's edge and leaves (edge).
+    distractionPatternOdds: { edge: 0.15, leave: 0.25, visit: 0.6 },
     // About this share of the movers of a shy hopping kind hop shy, drawn per mover.
     shyHopperShare: 0.5,
     // A hit that would land on a small dog misses it this often, costing nothing.

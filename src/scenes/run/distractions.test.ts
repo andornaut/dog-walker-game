@@ -16,6 +16,7 @@ import {
   START_STRIP_LENGTH,
 } from "../../road/roadsideProps";
 import { currentZone } from "../../rules/route";
+import { read } from "../../rules/units";
 import { STEP_SECONDS } from "../../runner/fixedStep";
 import { DART_VERGE_LANES } from "../../runner/moverPlanning";
 import { moverPlace } from "../../runner/movers";
@@ -34,6 +35,7 @@ import { type WalkItem } from "../../runner/walkItems";
 import { newRun } from "../../state/runState";
 import { defined } from "../../testing/defined";
 import {
+  type Distraction,
   type DistractionDeps,
   type DistractionFrame,
   distractionKinds,
@@ -159,6 +161,18 @@ describe("distractionKinds", () => {
   });
 });
 
+// A distraction of pattern placed on the left at row 0, stepping at step.
+const leftAt = (pattern: Distraction["pattern"], step: number): Distraction => ({
+  key: "tourist",
+  latest: 1000,
+  pattern,
+  placed: -1,
+  row: 0,
+  side: -1,
+  skipped: false,
+  step,
+});
+
 describe("placeDistraction", () => {
   // Where each pattern starts, in lanes out from the left edge lane's middle: a visit on the verge,
   // an edge waiter at the road's edge where a dart waits idle, a leave in the edge lane.
@@ -167,23 +181,67 @@ describe("placeDistraction", () => {
     ["leave", 0],
     ["visit", DART_VERGE_LANES + 0.5],
   ] as const)("starts a %s %s lanes out", (pattern, out) => {
-    const distraction = {
-      key: "tourist",
-      latest: 1000,
-      pattern,
-      placed: -1,
-      row: 0,
-      side: -1,
-      skipped: false,
-      step: 0,
-    } as const;
     const place = newDistractionPlace();
-    expect(placeDistraction(gameData, GEOMETRY, 0, { ...distraction }, place)).toBe(true);
+    expect(placeDistraction(gameData, GEOMETRY, 0, leftAt(pattern, 0), place)).toBe(true);
     expect(place.lanePosition).toBeCloseTo(-out);
   });
 });
 
+// Where a distraction is drawn at SAMPLES even moments through its time on screen, each null
+// once it is not drawn.
+const SAMPLES = 2000;
+const samplesOf = (distraction: Distraction): (DistractionPlace | null)[] =>
+  Array.from({ length: SAMPLES }, (_, i) => {
+    const place = newDistractionPlace();
+    return placeDistraction(gameData, GEOMETRY, (END * i) / SAMPLES, distraction, place)
+      ? place
+      : null;
+  });
+
+describe("distraction timeline", () => {
+  // At step 0 a leave stands from its start, and a visit from stepping in, for its linger share.
+  it.each([
+    ["leave", "distractionLeaveLingerShare"],
+    ["visit", "distractionVisitLingerShare"],
+  ] as const)("stands a %s still in its edge lane for multipliers.%s", (pattern, key) => {
+    const standing = samplesOf(leftAt(pattern, 0)).filter(
+      (place) => place !== null && !place.moving && Math.abs(place.lanePosition) < 1e-9,
+    );
+    expect(standing.length / SAMPLES).toBeCloseTo(read(gameData.tuning, "multipliers", key), 2);
+  });
+
+  // The visit's linger leaves it time to walk back off the road at no more than the pace it
+  // stepped on at, at any step, so a tuning pass can't hurry it off.
+  it.each([0, 0.5, 0.999])(
+    "walks a visit at step %s off the road no faster than it stepped on, before its time is up",
+    (step) => {
+      const lanes = samplesOf(leftAt("visit", step)).flatMap((place) =>
+        place === null ? [] : [place.lanePosition],
+      );
+      const moves = lanes.slice(1).map((lane, i) => lane - defined(lanes[i]));
+      const fastestIn = Math.max(...moves);
+      expect(fastestIn).toBeGreaterThan(0);
+      expect(Math.max(...moves.map((moved) => -moved))).toBeLessThanOrEqual(fastestIn);
+      // Past the road's edge, half a lane out from the edge lane's middle.
+      expect(lanes.at(-1)).toBeLessThan(-0.5);
+    },
+  );
+});
+
 describe("planDistractions", () => {
+  // Every distraction planned for the first zone over many seeds.
+  const many = Array.from({ length: 200 }, (_, seed) =>
+    planDistractions(deps(seed), GEOMETRY, FIRST_ZONE),
+  ).flat();
+
+  it.each(Object.entries(gameData.tuning.probability.distractionPatternOdds))(
+    "draws the %s pattern at about its odds, %s",
+    (pattern, odds) => {
+      const share = many.filter((planned) => planned.pattern === pattern).length / many.length;
+      expect(share).toBeCloseTo(odds, 1);
+    },
+  );
+
   it.each(ZONES)("plans %s's count, one in each stretch, gone before its end", (_, zone) => {
     const planned = planDistractions(deps(1), GEOMETRY, zone);
     expect(planned).toHaveLength(COUNT);
