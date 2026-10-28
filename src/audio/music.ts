@@ -34,7 +34,7 @@ export type MusicState =
 
 export const MUSIC_STOPPED: MusicState = { kind: "stopped" };
 
-export function musicLevel(state: MusicState): number {
+function musicLevel(state: MusicState): number {
   switch (state.kind) {
     case "fading":
       return state.level;
