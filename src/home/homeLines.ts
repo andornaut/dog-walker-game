@@ -115,9 +115,9 @@ export function messageLine(text: HomeText, action: HomeAction): string | null {
     case "bought":
       return boughtLine(text, action.purchase, action.name);
     case "cantAfford":
-      return homeLine(text, "dogCantAfford", {
+      return homeLine(text, "cantAfford", {
         amount: dollarText(action.amount),
-        dog: action.name,
+        item: action.name,
       });
     case "focus":
     case "notice":

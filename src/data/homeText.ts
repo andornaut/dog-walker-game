@@ -14,6 +14,7 @@ export const HOME_TEXT = {
     newWalker: "New walker!",
     noWalker: "Who's walking? Tap a face.",
   },
+  cantAfford: "Save {amount} more for {item}.",
   detail: {
     dogKind: "{size} · {hearts}♥",
     dogLarge: "−{speed} lane change speed",
@@ -32,7 +33,6 @@ export const HOME_TEXT = {
   },
   dodgeEffect: "{sizes} dogs dodge 1 in {dodgeIn}",
   dogBought: "{dog} joins your clients!",
-  dogCantAfford: "Save {amount} more for {dog}.",
   dogSlotName: "Dog slot {slot}",
   effect: {
     durations: { nextZone: "next neighbourhood", run: "all walk" },

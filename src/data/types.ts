@@ -678,6 +678,9 @@ export interface HomeText {
     readonly newWalker: string;
     readonly noWalker: string;
   };
+  // A purchase the bank does not cover yet: the {amount} short and the {item}'s name, a dog,
+  // gear item or dog slot.
+  readonly cantAfford: string;
   // A held dog or gear tile's detail card: the dog's rows, the gear card's subtitle and
   // status, the price status of anything not owned yet, and a locked dog's subtitle.
   readonly detail: {
@@ -705,7 +708,6 @@ export interface HomeText {
   // reaches, joined as a sentence lists them, and its chance as one in {dodgeIn}.
   readonly dodgeEffect: string;
   readonly dogBought: string;
-  readonly dogCantAfford: string;
   // A dog slot's name in the purchase line.
   readonly dogSlotName: string;
   // The words an effect's text is built from, wherever it shows: what each duration adds, a

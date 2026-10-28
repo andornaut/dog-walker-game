@@ -25,8 +25,8 @@ const data = { ...gameData, tuning: TEST_TUNING };
 // The home text, with test lines for every message these tests check.
 const text = {
   ...data.homeText,
+  cantAfford: "{amount} short for {item}.",
   dogBought: "{dog} joined.",
-  dogCantAfford: "{amount} short for {dog}.",
   gearBought: "Got {gear}.",
   slotBought: "{slot} open.",
 };
