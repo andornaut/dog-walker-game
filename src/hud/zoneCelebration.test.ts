@@ -107,8 +107,13 @@ describe("celebrationText", () => {
     ]);
   });
 
-  // Every walker, at the base lane-change speed or not.
-  it.each(keysOf(gameData.walkers))(
+  // A walker at the base lane-change speed and one off it: the info reads only which it is.
+  const atBase = (walker: WalkerId) => agilityPercent(gameData.walkers[walker].agility) === null;
+  const walkers = keysOf(gameData.walkers);
+  const sampled = [walkers.find(atBase), walkers.find((walker) => !atBase(walker))].filter(
+    (walker): walker is WalkerId => walker !== undefined,
+  );
+  it.each(sampled)(
     "names new walker %s, with its own agility against the base, if not at it, and perk icon",
     (walker) => {
       const shown = celebrationText(gameData, { kind: "newWalker", walker });

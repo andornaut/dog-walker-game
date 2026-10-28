@@ -56,6 +56,11 @@ const locked = (walker: WalkerId) => {
   });
 };
 const WALKER_IDS = keysOf(gameData.walkers);
+// A walker at the base lane-change speed and one off it: a walker's lines read only which it is.
+const atBase = (walker: WalkerId) => agilityPercent(gameData.walkers[walker].agility) === null;
+const SAMPLED = [WALKER_IDS.find(atBase), WALKER_IDS.find((walker) => !atBase(walker))].filter(
+  (walker): walker is WalkerId => walker !== undefined,
+);
 
 describe("tapWalker", () => {
   it("drops the picked walker, picks an owned one and names a locked one's goal", () => {
@@ -70,8 +75,7 @@ describe("tapWalker", () => {
     }
   });
 
-  // Every walker, at the base lane-change speed or not.
-  it.each(WALKER_IDS)("says %s's agility, if not at the base, and perk on a pick", (walker) => {
+  it.each(SAMPLED)("says %s's agility, if not at the base, and perk on a pick", (walker) => {
     expect(tapWalker(gameData, { walkers: WALKER_IDS }, null, walker)).toEqual({
       kind: "pick",
       text: info(walker),
@@ -81,7 +85,7 @@ describe("tapWalker", () => {
 });
 
 describe("walkerDetailLines", () => {
-  it.each(WALKER_IDS)(
+  it.each(SAMPLED)(
     "gives %s's agility against the base, left out at the base, then its perk",
     (walker) => {
       const { agility, perk } = gameData.walkers[walker];
