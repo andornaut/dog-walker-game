@@ -1516,7 +1516,8 @@ export function screenHasRoom(
 }
 
 // The spawn planner's grid of rows and lanes. block blocks lanes in a row's window for rows rows,
-// if every lane-blocking spawn keeps clear of the path, and undoes it unless keep is set.
+// as a dart's sweep where dart is set, if every lane-blocking spawn keeps clear of the path, and
+// undoes it unless keep is set.
 // leavesRoom is false when taking the cells would leave too few for the spawns placed later that
 // are never skipped. packFits is true when the pack fits between each stand and every lane-blocking
 // spawn placed so far along the path, and between the stands themselves, and stand records the
@@ -1525,7 +1526,7 @@ export function screenHasRoom(
 // placed later takes it, but a lane-blocking standing spawn where no mover's body comes: occupy
 // records a mover's body, at distances along the zone, for those.
 interface MoverGrid {
-  block(row: number, lanes: LaneSpan, rows: number, keep: boolean): boolean;
+  block(row: number, lanes: LaneSpan, rows: number, keep: boolean, dart?: boolean): boolean;
   clearRun(lanes: LaneSpan, row: number): number;
   isFree(motion: MoverPath["motion"], lane: number, row: number): boolean;
   leavesRoom(cells: readonly BlockCell[]): boolean;
@@ -1615,7 +1616,13 @@ export function placeMovers<Kind extends string>(
       cells.every(({ lane, row }) => grid.isFree(placement.path.motion, lane, spot.row + row)) &&
       grid.leavesRoom(cells.map(({ lane, row }) => ({ lane, row: spot.row + row }))) &&
       grid.packFits(standsOf(spot)) &&
-      grid.block(spot.row, placement.lanes, placement.rows, false)
+      grid.block(
+        spot.row,
+        placement.lanes,
+        placement.rows,
+        false,
+        placement.path.motion === "cross",
+      )
     );
   };
   const spotsIn = (placements: readonly MoverPlacement[], first: number, end: number) =>
@@ -1718,7 +1725,7 @@ export function placeMovers<Kind extends string>(
         const { from, lanes, to } = placement.body;
         grid.occupy({ from: spot.distance + from, lanes, to: spot.distance + to });
       }
-      grid.block(spot.row, placement.lanes, placement.rows, true);
+      grid.block(spot.row, placement.lanes, placement.rows, true, dart);
       grid.stand(standsOf(spot));
       onScreen.push(onScreenOf(placement.path, screenOf(spot)));
       spawns.push({

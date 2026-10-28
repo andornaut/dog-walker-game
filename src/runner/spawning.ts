@@ -372,6 +372,24 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
   return { lastGap, lastRow };
 }
 
+// Whether every stretch of road between walls, the lanes walls blocks, keeps a lane that darts,
+// the lanes the darts sweep, leaves open: a pack anywhere in the stretch can dodge them there.
+export function openStretches(laneCount: number, walls: number, darts: number): boolean {
+  let stretch = 0;
+  for (let lane = 0; lane <= laneCount; lane++) {
+    const bit = 1 << lane;
+    if (lane === laneCount || (walls & bit) !== 0) {
+      if (stretch !== 0 && (stretch & ~darts) === 0) {
+        return false;
+      }
+      stretch = 0;
+    } else {
+      stretch |= bit;
+    }
+  }
+  return true;
+}
+
 // Whether a mover of a motion may take a cell, held by darts or by other spawns or by none: a
 // dart one no dart holds, as it may set off over or past cells other spawns hold; a rider one only
 // darts hold, as it may pass where a dart crosses; any other mover one nothing holds.
@@ -464,12 +482,15 @@ function drawPath(streams: PlannerStreams, plan: SpawnPlan<string>, rowCount: nu
 // is placed, the zone draws its guaranteed path (drawPath), the lanes a pack can follow through
 // it from pathStart. Lane-blocking spawns only take cells that keep that path clear: the path's
 // lane stays open in every row's window and the gap after it, and on the row before the path
-// changes lane every lane the change crosses does too. Each row's window and
-// the gap after it also keep minOpenLanes open. A spawn more than one row long blocks every window
-// and gap it overlaps, and must end within the zone's last row. Where the path changes lanes
-// between two lane-blocking spawns, packFitsOnPath holds, for a mover wherever it stands, each
-// spawn measured at its kind's drawn hit length (hitLength) and the pack at the tallest pack's hit
-// boxes (packHitLength). Off the path, nothing checks a way between spawns. Two lane-blocking
+// changes lane every lane the change crosses does too. Each row's window and the gap after it
+// also keep minOpenLanes open. In each row's window, no dart sweeps every lane of a stretch of
+// road that the other lane-blocking spawns there wall off (openStretches), so a pack anywhere on
+// the road has a lane to dodge a dart in without crossing another obstacle. A spawn more than one
+// row long blocks every window and gap it overlaps, and must end within the zone's last row. Where
+// the path changes lanes between two lane-blocking spawns, packFitsOnPath holds, for a mover
+// wherever it stands, each spawn measured at its kind's drawn hit length (hitLength) and the pack
+// at the tallest pack's hit boxes (packHitLength). Off the path, nothing else checks a way between
+// spawns. Two lane-blocking
 // spawns WIDE_LANES wide or wider have a row between the rows their hit boxes are on. The quotas
 // marked first are placed first, their movers then the rest; then the other lane-blocking movers;
 // then the other lane-blocking spawns; then the moving prizes; then the other spawns. Movers are
@@ -558,6 +579,11 @@ export function planSpawns<Kind extends string>(
   // Lanes a moving prize holds, which a spawn a mover may pass over still keeps off.
   const prizeHeld = new Int32Array(rows.length);
   const blocked = new Int32Array(rows.length);
+  // The lanes darts block in each row's window, and the lanes every other lane-blocking spawn does.
+  const dartBlocked = new Int32Array(rows.length);
+  const wallBlocked = new Int32Array(rows.length);
+  const dartBefore = new Int32Array(rows.length);
+  const wallBefore = new Int32Array(rows.length);
   const gapBlocked = new Int32Array(rows.length);
   // What a trial block overwrote, by row, to undo it.
   const blockedBefore = new Int32Array(rows.length);
@@ -664,9 +690,11 @@ export function planSpawns<Kind extends string>(
   }
   const blocks: Block[] = [];
 
-  // Blocks the footprint's lanes where they keep clear of the path and leave minOpenLanes open
-  // in every window and gap they block, and undoes the block unless keep is set and they do.
-  const tryBlock = (cell: Cell, footprint: Footprint, keep: boolean): boolean => {
+  // Blocks the footprint's lanes where they keep clear of the path, leave minOpenLanes open in
+  // every window and gap they block and leave each stretch of road open in every window they
+  // block (openStretches), counting them as a dart's sweep where dart is set and as a wall
+  // otherwise, and undoes the block unless keep is set and they do.
+  const tryBlock = (cell: Cell, footprint: Footprint, keep: boolean, dart = false): boolean => {
     const { lastGap, lastRow } = blockingSpan(plan, spacing, cell.row, footprint.rows);
     if (lastRow >= rows.length || lastGap >= rows.length - 1) {
       return false;
@@ -677,9 +705,13 @@ export function planSpawns<Kind extends string>(
         return false;
       }
     }
+    const swept = dart ? dartBlocked : wallBlocked;
+    const sweptBefore = dart ? dartBefore : wallBefore;
     for (let row = cell.row; row <= lastRow; row++) {
       blockedBefore[row] = blocked[row] ?? 0;
       blocked[row] = (blocked[row] ?? 0) | covered;
+      sweptBefore[row] = swept[row] ?? 0;
+      swept[row] = (swept[row] ?? 0) | covered;
     }
     for (let row = cell.row; row <= lastGap; row++) {
       gapBefore[row] = gapBlocked[row] ?? 0;
@@ -687,7 +719,9 @@ export function planSpawns<Kind extends string>(
     }
     let ok = true;
     for (let row = cell.row; ok && row <= lastRow; row++) {
-      ok = laneCount - laneTotal(blocked[row] ?? 0) >= minOpenLanes;
+      ok =
+        laneCount - laneTotal(blocked[row] ?? 0) >= minOpenLanes &&
+        openStretches(laneCount, wallBlocked[row] ?? 0, dartBlocked[row] ?? 0);
     }
     for (let row = cell.row; ok && row <= lastGap; row++) {
       ok = laneCount - laneTotal(gapBlocked[row] ?? 0) >= minOpenLanes;
@@ -698,6 +732,7 @@ export function planSpawns<Kind extends string>(
     if (!ok || !keep) {
       for (let row = cell.row; row <= lastRow; row++) {
         blocked[row] = blockedBefore[row] ?? 0;
+        swept[row] = sweptBefore[row] ?? 0;
       }
       for (let row = cell.row; row <= lastGap; row++) {
         gapBlocked[row] = gapBefore[row] ?? 0;
@@ -804,8 +839,8 @@ export function planSpawns<Kind extends string>(
     );
   const movers = moverQuotas(true);
   const moverGrid = {
-    block: (row: number, span: LaneSpan, rowsBlocked: number, keep: boolean) =>
-      tryBlock({ lane: span.first, row }, { lanes: span.count, rows: rowsBlocked }, keep),
+    block: (row: number, span: LaneSpan, rowsBlocked: number, keep: boolean, dart = false) =>
+      tryBlock({ lane: span.first, row }, { lanes: span.count, rows: rowsBlocked }, keep, dart),
     clearRun,
     isFree: (motion: MoverPath["motion"], lane: number, row: number) => {
       const cell = laneRun(lane, 1);

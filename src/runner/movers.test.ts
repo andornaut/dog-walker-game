@@ -1609,7 +1609,11 @@ describe("placeMovers", () => {
       plannerStreams(2),
       zoned,
       CAPS,
-      { ...grid, block: (row, ...rest) => onlyFirstRows(row) && grid.block(row, ...rest) },
+      {
+        ...grid,
+        block: (row: number, span: LaneSpan, rest: number, keep: boolean) =>
+          onlyFirstRows(row) && grid.block(row, span, rest, keep),
+      },
       [],
       rows,
       [{ count: 1, kind: "then", spec: then }],
@@ -1659,7 +1663,11 @@ describe("placeMovers", () => {
         plannerStreams(3),
         zoned,
         CAPS,
-        { ...grid, block: (row, ...rest) => !refused(row) && grid.block(row, ...rest) },
+        {
+          ...grid,
+          block: (row: number, span: LaneSpan, rest: number, keep: boolean) =>
+            !refused(row) && grid.block(row, span, rest, keep),
+        },
         [],
         rows,
         [{ count: 3, kind: "car", spec: spec({ kind: "ride", speedMultiplier: 2 }) }],

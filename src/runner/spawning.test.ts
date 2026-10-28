@@ -10,6 +10,7 @@ import {
   hitLength,
   moverMayTake,
   moverRests,
+  openStretches,
   packFitsOnPath,
   packGap,
   PATH_HOLD_ROWS,
@@ -1061,6 +1062,29 @@ describe("pathReach and rowSpacing", () => {
     const distances = planSpawns(plannerStreams(1), fast).events.map(({ distance }) => distance);
     expect(distances.length).toBeGreaterThan(0);
     expect(distances.every((distance) => distance % rowSpacing(fast) === 0)).toBe(true);
+  });
+});
+
+// On a road of 5 lanes, written lane 0 first: each stretch between walls (W) keeps a lane the darts
+// (D) leave open (.), wherever the walls stand.
+describe("openStretches", () => {
+  const masks = (road: string) =>
+    [..."WD"].map((mark) =>
+      [...road].reduce((mask, cell, lane) => (cell === mark ? mask | (1 << lane) : mask), 0),
+    );
+  it.each([
+    { open: true, road: "....." },
+    { open: true, road: "DDDD." },
+    { open: false, road: "DDDDD" },
+    { open: true, road: ".DWD." },
+    { open: false, road: "..WDD" },
+    { open: true, road: "D.WD." },
+    { open: false, road: "DWDW." },
+    { open: true, road: "WWW.D" },
+    { open: false, road: "WWWDD" },
+  ])("leaves a stretch of $road open: $open", ({ open, road }) => {
+    const [walls = 0, darts = 0] = masks(road);
+    expect(openStretches(5, walls, darts)).toBe(open);
   });
 });
 
