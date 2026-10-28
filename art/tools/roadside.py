@@ -254,11 +254,9 @@ def garden_car():
             g.rect(x, y, 1.5, n, "canopy")
         leaves(g, ((10, 31, 6, 3), (22, 31, 7, 3), (36, 30, 8, 3), (50, 31, 7, 3), (62, 31, 6, 3)))
         leaves(g, ((10, 56, 8, 6), (22, 57, 7, 5), (36, 56, 9, 6), (50, 57, 7, 5), (62, 56, 8, 6)))
-        flowers(g, ((20, 9, "red"), (28, 5, "yellow"), (35, 3, "pink"), (43, 5, "white"), (51, 9, "red"),
-                    (31, 11, "lilac"), (41, 11, "yellow"), (8, 30, "pink"), (19, 29, "yellow"), (30, 29, "red"),
-                    (42, 29, "white"), (53, 29, "pink"), (64, 30, "yellow"), (22, 26, "red"), (50, 26, "yellow"),
-                    (6, 52, "yellow"), (16, 53, "red"), (28, 54, "pink"), (40, 53, "yellow"), (52, 54, "white"),
-                    (64, 52, "red")))
+        # flowers spaced out in red, yellow and pink, a few to each heap, so the greenery reads as one mass
+        flowers(g, ((22, 8, "red"), (35, 3, "yellow"), (48, 8, "pink"), (10, 30, "yellow"), (30, 29, "red"),
+                    (44, 29, "pink"), (62, 30, "red"), (12, 53, "red"), (36, 53, "yellow"), (60, 53, "pink")))
     return w, h, draw
 
 
@@ -427,8 +425,8 @@ def love_lock():
 def mural_wall():
     """A Kensington Market mural wall: a free-standing brick wall between two piers capped in stone, its face
     painted under a walnut coping as the backdrop's laneway murals are, in diagonal bands of their paint
-    with a cartoon dog's face looking out of them, its tongue out, tags sprayed round it, and the paint stopping
-    short of a stone footing, bare brick below."""
+    with a cartoon dog's face looking out of them, its tongue out, three solid tags sprayed round it, and the paint
+    stopping short of a stone footing, bare brick below."""
     w, h = 80, 64
     x0, x1, top, paint = 11, 69, 9, 52
 
@@ -455,9 +453,6 @@ def mural_wall():
         g.rect(74, base - 3, 4, 4, "dstone")
         field(g, bands)
         g.rect(x0, top - 2, x1 - x0, 2, "walnut")
-        # drips of paint run onto the bare brick
-        for x, n, c in ((16, 3, "dred"), (31, 2, "olive"), (47, 4, "violet"), (60, 2, "ochre")):
-            g.rect(x, paint, 1, n, c)
         # the dog: a cream face outlined in coal, a brown ear flopped down each side, a brown patch round
         # its right eye, a white muzzle, a coal nose and its tongue out
         cx, cy = 40, 29
@@ -478,12 +473,8 @@ def mural_wall():
         g.ell(cx + 0.5, cy + 11, 3.5, 4, "coal")
         g.ell(cx + 0.5, cy + 10.5, 2.5, 3, "pink")
         g.rect(cx, cy + 8, 1, 4, "mauve")
-        # the tags: white scrawls top left, a gold crown top right, a lime lightning bolt with a coal drop shadow
-        # low left and a pink heart low right
-        for x, y in ((14, 13), (19, 15)):
-            g.rect(x, y, 4, 1, "white")
-            g.rect(x, y, 1, 4, "white")
-            g.rect(x + 3, y + 3, 3, 1, "white")
+        # the tags: a gold crown top right, a lime lightning bolt with a coal drop shadow low left and a pink
+        # heart low right, each solid enough to hold at @50
         g.rect(57, 14, 8, 3, "gold")
         for x in (57, 60.5, 64):
             g.tri((x - 1, 14), (x + 1, 14), (x, 11), "gold")
