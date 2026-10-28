@@ -8514,6 +8514,87 @@
       }
     },
     {
+      "key": "sign-spinner",
+      "png": "sprites/sign-spinner.png",
+      "json": "sprites/sign-spinner.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "sign-spinner@50",
+      "png": "sprites/sign-spinner@50.png",
+      "json": "sprites/sign-spinner@50.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "sign-spinner@56",
+      "png": "sprites/sign-spinner@56.png",
+      "json": "sprites/sign-spinner@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "sign-spinner@62",
+      "png": "sprites/sign-spinner@62.png",
+      "json": "sprites/sign-spinner@62.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "sign-spinner@69",
+      "png": "sprites/sign-spinner@69.png",
+      "json": "sprites/sign-spinner@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "sign-spinner@75",
+      "png": "sprites/sign-spinner@75.png",
+      "json": "sprites/sign-spinner@75.json",
+      "anchor": {
+        "feetY": 51,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "sign-spinner@81",
+      "png": "sprites/sign-spinner@81.png",
+      "json": "sprites/sign-spinner@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "sign-spinner@88",
+      "png": "sprites/sign-spinner@88.png",
+      "json": "sprites/sign-spinner@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "sign-spinner@94",
+      "png": "sprites/sign-spinner@94.png",
+      "json": "sprites/sign-spinner@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 33
+      }
+    },
+    {
       "key": "skunk",
       "png": "sprites/skunk.png",
       "json": "sprites/skunk.json",

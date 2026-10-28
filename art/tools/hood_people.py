@@ -87,6 +87,16 @@ food-cart-vendor    48x72   Kensington Market; a stop-and-go mover pushing a chu
                             down the tires; idle (4 frames, 250ms): wiping the counter, the cloth out
                             and back, breathing; cue (4 frames, 200ms): the hand up over the bell and
                             down on it as it rings, twice
+sign-spinner        48x72   Yonge Street; a hopping stepper facing the player, as snatch-raccoon steps,
+                            twirling a big arrow sign held by its middle in front of the hips: the board
+                            arrow-shaped, red with a yellow arrow face, no word; a red cap with its brim
+                            to the player, black sunglasses, an azure tee, dark grey trousers and white
+                            sneakers; hop (4 frames, 75ms): a hop sideways, the sign level and pointing
+                            the way (mirrored for left), crouched, pushing off, tucked at the top,
+                            reaching down to land; idle (8 frames, 120ms): the twirl, the sign turned 45
+                            degrees a frame anticlockwise, level, angled, upright and round; cue (4
+                            frames, 60ms): the fast spin before each hop, 90 degrees a frame, the knees
+                            bent 1px
 
 Each has depth variants at every step in minis.STEPS (@94 to @50), redrawn at the
 step on a Mini at road.SCALE x the step, with the original's tags, frame counts
@@ -1074,6 +1084,100 @@ def food_cart_vendor(lf=0, rf=0, bob=0, wipe=None, bell=None, tread=0):
         g.rect(x0, 1, 4, 1, ("foam" if i % 2 == 0 else "white") if light else col)
         g.cel(x0 + 2, 7, 2, 1.6, col)
     return rim(g, CART_RIM)
+# ---------- sign-spinner: facing the player, twirling an arrow sign between hops ----------
+
+# The arrow sign, pointing right, about its pivot (the hands, at the centre of the board): (along, across)
+# corners in design pixels. The board is yellow, rimmed red, its arrow shape the only mark on it.
+SIGN_BOARD = ((-10, -3), (2, -3), (2, -6.5), (11, 0), (2, 6.5), (2, 3), (-10, 3))
+SIGN_FACE = ((-8.3, -1.3), (3.6, -1.3), (3.6, -3.4), (8.2, 0), (3.6, 3.4), (3.6, 1.3), (-8.3, 1.3))
+# Where the hands hold the sign, in front of the hips.
+SIGN_PIVOT = (16, 32)
+# The twirl: the sign turned 45 degrees a frame, anticlockwise on screen, a full turn in 8 frames at 120ms; the
+# fast spin before each hop turns it 90 degrees a frame, 4 frames at 60ms, the knees bent 1px for the hop.
+SPINNER_IDLE = tuple(dict(turn=45 * k) for k in range(8))
+SPINNER_IDLE_MS = 120
+SPINNER_CUE = tuple(dict(turn=90 * k, bob=1) for k in range(4))
+SPINNER_CUE_MS = 60
+# The hop sideways across a lane, the sign held level pointing the way (the game mirrors the sprite for a hop
+# to the left): crouched, pushing off stretched, tucked at the top with the feet drawn up under the body,
+# reaching down to land. The head clears the frame's top by a row at the top of the hop.
+SPINNER_HOP = (dict(bob=1), dict(bob=-2, lf=-2, rf=-2), dict(bob=-2, lf=-6, rf=-6), dict(bob=-1, lf=-3, rf=-3))
+SPINNER_HOP_MS = 75
+SPINNER = dict(legs="dslate", shoes="white")
+SPINNER_RIM = {**LIT, "cobalt": ("azure", None)}
+
+
+def turned(points, turn, b):
+    """points (along, across) turned turn degrees anticlockwise on screen about SIGN_PIVOT, raised b rows."""
+    a = math.radians(turn)
+    c, s = math.cos(a), math.sin(a)
+    x0, y0 = SIGN_PIVOT
+    return [(x0 + u * c + v * s, y0 + b - u * s + v * c) for u, v in points]
+
+
+def fan(g, pts, c):
+    """A polygon that is convex but for its arrow's notches, filled as triangles: the shaft's two corners
+    with the head's root, then the head."""
+    t0, s0, h0, tip, h1, s1, t1 = pts
+    g.tri(t0, s0, s1, c)
+    g.tri(t0, s1, t1, c)
+    g.tri(h0, tip, h1, c)
+
+
+def arrow_sign(g, turn, b):
+    """The arrow sign turned turn degrees: a red board with a yellow face inset, the face shaded amber along
+    its lower and right edges against the red."""
+    fan(g, turned(SIGN_BOARD, turn, b), "red")
+    fan(g, turned(SIGN_FACE, turn, b), "yellow")
+    px = raster(g)
+    yellow, red = K["yellow"], K["red"]
+    shade = [(x, y) for y in range(px.h) for x in range(px.w) if px.px[y][x] == yellow
+             and any(0 <= y + dy < px.h and 0 <= x + dx < px.w and px.px[y + dy][x + dx] == red
+                     for dx, dy in ((1, 0), (0, 1)))]
+    for x, y in shade:
+        px.px[y][x] = K["amber"]
+
+
+def spinner_top(turn=0):
+    """The sign spinner's top for road.person: the bright azure tee, both arms down and in to the sign's
+    middle, the head in a red cap and black sunglasses, then the sign in front of the hips and the hands
+    over it."""
+    def top(g, b):
+        # the tee, shaded down its right side, a white crew neck
+        g.rect(9, 21 + b, 14, 13, "azure")
+        g.rect(20, 21 + b, 3, 13, "cobalt")
+        g.rect(14, 21 + b, 4, 1, "white")
+        # short sleeves, then the bare forearms reaching down and in to the middle of the sign
+        x0, y0 = SIGN_PIVOT
+        for x, k in ((5, 1), (23, -1)):
+            g.rect(x, 22 + b, 4, 4, "azure")
+            g.rect(x + 3, 22 + b, 1, 4, "cobalt")
+            wrist = x0 - 3 if k > 0 else x0 + 3
+            g.tri((x, 26 + b), (x + 4, 26 + b), (wrist + 1.5, y0 + b), "skin2")
+            g.tri((x, 26 + b), (wrist + 1.5, y0 + b), (wrist - 1.5, y0 + b), "skin2")
+        # head: the neck, the face under a red cap with its brim to the player
+        g.rect(14, 19 + b, 4, 3, "skin2")
+        face_disc(g, 16, 12.5 + b, 8, 8, "skin2", "brown")
+        g.cel(16, 7 + b, 8.5, 4.5, "red", "dred", "pink")
+        g.rect(7.5, 9 + b, 17, 2, "dred")
+        g.rect(15, 3 + b, 2, 1.5, "white")
+        # black sunglasses across the eyes, a glint on each lens, and a smile under them
+        g.rect(9, 12.5 + b, 14, 2.5, "ink")
+        g.rect(15, 12.5 + b, 2, 1, "slate")
+        g.p(10.5, 12.5 + b, "white")
+        g.p(18.5, 12.5 + b, "white")
+        g.p(14, 17 + b, "dbrown")
+        g.p(17, 17 + b, "dbrown")
+        g.rect(15, 18 + b, 2, 1, "dbrown")
+        # the sign, then the hands, one over the other, gripping it by the middle
+        arrow_sign(g, turn, b)
+        g.cel(x0, y0 + b, 2.2, 1.7, "skin2", "brown")
+    return top
+
+
+def sign_spinner(turn=0, bob=0, lf=0, rf=0):
+    """The sign spinner facing the player, with the road outline and the lit rim."""
+    return rim(edged(road.person(spinner_top(turn), bob=bob, lf=lf, rf=rf, **SPINNER)), SPINNER_RIM)
 
 
 # ---------- every sprite at a depth step ----------
@@ -1127,6 +1231,15 @@ def steps(suffix, s):
     yield f"food-cart-vendor{suffix}", [("push", cart, CART_PUSH_MS),
                                         ("idle", [own(food_cart_vendor, q) for q in CART_IDLE], CART_IDLE_MS),
                                         ("cue", [own(food_cart_vendor, q) for q in CART_CUE], CART_CUE_MS)]
+
+    def spinner(q):
+        # the turn is an angle, not an offset, so it is not snapped
+        pose = posed({k: v for k, v in q.items() if k != "turn"}, p)
+        return minis.small(road, p, sign_spinner, turn=q.get("turn", 0), **pose).outlined()
+
+    yield f"sign-spinner{suffix}", [("hop", [spinner(q) for q in SPINNER_HOP], SPINNER_HOP_MS),
+                                    ("idle", [spinner(q) for q in SPINNER_IDLE], SPINNER_IDLE_MS),
+                                    ("cue", [spinner(q) for q in SPINNER_CUE], SPINNER_CUE_MS)]
 
 
 def sprites():

@@ -1,0 +1,144 @@
+{ "frames": {
+   "sign-spinner@69 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 75
+   },
+   "sign-spinner@69 1.aseprite": {
+    "frame": { "x": 33, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 75
+   },
+   "sign-spinner@69 2.aseprite": {
+    "frame": { "x": 66, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 75
+   },
+   "sign-spinner@69 3.aseprite": {
+    "frame": { "x": 99, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 75
+   },
+   "sign-spinner@69 4.aseprite": {
+    "frame": { "x": 132, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 120
+   },
+   "sign-spinner@69 5.aseprite": {
+    "frame": { "x": 165, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 120
+   },
+   "sign-spinner@69 6.aseprite": {
+    "frame": { "x": 198, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 120
+   },
+   "sign-spinner@69 7.aseprite": {
+    "frame": { "x": 231, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 120
+   },
+   "sign-spinner@69 8.aseprite": {
+    "frame": { "x": 264, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 120
+   },
+   "sign-spinner@69 9.aseprite": {
+    "frame": { "x": 297, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 120
+   },
+   "sign-spinner@69 10.aseprite": {
+    "frame": { "x": 330, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 120
+   },
+   "sign-spinner@69 11.aseprite": {
+    "frame": { "x": 363, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 120
+   },
+   "sign-spinner@69 12.aseprite": {
+    "frame": { "x": 396, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 60
+   },
+   "sign-spinner@69 13.aseprite": {
+    "frame": { "x": 429, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 60
+   },
+   "sign-spinner@69 14.aseprite": {
+    "frame": { "x": 462, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 60
+   },
+   "sign-spinner@69 15.aseprite": {
+    "frame": { "x": 495, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 60
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "sign-spinner@69.png",
+  "format": "RGBA8888",
+  "size": { "w": 528, "h": 50 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "hop", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "idle", "from": 4, "to": 11, "direction": "forward" },
+   { "name": "cue", "from": 12, "to": 15, "direction": "forward" }
+  ]
+ }
+}
