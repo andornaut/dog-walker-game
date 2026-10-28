@@ -111,14 +111,18 @@ const titleRight = (x: number, text: string) =>
 const valueLeft = (value: string) => rows.right - inkWidth("font-body", STYLE, value);
 
 // The Walks tab's rows with the widest figures: four-digit counts and dollars, three-digit
-// firings by the owner with the widest name, and the best walk's first dog as every dog. The
-// best walk's later dogs have no label, so the first dog's row covers them.
+// firings by the owner with the widest name, and the best walk's first dog as the dog with the
+// widest name. The best walk's later dogs have no label, so the first dog's row covers them.
 const save = veteranSave();
 const widest = (texts: readonly string[]) =>
   texts.reduce((a, b) =>
     inkWidth("font-body", STYLE, b) > inkWidth("font-body", STYLE, a) ? b : a,
   );
 const ownerName = widest(Object.values(gameData.dogs).map(({ owner }) => owner.name));
+const DOG_NAMES = Object.values(gameData.dogs).map(({ name }) => name);
+const WIDEST_DOG = widest(DOG_NAMES);
+// The dog whose name's title ink reaches farthest right in a Dogs tab block.
+const WIDEST_DOG_TITLE = DOG_NAMES.reduce((a, b) => (titleRight(0, b) > titleRight(0, a) ? b : a));
 const walksRows = Object.values(overallRows(gameData, save.stats))
   .flat()
   .filter(({ label }) => label !== "")
@@ -135,7 +139,7 @@ const walksRows = Object.values(overallRows(gameData, save.stats))
       ];
     }
     if (label === words.overall.bestRunDogs) {
-      return Object.values(gameData.dogs).map(({ name }) => ({ label, value: name }));
+      return [{ label, value: WIDEST_DOG }];
     }
     return [{ label, value: value.startsWith("$") ? "$9,999" : "9999" }];
   });
@@ -160,7 +164,7 @@ describe("the Walks and Dogs tabs' rows", () => {
 });
 
 describe("the Dogs tab's blocks", () => {
-  it.each(Object.values(gameData.dogs).map(({ name }) => [name] as const))(
+  it.each([[WIDEST_DOG_TITLE] as const])(
     "fits %s's name beside its face, clear of the scrollbar",
     (name) => {
       expect(titleRight(rows.left + dogs.nameDx, name)).toBeLessThanOrEqual(BAR_LEFT);
