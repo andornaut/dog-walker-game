@@ -184,8 +184,10 @@ def dodge(step):
         g.ell(x, y, r, r * 0.8, "lgrey", None if step == 4 else "grey")
     n = DODGE_LINES[step]
     for k, y in enumerate(DODGE_ROWS):
-        if n:
-            g.rect(12 - n + (2 if k == 1 else 0), y, n - (2 if k == 1 else 0), 1, "white")
+        # the middle line is 2px shorter, and goes once it would be under 2px, so no line ends as a dot
+        m = n - (2 if k == 1 else 0)
+        if m >= 2:
+            g.rect(12 - m, y, m, 1, "white")
     return rim(g)
 
 

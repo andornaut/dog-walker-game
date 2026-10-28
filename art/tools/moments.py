@@ -178,14 +178,15 @@ def payout_label():
 
 # ---------- treat given ----------
 
-CRUMBS = ((-6, -2, "cream"), (5, -3, "tan"), (-4, 1, "brown"), (6, 1, "cream"), (1, -4, "tan"))
+# Four 2x2 crumbs of the treat's bone, thrown out from the second frame on, after the white pop.
+CRUMBS = ((-6, -2, "cream"), (5, -3, "tan"), (-4, 1, "brown"), (6, 1, "cream"))
 # A 5x5 heart: SMALL crowds three hearts into 24x24.
 MINI = ["11.11", "12111", "11113", ".113.", "..1.."]
 
 
 def treat_pop(step):
     """24x24, centred where the treat lands on the dog. A yellow twinkle, a white pop, then three
-    small hearts pop up out of it and fan out while crumbs scatter and fall; each part is rimmed on its own so
+    small hearts pop up out of it and fan out while four 2x2 crumbs scatter and fall; each part is rimmed on its own so
     they stay apart, and the last frame fades the hearts to pink."""
     g = Grid(24, 24)
     cx, cy = 12, 15
@@ -194,11 +195,11 @@ def treat_pop(step):
         return g
     if step == 1:
         piece(g, lambda p: burst(p, cx, cy, 5.5, 2.5, 6, "white", 15), size=24)
-    for dx, dy, col in CRUMBS:
+    for dx, dy, col in CRUMBS if step >= 2 else ():
         x = round(cx + dx * (0.5 + step * 0.35))
         y = round(cy + dy * (0.5 + step * 0.3) + step * step * 0.4)
-        if 1 <= x < 23 and 1 <= y < 23:
-            piece(g, lambda p: p.p(x, y, col), size=24)
+        if 1 <= x < 22 and 1 <= y < 22:
+            piece(g, lambda p: p.rect(x, y, 2, 2, col), size=24)
     for x0, vx, delay in ((cx - 7, -1, 0), (cx + 3, 1, 0), (cx - 2, 0, 1)):
         t = step - 2 - delay
         if t < 0:
