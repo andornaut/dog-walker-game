@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Draw the logo and the full-screen backgrounds outside the run.
 
-logo: a 128x30 wooden yard sign carrying the "DOG WALKER" wordmark in
-block letters at 2x (flat yellow, a 1px ink outline and a solid 2px dred
-shadow), with the leash and a paw print. It is the board of the yard
-sign on the home screen (at 6,146, left of the gate path, where the pack never
-stands), and works as a header on any other screen.
+logo: 145x41 on a transparent ground, "Archie's Dog Walks" stacked beside
+Archie's head. On the left, portrait-dog-archie's head (its rows 10 to 41, in
+its ink line) over a short red bandana, lit red on the left and dred on the
+right. On the right, ARCHIE'S in the comic letters (fx.LETTERS, 7 rows, 2px
+stems, plus an apostrophe) over DOG WALKS in the sign letters at 2x
+(fonts.sign), both cream in a 1px ink outline on a solid dred shadow, so the
+bandana is the one red accent. The game draws it on the end screen; the home
+page and screen-loading show it at 2x and the og-image at 1x.
 
 screen-<name>: 360x560 backgrounds in the house palette, one per screen. Where panels
 and text sit, they are low-contrast dark wood, so the cream and tan UI text
@@ -124,6 +127,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 import backdrops as bd  # noqa: E402
 import fonts  # noqa: E402
+import fx  # noqa: E402
 import scene as sn  # noqa: E402
 import minis  # noqa: E402
 import road  # noqa: E402
@@ -131,7 +135,7 @@ from pixel import Grid, K, build as build_sprites, dk, edged, to_image  # noqa: 
 from ui import STATES  # noqa: E402
 
 W, H = 360, 560
-LOGO_W, LOGO_H = 128, 30
+LOGO_W, LOGO_H = 145, 41
 LOGO_AT = (6, 146)
 PET_SHOP_W, PET_SHOP_H = 120, 108
 PET_SHOP_AT = (234, 86)
@@ -207,82 +211,83 @@ def planks(cv, x, y, w, h, step, vertical=False, seed=1):
 
 PAW = [".#.#.", "#...#", ".###.", ".###."]
 
-# The sign letters, 5 rows at 1x (W is 6 wide), drawn at 2x with a 2px gap and 7px more for a space.
-SIGN = {
-    "D": ["####.", "#...#", "#...#", "#...#", "####."],
-    "O": [".###.", "#...#", "#...#", "#...#", ".###."],
-    "G": [".####", "#....", "#..##", "#...#", ".####"],
-    "W": ["#....#", "#....#", "#.##.#", "#.##.#", ".#..#."],
-    "A": [".###.", "#...#", "#####", "#...#", "#...#"],
-    "L": ["#....", "#....", "#....", "#....", "#####"],
-    "K": ["#..#.", "#.#..", "##...", "#.#..", "#..#."],
-    "E": ["#####", "#....", "####.", "#....", "#####"],
-    "R": ["####.", "#...#", "####.", "#..#.", "#...#"],
-}
-# The leash's span under the word, from its handle to the paw print, centred on the board.
-LEASH_W = 112
+# The comic letters' apostrophe, 2px wide like their stems, for ARCHIE'S.
+APOSTROPHE = ["##", "##", "#."]
+# The bandana's rows under the portrait's collar (row 41), and the column its point is centred on.
+BANDANA_ROWS, BANDANA_MID = 8, 30.5
 
 
-def wordmark(s):
-    """The word's pixels at 2x, as a set of (x, y) from its top-left."""
-    pts, x = set(), 0
-    for ch in s:
-        if ch == " ":
-            x += 7
-            continue
-        rows = SIGN[ch]
-        for y, row in enumerate(rows):
-            for i, c in enumerate(row):
-                if c == "#":
-                    pts |= {(x + 2 * i + dx, 2 * y + dy) for dx in (0, 1) for dy in (0, 1)}
-        x += 2 * len(rows[0]) + 2
-    return pts
+def board(cv, x, y, w, h):
+    """The yard sign's board, w x h: a plum rim with rounded corners, a light trim (cream top, tan
+    sides) so it keeps its edge on the dark yard, a dark-stained dbrown face, and a brown lip."""
+    cv.fill(x + 1, y, w - 2, h, "plum")
+    cv.fill(x, y + 1, w, h - 2, "plum")
+    cv.fill(x + 1, y + 1, w - 2, h - 5, "tan")
+    cv.fill(x + 1, y + 1, w - 2, 1, "cream")
+    cv.fill(x + 2, y + 2, w - 4, h - 6, "dbrown")
+    cv.fill(x + 1, y + h - 4, w - 2, 2, "brown")
 
 
-def board(cv, x, y):
-    """The yard sign's board, LOGO_W x LOGO_H: a plum rim with rounded corners, a light trim (cream top,
-    tan sides) so it keeps its edge on dark wood and night sky, a dark-stained dbrown face, and a brown lip."""
-    cv.fill(x + 1, y, LOGO_W - 2, LOGO_H, "plum")
-    cv.fill(x, y + 1, LOGO_W, LOGO_H - 2, "plum")
-    cv.fill(x + 1, y + 1, LOGO_W - 2, 25, "tan")
-    cv.fill(x + 1, y + 1, LOGO_W - 2, 1, "cream")
-    cv.fill(x + 2, y + 2, LOGO_W - 4, 24, "dbrown")
-    cv.fill(x + 1, y + 26, LOGO_W - 2, 2, "brown")
+def lettering(px, cv, x, y):
+    """Draw a {(x, y): colour} lettering at x, y by its top-left inked pixel."""
+    x0, y0 = min(p[0] for p in px), min(p[1] for p in px)
+    for (px_, py), col in px.items():
+        cv.fill(x + px_ - x0, y + py - y0, 1, 1, col)
+
+
+def extent(px):
+    """The width and height of a {(x, y): colour} lettering."""
+    xs, ys = [p[0] for p in px], [p[1] for p in px]
+    return max(xs) + 1 - min(xs), max(ys) + 1 - min(ys)
+
+
+def comic(text, fill):
+    """text in the comic letters (fx.LETTERS and APOSTROPHE), built as fx.word builds them: letters 1px
+    apart, a 1px ink ring that fills the gaps, a solid dred shadow 2px down and right."""
+    letters, x = set(), 1
+    for ch in text:
+        rows = APOSTROPHE if ch == "'" else fx.LETTERS[ch]
+        letters |= {(x + i, 1 + j) for j, row in enumerate(rows) for i, c in enumerate(row) if c == "#"}
+        x += len(rows[0]) + 1
+    ring = {(a + dx, b + dy) for a, b in letters for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
+    shadow = {(a + d, b + d) for a, b in ring for d in (1, 2)} - ring
+    out = {p: "dred" for p in shadow}
+    out.update({p: "ink" for p in ring - letters})
+    out.update({p: fill for p in letters})
+    return out
+
+
+def bust():
+    """Archie's head from portrait-dog-archie (its rows 10 to 41, the collar's ink line last) over a
+    short bandana in a closed ink line: {(x, y): RGBA} from the portrait's top-left."""
+    img = sn.image("portrait-dog-archie")
+    px = {(x, y): img.getpixel((x, y)) for y in range(10, 42) for x in range(img.width)
+          if img.getpixel((x, y))[3]}
+    band = {}
+    for k in range(BANDANA_ROWS):
+        half = 12.5 - 1.7 * k
+        for x in range(round(BANDANA_MID - half), round(BANDANA_MID + half) + 1):
+            band[(x, 42 + k)] = sn.rgb("red" if x < 33 - k // 2 else "dred") + (255,)
+    px.update(band)
+    for x, y in list(band):
+        for q in ((x + dx, y + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)):
+            px.setdefault(q, sn.rgb("ink") + (255,))
+    x0, y0 = min(p[0] for p in px), min(p[1] for p in px)
+    return {(x - x0, y - y0): c for (x, y), c in px.items()}
 
 
 def logo():
     cv = clear(LOGO_W, LOGO_H)
-    board(cv, 0, 0)
-    # a little plum grain on the face, under the word and clear of the leash
-    for x, y, n in ((4, 3, 6), (118, 3, 5), (30, 25, 6), (86, 25, 5)):
-        cv.fill(x, y, n, 1, "plum")
-    # the word: flat yellow letters (6.79:1 on the dbrown face) in a 1px ink outline, on a solid dred
-    # shadow offset 2px down and right, upright
-    word = wordmark("DOG WALKER")
-    wx = max(x for x, _ in word) + 1
-    ox, oy = (LOGO_W - wx - 3) // 2, 4
-    ring = {(x + dx, y + dy) for x, y in word for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
-    shadow = {(x + d, y + d) for x, y in ring for d in (1, 2)} - ring
-    for pts, col in ((shadow, "dred"), (ring - word, "ink"), (word, "yellow")):
-        for x, y in pts:
-            cv.fill(ox + x, oy + y, 1, 1, col)
-    # the leash in pink (3.1:1 on the face): a handle loop at the left, a slack line under the word, a
-    # clip and a cream paw print at the end
-    lx = (LOGO_W - LEASH_W) // 2
-    cv.fill(lx, 20, 5, 1, "pink")
-    cv.fill(lx - 1, 21, 1, 3, "pink")
-    cv.fill(lx, 24, 5, 1, "pink")
-    cv.fill(lx + 5, 21, 1, 3, "pink")
-    a, b = lx + 6, lx + LEASH_W - 12
-    for x in range(a, b):
-        t = (2 * x - a - b) / (b - a)
-        cv.fill(x, 21 + round(2.4 * (1 - t * t)), 1, 1, "pink")
-    cv.fill(lx + LEASH_W - 12, 21, 3, 3, "lgrey")
-    cv.fill(lx + LEASH_W - 11, 22, 1, 1, "grey")
-    for j, row in enumerate(PAW):
-        for i, c in enumerate(row):
-            if c == "#":
-                cv.fill(lx + LEASH_W - 6 + i, 20 + j, 1, 1, "cream")
+    head = bust()
+    for p, c in head.items():
+        cv.img.putpixel(p, c)
+    hw, hh = extent(head)
+    small, big = comic("ARCHIE'S", "cream"), fonts.sign("DOG WALKS", 2, "cream")[0]
+    sw, sh = extent(small)
+    bw, bh = extent(big)
+    y = (hh - sh - bh) // 2 + 1
+    lettering(small, cv, hw + 2, y)
+    lettering(big, cv, hw + 1, y + sh)
     return cv
 
 
@@ -528,7 +533,7 @@ def home():
     for px in (16, 120):
         cv.fill(px, 172, 3, 22, "dbrown")
         cv.fill(px - 1, 194, 5, 1, "dstone")
-    board(cv, *LOGO_AT)
+    board(cv, *LOGO_AT, 128, 30)
     # an urn of mums in the corner, fallen leaves, a water bowl by the path and a ball on the flagstones
     urn(cv, 324, 194)
     for x, y, col in ((40, 186, "ochre"), (140, 178, "rust"), (212, 172, "brown"), (96, 160, "ochre"),
