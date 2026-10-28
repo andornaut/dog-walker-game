@@ -83,14 +83,16 @@ export function dogCardTag(data: Pick<GameData, "dogs">, dog: DogId | null): str
 // Minor obstacles whose sprite key is not their id in kebab case.
 const MINOR_OBSTACLE_SPRITES: Readonly<Partial<Record<MinorObstacleId, string>>> = {
   ball: "ball-bounce",
-  barrier2: "barrier-2",
-  barrier3: "barrier-3",
   bunny: "chase-rabbit",
   car: "parked-car",
   cat: "chase-cat",
   ducklings: "chase-ducklings",
   frisbeeDog: "social-frisbee-dog",
   garbageTruck: "stink-garbage-truck",
+  ironFence2: "iron-fence-2",
+  ironFence3: "iron-fence-3",
+  marketStall2: "market-stall-2",
+  marketStall3: "market-stall-3",
   pigeons: "chase-pigeons",
   raccoon: "snatch-raccoon",
   scooter: "minor-scooter",

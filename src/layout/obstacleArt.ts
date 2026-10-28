@@ -20,8 +20,6 @@ import type { Silhouette } from "./packFormation";
 export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   "ball-bounce": { above: 32, left: -10, right: 10 },
   "barrel-stack": { above: 42, left: -21, right: 21 },
-  "barrier-2": { above: 35, left: -56, right: 56 },
-  "barrier-3": { above: 35, left: -88, right: 88 },
   "beach-umbrella": { above: 70, left: -22, right: 21 },
   bench: { above: 34, left: -55, right: 55 },
   busker: { above: 67, left: -23, right: 24 },

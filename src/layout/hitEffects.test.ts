@@ -41,7 +41,7 @@ function motionOf(steps: readonly MotionStep[]): { ends: number; moves: string[]
 describe("hit effects", () => {
   it("bursts over every hit with its effects", () => {
     for (const [, kind, obstacle, keys] of [
-      ["a barrier", "plain", "barrier3", [HIT_ART.bump.key]],
+      ["an iron fence", "plain", "ironFence3", [HIT_ART.bump.key]],
       ["a bench", "plain", "bench", [HIT_ART.bump.key]],
       [
         "a trash can, with litter",
@@ -77,9 +77,10 @@ describe("hit effects", () => {
   });
 
   it.each<[string, HitKind, MinorObstacleId | null, string[], "tipped" | "upright"]>([
-    ["a barrier shakes sideways", "plain", "barrier2", ["dx"], "upright"],
+    ["a market stall shakes sideways", "plain", "marketStall2", ["dx"], "upright"],
     ["a bench shakes sideways", "plain", "bench", ["dx"], "upright"],
     ["a trash can rocks back upright", "plain", "trashCan", ["angle"], "upright"],
+    ["an art sculpture rocks back upright", "plain", "artSculpture", ["angle"], "upright"],
     ["a cone rocks and stays tipped", "plain", "cone", ["angle"], "tipped"],
     ["a hedge shakes sideways", "plain", "hedge", ["dx"], "upright"],
     ["a standing hazard keeps still", "plain", STANDING_HAZARD ?? null, [], "upright"],

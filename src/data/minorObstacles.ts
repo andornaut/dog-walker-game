@@ -6,20 +6,13 @@ import type { MinorObstacle } from "./types";
 // zone's mover share, and stands still otherwise. onFoot marks a person or an animal, not a
 // vehicle or a thing.
 export const MINOR_OBSTACLES = {
+  artSculpture: { name: "Art sculpture", shape: { lanes: 1, rows: 1 }, zones: ["street"] },
   ball: {
     movement: { kind: "dart", stopShare: 0, tilt: { max: 0, min: 0 }, turnBackShare: 0 },
     name: "Ball",
     shape: { lanes: 1, rows: 1 },
   },
   barrelStack: { name: "Barrel stack", shape: { lanes: 1, rows: 1 }, zones: ["street"] },
-  barrier2: {
-    name: "Barrier",
-    shape: { lanes: 2, rows: 1 },
-  },
-  barrier3: {
-    name: "Barrier",
-    shape: { lanes: 3, rows: 1 },
-  },
   beachUmbrella: {
     name: "Beach umbrella",
     shape: { lanes: 1, rows: 1 },
@@ -55,8 +48,9 @@ export const MINOR_OBSTACLES = {
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
+  cherryTrees: { name: "Cherry trees", shape: { lanes: 3, rows: 1 }, zones: ["park"] },
   clothingRack: { name: "Clothing rack", shape: { lanes: 1, rows: 1 }, zones: ["shops"] },
-  cone: { name: "Cone", shape: { lanes: 1, rows: 1 } },
+  cone: { name: "Cone", shape: { lanes: 1, rows: 1 }, zones: ["homeStretch", "shops"] },
   couple: {
     movement: { kind: "sway", pauseSeconds: 0.25, times: { max: 3, min: 2 } },
     name: "Couple",
@@ -149,7 +143,11 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
     zones: ["shops"],
   },
-  hedge: { name: "Hedge", shape: { lanes: 3, rows: 1 } },
+  hedge: {
+    name: "Hedge",
+    shape: { lanes: 3, rows: 1 },
+    zones: ["pawsPromenade", "snoozeCrescent"],
+  },
   hen: {
     movement: { kind: "dart", stopShare: 0, tilt: { max: 0, min: 0 }, turnBackShare: 0 },
     name: "Hen",
@@ -182,6 +180,8 @@ export const MINOR_OBSTACLES = {
     name: "Ice cream truck",
     shape: { lanes: 1, rows: 3 },
   },
+  ironFence2: { name: "Iron fence", shape: { lanes: 2, rows: 1 }, zones: ["snoozeCrescent"] },
+  ironFence3: { name: "Iron fence", shape: { lanes: 3, rows: 1 }, zones: ["snoozeCrescent"] },
   jogger: {
     movement: { factor: 1.7, kind: "inLane" },
     name: "Jogger",
@@ -223,6 +223,8 @@ export const MINOR_OBSTACLES = {
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
+  marketStall2: { name: "Market stall", shape: { lanes: 2, rows: 1 }, zones: ["shops"] },
+  marketStall3: { name: "Market stall", shape: { lanes: 3, rows: 1 }, zones: ["shops"] },
   newspaperBox: { name: "Newspaper box", shape: { lanes: 1, rows: 1 }, zones: ["homeStretch"] },
   parkedCar: { name: "Parked car", shape: { lanes: 1, rows: 3 } },
   patioRail: { name: "Patio rail", shape: { lanes: 3, rows: 1 }, zones: ["street"] },

@@ -1648,6 +1648,18 @@
   ],
   "minorObstacles": [
     {
+      "id": "artSculpture",
+      "name": "Art sculpture",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "street"
+      ],
+      "spriteKey": "art-sculpture"
+    },
+    {
       "id": "ball",
       "movement": {
         "kind": "dart",
@@ -1676,24 +1688,6 @@
         "street"
       ],
       "spriteKey": "barrel-stack"
-    },
-    {
-      "id": "barrier2",
-      "name": "Barrier",
-      "shape": {
-        "lanes": 2,
-        "rows": 1
-      },
-      "spriteKey": "barrier-2"
-    },
-    {
-      "id": "barrier3",
-      "name": "Barrier",
-      "shape": {
-        "lanes": 3,
-        "rows": 1
-      },
-      "spriteKey": "barrier-3"
     },
     {
       "id": "beachUmbrella",
@@ -1797,6 +1791,18 @@
       "spriteKey": "chase-cat"
     },
     {
+      "id": "cherryTrees",
+      "name": "Cherry trees",
+      "shape": {
+        "lanes": 3,
+        "rows": 1
+      },
+      "zones": [
+        "park"
+      ],
+      "spriteKey": "cherry-trees"
+    },
+    {
       "id": "clothingRack",
       "name": "Clothing rack",
       "shape": {
@@ -1815,6 +1821,10 @@
         "lanes": 1,
         "rows": 1
       },
+      "zones": [
+        "homeStretch",
+        "shops"
+      ],
       "spriteKey": "cone"
     },
     {
@@ -2072,6 +2082,10 @@
         "lanes": 3,
         "rows": 1
       },
+      "zones": [
+        "pawsPromenade",
+        "snoozeCrescent"
+      ],
       "spriteKey": "hedge"
     },
     {
@@ -2161,6 +2175,30 @@
         "rows": 3
       },
       "spriteKey": "ice-cream-truck"
+    },
+    {
+      "id": "ironFence2",
+      "name": "Iron fence",
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "zones": [
+        "snoozeCrescent"
+      ],
+      "spriteKey": "iron-fence-2"
+    },
+    {
+      "id": "ironFence3",
+      "name": "Iron fence",
+      "shape": {
+        "lanes": 3,
+        "rows": 1
+      },
+      "zones": [
+        "snoozeCrescent"
+      ],
+      "spriteKey": "iron-fence-3"
     },
     {
       "id": "jogger",
@@ -2264,6 +2302,30 @@
         "rows": 1
       },
       "spriteKey": "mail-carrier"
+    },
+    {
+      "id": "marketStall2",
+      "name": "Market stall",
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "zones": [
+        "shops"
+      ],
+      "spriteKey": "market-stall-2"
+    },
+    {
+      "id": "marketStall3",
+      "name": "Market stall",
+      "shape": {
+        "lanes": 3,
+        "rows": 1
+      },
+      "zones": [
+        "shops"
+      ],
+      "spriteKey": "market-stall-3"
     },
     {
       "id": "newspaperBox",
@@ -3150,10 +3212,9 @@
       "speed": 1,
       "weights": {
         "minorObstacles": {
+          "artSculpture": 0,
           "ball": 0,
           "barrelStack": 0,
-          "barrier2": 3.5,
-          "barrier3": 3.5,
           "beachUmbrella": 0,
           "bench": 0,
           "bunny": 2,
@@ -3161,6 +3222,7 @@
           "car": 1.5,
           "cargoBike": 0,
           "cat": 2.25,
+          "cherryTrees": 0,
           "clothingRack": 0,
           "cone": 0,
           "couple": 0,
@@ -3183,6 +3245,8 @@
           "hotDogCart": 0,
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
+          "ironFence2": 3.5,
+          "ironFence3": 3.5,
           "jogger": 3,
           "kegDollyWorker": 0,
           "kidOnBike": 3,
@@ -3190,6 +3254,8 @@
           "lifeguardChair": 0,
           "littleFreeLibrary": 3.5,
           "mailCarrier": 2,
+          "marketStall2": 0,
+          "marketStall3": 0,
           "newspaperBox": 0,
           "parkedCar": 2,
           "patioRail": 0,
@@ -3267,10 +3333,9 @@
       "speed": 1,
       "weights": {
         "minorObstacles": {
+          "artSculpture": 0,
           "ball": 1.5,
           "barrelStack": 0,
-          "barrier2": 0,
-          "barrier3": 0,
           "beachUmbrella": 0,
           "bench": 9,
           "bunny": 3,
@@ -3278,6 +3343,7 @@
           "car": 0,
           "cargoBike": 0,
           "cat": 0,
+          "cherryTrees": 9,
           "clothingRack": 0,
           "cone": 0,
           "couple": 2,
@@ -3294,12 +3360,14 @@
           "gardener": 0,
           "goose": 3,
           "grannyCartShopper": 0,
-          "hedge": 9,
+          "hedge": 0,
           "hen": 0,
           "hopscotchKid": 0,
           "hotDogCart": 0,
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
+          "ironFence2": 0,
+          "ironFence3": 0,
           "jogger": 4,
           "kegDollyWorker": 0,
           "kidOnBike": 0,
@@ -3307,6 +3375,8 @@
           "lifeguardChair": 0,
           "littleFreeLibrary": 0,
           "mailCarrier": 0,
+          "marketStall2": 0,
+          "marketStall3": 0,
           "newspaperBox": 0,
           "parkedCar": 0,
           "patioRail": 0,
@@ -3384,10 +3454,9 @@
       "speed": 1,
       "weights": {
         "minorObstacles": {
+          "artSculpture": 6,
           "ball": 0,
           "barrelStack": 4,
-          "barrier2": 0,
-          "barrier3": 0,
           "beachUmbrella": 0,
           "bench": 0,
           "bunny": 0,
@@ -3395,8 +3464,9 @@
           "car": 0,
           "cargoBike": 0,
           "cat": 0,
+          "cherryTrees": 0,
           "clothingRack": 0,
-          "cone": 6,
+          "cone": 0,
           "couple": 0,
           "coyote": 0,
           "cyclist": 0,
@@ -3417,6 +3487,8 @@
           "hotDogCart": 4,
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
+          "ironFence2": 0,
+          "ironFence3": 0,
           "jogger": 0,
           "kegDollyWorker": 4,
           "kidOnBike": 0,
@@ -3424,6 +3496,8 @@
           "lifeguardChair": 0,
           "littleFreeLibrary": 0,
           "mailCarrier": 0,
+          "marketStall2": 0,
+          "marketStall3": 0,
           "newspaperBox": 0,
           "parkedCar": 0,
           "patioRail": 6,
@@ -3501,10 +3575,9 @@
       "speed": 1,
       "weights": {
         "minorObstacles": {
+          "artSculpture": 0,
           "ball": 0,
           "barrelStack": 0,
-          "barrier2": 3.75,
-          "barrier3": 3.75,
           "beachUmbrella": 0,
           "bench": 7.5,
           "bunny": 0,
@@ -3512,6 +3585,7 @@
           "car": 0,
           "cargoBike": 4.5,
           "cat": 3,
+          "cherryTrees": 0,
           "clothingRack": 5.5,
           "cone": 3.75,
           "couple": 2,
@@ -3534,6 +3608,8 @@
           "hotDogCart": 0,
           "iceCreamBike": 0,
           "iceCreamTruck": 1,
+          "ironFence2": 0,
+          "ironFence3": 0,
           "jogger": 0,
           "kegDollyWorker": 0,
           "kidOnBike": 3,
@@ -3541,6 +3617,8 @@
           "lifeguardChair": 0,
           "littleFreeLibrary": 0,
           "mailCarrier": 4,
+          "marketStall2": 3.75,
+          "marketStall3": 3.75,
           "newspaperBox": 0,
           "parkedCar": 0,
           "patioRail": 0,
@@ -3618,10 +3696,9 @@
       "speed": 1,
       "weights": {
         "minorObstacles": {
+          "artSculpture": 0,
           "ball": 1.5,
           "barrelStack": 0,
-          "barrier2": 0,
-          "barrier3": 0,
           "beachUmbrella": 3.75,
           "bench": 3.75,
           "bunny": 0,
@@ -3629,6 +3706,7 @@
           "car": 0,
           "cargoBike": 0,
           "cat": 0,
+          "cherryTrees": 0,
           "clothingRack": 0,
           "cone": 0,
           "couple": 2,
@@ -3651,6 +3729,8 @@
           "hotDogCart": 3.75,
           "iceCreamBike": 2,
           "iceCreamTruck": 0,
+          "ironFence2": 0,
+          "ironFence3": 0,
           "jogger": 5,
           "kegDollyWorker": 0,
           "kidOnBike": 2,
@@ -3658,6 +3738,8 @@
           "lifeguardChair": 4,
           "littleFreeLibrary": 0,
           "mailCarrier": 0,
+          "marketStall2": 0,
+          "marketStall3": 0,
           "newspaperBox": 0,
           "parkedCar": 0,
           "patioRail": 0,
@@ -3735,10 +3817,9 @@
       "speed": 0.94,
       "weights": {
         "minorObstacles": {
+          "artSculpture": 0,
           "ball": 0,
           "barrelStack": 0,
-          "barrier2": 0,
-          "barrier3": 0,
           "beachUmbrella": 0,
           "bench": 0,
           "bunny": 0,
@@ -3746,6 +3827,7 @@
           "car": 7,
           "cargoBike": 0,
           "cat": 3.75,
+          "cherryTrees": 0,
           "clothingRack": 0,
           "cone": 6,
           "couple": 0,
@@ -3768,6 +3850,8 @@
           "hotDogCart": 12.5,
           "iceCreamBike": 0,
           "iceCreamTruck": 2,
+          "ironFence2": 0,
+          "ironFence3": 0,
           "jogger": 0,
           "kegDollyWorker": 0,
           "kidOnBike": 0,
@@ -3775,6 +3859,8 @@
           "lifeguardChair": 0,
           "littleFreeLibrary": 0,
           "mailCarrier": 8.12,
+          "marketStall2": 0,
+          "marketStall3": 0,
           "newspaperBox": 10,
           "parkedCar": 12.5,
           "patioRail": 0,

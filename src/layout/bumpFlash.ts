@@ -65,10 +65,9 @@ const STRIP_BORDERS: Readonly<Record<FlashColour, BorderColour>> = {
 
 // Each minor obstacle's border: its sprite's main colour, the outline and dark shading aside.
 const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>> = {
+  artSculpture: "orange",
   ball: "red",
   barrelStack: "tan",
-  barrier2: "orange",
-  barrier3: "orange",
   beachUmbrella: "red",
   bench: "tan",
   bunny: "white",
@@ -76,6 +75,7 @@ const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>> = {
   car: "cyan",
   cargoBike: "tan",
   cat: "white",
+  cherryTrees: "green",
   clothingRack: "mauve",
   cone: "orange",
   couple: "mauve",
@@ -98,6 +98,8 @@ const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>> = {
   hotDogCart: "amber",
   iceCreamBike: "white",
   iceCreamTruck: "pink",
+  ironFence2: "orange",
+  ironFence3: "orange",
   jogger: "orange",
   kegDollyWorker: "orange",
   kidOnBike: "yellow",
@@ -105,6 +107,8 @@ const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>> = {
   lifeguardChair: "red",
   littleFreeLibrary: "cyan",
   mailCarrier: "cyan",
+  marketStall2: "orange",
+  marketStall3: "orange",
   newspaperBox: "red",
   parkedCar: "cyan",
   patioRail: "green",

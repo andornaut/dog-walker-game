@@ -30,12 +30,16 @@ const BUMP_ABOVE = 6;
 export const OBSTACLE_HITS: Readonly<
   Partial<Record<MinorObstacleId, { readonly debris?: Debris; readonly motion: ObstacleMotion }>>
 > = {
-  barrier2: { motion: "shake" },
-  barrier3: { motion: "shake" },
+  artSculpture: { motion: "rock" },
   bench: { motion: "shake" },
+  cherryTrees: { debris: "leaves", motion: "shake" },
   cone: { motion: "tip" },
   fallenLog: { motion: "shake" },
   hedge: { debris: "leaves", motion: "shake" },
+  ironFence2: { motion: "shake" },
+  ironFence3: { motion: "shake" },
+  marketStall2: { motion: "shake" },
+  marketStall3: { motion: "shake" },
   trashCan: { debris: "litter", motion: "rock" },
   volleyballNet2: { motion: "shake" },
   volleyballNet3: { motion: "shake" },
