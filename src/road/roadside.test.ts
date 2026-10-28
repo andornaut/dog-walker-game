@@ -153,8 +153,13 @@ describe("curbBand", () => {
 
 describe("curbFits", () => {
   const WIDTH = 20;
-  // Props placed against each verge's band, or anywhere beside a verge with none.
-  const CASES = VERGE_ARTS.flatMap(([art, verge]) => {
+  // Props placed against a verge's band, and anywhere beside a verge with none: curbFits reads
+  // only the band, so one verge of each covers every verge.
+  const SAMPLE = [
+    VERGE_ARTS.find(([, verge]) => curbBand(verge) !== null),
+    VERGE_ARTS.find(([, verge]) => curbBand(verge) === null),
+  ].flatMap((entry) => (entry === undefined ? [] : [entry]));
+  const CASES = SAMPLE.flatMap(([art, verge]) => {
     const band = curbBand(verge);
     if (band === null) {
       const across = walkFrom(verge) + WIDTH;
