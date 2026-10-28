@@ -286,9 +286,9 @@ def tara_top(wave):
 
 
 def clare_top(wave):
-    """Clare, psychology student, laid-back: brown hair to the shoulders with a side-swept fringe and a pink
-    clip, a cosy green knit sweater with a ribbed hem over a white collar, a navy skirt, and her psychology textbook in
-    her left hand."""
+    """Clare, psychology student, laid-back: fair skin, brown hair to the shoulders with a side-swept fringe and a
+    pink clip, a cosy green knit sweater with a ribbed hem over a white collar, a navy skirt, and her psychology
+    textbook in her left hand."""
     def top(g, b):
         g.rect(10, 33 + b, 12, 5, "navy")
         g.rect(19, 33 + b, 3, 5, "ink")
@@ -300,15 +300,15 @@ def clare_top(wave):
         g.rect(9, 32 + b, 14, 1, "dgreen")
         g.tri((13, 21 + b), (16, 21 + b), (15, 23 + b), "white")
         g.tri((16, 21 + b), (19, 21 + b), (17, 23 + b), "white")
-        arms(g, b, wave, "green", "dgreen", "brown")
+        arms(g, b, wave, "green", "dgreen", "skin1")
         # the textbook, cover out, in the left fist: a blue cover with a pink brain, its cream pages on top
         g.rect(3, 23 + b, 6, 10, "blue")
         g.rect(3, 23 + b, 1, 10, "navy")
         g.rect(4, 22 + b, 5, 1, "cream")
         g.rect(5, 25 + b, 3, 2, "pink")
         g.p(6, 25 + b, "mauve")
-        g.rect(5, 31 + b, 4, 3, "brown")
-        head(g, b, "brown", "dbrown")
+        g.rect(5, 31 + b, 4, 3, "skin1")
+        head(g, b, "skin1", "skin2")
         g.cel(16, 7.5 + b, 9, 4.5, "dbrown", "plum", "brown")
         g.cel(12, 8.5 + b, 4, 2, "dbrown", "plum", "brown")
         g.rect(8, 9 + b, 2, 7, "plum")
@@ -317,7 +317,7 @@ def clare_top(wave):
         face_front(g, 16, 13 + b)
         g.p(10, 12 + b, "ink")
         g.p(22, 12 + b, "ink")
-        cheeks(g, b, "rust")
+        cheeks(g, b)
     return top
 
 
@@ -517,7 +517,7 @@ OWNERS = {
     "reggie": (ryan_top, "slate", "dbrown", None),
     "buddy": (jason_top, "skin2", "dbrown", None),
     "pierre": (tara_top, "skin1", "ink", None),
-    "biscuit": (clare_top, "brown", "mauve", None),
+    "biscuit": (clare_top, "skin1", "mauve", None),
     "archie": (kiwi_top, "brown", "red", None),
     "snowball": (aunt_judy_top, "skin1", "white", aunt_judy_legs),
     "penny": (gadget_top, "dslate", "dbrown", None),

@@ -286,14 +286,14 @@ def tara(mood):
 
 
 def clare(mood):
-    """Psychology student, laid-back: brown hair to the shoulders with a side-swept fringe and a pink clip, a
-    cosy green knit sweater with a white collar."""
+    """Psychology student, laid-back: fair skin, brown hair to the shoulders with a side-swept fringe and a pink
+    clip, a cosy green knit sweater with a white collar."""
     g = face()
     # the hair falling behind the face to the shoulders
     g.cel(16, 14, 10, 10, "dbrown", "plum", "brown")
     g.rect(6, 14, 20, 10, "dbrown")
     g.rect(22, 14, 4, 10, "plum")
-    base(g, "brown", "dbrown", "green", "dgreen")
+    base(g, "skin1", "skin2", "green", "dgreen")
     # the knit: a ribbed crew neck round a white collar
     g.rect(11, 27, 10, 1, "dgreen")
     g.tri((13, 26), (16, 26), (15, 28), "white")
@@ -309,7 +309,7 @@ def clare(mood):
     # the pink clip above the right temple
     g.rect(20, 9, 3, 1, "pink")
     g.p(21, 10, "mauve")
-    expression(g, mood, feat="ink", blush="rust", lashes=True, whites=True)
+    expression(g, mood, feat="ink", lashes=True)
     return g
 
 
