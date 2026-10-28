@@ -2,7 +2,8 @@ import { type GameObjects, Scene } from "phaser";
 
 import { ownerFaceKey, ZONE_PIPS_KEY } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
+import { badgeStripHits, type BadgeView } from "../home/badgesView";
 import {
   breakdownLabelRoom,
   END_LAYOUT,
@@ -15,7 +16,13 @@ import {
   sideTotalAmountY,
   sideTotalLabelRoom,
 } from "../home/endLayout";
-import { closingLines, earningsBreakdown, zonePips } from "../home/endView";
+import {
+  closingLines,
+  earningsBreakdown,
+  type EndTarget,
+  endTargetAt,
+  zonePips,
+} from "../home/endView";
 import { signedDollarText } from "../home/home";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import {
@@ -26,7 +33,16 @@ import {
   waveOffset,
 } from "../home/returnHome";
 import { pipTag } from "../hud/hudView";
+import {
+  type HoldPress,
+  holdRule,
+  moveHold,
+  startHold,
+  tickHold,
+  TILE_SLOP_PX,
+} from "../input/hold";
 import { isConfirmKey } from "../input/keyBindings";
+import { screenArea } from "../input/outsideTap";
 import { itemAt } from "../lib/arrays";
 import { fillLine } from "../lib/lines";
 import type { Rect } from "../lib/rect";
@@ -47,9 +63,16 @@ import {
   setPixelText,
   withProbe,
 } from "../ui/phaser/pixelText";
+import { onceBeforeRender } from "../ui/phaser/rampDim";
 import { TEXT_FIT_STYLES, TEXT_SCALE, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
-import { addBadgeCelebration, addBurst, addCheeringFace, NEW_BEST_BURST } from "./badges";
-import { onBackPressed } from "./overlay";
+import {
+  addBadgeCelebration,
+  addBadgeDetail,
+  addBurst,
+  addCheeringFace,
+  NEW_BEST_BURST,
+} from "./badges";
+import { listenOutsideTap, onBackPressed } from "./overlay";
 import { addOwnerFigure, ownerSpriteKey } from "./ownerFigure";
 import {
   currentSettings,
@@ -59,16 +82,18 @@ import {
   walkerSpriteKey,
 } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
+import { guardScreenInput } from "./screenGuard";
 import { soundboardOf } from "./soundboard";
 import { firstTag, playTag } from "./sprites";
+import { listenTargetPress, sameByValue, type TargetPressListener } from "./targetPress";
 import {
   addBodyText,
   addMenuButton,
   addPanel,
   addScreenBackdrop,
   addTagImage,
+  addTapBurst,
   BODY_TEXT,
-  listenButtonTap,
 } from "./uiKit";
 
 const END_SCREEN_KEY = "screen-end";
@@ -83,6 +108,8 @@ const BADGES: Rect = END_LAYOUT.badges;
 const BADGE_SOUND_AFTER_BEST_MS = 1200;
 const RETURN_HOME_SCENE = END_LAYOUT.returnHome;
 const BUTTON: Rect = END_LAYOUT.button;
+// An open badge's card, over the badges just earned.
+const CARD_DEPTH = 2;
 
 // Money gained in forest and lost in darkRed, each with its sign, on the cream panel.
 function amountColour(amount: number): number {
@@ -94,8 +121,18 @@ function amountColour(amount: number): number {
 
 // The walk's result, already banked: what made up the total, zones walked, the bank, a ribbon
 // for a new best walk, and a closing line from each owner. Badges the run earned burst in
-// under the panel while the owners still walking cheer. Back home returns to the start screen.
+// under the panel while the owners still walking cheer, and a tap or a hold on one opens its
+// card, as on the Stats page. Back home returns to the start screen. The screen takes no input
+// until seconds.screenTapGuard after its first frame, so a steering tap never answers it.
 export class EndScene extends Scene {
+  // The badges just earned, in their slots' order.
+  private badges: BadgeView[] = [];
+  // The open badge's card.
+  private card: GameObjects.Container | undefined;
+  // A press on a badge, until its hold opens the card.
+  private hold: { readonly badge: number; readonly press: HoldPress } | undefined;
+  private presses: TargetPressListener | undefined;
+  private reduced = false;
   private returnHomeStep: (() => void) | undefined;
 
   constructor() {
@@ -109,13 +146,18 @@ export class EndScene extends Scene {
     const walk = save.stats.lastWalk;
     const goHome = () => this.scene.start(SCENE_KEYS.start);
     this.returnHomeStep = undefined;
+    this.badges = [];
+    this.card = undefined;
+    this.hold = undefined;
     if (walk === null) {
       goHome();
       return;
     }
+    onceBeforeRender(this, guardScreenInput(this).drawn);
     const ended = lastRunEnd(this);
     const earned = ended?.achievements ?? [];
     const reduced = currentSettings(this).reducedMotion;
+    this.reduced = reduced;
     addScreenBackdrop(this, END_SCREEN_KEY);
     this.addReturnHome(reduced, walk);
     // Over the house's roof, clear of the walker's head.
@@ -251,7 +293,7 @@ export class EndScene extends Scene {
     });
 
     if (celebrating) {
-      addBadgeCelebration(this, reduced, BADGES, earned);
+      this.badges = addBadgeCelebration(this, reduced, BADGES, earned);
       // After a new best's fanfare, so the two do not play over each other.
       this.time.delayedCall(newBest ? BADGE_SOUND_AFTER_BEST_MS : 0, () =>
         soundboardOf(this).play("badge"),
@@ -259,15 +301,76 @@ export class EndScene extends Scene {
     }
 
     const button = addMenuButton(this, BUTTON, words.backHome, { available: true, primary: true });
-    listenButtonTap(this, button, goHome);
-    // Back home is the page's way out, so Escape and back take it too. P does not: a player
-    // pausing as the walk ends would skip the page. A key's auto-repeat does nothing.
+    const badgeHits = badgeStripHits(BADGES, this.badges.length);
+    // Badges have no tap action of their own, so a tap opens a badge's card as a hold does.
+    // With a card open, a tap anywhere closes it.
+    this.presses = listenTargetPress<EndTarget>(this, {
+      onDown: (pointer, target) => {
+        addTapBurst(this, pointer.x, pointer.y);
+        const at = { x: pointer.x, y: pointer.y };
+        const rule = holdRule(gameData.tuning, TILE_SLOP_PX);
+        this.hold =
+          typeof target === "object"
+            ? { badge: target.badge, press: startHold(rule, at, this.time.now) }
+            : undefined;
+      },
+      onMove: (pointer) => {
+        if (this.hold !== undefined && pointer.isDown) {
+          const press = moveHold({ x: pointer.x, y: pointer.y }, this.hold.press);
+          this.hold = { ...this.hold, press };
+        }
+      },
+      onPressed: (target) => {
+        button.setPressed(target === "home");
+        if (target === undefined) {
+          this.hold = undefined;
+        }
+      },
+      onTap: (target) => {
+        if (target === "dismiss") {
+          this.closeCard();
+        } else if (target === "home") {
+          goHome();
+        } else {
+          this.openCard(target.badge);
+        }
+      },
+      same: sameByValue,
+      targetAt: (x, y) =>
+        endTargetAt({ badgeHits, button: BUTTON, cardOpen: this.card !== undefined }, x, y),
+    });
+    // A tap on the page beside the game closes an open card too.
+    listenOutsideTap(
+      this,
+      () => (this.card === undefined ? undefined : screenArea([SCREEN_LAYOUT.screen])),
+      () => this.closeCard(),
+    );
+    // Back home is the page's way out, so Escape and back take it too, once any open card has
+    // closed. P does not: a player pausing as the walk ends would skip the page. A key's
+    // auto-repeat does nothing.
+    const back = () => (this.card === undefined ? goHome() : this.closeCard());
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (!event.repeat && (isConfirmKey(event.key) || event.key === "Escape")) {
-        goHome();
+        back();
       }
     });
-    onBackPressed(this, goHome);
+    onBackPressed(this, back);
+  }
+
+  // The badge's card over the screen, bursting with confetti as it opens (addBadgeDetail).
+  private openCard(index: number): void {
+    const badge = this.badges[index];
+    if (badge === undefined) {
+      return;
+    }
+    this.closeCard();
+    this.card = this.add.container(0, 0).setDepth(CARD_DEPTH);
+    addBadgeDetail(this, this.card, this.reduced, true, badge);
+  }
+
+  private closeCard(): void {
+    this.card?.destroy();
+    this.card = undefined;
   }
 
   // The walker and the dogs still walking come up the front path from RETURN_HOME.risePx
@@ -338,6 +441,15 @@ export class EndScene extends Scene {
 
   override update(): void {
     this.returnHomeStep?.();
+    if (this.hold !== undefined) {
+      const { fire, press } = tickHold(this.time.now, this.hold.press);
+      this.hold = { ...this.hold, press };
+      // A hold opens the card while the finger is still down; its release then taps nothing.
+      if (fire) {
+        this.presses?.cancel();
+        this.openCard(this.hold.badge);
+      }
+    }
   }
 
   // A ui-quip speech bubble with its tail flipped to point right at the face, or a framed box

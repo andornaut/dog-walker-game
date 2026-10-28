@@ -1,8 +1,10 @@
 import type { DogId, GameData } from "../data/types";
+import { containsPoint, type Rect } from "../lib/rect";
 import { type Cents, cents } from "../lib/units";
 import type { Change, MoneyChange } from "../rules/causes";
 import { quipLine } from "../rules/choices";
 import type { LastWalk } from "../save/schema";
+import { rectIndexAt } from "../ui/grid";
 
 type EarningsKind = "cardCosts" | "fees" | "fullPack" | "luckyFinds" | "start" | "tips";
 
@@ -102,4 +104,27 @@ export function closingLines(
       text: quipLine(data, random, { dog, moment: fired ? "fired" : "happier" }),
     };
   });
+}
+
+// What a press on the end screen lands on: with a badge's card open, anything closes it, as on
+// the Stats page; else a badge the walk earned, by its tap target, or Back home.
+export type EndTarget = "dismiss" | "home" | { readonly badge: number };
+
+export function endTargetAt(
+  screen: {
+    readonly badgeHits: readonly Rect[];
+    readonly button: Rect;
+    readonly cardOpen: boolean;
+  },
+  x: number,
+  y: number,
+): EndTarget | undefined {
+  if (screen.cardOpen) {
+    return "dismiss";
+  }
+  if (containsPoint(screen.button, x, y)) {
+    return "home";
+  }
+  const badge = rectIndexAt(screen.badgeHits, x, y);
+  return badge === undefined ? undefined : { badge };
 }

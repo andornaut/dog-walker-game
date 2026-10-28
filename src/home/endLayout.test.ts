@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
+import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { fillLine } from "../lib/lines";
+import { insetRect, type Rect } from "../lib/rect";
 import { defined } from "../testing/defined";
 import { fontFileMetrics, inkWidth, narrowestGlyphGap } from "../testing/fontInk";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
@@ -21,7 +23,9 @@ import {
   type BadgeRowNames,
   badgeRowNames,
   badgeStrip,
+  badgeStripHits,
   CELEBRATION_PANEL,
+  panelBadgeStrip,
 } from "./badgesView";
 import {
   breakdownLabelRoom,
@@ -337,5 +341,54 @@ describe("a badge strip's names", () => {
 
   it("keeps the end screen's strip above its button", () => {
     expect(badges.y + badges.height).toBeLessThanOrEqual(END_LAYOUT.button.y);
+  });
+});
+
+describe("a badge strip's tap targets", () => {
+  // As many badges as fit the strip with a target at least MIN_TAP_SIZE wide each.
+  const fullest = Math.floor((badges.width - BADGE_STRIP.inset * 2) / MIN_TAP_SIZE);
+  const counts = Array.from({ length: fullest }, (_, i) => i + 1);
+  const within = (outer: Rect, inner: Rect) =>
+    inner.x >= outer.x &&
+    inner.y >= outer.y &&
+    inner.x + inner.width <= outer.x + outer.width &&
+    inner.y + inner.height <= outer.y + outer.height;
+  const nameInkBottom =
+    defined(badgeNameTops(BADGE_STRIP.nameLines, badges.y).at(-1)) +
+    inkRowsFromCapTop(BODY) * TEXT_SCALE;
+
+  it.each(counts)(
+    "gives each of %i badges a target at least the minimum, inside the panel's frame",
+    (count) => {
+      const inner = insetRect(BADGE_STRIP.frame, badges);
+      for (const hit of badgeStripHits(badges, count)) {
+        expect(hit.width).toBeGreaterThanOrEqual(MIN_TAP_SIZE);
+        expect(hit.height).toBeGreaterThanOrEqual(MIN_TAP_SIZE);
+        expect(within(inner, hit)).toBe(true);
+      }
+    },
+  );
+
+  it.each(counts)("covers each of %i badges and its name, edge to edge", (count) => {
+    const hits = badgeStripHits(badges, count);
+    const strip = panelBadgeStrip(badges, count);
+    const half = BADGE_STRIP.badgeSize / 2;
+    hits.forEach((hit, i) => {
+      const { centreX } = defined(strip.slots[i]);
+      const badge = {
+        height: BADGE_STRIP.badgeSize,
+        width: BADGE_STRIP.badgeSize,
+        x: centreX - half,
+        y: badges.y + BADGE_STRIP.badgeTop,
+      };
+      expect(within(hit, badge)).toBe(true);
+      if (strip.named) {
+        expect(hit.y + hit.height).toBeGreaterThanOrEqual(nameInkBottom);
+      }
+      const next = hits[i + 1];
+      if (next !== undefined) {
+        expect(next.x).toBe(hit.x + hit.width);
+      }
+    });
   });
 });

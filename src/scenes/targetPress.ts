@@ -8,6 +8,8 @@ interface TargetPressHandlers<T> {
   dipMs?: (target: T) => number;
   // After onPressed, on each press: for a tap burst, or a hold timer.
   onDown?: (pointer: Input.Pointer, target: T | undefined) => void;
+  // As the followed press moves: for a hold's slop.
+  onMove?: (pointer: Input.Pointer) => void;
   // The target a press shows pressed: the one under it as it lands, then undefined once it
   // ends, before any onTap.
   onPressed: (target: T | undefined) => void;
@@ -45,6 +47,7 @@ export function listenTargetPress<T>(
       handlers.onPressed(target);
       handlers.onDown?.(pointer, target);
     },
+    move: (pointer) => handlers.onMove?.(pointer),
     up: (pointer, cancelled) => {
       const released = cancelled ? undefined : handlers.targetAt(pointer.x, pointer.y);
       const release = pressUp(rule, scene.time.now, cancelled, press, released);

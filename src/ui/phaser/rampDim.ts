@@ -82,7 +82,7 @@ export function addRampDim(scene: Scene, rect: Rect, onDrawn?: () => void): void
 }
 
 // Calls then once, before the game's next frame is rendered, unless scene shuts down first.
-function onceBeforeRender(scene: Scene, then: () => void): void {
+export function onceBeforeRender(scene: Scene, then: () => void): void {
   const { events } = scene.game;
   const forget = () => events.off(Core.Events.PRE_RENDER, then);
   events.once(Core.Events.PRE_RENDER, then);

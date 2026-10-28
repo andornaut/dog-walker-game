@@ -45,6 +45,16 @@ export function badgeWall(
   }));
 }
 
+// The badges ids name, earned, in wall order: a strip of badges just earned.
+export function earnedBadges(
+  data: Pick<GameData, "achievements">,
+  ids: readonly AchievementId[],
+): BadgeView[] {
+  return badgeWall(data, { achievements: {} })
+    .filter(({ id }) => ids.includes(id))
+    .map((badge) => ({ ...badge, earned: true }));
+}
+
 export function earnedText(
   data: Pick<GameData, "menuText">,
   badges: readonly Pick<BadgeView, "earned">[],
@@ -191,16 +201,41 @@ export function badgeStrip(
 
 // A badge strip's rows from its panel's top: the title's capitals at titleY, each badge's
 // badgeSize square from badgeTop, and its name's first capitals nameGap under the badge, on up
-// to nameLines lines namePitch apart.
+// to nameLines lines namePitch apart. The slots share the panel's width less inset each side,
+// and a badge's tap target is its slot from badgeTop down to the panel's frame, frame thick.
 export const BADGE_STRIP = {
   badgeSize: 32,
   badgeTop: 22,
+  frame: 2,
+  inset: 4,
   maxNamed: 3,
   nameGap: 4,
   nameLines: 2,
   namePitch: 16,
   titleY: 8,
 } as const;
+
+// The strip of count badges across a panel at rect.
+export function panelBadgeStrip(rect: Rect, count: number): BadgeStrip {
+  const { inset, maxNamed } = BADGE_STRIP;
+  return badgeStrip({ maxNamed, width: rect.width - inset * 2, x: rect.x + inset }, count);
+}
+
+// Each of count badges' tap targets in a strip across a panel at rect: its slot, edge to edge
+// with its neighbours, from the badges' top down to the panel's frame.
+export function badgeStripHits(rect: Rect, count: number): Rect[] {
+  const { badgeTop, frame, inset } = BADGE_STRIP;
+  const width = (rect.width - inset * 2) / Math.max(1, count);
+  const edge = (i: number) => Math.round(rect.x + inset + width * i);
+  const y = rect.y + badgeTop;
+  const height = rect.y + rect.height - frame - y;
+  return Array.from({ length: count }, (_, i) => ({
+    height,
+    width: edge(i + 1) - edge(i),
+    x: edge(i),
+    y,
+  }));
+}
 
 // The panel of badges earned away from a walk's end, as tall as badgesHeight, then a row of
 // faces facesHeight tall when owners cheer.

@@ -8,6 +8,7 @@ import { fillNames, wrapWords } from "../lib/lines";
 import { keysOf } from "../lib/records";
 import { cents, dollarsToCents } from "../lib/units";
 import type { SaveDocument } from "../save/schema";
+import { defined } from "../testing/defined";
 import { inkWidth } from "../testing/fontInk";
 import { newPlayerSave } from "../testing/saves";
 import { TEXT_SCALE } from "../ui/textFit";
@@ -15,6 +16,7 @@ import {
   badgeProgress,
   badgeStrip,
   badgeWall,
+  earnedBadges,
   earnedText,
   wallCell,
   wallCellLines,
@@ -150,6 +152,16 @@ describe("badgeWall", () => {
     expect(wall[0]).toMatchObject({ art: badgeKey(first.id), earned: true, name: first.name });
     expect(wall.filter(({ earned }) => earned).map(({ id }) => id)).toEqual([first.id, "squirrel"]);
     expect(earnedText(gameData, wall)).toBe(`2/${gameData.achievements.length} earned`);
+  });
+});
+
+describe("earnedBadges", () => {
+  it("lists the badges named, earned, in wall order whatever order they came in", () => {
+    const ids = gameData.achievements.map(({ id }) => id);
+    const [first, second, last] = [defined(ids[0]), defined(ids[2]), defined(ids.at(-1))];
+    const shown = earnedBadges(gameData, [last, first, second]);
+    expect(shown.map(({ id }) => id)).toEqual([first, second, last]);
+    expect(shown.every(({ earned }) => earned)).toBe(true);
   });
 });
 

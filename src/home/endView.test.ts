@@ -4,7 +4,7 @@ import { gameData } from "../data";
 import { QUIPS } from "../data/quips";
 import { cents, type Hearts } from "../lib/units";
 import type { Cause, Change, MoneyChange } from "../rules/causes";
-import { closingLines, earningsBreakdown, zonePips } from "./endView";
+import { closingLines, earningsBreakdown, type EndTarget, endTargetAt, zonePips } from "./endView";
 
 const money = (amount: number, base: Cause): MoneyChange => ({
   amount: cents(amount),
@@ -95,5 +95,24 @@ describe("closingLines", () => {
       { dog: "kilo", fired: false, text: QUIPS.kilo.happier[0] },
       { dog: "biscuit", fired: true, text: QUIPS.biscuit.fired[0] },
     ]);
+  });
+});
+
+describe("endTargetAt", () => {
+  const badgeHits = [
+    { height: 60, width: 100, x: 10, y: 400 },
+    { height: 60, width: 100, x: 110, y: 400 },
+  ];
+  const button = { height: 44, width: 200, x: 50, y: 500 };
+  it.each<[string, boolean, number, number, EndTarget | undefined]>([
+    ["the first badge", false, 20, 420, { badge: 0 }],
+    ["the second badge", false, 150, 459, { badge: 1 }],
+    ["Back home", false, 60, 510, "home"],
+    ["the panel's title, above the badges", false, 60, 399, undefined],
+    ["a badge, with a card open", true, 20, 420, "dismiss"],
+    ["Back home, with a card open", true, 60, 510, "dismiss"],
+    ["bare screen, with a card open", true, 5, 5, "dismiss"],
+  ])("a press on %s (card open: %s) lands on its target", (_, cardOpen, x, y, target) => {
+    expect(endTargetAt({ badgeHits, button, cardOpen }, x, y)).toEqual(target);
   });
 });

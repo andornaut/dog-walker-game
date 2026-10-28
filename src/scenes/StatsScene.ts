@@ -16,12 +16,8 @@ import {
 } from "../home/badgesView";
 import { FEEDBACK } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
-import { MENU_TEXT_FIELDS } from "../home/menuText";
 import {
   badgesBottom,
-  DETAIL_TEXT_WIDTH,
-  detailLineY,
-  detailPanel,
   DOG_STATS,
   dogBlockTop,
   dogsBottom,
@@ -49,21 +45,12 @@ import {
   stepScroll,
 } from "../input/listScroll";
 import { clampIndex } from "../lib/arrays";
-import { fillLine } from "../lib/lines";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
-import { closeControl } from "../ui/closeControl";
 import { rectIndexAt } from "../ui/grid";
-import { addDim, fillRect } from "../ui/phaser/draw";
+import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import {
-  type FontRole,
-  inkSpan,
-  pixelFontMetrics,
-  setPixelText,
-  withProbe,
-  wrapPixelText,
-} from "../ui/phaser/pixelText";
-import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
+import { type FontRole, inkSpan, setPixelText, withProbe } from "../ui/phaser/pixelText";
+import { addBadge, addBadgeDetail, BADGE_SIZE } from "./badges";
 import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
 import { currentSettings, profileSave } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
@@ -109,12 +96,7 @@ const VIEW: Rect = STATS_LAYOUT.view;
 const SCROLL = STATS_LAYOUT.scroll;
 // A screen-sized texture, white over the view: the mask that clips each tab's content to it.
 const VIEW_MASK_KEY = "stats-view-mask";
-const DETAIL: Rect = STATS_LAYOUT.detail;
 const SCREEN = SCREEN_LAYOUT.screen;
-const DETAIL_TEXT = STATS_LAYOUT.detailText;
-// The badge and its confetti are drawn at 2x, so the burst shows around the bigger badge.
-const DETAIL_BADGE_SCALE = 2;
-const FIELDS = MENU_TEXT_FIELDS.stats;
 
 // The Stats page, which the home screen's Logbook button opens, in three tabs on the cream
 // panel: overall figures and walks by outcome; a block per dog with its walks, zones and
@@ -482,59 +464,11 @@ export class StatsScene extends Scene {
     draw(cell.progress, PALETTE[colours.goal]);
   }
 
-  // The tapped badge at 2x over a panel, with its name, goal and line; an earned one bursts
-  // with confetti, and the close control in its corner. Any tap closes it.
+  // The tapped badge's card (addBadgeDetail); an earned one bursts with confetti as it opens.
+  // Any tap closes it.
   private drawDetail(badge: BadgeView): void {
     const reduced = currentSettings(this).reducedMotion;
-    const words = gameData.menuText.stats;
-    const goal = this.wrap(badge.goal);
-    const line = this.wrap(fillLine(FIELDS, words, "badgeLine", { line: badge.badgeLine }));
-    const body = pixelFontMetrics(this, "body");
-    const panel = detailPanel(body, goal.length, line.length);
-    addDim(this, SCREEN);
-    addPanel(this, panel);
-    addCloseButton(this, this.add.container(0, 0), closeControl(panel), false);
-    const centre = DETAIL.x + DETAIL.width / 2;
-    const badgeY = DETAIL.y + DETAIL_TEXT.badgeY;
-    if (badge.earned && (this.burst || reduced)) {
-      addConfetti(this, reduced, DETAIL_BADGE_SCALE, centre, badgeY);
-    }
+    addBadgeDetail(this, this.add.container(0, 0), reduced, this.burst, badge);
     this.burst = false;
-    addBadge(this, badge.art, badge.earned, centre, badgeY)
-      .setScale(DETAIL_BADGE_SCALE)
-      .setDepth(1);
-    // An earned badge's card: a plum name and goal, a forest status, a dark brown line.
-    const locked = BADGE_TEXT_COLOURS.locked;
-    const colours = badge.earned
-      ? { goal: PALETTE.plum, line: PALETTE.darkBrown, name: PALETTE.plum, status: PALETTE.forest }
-      : {
-          goal: PALETTE[locked.goal],
-          line: PALETTE[locked.goal],
-          name: PALETTE[locked.name],
-          status: PALETTE[locked.goal],
-        };
-    this.text(centre, DETAIL.y + DETAIL_TEXT.nameY, badge.name, {
-      colour: colours.name,
-      font: "title",
-      originX: 0.5,
-    });
-    const status = badge.earned ? words.badgeEarned : words.badgeLocked;
-    this.text(centre, DETAIL.y + DETAIL_TEXT.statusY, status, {
-      colour: colours.status,
-      originX: 0.5,
-    });
-    // The goal and line centred under the name, each line of them centred on the card.
-    const centred = { align: "centre", originX: 0.5 } as const;
-    this.text(centre, DETAIL.y + DETAIL_TEXT.goalY, goal.join("\n"), {
-      ...centred,
-      colour: colours.goal,
-    });
-    const lineY = DETAIL.y + detailLineY(body, goal.length);
-    this.text(centre, lineY, line.join("\n"), { ...centred, colour: colours.line });
-  }
-
-  // Body text at 2x broken into lines no wider than the open badge's text.
-  private wrap(text: string): string[] {
-    return wrapPixelText(this, BODY_TEXT, DETAIL_TEXT_WIDTH, text);
   }
 }
