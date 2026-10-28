@@ -129,9 +129,9 @@ export function startSession(
   };
 }
 
-// One step of seconds: the inputs, the pulls, the walk, then the step's cards are queued and
-// an owner who fired you holds the walk. Then the next card opens, or the zone ends, or the
-// next zone is planned. Does nothing while a card is open or unless walking.
+// One step of seconds: the inputs, the pulls, the Zoomies' drift, the walk, then the step's cards
+// are queued and an owner who fired you holds the walk. Then the next card opens, or the zone ends,
+// or the next zone is planned. Does nothing while a card is open or unless walking.
 export function stepSession(
   data: SessionData,
   streams: RunStreams,
@@ -251,7 +251,6 @@ function planned(
 // the queued cards and the zone's end wait for it.
 function heldForFiring(data: SessionData, fired: readonly DogId[], session: Session): Session {
   const { walk } = session;
-  // No firing holds nothing.
   if (fired.length === 0 || walk.run.phase.kind === "ended") {
     return session;
   }
