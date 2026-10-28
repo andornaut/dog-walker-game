@@ -194,9 +194,9 @@ def fruit_stand():
 def garden_car():
     """The Garden Car on Augusta Avenue from the front: an old rust sedan painted in patches of mural colour,
     round headlights either side of a chrome grille, sunflowers rising from the trunk behind, leaves inside its
-    windshield, its roof and hood heaped with plants in flower and its wheels sunk in a bank of greenery, in
-    backdrops.garden_car's colours but for its turquoise patch, a step lighter than the backdrop's dturq: a patch
-    in the paving's dturq reads as a hole through the car."""
+    windshield, its roof and hood heaped with plants in flower and its wheels sunk in a bank of greenery. Its
+    turquoise patch is a step lighter than dturq, which reads as a hole through the car. No neighbourhood places
+    it."""
     w, h = 72, 64
 
     def leaves(g, lobes):
@@ -1038,11 +1038,11 @@ def gap(*props):
 # a prop in gaps 0 and 3, so each side has a prop every 6 slots (840 px): the neighbourhood's tree or
 # street furniture in gap 0, then its own prop in gap 3. The right side's gapStart of 2 puts its props
 # 3 slots after the left's, so they alternate sides, one every 420 px. Kensington Market, The Beaches and
-# Yonge Street run twelve gaps, so one prop stands every 210 px. Kensington: the violet shopfront in gap 0
-# and the ochre in 6, the fruit stand in 3, the Garden Car in 9, café patios in 1 and 7 and mural walls in 4
-# and 10. The Beaches: the Leuty in gaps 0 and 6, dune grass in 3, the ice cream stand in 9, and beach
-# umbrellas and chairs in 1, 4, 7 and 10. Yonge Street: street lamps in gaps 0, 1, 4, 6, 7 and 10 and the
-# transit stop in 3 and 9.
+# Yonge Street run twelve gaps, so one prop stands every 210 px. Kensington: the violet shopfront in gaps 0
+# and 9 and the ochre in 6, the fruit stand in 3, café patios in 1 and 7 and mural walls in 4 and 10. The
+# Beaches: the Leuty in gaps 0 and 6, dune grass in 3, the ice cream stand in 9, and beach umbrellas and
+# chairs in 1, 4, 7 and 10. Yonge Street: street lamps in gaps 0, 1, 4, 6, 7 and 10 and the transit stop in
+# 3 and 9.
 SIDES = dict(
     left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=1),
     right=dict(offset=1, lotStart=0, lotStride=1, gapStart=2, gapStride=1),
@@ -1070,7 +1070,7 @@ PLACEMENT = {
         4: (("mural-wall", 216, 0),),
         6: (("shopfront-ochre", 216, 0),),
         7: (("cafe-patio", 213, 0),),
-        9: (("garden-car", 216, 0),),
+        9: (("shopfront-violet", 216, 0),),
         10: (("mural-wall", 216, 0),),
     }),
     "the-beaches": sparse(("leuty", 220, 0), ("dune-grass", 213, 0), {
@@ -1129,7 +1129,7 @@ CURB = {
 }
 # Each zone's ground shadow under a free-standing prop: a darker tone of its lawn or paving.
 SHADOWS = {"cabbagetown": "dolive", "high-park": "fir", "distillery-district": "dbrown",
-           "kensington-market": "slate", "the-beaches": "stone", "yonge-street": "navy"}
+           "kensington-market": "ink", "the-beaches": "stone", "yonge-street": "navy"}
 # Props that stand free and take the game's ground shadow.
 SHADOWED = tuple(k for k, v in PROPS.items() if v[3])
 TABLE_JSON = "shared/roadside.json"

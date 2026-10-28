@@ -276,7 +276,7 @@
         [],
         [
           {
-            "key": "roadside-garden-car",
+            "key": "roadside-shopfront-violet",
             "across": 270,
             "dz": 0
           }
@@ -306,7 +306,7 @@
           "gapStride": 1
         }
       },
-      "shadowColour": "5a6988",
+      "shadowColour": "181425",
       "curb": {
         "groups": [
           [
