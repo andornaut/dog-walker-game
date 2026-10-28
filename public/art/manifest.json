@@ -1542,6 +1542,87 @@
       }
     },
     {
+      "key": "beach-umbrella",
+      "png": "sprites/beach-umbrella.png",
+      "json": "sprites/beach-umbrella.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 43
+      }
+    },
+    {
+      "key": "beach-umbrella@50",
+      "png": "sprites/beach-umbrella@50.png",
+      "json": "sprites/beach-umbrella@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "beach-umbrella@56",
+      "png": "sprites/beach-umbrella@56.png",
+      "json": "sprites/beach-umbrella@56.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "beach-umbrella@62",
+      "png": "sprites/beach-umbrella@62.png",
+      "json": "sprites/beach-umbrella@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "beach-umbrella@69",
+      "png": "sprites/beach-umbrella@69.png",
+      "json": "sprites/beach-umbrella@69.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "beach-umbrella@75",
+      "png": "sprites/beach-umbrella@75.png",
+      "json": "sprites/beach-umbrella@75.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "beach-umbrella@81",
+      "png": "sprites/beach-umbrella@81.png",
+      "json": "sprites/beach-umbrella@81.json",
+      "anchor": {
+        "feetY": 58,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "beach-umbrella@88",
+      "png": "sprites/beach-umbrella@88.png",
+      "json": "sprites/beach-umbrella@88.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "beach-umbrella@94",
+      "png": "sprites/beach-umbrella@94.png",
+      "json": "sprites/beach-umbrella@94.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 40
+      }
+    },
+    {
       "key": "bench",
       "png": "sprites/bench.png",
       "json": "sprites/bench.json",

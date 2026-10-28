@@ -6,6 +6,12 @@ dropped-cone        48x72   card obstacle (Dropped ice cream): a kid in a peach 
                             pigtails looking down, sad, at her ice cream cone tipped on its side on the
                             ground beside her, its strawberry scoop squashed into a pink puddle. She stands
                             still. idle (2 frames, 400ms): a breath, a tear on her cheek on frame 1
+beach-umbrella      48x72   minor, 1 lane: someone's spot set up in the road, a red and white beach
+                            umbrella leaning right out of a mound of sand, a towel striped lilac and white
+                            spread in front of it and a sky blue cooler with a white lid and a grey
+                            handle beside it; red and white, with the towel and cooler, sets it apart
+                            from the roadside umbrellas. idle (4 frames, 450ms): the canopy's valance
+                            lifts on frame 2
 sandcastle          48x48   minor, 1 lane: a sandcastle of three bucket towers over a crenellated wall
                             and an arched door on a mound of sand, a red pennant on the middle tower,
                             shells pressed into the wall. idle (4 frames, 400ms): the pennant flutters
@@ -454,6 +460,76 @@ def pedicab(lf=39, rf=44, roll=0):
     road.face_front(g, 16, 18, lips="ink", spread=3, mouth=3)
     return rim(g, dict(LIT, dbrown=("skin2", "brown"), plum=("skin2", "brown"), coal=("ash", None),
                        shale=("ash", None)))
+
+
+# ---------- beach umbrella: someone's spot set up in the road ----------
+
+UMBRELLA_IDLE = (0, 0, 2, 0), 450
+UMBRELLA_H = 60
+
+
+def beach_umbrella(lift=0):
+    """A beach spot set up in the road, front on, laid out on obstacles.SIZE by UMBRELLA_H: a red and white
+    umbrella planted in a mound of sand, leaning right, its peaked canopy of eight wedges, the right ones
+    shaded, scalloped round its rim; a towel striped lilac and white spread in front of it and a sky blue
+    cooler with a white lid and a grey handle beside it on the right. lift lifts that many of the
+    valance's scallops a pixel, from its right end, as a breeze catches it."""
+    g = edged(Grid(obstacles.SIZE, UMBRELLA_H))
+    uy = unit(g)[1]
+    tilt = math.radians(7)
+    cos, sin = math.cos(tilt), math.sin(tilt)
+    fx, fy = 15, 52
+
+    def at(across, up):
+        """The design point across from the pole and up it from its foot."""
+        return fx + across * cos + up * sin, fy + across * sin - up * cos
+
+    # the pole, lit on its left
+    for c, x0, x1 in (("lgrey", -1, 1), ("white", -1, 0)):
+        g.tri(at(x0, 2), at(x1, 2), at(x1, 40), c)
+        g.tri(at(x0, 2), at(x1, 40), at(x0, 40), c)
+    # the canopy: eight wedges from the peak to a rim that dips toward the viewer at the middle, the right
+    # four a ramp step darker
+    peak, rim, dip, reach, n = 49, 38, 4, 17.5, 8
+    cols = ("red", "white", "red", "white", "dred", "lgrey", "dred", "lgrey")
+
+    def edge(a):
+        return at(a, rim - dip * (1 - (a / reach) ** 2))
+
+    for i in range(n):
+        a0, a1 = -reach + 2 * reach * i / n, -reach + 2 * reach * (i + 1) / n
+        g.tri(at(0, peak), edge(a0), edge(a1), cols[i])
+    # the valance: a scallop under each wedge, the right ones lifting in a breeze
+    for i in range(n):
+        x, y = edge(-reach + 2 * reach * (i + 0.5) / n)
+        g.cel(x, y + 0.8 - (i >= n - lift) * uy, reach / n, 1.8, cols[i])
+    # the finial
+    x, y = at(0, peak + 1)
+    g.rect(x - 1, y - 1, 2, 2, "white")
+    # the mound of sand round the pole's foot
+    g.cel(fx, fy, 8, 3, "tan", "brown", "skin1")
+    # the towel spread in front, its stripes running across it, the near edge shaded
+    g.tri((6, 53), (27, 53), (3, 58), "white")
+    g.tri((27, 53), (28, 58), (3, 58), "white")
+    for k in range(5):
+        t0, t1 = k / 5 + 0.05, k / 5 + 0.15
+        g.tri((6 + 21 * t0, 53), (6 + 21 * t1, 53), (3 + 25 * t0, 58), "lilac")
+        g.tri((6 + 21 * t1, 53), (3 + 25 * t1, 58), (3 + 25 * t0, 58), "lilac")
+    g.rect(3, 58, 25, 1, "lgrey")
+    for k in range(5):
+        g.rect(3 + 25 * (k / 5 + 0.05), 58, 25 * 0.1, 1, "violet")
+    # the cooler beside it, lit on its left: the box with a white latch, its lid and the handle over it
+    g.rect(24, 45, 12, 13, "sky")
+    g.rect(32, 45, 4, 13, "blue")
+    g.rect(24, 45, 1, 13, "cyan")
+    g.rect(28, 49, 3, 2, "white")
+    g.rect(23, 42, 14, 4, "white")
+    g.rect(33, 42, 4, 4, "lgrey")
+    g.rect(23, 45, 14, 1, "lgrey")
+    g.rect(26, 39, 1, 3, "grey")
+    g.rect(33, 39, 1, 3, "grey")
+    g.rect(26, 38, 8, 1, "grey")
+    return lit(g)
 
 
 # ---------- sandcastle ----------
@@ -933,7 +1009,8 @@ def sprites():
                                                   for q in ROLLER_RIDE], ROLLER_RIDE_MS)]
         yield f"pedicab{suffix}", [("ride", [small(me, p, pedicab, **posed(q, p)).outlined()
                                              for q in PEDICAB_RIDE], PEDICAB_RIDE_MS)]
-        for key, draw, (args, ms) in (("sandcastle", sandcastle, SANDCASTLE_IDLE),
+        for key, draw, (args, ms) in (("beach-umbrella", beach_umbrella, UMBRELLA_IDLE),
+                                      ("sandcastle", sandcastle, SANDCASTLE_IDLE),
                                       ("lifeguard-chair", lifeguard_chair, LIFEGUARD_IDLE),
                                       ("sandwich-board", sandwich_board, BOARD_IDLE),
                                       ("newspaper-box", newspaper_box, NEWS_IDLE)):
