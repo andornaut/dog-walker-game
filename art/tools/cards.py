@@ -9,10 +9,10 @@
     with cream face either side,
     body 6..105 x 76..130, badge spot 20,134, 71x13 (plain face; card-cost goes there on a paid option).
 - card-frame-large: a 166x280 sprite with the same tags, for the tap-to-enlarge
-  view: the 83x140 layout (art window 3,15, body 6..76 x 76..117, badge spot 6,121) doubled with
-  1px detail. Band 4..24 (title line from row
-  9), art window 6,30, 154x116 (illustration at 2x at 8,32),
-  body 12..153 x 152..233, badge spot 12,242, 142x26.
+  view: the 83x140 layout (art window 3,15, body 6..76 x 76..117, badge spot 6,121)
+  doubled with 1px detail. Band 4..24 (title line from row 9), art window 6,30,
+  154x116 (illustration at 2x at 8,32), body 12..153 x 152..233, badge spot 12,242,
+  142x26.
 - card-cost: a 71x13 image, the cost plaque laid over the badge (at 2x on the
   large frame); the game writes the cost centred on its face.
 - card-<encounter>-<option>, card-<upgrade> and card-skip: 75x56
@@ -85,7 +85,7 @@ LW, LH = 2 * LBW, 2 * LBH
 
 
 def card_frame_large(kind):
-    """The tap-to-enlarge card: the card-frame layout at twice the size with 1px detail, so the
+    """The tap-to-enlarge card: the 83x140 layout (LBW x LBH) at twice the size with 1px detail, so the
     illustration shows at 2x and the body has room for the modifiers behind the numbers. The
     chrome's lines and lip are 2px."""
     g = Grid(LW, LH)
@@ -104,8 +104,8 @@ def card_frame_large(kind):
 
 
 def card_cost():
-    """71x13: the cost plaque, laid over the frame's badge spot at 6,121 (12,242 at 2x on the
-    large frame). ui.py's chrome with its corners cut 1px: the cream face is x 2 to 67, rows 2
+    """71x13: the cost plaque, laid over the frame's badge spot at 20,134 (12,242 at 2x on the large
+    frame). ui.py's chrome with its corners cut 1px: the cream face is x 2 to 67, rows 2
     to 9, over the tan lip. The game writes the cost ($, $$$, the heart change, Free or Need $...)
     centred in font-title, plum (9.42:1), caps in rows 4 to 8. A disabled card's grey copy turns
     the face nlgrey, where ink holds 12.64:1."""
