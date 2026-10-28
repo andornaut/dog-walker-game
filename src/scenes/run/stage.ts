@@ -48,8 +48,8 @@ export const DEPTH = {
 };
 
 // How much each screen row adds to the depth of the layers drawn nearer rows in front: the
-// roadside props and the distractions, which sort by row together, and the struck obstacles. A
-// thousand rows' worth stays under the next layer.
+// roadside props and the distractions, which sort by row together, and the struck obstacles. The
+// screen's rows, under a thousand, add less than 1, so each layer stays under the next.
 export const ROW_DEPTH = 1 / 1000;
 
 // The row where the road's junction meets the band's cross street.

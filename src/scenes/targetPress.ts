@@ -25,7 +25,8 @@ export interface TargetPressListener {
 const NO_DIP = () => 0;
 const IDENTICAL = <T>(a: T, b: T) => a === b;
 
-// Whether two targets are alike field for field, for targets made afresh on each press.
+// Whether two targets are alike as JSON, for targets made afresh on each press with their keys in
+// one order.
 export function sameByValue<T>(a: T, b: T | undefined): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }

@@ -187,7 +187,7 @@ function namesBase(change: Change, cause: Cause): boolean {
 }
 
 // The short floating label for a change: its amount, then its base unless the player just
-// picked it on a card, then everything that changed it, as "−1♥ bump, Second chance" or
+// picked it on a card, then everything that changed it, as "−1♥ bump", "+0♥ Second chance" or
 // "+$2 tip, Big tipper".
 export function causeLabel(data: CauseData, change: Change): string {
   const amount = amountText(change.kind, changeAmount(change));

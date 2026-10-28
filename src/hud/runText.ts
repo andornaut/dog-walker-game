@@ -1,7 +1,7 @@
 import type { FieldTable } from "../lib/lines";
 
-// The message strip's single lines, filled with fillLine(STRIP_LINE_FIELDS,
-// gameData.runText.strip, key, fields); its debuff lines are filled by debuff id.
+// The message strip's single lines, filled with stripLine (src/hud/stripLines.ts); its debuff lines
+// are filled by debuff id.
 export const STRIP_LINE_FIELDS = {
   achievement: ["name"],
   cashHit: ["amount"],

@@ -14,7 +14,8 @@ export interface RoadCamera {
   readonly ratio: number;
 }
 
-interface RoadPoint {
+// A place on the road: its distance up the road and its x across it, in road pixels.
+interface RoadSpot {
   readonly distance: number;
   readonly x: number;
 }
@@ -93,7 +94,7 @@ export function scaleAtY(projection: Pick<Camera, "footY" | "horizonY">, y: numb
 
 export function project(
   projection: Pick<RoadProjection, "centreX" | keyof Camera>,
-  point: RoadPoint,
+  point: RoadSpot,
 ): ScreenPlacement {
   const scale = scaleAt(projection, point.distance);
   return {
