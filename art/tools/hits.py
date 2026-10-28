@@ -11,7 +11,7 @@ and white speed lines.
 
 fx-hit-skunk       77x77  play (8 frames, 70ms)  lumpy mauve gas cloud that thins to a dither, wisps
                                                   and stink squiggles
-fx-hit-thief       77x77  play (8 frames, 70ms)  the wallet flying up out of a poof, three coins
+fx-hit-thief       77x77  play (8 frames, 70ms)  the tip pouch flying up out of a poof, three coins
                                                   thrown out
 fx-hit-other-dog   77x77  play (8 frames, 70ms)  tangle cloud, fur tufts and hearts
 ui-hit-flash-sky, -amber, -mauve, -orange, -pink
@@ -216,24 +216,24 @@ def hit_skunk(step):
     return g
 
 
-def wallet(g, cx, cy, tilt):
-    """The lost wallet as road.wallet draws it, 12x9: one green bill lit along its top standing up out of a
-    brown wallet, a white $ on the bill, the flap tab on the right with an amber snap; tilt shifts the bill
-    a pixel as the wallet tumbles."""
-    g.rect(cx - 4 + tilt, cy - 8, 7, 5, "green")
-    g.rect(cx - 4 + tilt, cy - 8, 7, 1, "lgrey")
-    g.rect(cx - 6, cy - 4, 12, 7, "brown")
-    g.rect(cx - 6, cy - 4, 12, 1, "tan")
-    g.rect(cx - 6, cy + 2, 12, 1, "dbrown")
-    g.rect(cx + 5, cy - 4, 1, 7, "dbrown")
-    g.rect(cx, cy - 2, 6, 3, "dbrown")
-    g.rect(cx + 2, cy - 1, 2, 1, "amber")
-    x, y = drawn_at(g, cx - 1 + tilt, cy - 7.5)
-    px = raster(g)
-    for j, row in enumerate([".1.", "111", "1..", "111", "..1", "111", ".1."]):
-        for i, c in enumerate(row):
-            if c == "1":
-                px.p(x + i - 1, y + j, "white")
+def pouch(g, cx, cy, tilt):
+    """The walker's tip pouch as road.py's thief carries it, about 11x15: a green cloth body lit lime and
+    shaded forest, its neck gathered under a cream drawstring, the frill above it flared, the drawstring's
+    two ends tied off at the top and a yellow coin with an amber centre on its face; tilt swings the neck
+    and frill a pixel as the pouch tumbles."""
+    g.cel(cx, cy, 5.5, 5, "green", "forest", "lime")
+    g.rect(cx - 1.5 + tilt / 2, cy - 6.5, 3, 2, "green")
+    g.tri((cx - 3.5 + tilt, cy - 9.5), (cx + 3.5 + tilt, cy - 9.5), (cx + tilt / 2, cy - 5.5), "green")
+    g.rect(cx - 3 + tilt, cy - 9.5, 2, 1, "lime")
+    g.rect(cx + 1.5 + tilt, cy - 9.5, 2, 1, "forest")
+    g.rect(cx - 2 + tilt / 2, cy - 6, 4, 1, "cream")
+    g.p(cx - 3 + tilt, cy - 11, "cream")
+    g.p(cx + 2 + tilt, cy - 11, "cream")
+    g.p(cx - 2 + tilt, cy - 10.2, "cream")
+    g.p(cx + 1 + tilt, cy - 10.2, "cream")
+    g.cel(cx - 0.5, cy + 0.5, 2.5, 2.5, "yellow", "amber")
+    x, y = drawn_at(g, cx - 0.5, cy + 0.5)
+    raster(g).p(x, y, "amber")
 
 
 def coin(g, x, y, spin):
@@ -244,8 +244,8 @@ def coin(g, x, y, spin):
 
 
 def hit_thief(step):
-    """A dust poof; the wallet shoots straight up out of it while three coins fly out and fall. No
-    second ring of puffs, so the wallet carries the moment."""
+    """A dust poof; the snatched tip pouch shoots straight up out of it while three coins fly out and fall.
+    No second ring of puffs, so the pouch carries the moment."""
     g = Grid(64, 64)
     cx, cy = 32, 40
     if step == 0:
@@ -262,7 +262,7 @@ def hit_thief(step):
         x, y = cx + vx * t * 0.85, cy - 4 + vy * t * 0.85 + 1.2 * t * t
         if 3 <= y < 60 and 3 <= x < 61:
             piece(g, lambda p: coin(p, x, y, step + i))
-    piece(g, lambda p: wallet(p, cx, wy, tilt))
+    piece(g, lambda p: pouch(p, cx, wy + 2, tilt))
     return g
 
 

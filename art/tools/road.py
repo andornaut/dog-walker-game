@@ -1125,22 +1125,46 @@ def stripes(g, x, y0, y1, w, b, light="white"):
         px.rect(e(x), r, max(1, e(x + w) - e(x)), 1, light if (r - anchor) % period < period // 2 else "ink")
 
 
-def thief_top(g, b, arms=0, sack=True):
-    """The thief coming down the road: striped shirt, beanie, mask and the loot sack over his shoulder; the
-    free arm (screen left) swings, the one under the sack stays. sack=False leaves the sack off, for the
-    cards, which draw the tip pouch he snatches instead."""
+# The walker's tip pouch, which the thief snatches: a green cloth drawstring pouch lit lime on its left and
+# shaded forest on its right, its neck gathered under a cream drawstring tied off at the top, a yellow coin
+# with an amber centre on its face. The road thief carries BIG_POUCH or TIP_POUCH (POUCHES, widest first),
+# pouch_px picking by the grid's scale, so it stays a clean bitmap at every depth step and never shrinks
+# below TIP_POUCH, which still reads at @50. The cards hold TIP_POUCH close and FAR_POUCH in a distant hand.
+BIG_POUCH = ["...c.c...", "....c....", "..lgcgf..", "...lgf...", "..lgggf..", ".lggyggf.", "lggyayggf",
+             "lgggyggff", "lggggggff", "lggggggff", ".ggggfff.", "..fffff.."]
+TIP_POUCH = ["..c.c..", "...c...", "..lgf..", ".lgggf.", "lggyggf", "lgyaygf", "lggyggf", ".gggff.", "..fff.."]
+FAR_POUCH = [".c.c.", "..c..", ".lgf.", "lgygf", "lgggf", ".fff."]
+POUCHES = (BIG_POUCH, TIP_POUCH)
+POUCH_INK = {"c": "cream", "l": "lime", "g": "green", "f": "forest", "y": "yellow", "a": "amber"}
+# The pouch's width in design pixels on the thief: BIG_POUCH from the full size down to @88, TIP_POUCH below.
+POUCH_WIDTH = 6.5
+
+
+def pouch_px(g, cx, fist):
+    """The tip pouch from POUCHES hanging from a fist: centred on design column cx, its drawstring's top on the
+    last pixel row above design row fist, where the fist ends; the widest no wider than POUCH_WIDTH design
+    pixels at the grid's scale (the smallest at least)."""
+    s, px = scale_of(g), raster(g)
+    sy = getattr(g, "sy", s)
+    bitmap = next((b for b in POUCHES if len(b[0]) <= POUCH_WIDTH * s + 0.5), POUCHES[-1])
+    x0 = math.floor((cx + 0.5) * s) - len(bitmap[0]) // 2
+    y0 = math.floor(fist * sy + 0.5) - 1
+    for j, row in enumerate(bitmap):
+        for i, ch in enumerate(row):
+            if ch in POUCH_INK:
+                px.p(x0 + i, y0 + j, POUCH_INK[ch])
+
+
+def thief_top(g, b, arms=0, pouch=True):
+    """The thief coming down the road: striped shirt, beanie and mask, both arms swinging, the walker's tip
+    pouch dangling by its drawstring from his fist (screen right). pouch=False leaves it off, for the cards,
+    which draw the pouch themselves."""
     stripes(g, 9, 21 + b, 34 + b, 14, b)
-    for x, n in ((5, swung(arms, -1)), (23, 0)):
+    for x, n in ((5, swung(arms, -1)), (23, swung(arms, 1))):
         stripes(g, x, 22 + b, 31 + b - n, 4, b, "lgrey")
         g.rect(x, 31 + b - n, 4, 3, "skin2")
-    if sack:
-        # the loot sack slung over the shoulder: its neck tied and flared at the shoulder, the bag bulging
-        # below it, a $ on its face
-        g.cel(26, 23 + b, 4.5, 5.5, "tan", "brown", "cream")
-        g.tri((22.5, 20 + b), (29.5, 20 + b), (26, 15 + b), "tan")
-        g.tri((24, 13 + b), (28, 13 + b), (26, 15.5 + b), "tan")
-        g.rect(24.5, 15 + b, 3, 1, "brown")
-        dollar(g, 26, 23 + b, "dbrown")
+        if x > 16 and pouch:
+            pouch_px(g, 25, 34 + b - n)
     face_disc(g, 16, 12.5 + b, 8, 8, "skin2", "brown")
     g.cel(16, 7.5 + b, 8.5, 5, "navy", "ink", "dslate")
     g.rect(8, 9 + b, 17, 2, "dslate")
@@ -1151,25 +1175,11 @@ def thief_top(g, b, arms=0, sack=True):
     g.p(18, 16 + b, "dbrown")
 
 
-# A 3x7 dollar sign, drawn in the grid's own pixels so it keeps its strokes 1px at any scale.
-DOLLAR = (".#.", ".##", "#..", ".#.", "..#", "##.", ".#.")
-
-
-def dollar(g, cx, cy, c):
-    """DOLLAR centred on design point (cx, cy)."""
-    s, px = scale_of(g), raster(g)
-    sy = getattr(g, "sy", s)
-    x0, y0 = math.floor((cx + 0.5) * s) - 1, math.floor((cy + 0.5) * sy) - 3
-    for j, row in enumerate(DOLLAR):
-        for i, ch in enumerate(row):
-            if ch == "#":
-                px.p(x0 + i, y0 + j, c)
-
-
-def thief_fleeing(stride, sack=True):
+def thief_fleeing(stride, pouch=True):
     """The thief running off up the road, seen from behind: stride is -1 or 1, the side whose knee is up.
     The arms pump against the legs from the shoulders (the far arm bent forward, its forearm hidden, the near
-    one swung back and low), and the loot sack bounces on his back (sack=False leaves it off, as thief_top).
+    one swung back and low), and the tip pouch swings from his fist on screen right: hanging low from the
+    swung-back arm, then jerked up beside his ribs by the bent one (pouch=False leaves it off, as thief_top).
     The road outline and the lit rim."""
     g = edged(Grid(32, 48))
     s = stride
@@ -1198,14 +1208,14 @@ def thief_fleeing(stride, sack=True):
     stripes(g, 9, 21 + b, 34 + b, 14, b)
     g.p(9, 21 + b, None)
     g.p(22, 21 + b, None)
-    # loot sack slung over the right shoulder, bouncing a pixel against the stride, its neck gathered at the top
-    k = b + (1 if s > 0 else 0)
-    if sack:
-        g.cel(22, 28 + k, 5, 5, "tan", "brown", "cream")
-        g.tri((19.5, 24 + k), (24.5, 24 + k), (22, 19 + k), "tan")
-        g.rect(21, 21 + k, 3, 2, "brown")
-        g.rect(20, 23 + k, 5, 1, "dbrown")
-        dollar(g, 22, 28 + k, "dbrown")
+    if pouch:
+        # swinging out from the hand held back and low, or tucked up at the hip under the bent arm's fist,
+        # which shows in full over the shirt's edge
+        if s > 0:
+            pouch_px(g, 25.5, 35 + b)
+        else:
+            g.rect(22, 26 + b, 3, 2, "skin2")
+            pouch_px(g, 24.5, 28 + b)
     # the back of the head: the beanie, the ears and the mask's band tied all the way round
     g.rect(14, 19 + b, 4, 3, "skin2")
     g.cel(16, 12.5 + b, 8, 8, "skin2", "brown", "skin1")
@@ -1658,7 +1668,7 @@ def jogger(knee=None, passing=None, bob=0, tail=None):
     return rim(g, LIT)
 
 
-# The bib's number, 3x5 digits drawn in the grid's own pixels, as DOLLAR is.
+# The bib's number, 3x5 digits drawn in the grid's own pixels, as WALLET_DOLLAR is.
 BIB = ("111", "001", "010", "100", "100"), ("111", "100", "111", "001", "111")
 
 

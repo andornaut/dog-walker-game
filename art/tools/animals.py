@@ -29,7 +29,7 @@ motion), run (4 frames, 80ms: down the road at the player).
 Snatch, the thief's tags: walk (4 frames, 100ms, road.PERSON_WALK: a foot lifted,
 passing 1px higher, the other foot), flee (4 frames, 90ms: from behind, see FLEE
 and SEAGULL_FLEE), idle (2 frames, 400ms: breathing). Each carries a tan loot
-sack, as the thief does.
+sack.
   snatch-raccoon     38x57, standing about as tall as a medium dog, the sack at its chest: a
                      grey-brown coat (RACCOON_LIT) with dark legs and paws, the black bandit mask
                      between white brows and a white muzzle, rounded white-rimmed ears and a bushy
@@ -415,7 +415,7 @@ def rabbit_hop(phase):
 # ---------- Snatch ----------
 
 def sack(g, x, y):
-    """The tan loot sack centred on (x, y), its neck gathered at the top, as the thief's."""
+    """The tan loot sack centred on (x, y), its neck gathered at the top."""
     g.cel(x, y, 4, 4, "tan", "brown", "cream")
     g.tri((x - 2.5, y - 2.5), (x + 2.5, y - 2.5), (x, y - 6), "tan")
     g.rect(x - 1, y - 5, 2, 1, "brown")

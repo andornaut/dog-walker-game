@@ -272,16 +272,9 @@ def other_dog_pull_away():
     return a
 
 
-# The walker's tip pouch, which the thief snatches: a green cloth drawstring pouch lit lime on its left and
-# shaded forest on its right, its neck gathered under a cream drawstring tied off at the top, a yellow coin
-# with an amber centre on its face. TIP_POUCH is held close; FAR_POUCH is the same pouch in a distant hand.
-TIP_POUCH = ["..c.c..", "...c...", "..lgf..", ".lgggf.", "lggyggf", "lgyaygf", "lggyggf", ".gggff.", "..fff.."]
-FAR_POUCH = [".c.c.", "..c..", ".lgf.", "lgygf", "lgggf", ".fff."]
-POUCH_INK = {"c": "cream", "l": "lime", "g": "green", "f": "forest", "y": "yellow", "a": "amber"}
-
-
 def tip_pouch(far=False):
-    return pixmap(FAR_POUCH if far else TIP_POUCH, POUCH_INK)
+    """road.py's tip pouch, outlined: road.TIP_POUCH held close, road.FAR_POUCH in a distant hand."""
+    return pixmap(road.FAR_POUCH if far else road.TIP_POUCH, road.POUCH_INK)
 
 
 def thief(s, draw, *args, k=0, **q):
@@ -292,9 +285,9 @@ def thief(s, draw, *args, k=0, **q):
 
 
 def thief_reaching(g, b, arms=0):
-    """thief_top without the sack, his free arm (screen left) out level from the shoulder to grab: a lgrey
+    """thief_top without the pouch, his free arm (screen left) out level from the shoulder to grab: a lgrey
     sleeve banded ink as his shirt is, the hand at its end."""
-    road.thief_top(g, b, sack=False)
+    road.thief_top(g, b, pouch=False)
     g.rect(5, 22 + b, 4, 12, None)
     g.rect(2, 22 + b, 8, 4, "lgrey")
     for x in (3.5, 7):
@@ -333,7 +326,7 @@ def thief_let_go():
     a = Art()
     a.ground("street")
     s = 0.8
-    t = thief(s, road.thief_fleeing, 1, sack=False)
+    t = thief(s, road.thief_fleeing, 1, pouch=False)
     x, y = stand(a, t, 50, 40)
     # the pouch hangs from his back-swung hand (screen right), layout 23..27 x 31..33
     a.paste(tip_pouch(), x + round(23 * s), y + round(30 * s))
@@ -377,7 +370,7 @@ def thief_give_chase():
     a = Art()
     a.ground("street")
     s = 0.5
-    t = thief(s, road.thief_fleeing, -1, sack=False)
+    t = thief(s, road.thief_fleeing, -1, pouch=False)
     x, y = stand(a, t, 45, 29)
     a.paste(tip_pouch(far=True), x + round(4 * s) - 3, y + round(31 * s))
     dust(a, x + 8, y + t.height - 3)
