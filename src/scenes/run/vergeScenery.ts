@@ -1,4 +1,4 @@
-import { moverPlace, stopsOnVerge } from "../../runner/movers";
+import { moverPlace, moverY, stopsOnVerge } from "../../runner/movers";
 import type { WalkItem } from "../../runner/walk";
 
 // A dart that stops on the verge leaves the walk as it leaves the road, so it collides with
@@ -35,6 +35,6 @@ export function vergeNow(
   }
   const since = item.mover.since + run.zoneDistance - kept.zoneDistance;
   const place = moverPlace(road.laneCount, item.mover.path, since);
-  const y = road.roadTop - item.height + place.travel;
+  const y = moverY(road.roadTop, item.height, place);
   return y < road.roadBottom ? { ...item, mover: { ...item.mover, since }, y } : null;
 }

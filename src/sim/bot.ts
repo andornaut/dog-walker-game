@@ -3,7 +3,7 @@ import type { LaneDirection } from "../layout/lanes";
 import { chance, type Random } from "../lib/random";
 import type { LanedBox, ScaledBox } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
-import { hasLeftRoad, laneAt, type MoverPath, moverPlace } from "../runner/movers";
+import { hasLeftRoad, laneAt, type MoverPath, moverPlace, moverY } from "../runner/movers";
 import { moverOutcomes } from "../runner/outcomes";
 import type { PullEvent, Pulls } from "../runner/pulls";
 import {
@@ -309,7 +309,7 @@ function scrollContacts(
   let previous: MoverSample | null = null;
   for (let since = 0; since < MOVER_SCROLL_MAX; since += MOVER_SAMPLE_SCROLL) {
     const place = moverPlace(laneCount, path, since);
-    const y = roadTop - height + place.travel;
+    const y = moverY(roadTop, height, place);
     if (hasLeftRoad(laneCount, place) || y >= packBand.bottom) {
       break;
     }
@@ -422,7 +422,7 @@ export function moverPrizes(
   return paths.flatMap((path) => {
     for (let since = mover.since; since <= last; since += MOVER_SAMPLE_SCROLL) {
       const place = moverPlace(laneCount, path, since);
-      const y = roadTop - item.height + place.travel;
+      const y = moverY(roadTop, item.height, place);
       if (hasLeftRoad(laneCount, place) || y >= packBand.bottom) {
         return [];
       }

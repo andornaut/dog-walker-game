@@ -96,6 +96,7 @@ import {
   type MoverPath,
   moverPlace,
   type MoverSpec,
+  moverY,
   type PlannerStreams,
   type StepShape,
 } from "./movers";
@@ -1622,7 +1623,7 @@ function scrolledItems(
     }
     const since = mover.since + travel;
     const place = moverPlace(laneCount, mover.path, since);
-    const y = roadTop - item.height + place.travel;
+    const y = moverY(roadTop, item.height, place);
     if (!hasLeftRoad(laneCount, place) && y < roadBottom) {
       const lane = laneAt(place.lanePosition);
       sortItem(laneCount, sorted, { ...item, lane, mover: { ...mover, since }, y });

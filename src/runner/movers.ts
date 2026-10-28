@@ -148,6 +148,11 @@ interface MoverPlace {
   readonly travel: number;
 }
 
+// The y of the top of a mover height tall at place on a road whose far edge is at roadTop.
+export function moverY(roadTop: number, height: number, place: Pick<MoverPlace, "travel">): number {
+  return roadTop - height + place.travel;
+}
+
 export function laneAt(lanePosition: number): number {
   return Math.floor(lanePosition + 0.5);
 }
@@ -442,7 +447,7 @@ export function moveMovers<Item extends MoverItem>(
         ...item,
         lane: laneAt(place.lanePosition),
         mover,
-        y: road.roadTop - item.height + place.travel,
+        y: moverY(road.roadTop, item.height, place),
       });
     }
   }

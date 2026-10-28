@@ -16,7 +16,7 @@ import { currentZoneId } from "../rules/route";
 import { addCents, type Cents, cents } from "../rules/units";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { destinationLane } from "../runner/laneMotion";
-import { hasLeftRoad, moverPlace } from "../runner/movers";
+import { hasLeftRoad, moverPlace, moverY } from "../runner/movers";
 import { screenRoadGeometry } from "../runner/screenGeometry";
 import {
   chooseCard,
@@ -222,7 +222,7 @@ function countLeaving(
       touched = item.y + travel < geometry.roadBottom;
     } else {
       const place = moverPlace(geometry.laneCount, mover.path, mover.since + travel);
-      const y = geometry.roadTop - item.height + place.travel;
+      const y = moverY(geometry.roadTop, item.height, place);
       touched = !(hasLeftRoad(geometry.laneCount, place) || y >= geometry.roadBottom);
     }
     countItem(tally, touched, { kind: item.kind, moving: mover !== undefined });

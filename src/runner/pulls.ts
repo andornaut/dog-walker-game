@@ -8,7 +8,7 @@ import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { pullLane } from "./laneControl";
 import { destinationLane } from "./laneMotion";
-import { isWaiting, laneAt, moverPlace } from "./movers";
+import { isWaiting, laneAt, moverPlace, moverY } from "./movers";
 import { moverOutcomes } from "./outcomes";
 import {
   blocksLane,
@@ -235,7 +235,7 @@ export function laneBlockedWithin(
       for (let sample = 0; sample <= SWEEP_SAMPLES; sample++) {
         const scroll = (sample / SWEEP_SAMPLES) * horizon * speed;
         const place = moverPlace(geometry.laneCount, path, mover.since + scroll);
-        const y = geometry.roadTop - item.height + place.travel;
+        const y = moverY(geometry.roadTop, item.height, place);
         const touches = y + item.height > top && y < bottom;
         // A mover between lanes touches both: it covers every lane its hit box overlaps.
         const left = place.lanePosition + inset;

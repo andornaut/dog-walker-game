@@ -9,6 +9,7 @@ import {
   hasLeftRoad,
   type MoverOnRoad,
   moverPlace,
+  moverY,
   stopsOnVerge,
 } from "../../runner/movers";
 import type { SpawnEvent } from "../../runner/spawning";
@@ -404,7 +405,7 @@ function itemBoxAfter(geometry: RoadGeometry, scroll: number, item: WalkItem): B
     return null;
   }
   const span = drawnLanes(item.laneSpan, path);
-  const y = roadTop - item.height + place.travel;
+  const y = moverY(roadTop, item.height, place);
   const box = {
     bottom: y + item.height,
     left: place.lanePosition - 0.5,
