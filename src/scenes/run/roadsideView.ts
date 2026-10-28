@@ -12,15 +12,7 @@ import {
 import { zoneLength } from "../../runner/walk";
 import { showAtDepth, spriteMetrics } from "../sprites";
 import { ShadowPool } from "./shadowPool";
-import {
-  DEPTH,
-  JUNCTURE_Y,
-  LAYOUT,
-  PROJECTION,
-  ROW_DEPTH,
-  sceneryFade,
-  showOnRoad,
-} from "./stage";
+import { DEPTH, JUNCTURE_Y, LAYOUT, PROJECTION, ROW_DEPTH, sceneryFade, showOnRoad } from "./stage";
 
 // The roadside props' sprites, a fixed pool made once and reused frame to frame: each drawn
 // through the projection from its depth steps like the road's sprites, cut off at the
