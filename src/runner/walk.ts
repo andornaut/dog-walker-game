@@ -15,6 +15,7 @@ import type { LaneDirection } from "../layout/lanes";
 import { hasObstacleArt, obstacleParts, obstacleSilhouette } from "../layout/obstacleArt";
 import { formationOrder, PART_INSET } from "../layout/packFormation";
 import { itemAt } from "../lib/arrays";
+import { assertNever } from "../lib/assertNever";
 import { getOrInsert } from "../lib/maps";
 import {
   chance,
@@ -643,6 +644,118 @@ function crossStart(
   };
 }
 
+// How a mover of movement moves (moverSpec). A stepper's and a hopper's draws are made here.
+function moverMotion(
+  data: Pick<GameData, "tuning">,
+  streams: PlannerStreams,
+  movement: Movement,
+): MoverMotion {
+  const { tuning } = data;
+  switch (movement.kind) {
+    case "stopAndGoAcross":
+      return {
+        kind: "cross",
+        lanesPerSecond: read(tuning, "counts", "dartLanesPerSecond") * movement.speed,
+        pauseSeconds: movement.stopSeconds,
+        ...crossStart(tuning),
+        stopLanes: { max: 1, min: 1 },
+        stopShare: 0,
+        tilt: [0, 0],
+        turnAtShare: [0, 0],
+        turnBackShare: 0,
+        vergeShare: 0,
+      };
+    case "dart":
+    case "dive": {
+      const dive = movement.kind === "dive";
+      return {
+        kind: "cross",
+        lanesPerSecond: read(tuning, "counts", "dartLanesPerSecond") * (dive ? movement.speed : 1),
+        ...crossStart(tuning),
+        stopLanes: {
+          max: read(tuning, "counts", "dartStopLanesMax"),
+          min: read(tuning, "counts", "dartStopLanesMin"),
+        },
+        ...(dive ? { slide: movement.slide } : {}),
+        stopShare: dive ? 1 : movement.stopShare,
+        tilt: [movement.tilt.min, movement.tilt.max],
+        turnAtShare: [
+          read(tuning, "multipliers", "dartTurnAtShareMin"),
+          read(tuning, "multipliers", "dartTurnAtShareMax"),
+        ],
+        turnBackShare: dive ? 0 : movement.turnBackShare,
+        vergeShare: dive ? 0 : read(tuning, "probability", "dartVergeStopShare"),
+      };
+    }
+    case "bounce":
+    case "follow":
+    case "stopAndGo":
+    case "sway":
+      return patternMotion(data, movement);
+    case "inLane":
+      return { kind: "ride", speedMultiplier: movement.factor };
+    case "merge":
+      return {
+        kind: "ride",
+        merge: { at: movement.mergeAt, seconds: movement.mergeSeconds },
+        speedMultiplier: movement.factor,
+      };
+    case "approach":
+      return {
+        firstDelaySeconds: [
+          read(tuning, "seconds", "approachFirstDelayMin"),
+          read(tuning, "seconds", "approachFirstDelayMax"),
+        ],
+        kind: "approach",
+        secondRoadShare: [
+          read(tuning, "multipliers", "approachSecondRoadShareMin"),
+          read(tuning, "multipliers", "approachSecondRoadShareMax"),
+        ],
+        stepSeconds: read(tuning, "seconds", "moverStepSeconds"),
+        steps: movement.steps,
+      };
+    case "hop": {
+      const sideways = movement.sideways === true;
+      return {
+        count: movement.times,
+        kind: "steps",
+        sequences: countsOf(movement.times).flatMap((times) =>
+          hopSequences(streams.movers, movement.most, sideways, times),
+        ),
+        ...(movement.shy === true
+          ? {
+              shy: {
+                nearSeconds: read(tuning, "seconds", "shyHopNearSeconds"),
+                rise: sideways ? 0 : movement.most,
+                shapes: hopShapes(movement.most, sideways),
+                share: read(tuning, "probability", "shyHopperShare"),
+              },
+            }
+          : {}),
+        stepSeconds: read(tuning, "seconds", "moverHopSeconds"),
+      };
+    }
+    case "step": {
+      const { max, min } = movement.steps;
+      const steps = Array.from({ length: max }, (_, i) =>
+        randomPick(i < min ? streams.spawns : streams.movers, STEP_SHAPES),
+      );
+      const mirrored = steps.map(({ lanes, travel }) => ({ lanes: -lanes as -1 | 0 | 1, travel }));
+      return {
+        count: movement.steps,
+        kind: "steps",
+        sequences: countsOf(movement.steps).flatMap((count) => [
+          steps.slice(0, count),
+          mirrored.slice(0, count),
+        ]),
+        stepSeconds: read(tuning, "seconds", "moverStepSeconds"),
+      };
+    }
+    default:
+      return assertNever(movement);
+  }
+}
+
 // How a mover moves, by its movement and the tuning. A stepper's steps are drawn here, as many as
 // its most, the first min from the spawns stream and any more from the movers stream; it may take
 // the first steps of them, or of their mirror image, as many as its drawn count. A bounce, a
@@ -660,105 +773,7 @@ export function moverSpec(
   movement: Movement,
 ): MoverSpec {
   const { tuning } = data;
-  let motion: MoverMotion;
-  if (movement.kind === "stopAndGoAcross") {
-    motion = {
-      kind: "cross",
-      lanesPerSecond: read(tuning, "counts", "dartLanesPerSecond") * movement.speed,
-      pauseSeconds: movement.stopSeconds,
-      ...crossStart(tuning),
-      stopLanes: { max: 1, min: 1 },
-      stopShare: 0,
-      tilt: [0, 0],
-      turnAtShare: [0, 0],
-      turnBackShare: 0,
-      vergeShare: 0,
-    };
-  } else if (movement.kind === "dart" || movement.kind === "dive") {
-    const dive = movement.kind === "dive";
-    motion = {
-      kind: "cross",
-      lanesPerSecond: read(tuning, "counts", "dartLanesPerSecond") * (dive ? movement.speed : 1),
-      ...crossStart(tuning),
-      stopLanes: {
-        max: read(tuning, "counts", "dartStopLanesMax"),
-        min: read(tuning, "counts", "dartStopLanesMin"),
-      },
-      ...(dive ? { slide: movement.slide } : {}),
-      stopShare: dive ? 1 : movement.stopShare,
-      tilt: [movement.tilt.min, movement.tilt.max],
-      turnAtShare: [
-        read(tuning, "multipliers", "dartTurnAtShareMin"),
-        read(tuning, "multipliers", "dartTurnAtShareMax"),
-      ],
-      turnBackShare: dive ? 0 : movement.turnBackShare,
-      vergeShare: dive ? 0 : read(tuning, "probability", "dartVergeStopShare"),
-    };
-  } else if (
-    movement.kind === "bounce" ||
-    movement.kind === "follow" ||
-    movement.kind === "stopAndGo" ||
-    movement.kind === "sway"
-  ) {
-    motion = patternMotion(data, movement);
-  } else if (movement.kind === "inLane") {
-    motion = { kind: "ride", speedMultiplier: movement.factor };
-  } else if (movement.kind === "merge") {
-    motion = {
-      kind: "ride",
-      merge: { at: movement.mergeAt, seconds: movement.mergeSeconds },
-      speedMultiplier: movement.factor,
-    };
-  } else if (movement.kind === "approach") {
-    motion = {
-      firstDelaySeconds: [
-        read(tuning, "seconds", "approachFirstDelayMin"),
-        read(tuning, "seconds", "approachFirstDelayMax"),
-      ],
-      kind: "approach",
-      secondRoadShare: [
-        read(tuning, "multipliers", "approachSecondRoadShareMin"),
-        read(tuning, "multipliers", "approachSecondRoadShareMax"),
-      ],
-      stepSeconds: read(tuning, "seconds", "moverStepSeconds"),
-      steps: movement.steps,
-    };
-  } else if (movement.kind === "hop") {
-    const sideways = movement.sideways === true;
-    motion = {
-      count: movement.times,
-      kind: "steps",
-      sequences: countsOf(movement.times).flatMap((times) =>
-        hopSequences(streams.movers, movement.most, sideways, times),
-      ),
-      ...(movement.shy === true
-        ? {
-            shy: {
-              nearSeconds: read(tuning, "seconds", "shyHopNearSeconds"),
-              rise: sideways ? 0 : movement.most,
-              shapes: hopShapes(movement.most, sideways),
-              share: read(tuning, "probability", "shyHopperShare"),
-            },
-          }
-        : {}),
-      stepSeconds: read(tuning, "seconds", "moverHopSeconds"),
-    };
-  } else {
-    const { max, min } = movement.steps;
-    const steps = Array.from({ length: max }, (_, i) =>
-      randomPick(i < min ? streams.spawns : streams.movers, STEP_SHAPES),
-    );
-    const mirrored = steps.map(({ lanes, travel }) => ({ lanes: -lanes as -1 | 0 | 1, travel }));
-    motion = {
-      count: movement.steps,
-      kind: "steps",
-      sequences: countsOf(movement.steps).flatMap((count) => [
-        steps.slice(0, count),
-        mirrored.slice(0, count),
-      ]),
-      stepSeconds: read(tuning, "seconds", "moverStepSeconds"),
-    };
-  }
+  const motion = moverMotion(data, streams, movement);
   return {
     footprint,
     motion,
