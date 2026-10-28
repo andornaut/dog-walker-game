@@ -62,10 +62,7 @@ export function targetDogs(
     case "all":
       return pack;
     case "lead":
-      return packOrder(
-        data.dogs,
-        pack.filter((id) => context.affected.includes(id)),
-      ).slice(0, 1);
+      return packOrder(data.dogs, walkingAmong(state, context.affected)).slice(0, 1);
     default:
       return assertNever(target);
   }
