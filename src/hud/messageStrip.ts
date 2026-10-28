@@ -15,8 +15,9 @@ import { DEBUFF_BAR } from "./walkHud";
 // (OWNER_LEAD), wrapped onto up to MESSAGE_STRIP.rows rows; an owner the text names has their
 // face inline before their name (faceText.ts); the panel is as tall as the rows it
 // holds, and as the owner's lead. While debuff bars are up it moves under them and shows
-// the line on one row (messageLinePanel). A line waits its turn, shows, and fades out at the end
-// of its life. The strip shows while it has a line.
+// the line on one row (messageLinePanel), on the strip's one-row panel where the line shows a
+// face. A line waits its turn, shows, and fades out at the end of its life. The strip shows
+// while it has a line.
 
 // What a line is about, and the icon that leads it; or a walk effect, such as a gear, a perk or
 // an upgrade, led by its 16x16 icon.
@@ -116,9 +117,12 @@ export function messagePanel(body: FontMetrics, rows: number, bar: Rect = WALK_B
   return { height, width, x, y: stripTop(bar) };
 }
 
-// The one-row strip under bars debuff bars: a panel height tall, its top gap rows under the
-// last bar's top, the icon at icon and the text from textX, the strip's columns, in the first
-// of TEXT_FIT_STYLES whose ink fits room, its capitals centred on the icon's rows.
+// The one-row strip under bars debuff bars: its top gap rows under the last bar's top, the
+// text from textX, the strip's columns, in the first of TEXT_FIT_STYLES whose ink fits room,
+// its capitals centred on the icon's rows. A line with no face takes a panel height tall, the
+// icon icon.y down. A line that shows a face, its owner's lead or one inline, takes the strip's
+// one-row panel, its icon and row placed as the strip places them, so every face keeps the
+// rows round it that the strip gives it.
 export const MESSAGE_LINE = {
   gap: 2,
   height: 26,
@@ -134,13 +138,21 @@ interface MessageLinePanel {
   textX: number;
 }
 
-export function messageLinePanel(bars: number, bar: Rect = WALK_BAR_RECT): MessageLinePanel {
+// faced: the line shows a face.
+export function messageLinePanel(
+  body: FontMetrics,
+  bars: number,
+  faced: boolean,
+  bar: Rect = WALK_BAR_RECT,
+): MessageLinePanel {
   const { gap, height, icon, room, textX } = MESSAGE_LINE;
   const { width, x } = MESSAGE_STRIP;
   const y = bar.y + bar.height + gap + bars * DEBUFF_BAR.height;
+  const strip = messageStripLayout(body, bar);
+  const iconY = faced ? strip.icon.y - strip.panel.y : icon.y;
   return {
-    icon: { x: x + icon.x, y: y + icon.y },
-    panel: { height, width, x, y },
+    icon: { x: x + icon.x, y: y + iconY },
+    panel: { height: faced ? messagePanel(body, 1, bar).height : height, width, x, y },
     room,
     textX: x + textX,
   };
@@ -149,6 +161,31 @@ export function messageLinePanel(bars: number, bar: Rect = WALK_BAR_RECT): Messa
 // The top of a one-row line's capitals at scale, centred on its icon's rows.
 export function messageLineTop(body: FontMetrics, line: MessageLinePanel, scale: number): number {
   return line.icon.y + Math.floor((MESSAGE_STRIP.icon.size - body.capHeight * scale) / 2);
+}
+
+// A line's rows as set: how many, at what scale, and whether they show a face.
+export interface LineSet {
+  readonly faced: boolean;
+  readonly rows: number;
+  readonly scale: number;
+}
+
+// Where a line set as set goes under bars debuff bars: its panel, before an owner's lead grows
+// it; its icon; and the top of its first row's capitals. With no bar up, the strip as tall as
+// its rows; under bars, the one-row strip.
+export function linePlace(
+  body: FontMetrics,
+  bars: number,
+  set: LineSet,
+  bar: Rect = WALK_BAR_RECT,
+): { capsTop: number; icon: Point; panel: Rect } {
+  if (bars === 0) {
+    const strip = messageStripLayout(body, bar);
+    const panel = messagePanel(body, Math.max(1, set.rows), bar);
+    return { capsTop: strip.rowTops[0] ?? 0, icon: strip.icon, panel };
+  }
+  const one = messageLinePanel(body, bars, set.faced, bar);
+  return { capsTop: messageLineTop(body, one, set.scale), icon: one.icon, panel: one.panel };
 }
 
 // An owner's quip line leads with the owner's face-owner-<art>-20 (face square) in a 1px ink
@@ -184,9 +221,10 @@ export function stripLeadSlot(body: FontMetrics, bar: Rect = WALK_BAR_RECT): Lea
   return { capsTop: rowTops[0] ?? 0, iconX: icon.x, room, textX };
 }
 
-// The one-row strip's lead slot, under bars debuff bars.
+// The one-row strip's lead slot, under bars debuff bars, on the panel of a line that shows a
+// face.
 export function lineLeadSlot(body: FontMetrics, bars: number, bar: Rect = WALK_BAR_RECT): LeadSlot {
-  const one = messageLinePanel(bars, bar);
+  const one = messageLinePanel(body, bars, true, bar);
   const capsTop = messageLineTop(body, one, MESSAGE_STRIP.scale);
   return { capsTop, iconX: one.icon.x, room: one.room, textX: one.textX };
 }
@@ -224,12 +262,13 @@ export function ownerLeadPanel(panel: Rect, lead: OwnerLeadLayout): Rect {
 }
 
 // Every panel a line can take under bars debuff bars: with none, the strip on each count of
-// its rows; under bars, the one-row strip; and each of those grown to an owner's lead.
+// its rows; under bars, the one-row strip with and without a face; and each of those grown to
+// an owner's lead.
 export function linePanels(body: FontMetrics, bars: number, bar: Rect = WALK_BAR_RECT): Rect[] {
   const plain =
     bars === 0
       ? Array.from({ length: MESSAGE_STRIP.rows }, (_, row) => messagePanel(body, row + 1, bar))
-      : [messageLinePanel(bars, bar).panel];
+      : [false, true].map((faced) => messageLinePanel(body, bars, faced, bar).panel);
   const slot = bars === 0 ? stripLeadSlot(body, bar) : lineLeadSlot(body, bars, bar);
   const lead = ownerLeadLayout(body, slot, 0);
   return [...plain, ...plain.map((panel) => ownerLeadPanel(panel, lead))];

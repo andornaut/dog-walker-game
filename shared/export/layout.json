@@ -841,42 +841,42 @@
       },
       "underBars": [
         {
-          "bottom": 100,
+          "bottom": 103,
           "frame": {
             "height": 22,
             "width": 22,
             "x": 14,
-            "y": 69
+            "y": 72
           },
           "name": {
             "x": 25,
-            "y": 93
+            "y": 96
           },
           "room": 306,
           "textX": 40,
           "panel": {
-            "height": 42,
+            "height": 45,
             "width": 344,
             "x": 8,
             "y": 66
           }
         },
         {
-          "bottom": 116,
+          "bottom": 119,
           "frame": {
             "height": 22,
             "width": 22,
             "x": 14,
-            "y": 85
+            "y": 88
           },
           "name": {
             "x": 25,
-            "y": 109
+            "y": 112
           },
           "room": 306,
           "textX": 40,
           "panel": {
-            "height": 42,
+            "height": 45,
             "width": 344,
             "x": 8,
             "y": 82
@@ -897,7 +897,21 @@
           "y": 66
         },
         "room": 312,
-        "textX": 34
+        "textX": 34,
+        "faced": {
+          "icon": {
+            "x": 14,
+            "y": 74
+          },
+          "panel": {
+            "height": 32,
+            "width": 344,
+            "x": 8,
+            "y": 66
+          },
+          "room": 312,
+          "textX": 34
+        }
       },
       {
         "icon": {
@@ -911,7 +925,21 @@
           "y": 82
         },
         "room": 312,
-        "textX": 34
+        "textX": 34,
+        "faced": {
+          "icon": {
+            "x": 14,
+            "y": 90
+          },
+          "panel": {
+            "height": 32,
+            "width": 344,
+            "x": 8,
+            "y": 82
+          },
+          "room": 312,
+          "textX": 34
+        }
       }
     ]
   },

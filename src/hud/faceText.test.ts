@@ -3,14 +3,12 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
 import { placeholders } from "../lib/lines";
-import type { Rect } from "../lib/rect";
 import type { HeartChange } from "../rules/causes";
 import type { FaceMood } from "../rules/treats";
 import { clampHearts } from "../rules/units";
 import { bodyRunWidth } from "../testing/bodyFont";
 import { defined } from "../testing/defined";
 import { fontFileMetrics } from "../testing/fontInk";
-import { inside } from "../testing/rects";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import {
@@ -23,14 +21,7 @@ import {
   ownerFaceText,
   withoutFace,
 } from "./faceText";
-import {
-  MESSAGE_LINE,
-  MESSAGE_STRIP,
-  messageLinePanel,
-  messageLineTop,
-  messagePanel,
-  messageStripLayout,
-} from "./messageStrip";
+import { MESSAGE_LINE, MESSAGE_STRIP, messageStripLayout } from "./messageStrip";
 import { lowHeartsText } from "./moments";
 import {
   bumpLines,
@@ -226,7 +217,7 @@ describe("withoutFace", () => {
 });
 
 // The face draws at 1x, framed, beside 2x text only; it keeps clear of the rows over and under
-// its own, and inside each panel the strip draws a 2x line on.
+// its own.
 describe("an inline face", () => {
   const scale = INLINE_FACE.textScale;
 
@@ -235,25 +226,6 @@ describe("an inline face", () => {
     expect(BOX_2X.framed).toBe(INLINE_FACE.face + 2);
     expect(-BOX_2X.rise).toBeGreaterThanOrEqual(inkRowsFromCapTop(BODY) * scale - pitch);
     expect(BOX_2X.framed - BOX_2X.rise).toBeLessThanOrEqual(pitch);
-  });
-
-  const { rowTops } = messageStripLayout(BODY);
-  it.each<[string, number, Rect]>([
-    ["the strip's first row", rowTops[0] ?? 0, messagePanel(BODY, 1)],
-    ["the strip's second row", rowTops[1] ?? 0, messagePanel(BODY, 2)],
-    ...[1, 2].map((bars): [string, number, Rect] => [
-      `the one-row strip under ${bars} bars`,
-      messageLineTop(BODY, messageLinePanel(bars), scale),
-      messageLinePanel(bars).panel,
-    ]),
-  ])("sits inside the panel on %s", (_place, capsTop, panel) => {
-    const frame = {
-      height: BOX_2X.framed,
-      width: BOX_2X.framed,
-      x: panel.x,
-      y: capsTop - BOX_2X.rise,
-    };
-    expect(inside(frame, panel)).toBe(true);
   });
 
   // The one-row strip under the debuff bars: a line that fits its room at 2x keeps its face,

@@ -8,15 +8,12 @@ import {
   isOwnerLead,
   lineAlpha,
   lineLeadSlot,
+  linePlace,
   MESSAGE_STRIP,
   MESSAGE_TIMING,
   messageIconKey,
   type MessageLine,
-  messageLinePanel,
-  messageLineTop,
-  messagePanel,
   messageRows,
-  messageStripLayout,
   type MessageStripState,
   type OwnerLead,
   type OwnerLeadLayout,
@@ -130,15 +127,14 @@ export class MessageStrip {
 }
 
 // The line's lead and text: with no debuff bar up, its rows at 2x on a panel as tall as they
-// are; under bars, one row fitted by TEXT_FIT_STYLES on the one-row panel. An owner's lead
-// moves the text right, and grows a panel shorter than the lead. Each owner the text names has
-// their face inline before their name, but the owner whose face and name lead the line.
+// are; under bars, one row fitted by TEXT_FIT_STYLES on the one-row panel, the strip's own
+// where the line shows a face. An owner's lead moves the text right, and grows a panel shorter
+// than the lead. Each owner the text names has their face inline before their name, but the
+// owner whose face and name lead the line.
 function draw(scene: Scene, depth: number, bars: number, line: StripLine): Drawn {
   const body = pixelFontMetrics(scene, "body");
   const owner = typeof line.lead === "string" ? undefined : line.lead;
   const name = owner === undefined ? "" : gameData.dogs[owner.dog].owner.name;
-  const strip = messageStripLayout(body);
-  const one = messageLinePanel(bars);
   const slot = bars === 0 ? stripLeadSlot(body) : lineLeadSlot(body, bars);
   const lead =
     owner === undefined
@@ -151,23 +147,26 @@ function draw(scene: Scene, depth: number, bars: number, line: StripLine): Drawn
     ...withoutFace(owner?.dog, line),
     ...(line.names === undefined ? {} : { names: line.names }),
   });
-  const set =
-    bars === 0
-      ? { ...wrappedRows(scene, room, said), capsTop: strip.rowTops[0] ?? 0 }
-      : oneRow(scene, room, said, (scale) => messageLineTop(body, one, scale));
-  const fits = bars === 0 ? messagePanel(body, Math.max(1, set.rows.length)) : one.panel;
-  const panel: Faded = addPanel(scene, lead === undefined ? fits : ownerLeadPanel(fits, lead));
+  const set = bars === 0 ? wrappedRows(scene, room, said) : oneRow(scene, room, said);
+  const place = linePlace(body, bars, {
+    faced: lead !== undefined || set.rows.some((row) => row.faces.length > 0),
+    rows: set.rows.length,
+    scale: set.fit.scale,
+  });
+  const panel: Faded = addPanel(
+    scene,
+    lead === undefined ? place.panel : ownerLeadPanel(place.panel, lead),
+  );
   const text = {
     box: inlineFaceBox(body, set.fit.scale),
     fit: set.fit,
     style: TEXT_STYLE,
   };
-  const parts: Faded[] = addFaceRows(scene, { capsTop: set.capsTop, x: textX }, text, set.rows);
+  const parts: Faded[] = addFaceRows(scene, { capsTop: place.capsTop, x: textX }, text, set.rows);
   if (owner !== undefined && lead !== undefined) {
     parts.unshift(...ownerLead(scene, owner, name, lead));
   } else if (typeof line.lead === "string" && scene.textures.exists(line.lead)) {
-    const icon = bars === 0 ? strip.icon : one.icon;
-    parts.unshift(scene.add.image(icon.x, icon.y, line.lead).setOrigin(0));
+    parts.unshift(scene.add.image(place.icon.x, place.icon.y, line.lead).setOrigin(0));
   }
   (panel as Faded & GameObjects.Components.Depth).setDepth(depth);
   parts.forEach((part) => (part as Faded & GameObjects.Components.Depth).setDepth(depth));
@@ -204,14 +203,12 @@ function wrappedRows(
   return { fit, rows };
 }
 
-// The line on one row in the first of TEXT_FIT_STYLES that fits room, its capitals' top as
-// capsTop gives it for the style's scale.
+// The line on one row in the first of TEXT_FIT_STYLES that fits room.
 function oneRow(
   scene: Scene,
   room: number,
   line: FaceText,
-  capsTop: (scale: number) => number,
-): { capsTop: number; fit: TextFitStyle; rows: FaceRow[] } {
+): { fit: TextFitStyle; rows: FaceRow[] } {
   const fitted = fitFaceRows(scene, TEXT_STYLE, { room, styles: TEXT_FIT_STYLES }, line);
-  return { capsTop: capsTop(fitted.style.scale), fit: fitted.style, rows: fitted.rows };
+  return { fit: fitted.style, rows: fitted.rows };
 }

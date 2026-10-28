@@ -31,6 +31,7 @@ import {
   type LeadSlot,
   lineAlpha,
   lineLeadSlot,
+  linePlace,
   MESSAGE_ICONS,
   MESSAGE_LINE,
   MESSAGE_STRIP,
@@ -198,19 +199,21 @@ describe("messageStripLayout", () => {
   });
 });
 
-// With debuff bars up, the strip's one row sits under the last bar, in the band.
+// With debuff bars up, the strip's one row sits under the last bar, in the band, with a face
+// or without.
 describe("messageLinePanel", () => {
-  it("puts the one-row strip under the debuff bars, in the band", () => {
-    const { backdrop, topBar } = screenLayout(SCREEN_CONFIG);
-    for (const bars of [1, 2]) {
-      const one = messageLinePanel(bars);
+  it.each([1, 2].flatMap((bars) => [false, true].map((faced) => [bars, faced] as const)))(
+    "puts the one-row strip under %i debuff bars, in the band (faced: %s)",
+    (bars, faced) => {
+      const { backdrop, topBar } = screenLayout(SCREEN_CONFIG);
+      const one = messageLinePanel(BODY, bars, faced);
       const last = debuffBarRects(topBar, bars).at(-1);
       expect(one.panel.y).toBeGreaterThanOrEqual((last?.y ?? 0) + (last?.height ?? 0));
       expect(inside(one.panel, backdrop)).toBe(true);
       expect(inside({ ...one.icon, height: 16, width: 16 }, one.panel)).toBe(true);
       expect(one.textX + one.room).toBeLessThanOrEqual(one.panel.x + one.panel.width);
-    }
-  });
+    },
+  );
 });
 
 // Every line the strip can say: each hint and badge, and each of the walk's lines for every dog,
@@ -334,7 +337,7 @@ const LEAD_PLACES: readonly (readonly [string, LeadSlot, Rect])[] = [
       [
         `the one-row strip under ${bars} bars`,
         lineLeadSlot(BODY, bars),
-        messageLinePanel(bars).panel,
+        messageLinePanel(BODY, bars, true).panel,
       ] as const,
   ),
 ];
@@ -382,11 +385,16 @@ describe("an owner's lead", () => {
   it.each<[string, LeadSlot, Rect, boolean]>([
     ["grows the strip's one-row panel", stripLeadSlot(BODY), messagePanel(BODY, 1), true],
     ["keeps the strip's two-row panel", stripLeadSlot(BODY), messagePanel(BODY, 2), false],
-    ["grows the one-row strip under a bar", lineLeadSlot(BODY, 1), messageLinePanel(1).panel, true],
+    [
+      "grows the one-row strip under a bar",
+      lineLeadSlot(BODY, 1),
+      messageLinePanel(BODY, 1, true).panel,
+      true,
+    ],
     [
       "grows the one-row strip under two bars",
       lineLeadSlot(BODY, 2),
-      messageLinePanel(2).panel,
+      messageLinePanel(BODY, 2, true).panel,
       true,
     ],
   ])("%s to end padBottom under the lead's name", (_name, slot, panel, grows) => {
@@ -419,4 +427,105 @@ describe("an owner's lead", () => {
       expect(misfits).toEqual([]);
     },
   );
+});
+
+// The rows the strip's one row, with no bar up, gives an inline face over and under its frame.
+const STRIP_FACE_PAD = (() => {
+  const panel = messagePanel(BODY, 1);
+  const top = (messageStripLayout(BODY).rowTops[0] ?? 0) - BOX_2X.rise;
+  return { bottom: panel.y + panel.height - (top + BOX_2X.framed), top: top - panel.y };
+})();
+const BAR_COUNTS = [0, 1, 2] as const;
+
+// What a line shows under bars debuff bars, as the strip draws it: its panel, grown to its
+// owner's lead, and each face's frame.
+interface Shown {
+  faces: Rect[];
+  panel: Rect;
+}
+
+// A line with no lead, its rows wrapped at 2x on the strip, or fitted on the one-row strip.
+function shownLine(bars: number, said: FaceText): Shown {
+  const boxAt = (style: TextFitStyle) => inlineFaceBox(BODY, style.scale);
+  const set =
+    bars === 0
+      ? { rows: messageRows(width2x, BOX_2X, messageStripLayout(BODY).room, said), style: AT_2X }
+      : fittingFaceRows(TEXT_FIT_STYLES, bodyRunWidth, boxAt, MESSAGE_LINE.room, said);
+  const { scale } = set.style;
+  const box = boxAt(set.style);
+  const faced = set.rows.some((row) => row.faces.length > 0);
+  const place = linePlace(BODY, bars, { faced, rows: set.rows.length, scale });
+  const faces = set.rows.flatMap((row, i) =>
+    row.faces.map(() => {
+      const framed = box?.framed ?? 0;
+      const y = place.capsTop + i * BODY.lineHeight * scale - (box?.rise ?? 0);
+      return { height: framed, width: framed, x: 0, y };
+    }),
+  );
+  return { faces, panel: place.panel };
+}
+
+// An owner's quip, led by their face and name, its text wrapped or fitted beside the lead.
+function shownQuip(bars: number, ink: number, text: string): Shown {
+  const slot = bars === 0 ? stripLeadSlot(BODY) : lineLeadSlot(BODY, bars);
+  const lead = ownerLeadLayout(BODY, slot, ink);
+  const boxAt = (style: TextFitStyle) => inlineFaceBox(BODY, style.scale);
+  const set =
+    bars === 0
+      ? { rows: messageRows(width2x, BOX_2X, lead.room, { text }), style: AT_2X }
+      : fittingFaceRows(TEXT_FIT_STYLES, bodyRunWidth, boxAt, lead.room, { text });
+  const lineSet = { faced: true, rows: set.rows.length, scale: set.style.scale };
+  const panel = ownerLeadPanel(linePlace(BODY, bars, lineSet).panel, lead);
+  return { faces: [lead.frame], panel };
+}
+
+// Each face kept at least the strip's rows inside its panel, over and under, and the panel in
+// the band.
+function cramped({ faces, panel }: Shown): boolean {
+  const bottom = panel.y + panel.height;
+  return (
+    !inside(panel, screenLayout(SCREEN_CONFIG).backdrop) ||
+    faces.some(
+      (face) =>
+        face.y - panel.y < STRIP_FACE_PAD.top ||
+        bottom - (face.y + face.height) < STRIP_FACE_PAD.bottom,
+    )
+  );
+}
+
+// Every line that names an owner or a dog, and every owner's walk quip led by their face, under
+// no, one and two debuff bars: a face it shows, inline or leading, keeps the rows round it the
+// strip's one row gives; a line showing none keeps the one-row strip's own panel under the bars.
+describe("a line's faces", () => {
+  const lines = everyStripLine().map((said) => plain(faceTextWithNamePills(gameData, said)));
+  const named = lines.filter(
+    ({ marks, text }) =>
+      (marks ?? []).length > 0 ||
+      Object.values(gameData.dogs).some(({ name }) => text.includes(name)),
+  );
+
+  it.each(BAR_COUNTS)("keeps the strip's rows round each inline face under %i bars", (bars) => {
+    const shown = named.map((said) => [said.text, shownLine(bars, said)] as const);
+    expect(shown.some(([, { faces }]) => faces.length > 0)).toBe(true);
+    expect(shown.filter(([, line]) => cramped(line)).map(([text]) => text)).toEqual([]);
+  });
+
+  it.each(BAR_COUNTS)("keeps the strip's rows round each owner's lead under %i bars", (bars) => {
+    const misfits = OWNER_NAMES.flatMap(([dog, name, ink]) =>
+      WALK_QUIP_MOMENTS.flatMap((moment) => gameData.quips[dog][moment])
+        .filter((said) => cramped(shownQuip(bars, ink, plainMarks(said))))
+        .map((said) => `${name}: ${said}`),
+    );
+    expect(misfits).toEqual([]);
+  });
+
+  it.each([1, 2])("keeps a faceless line on the one-row strip's panel under %i bars", (bars) => {
+    const faceless = named
+      .map((said) => shownLine(bars, said))
+      .filter(({ faces }) => faces.length === 0);
+    expect(faceless.length).toBeGreaterThan(0);
+    expect(faceless.map(({ panel }) => panel.height)).toEqual(
+      faceless.map(() => MESSAGE_LINE.height),
+    );
+  });
 });

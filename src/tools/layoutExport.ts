@@ -145,7 +145,8 @@ export function layoutExport(
     },
     // The message strip under the walk bar: its panel at its tallest (two rows), the line's
     // icon, the text column and its room, and each row's capitals top; its one-row panel
-    // under one and two debuff bars; and an owner's quip's lead (OWNER_LEAD) for a name no
+    // under one and two debuff bars, for a line with no face and, faced, for one that shows a
+    // face (an owner's lead or one inline); and an owner's quip's lead (OWNER_LEAD) for a name no
     // wider than the frame, on the strip and under one and two bars, with the panels it grows
     // a one-row line to. inlineFace: an owner's face inline before their name in walk text at
     // 2x (INLINE_FACE): the frame's side, the gap from the frame to the name, and how far the
@@ -157,10 +158,13 @@ export function layoutExport(
         ...OWNER_LEAD,
         strip: ownerLead(body, stripLeadSlot(body), messagePanel(body, 1)),
         underBars: [1, 2].map((bars) =>
-          ownerLead(body, lineLeadSlot(body, bars), messageLinePanel(bars).panel),
+          ownerLead(body, lineLeadSlot(body, bars), messageLinePanel(body, bars, true).panel),
         ),
       },
-      underBars: [1, 2].map((bars) => messageLinePanel(bars)),
+      underBars: [1, 2].map((bars) => ({
+        ...messageLinePanel(body, bars, false),
+        faced: messageLinePanel(body, bars, true),
+      })),
     },
     // The pack as drawn and hit. silhouettes: each sprite's opaque pixels over its walk loop, left
     // and right columns from its column (right exclusive) and the rows above its feet row. slots:
