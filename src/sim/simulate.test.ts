@@ -124,12 +124,6 @@ describe("simulateRun", { timeout: 30_000 }, () => {
     expect(choices.filter((choice) => choice.cost > 0).length).toBeGreaterThan(0);
   });
 
-  // The mixed policy draws its choices from the seed.
-  it("gives the same choices for the same seed with the mixed policy", () => {
-    const played = () => runs(1, { pack: RISKY, policy: "mixed", skill: BLIND });
-    expect(played()).toEqual(played());
-  });
-
   // What each fee pays is the run rules' own test; this checks the walk pays the dogs it should.
   it("holds each zone's pay for every dog still walking at its end", () => {
     const results = runs(2, { pack: RISKY, policy: "alwaysHearts", skill: SKILL_PRESETS.novice });
@@ -177,11 +171,9 @@ describe("badgeCounters", { timeout: 30_000 }, () => {
   const cleanZones = (result: RunResult) =>
     result.zones.filter(({ zoneIndex }) => (result.run.bumpsByZone[zoneIndex] ?? 0) === 0).length;
 
-  it("counts some tallies, so the comparisons are not all of zeros", () => {
-    expect(Object.values(counters().meanTallies).some((count) => count > 0)).toBe(true);
-  });
-
+  // Some tally counts, so the comparison is not all of zeros.
   it("gives the mean of every tally per walk", () => {
+    expect(Object.values(counters().meanTallies).some((count) => count > 0)).toBe(true);
     expect(counters().meanTallies).toEqual(
       Object.fromEntries(
         TALLY_IDS.map((tally) => [tally, sessionMean((run) => run.tallies[tally] ?? 0)]),

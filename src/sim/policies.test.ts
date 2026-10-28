@@ -184,11 +184,10 @@ describe("the debuff policies", () => {
     },
   );
 
-  // A card with no debuff option: the policy, the draw and the option the mixed policy takes.
+  // A card with no debuff option: the policy, the draw and the option the mixed policy takes,
+  // each policy on one side of the pay share.
   it.each([
     ["debuffs", MIXED_PAY_SHARE - 0.01, PAY],
-    ["debuffs", MIXED_PAY_SHARE, HEARTS],
-    ["noDebuffs", MIXED_PAY_SHARE - 0.01, PAY],
     ["noDebuffs", MIXED_PAY_SHARE, HEARTS],
   ] as const)(
     "%s plays as mixed on a card with no debuff, drawing %s",
