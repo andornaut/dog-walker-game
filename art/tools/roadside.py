@@ -1072,47 +1072,65 @@ def gap(*props):
 # z = n * slot; with m = n - offset, an even m is a lot and an odd m a gap, k = m // 2 counts them, and
 # the side takes lots[(lotStart + k * lotStride) % len(lots)] and gaps[(gapStart + k * gapStride) %
 # len(gaps)]. gap() takes each prop as (key, inner edge, dz) and resolves its across from its frame's width;
-# dz is road px from the slot's z, nearer negative. Each table is sparse: an empty lot and six gaps,
-# a prop in gaps 0 and 3, so each side has a prop every 6 slots (840 px): the neighbourhood's tree or
-# street furniture in gap 0, then its own prop in gap 3. The right side's gapStart of 2 puts its props
-# 3 slots after the left's, so they alternate sides, one every 420 px. Kensington Market, The Beaches and
-# Yonge Street run twelve gaps, so one prop stands every 210 px. Kensington: the violet shopfront in gaps 0
-# and 9 and the ochre in 6, the fruit stand in 3, café patios in 1 and 7 and mural walls in 4 and 10. The
-# Beaches: the Leuty in gaps 0 and 6, dune grass in 3, the ice cream stand in 9, and beach umbrellas and
-# chairs in 1, 4, 7 and 10. Yonge Street: street lamps in gaps 0, 1, 4, 6, 7 and 10 and the transit stop in
-# 3 and 9.
+# dz is road px from the slot's z, nearer negative. The gaps hold each neighbourhood's props, sparsely: six
+# gaps, a prop in gaps 0 and 3, so each side has one every 6 slots (840 px). The right side's gapStart of 2
+# puts its props 3 slots after the left's, so they alternate sides, one every 420 px. Kensington Market,
+# The Beaches and Yonge Street run twelve gaps. Kensington: the violet shopfront in gaps 0 and 9 and the
+# ochre in 6, the fruit stand in 3, café patios in 1 and 7 and mural walls in 4 and 10. The Beaches: the
+# Leuty in gaps 0 and 6, dune grass in 3, the ice cream stand in 9, and beach umbrellas and chairs in 1, 4,
+# 7 and 10. Yonge Street: the transit stop in 3 and 9.
+#
+# The lots hold a neighbourhood's lamps, at a fixed rhythm: each side has a lamp every `every` lots
+# (every * 2 slots), every odd, and the right side's lamps stand halfway between the left's, so over
+# both sides one stands every `every` slots, alternating sides. A side's lamps stand midway between its
+# gap 0 and gap 3 props, across the road from the other side's. Gas lamps stand every 3 lots (840 px a
+# side, one every 420 px), street lamps every lot (280 px a side, one every 140 px). A zone with no lamps
+# has one empty lot.
 SIDES = dict(
     left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=1),
     right=dict(offset=1, lotStart=0, lotStride=1, gapStart=2, gapStride=1),
 )
 
 
-def sparse(tree, own, between=None):
-    """A sparse table: tree alone in gap 0 and own alone in gap 3, each a (key, inner edge, dz). between, if
-    given, maps more gaps to their props, each a tuple of (key, inner edge, dz): the gaps then run to 12,
-    tree and own repeating in gaps 6 and 9 unless between gives those gaps props of their own."""
-    if between is None:
-        return dict(slot=140, lots=((),), gaps=(gap(tree), (), (), gap(own), (), ()), sides=SIDES)
-    gaps = [gap(tree), (), (), gap(own), (), ()] * 2
-    for i, props in between.items():
+def lamps(key, inner, every):
+    """The lots and sides for a lamp every `every` lots on each side, the right side's halfway between the
+    left's: the left side's lamps at slots n = every + 1 (mod 2 * every), the right's every slots on."""
+    if every < 1 or every % 2 == 0:
+        sys.exit(f"{key}: a lamp every {every} lots does not alternate sides evenly")
+    lots = (gap((key, inner, 0)),) + ((),) * (every - 1)
+    left = dict(SIDES["left"], lotStart=-((every + 1) // 2) % every)
+    return lots, dict(left=left, right=SIDES["right"])
+
+
+def sparse(first, own, between=None, lamp=None):
+    """A sparse table: first alone in gap 0 and own alone in gap 3, each a (key, inner edge, dz) or None for
+    an empty gap. between, if given, maps more gaps to their props, each a tuple of (key, inner edge, dz):
+    the gaps then run to 12, first and own repeating in gaps 6 and 9 unless between gives those gaps props
+    of their own. lamp, if given, is a (key, inner edge, every) the lots hold (see lamps)."""
+    def one(prop):
+        return () if prop is None else gap(prop)
+    gaps = [one(first), (), (), one(own), (), ()] * (1 if between is None else 2)
+    for i, props in (between or {}).items():
         gaps[i] = gap(*props)
-    return dict(slot=140, lots=((),), gaps=tuple(gaps), sides=SIDES)
+    lots, sides = ((),), SIDES
+    if lamp is not None:
+        lots, sides = lamps(*lamp)
+    return dict(slot=140, lots=lots, gaps=tuple(gaps), sides=sides)
 
 
+GAS_LAMP = ("gas-lamp", 213, 3)
 PLACEMENT = {
-    "cabbagetown": sparse(("tree-maple", 220, 0), ("gas-lamp", 213, 0)),
+    "cabbagetown": sparse(("tree-maple", 220, 0), ("tree-maple", 220, 0), lamp=GAS_LAMP),
     "high-park": sparse(("tree-oak", 220, 0), ("hot-dog-stand", 216, 0)),
-    "distillery-district": sparse(("gas-lamp", 213, 0), ("love-lock", 216, 0)),
+    "distillery-district": sparse(None, ("love-lock", 216, 0), lamp=GAS_LAMP),
     "kensington-market": sparse(("shopfront-violet", 216, 0), ("fruit-stand", 216, 0), {
         1: (("cafe-patio", 213, 0),),
-        2: (("gas-lamp", 213, 0),),
         4: (("mural-wall", 216, 0),),
         6: (("shopfront-ochre", 216, 0),),
         7: (("cafe-patio", 213, 0),),
-        8: (("gas-lamp", 213, 0),),
         9: (("shopfront-violet", 216, 0),),
         10: (("mural-wall", 216, 0),),
-    }),
+    }, lamp=GAS_LAMP),
     "the-beaches": sparse(("leuty", 220, 0), ("dune-grass", 213, 0), {
         1: (("beach-umbrella-blue", 225, 0), ("beach-chair-blue", 220, -12)),
         4: (("beach-umbrella-coral", 213, 0),),
@@ -1120,12 +1138,7 @@ PLACEMENT = {
         9: (("ice-cream-stand", 216, 0),),
         10: (("beach-chair-coral", 213, 0),),
     }),
-    "yonge-street": sparse(("street-lamp", 213, 0), ("transit-stop", 213, 0), {
-        1: (("street-lamp", 213, 0),),
-        4: (("street-lamp", 213, 0),),
-        7: (("street-lamp", 213, 0),),
-        10: (("street-lamp", 213, 0),),
-    }),
+    "yonge-street": sparse(None, ("transit-stop", 213, 0), {}, lamp=("street-lamp", 213, 1)),
 }
 
 # Curb props stand on the sidewalk or paving, each frame wholly inside the zone's curb band: from 2 road
@@ -1175,9 +1188,35 @@ SHADOWED = tuple(k for k, v in PROPS.items() if v[3])
 TABLE_JSON = "shared/roadside.json"
 
 
+def lot_slots(p, side):
+    """The slots n in one cycle of a zone's lots and gaps at which a side's lot holds props."""
+    sd = p["sides"][side]
+    period = 2 * len(p["lots"]) * len(p["gaps"])
+    out = []
+    for n in range(period):
+        m = n - sd["offset"]
+        if m % 2 == 0 and p["lots"][(sd["lotStart"] + m // 2 * sd["lotStride"]) % len(p["lots"])]:
+            out.append(n)
+    return out, period
+
+
+def check_lamps(zone, p):
+    """Each side's lot props stand a fixed number of slots apart, and the right side's halfway between the
+    left's, so they alternate sides evenly."""
+    (left, period), (right, _) = lot_slots(p, "left"), lot_slots(p, "right")
+    if not left and not right:
+        return
+    step = period // len(left) if left else 0
+    if len(left) != len(right) or any((b - a) % period != step for a, b in zip(left, left[1:] + left[:1])):
+        sys.exit(f"{zone}: the lots' props do not stand at a fixed step on each side")
+    if sorted((n + step // 2) % period for n in left) != right or step % 2:
+        sys.exit(f"{zone}: the right side's lot props do not stand halfway between the left's")
+
+
 def check_placement():
     """Every lawn prop's frame clears the sidewalk by at least 4 road px, at no k do the two sides take the
-    same lot or gap that holds props, and every curb prop's frame lies wholly inside its zone's curb band."""
+    same gap that holds props, the lots' lamps keep their rhythm (check_lamps), and every curb prop's frame
+    lies wholly inside its zone's curb band."""
     walk = 208
     for zone, p in PLACEMENT.items():
         for group in p["lots"] + p["gaps"]:
@@ -1186,13 +1225,12 @@ def check_placement():
                 if inner < walk + 4:
                     sys.exit(f"{zone}: {key} at across {across} has its inner edge at {inner}")
         left, right = p["sides"]["left"], p["sides"]["right"]
-        for kind in ("lot", "gap"):
-            groups = p[f"{kind}s"]
-            n = len(groups)
-            for k in range(n):
-                a, b = ((sd[f"{kind}Start"] + k * sd[f"{kind}Stride"]) % n for sd in (left, right))
-                if a == b and groups[a]:
-                    sys.exit(f"{zone}: the sides take the same {kind} in step")
+        n = len(p["gaps"])
+        for k in range(n):
+            a, b = ((sd["gapStart"] + k * sd["gapStride"]) % n for sd in (left, right))
+            if a == b and p["gaps"][a]:
+                sys.exit(f"{zone}: the sides take the same gap in step")
+        check_lamps(zone, p)
     with open(VERGES_JSON) as f:
         verges = json.load(f)
     for zone, c in CURB.items():

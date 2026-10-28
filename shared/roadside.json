@@ -37,6 +37,14 @@
     "cabbagetown": {
       "slot": 140,
       "lots": [
+        [
+          {
+            "key": "roadside-gas-lamp",
+            "across": 231,
+            "dz": 0
+          }
+        ],
+        [],
         []
       ],
       "gaps": [
@@ -51,8 +59,8 @@
         [],
         [
           {
-            "key": "roadside-gas-lamp",
-            "across": 231,
+            "key": "roadside-tree-maple",
+            "across": 277,
             "dz": 0
           }
         ],
@@ -62,7 +70,7 @@
       "sides": {
         "left": {
           "offset": 0,
-          "lotStart": 0,
+          "lotStart": 1,
           "lotStride": 1,
           "gapStart": 0,
           "gapStride": 1
@@ -153,9 +161,6 @@
     "distillery-district": {
       "slot": 140,
       "lots": [
-        []
-      ],
-      "gaps": [
         [
           {
             "key": "roadside-gas-lamp",
@@ -163,6 +168,11 @@
             "dz": 0
           }
         ],
+        [],
+        []
+      ],
+      "gaps": [
+        [],
         [],
         [],
         [
@@ -178,7 +188,7 @@
       "sides": {
         "left": {
           "offset": 0,
-          "lotStart": 0,
+          "lotStart": 1,
           "lotStride": 1,
           "gapStart": 0,
           "gapStride": 1
@@ -226,6 +236,14 @@
     "kensington-market": {
       "slot": 140,
       "lots": [
+        [
+          {
+            "key": "roadside-gas-lamp",
+            "across": 231,
+            "dz": 0
+          }
+        ],
+        [],
         []
       ],
       "gaps": [
@@ -243,13 +261,7 @@
             "dz": 0
           }
         ],
-        [
-          {
-            "key": "roadside-gas-lamp",
-            "across": 231,
-            "dz": 0
-          }
-        ],
+        [],
         [
           {
             "key": "roadside-fruit-stand",
@@ -279,13 +291,7 @@
             "dz": 0
           }
         ],
-        [
-          {
-            "key": "roadside-gas-lamp",
-            "across": 231,
-            "dz": 0
-          }
-        ],
+        [],
         [
           {
             "key": "roadside-shopfront-violet",
@@ -305,7 +311,7 @@
       "sides": {
         "left": {
           "offset": 0,
-          "lotStart": 0,
+          "lotStart": 1,
           "lotStride": 1,
           "gapStart": 0,
           "gapStride": 1
@@ -486,23 +492,17 @@
     "yonge-street": {
       "slot": 140,
       "lots": [
-        []
+        [
+          {
+            "key": "roadside-street-lamp",
+            "across": 243,
+            "dz": 0
+          }
+        ]
       ],
       "gaps": [
-        [
-          {
-            "key": "roadside-street-lamp",
-            "across": 243,
-            "dz": 0
-          }
-        ],
-        [
-          {
-            "key": "roadside-street-lamp",
-            "across": 243,
-            "dz": 0
-          }
-        ],
+        [],
+        [],
         [],
         [
           {
@@ -511,28 +511,10 @@
             "dz": 0
           }
         ],
-        [
-          {
-            "key": "roadside-street-lamp",
-            "across": 243,
-            "dz": 0
-          }
-        ],
         [],
-        [
-          {
-            "key": "roadside-street-lamp",
-            "across": 243,
-            "dz": 0
-          }
-        ],
-        [
-          {
-            "key": "roadside-street-lamp",
-            "across": 243,
-            "dz": 0
-          }
-        ],
+        [],
+        [],
+        [],
         [],
         [
           {
@@ -541,13 +523,7 @@
             "dz": 0
           }
         ],
-        [
-          {
-            "key": "roadside-street-lamp",
-            "across": 243,
-            "dz": 0
-          }
-        ],
+        [],
         []
       ],
       "sides": {
