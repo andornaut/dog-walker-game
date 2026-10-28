@@ -1,7 +1,7 @@
 import { zonePipTag } from "../assets/spriteKeys";
 import type { DebuffId, DogId, GameData, ZoneId } from "../data/types";
 import type { Point } from "../lib/rect";
-import { amountText, type CauseData, causeLabel, type Change, changeAmount } from "../rules/causes";
+import { amountText, type Change, changeAmount } from "../rules/causes";
 import { zoneById } from "../rules/route";
 
 // A floating label for a change: over the dog's slot (dog), from where money changed hands to
@@ -39,14 +39,10 @@ function labelTarget(from: Point, change: Change): ChangeLabel["target"] {
   return tip || change.amount > 0 ? { kind: "cash", tip } : { from, kind: "bank" };
 }
 
-// One label per change at its labelTarget: a heart change's naming its causes ("−1♥ bump"), a
-// money change's its amount alone ("+$2", a Stinky tip's "+$0"). A heart change that nets
-// nothing, a loss forgiven whole, has none: its forgiven moment shows it.
-export function changeLabels(
-  data: CauseData,
-  from: Point,
-  changes: readonly Change[],
-): ChangeLabel[] {
+// One label per change at its labelTarget, its amount alone: "−1♥", "+$2", a Stinky tip's
+// "+$0". The message strip says what caused it. A heart change that nets nothing, a loss
+// forgiven whole, has none: its forgiven moment shows it.
+export function changeLabels(from: Point, changes: readonly Change[]): ChangeLabel[] {
   const shown = changes.filter((change) => change.kind === "money" || changeAmount(change) !== 0);
   return shown.map((change): ChangeLabel => {
     const zeroedBy = zeroingDebuff(change);
@@ -54,8 +50,7 @@ export function changeLabels(
       amount: changeAmount(change),
       gain: changeAmount(change) > 0,
       target: labelTarget(from, change),
-      text:
-        change.kind === "hearts" ? causeLabel(data, change) : amountText("money", change.amount),
+      text: amountText(change.kind, changeAmount(change)),
       ...(zeroedBy === undefined ? {} : { zeroedBy }),
     };
   });

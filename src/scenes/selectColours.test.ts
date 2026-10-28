@@ -134,7 +134,7 @@ describe("change label colours", () => {
   ] satisfies readonly [string, Change, number][])(
     "draws %s in its colour",
     (_what, change, colour) => {
-      const labels = changeLabels(gameData, { x: 0, y: 0 }, [change]);
+      const labels = changeLabels({ x: 0, y: 0 }, [change]);
       expect(labels.map(changeLabelColour)).toEqual([colour]);
     },
   );

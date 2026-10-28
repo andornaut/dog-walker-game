@@ -5,9 +5,8 @@ import type { CardSource, DogId } from "../data/types";
 import { fillNames } from "../lib/lines";
 import { testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
-import { causeLabel, firedByText } from "./causes";
+import { firedByText } from "./causes";
 import { cardFor, firesText } from "./choices";
-import { resolveEffects } from "./effects";
 
 const data = { ...gameData, tuning: TEST_TUNING };
 // Skunk's hearts option, its name, and what it costs each owner.
@@ -65,23 +64,5 @@ describe("firesText", () => {
     ] as const) {
       expect(firesText(data, dogs)).toBe(fillNames(gameData.runText.card.fires, { owners }));
     }
-  });
-});
-
-describe("causeLabel at a firing", () => {
-  it("names the owner who fires you", () => {
-    const { changes } = resolveEffects(
-      data,
-      {
-        affected: ["kilo"],
-        source: { encounter: "skunk", kind: "encounter", option: HOLD_YOUR_NOSE },
-      },
-      [{ amount: -2, kind: "hearts", target: { kind: "affected" } }],
-      testState({ kilo: 1 }),
-    );
-    const labels = changes.flatMap((change) =>
-      change.kind === "hearts" ? [causeLabel(data, change)] : [],
-    );
-    expect(labels).toEqual([`−1♥, ${firedByText(data, "kilo")}`]);
   });
 });

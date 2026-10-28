@@ -12,7 +12,6 @@ import { read } from "../rules/units";
 import { activeModifier, testState } from "../testing/runState";
 import { type ChangeLabel, changeLabels, heartRows } from "./hudView";
 
-const { causes } = gameData.runText;
 const { tuning } = gameData;
 // Where the money changed hands.
 const AT = { x: 120, y: 300 };
@@ -24,8 +23,8 @@ const bigTipper = activeModifier(
 );
 
 describe("changeLabels", () => {
-  it("labels each heart change at its dog with its causes, and a tip by the cash", () => {
-    const labels = changeLabels(gameData, AT, [
+  it("labels each heart change at its dog and a tip by the cash, each by its amount alone", () => {
+    const labels = changeLabels(AT, [
       {
         after: clampHearts(10, 3),
         before: clampHearts(10, 5),
@@ -58,13 +57,13 @@ describe("changeLabels", () => {
         amount: -2,
         gain: false,
         target: { dog: "reggie", kind: "dog" },
-        text: `−2♥, ${gameData.shopGear.luckyCollar.name}`,
+        text: "−2♥",
       },
       {
         amount: 1,
         gain: true,
         target: { dog: "kilo", kind: "dog" },
-        text: `+1♥ ${causes.treat}`,
+        text: "+1♥",
       },
       {
         amount: 200,
@@ -91,7 +90,7 @@ describe("changeLabels", () => {
       dog: "kilo",
       kind: "hearts",
     } as const;
-    expect(changeLabels(gameData, AT, [forgiven])).toEqual([]);
+    expect(changeLabels(AT, [forgiven])).toEqual([]);
   });
 
   it.each([
@@ -107,7 +106,7 @@ describe("changeLabels", () => {
       dog: null,
       kind: "money",
     } as const;
-    expect(changeLabels(gameData, AT, [tip])[0]?.zeroedBy).toBe(zeroedBy);
+    expect(changeLabels(AT, [tip])[0]?.zeroedBy).toBe(zeroedBy);
   });
 
   it("names no debuff on a change a debuff only shrank", () => {
@@ -120,18 +119,18 @@ describe("changeLabels", () => {
       dog: null,
       kind: "money",
     } as const;
-    expect(changeLabels(gameData, AT, [tip])[0]?.zeroedBy).toBeUndefined();
+    expect(changeLabels(AT, [tip])[0]?.zeroedBy).toBeUndefined();
   });
 
   it("has no labels without changes, and marks a loss at the bank as no gain", () => {
-    expect(changeLabels(gameData, AT, [])).toEqual([]);
+    expect(changeLabels(AT, [])).toEqual([]);
     const bump = {
       amount: cents(-1000),
       causes: [{ amount: -1000, kind: "bump" }],
       dog: null,
       kind: "money",
     } as const;
-    expect(changeLabels(gameData, AT, [bump])).toEqual([
+    expect(changeLabels(AT, [bump])).toEqual([
       {
         amount: -1000,
         gain: false,
@@ -193,7 +192,7 @@ describe("a money change's label", () => {
   ] satisfies readonly [string, () => readonly Change[], string | null, ChangeLabel["target"]][])(
     "shows %s as its amount alone, at its target",
     (_name, changes, text, target) => {
-      const labels = changeLabels(gameData, AT, changes());
+      const labels = changeLabels(AT, changes());
       expect(labels.map((label) => label.target)).toEqual([target]);
       if (text !== null) {
         expect(labels.map((label) => label.text)).toEqual([text]);
@@ -211,7 +210,7 @@ describe("the money counter", () => {
       const tip = tipValue(gameData, run);
       const shown = (money: Cents) => Number(dollarAmountText(money).replaceAll(",", ""));
       const gain = shown(cents(run.money + tip.amount)) - shown(run.money);
-      expect(changeLabels(gameData, AT, [tip])[0]?.text).toBe(`+$${gain}`);
+      expect(changeLabels(AT, [tip])[0]?.text).toBe(`+$${gain}`);
     }
   });
 });

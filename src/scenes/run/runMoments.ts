@@ -209,7 +209,7 @@ export class RunMoments {
   // forgiven label over its dog forgivenAtMs on and the forgiven heart flashing back on its card.
   addChanges(from: Point, changes: readonly Change[], forgivenAtMs = 0): void {
     this.changes.push(...changes);
-    const labels = changeLabels(gameData, from, changes);
+    const labels = changeLabels(from, changes);
     if (labels.length > 0) {
       this.scene.events.emit(CHANGE_LABELS_EVENT, labels);
     }
@@ -298,7 +298,7 @@ export class RunMoments {
       this.say(treatLine(gameData, change));
       if (change !== null) {
         this.changes.push(change);
-        const cue: TreatCue = { dog, labels: changeLabels(gameData, overPack(pack), [change]) };
+        const cue: TreatCue = { dog, labels: changeLabels(overPack(pack), [change]) };
         this.scene.events.emit(TREAT_EVENT, cue);
       }
     }
@@ -416,7 +416,7 @@ export class RunMoments {
     this.say(spareTreatUsedLine(gameData, change));
     const cue: SpareTreatCue = {
       dog: change.dog,
-      labels: changeLabels(gameData, this.pack ?? { x: 0, y: 0 }, [change]),
+      labels: changeLabels(this.pack ?? { x: 0, y: 0 }, [change]),
       well: gearWell(effectItems(gameData, run), spareTreatGiver(change)),
     };
     this.scene.events.emit(SPARE_TREAT_EVENT, cue);

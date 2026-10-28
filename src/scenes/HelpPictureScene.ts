@@ -175,7 +175,7 @@ export class HelpPictureScene extends Scene {
     this.scene.launch(SCENE_KEYS.helpHud, data);
     this.whenCreated(SCENE_KEYS.helpHud, (hud) => {
       if (picture.changes.length > 0) {
-        const labels = changeLabels(gameData, overPack(packPoint(walk)), picture.changes);
+        const labels = changeLabels(overPack(packPoint(walk)), picture.changes);
         events.emit(CHANGE_LABELS_EVENT, labels);
       }
       hud.events.once(Scenes.Events.POST_UPDATE, () => freezeScene(hud, STILL_FRAMES));
