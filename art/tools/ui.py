@@ -909,18 +909,15 @@ STITCH_DASH, STITCH_GAP = 5, 3
 
 def denim():
     """16x16 seamless tile: the Pocket section's jeans-pocket fill, repeated (TileSprite) over the
-    section's tile area. Blue twill: dslate diagonals rising to the right every 4px, and sparse slate
-    flecks of weft between them. Blue holds apart from the band's navy and the dogs section's plaid,
-    and the tiles' ink edges hold on it."""
+    section's tile area. Blue twill: dslate diagonals rising to the right every 4px, with no flecks
+    between them. Blue holds apart from the band's navy and the dogs section's plaid, and the tiles'
+    ink edges hold on it."""
     g = Grid(FABRIC, FABRIC)
     g.rect(0, 0, FABRIC, FABRIC, "blue")
     for y in range(FABRIC):
         for x in range(FABRIC):
-            d = (x + y) % 4
-            if d == 0:
+            if (x + y) % 4 == 0:
                 g.p(x, y, "dslate")
-            elif d == 2 and (x * 7 + y * 3) % 5 == 0:
-                g.p(x, y, "slate")
     return g
 
 
@@ -930,8 +927,9 @@ CORK = 32
 
 def cork():
     """32x32 seamless tile: the walker section's corkboard, repeated (TileSprite) over its tile area,
-    where the walkers' cards are pinned. Brown with scattered ochre and dbrown granules; the cream
-    tiles' ink edges hold on it, and it holds apart from the Pocket's blue and the dogs' plaid."""
+    where the walkers' cards are pinned. Brown with sparse 2x2 ochre and clay granules, close to it in
+    value so the fill stays quiet; the cream tiles' ink edges hold on it, and it holds apart from the
+    Pocket's blue and the dogs' plaid."""
     g = Grid(CORK, CORK)
     g.rect(0, 0, CORK, CORK, "brown")
     for x, y, c in CORK_GRAINS:
@@ -939,10 +937,10 @@ def cork():
     return g
 
 
-def cork_grains(seed=11, gap=3.4, tries=8000):
+def cork_grains(seed=11, gap=7, tries=8000):
     """The cork's granules: blue noise on the CORK x CORK torus (no two closer than gap, measured across the
-    tile's wrap too), so the repeated tile scatters evenly with no lattice. Each is dbrown or ochre, and
-    about half grow a second pixel beside or below them, so the grains vary in size as cork's do."""
+    tile's wrap too), so the repeated tile scatters evenly with no lattice. Each is a 2x2 block of ochre or
+    clay, so no grain turns to a lone fleck."""
     import random
 
     r, seeds = random.Random(seed), []
@@ -953,11 +951,8 @@ def cork_grains(seed=11, gap=3.4, tries=8000):
             seeds.append((x, y))
     pts = []
     for x, y in seeds:
-        c = "dbrown" if r.random() < 0.5 else "ochre"
-        pts.append((x, y, c))
-        if r.random() < 0.5:
-            dx, dy = r.choice(((1, 0), (0, 1), (1, 1)))
-            pts.append(((x + dx) % CORK, (y + dy) % CORK, c))
+        c = "clay" if r.random() < 0.5 else "ochre"
+        pts += [((x + dx) % CORK, (y + dy) % CORK, c) for dx in (0, 1) for dy in (0, 1)]
     return pts
 
 
