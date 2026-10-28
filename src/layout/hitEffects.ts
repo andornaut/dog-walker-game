@@ -34,6 +34,7 @@ export const OBSTACLE_HITS: Readonly<
   barrier3: { motion: "shake" },
   bench: { motion: "shake" },
   cone: { motion: "tip" },
+  fallenLog: { motion: "shake" },
   hedge: { debris: "leaves", motion: "shake" },
   trashCan: { debris: "litter", motion: "rock" },
   volleyballNet2: { motion: "shake" },

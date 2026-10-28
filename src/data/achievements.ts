@@ -280,7 +280,9 @@ export const ACHIEVEMENTS = [
   },
   {
     badgeLine: "The pigeons have a group chat about you.",
-    conditions: [{ count: 20, kind: "bumps", kinds: ["ducklings", "goose", "pigeons", "seagull"] }],
+    conditions: [
+      { count: 20, kind: "bumps", kinds: ["ducklings", "goose", "hen", "pigeons", "seagull"] },
+    ],
     goal: "Bump 20 birds",
     id: "birdBrain",
     name: "Bird Brain",
@@ -308,6 +310,7 @@ export const ACHIEVEMENTS = [
           "rangerCart",
           "rollerblader",
           "scooter",
+          "segwayRider",
           "streetcar",
           "taxi",
           "touristTrain",

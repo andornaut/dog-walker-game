@@ -1612,6 +1612,18 @@
       "spriteKey": "ball-bounce"
     },
     {
+      "id": "barrelStack",
+      "name": "Barrel stack",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "street"
+      ],
+      "spriteKey": "barrel-stack"
+    },
+    {
       "id": "barrier2",
       "name": "Barrier",
       "shape": {
@@ -1628,6 +1640,18 @@
         "rows": 1
       },
       "spriteKey": "barrier-3"
+    },
+    {
+      "id": "beachUmbrella",
+      "name": "Beach umbrella",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "pawsPromenade"
+      ],
+      "spriteKey": "beach-umbrella"
     },
     {
       "id": "bench",
@@ -1865,6 +1889,18 @@
       "spriteKey": "chase-ducklings"
     },
     {
+      "id": "fallenLog",
+      "name": "Fallen log",
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "zones": [
+        "park"
+      ],
+      "spriteKey": "fallen-log"
+    },
+    {
       "id": "foodCartVendor",
       "movement": {
         "factor": 0.7,
@@ -1985,6 +2021,28 @@
       "spriteKey": "hedge"
     },
     {
+      "id": "hen",
+      "movement": {
+        "kind": "dart",
+        "stopShare": 0,
+        "tilt": {
+          "max": 0,
+          "min": 0
+        },
+        "turnBackShare": 0
+      },
+      "name": "Hen",
+      "onFoot": true,
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "snoozeCrescent"
+      ],
+      "spriteKey": "hen"
+    },
+    {
       "id": "hopscotchKid",
       "movement": {
         "hops": {
@@ -2102,6 +2160,18 @@
       "spriteKey": "lifeguard-chair"
     },
     {
+      "id": "littleFreeLibrary",
+      "name": "Little Free Library",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "snoozeCrescent"
+      ],
+      "spriteKey": "little-free-library"
+    },
+    {
       "id": "mailCarrier",
       "movement": {
         "kind": "step",
@@ -2117,6 +2187,18 @@
         "rows": 1
       },
       "spriteKey": "mail-carrier"
+    },
+    {
+      "id": "newspaperBox",
+      "name": "Newspaper box",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "homeStretch"
+      ],
+      "spriteKey": "newspaper-box"
     },
     {
       "id": "parkedCar",
@@ -2342,6 +2424,22 @@
         "rows": 1
       },
       "spriteKey": "snatch-seagull"
+    },
+    {
+      "id": "segwayRider",
+      "movement": {
+        "factor": 1.1,
+        "kind": "inLane"
+      },
+      "name": "Segway tour rider",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "street"
+      ],
+      "spriteKey": "segway-rider"
     },
     {
       "id": "signSpinner",
@@ -2944,9 +3042,11 @@
       "speed": 1,
       "weights": {
         "minorObstacles": {
-          "ball": 1.5,
+          "ball": 0,
+          "barrelStack": 0,
           "barrier2": 3.5,
           "barrier3": 3.5,
+          "beachUmbrella": 0,
           "bench": 0,
           "bunny": 2,
           "busker": 0,
@@ -2962,6 +3062,7 @@
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
           "ducklings": 0,
+          "fallenLog": 0,
           "foodCartVendor": 0,
           "frisbeeDog": 3,
           "garbageTruck": 0,
@@ -2969,21 +3070,24 @@
           "goose": 0,
           "grannyCartShopper": 0,
           "hedge": 3.5,
+          "hen": 1.5,
           "hopscotchKid": 2,
           "hotDogCart": 0,
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
           "jogger": 3,
           "kidOnBike": 3,
-          "leafPile": 5.5,
+          "leafPile": 3.75,
           "lifeguardChair": 0,
+          "littleFreeLibrary": 3.5,
           "mailCarrier": 2,
+          "newspaperBox": 0,
           "parkedCar": 2,
           "patioRail": 0,
           "pedicab": 0,
           "picnicBlanket": 0,
           "pigeons": 0,
-          "porchSteps": 5.5,
+          "porchSteps": 3.75,
           "produceCrates": 0,
           "raccoon": 2,
           "rangerCart": 0,
@@ -2993,6 +3097,7 @@
           "sandwichBoard": 0,
           "scooter": 0,
           "seagull": 0,
+          "segwayRider": 0,
           "signSpinner": 0,
           "stiltWalker": 0,
           "streetcar": 0,
@@ -3051,9 +3156,11 @@
       "weights": {
         "minorObstacles": {
           "ball": 1.5,
+          "barrelStack": 0,
           "barrier2": 0,
           "barrier3": 0,
-          "bench": 10,
+          "beachUmbrella": 0,
+          "bench": 9,
           "bunny": 4,
           "busker": 0,
           "car": 0,
@@ -3068,13 +3175,15 @@
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
           "ducklings": 4,
+          "fallenLog": 4,
           "foodCartVendor": 0,
           "frisbeeDog": 0,
           "garbageTruck": 0,
           "gardener": 0,
           "goose": 3,
           "grannyCartShopper": 0,
-          "hedge": 10,
+          "hedge": 9,
+          "hen": 0,
           "hopscotchKid": 0,
           "hotDogCart": 0,
           "iceCreamBike": 0,
@@ -3083,11 +3192,13 @@
           "kidOnBike": 0,
           "leafPile": 0,
           "lifeguardChair": 0,
+          "littleFreeLibrary": 0,
           "mailCarrier": 0,
+          "newspaperBox": 0,
           "parkedCar": 0,
           "patioRail": 0,
           "pedicab": 0,
-          "picnicBlanket": 6,
+          "picnicBlanket": 4,
           "pigeons": 0,
           "porchSteps": 0,
           "produceCrates": 0,
@@ -3099,6 +3210,7 @@
           "sandwichBoard": 0,
           "scooter": 0,
           "seagull": 0,
+          "segwayRider": 0,
           "signSpinner": 0,
           "stiltWalker": 0,
           "streetcar": 0,
@@ -3157,8 +3269,10 @@
       "weights": {
         "minorObstacles": {
           "ball": 0,
+          "barrelStack": 4,
           "barrier2": 0,
           "barrier3": 0,
+          "beachUmbrella": 0,
           "bench": 0,
           "bunny": 0,
           "busker": 0,
@@ -3174,6 +3288,7 @@
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
           "ducklings": 0,
+          "fallenLog": 0,
           "foodCartVendor": 0,
           "frisbeeDog": 0,
           "garbageTruck": 0,
@@ -3181,18 +3296,21 @@
           "goose": 0,
           "grannyCartShopper": 0,
           "hedge": 0,
+          "hen": 0,
           "hopscotchKid": 0,
-          "hotDogCart": 6,
+          "hotDogCart": 4,
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
           "jogger": 0,
           "kidOnBike": 0,
           "leafPile": 0,
           "lifeguardChair": 0,
+          "littleFreeLibrary": 0,
           "mailCarrier": 0,
+          "newspaperBox": 0,
           "parkedCar": 0,
-          "patioRail": 7,
-          "pedicab": 8,
+          "patioRail": 6,
+          "pedicab": 5,
           "picnicBlanket": 0,
           "pigeons": 3,
           "porchSteps": 0,
@@ -3205,6 +3323,7 @@
           "sandwichBoard": 0,
           "scooter": 5,
           "seagull": 0,
+          "segwayRider": 6,
           "signSpinner": 0,
           "stiltWalker": 2,
           "streetcar": 0,
@@ -3212,11 +3331,11 @@
           "strollingBusker": 0,
           "taxi": 0,
           "tourGroup": 5,
-          "tourist": 9,
+          "tourist": 6,
           "touristTrain": 0,
           "trashCan": 0,
           "ttcBus": 0,
-          "velvetRope": 5,
+          "velvetRope": 4,
           "volleyballNet2": 0,
           "volleyballNet3": 0,
           "volleyballPlayer": 0
@@ -3263,8 +3382,10 @@
       "weights": {
         "minorObstacles": {
           "ball": 0,
+          "barrelStack": 0,
           "barrier2": 3.75,
           "barrier3": 3.75,
+          "beachUmbrella": 0,
           "bench": 7.5,
           "bunny": 0,
           "busker": 0,
@@ -3280,6 +3401,7 @@
           "deliveryCyclist": 3,
           "deliveryTruck": 2,
           "ducklings": 0,
+          "fallenLog": 0,
           "foodCartVendor": 2,
           "frisbeeDog": 0,
           "garbageTruck": 0,
@@ -3287,6 +3409,7 @@
           "goose": 0,
           "grannyCartShopper": 3,
           "hedge": 0,
+          "hen": 0,
           "hopscotchKid": 2,
           "hotDogCart": 0,
           "iceCreamBike": 0,
@@ -3295,7 +3418,9 @@
           "kidOnBike": 3,
           "leafPile": 0,
           "lifeguardChair": 0,
+          "littleFreeLibrary": 0,
           "mailCarrier": 4,
+          "newspaperBox": 0,
           "parkedCar": 0,
           "patioRail": 0,
           "pedicab": 0,
@@ -3311,6 +3436,7 @@
           "sandwichBoard": 0,
           "scooter": 3,
           "seagull": 0,
+          "segwayRider": 0,
           "signSpinner": 0,
           "stiltWalker": 3,
           "streetcar": 0,
@@ -3369,8 +3495,10 @@
       "weights": {
         "minorObstacles": {
           "ball": 1.5,
+          "barrelStack": 0,
           "barrier2": 0,
           "barrier3": 0,
+          "beachUmbrella": 3.75,
           "bench": 3.75,
           "bunny": 0,
           "busker": 0,
@@ -3386,6 +3514,7 @@
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
           "ducklings": 0,
+          "fallenLog": 0,
           "foodCartVendor": 0,
           "frisbeeDog": 0,
           "garbageTruck": 0,
@@ -3393,6 +3522,7 @@
           "goose": 3,
           "grannyCartShopper": 0,
           "hedge": 3.75,
+          "hen": 0,
           "hopscotchKid": 0,
           "hotDogCart": 3.75,
           "iceCreamBike": 2,
@@ -3400,8 +3530,10 @@
           "jogger": 5,
           "kidOnBike": 2,
           "leafPile": 0,
-          "lifeguardChair": 5.75,
+          "lifeguardChair": 4,
+          "littleFreeLibrary": 0,
           "mailCarrier": 0,
+          "newspaperBox": 0,
           "parkedCar": 0,
           "patioRail": 0,
           "pedicab": 0,
@@ -3413,10 +3545,11 @@
           "rangerCart": 0,
           "rollerblader": 3,
           "rollingBarrel": 0,
-          "sandcastle": 5.75,
+          "sandcastle": 3.75,
           "sandwichBoard": 0,
           "scooter": 0,
           "seagull": 3,
+          "segwayRider": 0,
           "signSpinner": 0,
           "stiltWalker": 0,
           "streetcar": 0,
@@ -3475,8 +3608,10 @@
       "weights": {
         "minorObstacles": {
           "ball": 0,
+          "barrelStack": 0,
           "barrier2": 0,
           "barrier3": 0,
+          "beachUmbrella": 0,
           "bench": 0,
           "bunny": 0,
           "busker": 2,
@@ -3492,6 +3627,7 @@
           "deliveryCyclist": 4,
           "deliveryTruck": 4,
           "ducklings": 0,
+          "fallenLog": 0,
           "foodCartVendor": 0,
           "frisbeeDog": 0,
           "garbageTruck": 2,
@@ -3499,6 +3635,7 @@
           "goose": 0,
           "grannyCartShopper": 0,
           "hedge": 0,
+          "hen": 0,
           "hopscotchKid": 0,
           "hotDogCart": 12.5,
           "iceCreamBike": 0,
@@ -3507,7 +3644,9 @@
           "kidOnBike": 0,
           "leafPile": 0,
           "lifeguardChair": 0,
+          "littleFreeLibrary": 0,
           "mailCarrier": 8.12,
+          "newspaperBox": 6,
           "parkedCar": 12.5,
           "patioRail": 0,
           "pedicab": 4,
@@ -3520,9 +3659,10 @@
           "rollerblader": 0,
           "rollingBarrel": 0,
           "sandcastle": 0,
-          "sandwichBoard": 14,
+          "sandwichBoard": 8,
           "scooter": 4,
           "seagull": 0,
+          "segwayRider": 0,
           "signSpinner": 2,
           "stiltWalker": 0,
           "streetcar": 3,

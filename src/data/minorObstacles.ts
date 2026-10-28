@@ -10,6 +10,7 @@ export const MINOR_OBSTACLES = {
     name: "Ball",
     shape: { lanes: 1, rows: 1 },
   },
+  barrelStack: { name: "Barrel stack", shape: { lanes: 1, rows: 1 }, zones: ["street"] },
   barrier2: {
     name: "Barrier",
     shape: { lanes: 2, rows: 1 },
@@ -17,6 +18,11 @@ export const MINOR_OBSTACLES = {
   barrier3: {
     name: "Barrier",
     shape: { lanes: 3, rows: 1 },
+  },
+  beachUmbrella: {
+    name: "Beach umbrella",
+    shape: { lanes: 1, rows: 1 },
+    zones: ["pawsPromenade"],
   },
   bench: { name: "Bench", shape: { lanes: 2, rows: 1 } },
   bunny: {
@@ -97,6 +103,7 @@ export const MINOR_OBSTACLES = {
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
+  fallenLog: { name: "Fallen log", shape: { lanes: 2, rows: 1 }, zones: ["park"] },
   foodCartVendor: {
     movement: {
       factor: 0.7,
@@ -147,6 +154,13 @@ export const MINOR_OBSTACLES = {
     zones: ["shops"],
   },
   hedge: { name: "Hedge", shape: { lanes: 3, rows: 1 } },
+  hen: {
+    movement: { kind: "dart", stopShare: 0, tilt: { max: 0, min: 0 }, turnBackShare: 0 },
+    name: "Hen",
+    onFoot: true,
+    shape: { lanes: 1, rows: 1 },
+    zones: ["snoozeCrescent"],
+  },
   hopscotchKid: {
     movement: { hops: { max: 4, min: 2 }, kind: "bounce", pauseSeconds: 0.6 },
     name: "Hopscotch kid",
@@ -189,12 +203,18 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
     zones: ["pawsPromenade"],
   },
+  littleFreeLibrary: {
+    name: "Little Free Library",
+    shape: { lanes: 1, rows: 1 },
+    zones: ["snoozeCrescent"],
+  },
   mailCarrier: {
     movement: { kind: "step", steps: { max: 4, min: 3 } },
     name: "Mail carrier",
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
+  newspaperBox: { name: "Newspaper box", shape: { lanes: 1, rows: 1 }, zones: ["homeStretch"] },
   parkedCar: { name: "Parked car", shape: { lanes: 1, rows: 3 } },
   patioRail: { name: "Patio rail", shape: { lanes: 3, rows: 1 }, zones: ["street"] },
   pedicab: {
@@ -254,6 +274,12 @@ export const MINOR_OBSTACLES = {
     name: "Seagull",
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
+  },
+  segwayRider: {
+    movement: { factor: 1.1, kind: "inLane" },
+    name: "Segway tour rider",
+    shape: { lanes: 1, rows: 1 },
+    zones: ["street"],
   },
   signSpinner: {
     movement: { hops: { max: 4, min: 2 }, kind: "bounce", pauseSeconds: 0.6 },
