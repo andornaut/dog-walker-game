@@ -25,6 +25,11 @@ export interface TargetPressListener {
 const NO_DIP = () => 0;
 const IDENTICAL = <T>(a: T, b: T) => a === b;
 
+// Whether two targets are alike field for field, for targets made afresh on each press.
+export function sameByValue<T>(a: T, b: T | undefined): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 // One finger presses a target, and releasing it over the same target taps it.
 export function listenTargetPress<T>(
   scene: Scene,

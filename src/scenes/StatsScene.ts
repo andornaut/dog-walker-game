@@ -40,21 +40,18 @@ import {
 import { dogRows, overallRows, type StatsRow } from "../home/statsView";
 import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import {
-  LIST_FLING,
   type ListScroll,
   listScroll,
   pageKeyScroll,
   resizeScroll,
   scrollBy,
   scrollMax,
-  type ScrollRule,
   stepScroll,
 } from "../input/listScroll";
 import { screenLayout } from "../layout/screenLayout";
 import { clampIndex } from "../lib/arrays";
 import { fillLine } from "../lib/lines";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
-import { read } from "../rules/units";
 import { closeControl } from "../ui/closeControl";
 import { rectIndexAt } from "../ui/grid";
 import { addDim, fillRect } from "../ui/phaser/draw";
@@ -73,12 +70,13 @@ import { currentSettings, profileSave } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import {
   addScrollbar,
+  LIST_SCROLL_RULE,
   listenListScroll,
   maskToRect,
   placeScrollbar,
   type ScrollbarView,
 } from "./scrollView";
-import { listenTargetPress, type TargetPressListener } from "./targetPress";
+import { listenTargetPress, sameByValue, type TargetPressListener } from "./targetPress";
 import {
   addCloseButton,
   addPanel,
@@ -109,11 +107,6 @@ const EARNED = WALL.earned;
 const WALL_TEXT = STATS_LAYOUT.wallText;
 const VIEW: Rect = STATS_LAYOUT.view;
 const SCROLL = STATS_LAYOUT.scroll;
-// A press that travels past the tap distance drags the open tab.
-const SCROLL_RULE: ScrollRule = {
-  ...LIST_FLING,
-  dragSlopPx: read(gameData.tuning, "pixels", "tapMaxDistance"),
-};
 // A screen-sized texture, white over the view: the mask that clips each tab's content to it.
 const VIEW_MASK_KEY = "stats-view-mask";
 const DETAIL: Rect = STATS_LAYOUT.detail;
@@ -178,7 +171,7 @@ export class StatsScene extends Scene {
         }
         this.render();
       },
-      same: sameTarget,
+      same: sameByValue,
       targetAt: (x, y) => (this.detail === undefined ? this.targetAt(x, y) : "dismiss"),
     });
     listenListScroll(this, {
@@ -189,7 +182,7 @@ export class StatsScene extends Scene {
         this.render();
       },
       place: () => this.placeContent(),
-      rule: SCROLL_RULE,
+      rule: LIST_SCROLL_RULE,
       scroll: () => this.scroll,
       setScroll: (scroll) => {
         this.scroll = scroll;
@@ -243,7 +236,7 @@ export class StatsScene extends Scene {
   }
 
   override update(_time: number, deltaMs: number): void {
-    const flung = stepScroll(SCROLL_RULE, deltaMs, this.scroll);
+    const flung = stepScroll(LIST_SCROLL_RULE, deltaMs, this.scroll);
     if (flung !== this.scroll) {
       this.scroll = flung;
       this.placeContent();
@@ -337,7 +330,7 @@ export class StatsScene extends Scene {
       }
       addTab(this, tabs, rect, words.tabs[tab], {
         open: tab === this.tab,
-        pressed: sameTarget({ tab: i }, this.pressed),
+        pressed: sameByValue({ tab: i }, this.pressed),
         reducedMotion,
       });
     });
@@ -554,8 +547,4 @@ export class StatsScene extends Scene {
     const style = { colour: PALETTE.plum, scale: TEXT_SCALE };
     return wrapPixelText(this, style, DETAIL_TEXT_WIDTH, text);
   }
-}
-
-function sameTarget(a: Press, b: Press | undefined): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
 }

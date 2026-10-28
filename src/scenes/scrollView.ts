@@ -1,9 +1,11 @@
 import type { GameObjects, Input, Scene } from "phaser";
 
+import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import {
   dragScroll,
   isDragging,
+  LIST_FLING,
   type ListScroll,
   pressScroll,
   releaseScroll,
@@ -11,12 +13,19 @@ import {
   wheelScroll,
 } from "../input/listScroll";
 import { containsPoint, type Rect } from "../lib/rect";
+import { read } from "../rules/units";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { listenOnePress } from "./onePress";
 import { currentSettings } from "./profileStore";
 import { paintRectMask } from "./rectMask";
 import { addNineSlice } from "./uiKit";
+
+// A scrolling list's fling, and its drag once a press travels past the tap distance.
+export const LIST_SCROLL_RULE: ScrollRule = {
+  ...LIST_FLING,
+  dragSlopPx: read(gameData.tuning, "pixels", "tapMaxDistance"),
+};
 
 // A scrollbar as drawn: the art's thumb, or the fallback's graphics.
 export type ScrollbarView =

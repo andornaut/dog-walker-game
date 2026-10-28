@@ -45,19 +45,17 @@ import {
 import { HOLD, type HoldPress, moveHold, startHold, tickHold } from "../input/hold";
 import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import {
-  LIST_FLING,
   type ListScroll,
   listScroll,
   pageKeyScroll,
   resizeScroll,
   scrollMax,
-  type ScrollRule,
   scrollToShow,
   stepScroll,
 } from "../input/listScroll";
 import { clampIndex } from "../lib/arrays";
 import { containsPoint, type Rect } from "../lib/rect";
-import { cents, read } from "../rules/units";
+import { cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import type { ArtLook } from "../ui/interaction";
 import { fillRect } from "../ui/phaser/draw";
@@ -89,12 +87,13 @@ import { drawPurchaseConfirm, type PurchaseConfirmHits } from "./purchaseConfirm
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import {
   addScrollbar,
+  LIST_SCROLL_RULE,
   listenListScroll,
   maskToRect,
   placeScrollbar,
   type ScrollbarView,
 } from "./scrollView";
-import { listenTargetPress, type TargetPressListener } from "./targetPress";
+import { listenTargetPress, sameByValue, type TargetPressListener } from "./targetPress";
 import {
   addCloseButton,
   addPanel,
@@ -144,16 +143,8 @@ const OWNED_DX = ROW.ownedDx;
 const LIST: Rect = LAYOUT.list.rect;
 const PLATE: Rect = LAYOUT.message.plate;
 // A press that travels past the tap distance drags the list.
-const SCROLL_RULE: ScrollRule = {
-  ...LIST_FLING,
-  dragSlopPx: read(gameData.tuning, "pixels", "tapMaxDistance"),
-};
 // A screen-sized texture, white over the list area: the mask that clips the list to it.
 const LIST_MASK_KEY = "shop-list-mask";
-
-function sameTarget(a: Target, b: Target | undefined): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
-}
 
 // A purchase's art on its row: a dog's face, a gear item's icon, the slot's art.
 function purchaseArt(purchase: Purchase): string {
@@ -255,7 +246,7 @@ export class ShopScene extends Scene {
         this.render();
       },
       onTap: (target) => this.act(target),
-      same: sameTarget,
+      same: sameByValue,
       targetAt: (x, y) => {
         const choice = this.confirmChoiceAt(x, y);
         if (choice !== undefined) {
@@ -317,7 +308,7 @@ export class ShopScene extends Scene {
         this.render();
       },
       place: () => this.placeList(),
-      rule: SCROLL_RULE,
+      rule: LIST_SCROLL_RULE,
       scroll: () => this.scroll,
       setScroll: (scroll) => {
         this.scroll = scroll;
@@ -489,7 +480,7 @@ export class ShopScene extends Scene {
   }
 
   override update(_time: number, deltaMs: number): void {
-    const flung = stepScroll(SCROLL_RULE, deltaMs, this.scroll);
+    const flung = stepScroll(LIST_SCROLL_RULE, deltaMs, this.scroll);
     if (flung !== this.scroll) {
       this.moveList(flung);
     }
@@ -717,7 +708,7 @@ export class ShopScene extends Scene {
       }
       addTab(this, root, shopTabFace(hit), gameData.homeText.shop.tabs[tab], {
         open: tab === this.tab,
-        pressed: sameTarget({ kind: "tab", tab }, this.pressed),
+        pressed: sameByValue({ kind: "tab", tab }, this.pressed),
         reducedMotion,
       });
     });
@@ -791,7 +782,7 @@ export class ShopScene extends Scene {
       state: view.state,
       tile: true,
     });
-    if (sameTarget({ id: row.id, kind: "row" }, this.pressed)) {
+    if (sameByValue({ id: row.id, kind: "row" }, this.pressed)) {
       tile.container.y += FEEDBACK.pressDipPx;
     }
     const content = tile.content;
