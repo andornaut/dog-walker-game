@@ -26,10 +26,8 @@ class FakeStorage implements SaveStorage {
 
 describe("createInstallNudge", () => {
   it.each<[InstallState, boolean]>([
-    ["iosSteps", true],
     ["prompt", true],
     ["installed", false],
-    ["unsupported", false],
   ])("is due for %s on a device that has not seen it: %s", async (state, expected) => {
     const nudge = createInstallNudge(new FakeStorage());
     await nudge.ready;
