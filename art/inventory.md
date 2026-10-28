@@ -94,6 +94,7 @@ Road sprites have depth variants `<key>@94`, `@88`, `@81`, `@75`, `@69`, `@62`, 
 | `ui-warning-wander`              | sprite | 16×16          | `pulse`                                          | A "?" over a wanderer before each step                                                                                                               |
 | `ui-warning`, `ui-warning-arrow` | sprite | 16×16          | `pulse`; the arrow also `down-pulse`, `up-pulse` | Hazard cue at the lane edge                                                                                                                          |
 | `velvet-rope`                    | sprite | 112×36         | `idle`                                           | Minor, Distillery District, 2 lanes; brass stanchions and a red rope                                                                                 |
+| `volleyball-player`              | sprite | 48×72          | `run`, `dive`, `idle`                            | The Beaches; a beach volleyball player in a visor darting across side on, diving one lane after a ball                                               |
 | `wedding-shoot`                  | sprite | 112×72         | `idle`                                           | Encounter, Distillery District, 2 lanes; a bride, and a kneeling photographer whose flash fires                                                      |
 
 ## Effects

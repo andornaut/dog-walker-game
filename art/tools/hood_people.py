@@ -108,6 +108,18 @@ tour-group          112x72  Distillery District, 2 lanes; a guided tour, a stepp
                             shuffling out of step; idle (2 frames, 400ms): road.BREATH, the flag up; cue
                             (3 frames, 200ms): the flag dips toward the player, half down, all the way
                             (the pennant hanging), half down
+volleyball-player   48x72   The Beaches; a beach volleyball player darting across the road after a ball,
+                            side on facing right (the game mirrors it for left), as social-frisbee-dog's
+                            run is: a turquoise visor over dark brown hair tied back in a ponytail, a red
+                            racerback tank with a white side stripe, navy shorts, bare legs and feet, a
+                            white and yellow volleyball; run (4 frames, 100ms): the near foot reaching to
+                            plant as the far one kicks up behind, the far knee coming through 1px higher,
+                            then the other side, the arms pumping; dive (4 frames, 90ms): the push off
+                            reaching low for the ball, flat out in the air under it, the belly landing
+                            with the ball popped up and sand kicked up, the slide with the ball going up
+                            out of the frame; idle (4 frames, 400ms): lying on the belly where they
+                            landed, propped on the elbows with the feet up behind, the face turned to the
+                            player: at rest, a breath, then a thumbs up over two frames
 
 Each has depth variants at every step in minis.STEPS (@94 to @50), redrawn at the
 step on a Mini at road.SCALE x the step, with the original's tags, frame counts
@@ -1346,6 +1358,169 @@ def tour_group(glf=0, grf=0, gbob=0, garms=0, llf=0, lrf=0, lbob=0, larms=0, rlf
     tour_right(g, TOUR_RIGHT, rbob, rlf, rrf, rarms)
     tour_guide(g, GUIDE, gbob, glf, grf, garms, dip)
     return rim(g, TOUR_RIM)
+# ---------- volleyball-player: side on, darting across the road after a ball ----------
+
+# Running across: the near leg reaching forward to plant as the far foot kicks up behind, the far knee coming
+# through under the body (1px higher), the same on the other side; the arms pump against the legs. 4 frames at
+# 100ms, social-frisbee-dog's run.
+VOLLEY_RUN = (
+    dict(pose="run-reach", tail=0),
+    dict(pose="run-pass", bob=-1, tail=1),
+    dict(pose="run-kick", tail=0),
+    dict(pose="run-tuck", bob=-1, tail=1),
+)
+VOLLEY_RUN_MS = 100
+# Diving one lane: the push off, arms out low after the ball; flat out in the air, the near forearm under it;
+# the belly landing, the ball popped up off the fist and the sand kicked up; the slide, the ball going up out of
+# the frame and the sand flying. 4 frames at 90ms, about the time the dart takes to cross a lane.
+VOLLEY_DIVE = tuple(dict(pose=p) for p in ("dive-launch", "dive-fly", "dive-land", "dive-slide"))
+VOLLEY_DIVE_MS = 90
+# Lying where they landed, on the belly, propped on the elbows with the feet up behind: at rest, a breath (the
+# head and shoulders 1px higher), then a thumbs up held over two frames, a breath on the second. 4 frames at
+# 400ms, frame 0 the rest pose.
+VOLLEY_IDLE = (dict(pose="lie"), dict(pose="lie", bob=-1), dict(pose="lie-thumb"), dict(pose="lie-thumb", bob=-1))
+VOLLEY_IDLE_MS = 400
+
+# Every pose's joints in design units, side on facing right: the hip, the shoulder and the head's centre, the
+# near and far arms as (elbow, hand) and legs as (knee, foot), the ball's centre (none for no ball) and the sand
+# thrown up as (x, y, r) puffs. A foot on row 43.5 or lower is planted on the road and stays put under a bob.
+# front turns the face to the player, as the lying player does to give the thumbs up.
+VOLLEY_LAND = dict(hip=(7, 41), sh=(14, 40.5), head=(20, 35),
+                   near_arm=((20, 43.2), (26.5, 43.5)), far_arm=((20, 42.2), (26, 42.5)))
+VOLLEY_LIE = dict(hip=(6.5, 41.5), sh=(13.5, 40), head=(18, 33.5), front=True,
+                  far_arm=((16, 43), (23, 43)), near_leg=((1, 43.5), (2, 37)), far_leg=((1.5, 43), (4.5, 37)))
+VOLLEY_POSES = {
+    "run-reach": dict(hip=(15, 31), sh=(17, 22), head=(19.5, 12.5),
+                      near_arm=((13, 26.5), (11, 30)), far_arm=((20.5, 26), (23.5, 23)),
+                      near_leg=((19.5, 36.5), (21, 43.5)), far_leg=((12.5, 37.5), (8, 39.5))),
+    "run-pass": dict(hip=(15, 31), sh=(17, 22), head=(19.5, 12.5),
+                     near_arm=((15, 27.5), (17.5, 30)), far_arm=((17.5, 27.5), (20, 30)),
+                     near_leg=((16.5, 37.5), (16, 44.5)), far_leg=((19.5, 35), (15, 39))),
+    "run-kick": dict(hip=(15, 31), sh=(17, 22), head=(19.5, 12.5),
+                     near_arm=((20.5, 26), (23.5, 23)), far_arm=((13, 26.5), (11, 30)),
+                     near_leg=((12.5, 37.5), (8, 39.5)), far_leg=((19.5, 36.5), (21, 43.5))),
+    "run-tuck": dict(hip=(15, 31), sh=(17, 22), head=(19.5, 12.5),
+                     near_arm=((17.5, 27.5), (20, 30)), far_arm=((15, 27.5), (17.5, 30)),
+                     near_leg=((19.5, 35), (15, 39)), far_leg=((16.5, 37.5), (16, 44.5))),
+    "dive-launch": dict(hip=(10, 33), sh=(16.5, 28.5), head=(21.5, 22),
+                        near_arm=((22, 33), (26.5, 37.5)), far_arm=((22.5, 32), (27, 36.5)),
+                        near_leg=((6, 38), (2.5, 43.5)), far_leg=((14, 38), (11, 43.5)), ball=(28, 40.5)),
+    "dive-fly": dict(hip=(7, 37), sh=(13.5, 36.5), head=(19, 31.5),
+                     near_arm=((19.5, 39.5), (25.5, 40)), far_arm=((19.5, 38.5), (25, 39)),
+                     near_leg=((2, 37.5), (1, 32.5)), far_leg=((2.5, 38.5), (2.5, 33.5)), ball=(28, 37)),
+    "dive-land": dict(VOLLEY_LAND, near_leg=((1.5, 43.5), (1, 38)), far_leg=((2, 43), (2.5, 39)), ball=(26, 26),
+                      sand=((30.5, 42.5, 1.5), (30, 39, 1))),
+    "dive-slide": dict(VOLLEY_LAND, near_leg=((1.5, 43.5), (1.5, 37)), far_leg=((2, 43), (3, 38)), ball=(24.5, 15),
+                       sand=((30.5, 40.5, 1.2), (29.5, 36.5, 1.1), (31, 33, 0.8), (27.5, 31.5, 0.7))),
+    "lie": dict(VOLLEY_LIE, near_arm=((16.5, 43.5), (23.5, 43.5))),
+    "lie-thumb": dict(VOLLEY_LIE, near_arm=((27, 43), (29.5, 37)), thumb=True),
+}
+VOLLEY_RIM = {**LIT, "dturq": ("turquoise", None)}
+
+
+def volley_bar(g, a, b, w, c):
+    """A limb w thick from a to b, as a quadrilateral, with a round joint at b."""
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    n = max(1e-6, (dx * dx + dy * dy) ** 0.5)
+    px, py = -dy / n * w / 2, dx / n * w / 2
+    p = ((a[0] + px, a[1] + py), (b[0] + px, b[1] + py), (b[0] - px, b[1] - py), (a[0] - px, a[1] - py))
+    g.tri(p[0], p[1], p[2], c)
+    g.tri(p[0], p[2], p[3], c)
+    g.ell(b[0], b[1], w / 2, w / 2, c)
+
+
+def volley_ball(g, cx, cy):
+    """The volleyball: white, two yellow panels curving across it, its lower right a step darker."""
+    g.cel(cx, cy, 3.5, 3.5, "white", "lgrey")
+    g.cel(cx - 1, cy - 1.5, 2.6, 1, "yellow")
+    g.cel(cx + 1, cy + 1.2, 2.4, 0.9, "yellow")
+
+
+def volleyball_player(pose="run-reach", bob=0, tail=0):
+    """The volleyball player side on, facing right: a turquoise visor over dark brown hair in a ponytail, a red
+    racerback tank with a white side stripe, navy shorts, bare legs and bare feet. pose is a VOLLEY_POSES
+    key; bob lifts all but the feet planted on row 44 or below; tail swings the ponytail down behind."""
+    q = VOLLEY_POSES[pose]
+    g = edged(Grid(32, 48))
+    b = bob
+    planted = lambda f: f[1] >= 43.5  # noqa: E731
+
+    def up(pt):
+        return (pt[0], pt[1] + b)
+
+    hip, sh, (hx, hy) = up(q["hip"]), up(q["sh"]), up(q["head"])
+
+    def leg(k, f, skin, shade):
+        f = f if planted(f) else up(f)
+        k = up(k)
+        volley_bar(g, hip, k, 4, skin)
+        volley_bar(g, k, f, 3.5, skin)
+        # the bare foot: toes forward along the road, or the sole up behind on a kicked foot
+        if planted(f):
+            g.rect(f[0] - 1.5, f[1] - 0.5, 4.5, 1.5, skin)
+            g.p(f[0] + 2.5, f[1] + 0.5, shade)
+        else:
+            g.ell(f[0], f[1], 1.8, 1.8, skin)
+
+    def arm(e, h, skin):
+        volley_bar(g, sh, up(e), 3, skin)
+        volley_bar(g, up(e), up(h), 2.5, skin)
+
+    # the far limbs, a step darker
+    arm(*q["far_arm"], "skin2")
+    leg(*q["far_leg"], "skin2", "brown")
+    # the ponytail out the back of the visor (to the side, face on), then the torso: the red tank with its
+    # white side stripe, the navy shorts
+    if q.get("front"):
+        g.cel(hx + 7.5, hy + 1 + tail, 2, 3.5, "dbrown", "plum", "brown")
+    else:
+        g.cel(hx - 9, hy + 1.5 + tail, 2.2, 3.5, "dbrown", "plum", "brown")
+    volley_bar(g, hip, sh, 8, "red")
+    mid = ((hip[0] + sh[0]) / 2, (hip[1] + sh[1]) / 2)
+    volley_bar(g, ((hip[0] + mid[0]) / 2, (hip[1] + mid[1]) / 2), sh, 1, "white")
+    g.cel(hip[0], hip[1], 4.2, 3.6, "navy", "ink", "dslate")
+    leg(*q["near_leg"], "skin1", "skin2")
+    nk = up(q["near_leg"][0])
+    volley_bar(g, hip, (hip[0] + (nk[0] - hip[0]) * 0.45, hip[1] + (nk[1] - hip[1]) * 0.45), 5, "navy")
+    volley_bar(g, sh, (hx - 0.5, hy + 5), 3.5, "skin1")
+    if q.get("front"):
+        # the head face on: the face, the hair over the crown, the visor's band and its brim seen from the front
+        face_disc(g, hx, hy, 7, 7, "skin1", "skin2")
+        g.cel(hx, hy - 3.5, 7.5, 4, "dbrown", "plum", "brown")
+        g.rect(hx - 7.5, hy - 3.5, 2, 5, "dbrown")
+        g.rect(hx + 5.5, hy - 3.5, 2, 5, "dbrown")
+        g.rect(hx - 7, hy - 5, 14, 2, "turquoise")
+        g.rect(hx - 8, hy - 3, 16, 1.5, "dturq")
+        road.face_front(g, hx, hy - 0.5, mouth=3.5)
+        g.p(hx - 5, hy + 2.5, "pink")
+        g.p(hx + 4, hy + 2.5, "pink")
+    else:
+        # the head side on: the face, nose, eye, smile and cheek, the hair over the crown and at the nape, the
+        # ear, then the visor's band and brim
+        g.ell(hx, hy, 7, 7, "skin1")
+        g.rect(hx + 6.5, hy - 0.5, 1.2, 2, "skin1")
+        g.cel(hx - 2, hy - 3, 6, 4.5, "dbrown", "plum", "brown")
+        g.cel(hx - 4.5, hy, 3, 4, "dbrown", "plum")
+        g.rect(hx - 2.5, hy - 0.5, 2, 3, "skin2")
+        g.rect(hx + 2.5, hy - 1, 2, 2, "ink")
+        g.p(hx + 2.5, hy - 1, "white")
+        g.rect(hx + 3.5, hy + 3.5, 1.5, 1, "dbrown")
+        g.p(hx + 1.5, hy + 2, "pink")
+        g.rect(hx - 7, hy - 4.5, 13.5, 2, "turquoise")
+        g.rect(hx - 7, hy - 3.5, 13.5, 1, "dturq")
+        g.tri((hx + 4, hy - 4.5), (hx + 10, hy - 3), (hx + 4, hy - 2.5), "turquoise")
+        g.rect(hx + 5, hy - 3, 4.5, 0.8, "dturq")
+    # the near arm, over the body, its fist and thumb up in the thumbs up
+    arm(*q["near_arm"], "skin1")
+    if q.get("thumb"):
+        hx2, hy2 = up(q["near_arm"][1])
+        g.cel(hx2, hy2, 2, 2, "skin1", "skin2")
+        g.rect(hx2 - 1.5, hy2 - 5, 1.5, 3.5, "skin1")
+    if q.get("ball"):
+        volley_ball(g, *q["ball"])
+    for x, y, r in q.get("sand", ()):
+        g.cel(x, y, r, r, "tan", "brown", "cream")
+    return rim(g, VOLLEY_RIM)
 
 
 # ---------- every sprite at a depth step ----------
@@ -1412,6 +1587,9 @@ def steps(suffix, s):
                                   ("idle", [own(tour_group, dict(gbob=b, lbob=b, rbob=b)) for b in road.BREATH],
                                    road.BREATH_MS),
                                   ("cue", [own(tour_group, q) for q in TOUR_CUE], TOUR_CUE_MS)]
+    yield f"volleyball-player{suffix}", [("run", [own(volleyball_player, q) for q in VOLLEY_RUN], VOLLEY_RUN_MS),
+                                         ("dive", [own(volleyball_player, q) for q in VOLLEY_DIVE], VOLLEY_DIVE_MS),
+                                         ("idle", [own(volleyball_player, q) for q in VOLLEY_IDLE], VOLLEY_IDLE_MS)]
 
 
 def sprites():

@@ -10312,6 +10312,87 @@
       }
     },
     {
+      "key": "volleyball-player",
+      "png": "sprites/volleyball-player.png",
+      "json": "sprites/volleyball-player.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 37
+      }
+    },
+    {
+      "key": "volleyball-player@50",
+      "png": "sprites/volleyball-player@50.png",
+      "json": "sprites/volleyball-player@50.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "volleyball-player@56",
+      "png": "sprites/volleyball-player@56.png",
+      "json": "sprites/volleyball-player@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "volleyball-player@62",
+      "png": "sprites/volleyball-player@62.png",
+      "json": "sprites/volleyball-player@62.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "volleyball-player@69",
+      "png": "sprites/volleyball-player@69.png",
+      "json": "sprites/volleyball-player@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "volleyball-player@75",
+      "png": "sprites/volleyball-player@75.png",
+      "json": "sprites/volleyball-player@75.json",
+      "anchor": {
+        "feetY": 51,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "volleyball-player@81",
+      "png": "sprites/volleyball-player@81.png",
+      "json": "sprites/volleyball-player@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "volleyball-player@88",
+      "png": "sprites/volleyball-player@88.png",
+      "json": "sprites/volleyball-player@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "volleyball-player@94",
+      "png": "sprites/volleyball-player@94.png",
+      "json": "sprites/volleyball-player@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 34
+      }
+    },
+    {
       "key": "walker-ada",
       "png": "sprites/walker-ada.png",
       "json": "sprites/walker-ada.json",
