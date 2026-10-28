@@ -24,7 +24,7 @@ import {
   offerUpgrades,
   openCard,
 } from "./choices";
-import { placeInPack,startHearts } from "./dogs";
+import { placeInPack, startHearts } from "./dogs";
 import { cents, read } from "./units";
 
 const data = {
