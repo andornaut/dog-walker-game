@@ -63,7 +63,7 @@ const STRIP_BORDERS: Readonly<Record<FlashColour, BorderColour>> = {
 };
 
 // Each minor obstacle's border: its sprite's main colour, the outline and dark shading aside.
-export const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>> = {
+const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>> = {
   ball: "red",
   barrelStack: "tan",
   barrier2: "orange",
