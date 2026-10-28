@@ -59,7 +59,7 @@
       }
     ],
     "seamColour": "dbrown",
-    "seamEvery": 16,
+    "seamEvery": 32,
     "walkTo": null,
     "lawn": "none",
     "lawnColours": null,

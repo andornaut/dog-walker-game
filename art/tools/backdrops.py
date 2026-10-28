@@ -666,7 +666,7 @@ VERGES = {
     "distillery-district": dict(curbColour="dstone", curbTo=164, strips=[], walkColour="brown",
                                 walkDots=[dict(colours=["brick"], share=0.1), dict(colours=["dbrown"], share=0.04),
                                           dict(colours=["rust"], share=0.02)],
-                                seamColour="dbrown", seamEvery=16, walkTo=None, lawn="none",
+                                seamColour="dbrown", seamEvery=32, walkTo=None, lawn="none",
                                 lawnColours=None, leaves=False),
     "kensington-market": dict(curbColour="stone", curbTo=162, strips=[dict(colour="teal", dots=[], to=166)],
                               walkColour="dturq", walkDots=[dict(colours=["turquoise"], share=0.05)],
