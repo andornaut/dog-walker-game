@@ -12,8 +12,8 @@ loose-dog           48x48   the corgi from other-dog in side view facing right, 
 ball-bounce         24x36   a ball bouncing across lanes, with its own ground shadow (the game draws
                             none); idle (2 frames, 400ms): resting round on the ground, rocking 1px;
                             bounce (6 frames, 70ms), squashed on contact
-cyclist             48x72   front view, riding down a lane at the player; ride (4 frames, 90ms): pedalling
-                            legs and a 1px sway
+cyclist             48x72   front view, riding down a lane at the player, a lit headlamp on the mudguard;
+                            ride (4 frames, 90ms): pedalling legs and a 1px sway
 coyote              48x48   three-quarter front, angled right, stalking the pack: the back sloping from
                             hunched shoulders to the hips over four thin legs set apart, a low head with
                             a long pointed snout, big ears forward, tail low; idle (2 frames, 400ms): a
@@ -60,7 +60,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from pixel import Grid, K, edged, main, raster, scale_of  # noqa: E402
 import minis  # noqa: E402
 from minis import SCALES, Mini, scaled  # noqa: E402
-from road import SCALE, SQUIRREL_FUR, face_disc, face_front, lean, lit  # noqa: E402
+from road import SCALE, SQUIRREL_FUR, face_disc, face_front, headlamp, lean, lit  # noqa: E402
 
 
 # ---------- squirrel-dash: side view, facing right ----------
@@ -323,6 +323,8 @@ def cyclist(lf=36, rf=41):
         g.rect(x - 1 if x == 16 else x, 4, 2, 3, "navy")
     g.rect(8, 13, 1, 5, "dslate")
     g.rect(23, 13, 1, 5, "dslate")
+    # the lit headlamp on the mudguard
+    headlamp(g, 16, 34)
     return g
 
 

@@ -46,9 +46,10 @@ clothing-rack       48x48   minor, 1 lane: a rolling rack of vintage clothes on 
                             and a striped tee. idle (4 frames, 450ms): the dress sways 1px on frame 2
 cargo-bike          48x72   minor mover, 1 lane by 2 rows: a cargo bike riding down a lane at the pack,
                             facing it: a wooden box of sunflowers and pink tulips out front over a
-                            small front wheel, its rider behind in a rust beanie and a turquoise
-                            jacket; the box hides the legs. ride (4 frames, 100ms): the rider sways
-                            1px over the bars, the flowers jiggle and a tread line rolls down the tire
+                            small front wheel with a lit headlamp on its fork, its rider behind in a
+                            rust beanie and a turquoise jacket; the box hides the legs. ride (4 frames,
+                            100ms): the rider sways 1px over the bars, the flowers jiggle and a tread
+                            line rolls down the tire
 
 fx-hit-cheese-crates 77x77  play (8 frames, 70ms): a gold impact star, then a puff of lime stink
                             swelling up and shrinking away as the cut wheel bounces up out of it and
@@ -746,11 +747,12 @@ FLOWERS = ((7.5, 25, "yellow", "amber", "dbrown"), (12, 23.5, "pink", "mauve", N
 
 
 def cargo_bike(sway=0, jiggle=0, roll=0):
-    """A cargo bike riding down a lane at the pack, facing it, laid out on 32x48: the small front wheel
-    edge-on under a wide wooden box (tan slats lit cream, shaded brown) full of flowers, sunflowers (their dark
-    centres at full size and the larger steps) and pink tulips in turn over green leaves; behind it the rider in a turquoise jacket with a rust beanie and an ochre
-    pompom, dark curls showing under it, hands on the wide handlebar. sway shifts the rider 1 drawn pixel
-    over the bars; jiggle lifts alternate flowers 1px; roll (0 to 3) rolls a grey tread line down the tire."""
+    """A cargo bike riding down a lane at the pack, facing it, laid out on 32x48: the small front wheel edge-on, a
+    lit headlamp on its fork crown (road.headlamp), under a wide wooden box (tan slats lit cream, shaded brown) full
+    of flowers, sunflowers (their dark centres at full size and the larger steps) and pink tulips in turn over green
+    leaves; behind it the rider in a turquoise jacket with a rust beanie and an ochre pompom, dark curls showing
+    under it, hands on the wide handlebar. sway shifts the rider 1 drawn pixel over the bars; jiggle lifts alternate
+    flowers 1px; roll (0 to 3) rolls a grey tread line down the tire."""
     g = edged(Grid(32, 48))
     u = unit(g)
     w = sway * u
@@ -801,6 +803,8 @@ def cargo_bike(sway=0, jiggle=0, roll=0):
     g.rect(26, 29, 2, 9, "brown")
     g.rect(5, 32, 21, 1, "brown")
     g.rect(4, 37, 24, 1, "brown")
+    # the lit headlamp on the fork crown under the box
+    road.headlamp(g, 16, 39.5)
     return lit(g, dict(dturq=("turquoise", None)))
 
 

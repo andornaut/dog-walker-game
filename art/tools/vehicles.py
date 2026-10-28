@@ -18,7 +18,7 @@ minor-scooter       48x72   a sky scooter from behind on its stand, laid out on 
                             tread lines climb the tire, the right indicator blinks. ride (4 frames,
                             100ms): ridden down its lane at the pack, facing the player as
                             hazards.cyclist does, a rider in an open white helmet with a sky stripe
-                            and a purple jacket on it behind the leg shield and headlight, the tread
+                            and a purple jacket on it behind the leg shield and lit headlamp, the tread
                             falling down the tire 1px a frame and the scooter and rider dipping 1px
                             onto it on frames 1 and 2
 tourist-train       176x64  High Park's trackless tourist train crossing the road side on, facing right
@@ -59,7 +59,7 @@ import obstacles  # noqa: E402
 from minis import STEPS, small  # noqa: E402
 from obstacles import PULL_OUT, treads, unit  # noqa: E402
 from pixel import K, Grid, edged, main, raster, scale_of  # noqa: E402
-from road import SCALE, face_disc, face_front, lit, raise_mouth  # noqa: E402
+from road import SCALE, face_disc, face_front, headlamp, lit, raise_mouth  # noqa: E402
 
 # The garbage truck is laid out on 56x50 and drawn as obstacles.delivery_truck is, its columns kept (a lane less
 # 4px each side) and its rows TRUCK_SCALE times taller: 56x60, taller than the delivery truck's 54 and as tall
@@ -230,13 +230,13 @@ def scooter_pulling(roll, u=1):
 
 
 def scooter_riding(roll, u=1):
-    """scooter's ride frame roll: ridden down its lane at the pack, facing the player as hazards.cyclist does.
-    The front tire edge-on under the front mudguard, tread lines falling 1px a frame as it rolls toward the
-    player (obstacles.treads, back); the sky leg shield across the front with a chrome horn badge, the
-    headlight on the headset over it, the handlebar with its orange indicators at the ends and the mirrors
-    on stalks. Its rider, behind the shield: an open white helmet with a sky stripe over the face, a purple
-    jacket, brown gloves on the grips. The scooter and rider dip 1px onto the tire on frames 1 and 2. u is
-    one pixel at the drawn size, in layout units."""
+    """scooter's ride frame roll: ridden down its lane at the pack, facing the player as hazards.cyclist does. The
+    front tire edge-on under the front mudguard, tread lines falling 1px a frame as it rolls toward the player
+    (obstacles.treads, back); the sky leg shield across the front with a chrome horn badge, a lit headlamp
+    (road.headlamp) in a chrome housing on the headset over it, the handlebar with its orange indicators at the ends
+    and the mirrors on stalks. Its rider, behind the shield: an open white helmet with a sky stripe over the face, a
+    purple jacket, brown gloves on the grips. The scooter and rider dip 1px onto the tire on frames 1 and 2. u is one
+    pixel at the drawn size, in layout units."""
     g = frame(SCOOTER_W, SCOOTER_H)
     px = raster(g)
     # the tire first, so the body can dip over it
@@ -273,14 +273,15 @@ def scooter_riding(roll, u=1):
     g.rect(23, 20, 3, 3, "dbrown")
     g.rect(4, 21, 2, 2, "orange")
     g.rect(26, 21, 2, 2, "orange")
-    # the leg shield across the front, lit down its left, a chrome horn badge on it, the headlight on top
+    # the leg shield across the front, lit down its left, a chrome horn badge on it, the headlamp on top
     g.cel(16, 31, 7.5, 9, "sky", "blue", "cyan", power=2.6)
     g.rect(12, 22, 8, 3, "sky")
     g.rect(18, 22, 2, 3, "blue")
     g.rect(14, 27, 4, 3, "lgrey")
     g.rect(14, 27, 4, 1, "white")
     g.rect(15, 29, 2, 1, "grey")
-    g.cel(16, 21, 2.5, 2, "yellow", "amber", "white")
+    g.cel(16, 21, 2.5, 2, "lgrey", "grey")
+    headlamp(g, 16, 21.5)
     # the front mudguard over the tire
     g.cel(16, 38.5, 3, 2, "sky", "blue", "cyan")
     dip = 1 if roll in (1, 2) else 0

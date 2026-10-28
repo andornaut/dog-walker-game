@@ -20,8 +20,8 @@ down, each side in turn, the ponytail swinging out from behind the head) wears
 an orange racerback singlet with a white race bib on its front; kid-on-bike
 (48x72, ride: 4 frames at 100ms, the pedals going round, a 1px sway and the
 streamers fluttering) is a kid in a red helmet on a mauve bike with training
-wheels. The movers going up the road ahead of the pack are seen from behind
-too: stroller (48x72, walk: 4 frames at 160ms, the walkers' stride and pace)
+wheels and a lit headlamp. The movers going up the road ahead of the pack are
+seen from behind too: stroller (48x72, walk: 4 frames at 160ms, the walkers' stride and pace)
 is a dad pushing a stroller one-handed, a takeaway coffee in his other hand,
 the stroller rolling beside him on his right.
 
@@ -121,6 +121,51 @@ LIT = dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate
 def lit(g, extra=None):
     """rim with LIT (and extra, by colour) on g, returning g."""
     rim(g, {**LIT, **(extra or {})})
+    return g
+
+
+def lamp_box(s, cx, cy, sy=None):
+    """Where headlamp draws a lamp centred on layout point (cx, cy) at scale s (sy for the rows, if given):
+    (x0, y0, n), its white core's top-left pixel and side. The core is 2 layout pixels across, 3px from the
+    @75 step up and 2px below it, so a depth step's row or column cut leaves it at least 2px."""
+    sy = s if sy is None else sy
+    n = max(2, math.floor(2 * s + 0.8))
+    return math.floor(cx * s - n / 2 + 0.5), math.floor(cy * sy - n / 2 + 0.5), n
+
+
+def stamp_lamp(px, x0, y0, n, edge="cream", spare=0):
+    """A lit headlamp on the Grid px: an n x n white core at (x0, y0) in a 1px ring of edge with its corners
+    clear, so it reads as a round lamp. It paints only pixels already drawn, so the silhouette and outline
+    stay as they are, and its core lies wholly on them: where the drawing under (x0, y0) is too small for it,
+    the core moves up to 1px, then shrinks to 2px. A 2px core is spare rows taller, a row that a depth step's
+    settling (pixel.depth_settled) can take out of the lamp instead of out of a feature such as the eyes."""
+
+    def drawn(x, y, k, h):
+        return all(0 <= xx < px.w and 0 <= yy < px.h and px.px[yy][xx]
+                   for yy in range(y, y + h) for xx in range(x, x + k))
+
+    moves = sorted(((dx, dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)), key=lambda d: abs(d[0]) + abs(d[1]))
+    found = [(k, x0 + dx + (n - k) // 2, y0 + dy + (n - k) // 2) for k in range(n, 1, -1) for dx, dy in moves
+             if drawn(x0 + dx + (n - k) // 2, y0 + dy + (n - k) // 2, k, k + (spare if k == 2 else 0))]
+    if not found:
+        raise ValueError(f"no drawing under a headlamp at ({x0}, {y0}) wide enough for a 2px core")
+    k, x0, y0 = found[0]
+    h = k + (spare if k == 2 else 0)
+    for x, y, w, hh, c in ((x0 - 1, y0, k + 2, h, edge), (x0, y0 - 1, k, h + 2, edge), (x0, y0, k, h, "white")):
+        for yy in range(y, y + hh):
+            for xx in range(x, x + w):
+                if 0 <= xx < px.w and 0 <= yy < px.h and px.px[yy][xx]:
+                    px.p(xx, yy, c)
+    return px
+
+
+def headlamp(g, cx, cy, edge="cream", spare=0):
+    """A lit headlamp on a mover coming at the pack, centred on layout point (cx, cy) of g (a Grid or a
+    minis.Mini) and drawn in g's own pixels (lamp_box, stamp_lamp, which takes spare), so it is the same at
+    every depth step. The game's light layer starts the headlight cone from the white core. White, never gold,
+    so it never reads as a pickup."""
+    s = scale_of(g)
+    stamp_lamp(raster(g), *lamp_box(s, cx, cy, getattr(g, "sy", s)), edge, spare)
     return g
 
 
@@ -1768,12 +1813,12 @@ KID_BIKE_RIDE_MS = 100
 
 
 def kid_on_bike(lf=0, rf=0, sway=0, flutter=(0, 0, 0)):
-    """A kid riding a little bike down the road at the pack, facing the player as the cyclist does: a yellow
-    tee, sky shorts, red shoes and ochre hair under a red helmet with a white stripe, its rim a dark visor line
-    with the face clear under it, as the cyclist's. The bike is mauve, its front tire edge-on under a mudguard
-    with a white reflector, the training wheels showing either side behind, a pink streamer 2 design pixels
-    wide trailing from each grip. Shorter than an adult rider: the helmet's
-    top is 4 design rows (6px) lower than the cyclist's. The road outline and the lit rim."""
+    """A kid riding a little bike down the road at the pack, facing the player as the cyclist does: a yellow tee, sky
+    shorts, red shoes and ochre hair under a red helmet with a white stripe, its rim a dark visor line with the face
+    clear under it, as the cyclist's. The bike is mauve, its front tire edge-on under a mudguard with a lit headlamp
+    (headlamp) over a white reflector, the training wheels showing either side behind, a pink streamer 2 design
+    pixels wide trailing from each grip. Shorter than an adult rider: the helmet's top is 4 design rows (6px) lower
+    than the cyclist's. The road outline and the lit rim."""
     g = edged(Grid(32, 48))
     w = sway
     # the training wheels behind, on their strut, then the front tire, fork, mudguard and reflector
@@ -1820,6 +1865,8 @@ def kid_on_bike(lf=0, rf=0, sway=0, flutter=(0, 0, 0)):
     g.rect(15.5 + w, 7, 1, 6, "white")
     g.rect(9 + w, 13, 14, 1, "ink")
     face_front(g, 16 + w, 15)
+    # the lit headlamp on the mudguard, a row taller at the 2px steps so @50's settling thins it, not the eyes
+    headlamp(g, 16, 35.5, spare=1)
     return rim(g, LIT)
 
 

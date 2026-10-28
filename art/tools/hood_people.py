@@ -53,7 +53,7 @@ delivery-cyclist    48x72   Kensington Market and Yonge Street; a fast rider com
                             player, facing it as cyclist does: a big turquoise insulated delivery box
                             on the back, wider than the shoulders and over the head, with a reflective
                             band; a black helmet, a violet jacket, jeans, a black bike with a
-                            white headlamp and a phone on the bars; ride (4 frames, 90ms):
+                            lit headlamp over the mudguard and a phone on the bars; ride (4 frames, 90ms):
                             hazards.CYCLIST_RIDE's pedalling and 1px sway; merge (4 frames, 100ms):
                             changing lanes right (the game mirrors it for left), still pedalling, the
                             bike, the rider and the box leaning right about the handlebar, the box's top
@@ -705,13 +705,15 @@ DELIVERY_MERGE_MS = 100
 # The layout rows the merge's tilt turns about (the handlebar) and carries the head by (the neck).
 DELIVERY_PIVOT = 24
 DELIVERY_NECK = 20
+# The headlamp's layout point, over the mudguard.
+DELIVERY_LAMP = (16, 31)
 DELIVERY_RIM = {**LIT, "violet": ("lilac", None), "dturq": ("turquoise", None), "blue": ("sky", None)}
 
 
 def delivery_cyclist(lf=36, rf=41, part="all"):
     """The delivery rider facing the player, laid out on 32x48 as hazards.cyclist is; delivery_at draws it at
-    size and adds the sway. part "body" leaves out the head and "head" draws only the head, for the merge's
-    tilt."""
+    size and adds the sway. part "body" leaves out the head and the headlamp and "head" draws only the head, for
+    the merge's tilt, which puts the headlamp on after it shears the body."""
     g = edged(Grid(32, 48))
     if part == "head":
         delivery_head(g)
@@ -727,12 +729,11 @@ def delivery_cyclist(lf=36, rf=41, part="all"):
     g.rect(23, 13, 4, 2, "grey")
     g.p(5, 1, None)
     g.p(26, 1, None)
-    # front wheel: a fat black tire edge-on, the fork, a black mudguard and the white headlamp
+    # front wheel: a fat black tire edge-on, the fork, a black mudguard and the lit headlamp over it
     g.blob(16, 39.5, 3, 7, "ink")
     g.rect(15, 34, 2, 9, "dslate")
     g.rect(13.5, 32, 5, 2, "ink")
     g.rect(14.5, 30, 3, 2, "lgrey")
-    g.rect(15, 30.5, 2, 1, "white")
     # legs either side of the wheel: jeans to the ankle, black trainers with white soles
     for x, foot in ((10, lf), (19, rf)):
         g.rect(x, 29, 3, foot - 29, "blue")
@@ -760,6 +761,7 @@ def delivery_cyclist(lf=36, rf=41, part="all"):
     for x in (4, 25):
         g.rect(x, 25, 3, 4, "ink")
     if part == "all":
+        road.headlamp(g, *DELIVERY_LAMP)
         delivery_head(g)
     return rim(g, DELIVERY_RIM)
 
@@ -812,6 +814,9 @@ def delivery_tilted(whole, body, head, tilt, p):
         for x in range(whole.w):
             if head.px[y][x] and 0 <= x + neck < whole.w:
                 out.px[y][x + neck] = whole.px[y][x]
+    # the headlamp goes on after the shear, moved whole by its middle row's shift, so it stays square
+    x0, y0, n = road.lamp_box(p, *DELIVERY_LAMP)
+    road.stamp_lamp(out, x0 + shift(y0 + n // 2), y0, n)
     return out
 
 

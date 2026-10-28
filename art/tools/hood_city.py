@@ -66,8 +66,9 @@ pedicab             48x72   minor rider, 1 lane, coming down its lane at the pac
                             bike taxi, its cobalt canopy edged in a white scalloped valance shading a
                             padded red bench on two wheels, a passenger in a
                             green top and a gold bob sitting on its left, and in front the rider, who
-                            wears a purple tee and a white headband. ride (4 frames, 120ms): the pedals
-                            going round, the front tire's tread falling 1px a frame
+                            wears a purple tee and a white headband, a lit headlamp on the fork crown.
+                            ride (4 frames, 120ms): the pedals going round, the front tire's tread
+                            falling 1px a frame
 
 Every key above also has <key>@<step> for each depth step in minis.STEPS, floor(size x scale + 0.5),
 with the original's tags, frames and durations, drawn on a minis.Mini with its own outline. The people
@@ -393,8 +394,8 @@ def pedicab(lf=39, rf=44, roll=0):
     bench, its seat roll lit pink, and on the bench's left a
     passenger, gold hair and a green top, their head and shoulders under the valance. In front, lower and
     centred, the rider in a purple tee and a white headband, the hands on the handlebar, the legs either side
-    of the front tire, edge-on under its mudguard, the tread falling down it 1px a frame; the cab's two
-    wheels show either side."""
+    of the front tire, edge-on under its mudguard and a lit headlamp on the fork crown (road.headlamp), the
+    tread falling down it 1px a frame; the cab's two wheels show either side."""
     g = edged(Grid(32, 48))
     u = unit(g)[1]
     # the cab's wheels, behind and to the sides
@@ -454,6 +455,8 @@ def pedicab(lf=39, rf=44, roll=0):
     g.rect(11, 15, 10, 1.5, "white")
     g.rect(18.5, 15, 2.5, 1.5, "lgrey")
     road.face_front(g, 16, 18, lips="ink", spread=3, mouth=3)
+    # the lit headlamp on the fork crown over the mudguard
+    road.headlamp(g, 16, 36.5)
     return rim(g, dict(LIT, dbrown=("skin2", "brown"), plum=("skin2", "brown"), coal=("ash", None),
                        shale=("ash", None)))
 
