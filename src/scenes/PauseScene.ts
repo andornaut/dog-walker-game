@@ -23,6 +23,7 @@ import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, pixelFontMetrics, wrapPixelText } from "../ui/phaser/pixelText";
 import { addRampDim } from "../ui/phaser/rampDim";
+import { TEXT_SCALE } from "../ui/textFit";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { listenOutsideTap, onceSceneEvent, openOverlay } from "./overlay";
@@ -30,7 +31,7 @@ import { SCENE_KEYS } from "./sceneKeys";
 import { SETTINGS_CLOSED_EVENT } from "./SettingsScene";
 import { soundboardOf } from "./soundboard";
 import { listenTargetPress } from "./targetPress";
-import { addMenuButton, addRimmedPanel, addTapBurst, type MenuButton, TEXT_SCALE } from "./uiKit";
+import { addMenuButton, addRimmedPanel, addTapBurst, type MenuButton } from "./uiKit";
 
 // Help or the settings, opened at once over the menu from the walk bar: alone, closing it
 // resumes the walk; opened over the menu or the question, closing it shows the menu again.

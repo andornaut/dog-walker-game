@@ -7,9 +7,9 @@ import type { Rect } from "../lib/rect";
 import { addDim } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, fitPixelText } from "../ui/phaser/pixelText";
-import { TEXT_FIT_STYLES } from "../ui/textFit";
+import { TEXT_FIT_STYLES, TEXT_SCALE } from "../ui/textFit";
 import { addDetailCard, addDetailWell } from "./homePanels";
-import { addMenuButton, TEXT_SCALE } from "./uiKit";
+import { addMenuButton } from "./uiKit";
 
 // Everything the purchase confirm draws from. The scene that opens it routes its taps and keys
 // through the model in home/purchaseConfirm; the view only draws.

@@ -27,13 +27,14 @@ import {
   withProbe,
 } from "../ui/phaser/pixelText";
 import { addRampDim } from "../ui/phaser/rampDim";
+import { TEXT_SCALE } from "../ui/textFit";
 import { addConfetti } from "./badges";
 import { closeOverlay, listenOutsideTap, type OverlayData } from "./overlay";
 import { currentSettings, walkerSpriteKey } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 import { playFirstTag } from "./sprites";
-import { addMenuButton, addPanel, listenButtonTap, TEXT_SCALE } from "./uiKit";
+import { addMenuButton, addPanel, listenButtonTap } from "./uiKit";
 
 export interface ZoneCelebrationSceneData extends OverlayData {
   celebration: ZoneCelebration;

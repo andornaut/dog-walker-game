@@ -64,6 +64,7 @@ import {
   withProbe,
   wrapPixelText,
 } from "../ui/phaser/pixelText";
+import { TEXT_SCALE } from "../ui/textFit";
 import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
 import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
 import { currentSettings, profileSave } from "./profileStore";
@@ -86,7 +87,6 @@ import {
   addTapBurst,
   clearScene,
   tagFrame,
-  TEXT_SCALE,
 } from "./uiKit";
 
 type Tab = StatsTab;

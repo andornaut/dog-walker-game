@@ -27,17 +27,10 @@ import {
   wrapPixelText,
 } from "../ui/phaser/pixelText";
 import { AFFORD_OUTSET } from "../ui/selection";
-import { WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
+import { TEXT_SCALE, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 import { addNamePills } from "./effectNameColours";
 import { playFirstTag } from "./sprites";
-import {
-  addCloseButton,
-  addLoopingFrame,
-  addNineSlice,
-  selectOuter,
-  type SliceKey,
-  TEXT_SCALE,
-} from "./uiKit";
+import { addCloseButton, addLoopingFrame, addNineSlice, selectOuter, type SliceKey } from "./uiKit";
 
 // The home screen's drawing beyond its tiles: the gold outline on the Pet shop while the
 // player can afford something in it, and the detail card that opens over the screen. Positions

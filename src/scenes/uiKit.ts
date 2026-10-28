@@ -47,9 +47,6 @@ export function artFits(scene: Scene, key: string, size: { height: number; width
   return frame.realWidth === size.width && frame.realHeight === size.height;
 }
 
-// Text is drawn at 2x so it reads on a phone; 1x is for incidental marks only.
-export { TEXT_SCALE };
-
 // The UI kit's nine-slice borders, in pixels from each edge.
 const SLICES = {
   // The gold outline on the Pet shop while anything in it is affordable.

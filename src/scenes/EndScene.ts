@@ -48,7 +48,7 @@ import {
   setPixelText,
   withProbe,
 } from "../ui/phaser/pixelText";
-import { TEXT_FIT_STYLES, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
+import { TEXT_FIT_STYLES, TEXT_SCALE, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 import { addBadgeCelebration, addBurst, addCheeringFace, NEW_BEST_BURST } from "./badges";
 import { onBackPressed } from "./overlay";
 import { addOwnerFigure, ownerSpriteKey } from "./ownerFigure";
@@ -62,14 +62,7 @@ import {
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 import { firstTag, playTag } from "./sprites";
-import {
-  addMenuButton,
-  addPanel,
-  addScreenBackdrop,
-  addTagImage,
-  listenButtonTap,
-  TEXT_SCALE,
-} from "./uiKit";
+import { addMenuButton, addPanel, addScreenBackdrop, addTagImage, listenButtonTap } from "./uiKit";
 
 const END_SCREEN_KEY = "screen-end";
 const LOGO = { ...END_LAYOUT.logo, key: "logo" };

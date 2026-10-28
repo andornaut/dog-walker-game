@@ -126,7 +126,7 @@ import {
   withProbe,
 } from "../ui/phaser/pixelText";
 import { BUTTON_COLOURS, GREYED, pictureBox, type SelectLook } from "../ui/selection";
-import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
+import { TEXT_FIT_STYLES, TEXT_SCALE, type TextFitStyle } from "../ui/textFit";
 import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { addNamePills } from "./effectNameColours";
@@ -190,7 +190,6 @@ import {
   settingsIcon,
   soundIcon,
   tagFrame,
-  TEXT_SCALE,
   tileTextureKey,
 } from "./uiKit";
 

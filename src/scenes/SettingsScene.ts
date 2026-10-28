@@ -31,6 +31,7 @@ import { drawFocusRing, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, fitPixelTextsAlike, type LabelToFit } from "../ui/phaser/pixelText";
 import { GREYED } from "../ui/selection";
+import { TEXT_SCALE } from "../ui/textFit";
 import { addDetailCard } from "./homePanels";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
@@ -46,7 +47,6 @@ import {
   addTagImage,
   addTapBurst,
   clearScene,
-  TEXT_SCALE,
 } from "./uiKit";
 
 // Emitted on game.events when settings close.

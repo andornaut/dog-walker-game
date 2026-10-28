@@ -12,12 +12,13 @@ import { insetRect, type Point, type Rect } from "../lib/rect";
 import { addFilledRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, wrapPixelText } from "../ui/phaser/pixelText";
+import { TEXT_SCALE } from "../ui/textFit";
 import type { HelpPictureData } from "./HelpPictureScene";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
 import { updateProfile } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
-import { addCloseButton, addMenuButton, addTapBurst, clearScene, TEXT_SCALE } from "./uiKit";
+import { addCloseButton, addMenuButton, addTapBurst, clearScene } from "./uiKit";
 
 // Emitted on game.events when the help closes, by any route.
 export const HELP_CLOSED_EVENT = "help-closed";

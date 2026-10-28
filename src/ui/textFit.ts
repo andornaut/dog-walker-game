@@ -9,7 +9,7 @@ export interface TextFitStyle {
   scale: number;
 }
 
-// The scale menu and HUD text draws at.
+// The scale menu and HUD text draws at, so it reads on a phone; 1x is for incidental marks only.
 export const TEXT_SCALE = 2;
 
 // Text that may not fit its room at 2x tries 2x with its glyphs a screen pixel closer, then 1x.

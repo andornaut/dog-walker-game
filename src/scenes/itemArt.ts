@@ -10,7 +10,7 @@ import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
 import { PLATE_LOOKS, type PlateKind } from "../ui/selection";
-import { TEXT_SCALE } from "./uiKit";
+import { TEXT_SCALE } from "../ui/textFit";
 
 // The home screen's and the shop's art keys, each with a drawn stand-in below while missing.
 export const SHOP_ART = {

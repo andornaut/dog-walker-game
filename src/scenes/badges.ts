@@ -20,8 +20,9 @@ import {
   type PixelTextStyle,
   withProbe,
 } from "../ui/phaser/pixelText";
+import { TEXT_SCALE } from "../ui/textFit";
 import { playTag, playTagOnce } from "./sprites";
-import { addPanel, tagFrame, TEXT_SCALE } from "./uiKit";
+import { addPanel, tagFrame } from "./uiKit";
 
 export const BADGE_SIZE = BADGE_STRIP.badgeSize;
 const BURST_TAG = "play";

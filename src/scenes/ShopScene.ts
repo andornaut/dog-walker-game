@@ -70,7 +70,7 @@ import {
   placePixelText,
 } from "../ui/phaser/pixelText";
 import { GREYED, pictureBox, type PlateKind } from "../ui/selection";
-import { TEXT_FIT_STYLES } from "../ui/textFit";
+import { TEXT_FIT_STYLES, TEXT_SCALE } from "../ui/textFit";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { addDetailCard, drawDetailCard } from "./homePanels";
 import {
@@ -105,7 +105,6 @@ import {
   clearScene,
   selectOuter,
   tagFrame,
-  TEXT_SCALE,
   tileTextureKey,
 } from "./uiKit";
 
