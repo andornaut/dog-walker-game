@@ -64,7 +64,7 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 - `src/pwa/`, `src/dev/`: phone app and dev tools
 - `src/road/`: road clipping, the roadside, ambient movers and struck scenery; `phaser/` draws the backdrop band
 - `src/rules/`, `src/state/`: run state and pure rules
-- `src/runner/`: the walk session, lane motion, spawn planning, collisions, movers and pulls
+- `src/runner/`: the walk session, lane motion, spawn planning, collisions, movers and pulls. `walk.ts` steps the walk over the road items `walkItems.ts` sorts into kinds; `zonePlan.ts` turns a zone's data into spawn quotas, which `zonePlanner.ts` places on the row grid and path of `spawning.ts`, keeping its cells in `spawnCells.ts`; `moverSpecs.ts` reads each mover's spec from the data, `moverPlanning.ts` draws and places its path, and `movers.ts` moves it along that path
 - `src/save/`: persistence
 - `src/scenes/`, `src/main.ts`: the Phaser scenes
 - `src/sim/`: the run simulator
