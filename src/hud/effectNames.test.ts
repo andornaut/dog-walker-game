@@ -114,7 +114,7 @@ describe("faceTextWithNamePills", () => {
 
 describe("debuffNameMarks", () => {
   it.each([
-    ["+$0 Stinky", [{ at: 4, kind: "stinky", length: 6 }]],
+    ["So Stinky", [{ at: 3, kind: "stinky", length: 6 }]],
     ["Stinky pack! Stinky again", [{ at: 0, kind: "stinky", length: 6 }]],
     ["UnStinky", []],
     ["Stinkyness", []],

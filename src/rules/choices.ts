@@ -25,6 +25,7 @@ import {
   firedByText,
   type HeartChange,
   heartsForgiven,
+  isNamedCause,
   type MoneyChange,
 } from "./causes";
 import { debuffLasting } from "./durations";
@@ -231,8 +232,10 @@ function outcomeOf(
 function causeLines(data: ChoiceData, changes: readonly Change[]): BreakdownLine[] {
   return changes.flatMap((change) =>
     change.causes.flatMap((cause) =>
-      // A meter held at 0 is said by the firing line instead.
-      change.kind === "hearts" && cause.kind === "limit" && cause.bound === "min"
+      // A meter held at 0 is said by the firing line instead. No card's change starts with a
+      // cause left unnamed (isNamedCause).
+      !isNamedCause(cause) ||
+      (change.kind === "hearts" && cause.kind === "limit" && cause.bound === "min")
         ? []
         : [
             {

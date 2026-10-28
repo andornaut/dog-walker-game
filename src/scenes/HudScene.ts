@@ -13,7 +13,6 @@ import {
   effectItemsKey,
   perkIconKey,
 } from "../hud/effectIcons";
-import { debuffNameMarks, withNamePills } from "../hud/effectNames";
 import { explainDetail } from "../hud/explain";
 import { FEEDBACK } from "../hud/feedback";
 import { runHintTriggers } from "../hud/hintTriggers";
@@ -34,7 +33,6 @@ import {
   moneyChipPlace,
   moneyFlightPath,
   stackOrders,
-  type TipTally,
 } from "../hud/moneyLabels";
 import { stripLine } from "../hud/stripLines";
 import {
@@ -101,7 +99,6 @@ import {
 import { addCharm, glintWell } from "./buffCharm";
 import { BumpBorder } from "./bumpBorder";
 import { DEBUFF_COLOURS } from "./debuffColours";
-import { addNamePills } from "./effectNameColours";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
 import { drawDetailCard } from "./homePanels";
@@ -147,20 +144,14 @@ interface ChangeChip {
   rect: Rect;
 }
 
-// The tip label showing by the cash before it goes in: its tally, its chip, and the money it
+// The tip label showing by the cash before it goes in: its label, its chip, and the money it
 // keeps off the counter until it lands.
-interface ShowingTip extends TipTally {
+interface ShowingTip {
   chip: ChangeChip;
   held: number;
+  label: ChangeLabel;
 }
 
-// A change label's text as drawn: the name of a debuff that zeroed it, as Stinky's in "+$0
-// Stinky", in the debuff's pill.
-function changeLabelText(label: ChangeLabel): string {
-  return label.zeroedBy === undefined
-    ? label.text
-    : withNamePills(gameData, label.text, debuffNameMarks(gameData, label.zeroedBy, label.text));
-}
 // The message strip draws under the HUD's other parts, and over a card's or the pause menu's
 // parts when it draws there.
 const MESSAGE_DEPTH = { hud: -1, overlay: 1000 };
@@ -933,7 +924,7 @@ export class HudScene extends Scene {
   // "+$0" beside a paying tip, sends the showing label in now and takes its place.
   private showTipLabel(label: ChangeLabel): void {
     const showing = this.tip;
-    const merged = showing === undefined ? undefined : mergeTips(gameData, showing, label);
+    const merged = showing === undefined ? undefined : mergeTips(showing.label, label);
     if (showing !== undefined) {
       if (merged === undefined) {
         this.sendMoneyLabel(showing.chip, showing.held);
@@ -941,14 +932,14 @@ export class HudScene extends Scene {
         showing.chip.parts.forEach((part) => part.destroy());
       }
     }
-    const tally = merged ?? { count: 1, label };
+    const tipLabel = merged ?? label;
     const body = pixelFontMetrics(this, "body");
-    const chip = this.addChangeChip(tally.label, MONEY_LABEL.room, (shown) =>
+    const chip = this.addChangeChip(tipLabel, MONEY_LABEL.room, (shown) =>
       cashChipPlace(body, shown),
     );
     const before = merged === undefined ? 0 : (showing?.held ?? 0);
     const held = before + this.holdOffCounter(label.amount);
-    const tip = { ...tally, chip, held };
+    const tip = { chip, held, label: tipLabel };
     this.tip = tip;
     this.labels.after(this, MONEY_LABEL.holdMs, () => {
       if (this.tip === tip) {
@@ -1010,7 +1001,7 @@ export class HudScene extends Scene {
   }
 
   // A change on a cream chip, so gains in forest and losses in dark red read over anything, and
-  // one a debuff zeroed, as Stinky's "+$0" tip, in the debuff's colour; fitted to room by
+  // one of nothing, as a Stinky tip's "+$0", in grey; fitted to room by
   // CHANGE_LABEL_STYLES, and placed by place. Its parts, and its chip's rect.
   private addChangeChip(
     label: ChangeLabel,
@@ -1019,7 +1010,7 @@ export class HudScene extends Scene {
   ): ChangeChip {
     const colour =
       label.amount === 0 ? PALETTE.grey : label.gain ? PALETTE.forest : PALETTE.darkRed;
-    const text = addPixelText(this, 0, 0, changeLabelText(label), { colour, scale: 2 });
+    const text = addPixelText(this, 0, 0, label.text, { colour, scale: 2 });
     const { lines, style } = fitPixelText(text, { room, styles: CHANGE_LABEL_STYLES }, 0, 0);
     const ink = inkSpan(text);
     const placed = place({ lines: lines.length, scale: style.scale, width: ink.right - ink.left });
@@ -1027,8 +1018,7 @@ export class HudScene extends Scene {
     const chip = this.add.graphics();
     drawFramedRect(chip, CREAM_PANEL_COLOURS, placed.chip);
     text.setDepth(1);
-    const pills = addNamePills([text]);
-    return { parts: [chip, ...pills, text], rect: placed.chip };
+    return { parts: [chip, text], rect: placed.chip };
   }
 
   // The first-time hints the run's state raises, each said on the message strip once.

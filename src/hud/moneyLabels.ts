@@ -1,4 +1,3 @@
-import type { GameData } from "../data/types";
 import type { Point, Rect } from "../lib/rect";
 import { amountText } from "../rules/causes";
 import type { FontMetrics } from "../ui/fontMetrics";
@@ -66,57 +65,24 @@ export function cashChipPlace(
   return changeChipAt(body, { x, y }, text);
 }
 
-// The tip label showing by the cash, and how many tips it adds up.
-export interface TipTally {
-  count: number;
-  label: ChangeLabel;
-}
-
-// The label count tips totalling amount read, others naming what changed them: one tip as its
-// change names it ("+$2 tip, Big tipper"), more as "+$4 tips, Big tipper", and tips a debuff
-// zeroed by the debuff alone, however many ("+$0 Stinky").
-export function tipLabelText(
-  data: Pick<GameData, "runText">,
-  tips: { amount: number; count: number; others: readonly string[]; zeroed: boolean },
-): string {
-  const amount = amountText("money", tips.amount);
-  if (tips.zeroed) {
-    return `${amount} ${tips.others.join(", ")}`;
-  }
-  const { tip, tips: several } = data.runText.causes;
-  return [`${amount} ${tips.count > 1 ? several : tip}`, ...tips.others].join(", ");
-}
-
-// The tip label showing adding up next, a tip grabbed before it flies: one label for both,
-// their total, and everything that changed either. Undefined when either is not a tip's label,
-// or when a debuff zeroed one and not the other, or zeroed them by different debuffs, so a grey
-// "+$0 Stinky" never adds up with a paying tip.
-export function mergeTips(
-  data: Pick<GameData, "runText">,
-  showing: TipTally,
-  next: ChangeLabel,
-): TipTally | undefined {
-  const { label } = showing;
+// The tip label showing adding up next, a tip grabbed before it flies: one label for both, their
+// total. Undefined when either is not a tip's label, or when a debuff zeroed one and not the
+// other, or zeroed them by different debuffs, so a grey "+$0" never adds up with a paying tip.
+export function mergeTips(showing: ChangeLabel, next: ChangeLabel): ChangeLabel | undefined {
   if (
-    label.target.kind !== "cash" ||
+    showing.target.kind !== "cash" ||
     next.target.kind !== "cash" ||
-    label.zeroedBy !== next.zeroedBy
+    showing.zeroedBy !== next.zeroedBy
   ) {
     return undefined;
   }
-  const amount = label.amount + next.amount;
-  const count = showing.count + 1;
-  const others = [...new Set([...label.target.others, ...next.target.others])];
-  const zeroed = label.zeroedBy !== undefined;
+  const amount = showing.amount + next.amount;
   return {
-    count,
-    label: {
-      amount,
-      gain: amount > 0,
-      target: { kind: "cash", others },
-      text: tipLabelText(data, { amount, count, others, zeroed }),
-      ...(label.zeroedBy === undefined ? {} : { zeroedBy: label.zeroedBy }),
-    },
+    amount,
+    gain: amount > 0,
+    target: { kind: "cash" },
+    text: amountText("money", amount),
+    ...(showing.zeroedBy === undefined ? {} : { zeroedBy: showing.zeroedBy }),
   };
 }
 

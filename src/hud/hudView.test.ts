@@ -1,13 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import type { Effect } from "../data/types";
 import { dollarAmountText } from "../home/home";
-import { tipValue } from "../rules/run";
-import { type Cents, cents, clampHearts } from "../rules/units";
+import type { Change } from "../rules/causes";
+import { resolveEffects } from "../rules/effects";
+import { formatDollars } from "../rules/effectText";
+import { bumpCash, tipValue } from "../rules/run";
+import { type Cents, cents, clampHearts, read } from "../rules/units";
 import { activeModifier, testState } from "../testing/runState";
 import { changeLabels, heartRows } from "./hudView";
 
 const { causes } = gameData.runText;
+const { tuning } = gameData;
 // Where the money changed hands.
 const AT = { x: 120, y: 300 };
 
@@ -19,7 +24,7 @@ const bigTipper = activeModifier(
 describe("changeLabels", () => {
   const skunkIgnore = { encounter: "skunk", kind: "encounter", option: 2 } as const;
 
-  it("labels each heart change at its dog and money from where it changed hands, with causes", () => {
+  it("labels each heart change at its dog with its causes, and a tip by the cash", () => {
     const labels = changeLabels(gameData, AT, [
       {
         after: clampHearts(10, 3),
@@ -64,21 +69,21 @@ describe("changeLabels", () => {
       {
         amount: 200,
         gain: true,
-        target: { kind: "cash", others: [gameData.upgrades.bigTipper.name] },
-        text: `+$2 ${causes.tip}, ${gameData.upgrades.bigTipper.name}`,
+        target: { kind: "cash" },
+        text: "+$2",
       },
     ]);
   });
 
   it.each([
-    ["a tip", [{ amount: 100, kind: "tip" }], { kind: "cash", others: [] }],
+    ["a tip", [{ amount: 100, kind: "tip" }], { kind: "cash" }],
     [
       "a tip Stinky zeroed",
       [
         { amount: 100, kind: "tip" },
         { amount: -100, kind: "modifier", source: { debuff: "stinky", kind: "debuff" } },
       ],
-      { kind: "cash", others: [gameData.debuffs.stinky.name] },
+      { kind: "cash" },
     ],
     ["a bump", [{ amount: -1000, kind: "bump" }], { from: AT, kind: "bank" }],
     [
@@ -153,10 +158,63 @@ describe("changeLabels", () => {
         amount: -1000,
         gain: false,
         target: { from: AT, kind: "bank" },
-        text: `−$10 ${causes.bump}`,
+        text: "−$10",
       },
     ]);
   });
+});
+
+describe("a money change's label", () => {
+  const money = (amount: Cents, sign: "+" | "−") => `${sign}${formatDollars(amount)}`;
+  const tip = read(tuning, "money", "tip");
+  const kilo = testState({ kilo: 5 });
+  const resolved = (effect: Effect, source: Parameters<typeof resolveEffects>[1]["source"]) =>
+    resolveEffects(gameData, { affected: ["kilo"], source }, [effect], kilo).changes;
+  const spotlight = testState(
+    { kilo: 5 },
+    { debuffs: [{ debuff: "spotlight", secondsLeft: 20, untilZone: 0 }], money: cents(10_000) },
+  );
+  const stinky = testState(
+    { kilo: 5 },
+    { debuffs: [{ debuff: "stinky", secondsLeft: 20, untilZone: 0 }] },
+  );
+  it.each([
+    ["a tip", () => [tipValue(gameData, kilo)], money(tip, "+")],
+    [
+      "a Big tipper tip",
+      () => [tipValue(gameData, testState({ kilo: 5 }, { modifiers: [bigTipper] }))],
+      money(cents(tip + read(tuning, "money", "bigTipperTipBonus")), "+"),
+    ],
+    ["a Stinky tip", () => [tipValue(gameData, stinky)], "+$0"],
+    [
+      "a lucky find",
+      () =>
+        resolved(
+          { amount: "lostWalletKeep", change: "gain", kind: "money" },
+          { encounter: "lostWallet", kind: "instant" },
+        ),
+      money(read(tuning, "money", "lostWalletKeep"), "+"),
+    ],
+    [
+      "a card cost",
+      () =>
+        resolved(
+          { amount: "encounterLow", change: "lose", kind: "money" },
+          { encounter: "skunk", kind: "encounter", option: 2 },
+        ),
+      money(read(tuning, "money", "encounterLow"), "−"),
+    ],
+    [
+      "a Spotlight bump",
+      () => [bumpCash(gameData, spotlight)].flatMap((change) => (change === null ? [] : [change])),
+      money(read(tuning, "money", "spotlightBump"), "−"),
+    ],
+  ] satisfies readonly [string, () => readonly Change[], string][])(
+    "shows %s as its amount alone",
+    (_name, changes, text) => {
+      expect(changeLabels(gameData, AT, changes()).map((label) => label.text)).toEqual([text]);
+    },
+  );
 });
 
 describe("the money counter", () => {
@@ -168,7 +226,7 @@ describe("the money counter", () => {
       const tip = tipValue(gameData, run);
       const shown = (money: Cents) => Number(dollarAmountText(money).replaceAll(",", ""));
       const gain = shown(cents(run.money + tip.amount)) - shown(run.money);
-      expect(changeLabels(gameData, AT, [tip])[0]?.text.split(" ")[0]).toBe(`+$${gain}`);
+      expect(changeLabels(gameData, AT, [tip])[0]?.text).toBe(`+$${gain}`);
     }
   });
 });

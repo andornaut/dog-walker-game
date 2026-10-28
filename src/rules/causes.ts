@@ -12,7 +12,8 @@ import { type Cents, type Hearts, roundDollars } from "./units";
 // limit (a meter held within 0 and its max, money held at $0 or more).
 export type Cause =
   | { readonly amount: number; readonly bound: "max" | "min"; readonly kind: "limit" }
-  | { readonly amount: number; readonly kind: "bonus" | "bump" | "pay" | "tip" | "treat" }
+  | { readonly amount: number; readonly kind: "bonus" | "pay" | "tip" }
+  | { readonly amount: number; readonly kind: "bump" | "treat" }
   | { readonly amount: number; readonly kind: "effect"; readonly source: EffectSource }
   | ModifierCause;
 
@@ -140,16 +141,21 @@ function effectSourceName(data: CauseData, source: ModifierSource): string {
   }
 }
 
-// A readable name for one cause of a change, such as "tip" or "Big tipper".
-export function causeName(data: CauseData, change: Change, cause: Cause): string {
+// A cause a heart label or a card's breakdown names: any but the Walk bonus, a zone's pay or a
+// tip, which only ever start a money change outside a card, whose label shows its amount alone.
+export type NamedCause = Exclude<Cause, { readonly kind: "bonus" | "pay" | "tip" }>;
+
+export function isNamedCause(cause: Cause): cause is NamedCause {
+  return cause.kind !== "bonus" && cause.kind !== "pay" && cause.kind !== "tip";
+}
+
+// A readable name for one cause of a change, such as "bump" or "Big tipper".
+export function causeName(data: CauseData, change: Change, cause: NamedCause): string {
   switch (cause.kind) {
     case "effect":
     case "modifier":
       return effectSourceName(data, cause.source);
-    case "bonus":
     case "bump":
-    case "pay":
-    case "tip":
     case "treat":
       return data.runText.causes[cause.kind];
     case "limit":
@@ -173,12 +179,8 @@ export function amountText(kind: Change["kind"], amount: number): string {
   return kind === "hearts" ? heartsChangeText(amount) : signedText(amount, wholeDollarText(amount));
 }
 
-// A card choice's own effects need no name: the player just picked them. A change cancelled
-// to nothing names only what cancelled it, as "+$0 Stinky".
-function namesBase(change: Change, cause: Cause): boolean {
-  if (changeAmount(change) === 0 && change.causes.length > 1) {
-    return false;
-  }
+// A card choice's own effects need no name: the player just picked them.
+function namesBase(cause: NamedCause): boolean {
   if (cause.kind !== "effect") {
     return true;
   }
@@ -186,21 +188,17 @@ function namesBase(change: Change, cause: Cause): boolean {
   return kind !== "encounter" && kind !== "upgrade";
 }
 
-// The short floating label for a change: its amount, then its base unless the player just
-// picked it on a card, then everything that changed it, as "−1♥ bump", "+0♥ Second chance" or
-// "+$2 tip, Big tipper".
-export function causeLabel(data: CauseData, change: Change): string {
+// The short floating label for a heart change: its amount, then its base unless the player just
+// picked it on a card, then everything that changed it, as "−1♥ bump" or "−2♥, Lucky collar".
+// A money change's label shows its amount alone (amountText).
+export function causeLabel(data: CauseData, change: HeartChange): string {
   const amount = amountText(change.kind, changeAmount(change));
-  const [base, ...rest] = change.causes;
+  const [base, ...rest] = change.causes.filter(isNamedCause);
   const others = rest.map((cause) => causeName(data, change, cause));
   if (base === undefined) {
     return amount;
   }
-  if (namesBase(change, base)) {
-    return [`${amount} ${causeName(data, change, base)}`, ...others].join(", ");
-  }
-  // A change cancelled to nothing reads as what cancelled it, as "+$0 Stinky".
-  return changeAmount(change) === 0 && others.length > 0
-    ? `${amount} ${others.join(", ")}`
+  return namesBase(base)
+    ? [`${amount} ${causeName(data, change, base)}`, ...others].join(", ")
     : [amount, ...others].join(", ");
 }

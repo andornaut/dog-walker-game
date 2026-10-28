@@ -12,12 +12,11 @@ import { LONE } from "../testing/packPlaces";
 import { activeModifier, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
-import { causeLabel, type Change, changeAmount } from "./causes";
+import { causeLabel, type Change, changeAmount, type HeartChange } from "./causes";
 import { maxHearts } from "./dogs";
 import { changeHearts, resolveEffects } from "./effects";
-import { formatDollars } from "./effectText";
-import { payZone, tipValue } from "./run";
-import { cents, read } from "./units";
+import { tipValue } from "./run";
+import { read } from "./units";
 
 const data = {
   debuffs: DEBUFFS,
@@ -47,20 +46,6 @@ const resolved = (
   source: EffectSource = skunkIgnore,
 ) => only(resolveEffects(data, { affected, source }, [effect], state).changes);
 
-const sweetTalker = activeModifier(
-  { kind: "upgrade", upgrade: "sweetTalker" },
-  { by: "sweetTalkerFreeCards", operation: "add", stat: "freeCards" },
-);
-const lonePay = read(TEST_TUNING, "money", "payPerDog");
-const tipText = formatDollars(
-  cents(read(TEST_TUNING, "money", "tip") + read(TEST_TUNING, "money", "bigTipperTipBonus")),
-);
-
-const towel: Effect = {
-  amount: "encounterLow",
-  change: "lose",
-  kind: "money",
-};
 const loseOne: Effect = { amount: -1, kind: "hearts", target: { kind: "affected" } };
 // A lone dog's owner's max.
 const maxOf = (dog: DogId) => maxHearts(TEST_TUNING, [], LONE, DOGS[dog]);
@@ -71,70 +56,49 @@ const bigTipper = activeModifier(
 );
 const bigTipperTip = () => tipValue(data, testState({ kilo: 5 }, { modifiers: [bigTipper] }));
 
+function hearts(change: Change | null): HeartChange {
+  if (change?.kind !== "hearts") {
+    throw new Error("Expected a heart change");
+  }
+  return change;
+}
+
 describe("causeLabel", () => {
-  it("names each cause", () => {
-    for (const [, change, text] of [
-      [
-        "a card option just picked by its amount alone",
-        () => resolved(loseOne, testState({ reggie: 5 }), ["reggie"]),
-        "−1♥",
-      ],
-      [
-        "the max when a gain is cut short there",
-        () =>
-          resolved(gainTwo, testState({ reggie: maxOf("reggie") - 1 }), [], {
-            kind: "upgrade",
-            upgrade: "bellyRubs",
-          }),
-        `+1♥, ${RUN_TEXT.causes.atMax}`,
-      ],
-      [
-        "the tip and Big tipper's bonus",
-        bigTipperTip,
-        `+${tipText} ${RUN_TEXT.causes.tip}, ${UPGRADES.bigTipper.name}`,
-      ],
-      [
-        "a zone's pay as pay alone",
-        () => only(payZone(data, testState({ duchess: 5 })).changes),
-        `+${formatDollars(cents(lonePay))} ${RUN_TEXT.causes.pay}`,
-      ],
-      [
-        "a cost by its amount alone",
-        () =>
-          resolved(
-            towel,
-            testState({ duchess: 5, kilo: 5 }, { cardsThisZone: 1, modifiers: [sweetTalker] }),
-            ["duchess", "kilo"],
-          ),
-        `−${formatDollars(read(TEST_TUNING, "money", "encounterLow"))}`,
-      ],
-      [
-        "a treat as the base",
-        () =>
-          changeHearts(
-            data,
-            [{ amount: read(TEST_TUNING, "hearts", "treat"), kind: "treat" }],
-            "kilo",
-            testState({ kilo: 3 }),
-          ).change,
-        `+${read(TEST_TUNING, "hearts", "treat")}♥ ${RUN_TEXT.causes.treat}`,
-      ],
-      [
-        "an instant encounter as the base",
-        () =>
-          resolved(
-            { amount: "lostWalletKeep", change: "gain", kind: "money" },
-            testState({ kilo: 5 }),
-            [],
-            { encounter: "lostWallet", kind: "instant" },
-          ),
-        `+${formatDollars(read(TEST_TUNING, "money", "lostWalletKeep"))} ${ENCOUNTERS.lostWallet.name}`,
-      ],
-    ] satisfies readonly [string, () => Change | null, string][]) {
-      const made = change();
-      expect(made === null ? null : causeLabel(data, made)).toBe(text);
-    }
-  });
+  const treat = read(TEST_TUNING, "hearts", "treat");
+  it.each([
+    [
+      "a card option just picked by its amount alone",
+      () => resolved(loseOne, testState({ reggie: 5 }), ["reggie"]),
+      "−1♥",
+    ],
+    [
+      "the max when a gain is cut short there",
+      () =>
+        resolved(gainTwo, testState({ reggie: maxOf("reggie") - 1 }), [], {
+          kind: "upgrade",
+          upgrade: "bellyRubs",
+        }),
+      `+1♥, ${RUN_TEXT.causes.atMax}`,
+    ],
+    [
+      "a treat as the base",
+      () =>
+        changeHearts(data, [{ amount: treat, kind: "treat" }], "kilo", testState({ kilo: 3 }))
+          .change,
+      `+${treat}♥ ${RUN_TEXT.causes.treat}`,
+    ],
+    [
+      "a bump as the base",
+      () =>
+        changeHearts(data, [{ amount: -1, kind: "bump" }], "kilo", testState({ kilo: 3 })).change,
+      `−1♥ ${RUN_TEXT.causes.bump}`,
+    ],
+  ] satisfies readonly [string, () => Change | null, string][])(
+    "names %s",
+    (_name, change, text) => {
+      expect(causeLabel(data, hearts(change()))).toBe(text);
+    },
+  );
 });
 
 describe("change causes", () => {

@@ -35,7 +35,6 @@ import { itemAt } from "../lib/arrays";
 import { seededRandom } from "../lib/random";
 import { keysOf } from "../lib/records";
 import { earnedByRun, runCountersOf } from "../rules/achievements";
-import { causeLabel } from "../rules/causes";
 import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices";
 import { modifiersOf, modifierValue } from "../rules/modifiers";
 import { currentZone } from "../rules/route";
@@ -73,7 +72,6 @@ import {
   ZONE_IDS,
 } from "../testing/planner";
 import { activeModifier, heartsByDog } from "../testing/runState";
-import { TEST_TUNING } from "../testing/tuning";
 import {
   atPack,
   data,
@@ -601,20 +599,14 @@ describe("stepWalk", () => {
     }
   });
 
-  it("pays a tip grabbed its value, labelled, clean or Stinky", () => {
-    for (const [, debuffed, amount, label] of [
-      [
-        "clean",
-        (walk: Walk) => walk,
-        read(tuning, "money", "tip"),
-        `+$${TEST_TUNING.money.tip} tip`,
-      ],
-      ["Stinky", stinkyRun, 0, `+$0 ${DEBUFFS.stinky.name}`],
+  it("pays a tip grabbed its value, clean or Stinky", () => {
+    for (const [, debuffed, amount] of [
+      ["clean", (walk: Walk) => walk, read(tuning, "money", "tip")],
+      ["Stinky", stinkyRun, 0],
     ] as const) {
       const { run } = debuffed(walkWith(["kilo"]));
       const { tip } = collectTip(data, run);
       expect(tip.amount).toBe(amount);
-      expect(causeLabel(data, tip)).toBe(label);
     }
   });
 

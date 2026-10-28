@@ -80,8 +80,9 @@ describe("causeLabel at a firing", () => {
       [{ amount: -2, kind: "hearts", target: { kind: "affected" } }],
       testState({ kilo: 1 }),
     );
-    expect(changes.map((change) => causeLabel(data, change))).toEqual([
-      `−1♥, ${firedByText(data, "kilo")}`,
-    ]);
+    const labels = changes.flatMap((change) =>
+      change.kind === "hearts" ? [causeLabel(data, change)] : [],
+    );
+    expect(labels).toEqual([`−1♥, ${firedByText(data, "kilo")}`]);
   });
 });

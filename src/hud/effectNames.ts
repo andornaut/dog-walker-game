@@ -105,7 +105,7 @@ export function withNamePills(data: NameData, text: string, own: readonly NameMa
 }
 
 // The debuff's name where text first names it as a word, as a debuff's strip line ("Stinky pack!")
-// or a tip it zeroed ("+$0 Stinky") does, or none.
+// does, or none.
 export function debuffNameMarks(
   data: Pick<GameData, "debuffs">,
   debuff: DebuffId,

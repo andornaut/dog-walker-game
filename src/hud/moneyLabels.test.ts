@@ -1,11 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { gameData } from "../data";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { rectsOverlap } from "../lib/rect";
-import { amountText, causeLabel } from "../rules/causes";
-import { payFor } from "../rules/run";
-import { cents } from "../rules/units";
+import { amountText } from "../rules/causes";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { inkRowsOfLines } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
@@ -20,7 +17,6 @@ import {
   moneyChipPlace,
   moneyFlightPath,
   stackOrders,
-  tipLabelText,
 } from "./moneyLabels";
 import { WALK_BAR, walkBarLayout } from "./walkHud";
 
@@ -96,112 +92,38 @@ describe("cashChipPlace", () => {
   );
 });
 
-describe("tipLabelText", () => {
-  const { stinky } = gameData.debuffs;
-  const tipper = gameData.upgrades.bigTipper.name;
-  it.each([
-    [
-      "one tip",
-      [{ amount: 100, kind: "tip" }],
-      { amount: 100, count: 1, others: [], zeroed: false },
-    ],
-    [
-      "one Big tipper tip",
-      [
-        { amount: 100, kind: "tip" },
-        { amount: 100, kind: "modifier", source: { kind: "upgrade", upgrade: "bigTipper" } },
-      ],
-      { amount: 200, count: 1, others: [tipper], zeroed: false },
-    ],
-    [
-      "one tip Stinky zeroed",
-      [
-        { amount: 100, kind: "tip" },
-        { amount: -100, kind: "modifier", source: { debuff: "stinky", kind: "debuff" } },
-      ],
-      { amount: 0, count: 1, others: [stinky.name], zeroed: true },
-    ],
-  ] as const)("reads %s as its change's label", (_name, causes, tips) => {
-    const change = { amount: cents(tips.amount), causes, dog: null, kind: "money" } as const;
-    expect(tipLabelText(gameData, tips)).toBe(causeLabel(gameData, change));
-  });
-
-  const { tips } = gameData.runText.causes;
-  it.each([
-    ["two tips", { amount: 200, count: 2, others: [], zeroed: false }, `+$2 ${tips}`],
-    [
-      "three Big tipper tips",
-      { amount: 600, count: 3, others: [tipper], zeroed: false },
-      `+$6 ${tips}, ${tipper}`,
-    ],
-    [
-      "two tips Stinky zeroed",
-      { amount: 0, count: 2, others: [stinky.name], zeroed: true },
-      `+$0 ${stinky.name}`,
-    ],
-  ])("reads %s as one label", (_name, tally, text) => {
-    expect(tipLabelText(gameData, tally)).toBe(text);
-  });
-});
-
 describe("mergeTips", () => {
-  const tipper = gameData.upgrades.bigTipper.name;
-  const { stinky } = gameData.debuffs;
-  const { tips } = gameData.runText.causes;
-  const tip = (amount: number, others: string[] = []): ChangeLabel => ({
+  const tip = (amount: number): ChangeLabel => ({
     amount,
     gain: amount > 0,
-    target: { kind: "cash", others },
-    text: tipLabelText(gameData, { amount, count: 1, others, zeroed: false }),
+    target: { kind: "cash" },
+    text: amountText("money", amount),
   });
-  const zeroed: ChangeLabel = {
-    amount: 0,
-    gain: false,
-    target: { kind: "cash", others: [stinky.name] },
-    text: `+$0 ${stinky.name}`,
-    zeroedBy: "stinky",
-  };
+  const zeroed: ChangeLabel = { ...tip(0), zeroedBy: "stinky" };
   const bump: ChangeLabel = {
     amount: -1000,
     gain: false,
     target: { from: { x: 0, y: 0 }, kind: "bank" },
-    text: "−$10 bump",
+    text: amountText("money", -1000),
   };
   it.each([
-    [
-      "two tips",
-      { count: 1, label: tip(100) },
-      tip(100),
-      { amount: 200, count: 2, others: [], text: `+$2 ${tips}` },
-    ],
-    [
-      "a third tip, one Big tipper changed",
-      { count: 2, label: { ...tip(200), text: `+$2 ${tips}` } },
-      tip(200, [tipper]),
-      { amount: 400, count: 3, others: [tipper], text: `+$4 ${tips}, ${tipper}` },
-    ],
-    [
-      "two Stinky tips",
-      { count: 1, label: zeroed },
-      zeroed,
-      { amount: 0, count: 2, others: [stinky.name], text: `+$0 ${stinky.name}` },
-    ],
-  ])("adds up %s on one label", (_name, showing, next, merged) => {
-    const result = mergeTips(gameData, showing, next);
-    expect(result?.count).toBe(merged.count);
-    expect(result?.label).toMatchObject({
-      amount: merged.amount,
-      target: { kind: "cash", others: merged.others },
-      text: merged.text,
+    ["two tips", tip(100), tip(100), { amount: 200, text: "+$2" }],
+    ["two Big tipper tips", tip(200), tip(200), { amount: 400, text: "+$4" }],
+    ["two Stinky tips", zeroed, zeroed, { amount: 0, text: "+$0", zeroedBy: "stinky" }],
+  ])("adds up %s on one label by its amount alone", (_name, showing, next, merged) => {
+    expect(mergeTips(showing, next)).toEqual({
+      gain: merged.amount > 0,
+      target: { kind: "cash" },
+      ...merged,
     });
   });
 
   it.each([
-    ["a Stinky tip into a paying one", { count: 1, label: tip(100) }, zeroed],
-    ["a paying tip into a Stinky one", { count: 1, label: zeroed }, tip(100)],
-    ["a bump into a tip", { count: 1, label: tip(100) }, bump],
+    ["a Stinky tip into a paying one", tip(100), zeroed],
+    ["a paying tip into a Stinky one", zeroed, tip(100)],
+    ["a bump into a tip", tip(100), bump],
   ])("keeps %s apart", (_name, showing, next) => {
-    expect(mergeTips(gameData, showing, next)).toBeUndefined();
+    expect(mergeTips(showing, next)).toBeUndefined();
   });
 });
 
@@ -235,34 +157,13 @@ describe("moneyFlightPath", () => {
   });
 });
 
-// Every money change, after the largest amounts, fits the label's room: a card option's or any
-// other source's, a zone's pay, and a tip with what changed it.
+// Every money label, at the largest amounts a change makes, fits the label's room.
 describe("a money change's label", () => {
-  const modifiers = [
-    ...Object.values(gameData.debuffs).map(({ name }) => name),
-    ...Object.values(gameData.shopGear).map(({ name }) => name),
-    ...Object.values(gameData.upgrades).map(({ name }) => name),
-    ...Object.values(gameData.walkerPerks).map(({ name }) => name),
-  ];
-  const sources = [
-    ...modifiers,
-    ...Object.values(gameData.encounters).flatMap(({ name, resolution }) => [
-      name,
-      ...(resolution.kind === "card" ? resolution.options.map((option) => option.name) : []),
-    ]),
-  ];
-  const money = [
-    ...sources.map((name) => `+$999 ${name}`),
-    `${amountText("money", payFor(gameData.tuning))} ${gameData.runText.causes.pay}`,
-    ...modifiers.map((name) => `+$99 ${gameData.runText.causes.tip}, ${name}`),
-    ...modifiers.map((name) => `+$99 ${gameData.runText.causes.tips}, ${name}`),
-  ];
-  it("fits every money change", () => {
-    const misfits = [...new Set(money)].filter((text) => {
-      const { room } = MONEY_LABEL;
-      const fitted = fitInFont("font-body", CHANGE_LABEL_STYLES, room, plainMarks(text));
-      return fitted.lines.length > (fitted.style.lines ?? 1) || fitted.widest > room;
-    });
-    expect(misfits).toEqual([]);
+  it.each([999, -999, 0])("fits %i dollars", (dollars) => {
+    const { room } = MONEY_LABEL;
+    const text = amountText("money", dollars * 100);
+    const fitted = fitInFont("font-body", CHANGE_LABEL_STYLES, room, plainMarks(text));
+    expect(fitted.lines).toHaveLength(1);
+    expect(fitted.widest).toBeLessThanOrEqual(room);
   });
 });
