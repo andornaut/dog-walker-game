@@ -268,6 +268,9 @@ export class SpawnCells {
   private readonly moverHeld: Int32Array;
   // Lanes a mover other than a dart holds, which no rider takes.
   private readonly otherMoverHeld: Int32Array;
+  // Lanes a mover other than a dart or a lane-blocking rider holds: a lane-blocking rider may take
+  // one another such rider holds, where their hit boxes never meet (ridersMeet).
+  private readonly stepperHeld: Int32Array;
   // Lanes a moving prize holds, which a spawn a mover may pass over still keeps off.
   private readonly prizeHeld: Int32Array;
   // Lanes where a mover may end a move and stand, which no spawn that blocks no lane takes but
@@ -283,6 +286,7 @@ export class SpawnCells {
     this.left = rowCount * laneCount;
     this.moverHeld = new Int32Array(rowCount);
     this.otherMoverHeld = new Int32Array(rowCount);
+    this.stepperHeld = new Int32Array(rowCount);
     this.prizeHeld = new Int32Array(rowCount);
     this.restHeld = new Int32Array(rowCount);
     this.taken = new Int32Array(rowCount);
@@ -318,22 +322,26 @@ export class SpawnCells {
   }
 
   // Whether a mover of a motion may take the cell (moverMayTake).
-  isFree(motion: MoverPath["motion"], lane: number, row: number): boolean {
+  isFree(motion: MoverPath["motion"], lane: number, row: number, passRiders = false): boolean {
     const cell = laneMask(lane, 1);
+    const movers = passRiders && motion === "ride" ? this.stepperHeld : this.otherMoverHeld;
     return moverMayTake(
       motion,
       ((this.dartHeld[row] ?? 0) & cell) !== 0,
-      (((this.heldByStanding[row] ?? 0) | (this.otherMoverHeld[row] ?? 0)) & cell) !== 0,
+      (((this.heldByStanding[row] ?? 0) | (movers[row] ?? 0)) & cell) !== 0,
     );
   }
 
   // A mover, a dart or any other, takes the cell, when it is on the zone's rows.
-  takeMover(dart: boolean, lane: number, row: number): void {
+  takeMover(dart: boolean, lane: number, row: number, rider = false): void {
     if (row >= 0 && row < this.taken.length) {
       const cell = laneMask(lane, 1);
       this.take(row, cell);
       addLanes(row, cell, this.moverHeld);
       addLanes(row, cell, dart ? this.dartHeld : this.otherMoverHeld);
+      if (!dart && !rider) {
+        addLanes(row, cell, this.stepperHeld);
+      }
     }
   }
 

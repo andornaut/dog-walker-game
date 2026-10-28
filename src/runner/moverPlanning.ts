@@ -1189,16 +1189,17 @@ export function screenHasRoom(
 
 // The spawn planner's grid of rows and lanes. block blocks lanes in a row's window for rows rows,
 // as a dart's sweep where dart is set, if every lane-blocking spawn keeps clear of the path, and
-// undoes it unless keep is set.
-// leavesRoom is false when taking the cells would leave too few for the spawns placed later that
-// are never skipped. packFits is true when the pack fits between each stand and every lane-blocking
-// spawn placed so far along the path, and between the stands themselves, and stand records the
-// stands for the spawns placed later. isFree is true when a mover of a motion may take a cell
-// (moverMayTake in spawning.ts). take holds a cell for a mover, a dart if dart is set, so nothing
-// placed later takes it, but a lane-blocking standing spawn where no mover's body comes: occupy
-// records a mover's body, at distances along the zone, for those. clearOf is true when a mover's
-// body, at distances along the zone, shares no road with a lane-blocking standing spawn placed
-// so far, which a dart may set off over.
+// undoes it unless keep is set. leavesRoom is false when taking the cells would leave too few for
+// the spawns placed later that are never skipped. packFits is true when the pack fits between each
+// stand and every lane-blocking spawn placed so far along the path, and between the stands
+// themselves, and stand records the stands for the spawns placed later. isFree is true when a mover
+// of a motion may take a cell (moverMayTake in spawning.ts). take holds a cell for a mover, a dart
+// if dart is set, so nothing placed later takes it, but a lane-blocking standing spawn where no
+// mover's body comes: occupy records a mover's body, at distances along the zone, for those.
+// clearOf is true when a mover's body, at distances along the zone, shares no road with a
+// lane-blocking standing spawn placed so far, which a dart may set off over. clearOfRiders is true
+// when a lane-blocking rider's hit box never meets that of one recorded by rode, which a grid of
+// movers that block no lane leaves out.
 interface MoverGrid {
   block(row: number, lanes: LaneSpan, rows: number, keep: boolean, dart?: boolean): boolean;
   clearOf(body: MoverBody): boolean;
@@ -1208,7 +1209,63 @@ interface MoverGrid {
   occupy(body: MoverBody): void;
   packFits(stands: readonly MoverStand[]): boolean;
   stand(stands: readonly MoverStand[]): void;
-  take(dart: boolean, lane: number, row: number): void;
+  take(dart: boolean, lane: number, row: number, rider?: boolean): void;
+  clearOfRiders?(ride: RiderSpan): boolean;
+  rode?(ride: RiderSpan): void;
+}
+
+// A lane-blocking rider in road and time: the lanes it covers over its whole path as a lane mask,
+// the zone's scroll from which its hit box is on the road and moving (from) until it has left the
+// road's bottom (to), its speed down the road over the road's, and its planned hit length.
+export interface RiderSpan {
+  readonly from: number;
+  readonly lanes: number;
+  readonly length: number;
+  readonly speed: number;
+  readonly to: number;
+}
+
+// The rider span of a rider spawned at distance, at its planned hit length.
+function riderSpanOf(
+  geometry: MoverGeometry,
+  spec: MoverSpec,
+  distance: number,
+  placement: MoverPlacement,
+): RiderSpan | undefined {
+  const { path } = placement;
+  if (path.motion !== "ride") {
+    return undefined;
+  }
+  const length = Math.max(
+    bodyLength(geometry, spec.footprint.rows),
+    drawnHitLength(geometry, spec),
+  );
+  const from = distance + path.warning;
+  return {
+    from,
+    lanes: ((1 << placement.lanes.count) - 1) << placement.lanes.first,
+    length,
+    speed: path.speedMultiplier,
+    to: from + (geometry.roadLength + length) / path.speedMultiplier,
+  };
+}
+
+// Whether two riders' hit boxes meet: they share a lane and, at some moment both are on the road,
+// one's travel down it is within the other's hit length. Each one's travel grows at its speed from
+// when it enters, so the gap between them changes linearly over the moments they share.
+export function ridersMeet(a: RiderSpan, b: RiderSpan): boolean {
+  if ((a.lanes & b.lanes) === 0) {
+    return false;
+  }
+  const from = Math.max(a.from, b.from);
+  const to = Math.min(a.to, b.to);
+  if (from >= to) {
+    return false;
+  }
+  // a's travel less b's: a's hit box ends at its travel and starts its length above it.
+  const gap = (scroll: number) => a.speed * (scroll - a.from) - b.speed * (scroll - b.from);
+  const [low, high] = [gap(from), gap(to)].sort((x, y) => x - y) as [number, number];
+  return low < a.length && high > -b.length;
 }
 
 // within is the share of the zone's rows the quota's movers are spread over, from and to; the
@@ -1274,15 +1331,16 @@ function standsOf(spot: Spot): MoverStand[] {
 // to merge before it reaches the pack comes on slower, and a stepper with no room for its drawn
 // steps takes fewer or more. A mover with no room at any is dropped, which uses no random draw past
 // its own draws, as the planner drops an obstacle it has no room for. A dart may take cells other
-// spawns hold, and a rider cells only darts hold (MoverGrid.isFree); no other mover takes a cell a
-// dart holds. A mover never stands still in place of moving. Each mover makes its own draws
-// (drawMover) before it is placed, and is placed as they have it move, so the path rule holds for
-// the speed and moments it was drawn. Of the places that fit, it takes a start lane from the movers
-// stream, drawn toward the lanes left unblocked longest (laneBalanceWeight), so an edge lane that
-// fits fewer of its ways comes up as often as a middle one; then, from the spawns stream, a place
-// in that lane of the highest rank in its row, so each row gives the lane the widest reach that
-// fits there. onScreen holds the movers already on screen, from an earlier call, and gains each
-// mover placed.
+// spawns hold, and a rider cells only darts hold (MoverGrid.isFree), or another lane-blocking rider
+// holds where their hit boxes never meet (ridersMeet, MoverGrid.clearOfRiders); no other mover
+// takes a cell a dart holds. A mover never stands still in place of moving. Each mover makes its
+// own draws (drawMover) before it is placed, and is placed as they have it move, so the path rule
+// holds for the speed and moments it was drawn. Of the places that fit, it takes a start lane from
+// the movers stream, drawn toward the lanes left unblocked longest (laneBalanceWeight), so an edge
+// lane that fits fewer of its ways comes up as often as a middle one; then, from the spawns stream,
+// a place in that lane of the highest rank in its row, so each row gives the lane the widest reach
+// that fits there. onScreen holds the movers already on screen, from an earlier call, and gains
+// each mover placed.
 export function placeMovers<Kind extends string>(
   streams: PlannerStreams,
   geometry: MoverGeometry & { readonly zoneLength: number },
@@ -1292,6 +1350,16 @@ export function placeMovers<Kind extends string>(
   rows: readonly number[],
   quotas: readonly MoverQuota<Kind>[],
 ): PlacedMovers<Kind> {
+  // The spec of the mover being placed, for its rider span.
+  let placing: MoverSpec | undefined;
+  const riderOf = (spot: Spot) =>
+    placing === undefined
+      ? undefined
+      : riderSpanOf(geometry, placing, spot.distance + spot.placement.appears, spot.placement);
+  const ridersClear = (spot: Spot) => {
+    const ride = riderOf(spot);
+    return ride === undefined || (grid.clearOfRiders?.(ride) ?? true);
+  };
   const fits = (spot: Spot) => {
     const [start, end] = screenOf(spot);
     const { placement } = spot;
@@ -1302,6 +1370,7 @@ export function placeMovers<Kind extends string>(
       end <= geometry.zoneLength &&
       screenHasRoom(caps, onScreen, onScreenOf(placement.path, [start, end])) &&
       cells.every(({ lane, row }) => grid.isFree(placement.path.motion, lane, spot.row + row)) &&
+      ridersClear(spot) &&
       (body === undefined || grid.clearOf(body)) &&
       grid.leavesRoom(cells.map(({ lane, row }) => ({ lane, row: spot.row + row }))) &&
       grid.packFits(standsOf(spot)) &&
@@ -1357,6 +1426,7 @@ export function placeMovers<Kind extends string>(
     const [, to] = quotaRows;
     for (let i = 0; i < count; i++) {
       const draws = drawMover(streams);
+      placing = spec;
       const lifts = spec.motion.kind === "cross" ? [0, ...DART_LIFTS] : [0];
       const [first, end] = nthStretch(count, i, quotaRows);
       const fittingAt = (moverDraws: MoverDraws) => {
@@ -1404,7 +1474,12 @@ export function placeMovers<Kind extends string>(
       );
       const { placement } = spot;
       const dart = placement.path.motion === "cross";
-      placement.cells.forEach(({ lane, row }) => grid.take(dart, lane, spot.row + row));
+      const rider = placement.path.motion === "ride";
+      placement.cells.forEach(({ lane, row }) => grid.take(dart, lane, spot.row + row, rider));
+      const ride = riderOf(spot);
+      if (ride !== undefined) {
+        grid.rode?.(ride);
+      }
       const body = bodyOf(spot);
       if (body !== undefined) {
         grid.occupy(body);

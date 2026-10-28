@@ -10,6 +10,8 @@ import {
   type OnScreen,
   placeMovers,
   type PlannerStreams,
+  ridersMeet,
+  type RiderSpan,
 } from "./moverPlanning";
 import { hasLeftRoad, type LaneSpan, type MoverPath, moverPlace } from "./movers";
 import { type Block, LaneBlocks, PlacedPlaces, SpawnCells } from "./spawnCells";
@@ -77,7 +79,8 @@ function moverQuotas<Kind extends string>(
 }
 
 // How many kinds of cell a mover may share (moverMayTake): a stepper, hopper or stalker none, a
-// rider those only darts hold, and a dart any but those darts hold.
+// rider those only darts hold or other riders hold where they never meet, and a dart any but those
+// darts hold.
 function sharing(spec: MoverSpec): number {
   const { kind } = spec.motion;
   return kind === "cross" ? 2 : kind === "ride" ? 1 : 0;
@@ -270,6 +273,8 @@ class ZonePlanner<Kind extends string> {
   // What is on screen as the lane-blocking movers are placed.
   private readonly onScreen: OnScreen[] = [];
   private readonly places: PlacedPlaces;
+  // The lane-blocking riders placed, in road and time.
+  private readonly riders: RiderSpan[] = [];
   private readonly plan: SpawnPlan<Kind>;
   private readonly rows: readonly number[];
   private readonly spacing: number;
@@ -406,22 +411,26 @@ class ZonePlanner<Kind extends string> {
           dart,
         ),
       clearOf: (body: MoverBody) => this.clearOfStanding(body),
+      clearOfRiders: (ride: RiderSpan) => this.riders.every((other) => !ridersMeet(ride, other)),
       clearRun: (span: LaneSpan, row: number) => lanes.clearRun(span, row),
       isFree: (motion: MoverPath["motion"], lane: number, row: number) =>
-        cells.isFree(motion, lane, row),
+        cells.isFree(motion, lane, row, true),
       // Only the cells not yet taken use up room: a dart may set off over taken ones.
       leavesRoom: (spots: readonly Cell[]) => cells.leavesRoom(cells.untaken(spots)),
       occupy: ({ from, lanes: span, to }: MoverBody) => {
         this.moverBodies.push({ from, lanes: laneMask(span.first, span.count), to });
       },
       packFits: (stands: readonly MoverStand[]) => places.fitsAll(stands),
+      rode: (ride: RiderSpan) => {
+        this.riders.push(ride);
+      },
       stand: (stands: readonly MoverStand[]) => {
         for (const stand of stands) {
           places.add(stand);
         }
       },
-      take: (dart: boolean, lane: number, row: number) => {
-        cells.takeMover(dart, lane, row);
+      take: (dart: boolean, lane: number, row: number, rider = false) => {
+        cells.takeMover(dart, lane, row, rider);
       },
     };
   }
@@ -434,8 +443,12 @@ class ZonePlanner<Kind extends string> {
       ...this.moverGrid(),
       block: () => true,
       clearOf: () => true,
+      clearOfRiders: () => true,
+      isFree: (motion: MoverPath["motion"], lane: number, row: number) =>
+        this.cells.isFree(motion, lane, row),
       occupy: () => {},
       packFits: () => true,
+      rode: () => {},
       stand: () => {},
       take: (dart: boolean, lane: number, row: number) => {
         this.cells.takePrize(dart, lane, row);
@@ -799,7 +812,8 @@ class ZonePlanner<Kind extends string> {
 // none, a rider's only those darts hold and a dart's any but those, and of those the widest first
 // (placingOrder), so each placed later, freer to share, fits around those placed before. A dart may
 // set off over cells the spawns placed before it hold, crossing over or past them, and a rider may
-// pass over cells only darts hold (moverMayTake). A stop-and-go across, a vehicle crossing side-on,
+// pass over cells only darts hold (moverMayTake), or another lane-blocking rider holds where their
+// hit boxes never meet on the road (ridersMeet). A stop-and-go across, a vehicle crossing side-on,
 // is placed as a dart but has a body, which keeps clear of the lane-blocking standing spawns placed
 // before it. Nothing else placed after a mover takes its cells, another dart included, but a
 // lane-blocking standing spawn: one where a dart passes, which the dart then crosses over or past
