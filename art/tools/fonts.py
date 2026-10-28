@@ -19,7 +19,7 @@ small text reads: capitals and digits 6 rows (rows 2 to 7, Tiny5's with one row 
 REPEAT), a drawn lower case (LOWER) on a 5-row x-height (rows 3 to 7) with round letters 4 wide,
 ascenders a row above the capitals (row 1) and descenders one row (row 8), base 8. Marks that span
 the capitals get a row more; marks on the baseline or the x-height's middle move a row down
-(LOWERED). Its $ is drawn (DRAWN), as Tiny5's is too thin to read at 1x.
+(LOWERED). Its $ and % are drawn (DRAWN), as Tiny5's are too thin to read at 1x.
 
 font-display has A to Z, 0 to 9, ! ? , . ' - + $, space and ♥. Its line is 18px: the capitals'
 outline on rows 2 to 13 and their fill on rows 3 to 12 (base 13), with room above for the $ and
@@ -68,6 +68,9 @@ DRAWN = {TINY5: {
     # Tiny5's 9 closes its bowl on row 3, so it differs from the 3 only in its top two rows: a 6 turned
     # round, the bowl two rows deep.
     "9": ([".1.", "1.1", "1.1", ".11", "..1", "11."], 2, 4),
+    # Tiny5's % is 4 rows of single pixels that read as an x: the capitals' height, 2px dots either side
+    # of an unbroken slash.
+    "%": (["11..1", "11.1.", "..1..", "..1..", ".1.11", "1..11"], 2, 6),
     # The lower case: x-height rows 3 to 7, ascenders from row 1, descenders on row 8.
     "a": ([".11.", "...1", ".111", "1..1", ".111"], 3, 5),
     "b": (["1...", "1...", "111.", "1..1", "1..1", "1..1", "111."], 1, 5),
@@ -106,7 +109,7 @@ REPEAT = {TINY5: {
     **{c: 2 for c in "!?()[]{}/\\|#&@<>"},
 }}
 # Marks on the baseline or the x-height's middle, a row lower with them.
-LOWERED = {TINY5: set(".,;:-+=*~_%·♥")}
+LOWERED = {TINY5: set(".,;:-+=*~_·♥")}
 # How many rows lower than the face's ascent the baseline is.
 BASE_DROP = {TINY5: 1}
 # Kerning pairs by font file. Silkscreen's $ inks its right column on two rows only, so a digit
