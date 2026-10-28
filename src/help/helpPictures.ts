@@ -31,6 +31,7 @@ import {
   zoneLength,
 } from "../runner/walk";
 import { walkProjection } from "../runner/walkGeometry";
+import { heartsOf, mapPack } from "../state/pack";
 import {
   type CardSource,
   newRun,
@@ -294,15 +295,14 @@ function cards(data: GameData): HelpPicture {
 function owners(data: GameData): HelpPicture {
   const { bumped, dogs, fired, lane, zoneFraction } = HELP_SCENES.owners;
   const started = startRun(data, dogs);
-  const hearts = (slot: PackSlot | undefined) => (slot?.status === "walking" ? slot.hearts : 0);
-  const before = hearts(started.pack.find((slot) => slot.dog === bumped.dog));
+  const before = heartsOf(started, bumped.dog) ?? 0;
   const after = clampHearts(before, before - bumped.lost);
-  const pack = started.pack.map((slot): PackSlot => {
+  const pack = mapPack((slot): PackSlot => {
     if (slot.dog === fired) {
       return { dog: slot.dog, status: "fired", zoneIndex: 0 };
     }
     return slot.dog === bumped.dog && slot.status === "walking" ? { ...slot, hearts: after } : slot;
-  }) as unknown as RunState["pack"];
+  }, started.pack);
   const change: Change = {
     after,
     before: clampHearts(before, before),
