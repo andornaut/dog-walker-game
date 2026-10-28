@@ -304,7 +304,7 @@ TRAIN_AXLE, TRAIN_WHEEL = 37.2, 4.4
 # Moving: the wheels' spokes turn a quarter of their spacing a frame (roll), the engine dips 1px onto its wheels
 # on frames 1 and 2 and the cars bob 1px in turn; 4 frames at 100ms, as every drive. Stopped: the second car's
 # middle passenger waves, the hand swung out on frame 2; 4 frames at 400ms. Restarting: the whistle's puff grows out of
-# the stack and lifts away; 3 frames at 120ms, as the carriage's cue.
+# the stack and lifts away; 3 frames at 120ms.
 TRAIN_TAGS = (
     ("push", tuple(dict(roll=r) for r in range(4)), 100),
     ("idle", (dict(), dict(wave=1), dict(wave=2), dict(wave=1)), 400),
