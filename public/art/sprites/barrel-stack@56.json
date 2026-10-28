@@ -1,0 +1,46 @@
+{ "frames": {
+   "barrel-stack@56 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 27, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 27, "h": 27 },
+    "sourceSize": { "w": 27, "h": 27 },
+    "duration": 400
+   },
+   "barrel-stack@56 1.aseprite": {
+    "frame": { "x": 27, "y": 0, "w": 27, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 27, "h": 27 },
+    "sourceSize": { "w": 27, "h": 27 },
+    "duration": 400
+   },
+   "barrel-stack@56 2.aseprite": {
+    "frame": { "x": 54, "y": 0, "w": 27, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 27, "h": 27 },
+    "sourceSize": { "w": 27, "h": 27 },
+    "duration": 400
+   },
+   "barrel-stack@56 3.aseprite": {
+    "frame": { "x": 81, "y": 0, "w": 27, "h": 27 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 27, "h": 27 },
+    "sourceSize": { "w": 27, "h": 27 },
+    "duration": 400
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "barrel-stack@56.png",
+  "format": "RGBA8888",
+  "size": { "w": 108, "h": 27 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

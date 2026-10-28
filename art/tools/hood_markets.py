@@ -26,6 +26,11 @@ rolling-barrel      48x48   minor dart, 1 lane: a whisky barrel on its side roll
                             rolls right, the game mirrors it for left. idle (2 frames, 400ms):
                             resting, rocking 15 degrees; run (8 frames, 60ms): a full turn, 45
                             degrees a frame, a puff of dust kicked up behind it
+barrel-stack        48x48   minor, 1 lane: three whisky barrels stacked as a pyramid on a tan pallet,
+                            lying on their sides with their ochre heads to the camera, each in a silver
+                            hoop with a bark stencil (a diamond round a dot), the brown bodies showing
+                            above the heads, bark wedges chocking the bottom two. idle (4 frames,
+                            400ms): a glint runs down the top barrel's hoop on frames 2 and 3
 
 Kensington Market:
 
@@ -407,6 +412,83 @@ BARREL_IDLE = ((0,), (15,)), 400
 BARREL_RUN = tuple((k * 45, k % 2) for k in range(8)), 60
 
 
+# ---------- the barrel stack ----------
+
+def barrel_end(g, cx, cy, r, glint=None):
+    """A barrel lying on its side with its head to the camera, centred on cx, cy with radius r in layout
+    pixels: its brown body showing above the head, lit tan, a grey hoop round it; a silver hoop (lgrey,
+    lit white on its upper left, shaded grey on its lower right) and a dbrown chime round the ochre head,
+    its brown stave seams upright and a bark stencil on it, a diamond round a dot. glint is the angle in
+    degrees, clockwise from the right, of a white glint on the hoop. Drawn pixel for pixel at the grid's
+    scale so its rings and seams stay 1px."""
+    px, s = raster(g), scale_of(g)
+    cx, cy, r = cx * s, cy * s, r * s
+    lift = max(2, round(2.2 * s))
+    hoop, chime = max(1, round(1.2 * s)), max(1, round(1.2 * s)) + max(1, round(1.2 * s))
+    gap = max(4, round(3.3 * s))
+    for y in range(px.h):
+        for x in range(px.w):
+            dx, dy = x + 0.5 - cx, y + 0.5 - cy
+            d = math.hypot(dx, dy)
+            if d <= r:
+                light = (dx + dy) / max(d, 1e-9)
+                if d > r - hoop:
+                    c = "grey" if light > 0.4 else "lgrey"
+                elif d > r - chime:
+                    c = "dbrown"
+                else:
+                    c = "brown" if math.floor(dx + 0.5 * gap) % gap == 0 else "ochre"
+                px.p(x, y, c)
+                continue
+            # the body above the head, seen from above: the head's disc pushed back lift pixels
+            for k in range(1, lift + 1):
+                if math.hypot(dx, dy + k) <= r:
+                    px.p(x, y, "tan" if k == lift and math.hypot(dx, dy + k - 1) > r else "brown")
+                    break
+    # the stencil: a diamond round a dot, the dot alone where the head is too small to hold the diamond
+    m = round(2.2 * s) if s > 0.9 else 0
+    ox, oy = math.floor(cx), math.floor(cy)
+    for i in range(m + 1 if m else 0):
+        for x, y in ((ox - m + i, oy - i), (ox + i, oy - m + i), (ox + m - i, oy + i), (ox - i, oy + m - i)):
+            px.p(x, y, "bark")
+    px.p(ox, oy, "bark")
+    if glint is not None:
+        a = math.radians(glint)
+        rr = r - hoop / 2
+        for t in (a, a + math.radians(8)):
+            px.p(math.floor(cx + math.cos(t) * rr), math.floor(cy + math.sin(t) * rr), "white")
+
+
+def barrel_stack(glint=None):
+    """Three whisky barrels stacked as a pyramid on a pallet in a lane, laid out on 40x40: two lying side by
+    side with their heads to the camera and the third in the groove on top (barrel_end), bark wedges
+    chocking the bottom two at either end, all on a tan pallet lit cream with brown blocks, the road showing
+    through its fork openings. glint runs a white glint along the top barrel's hoop."""
+    g = edged(Grid(ob.SIZE, ob.SIZE))
+    # the pallet's foot on row 37, as produce_crates' crates stand
+    r, base = 7.5, 33
+    low = base - r
+    top = low - r * math.sqrt(3)
+    x0, x1 = 3, 37
+    # the pallet: a deck board on three blocks on a bottom board
+    g.rect(x0, base, x1 - x0, 2, "tan")
+    g.rect(x0, base, x1 - x0, 1, "cream")
+    for x in (x0, 18, x1 - 4):
+        g.rect(x, base + 2, 4, 1, "brown")
+    g.rect(x0, base + 3, x1 - x0, 1, "brown")
+    barrel_end(g, 20, top, r, glint)
+    barrel_end(g, 20 - r, low, r)
+    barrel_end(g, 20 + r, low, r)
+    # the wedges chocking the bottom barrels
+    g.tri((x0, base), (x0 + 4, base), (x0, base - 4), "bark")
+    g.tri((x1, base), (x1 - 4, base), (x1, base - 4), "bark")
+    return lit(g, dict(bark=("clay", None)))
+
+
+# The glint runs down the top barrel's hoop on its upper left on frames 2 and 3.
+STACK_IDLE = (None, 200, 235, None), 400
+
+
 # ---------- the fish crate spill ----------
 
 def fish(g, x, y, length, back, belly, flip=False, tail=0.0, head=0.0, eye="ink"):
@@ -742,6 +824,8 @@ def road_sprites(s=1):
     run, run_ms = BARREL_RUN
     yield "rolling-barrel", [("idle", frames(p, rolling_barrel, [dict(rock=a) for a, in idle]), idle_ms),
                              ("run", frames(p, rolling_barrel, [dict(turn=a, dust=d) for a, d in run]), run_ms)]
+    args, ms = STACK_IDLE
+    yield "barrel-stack", [("idle", frames(o, barrel_stack, [dict(glint=a) for a in args]), ms)]
     args, ms = FISH_IDLE
     yield "fish-crates", [("idle", frames(p, fish_crates, [dict(flop=a) for a in args]), ms)]
     args, ms = CHEESE_IDLE

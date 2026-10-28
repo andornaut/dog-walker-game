@@ -1299,6 +1299,87 @@
       }
     },
     {
+      "key": "barrel-stack",
+      "png": "sprites/barrel-stack.png",
+      "json": "sprites/barrel-stack.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "barrel-stack@50",
+      "png": "sprites/barrel-stack@50.png",
+      "json": "sprites/barrel-stack@50.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "barrel-stack@56",
+      "png": "sprites/barrel-stack@56.png",
+      "json": "sprites/barrel-stack@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "barrel-stack@62",
+      "png": "sprites/barrel-stack@62.png",
+      "json": "sprites/barrel-stack@62.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "barrel-stack@69",
+      "png": "sprites/barrel-stack@69.png",
+      "json": "sprites/barrel-stack@69.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "barrel-stack@75",
+      "png": "sprites/barrel-stack@75.png",
+      "json": "sprites/barrel-stack@75.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "barrel-stack@81",
+      "png": "sprites/barrel-stack@81.png",
+      "json": "sprites/barrel-stack@81.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "barrel-stack@88",
+      "png": "sprites/barrel-stack@88.png",
+      "json": "sprites/barrel-stack@88.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 37
+      }
+    },
+    {
+      "key": "barrel-stack@94",
+      "png": "sprites/barrel-stack@94.png",
+      "json": "sprites/barrel-stack@94.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 39
+      }
+    },
+    {
       "key": "barrier-2",
       "png": "sprites/barrier-2.png",
       "json": "sprites/barrier-2.json",
