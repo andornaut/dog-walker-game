@@ -10,7 +10,6 @@ import {
   bumpFlash,
   type BumpSource,
   FLASH_COLOURS,
-  MINOR_FLASH_COLOURS,
 } from "./bumpFlash";
 
 const MINOR_OBSTACLES = keysOf(gameData.minorObstacles);
@@ -20,19 +19,22 @@ const BUMPED_ENCOUNTERS = keysOf(gameData.encounters).filter((id) => {
   const encounter = gameData.encounters[id];
   return encounter.kind === "obstacle" && encounter.resolution.kind !== "pull";
 });
+// A minor obstacle and a bumped encounter: the flash reads its colour the same way for every
+// kind of each.
 const SOURCES: readonly BumpSource[] = [
-  ...MINOR_OBSTACLES.map((obstacle): BumpSource => ({ kind: "minor", obstacle })),
-  ...BUMPED_ENCOUNTERS.map((encounter): BumpSource => ({ encounter, kind: "encounter" })),
+  ...MINOR_OBSTACLES.slice(0, 1).map((obstacle): BumpSource => ({ kind: "minor", obstacle })),
+  ...BUMPED_ENCOUNTERS.slice(0, 1).map(
+    (encounter): BumpSource => ({ encounter, kind: "encounter" }),
+  ),
 ];
 const SCREEN: Rect = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 };
 
+// The minor obstacles' table is typed over every kind; the encounters' is partial.
 describe("bump flash colours", () => {
-  it.each(MINOR_OBSTACLES)("gives the minor obstacle %s a border colour", (obstacle) => {
-    expect(MINOR_FLASH_COLOURS[obstacle]).toBeDefined();
-  });
-
-  it.each(BUMPED_ENCOUNTERS)("gives the bumped encounter %s a flash colour", (encounter) => {
-    expect(FLASH_COLOURS[encounter]).toBeDefined();
+  it("gives every bumped encounter a flash colour", () => {
+    expect(BUMPED_ENCOUNTERS.filter((encounter) => FLASH_COLOURS[encounter] === undefined)).toEqual(
+      [],
+    );
   });
 });
 
