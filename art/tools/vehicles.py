@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Draw the vehicle minor obstacles: the garbage truck (garbageTruck) and the scooter (scooter), High Park's
-tourist train, Yonge Street's crossing TTC bus and the Distillery District's brewery dray. Like obstacles.py's
-the truck and the scooter are billboards from a low camera, a front elevation, squat, with at most a sliver of
-top surface; the train, the bus and the dray are crossers, side on. All take the road outline and road.LIT's
-rim.
+tourist train, Yonge Street's crossing TTC bus, the Distillery District's brewery dray and The Beaches'
+patrol buggy. Like obstacles.py's the truck and the scooter are billboards from a low camera, a front
+elevation, squat, with at most a sliver of top surface; the train, the bus, the dray and the buggy are
+crossers, side on. All take the road outline and road.LIT's rim.
 
 stink-garbage-truck 56x60   a rear-loader garbage truck from behind, its hopper
                             open on bags and a banana peel, the beacon blinking, two flies.
@@ -66,6 +66,20 @@ brewery-dray        176x64  the Distillery District's brewery dray crossing the 
                             bobbing 1px in turn; idle (4 frames, 400ms): stopped, the driver waving out
                             of the open cab, the hand swung out on frame 2; cue (3 frames, 120ms): the
                             roof beacon blinking, the wheels a quarter turned on frame 2
+patrol-buggy        112x64  The Beaches' lifeguard patrol buggy crossing the road side on, facing right
+                            (the game mirrors it for left), on the train's grid two lanes wide: an open red
+                            utility buggy with a white rescue cross on its cargo bed's side, a white rail
+                            along its top, a white roll bar with a red light bar over the lifeguard
+                            (sunglasses, a red tank top) at the wheel, a lit headlamp (road.headlamp) at
+                            the nose, a red and yellow surf flag on a whip pole at the back, and two black
+                            tires with white hubs; it tows a small trailer carrying a yellow rescue board
+                            with grab handles along its rail. The lifeguard chair's red, white and yellow,
+                            told apart from it by its wheels and its length. push (4 frames, 100ms): a
+                            spoke across each hub turning an eighth a frame, the buggy dipping 1px onto
+                            its wheels on frames 1 and 2 and the trailer bobbing 1px in turn; idle (4
+                            frames, 400ms): stopped, the flag's fly end lifting on frames 1 to 3, furthest
+                            on frame 2; cue (3 frames, 120ms): the light bar flashing on frames 0 and 2,
+                            the wheels a quarter turned on frame 2
 
 Every key also has <key>@<step> for each depth step in minis.STEPS, floor(size x scale + 0.5), with
 the original's tags, frames and durations, drawn on a minis.Mini with its own outline. The scooter's
@@ -815,13 +829,155 @@ def brewery_dray(roll=None, wave=0, blink=0):
     return lit(g, dict(brick=("rust", None), dbrick=("brick", None)))
 
 
+# ---------- lifeguard patrol buggy ----------
+
+
+# The key, and the buggy's design grid: 112x64 at road.SCALE, two lanes on the train's grid.
+BUGGY_KEY = "patrol-buggy"
+BUGGY_W, BUGGY_H = 112 / SCALE, TRAIN_H
+# The buggy's wheels (column, radius) and the trailer's, each on its axle row, their feet on the train's row.
+BUGGY_FEET = TRAIN_AXLE + TRAIN_WHEEL
+BUGGY_WHEELS, BUGGY_WHEEL = (37, 64.5), 5.4
+TRAILER_WHEEL_X, TRAILER_WHEEL = 13, 3.8
+# Moving: the hubs' spokes turn an eighth a frame, the buggy dips 1px onto its wheels on frames 1 and 2 and the
+# trailer bobs 1px in turn, as the train's cars; 4 frames at 100ms. Stopped: the surf flag on its whip pole
+# flutters, its fly end lifting on frames 1 to 3 and furthest on frame 2; 4 frames at 400ms. Pulling away: the
+# roll bar's light bar flashes, the wheels a quarter turned on frame 2; 3 frames at 120ms, the train's.
+BUGGY_TAGS = (
+    ("push", tuple(dict(roll=r) for r in range(4)), 100),
+    ("idle", (dict(), dict(flap=1), dict(flap=2), dict(flap=1)), 400),
+    ("cue", (dict(flash=1), dict(), dict(roll=1, flash=1)), 120),
+)
+
+
+def buggy_wheel(g, cx, r, roll):
+    """A black tire side on round a white hub, its feet on BUGGY_FEET, a dslate spoke across the hub turned an
+    eighth of a turn clockwise a frame (roll 0 to 3), as bus_wheel's."""
+    cy = BUGGY_FEET - r
+    g.ell(cx, cy, r, r, "ink")
+    g.rect(cx - r + 0.6, cy - 1.5, 0.75, 3, "dslate")
+    g.ell(cx, cy, r * 0.5, r * 0.5, "white", "lgrey")
+    a, d = math.pi / 4 * roll, r * 0.42
+    dx, dy = d * math.sin(a), -d * math.cos(a)
+    strand(g, [(cx - dx, cy - dy), (cx + dx, cy + dy)], "dslate")
+
+
+def trailer(g):
+    """The trailer behind the buggy: a dslate frame on one small wheel's fender, a red tail light at its back,
+    its tongue to the hitch, and the rescue board lying on it, yellow with a white lit top, grab handles along its amber rail, its nose
+    turned up at the front."""
+    g.rect(2, 31, 21, 3, "dslate")
+    row(g, 2, 23, 31, "slate")
+    g.rect(22, 32, 7, 1.5, "ink")
+    g.rect(1, 31, 2, 2.5, "red")
+    g.cel(TRAILER_WHEEL_X, 32.5, 5.5, 2, "dslate", None, power=3)
+    # the board, flat along the bed, its nose rising at the front, a dark fin under its tail and the grab
+    # handles along its amber rail
+    g.rect(1.5, 27, 21, 3.5, "yellow")
+    quad(g, (21, 27), (24, 25.2), (25.5, 26.2), (21, 30.5), "yellow")
+    g.rect(1.5, 29, 21, 1.5, "amber")
+    quad(g, (21, 29), (25, 26.2), (25.5, 26.2), (21, 30.5), "amber")
+    g.rect(1.5, 27, 21, 0.75, "white")
+    for x in (5, 10, 15):
+        g.rect(x, 29.25, 2, 1, "dslate")
+
+
+def buggy_body(g, flap=0, flash=0):
+    """The buggy facing right: the surf flag on its whip pole at the back, the red cargo bed with a white rescue
+    cross on its side, the seat and the lifeguard in a red tank top driving, the white roll bar over them with
+    its light bar, the red hood sloping to the headlamp, the bumpers and the black running board between the
+    wheel arches."""
+    # the whip pole and the surf flag on it, red over yellow, flying back; flap lifts its fly end
+    g.rect(28.5, 2, 1, 23, "dslate")
+    lift = (0, 0.75, 1.5)[flap]
+    quad(g, (21, 2.5 - lift), (28.5, 2.5), (28.5, 5), (21, 5 - lift), "red")
+    quad(g, (21, 5 - lift), (28.5, 5), (28.5, 7.5), (21, 7.5 - lift), "yellow")
+    # the roll bar: a white hoop from the bed over the seat to the hood, its light bar on top
+    g.rect(41, 7, 1.75, 17, "white")
+    g.rect(41, 6, 17, 1.75, "white")
+    quad(g, (56.5, 6), (58.25, 6), (60.75, 22), (59, 22), "lgrey")
+    g.rect(41.5, 7.75, 1.25, 16, "lgrey")
+    g.rect(44, 3.5, 11, 2.5, "dslate")
+    for x in (44.5, 51):
+        g.rect(x, 3.5, 3.5, 2, "pink" if flash else "red")
+        if flash:
+            g.rect(x + 1, 3.5, 1.5, 1, "white")
+    # the seat back and the lifeguard: a red tank top, arms to the wheel, sunglasses, dbrown hair
+    g.rect(43, 16, 2.5, 10, "dslate")
+    g.cel(48.5, 22, 4, 5.5, "red", "dred", None, power=3)
+    g.rect(46.5, 16.5, 4, 2, "skin1")
+    g.rect(51, 20.5, 5, 1.5, "skin1")
+    g.rect(51, 21.5, 5, 0.75, "skin2")
+    face_disc(g, 48.5, 13, 3, 3, "skin1", "skin2")
+    g.cel(48, 10.8, 3.2, 1.8, "dbrown", None, power=3)
+    g.rect(45.3, 11, 1.5, 3.5, "dbrown")
+    g.rect(49.5, 12.5, 2.4, 1.2, "ink")
+    # the steering wheel's column
+    g.rect(55, 18.5, 1.25, 4.5, "dslate")
+    g.rect(54, 19, 1.25, 4, "ink")
+    # the cargo bed: its red side with the white rescue cross, a white rail along its top
+    g.rect(27, 18, 16, 15, "red")
+    row(g, 27, 43, 18, "white")
+    g.rect(27, 18.75, 16, 0.75, "white")
+    g.rect(32.5, 20.5, 3, 9, "white")
+    g.rect(29.5, 23.5, 9, 3, "white")
+    # the body under the seat and the hood, sloping down to the nose
+    g.rect(42.5, 26, 15, 7, "red")
+    quad(g, (57, 22), (69, 23.5), (72.5, 27), (57, 33), "red")
+    g.rect(57, 26, 15.5, 7, "red")
+    row(g, 57, 69, 22, "pink")
+    g.rect(42.5, 26, 15, 0.75, "white")
+    g.rect(71, 27, 1.5, 6, "dred")
+    g.rect(27, 31.5, 45.5, 1.5, "dred")
+    # the headlamp at the nose (road.headlamp), the bumpers at each end
+    headlamp(g, 70.5, 27.5)
+    g.rect(71.5, 29.5, 2, 4.5, "dslate")
+    g.rect(26, 29.5, 1.5, 4.5, "dslate")
+    # the dark wheel arches, cut off at the running board
+    for cx in BUGGY_WHEELS:
+        g.ell(cx, BUGGY_FEET - BUGGY_WHEEL, BUGGY_WHEEL + 1.4, BUGGY_WHEEL + 1.4, "navy")
+    g.rect(0, 34.5, BUGGY_W, BUGGY_H, None)
+    g.rect(42.5, 33, 15, 1.5, "ink")
+
+
+def patrol_buggy(roll=None, flap=0, flash=0):
+    """The Beaches' lifeguard patrol buggy side on, facing right, towing the rescue board's trailer (see the
+    docstring). roll (0 to 3) is a push frame: the spokes turn, the buggy dips onto its wheels on frames 1 and
+    2 and the trailer bobs in turn; flap lifts the surf flag's fly end (2 furthest), flash lights the light bar."""
+    g = edged(Grid(BUGGY_W, BUGGY_H))
+    px = raster(g)
+    moving = roll is not None
+    dip = 1 if roll in (1, 2) else 0
+    alt = 1 if roll in (0, 3) else 0
+    out = [[None] * px.w for _ in range(px.h)]
+
+    def layer(draw, dy):
+        px.px = [[None] * px.w for _ in range(px.h)]
+        draw()
+        for y in range(dy, px.h):
+            for x in range(px.w):
+                c = px.px[y - dy][x]
+                if c:
+                    out[y][x] = c
+
+    def wheels():
+        for x in BUGGY_WHEELS:
+            buggy_wheel(g, x, BUGGY_WHEEL, roll or 0)
+        buggy_wheel(g, TRAILER_WHEEL_X, TRAILER_WHEEL, roll or 0)
+
+    layer(lambda: trailer(g), alt if moving else 0)
+    layer(lambda: buggy_body(g, flap, flash), dip)
+    layer(wheels, 0)
+    px.px = out
+    return lit(g)
+
 # ---------- build ----------
 
 
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for each sprite at full size, then at every depth
     step: the garbage truck on a minis.Mini at TRUCK_SCALE x the step, the scooter, the tourist train, the
-    TTC bus and the brewery dray at road.SCALE x the step."""
+    TTC bus, the brewery dray and the patrol buggy at road.SCALE x the step."""
     this = sys.modules[__name__]
     drive, drive_ms = obstacles.DRIVE
     for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
@@ -844,6 +1000,10 @@ def sprites():
         s = SCALE * step
         yield f"{DRAY_KEY}{suffix}", [(tag, [small(this, s, brewery_dray, **q).outlined() for q in poses], ms)
                                       for tag, poses, ms in DRAY_TAGS]
+    for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
+        s = SCALE * step
+        yield f"{BUGGY_KEY}{suffix}", [(tag, [small(this, s, patrol_buggy, **q).outlined() for q in poses], ms)
+                                       for tag, poses, ms in BUGGY_TAGS]
 
 
 if __name__ == "__main__":

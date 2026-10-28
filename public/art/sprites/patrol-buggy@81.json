@@ -1,0 +1,104 @@
+{ "frames": {
+   "patrol-buggy@81 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 91, "h": 52 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 91, "h": 52 },
+    "sourceSize": { "w": 91, "h": 52 },
+    "duration": 100
+   },
+   "patrol-buggy@81 1.aseprite": {
+    "frame": { "x": 91, "y": 0, "w": 91, "h": 52 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 91, "h": 52 },
+    "sourceSize": { "w": 91, "h": 52 },
+    "duration": 100
+   },
+   "patrol-buggy@81 2.aseprite": {
+    "frame": { "x": 182, "y": 0, "w": 91, "h": 52 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 91, "h": 52 },
+    "sourceSize": { "w": 91, "h": 52 },
+    "duration": 100
+   },
+   "patrol-buggy@81 3.aseprite": {
+    "frame": { "x": 273, "y": 0, "w": 91, "h": 52 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 91, "h": 52 },
+    "sourceSize": { "w": 91, "h": 52 },
+    "duration": 100
+   },
+   "patrol-buggy@81 4.aseprite": {
+    "frame": { "x": 364, "y": 0, "w": 91, "h": 52 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 91, "h": 52 },
+    "sourceSize": { "w": 91, "h": 52 },
+    "duration": 400
+   },
+   "patrol-buggy@81 5.aseprite": {
+    "frame": { "x": 455, "y": 0, "w": 91, "h": 52 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 91, "h": 52 },
+    "sourceSize": { "w": 91, "h": 52 },
+    "duration": 400
+   },
+   "patrol-buggy@81 6.aseprite": {
+    "frame": { "x": 546, "y": 0, "w": 91, "h": 52 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 91, "h": 52 },
+    "sourceSize": { "w": 91, "h": 52 },
+    "duration": 400
+   },
+   "patrol-buggy@81 7.aseprite": {
+    "frame": { "x": 637, "y": 0, "w": 91, "h": 52 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 91, "h": 52 },
+    "sourceSize": { "w": 91, "h": 52 },
+    "duration": 400
+   },
+   "patrol-buggy@81 8.aseprite": {
+    "frame": { "x": 728, "y": 0, "w": 91, "h": 52 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 91, "h": 52 },
+    "sourceSize": { "w": 91, "h": 52 },
+    "duration": 120
+   },
+   "patrol-buggy@81 9.aseprite": {
+    "frame": { "x": 819, "y": 0, "w": 91, "h": 52 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 91, "h": 52 },
+    "sourceSize": { "w": 91, "h": 52 },
+    "duration": 120
+   },
+   "patrol-buggy@81 10.aseprite": {
+    "frame": { "x": 910, "y": 0, "w": 91, "h": 52 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 91, "h": 52 },
+    "sourceSize": { "w": 91, "h": 52 },
+    "duration": 120
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "patrol-buggy@81.png",
+  "format": "RGBA8888",
+  "size": { "w": 1001, "h": 52 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "push", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "idle", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "cue", "from": 8, "to": 10, "direction": "forward" }
+  ]
+ }
+}

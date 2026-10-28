@@ -8038,6 +8038,87 @@
       }
     },
     {
+      "key": "patrol-buggy",
+      "png": "sprites/patrol-buggy.png",
+      "json": "sprites/patrol-buggy.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 110
+      }
+    },
+    {
+      "key": "patrol-buggy@50",
+      "png": "sprites/patrol-buggy@50.png",
+      "json": "sprites/patrol-buggy@50.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 55
+      }
+    },
+    {
+      "key": "patrol-buggy@56",
+      "png": "sprites/patrol-buggy@56.png",
+      "json": "sprites/patrol-buggy@56.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "patrol-buggy@62",
+      "png": "sprites/patrol-buggy@62.png",
+      "json": "sprites/patrol-buggy@62.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 69
+      }
+    },
+    {
+      "key": "patrol-buggy@69",
+      "png": "sprites/patrol-buggy@69.png",
+      "json": "sprites/patrol-buggy@69.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 76
+      }
+    },
+    {
+      "key": "patrol-buggy@75",
+      "png": "sprites/patrol-buggy@75.png",
+      "json": "sprites/patrol-buggy@75.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 83
+      }
+    },
+    {
+      "key": "patrol-buggy@81",
+      "png": "sprites/patrol-buggy@81.png",
+      "json": "sprites/patrol-buggy@81.json",
+      "anchor": {
+        "feetY": 51,
+        "opaqueWidth": 89
+      }
+    },
+    {
+      "key": "patrol-buggy@88",
+      "png": "sprites/patrol-buggy@88.png",
+      "json": "sprites/patrol-buggy@88.json",
+      "anchor": {
+        "feetY": 55,
+        "opaqueWidth": 96
+      }
+    },
+    {
+      "key": "patrol-buggy@94",
+      "png": "sprites/patrol-buggy@94.png",
+      "json": "sprites/patrol-buggy@94.json",
+      "anchor": {
+        "feetY": 59,
+        "opaqueWidth": 103
+      }
+    },
+    {
       "key": "pedicab",
       "png": "sprites/pedicab.png",
       "json": "sprites/pedicab.json",
