@@ -246,8 +246,8 @@ export function noteDebuffCosts(
     readonly walk: { readonly run: Pick<RunState, "debuffs"> };
   },
 ): void {
-  for (const tip of step.tips) {
-    for (const cause of tip.causes) {
+  for (const { change } of step.tips) {
+    for (const cause of change.causes) {
       if (cause.kind === "modifier" && cause.source.kind === "debuff") {
         costs[cause.source.debuff].centsLost -= cause.amount;
       }
@@ -418,7 +418,10 @@ function playBySkill(
           for (const dog of event.step.fired) {
             tally.firings.push({ dog, zoneIndex: pulledWalk.run.zoneIndex });
           }
-          tally.tips = event.step.tips.reduce((sum, tip) => addCents(sum, tip.amount), tally.tips);
+          tally.tips = event.step.tips.reduce(
+            (sum, tip) => addCents(sum, tip.change.amount),
+            tally.tips,
+          );
           if (event.step.bumps.length > 0) {
             bot.replan = true;
           }

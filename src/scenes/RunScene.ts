@@ -78,7 +78,7 @@ import { RunMoments, showHint } from "./run/runMoments";
 import { emitDevState, RunRecorder } from "./run/runRecorder";
 import { type RunRandom, runRandom } from "./run/runStart";
 import { ShadowPool } from "./run/shadowPool";
-import { LAYOUT, packPoint } from "./run/stage";
+import { LAYOUT, overPack, packPoint } from "./run/stage";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 
@@ -517,7 +517,8 @@ export class RunScene extends Scene implements HudRun {
         const { choice, outcome, timeMs } = event;
         recorder.log({ choice, kind: "card", timeMs });
         world.menus.closeCard();
-        moments.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
+        const over = overPack(packPoint(this.session?.walk));
+        moments.addChanges(over, [...outcome.heartChanges, ...outcome.moneyChanges]);
         moments.chosen(outcome);
         moments.sayQuips(outcome.quips);
         moments.afterOutcome(outcome);

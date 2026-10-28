@@ -15,6 +15,7 @@ import {
 } from "../hud/effectIcons";
 import { debuffNameMarks, withNamePills } from "../hud/effectNames";
 import { explainDetail } from "../hud/explain";
+import { FEEDBACK } from "../hud/feedback";
 import { runHintTriggers } from "../hud/hintTriggers";
 import {
   CHANGE_LABEL_STYLES,
@@ -25,7 +26,8 @@ import {
 } from "../hud/hudLanes";
 import type { ChangeLabel } from "../hud/hudView";
 import type { MessageLine } from "../hud/messageStrip";
-import { cardOwnerMood, FORGIVEN_EVENT, type ForgivenCue } from "../hud/moments";
+import { cardOwnerMood, curvePoint, FORGIVEN_EVENT, type ForgivenCue } from "../hud/moments";
+import { MONEY_LABEL, moneyChipPlace, moneyFlightPath, stackOrders } from "../hud/moneyLabels";
 import { STRIP_LINE_FIELDS } from "../hud/runText";
 import {
   buttonIcon,
@@ -63,13 +65,13 @@ import {
 } from "../hud/walkHud";
 import { screenLayout } from "../layout/screenLayout";
 import { fillLine } from "../lib/lines";
-import type { Rect } from "../lib/rect";
+import type { Point, Rect } from "../lib/rect";
 import { ownerMaxHearts } from "../rules/dogs";
 import { debuffLasting } from "../rules/durations";
 import { hintFor, hintJumpsQueue } from "../rules/hints";
 import { currentZone } from "../rules/route";
 import { faceMood } from "../rules/treats";
-import { type Cents, read } from "../rules/units";
+import { type Cents, cents, read } from "../rules/units";
 import type { PackSlot, RunState } from "../state/runState";
 import {
   addFilledRect,
@@ -194,8 +196,6 @@ export type HudSceneData = { picture: { source: HudWalk; view: ScenePicture } } 
 // except the walk's moments: while the player has paused, heart pops, change labels, owners'
 // pop-ins and the message strip's ageing hold.
 export class HudScene extends Scene {
-  private bankLabels: ChangeLabel[] = [];
-  private bankShowing = false;
   private cards: CardView[] = [];
   private debuffBars: DebuffBarView[] = [];
   private debuffFills: GameObjects.Graphics | undefined;
@@ -212,6 +212,8 @@ export class HudScene extends Scene {
   private labels = new TimedGroup();
   private messages = new MessageStrip();
   private money: GameObjects.BitmapText | undefined;
+  // The money changes still flying to the cash, which the counter leaves out until they land.
+  private moneyInFlight = 0;
   private owners: OwnerTabs | undefined;
   private pauseGlyph: GameObjects.Graphics | undefined;
   private pauseIcon: GameObjects.Image | undefined;
@@ -228,9 +230,8 @@ export class HudScene extends Scene {
     super(key);
   }
 
-  // The HUD's lanes, under the message strip as tall as the body font draws it.
   private lanes(): HudLanes {
-    return hudLanes(pixelFontMetrics(this, "body"), LAYOUT);
+    return hudLanes(LAYOUT);
   }
 
   create(data: HudSceneData): void {
@@ -246,8 +247,7 @@ export class HudScene extends Scene {
     this.effectParts = [];
     this.explained = NOT_EXPLAINED;
     this.messages = new MessageStrip();
-    this.bankLabels = [];
-    this.bankShowing = false;
+    this.moneyInFlight = 0;
     this.labels = new TimedGroup();
     const g = this.add.graphics();
     // The card band ends on the dog row's bottom row, its top rows (the shadow and the trim)
@@ -534,9 +534,10 @@ export class HudScene extends Scene {
     }
   }
 
-  // The counter leaves out fees still flying to it.
+  // The counter leaves out fees and money changes still flying to it.
   private shownMoney(money: Cents): Cents {
-    return this.feedback?.shownMoney(money) ?? money;
+    const landed = cents(money - this.moneyInFlight);
+    return this.feedback?.shownMoney(landed) ?? landed;
   }
 
   // The "$" and the amount from the cash's x at the largest scale that fits, one font advance
@@ -820,16 +821,17 @@ export class HudScene extends Scene {
     return index < 0 ? undefined : index;
   }
 
-  // Each change shows in its lane and fades out: a money change in the bank lane (one at a
-  // time); a heart change pops over its dog and flies into its card (heartFeedback.ts), its
-  // label then fading in place on the card's bottom rows, while its owner pops in on the card
-  // for ownerMs.
+  // Each change shows where it happened: a money change pops where it changed hands and flies
+  // into the cash; a heart change pops over its dog and flies into its card (heartFeedback.ts),
+  // its label then fading in place on the card's bottom rows, while its owner pops in on the
+  // card for ownerMs.
   private floatLabels(ownerMs: number, labels: ChangeLabel[]): void {
     const run = this.walk();
-    this.bankLabels.push(...labels.filter((label) => label.target.kind === "bank"));
-    if (!this.bankShowing) {
-      this.showNextBankLabel();
-    }
+    const money = labels.flatMap((label) =>
+      label.target.kind === "bank" ? [{ from: label.target.from, label }] : [],
+    );
+    const orders = stackOrders(money.map(({ from }) => from));
+    money.forEach(({ from, label }, i) => this.showMoneyLabel(label, from, orders[i] ?? 0));
     const pops = heartPops({ lanes: this.lanes().heartLabels, run }, labels, (slot) => {
       const view = this.cards[slot];
       return view === undefined ? undefined : { card: view.card, parts: cardParts(view) };
@@ -874,48 +876,81 @@ export class HudScene extends Scene {
     }
   }
 
-  // The next money change in the bank lane, under the cash well: it rises from the lane's
-  // bottom to its top, or fades in place with reduced motion, then the next follows.
-  private showNextBankLabel(): void {
-    const label = this.bankLabels.shift();
-    this.bankShowing = label !== undefined;
-    if (label === undefined) {
+  // A money change pops on its chip from from, where it changed hands, order places up the
+  // stack of labels popping there, and holds as a heart's pop does; then it flies along a heart's
+  // arc into the cash, which counts it as it lands. Reduced motion keeps the pop and fades it in
+  // place, as a heart lands without flying.
+  private showMoneyLabel(label: ChangeLabel, from: Point, order: number): void {
+    const body = pixelFontMetrics(this, "body");
+    const chip = this.addChangeChip(label, MONEY_LABEL.room, (shown) =>
+      moneyChipPlace(body, SCREEN_CONFIG.width, from, order, shown),
+    );
+    if (this.walk().reducedMotion()) {
+      this.labels.join(fadeAway(this, chip.parts, { ms: LABEL.ms, rise: 0 }));
       return;
     }
-    const rise = !this.walk().reducedMotion();
-    this.showLabel(label, { anchor: "bottom", lane: this.lanes().bank, rise }, () =>
-      this.showNextBankLabel(),
-    );
+    const { amount } = label;
+    this.moneyInFlight += amount;
+    const land = () => {
+      this.moneyInFlight -= amount;
+      chip.parts.forEach((part) => part.destroy());
+    };
+    const path = moneyFlightPath(chip.rect);
+    this.labels.after(this, MONEY_LABEL.holdMs, () => {
+      const bases = chip.parts.map(({ x, y }) => ({ x, y }));
+      const progress = { t: 0 };
+      this.labels.tween(this, {
+        duration: FEEDBACK.heart.flyMs,
+        ease: "Sine.easeIn",
+        onComplete: land,
+        onUpdate: () => {
+          const point = curvePoint(path.from, path.control, path.to, progress.t);
+          const dx = Math.round(point.x) - path.from.x;
+          const dy = Math.round(point.y) - path.from.y;
+          chip.parts.forEach((part, i) => {
+            const base = bases[i] ?? part;
+            part.setPosition(base.x + dx, base.y + dy);
+          });
+        },
+        t: 1,
+        targets: progress,
+      });
+    });
   }
 
-  // A heart change's label on its card's bottom rows, once its heart has landed.
+  // A heart change's label in the middle of its card's bottom rows, once its heart has landed,
+  // fading in place.
   private showHeartLabel(label: ChangeLabel, lane: Rect): void {
-    this.showLabel(label, { anchor: "middle", lane, rise: false });
+    const body = pixelFontMetrics(this, "body");
+    const chip = this.addChangeChip(label, changeLabelRoom(lane.width), (shown) =>
+      changeChipPlace(body, lane, shown),
+    );
+    this.labels.join(fadeAway(this, chip.parts, { ms: LABEL.ms, rise: 0 }));
   }
 
   // A change on a cream chip, so gains in forest and losses in dark red read over anything, and
-  // one a debuff zeroed, as Stinky's "+$0" tip, in the debuff's colour; fitted to its lane by
-  // CHANGE_LABEL_STYLES. A rising chip rises to the lane's top.
-  private showLabel(
+  // one a debuff zeroed, as Stinky's "+$0" tip, in the debuff's colour; fitted to room by
+  // CHANGE_LABEL_STYLES, and placed by place. Its parts, and its chip's rect.
+  private addChangeChip(
     label: ChangeLabel,
-    at: { anchor: "bottom" | "middle"; lane: Rect; rise: boolean },
-    done: () => void = () => undefined,
-  ): void {
+    room: number,
+    place: (shown: { lines: number; scale: number; width: number }) => { chip: Rect; text: Point },
+  ): {
+    parts: (GameObjects.Graphics | GameObjects.BitmapText)[];
+    rect: Rect;
+  } {
     const colour =
       label.amount === 0 ? PALETTE.grey : label.gain ? PALETTE.forest : PALETTE.darkRed;
     const text = addPixelText(this, 0, 0, changeLabelText(label), { colour, scale: 2 });
-    const room = changeLabelRoom(at.lane.width);
     const { lines, style } = fitPixelText(text, { room, styles: CHANGE_LABEL_STYLES }, 0, 0);
     const ink = inkSpan(text);
-    const shown = { lines: lines.length, scale: style.scale, width: ink.right - ink.left };
-    const place = changeChipPlace(pixelFontMetrics(this, "body"), at.lane, at.anchor, shown);
-    placePixelText(text, place.text.x - ink.left, place.text.y);
+    const placed = place({ lines: lines.length, scale: style.scale, width: ink.right - ink.left });
+    placePixelText(text, placed.text.x - ink.left, placed.text.y);
     const chip = this.add.graphics();
-    drawFramedRect(chip, { border: PALETTE.plum, fill: PALETTE.cream }, place.chip);
+    drawFramedRect(chip, { border: PALETTE.plum, fill: PALETTE.cream }, placed.chip);
     text.setDepth(1);
     const pills = addNamePills([text]);
-    const rise = at.rise ? place.chip.y - at.lane.y : 0;
-    this.labels.join(fadeAway(this, [chip, ...pills, text], { ms: LABEL.ms, rise }, done));
+    return { parts: [chip, ...pills, text], rect: placed.chip };
   }
 
   // The first-time hints the run's state raises, each said on the message strip once.

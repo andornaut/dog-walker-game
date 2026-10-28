@@ -181,10 +181,17 @@ export interface RoadGeometry {
   tallestPackBand: number;
 }
 
-// A lucky encounter that applied on contact, with no card.
+// A lucky encounter that applied on contact, with no card, and the item the pack grabbed.
 interface InstantFind {
   encounter: EncounterId;
+  item: WalkItem;
   outcome: ChoiceOutcome;
+}
+
+// A tip the pack grabbed: the money it paid, and its item.
+interface TipGrab {
+  change: MoneyChange;
+  item: WalkItem;
 }
 
 // A gear drop the pack grabbed: its gear, now the found item, and the found item it replaced,
@@ -233,12 +240,11 @@ interface RoadModified {
   readonly value: ModifiedValue;
 }
 
-// bumps, cards, contacts, found, instants and treats are in the order the pack met them; tips are the
-// money changes of the tips collected; modified every value modifiers changed, in the order the
-// pack met their items; fired the owners a bump left at 0 hearts; zoneEnded is
-// set on the step that reaches the end of the zone. encounterHits are the card obstacles met
-// this step, which play a hit moment. A hit stop holds the step's cards and zone end back to the
-// step it ends on.
+// bumps, cards, contacts, found, instants, tips and treats are in the order the pack met them;
+// modified every value modifiers changed, in the order the pack met their items; fired the
+// owners a bump left at 0 hearts; zoneEnded is set on the step that reaches the end of the zone.
+// encounterHits are the card obstacles met this step, which play a hit moment. A hit stop holds
+// the step's cards and zone end back to the step it ends on.
 export interface WalkStep {
   bumps: MinorBump[];
   cards: CardSource[];
@@ -249,7 +255,7 @@ export interface WalkStep {
   found: GearFind[];
   instants: InstantFind[];
   modified: RoadModified[];
-  tips: MoneyChange[];
+  tips: TipGrab[];
   treats: TreatGrab[];
   walk: Walk;
   zoneEnded: boolean;
@@ -1442,7 +1448,7 @@ export function stepWalk(
   const found: GearFind[] = [];
   const instants: InstantFind[] = [];
   const modified: RoadModified[] = [];
-  const tips: MoneyChange[] = [];
+  const tips: TipGrab[] = [];
   const treats: TreatGrab[] = [];
   const modifiedAt = (item: WalkItem, values: readonly (ModifiedValue | null)[]) => {
     for (const value of values) {
@@ -1459,7 +1465,7 @@ export function stepWalk(
     if (kind === "tip") {
       const pickup = collectTip(data, nextRun);
       nextRun = countTally("tips", pickup.run);
-      tips.push(pickup.tip);
+      tips.push({ change: pickup.tip, item });
       collected.push(item);
       modifiedAt(item, [changeModified(pickup.tip)]);
     } else if (kind === "treat") {
@@ -1506,7 +1512,7 @@ export function stepWalk(
         nextRun = outcome.state;
         if (resolution.kind === "instant") {
           nextRun = countTally(resolution.tally, nextRun);
-          instants.push({ encounter: kind, outcome });
+          instants.push({ encounter: kind, item, outcome });
         } else {
           contacts.push({ dog, encounter: kind, item, outcome });
         }

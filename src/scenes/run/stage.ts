@@ -69,6 +69,11 @@ export function packPoint(walk: Walk | undefined): { x: number; y: number } {
   return { x, y: walkerFootY(road) - 20 };
 }
 
+// Over the pack at pack: where pops over the pack, its sparkles and its money labels show.
+export function overPack(pack: { x: number; y: number }): { x: number; y: number } {
+  return { x: pack.x, y: pack.y - 24 };
+}
+
 // How long a firing holds the walk, read live from the tuning.
 export function firingSeconds(): number {
   return read(gameData.tuning, "seconds", "firingHoldSeconds");

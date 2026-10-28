@@ -22,7 +22,7 @@ import { PackView } from "./run/packView";
 import { RoadArt, RoadView } from "./run/roadView";
 import { CHANGE_LABELS_EVENT } from "./run/runMoments";
 import { ShadowPool } from "./run/shadowPool";
-import { DEPTH, LANE_XS } from "./run/stage";
+import { DEPTH, LANE_XS, overPack, packPoint } from "./run/stage";
 import { SCENE_KEYS } from "./sceneKeys";
 import { freezeScene, type ScenePicture, showAsPicture } from "./scenePicture";
 import { tagFrame } from "./uiKit";
@@ -175,7 +175,8 @@ export class HelpPictureScene extends Scene {
     this.scene.launch(SCENE_KEYS.helpHud, data);
     this.whenCreated(SCENE_KEYS.helpHud, (hud) => {
       if (picture.changes.length > 0) {
-        events.emit(CHANGE_LABELS_EVENT, changeLabels(gameData, picture.changes));
+        const labels = changeLabels(gameData, overPack(packPoint(walk)), picture.changes);
+        events.emit(CHANGE_LABELS_EVENT, labels);
       }
       hud.events.once(Scenes.Events.POST_UPDATE, () => freezeScene(hud, STILL_FRAMES));
     });

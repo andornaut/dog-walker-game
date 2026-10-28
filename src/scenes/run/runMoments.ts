@@ -72,7 +72,7 @@ import { hintFor } from "../../rules/hints";
 import { walkLength } from "../../rules/route";
 import { read } from "../../rules/units";
 import type { PullStep } from "../../runner/pulls";
-import type { EncounterCard, MinorBump, WalkStep } from "../../runner/walk";
+import type { EncounterCard, MinorBump, WalkItem, WalkStep } from "../../runner/walk";
 import {
   type AchievementPreview,
   NOTHING_PREVIEWED,
@@ -97,7 +97,7 @@ import { flashWhite, moveObstacle, playHitEffects, shakeRoad } from "./hitFx";
 import type { ItemViews } from "./itemViews";
 import type { PackView } from "./packView";
 import { showGearPopup, showInstantPopup } from "./roadBanners";
-import { DEPTH, firingSeconds, LAYOUT } from "./stage";
+import { DEPTH, firingSeconds, LAYOUT, overPack } from "./stage";
 
 // How long the step's hit stop holds the road, or a plain obstacle's stop while it has none.
 function stopMs(step: WalkStep): number {
@@ -205,11 +205,12 @@ export class RunMoments {
     return delayMs;
   }
 
-  // The changes' labels, and each loss the walker's perk forgave: its strip line, the forgiven
-  // label over its dog forgivenAtMs on and the forgiven heart flashing back on its card.
-  addChanges(changes: readonly Change[], forgivenAtMs = 0): void {
+  // The changes' labels, money's from from, where it changed hands, and each loss the walker's
+  // perk forgave: its strip line, the forgiven label over its dog forgivenAtMs on and the
+  // forgiven heart flashing back on its card.
+  addChanges(from: Point, changes: readonly Change[], forgivenAtMs = 0): void {
     this.changes.push(...changes);
-    const labels = changeLabels(gameData, changes);
+    const labels = changeLabels(gameData, from, changes);
     if (labels.length > 0) {
       this.scene.events.emit(CHANGE_LABELS_EVENT, labels);
     }
@@ -279,9 +280,12 @@ export class RunMoments {
       sound.play("tip");
       this.hint({ kind: "tip" });
     }
-    this.addChanges(step.tips);
+    // A tip's money changes hands at its pickup.
+    for (const { change, item } of step.tips) {
+      this.addChanges(this.itemPoint(item, pack), [change]);
+    }
     for (const item of step.collected) {
-      playEffect(this.scene, "fx-sparkle", "play", { x: pack.x, y: pack.y - 24 }, DEPTH.fx);
+      playEffect(this.scene, "fx-sparkle", "play", overPack(pack), DEPTH.fx);
       if (item.kind === "treat") {
         sound.play("treat");
         this.hint({ kind: "treat" });
@@ -292,7 +296,7 @@ export class RunMoments {
       this.say(treatLine(gameData, change));
       if (change !== null) {
         this.changes.push(change);
-        const cue: TreatCue = { dog, labels: changeLabels(gameData, [change]) };
+        const cue: TreatCue = { dog, labels: changeLabels(gameData, overPack(pack), [change]) };
         this.scene.events.emit(TREAT_EVENT, cue);
       }
     }
@@ -312,6 +316,7 @@ export class RunMoments {
       this.playBumpHit(bump, step, pack);
       sound.play("bump");
       this.addChanges(
+        overPack(pack),
         [bump.change, bump.cash].flatMap((change) => (change === null ? [] : [change])),
         BUFF_POP.fadeAtMs,
       );
@@ -338,14 +343,18 @@ export class RunMoments {
       }
       this.flashBump({ encounter, kind: "encounter" });
       this.deps.pack.stumble(still, DOG_REACTIONS.splash);
-      this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
+      this.addChanges(overPack(pack), [...outcome.heartChanges, ...outcome.moneyChanges]);
       this.sayQuips(outcome.quips);
       this.afterOutcome(outcome);
     }
     this.sayQuips(step.fired.map((dog): QuipCue => ({ dog, moment: "fired" })));
     this.fired(step.fired, step.walk.run);
-    for (const { encounter, outcome } of step.instants) {
-      this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
+    // A lucky find's money changes hands at its pickup.
+    for (const { encounter, item, outcome } of step.instants) {
+      this.addChanges(this.itemPoint(item, pack), [
+        ...outcome.heartChanges,
+        ...outcome.moneyChanges,
+      ]);
       showInstantPopup(this.scene, encounter, this.deps.still());
       this.say(luckyLine(gameData, encounter, [...outcome.heartChanges, ...outcome.moneyChanges]));
       this.sayQuips(outcome.quips);
@@ -488,23 +497,33 @@ export class RunMoments {
     }
   }
 
+  // Where an item is on screen, else over the pack at pack.
+  private itemPoint(item: WalkItem, pack: Point): Point {
+    return this.deps.items.point(item.id) ?? overPack(pack);
+  }
+
   // The charm's place: beside the walker's head, over its dog, over its item, or over the pack.
   private popRect(pop: BuffPop): Rect | undefined {
-    const overPack = () =>
-      this.pack === undefined ? undefined : charmOverRect(this.pack.x, this.pack.y - 24);
+    const overPackRect = () => {
+      if (this.pack === undefined) {
+        return undefined;
+      }
+      const over = overPack(this.pack);
+      return charmOverRect(over.x, over.y);
+    };
     switch (pop.at.kind) {
       case "walker":
         return charmByWalkerRect(dogTop(this.deps.pack.walkerSprite()));
       case "dog": {
         const top = this.deps.pack.dogPoint(pop.at.dog);
-        return top === undefined ? overPack() : charmOverRect(top.x, top.y);
+        return top === undefined ? overPackRect() : charmOverRect(top.x, top.y);
       }
       case "item": {
         const point = this.deps.items.point(pop.at.item);
-        return point === null ? overPack() : charmOverRect(point.x, point.y);
+        return point === null ? overPackRect() : charmOverRect(point.x, point.y);
       }
       case "pack":
-        return overPack();
+        return overPackRect();
       default:
         return pop.at satisfies never;
     }

@@ -192,12 +192,6 @@
     ]
   },
   "hudLanes": {
-    "bank": {
-      "height": 24,
-      "width": 70,
-      "x": 5,
-      "y": 158
-    },
     "heartLabels": [
       {
         "height": 24,

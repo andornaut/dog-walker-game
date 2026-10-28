@@ -128,9 +128,9 @@ export function layoutExport(
       parts: DOG_CARD,
       slots: regions.dogSlots,
     },
-    // The walk HUD's transient layers, each kept to its lane: money changes under the message
-    // strip, the owners' tabs over the cards' tops, and heart changes by slot.
-    hudLanes: hudLanes(body, regions),
+    // The walk HUD's transient layers, each kept to its lane: the owners' tabs over the cards'
+    // tops, and heart changes by slot.
+    hudLanes: hudLanes(regions),
     // The road on each of the band's junction and approach rows, where the moving road draws
     // over the backdrop, down to the band's bottom row; bandRow counts from the band's top.
     join: bandRows.map((row) => ({

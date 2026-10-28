@@ -629,12 +629,12 @@ describe("stepWalk", () => {
     expect(after.run.zoneDistance).toBeCloseTo(4);
   });
 
-  it("collects a tip the pack walks into, worth what tips pay now", () => {
+  it("collects a tip the pack walks into, worth what tips pay now, with its item", () => {
     const walk = walkWith(["kilo"], [atPack("tip")]);
     const { collected, tips, walk: after } = step(walk);
     expect(collected.map(({ kind }) => kind)).toEqual(["tip"]);
     expect(after.run.money).toBe(walk.run.money + tipValue(data, walk.run).amount);
-    expect(tips).toEqual([tipValue(data, walk.run)]);
+    expect(tips).toEqual([{ change: tipValue(data, walk.run), item: collected[0] }]);
     expect(after.road.items).toEqual([]);
   });
 

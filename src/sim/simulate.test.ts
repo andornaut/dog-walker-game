@@ -240,12 +240,13 @@ describe("noteDebuffCosts", () => {
   // dodged.
   const step = (state: RunState) => {
     const item = {} as WalkStep["bumps"][number]["item"];
+    const tipItem = {} as WalkStep["tips"][number]["item"];
     return {
       bumps: [
         { cash: bumpCash(gameData, state), change: null, dodged: false, dog: "duchess", item },
         { cash: null, change: null, dodged: true, dog: "duchess", item },
       ] as const satisfies WalkStep["bumps"],
-      tips: [tipValue(gameData, state)],
+      tips: [{ change: tipValue(gameData, state), item: tipItem }],
       walk: { run: state },
     };
   };

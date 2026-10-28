@@ -18,7 +18,7 @@ import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import type { TextFitStyle } from "../ui/textFit";
 import { fittingFaceRows, inlineFaceBox } from "./faceText";
-import { hudLanes } from "./hudLanes";
+import { linePanels } from "./messageStrip";
 import {
   arcControl,
   bowRightControl,
@@ -415,9 +415,13 @@ describe("the low-hearts chip", () => {
 });
 
 // Every owner's fired line wraps onto the bubble's lines at 2x, and the bubble, grown up from
-// over the face, stays under the bank's lane.
+// over the face, stays under the lowest the message strip reaches, under any count of debuff
+// bars.
 describe("a fired line's bubble", () => {
-  const lanes = hudLanes(BODY, screenLayout(SCREEN_CONFIG));
+  const { topBar } = screenLayout(SCREEN_CONFIG);
+  const bars = Array.from({ length: Object.keys(gameData.debuffs).length + 1 }, (_, i) => i);
+  const panels = bars.flatMap((count) => linePanels(BODY, count, topBar));
+  const stripBottom = Math.max(...panels.map((panel) => panel.y + panel.height));
   const fired = Object.values(gameData.quips).flatMap(({ fired: lines }) => lines);
   it.each(fired)("holds %j", (text) => {
     const plain = plainMarks(text);
@@ -428,7 +432,7 @@ describe("a fired line's bubble", () => {
       const top =
         firingLayout(screenLayout(SCREEN_CONFIG).walkView, slot).line.y -
         firedLineHeight(BODY, fitted.lines.length);
-      expect(top).toBeGreaterThanOrEqual(lanes.bank.y + lanes.bank.height);
+      expect(top).toBeGreaterThanOrEqual(stripBottom);
     }
   });
 

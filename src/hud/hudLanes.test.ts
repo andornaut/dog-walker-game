@@ -5,8 +5,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
 import { type Rect, rectsOverlap } from "../lib/rect";
-import { amountText, firedByText } from "../rules/causes";
-import { payFor } from "../rules/run";
+import { firedByText } from "../rules/causes";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { inkRowsOfLines } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
@@ -17,21 +16,12 @@ import {
   changeLabelRoom,
   hudLanes,
 } from "./hudLanes";
-import {
-  lineLeadSlot,
-  MESSAGE_STRIP,
-  messageLinePanel,
-  messagePanel,
-  messageStripLayout,
-  ownerLeadLayout,
-  ownerLeadPanel,
-  stripLeadSlot,
-} from "./messageStrip";
+import { messageStripLayout } from "./messageStrip";
 import { DOG_CARD, ownerTabRect } from "./walkHud";
 
 const layout = screenLayout(SCREEN_CONFIG);
 const BODY = fontFileMetrics("font-body");
-const lanes = hudLanes(BODY, layout);
+const lanes = hudLanes(layout);
 const messages = messageStripLayout(BODY).panel;
 
 describe("hudLanes", () => {
@@ -46,9 +36,6 @@ describe("hudLanes", () => {
       ];
     });
     const pairs: [string, Rect, Rect][] = [
-      ["the bank and the walk bar", lanes.bank, layout.topBar],
-      ["the bank and the message strip", lanes.bank, messages],
-      ["the bank and the road", lanes.bank, layout.roadView],
       ["the message strip and the walk bar", messages, layout.topBar],
       ["the message strip and the road", messages, layout.roadView],
       ["the owners' tabs and the message strip", lanes.ownerTabs, messages],
@@ -59,7 +46,7 @@ describe("hudLanes", () => {
 
   it("keeps every lane on screen, with one heart label per slot and each owner tab in its lane", () => {
     expect(lanes.heartLabels).toHaveLength(layout.dogSlots.length);
-    for (const lane of [lanes.bank, messages, lanes.ownerTabs, ...lanes.heartLabels]) {
+    for (const lane of [messages, lanes.ownerTabs, ...lanes.heartLabels]) {
       expect(Math.min(lane.x, lane.y)).toBeGreaterThanOrEqual(0);
       expect(lane.x + lane.width).toBeLessThanOrEqual(SCREEN_CONFIG.width);
       expect(lane.y + lane.height).toBeLessThanOrEqual(SCREEN_CONFIG.height);
@@ -72,36 +59,10 @@ describe("hudLanes", () => {
   });
 });
 
-// Each line the strip can show under each count of debuff bars, one bar per debuff at most: with
-// none, a line on each count of the strip's rows; under bars, the one-row line; each plain or led
-// by an owner's face and name.
-const BAR_COUNTS = Array.from({ length: Object.keys(gameData.debuffs).length + 1 }, (_, i) => i);
-const STRIP_LINES = BAR_COUNTS.flatMap((bars) => {
-  const plain: [string, Rect][] =
-    bars === 0
-      ? Array.from({ length: MESSAGE_STRIP.rows }, (_, row) => [
-          `${row + 1}-row line`,
-          messagePanel(BODY, row + 1),
-        ])
-      : [["one-row line", messageLinePanel(bars).panel]];
-  const slot = bars === 0 ? stripLeadSlot(BODY) : lineLeadSlot(BODY, bars);
-  const lead = ownerLeadLayout(BODY, slot, 0);
-  return plain.flatMap(([kind, panel]) => [
-    [bars, kind, panel] as const,
-    [bars, `owner's ${kind}`, ownerLeadPanel(panel, lead)] as const,
-  ]);
-});
-
-describe("the bank lane", () => {
-  it.each(STRIP_LINES)("starts under the strip's %i-bar %s", (_bars, _kind, panel) => {
-    expect(panel.y + panel.height).toBeLessThanOrEqual(lanes.bank.y);
-  });
-});
-
-// Every cause a change label names, after the largest amounts, fits its lane on a chip inside
-// the lane, the text's ink padded inside the chip.
-describe("a change label", () => {
-  it("sets every heart and money change on a chip inside its lane", () => {
+// Every cause a heart change's label names, after the largest amount, fits its lane on a chip
+// inside the lane, the text's ink padded inside the chip.
+describe("a heart change's label", () => {
+  it("sets every heart change on a chip inside its lane", () => {
     const modifiers = [
       ...Object.values(gameData.debuffs).map(({ name }) => name),
       ...Object.values(gameData.shopGear).map(({ name }) => name),
@@ -118,27 +79,17 @@ describe("a change label", () => {
     const firedBy = (Object.keys(gameData.dogs) as DogId[]).map((dog) =>
       firedByText(gameData, dog),
     );
-    // A heart change names any source or the owner who fires you, over its card; a money
-    // change names any source, or a tip and what changed it, at the bank.
+    // A heart change names any source or the owner who fires you, over its card.
     const hearts = [...sources, ...firedBy].map((name) => `−10♥ ${name}`);
-    const money = [
-      ...sources.map((name) => `+$999 ${name}`),
-      // A zone's pay names its cause.
-      `${amountText("money", payFor(gameData.tuning))} ${gameData.runText.causes.pay}`,
-      ...modifiers.map((name) => `+$99 tip, ${name}`),
-    ];
-    const cases = [
-      ...[...new Set(hearts)].map(
-        (text) => [text, lanes.heartLabels[0] ?? lanes.bank, "middle"] as const,
-      ),
-      ...[...new Set(money)].map((text) => [text, lanes.bank, "bottom"] as const),
-    ];
-    const misfits = cases.filter(([text, lane, anchor]) => {
+    const cases = lanes.heartLabels
+      .slice(0, 1)
+      .flatMap((lane) => [...new Set(hearts)].map((text) => [text, lane] as const));
+    const misfits = cases.filter(([text, lane]) => {
       const room = changeLabelRoom(lane.width);
       const fitted = fitInFont("font-body", CHANGE_LABEL_STYLES, room, plainMarks(text));
       const { scale } = fitted.style;
       const shown = { lines: fitted.lines.length, scale, width: fitted.widest };
-      const { chip, text: caps } = changeChipPlace(BODY, lane, anchor, shown);
+      const { chip, text: caps } = changeChipPlace(BODY, lane, shown);
       const inkBottom = caps.y + inkRowsOfLines(BODY, shown.lines) * scale;
       return (
         fitted.lines.length > (fitted.style.lines ?? 1) ||
