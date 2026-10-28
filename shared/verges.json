@@ -66,40 +66,18 @@
     "leaves": false
   },
   "kensington-market": {
-    "curbColour": "stone",
+    "curbColour": "driftwood",
     "curbTo": 162,
     "strips": [
       {
-        "colour": "mauve",
+        "colour": "dstone",
         "dots": [],
         "to": 166
       }
     ],
-    "walkColour": "grey",
-    "walkDots": [
-      {
-        "colours": [
-          "lgrey"
-        ],
-        "share": 0.01
-      },
-      {
-        "colours": [
-          "slate"
-        ],
-        "share": 0.012
-      },
-      {
-        "colours": [
-          "pink",
-          "lime",
-          "lilac",
-          "cyan"
-        ],
-        "share": 0.016
-      }
-    ],
-    "seamColour": "slate",
+    "walkColour": "walnut",
+    "walkDots": [],
+    "seamColour": "coal",
     "seamEvery": 32,
     "walkTo": null,
     "lawn": "none",
