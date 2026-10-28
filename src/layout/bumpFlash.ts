@@ -45,6 +45,7 @@ export const FLASH_COLOURS: Readonly<Partial<Record<EncounterId, FlashColour>>> 
   greenBin: "amber",
   otherDog: "pink",
   porchCat: "orange",
+  pothole: "sky",
   promoTeam: "amber",
   puddle: "sky",
   skunk: "mauve",

@@ -242,8 +242,8 @@ export function planZone(
     // The tallest pack's hit boxes, inside its outline by PART_INSET at each end.
     packHitLength: geometry.tallestPackBand - 2 * PART_INSET,
     packLength: geometry.tallestPackBand,
-    // A Muddy pack's lane move, the slowest, spaces the path's lane changes: a puddle may be on
-    // any neighbourhood's road, and Muddy may last past a neighbourhood's end.
+    // A Muddy pack's lane move, the slowest, spaces the path's lane changes: a puddle, a pothole
+    // or a card may muddy the pack in any neighbourhood, and Muddy may last past its end.
     pathLaneMoveSeconds: read(data.tuning, "seconds", "laneMove") / slowestDebuffedAgility(data),
     // The path goes on from where the last zone's ends, or starts in the pack's lane.
     pathStart: road.path[road.path.length - 1]?.lane ?? road.control.target,

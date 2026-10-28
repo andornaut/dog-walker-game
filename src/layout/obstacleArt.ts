@@ -1,5 +1,6 @@
 import {
   encounterSpriteKey,
+  FLAT_ENCOUNTERS,
   type HasArt,
   minorObstacleSpriteKey,
   MOVER_SPRITE_KEYS,
@@ -166,9 +167,10 @@ export function moverBodyArt(
 }
 
 // The sprites an obstacle draws, standing or moving. Each stands at the near edge of the item's
-// hit box, however many rows it covers. A puddle lies flat under the rest, and a skunk stands
-// just inside the front of its spray cloud, which lies flat too and goes with it when it moves;
-// any other mover draws its body alone. The other dog's owner stands beside it.
+// hit box, however many rows it covers. A flat encounter, such as a puddle, lies flat under the
+// rest, and a skunk stands just inside the front of its spray cloud, which lies flat too and goes
+// with it when it moves; any other mover draws its body alone. The other dog's owner stands
+// beside it.
 export function obstacleParts(
   data: ObstacleData,
   has: HasArt,
@@ -187,7 +189,7 @@ export function obstacleParts(
   if (kind === "otherDog" && has(owner)) {
     return [part(art, { dx: OTHER_DOG_DX }), part(owner, { dx: OTHER_DOG_OWNER_DX })];
   }
-  return [part(art, { flat: kind === "puddle" })];
+  return [part(art, { flat: FLAT_ENCOUNTERS.has(kind as EncounterId) })];
 }
 
 // A sprite's silhouette, or, for art not drawn yet, its placeholder's: ROAD_SPRITE_SIZE tall,

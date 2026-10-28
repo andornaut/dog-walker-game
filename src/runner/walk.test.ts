@@ -922,38 +922,48 @@ describe("stepWalk", () => {
     }
   });
 
-  // Raincoats keep a puddle's Muddy off; the capybara's Help the keeper muddies the pack anyway
-  // (chooseOption).
-  it.each([
-    { muddy: true, raincoats: false },
-    { muddy: false, raincoats: true },
-  ])("muddies the pack on a puddle: $muddy, with Raincoats: $raincoats", ({ muddy, raincoats }) => {
-    const walk = walkWith(["kilo"], [atPack("puddle")]);
-    const coated = raincoats
-      ? { ...walk, run: { ...walk.run, immunities: [{ encounter: "puddle", source: RAINCOATS }] } }
-      : walk;
-    const debuffs = step(coated as Walk).walk.run.debuffs.map(({ debuff }) => debuff);
-    expect(debuffs).toEqual(muddy ? ["muddy"] : []);
+  // Every contact obstacle, such as a puddle, and the immunities Raincoats give.
+  const CONTACTS = keysOf(ENCOUNTERS).filter((id) => ENCOUNTERS[id].resolution.kind === "contact");
+  const COATED = UPGRADES.raincoats.effects.map(({ encounter }) => ({
+    encounter,
+    source: RAINCOATS,
+  }));
+
+  // Raincoats keep every contact obstacle's Muddy off; the capybara's Help the keeper muddies the
+  // pack anyway (chooseOption).
+  it.each(
+    CONTACTS.flatMap((encounter) => [true, false].map((raincoats) => ({ encounter, raincoats }))),
+  )("muddies the pack on a $encounter unless Raincoats: $raincoats", ({ encounter, raincoats }) => {
+    const walk = walkWith(["kilo"], [atPack(encounter)]);
+    const coated = raincoats ? { ...walk, run: { ...walk.run, immunities: COATED } } : walk;
+    const debuffs = step(coated).walk.run.debuffs.map(({ debuff }) => debuff);
+    expect(debuffs).toEqual(raincoats ? [] : ["muddy"]);
   });
 
-  it("muddies the whole pack on a puddle, with no card or heart and a plain obstacle's stop", () => {
-    const dogs: PackDogs = ["kilo", "duchess"];
-    const walk = walkWith(dogs, [atPack("puddle")]);
-    const after = step(walk);
-    const { resolution } = ENCOUNTERS.puddle;
-    const debuffs = resolution.effects.flatMap((effect) =>
-      effect.kind === "debuff" ? [effect.debuff] : [],
-    );
-    expect(after.cards).toEqual([]);
-    expect(after.encounterHits).toEqual([]);
-    expect(after.contacts.map(({ encounter }) => encounter)).toEqual(["puddle"]);
-    // The touching dog, as a plain obstacle in its place would land on.
-    const cone = step(walkWith(dogs, [atPack("cone")]));
-    expect(after.contacts.map(({ dog }) => dog)).toEqual(cone.bumps.map(({ dog }) => dog));
-    expect(after.walk.run.debuffs.map(({ debuff }) => debuff)).toEqual(debuffs);
-    expect(heartsByDog(after.walk.run)).toEqual(heartsByDog(walk.run));
-    expect(after.walk.road.hitStop?.seconds).toBe(read(tuning, "seconds", "minorHitStopSeconds"));
-  });
+  it.each(CONTACTS)(
+    "muddies the whole pack on a %s, with no card or heart and a plain obstacle's stop",
+    (encounter) => {
+      const dogs: PackDogs = ["kilo", "duchess"];
+      const walk = walkWith(dogs, [atPack(encounter)]);
+      const after = step(walk);
+      const { resolution } = ENCOUNTERS[encounter];
+      const debuffs =
+        resolution.kind === "contact"
+          ? resolution.effects.flatMap((effect) =>
+              effect.kind === "debuff" ? [effect.debuff] : [],
+            )
+          : [];
+      expect(after.cards).toEqual([]);
+      expect(after.encounterHits).toEqual([]);
+      expect(after.contacts.map((contact) => contact.encounter)).toEqual([encounter]);
+      // The touching dog, as a plain obstacle in its place would land on.
+      const cone = step(walkWith(dogs, [atPack("cone")]));
+      expect(after.contacts.map(({ dog }) => dog)).toEqual(cone.bumps.map(({ dog }) => dog));
+      expect(after.walk.run.debuffs.map(({ debuff }) => debuff)).toEqual(debuffs);
+      expect(heartsByDog(after.walk.run)).toEqual(heartsByDog(walk.run));
+      expect(after.walk.road.hitStop?.seconds).toBe(read(tuning, "seconds", "minorHitStopSeconds"));
+    },
+  );
 
   describe("a hit that opens no card", () => {
     const raincoats = (walk: Walk): Walk => ({

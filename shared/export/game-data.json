@@ -504,7 +504,7 @@
         "id": "raincoats",
         "kind": "upgrade"
       },
-      "text": "Puddles don't make the pack Muddy all walk",
+      "text": "Puddles don't make the pack Muddy, potholes don't make the pack Muddy all walk",
       "title": "Which way?"
     },
     {
@@ -1227,6 +1227,31 @@
       "spriteKey": "porch-cat"
     },
     {
+      "id": "pothole",
+      "hitWord": "SPLUNK!",
+      "kind": "obstacle",
+      "name": "Pothole",
+      "resolution": {
+        "effects": [
+          {
+            "debuff": "muddy",
+            "kind": "debuff"
+          }
+        ],
+        "immuneText": "potholes don't make the pack Muddy",
+        "kind": "contact"
+      },
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "zones": [
+        "shops",
+        "homeStretch"
+      ],
+      "spriteKey": "pothole"
+    },
+    {
       "id": "promoTeam",
       "hitLabel": "FREE SAMPLE!",
       "hitWord": "FLASH!",
@@ -1302,6 +1327,11 @@
         "lanes": 2,
         "rows": 1
       },
+      "zones": [
+        "snoozeCrescent",
+        "park",
+        "pawsPromenade"
+      ],
       "spriteKey": "puddle"
     },
     {
@@ -2961,11 +2991,16 @@
       "id": "raincoats",
       "art": "card-raincoats",
       "duration": "run",
-      "effect": "No Muddy from puddles",
+      "effect": "No Muddy from puddles or potholes",
       "effects": [
         {
           "duration": "run",
           "encounter": "puddle",
+          "kind": "immune"
+        },
+        {
+          "duration": "run",
+          "encounter": "pothole",
           "kind": "immune"
         }
       ],
@@ -3178,6 +3213,7 @@
           "greenBin": 0,
           "otherDog": 1.1,
           "porchCat": 1,
+          "pothole": 0,
           "promoTeam": 0,
           "puddle": 1,
           "skunk": 1.8,
@@ -3293,6 +3329,7 @@
           "greenBin": 0,
           "otherDog": 2.2,
           "porchCat": 0,
+          "pothole": 0,
           "promoTeam": 0,
           "puddle": 2,
           "skunk": 1.8,
@@ -3408,6 +3445,7 @@
           "greenBin": 0,
           "otherDog": 1.1,
           "porchCat": 0,
+          "pothole": 0,
           "promoTeam": 0,
           "puddle": 0,
           "skunk": 0,
@@ -3523,8 +3561,9 @@
           "greenBin": 1,
           "otherDog": 1.1,
           "porchCat": 0,
+          "pothole": 1,
           "promoTeam": 0,
-          "puddle": 1,
+          "puddle": 0,
           "skunk": 1.8,
           "squirrel": 1,
           "thief": 2.2,
@@ -3638,6 +3677,7 @@
           "greenBin": 0,
           "otherDog": 0,
           "porchCat": 0,
+          "pothole": 0,
           "promoTeam": 0,
           "puddle": 3,
           "skunk": 1.8,
@@ -3753,8 +3793,9 @@
           "greenBin": 0,
           "otherDog": 0,
           "porchCat": 0,
+          "pothole": 1,
           "promoTeam": 2,
-          "puddle": 1,
+          "puddle": 0,
           "skunk": 1.1,
           "squirrel": 1,
           "thief": 1.1,

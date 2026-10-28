@@ -215,6 +215,18 @@ export const ENCOUNTERS = {
     shape: { lanes: 1, rows: 1 },
     zones: ["snoozeCrescent"],
   },
+  pothole: {
+    hitWord: "SPLUNK!",
+    kind: "obstacle",
+    name: "Pothole",
+    resolution: {
+      effects: [{ debuff: "muddy", kind: "debuff" }],
+      immuneText: "potholes don't make the pack Muddy",
+      kind: "contact",
+    },
+    shape: { lanes: 2, rows: 1 },
+    zones: ["shops", "homeStretch"],
+  },
   promoTeam: {
     hitLabel: "FREE SAMPLE!",
     hitWord: "FLASH!",
@@ -256,6 +268,7 @@ export const ENCOUNTERS = {
       kind: "contact",
     },
     shape: { lanes: 2, rows: 1 },
+    zones: ["snoozeCrescent", "park", "pawsPromenade"],
   },
   skunk: {
     hitLabel: "SPRAYED!",

@@ -17,6 +17,7 @@ import {
   dogFaceKey,
   dogSpriteKey,
   encounterSpriteKey,
+  FLAT_ENCOUNTERS,
   LOADING_ART,
   ownerCardFaceKey,
   ownerFaceKey,
@@ -85,7 +86,11 @@ function placeholderSizes(): Map<string, Size> {
     "weddingShoot",
   ];
   for (const encounter of keysOf(gameData.encounters)) {
-    const height = encounter === "puddle" ? short : tall.includes(encounter) ? tallest : side;
+    const height = FLAT_ENCOUNTERS.has(encounter)
+      ? short
+      : tall.includes(encounter)
+        ? tallest
+        : side;
     const colour = gameData.encounters[encounter].kind === "lucky" ? PALETTE.green : PALETTE.mauve;
     sizes.set(encounterSpriteKey(encounter), box(side, height, colour));
   }

@@ -20,6 +20,7 @@ export type EncounterId =
   | "otherDog"
   | "pettingNeighbour"
   | "porchCat"
+  | "pothole"
   | "promoTeam"
   | "puddle"
   | "skunk"

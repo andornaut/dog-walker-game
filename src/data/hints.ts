@@ -39,6 +39,10 @@ export const HINTS = {
     text: "Small pack: extra ♥ for your lead.",
     trigger: { kind: "packBonus" },
   },
+  pothole: {
+    text: "Potholes make the pack Muddy.",
+    trigger: { encounter: "pothole", kind: "encounter" },
+  },
   puddle: {
     text: "Puddles make the pack Muddy.",
     trigger: { encounter: "puddle", kind: "encounter" },

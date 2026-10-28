@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import { kebabCase } from "../assets/spriteKeys";
+import type { EncounterId } from "../data/types";
 import {
   admitPlay,
   clampVolume,
   effectiveVolumes,
+  HIT_SOUND_STAND_INS,
   hitCue,
   INITIAL_MIX,
   MAX_PLAYS_PER_WINDOW,
@@ -11,6 +14,7 @@ import {
   PAUSED_MUSIC_DUCK,
   PLAY_WINDOW_MS,
   type RecentPlays,
+  SOUND_KEYS,
   type SoundCue,
   soundKeyFor,
   soundKeysOf,
@@ -46,6 +50,17 @@ describe("soundKeysOf", () => {
       expect(soundKeysOf(cue), name).toEqual(expected);
     }
   });
+
+  it.each(Object.entries(HIT_SOUND_STAND_INS))(
+    "plays %s's own hit sound, then %s's in its place, then the bump",
+    (encounter, standIn) => {
+      expect(soundKeysOf(hitCue("obstacle", encounter as EncounterId))).toEqual([
+        `sfx-hit-${kebabCase(encounter)}`,
+        soundKeysOf(hitCue("obstacle", standIn))[0],
+        SOUND_KEYS.bump,
+      ]);
+    },
+  );
 
   it("picks the first key that loaded, or none", () => {
     const loaded = (keys: string[]) => (key: string) => keys.includes(key);

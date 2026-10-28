@@ -48,8 +48,11 @@ export const UPGRADES = {
   raincoats: {
     art: "card-raincoats",
     duration: "run",
-    effect: "No Muddy from puddles",
-    effects: [{ duration: "run", encounter: "puddle", kind: "immune" }],
+    effect: "No Muddy from puddles or potholes",
+    effects: [
+      { duration: "run", encounter: "puddle", kind: "immune" },
+      { duration: "run", encounter: "pothole", kind: "immune" },
+    ],
     kind: "boost",
     name: "Raincoats",
   },

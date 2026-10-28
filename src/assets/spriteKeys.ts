@@ -150,10 +150,13 @@ export function standsOnGround(key: string): boolean {
 }
 
 // A 1x road sprite's drawn frame side: dogs, obstacles and encounters are this square, the
-// walker and the tall encounters this wide and half again as tall, and tips, treats and
-// puddles this wide and half as tall. An object spanning n lanes is drawn n lanes wide less
-// the lane's spare width beside a 1-lane sprite.
+// walker and the tall encounters this wide and half again as tall, and tips, treats and the
+// flat encounters this wide and half as tall. An object spanning n lanes is drawn n lanes wide
+// less the lane's spare width beside a 1-lane sprite.
 export const ROAD_SPRITE_SIZE = 48;
+
+// The encounters that lie flat on the road, drawn under everything standing on it.
+export const FLAT_ENCOUNTERS: ReadonlySet<EncounterId> = new Set(["pothole", "puddle"]);
 
 // A dog's road sprite frame side by its size: a medium dog's is ROAD_SPRITE_SIZE.
 export const DOG_FRAME_SIDES: Readonly<Record<Size, number>> = { large: 54, medium: 48, small: 38 };
