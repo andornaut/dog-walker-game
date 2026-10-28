@@ -154,30 +154,24 @@ def cat_head(g, x, y):
 
 
 def pigeon(g, cx, by, peck=False, wings=None):
-    """A pigeon facing the player with its feet on row by - 1: a round grey body, the green and mauve neck
-    sheen, a small head. peck lowers the head to the ground; wings, from -1 (out and down) to 1 (raised),
-    spreads both wings, None keeps them folded."""
+    """A pigeon facing the player with its feet on row by - 1: a round grey body, a green neck band, a small
+    head with ink eyes over a dark beak. peck lowers the head to the ground; wings, from -1 (out and down) to 1
+    (raised), spreads both wings, None keeps them folded. No single-pixel bars, sheen flecks or glints, so the
+    flock stays clean at @50."""
     if wings is not None:
         for side in (-1, 1):
             tip = (cx + side * 8, by - 8.5 - 4.5 * wings)
             g.tri((cx + side * 2, by - 7), (cx + side * 2, by - 3), tip, "lgrey")
             g.tri((cx + side * 5, by - 6 - wings), (cx + side * 5, by - 4), tip, "grey")
-            g.p(tip[0] - side, tip[1] + (1 if wings > 0 else -1 if wings < 0 else 0), "dslate")
     for x in (cx - 2, cx + 1):
         g.p(x, by - 1, "pink")
     g.cel(cx, by - 4, 5, 3.5, "grey", "slate", "lgrey")
-    for side in (-1, 1):
-        g.rect(cx + (3 if side > 0 else -4), by - 5, 1, 1, "dslate")
-        g.rect(cx + (3 if side > 0 else -4), by - 3, 1, 1, "dslate")
     hy = by - 3 if peck else by - 9
     g.rect(cx - 2, by - 7, 4, 1, "green")
-    g.p(cx - 2, by - 7, "mauve")
-    g.p(cx + 1, by - 7, "mauve")
     g.cel(cx, hy, 2.2, 2.2, "grey", "slate", "lgrey")
-    g.p(cx - 2, hy - 0.5, "orange")
-    g.p(cx + 1, hy - 0.5, "orange")
+    g.p(cx - 2, hy - 0.5, "ink")
+    g.p(cx + 1, hy - 0.5, "ink")
     g.p(cx - 0.5, hy + 1.5, "dslate")
-    g.p(cx - 0.5, hy + 0.5, "white")
 
 
 # The flock's spots: (x, feet row), the two behind, then the one in front.
@@ -202,12 +196,11 @@ PIGEONS_RUN = ((-1, (0, 0, 1)), (0, (2, 2, 0)), (1, (3, 3, 2)), (0, (1, 1, 3)))
 def pigeon_back(g, cx, cy, wings):
     """A pigeon flying away up the road, seen from behind, its body centred on (cx, cy): a grey back with
     the dark tail fan under it, the head over it and both wings spread, their tips at wings (-1 raised to
-    1 swept down) with dark bars."""
+    1 swept down)."""
     for side in (-1, 1):
         tip = (cx + side * 8, cy - 1 + 5 * wings)
         g.tri((cx + side * 1.5, cy - 2), (cx + side * 1.5, cy + 1.5), tip, "lgrey")
         g.tri((cx + side * 4, cy - 1.5 + wings), (cx + side * 4, cy + 1 + wings), tip, "grey")
-        g.p(tip[0] - side, tip[1], "dslate")
     g.tri((cx - 2.5, cy + 2), (cx + 2.5, cy + 2), (cx, cy + 5.5), "dslate")
     g.rect(cx - 2, cy + 4, 4, 1, "ink")
     g.cel(cx, cy, 3, 3.5, "grey", "slate", "lgrey")
