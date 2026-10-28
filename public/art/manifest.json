@@ -8271,6 +8271,87 @@
       }
     },
     {
+      "key": "roadside-garden-car",
+      "png": "sprites/roadside-garden-car.png",
+      "json": "sprites/roadside-garden-car.json",
+      "anchor": {
+        "feetY": 93,
+        "opaqueWidth": 104
+      }
+    },
+    {
+      "key": "roadside-garden-car@50",
+      "png": "sprites/roadside-garden-car@50.png",
+      "json": "sprites/roadside-garden-car@50.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 52
+      }
+    },
+    {
+      "key": "roadside-garden-car@56",
+      "png": "sprites/roadside-garden-car@56.png",
+      "json": "sprites/roadside-garden-car@56.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 59
+      }
+    },
+    {
+      "key": "roadside-garden-car@62",
+      "png": "sprites/roadside-garden-car@62.png",
+      "json": "sprites/roadside-garden-car@62.json",
+      "anchor": {
+        "feetY": 59,
+        "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "roadside-garden-car@69",
+      "png": "sprites/roadside-garden-car@69.png",
+      "json": "sprites/roadside-garden-car@69.json",
+      "anchor": {
+        "feetY": 64,
+        "opaqueWidth": 72
+      }
+    },
+    {
+      "key": "roadside-garden-car@75",
+      "png": "sprites/roadside-garden-car@75.png",
+      "json": "sprites/roadside-garden-car@75.json",
+      "anchor": {
+        "feetY": 70,
+        "opaqueWidth": 78
+      }
+    },
+    {
+      "key": "roadside-garden-car@81",
+      "png": "sprites/roadside-garden-car@81.png",
+      "json": "sprites/roadside-garden-car@81.json",
+      "anchor": {
+        "feetY": 76,
+        "opaqueWidth": 85
+      }
+    },
+    {
+      "key": "roadside-garden-car@88",
+      "png": "sprites/roadside-garden-car@88.png",
+      "json": "sprites/roadside-garden-car@88.json",
+      "anchor": {
+        "feetY": 82,
+        "opaqueWidth": 91
+      }
+    },
+    {
+      "key": "roadside-garden-car@94",
+      "png": "sprites/roadside-garden-car@94.png",
+      "json": "sprites/roadside-garden-car@94.json",
+      "anchor": {
+        "feetY": 87,
+        "opaqueWidth": 97
+      }
+    },
+    {
       "key": "roadside-gas-lamp",
       "png": "sprites/roadside-gas-lamp.png",
       "json": "sprites/roadside-gas-lamp.json",

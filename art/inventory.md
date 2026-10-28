@@ -181,6 +181,7 @@ Placed by the style guide's Roadside table (`shared/roadside.json`): the lawn pr
 | `roadside-cafe-patio`                 | 72×72   | A bistro table and two chairs under a red and cream umbrella     |
 | `roadside-dune-grass`                 | 60×48   | A tuft of dune grass                                             |
 | `roadside-fruit-stand`                | 108×84  | Fruit crates under a striped awning on two posts                 |
+| `roadside-garden-car`                 | 108×96  | The Garden Car, a mural-painted sedan heaped with flowers        |
 | `roadside-gas-lamp`                   | 36×150  | A heritage lamp lit gold                                         |
 | `roadside-hot-dog-stand`              | 90×126  | A red park kiosk, a hot dog on its sign                          |
 | `roadside-ice-cream-stand`            | 90×126  | A foam beach kiosk, a soft-serve cone on its roof                |

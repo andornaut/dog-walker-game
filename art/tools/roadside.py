@@ -22,6 +22,8 @@ roadside-cafe-patio      72x72    a café patio: a bistro table with a coffee cu
                                   cream market umbrella, a bentwood chair each side
 roadside-dune-grass      60x48    a tuft of dune grass, moss and olive blades with gold tips
 roadside-fruit-stand     108x84   a tiered fruit stand under a little striped awning
+roadside-garden-car      108x96   the Garden Car on Augusta Avenue from the front, a mural-painted sedan heaped with
+                                  plants in flower, its wheels sunk in greenery
 roadside-gas-lamp        36x150   a heritage street lamp, its lantern lit gold
 roadside-hot-dog-stand   90x126   a red park kiosk under a flat white roof, a hot dog on its sign
 roadside-ice-cream-stand 90x126   a foam beach kiosk under a flat turquoise roof, a soft-serve cone on top
@@ -180,6 +182,79 @@ def fruit_stand():
             g.rect(x0 + 50 + row * 4 - 3, y, 3, 9, "bark")
             for k in range((52 + row * 4) // 5):
                 g.ell(x0 + 3 + k * 5, y - 1, 2.4, 2.2, fruits[k % 2])
+    return w, h, draw
+
+
+def garden_car():
+    """The Garden Car on Augusta Avenue from the front: an old rust sedan painted in patches of mural colour,
+    round headlights either side of a chrome grille, sunflowers rising from the trunk behind, leaves inside its
+    windshield, its roof and hood heaped with plants in flower and its wheels sunk in a bank of greenery, in
+    backdrops.garden_car's colours."""
+    w, h = 72, 64
+
+    def leaves(g, lobes):
+        """Lobes of greenery, shaded pine lower right and lit moss upper left over canopy."""
+        for x, y, rx, ry in lobes:
+            g.ell(x, y, rx, ry, "pine")
+        for x, y, rx, ry in lobes:
+            g.ell(x - 1, y - 1, rx - 1, ry - 1, "canopy")
+        for x, y, rx, ry in lobes:
+            g.ell(x - 2, y - 2, rx / 3, ry / 3, "moss")
+
+    def flowers(g, heads):
+        for x, y, c in heads:
+            g.ell(x, y, 1.6, 1.6, c)
+
+    def draw(g, f=0):
+        base = h - 2
+        # the cabin: rust pillars round a windshield full of leaves, side mirrors at its foot
+        g.tri((10, 32), (20, 15), (20, 32), "rust")
+        g.tri((62, 32), (52, 15), (52, 32), "dbrown")
+        g.rect(20, 15, 32, 17, "rust")
+        g.tri((15, 31), (23, 18), (23, 31), "olive")
+        g.tri((57, 31), (49, 18), (49, 31), "olive")
+        g.rect(23, 18, 26, 13, "olive")
+        bar(g, (40, 18), (33, 30), "pine", 3)
+        bar(g, (46, 18), (40, 30), "pine", 1)
+        leaves(g, ((22, 28, 5, 4), (50, 28, 5, 4)))
+        g.rect(5, 26, 6, 3, "rust")
+        g.rect(61, 26, 6, 3, "dbrown")
+        # the front: a body in mural patches, round headlights, the grille and a chrome bumper
+        g.rect(4, 32, 64, 16, "rust")
+        for x, y, ww, hh, c in ((4, 32, 14, 9, "gold"), (54, 32, 14, 9, "dturq"), (18, 41, 10, 7, "lilac"),
+                                (44, 41, 10, 7, "moss"), (28, 32, 8, 2, "pink"), (40, 32, 6, 2, "gold")):
+            g.rect(x, y, ww, hh, c)
+        g.rect(65, 32, 3, 16, "dbrown")
+        g.rect(4, 32, 64, 1, "ochre")
+        for x in (12, 60):
+            g.ell(x, 37, 4, 4, "coal")
+            g.ell(x, 37, 2.8, 2.8, "cream")
+            g.ell(x - 1, 36, 1.2, 1.2, "white")
+        g.rect(24, 35, 24, 7, "coal")
+        for x in range(26, 47, 4):
+            g.rect(x, 36, 2, 5, "ash")
+        g.rect(2, 44, 68, 3, "lgrey")
+        g.rect(2, 46, 68, 1, "grey")
+        # the wheels, sunk in greenery
+        for x in (8, 54):
+            g.rect(x, 47, 10, 8, "coal")
+        # sunflowers growing up from the trunk behind, plants heaped on the roof and hood, trailing down
+        # the pillars, and banked round the wheels
+        for x, y in ((13, 6), (59, 8)):
+            g.rect(x - 0.5, y, 1, 12, "canopy")
+            g.ell(x, y, 3, 3, "amber")
+            g.ell(x - 0.5, y - 0.5, 2, 2, "yellow")
+            g.ell(x, y, 1.2, 1.2, "brown")
+        leaves(g, ((24, 13, 9, 6), (36, 9, 12, 7), (48, 13, 9, 6)))
+        for x, y, n in ((21, 18, 6), (50, 18, 7)):
+            g.rect(x, y, 1.5, n, "canopy")
+        leaves(g, ((10, 31, 6, 3), (22, 31, 7, 3), (36, 30, 8, 3), (50, 31, 7, 3), (62, 31, 6, 3)))
+        leaves(g, ((10, 56, 8, 6), (22, 57, 7, 5), (36, 56, 9, 6), (50, 57, 7, 5), (62, 56, 8, 6)))
+        flowers(g, ((20, 9, "red"), (28, 5, "yellow"), (35, 3, "pink"), (43, 5, "white"), (51, 9, "red"),
+                    (31, 11, "lilac"), (41, 11, "yellow"), (8, 30, "pink"), (19, 29, "yellow"), (30, 29, "red"),
+                    (42, 29, "white"), (53, 29, "pink"), (64, 30, "yellow"), (22, 26, "red"), (50, 26, "yellow"),
+                    (6, 52, "yellow"), (16, 53, "red"), (28, 54, "pink"), (40, 53, "yellow"), (52, 54, "white"),
+                    (64, 52, "red")))
     return w, h, draw
 
 
@@ -782,6 +857,7 @@ PROPS = {
     "roadside-tree-maple": (lobed_tree("canopy", "pine", "moss"), (0,), STILL_MS, True),
     "roadside-tree-oak": (lobed_tree("pine", "fir", "canopy", "bark", big=True), (0,), STILL_MS, True),
     "roadside-fruit-stand": (fruit_stand(), (0,), STILL_MS, True),
+    "roadside-garden-car": (garden_car(), (0,), STILL_MS, True),
     "roadside-dune-grass": (dune_grass(), (0,), STILL_MS, True),
     "roadside-transit-stop": (transit_stop(), (0,), STILL_MS, True),
     "roadside-hot-dog-stand": (hot_dog_stand(), (0,), STILL_MS, True),

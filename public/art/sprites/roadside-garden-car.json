@@ -1,0 +1,22 @@
+{ "frames": {
+   "roadside-garden-car.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 108, "h": 96 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 108, "h": 96 },
+    "sourceSize": { "w": 108, "h": 96 },
+    "duration": 1000
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "roadside-garden-car.png",
+  "format": "RGBA8888",
+  "size": { "w": 108, "h": 96 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 0, "direction": "forward" }
+  ]
+ }
+}
