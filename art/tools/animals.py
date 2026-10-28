@@ -417,11 +417,12 @@ BUNDLE = ((-2, 1, 2.8, 2.6), (2.2, 1.2, 2.6, 2.4), (0, -1.4, 2.8, 2.4))
 SLUNG = 0.75
 
 
-def bundle(g, x, y, k=1):
+def bundle(g, x, y, k=1, fill="dstone", light="stone"):
     """The snatchers' loot, centred on (x, y): a lumpy grey-brown cloth bundle, dstone lit stone, in a coal line,
     gathered at the top under a knot whose two ends flare up either side. Grey, never tan, and lumpy, never
     round, so it never reads as a tip coin. k scales the lumps about the centre; the knot keeps its size, so its
-    parts stay 2px, and sits 4 + 2k above the centre, on the top lump."""
+    parts stay 2px, and sits 4 + 2k above the centre, on the top lump. fill and light (None for a flat fill)
+    lighten the cloth where it lies on the coat."""
     lumps = [(x + dx * k, y + dy * k, rx * k, ry * k) for dx, dy, rx, ry in BUNDLE]
     t = y - 4 - 2 * k
     knot = ((x - 1, t + 1, 2, 2), (x - 3, t, 2, 2), (x + 1, t, 2, 2))
@@ -430,9 +431,9 @@ def bundle(g, x, y, k=1):
     for kx, ky, kw, kh in knot:
         g.rect(kx - 0.9, ky - 0.9, kw + 1.8, kh + 1.8, "coal")
     for cx, cy, rx, ry in lumps:
-        g.cel(cx, cy, rx, ry, "dstone", None, "stone")
+        g.cel(cx, cy, rx, ry, fill, None, light)
     for kx, ky, kw, kh in knot:
-        g.rect(kx, ky, kw, kh, "dstone")
+        g.rect(kx, ky, kw, kh, fill)
     g.rect(x - 1.5, t + 2.8, 3, 1, "coal")
 
 
@@ -531,8 +532,6 @@ def raccoon_fleeing(stride, bob=-1):
         g.rect(x - 1, y + b, 3, 4, "dstone")
         g.rect(x - 1, y + 4 + b, 3, 2, "coal")
     g.cel(16, 31 + b, 8, 7.5, "stone", "dstone", "driftwood")
-    k = b + (1 if s > 0 else 0)
-    bundle(g, 22, 27 + k, SLUNG)
     # the tail down the back, swinging against the stride
     raccoon_tail(g, [(16 - s * (1 + i), y + b, 3, 2.3) for i, y in enumerate((29.5, 33.5, 37.5))],
                  (16 - s * 4, 41.5 + b, 2.2, 1.9))
@@ -540,6 +539,10 @@ def raccoon_fleeing(stride, bob=-1):
     g.cel(16, 18.5 + b, 8.5, 6.5, "stone", "dstone", "driftwood")
     for x in (7.5, 22.5):
         g.rect(x, 18 + b, 2, 2, "ink")
+    # the bundle over the right shoulder, laid over the head's side so its coal line is whole all round, and
+    # flat driftwood, two steps lighter than the chest bundle, so it separates from the stone back and its
+    # dstone shade by lightness as well as by the line
+    bundle(g, 22, 27 + b + (1 if s > 0 else 0), SLUNG, "driftwood", None)
     return lit(g, RACCOON_LIT)
 
 
