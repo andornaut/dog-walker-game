@@ -1,5 +1,6 @@
 import type { DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
+import { getOrInsert } from "../lib/maps";
 import { chance, type Random } from "../lib/random";
 import type { LanedBox, ScaledBox } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
@@ -288,16 +289,8 @@ function scrollContacts(
   const { laneCount, packBand, roadTop } = geometry;
   const { height, kind, laneSpan } = item;
   const key = `${kind} ${height} ${laneSpan}`;
-  let byPath = SCROLL_CONTACTS.get(geometry);
-  if (byPath === undefined) {
-    byPath = new WeakMap();
-    SCROLL_CONTACTS.set(geometry, byPath);
-  }
-  let bySize = byPath.get(path);
-  if (bySize === undefined) {
-    bySize = new Map();
-    byPath.set(path, bySize);
-  }
+  const byPath = getOrInsert(SCROLL_CONTACTS, geometry, () => new WeakMap());
+  const bySize = getOrInsert(byPath, path, () => new Map());
   const known = bySize.get(key);
   if (known !== undefined) {
     return known;

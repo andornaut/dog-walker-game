@@ -6,6 +6,7 @@ import { gameData } from "../../data";
 import { LANE_COUNT } from "../../data/screen";
 import { project } from "../../layout/projection";
 import { itemAt } from "../../lib/arrays";
+import { getOrInsert } from "../../lib/maps";
 import type { Random } from "../../lib/random";
 import { ROADSIDE } from "../../road/roadsideProps";
 import { currentZone, zoneAt } from "../../rules/route";
@@ -92,11 +93,7 @@ export class DistractionView {
   private show(distraction: Distraction, halted: boolean): void {
     const { scene } = this;
     const { key } = distraction;
-    let sprite = this.sprites.get(distraction);
-    if (sprite === undefined) {
-      sprite = scene.add.sprite(0, 0, key);
-      this.sprites.set(distraction, sprite);
-    }
+    const sprite = getOrInsert(this.sprites, distraction, () => scene.add.sprite(0, 0, key));
     const { place } = this;
     const { road } = LAYOUT;
     const x = itemAt(LANE_XS, 0) + (place.lanePosition * road.width) / LANE_COUNT;

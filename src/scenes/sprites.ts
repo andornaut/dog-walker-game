@@ -6,6 +6,7 @@ import { spriteAnchor } from "../assets/spriteAnchor";
 import { depthVariantKey, ROAD_SPRITE_SIZE, standsOnGround } from "../assets/spriteKeys";
 import { type DepthArt, type DepthDraw, depthDraw } from "../layout/depthScale";
 import { SCALE_STEPS } from "../layout/projection";
+import { getOrInsert } from "../lib/maps";
 import { opaqueBoundsOfRgba, type PixelBounds } from "../lib/opaqueBounds";
 
 // feetY is the line the sprite stands on, measured from the top of its frame, and
@@ -68,29 +69,23 @@ export function measureSprite(scene: Scene, key: string, anchor: SpriteAnchor | 
 // A loaded sprite's top opaque row in its first frame, read from its pixels on first use and
 // kept: the manifest's anchors give only the feet line and width.
 export function spriteTopY(scene: Scene, key: string): number {
-  let top = tops.get(key);
-  if (top === undefined) {
-    top = scene.textures.exists(key) ? (firstFrameBounds(scene, key)?.top ?? 0) : 0;
-    tops.set(key, top);
-  }
-  return top;
+  return getOrInsert(tops, key, () =>
+    scene.textures.exists(key) ? (firstFrameBounds(scene, key)?.top ?? 0) : 0,
+  );
 }
 
 const depthArts = new Map<string, DepthArt[]>();
 
 // A road sprite's loaded art steps, 1x first, read once.
 function depthArtsOf(scene: Scene, key: string): DepthArt[] {
-  let arts = depthArts.get(key);
-  if (arts === undefined) {
-    arts = SCALE_STEPS.map((step) => depthVariantKey(key, step) ?? key)
+  return getOrInsert(depthArts, key, () =>
+    SCALE_STEPS.map((step) => depthVariantKey(key, step) ?? key)
       .filter((art) => art === key || scene.textures.exists(art))
       .map((art) => {
         const { feetY, frameHeight, frameWidth } = spriteMetrics(art);
         return { feetY, height: frameHeight, key: art, width: frameWidth };
-      });
-    depthArts.set(key, arts);
-  }
-  return arts;
+      }),
+  );
 }
 
 // Shows a road sprite at its projected scale by depthDraw, the one rule for every road

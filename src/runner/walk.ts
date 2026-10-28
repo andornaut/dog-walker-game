@@ -15,6 +15,7 @@ import type { LaneDirection } from "../layout/lanes";
 import { hasObstacleArt, obstacleParts, obstacleSilhouette } from "../layout/obstacleArt";
 import { formationOrder, PART_INSET } from "../layout/packFormation";
 import { itemAt } from "../lib/arrays";
+import { getOrInsert } from "../lib/maps";
 import {
   chance,
   chanceRound,
@@ -1008,23 +1009,16 @@ export function obstacleOnRoad(
   moving: boolean,
   tags: readonly string[] = [],
 ): readonly PlacedPart[] {
-  let byKind = PLACED_PARTS.get(data);
-  if (byKind === undefined) {
-    byKind = new Map();
-    PLACED_PARTS.set(data, byKind);
-  }
+  const byKind = getOrInsert(PLACED_PARTS, data, () => new Map());
   const key = `${geometry.cell.length} ${kind} ${moving} ${tags.join(",")}`;
-  let parts = byKind.get(key);
-  if (parts === undefined) {
+  return getOrInsert(byKind, key, () => {
     const { lanes } = footprintOf(data, kind);
-    parts = obstacleParts(data, hasObstacleArt, kind, moving).map(({ behind, dx, key: art }) => ({
+    return obstacleParts(data, hasObstacleArt, kind, moving).map(({ behind, dx, key: art }) => ({
       behind,
       dx,
       silhouette: obstacleSilhouette(geometry.cell.length, lanes, art, tags),
     }));
-    byKind.set(key, parts);
-  }
-  return parts;
+  });
 }
 
 // By lens, then the pack band's bottom, then the parts.
@@ -1045,22 +1039,9 @@ export function itemHeight(
   }
   const parts = obstacleOnRoad(data, geometry, kind, moving);
   const { bottom } = geometry.packBand;
-  let byBottom = EXIT_LENGTHS.get(geometry.lens);
-  if (byBottom === undefined) {
-    byBottom = new Map();
-    EXIT_LENGTHS.set(geometry.lens, byBottom);
-  }
-  let lengths = byBottom.get(bottom);
-  if (lengths === undefined) {
-    lengths = new Map();
-    byBottom.set(bottom, lengths);
-  }
-  let length = lengths.get(parts);
-  if (length === undefined) {
-    length = exitLength(geometry.lens, PART_INSET, parts, bottom);
-    lengths.set(parts, length);
-  }
-  return length;
+  const byBottom = getOrInsert(EXIT_LENGTHS, geometry.lens, () => new Map());
+  const lengths = getOrInsert(byBottom, bottom, () => new Map());
+  return getOrInsert(lengths, parts, () => exitLength(geometry.lens, PART_INSET, parts, bottom));
 }
 
 // The planner's inset at each end of a footprint row: whatever lane-blocking obstacle stands in

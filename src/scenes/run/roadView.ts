@@ -13,6 +13,7 @@ import {
   solidStrip,
   STRIP,
 } from "../../layout/roadRaster";
+import { getOrInsert } from "../../lib/maps";
 import type { Rect } from "../../lib/rect";
 import { zoneAt } from "../../rules/route";
 import type { Walk } from "../../runner/walk";
@@ -33,27 +34,19 @@ export class RoadArt {
   }
 
   look(zone: Zone, key: string): RoadLook {
-    let look = this.looks.get(key);
-    if (look === undefined) {
+    return getOrInsert(this.looks, key, () => {
       const image = this.imagePixels(key);
       const fits = image?.width === STRIP.width && image.height === STRIP.height;
       const strip = fits ? image : solidStrip(colourFromHex(zone.roadColour));
-      look = roadLook(zone.id as RoadLook["zone"], strip);
-      this.looks.set(key, look);
-    }
-    return look;
+      return roadLook(zone.id as RoadLook["zone"], strip);
+    });
   }
 
   // The backdrop's bottom rows, where the road's junction and approach are drawn over it,
   // across the road's view.
   approach(zone: Zone): Uint32Array | null {
     const key = backdropKey(zone);
-    let rows = this.approaches.get(key);
-    if (rows === undefined) {
-      rows = this.approachRows(key);
-      this.approaches.set(key, rows);
-    }
-    return rows;
+    return getOrInsert(this.approaches, key, () => this.approachRows(key));
   }
 
   private approachRows(key: string): Uint32Array | null {
