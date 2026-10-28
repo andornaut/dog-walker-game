@@ -138,10 +138,10 @@ def long_reach():
     g = Grid(16, 16)
     bitmap(g, 4, 0, [".s.s.s..", ".s.s.s.s", ".sssss.s", "ss.sssss", "sssssssd", ".ssssssd",
                      "..sssssd", "..sssdd."], {"s": "skin1", "d": "skin2"})
-    g.tri((0, 12.5), (3.5, 9), (3.5, 16), "green")
-    g.tri((16, 12.5), (12.5, 9), (12.5, 16), "green")
-    g.rect(3, 11, 10, 3, "green")
-    g.rect(3, 13, 10, 1, "dgreen")
+    g.tri((1, 12.5), (4, 9.5), (4, 15.5), "green")
+    g.tri((15, 12.5), (12, 9.5), (12, 15.5), "green")
+    g.rect(4, 11, 8, 3, "green")
+    g.rect(4, 13, 8, 1, "dgreen")
     return g
 
 
@@ -173,7 +173,8 @@ class Zone(Grid):
 
 
 def cabbagetown():
-    """A bay-and-gable house: a steep slate gable trimmed in white over brick, a bay of lit windows."""
+    """A bay-and-gable house: a steep slate gable trimmed in white, a lit attic window in it, over brick, a bay
+    of lit windows."""
     g = Zone()
     g.tri((1.5, 7.5), (8, 1), (14.5, 7.5), "dslate")
     for k in range(6):
@@ -185,7 +186,7 @@ def cabbagetown():
     for y in (8, 12):
         g.rect(3, y, 4, 2, "gold")
     g.rect(10, 10, 2, 5, "forest")
-    g.p(8, 4, "cyan")
+    g.rect(7, 4, 2, 2, "gold")
     return g
 
 
@@ -375,13 +376,13 @@ def big_tipper():
     """A stack of coins with an arrow up."""
     g = Grid(16, 16)
     for x, y in ((1, 12), (2, 10), (1, 8), (2, 6)):
-        g.rect(x, y, 8, 2, "amber")
-        g.rect(x, y + 1, 8, 1, "orange")
+        g.rect(x, y, 7, 2, "amber")
+        g.rect(x, y + 1, 7, 1, "orange")
         g.p(x + 1, y, "yellow")
-    g.ell(6, 4.5, 4, 2, "yellow", "amber")
-    g.rect(4, 4, 4, 1, "amber")
-    g.tri((13, 0.5), (9.5, 5.5), (16.5, 5.5), "green")
-    g.rect(12, 5, 2, 9, "green")
+    g.ell(5.5, 4.5, 3.5, 2, "yellow", "amber")
+    g.rect(4, 4, 3, 1, "amber")
+    g.tri((12, 0.8), (9, 4.8), (15, 4.8), "green")
+    g.rect(11, 4, 2, 10, "green")
     return g
 
 
@@ -457,16 +458,16 @@ def raincoats():
         "...yyyyyyaa.",
         "...yyyyyaaa.",
     ], {"y": "yellow", "a": "amber", "k": "orange"})
-    drop(g, 1.5, 0, 1.3, "cyan", "sky")
+    drop(g, 2, 1, 1.3, "cyan", "sky")
     return g
 
 
 def sweet_talker():
     """A speech bubble saying money goes down."""
     g = Grid(16, 16)
-    g.rect(1, 2, 14, 9, "white")
-    g.rect(0, 3, 16, 7, "white")
-    g.rect(1, 10, 14, 1, "lgrey")
+    g.rect(2, 2, 12, 9, "white")
+    g.rect(1, 3, 14, 7, "white")
+    g.rect(2, 10, 12, 1, "lgrey")
     g.tri((3, 10), (3, 15), (7, 10), "white")
     bitmap(g, 3, 3, [".s.", "sss", "s..", "sss", "..s", "sss", ".s."], {"s": "forest"})
     bitmap(g, 8, 3, ["..d..", "..d..", "..d..", "ddddd", ".ddd.", "..d.."], {"d": "dred"})
@@ -478,8 +479,8 @@ def rush_hour():
     g = Grid(16, 16)
     g.ell(3.5, 3.5, 2.5, 2.5, "amber", "orange", "yellow")
     g.ell(12.5, 3.5, 2.5, 2.5, "amber", "orange", "yellow")
-    g.rect(3, 13, 2, 3, "lgrey")
-    g.rect(11, 13, 2, 3, "lgrey")
+    g.rect(3, 13, 2, 2, "lgrey")
+    g.rect(11, 13, 2, 2, "lgrey")
     g.ell(8, 9, 6, 6, "red", None, "pink")
     g.ell(8, 9, 4, 4, "white", "lgrey")
     g.rect(8, 6, 1, 4, "ink")
@@ -492,16 +493,16 @@ def rush_hour():
 def gear_whistle():
     """The whistle without its sound lines, which blur together at 16x16."""
     g = Grid(16, 16)
-    g.ell(6.5, 11, 5.5, 4.8, "lgrey", "grey", "white")
-    g.rect(6, 7, 10, 4, "lgrey")
-    g.rect(6, 7, 10, 1, "white")
-    g.rect(6, 10, 10, 1, "grey")
-    g.rect(15, 7, 1, 4, "grey")
-    g.rect(7, 7, 3, 1, None)
-    g.rect(7, 8, 3, 1, "dslate")
-    for x, y in ((4, 10), (6, 10), (3, 11), (7, 11)):
+    g.ell(6.5, 10, 5.5, 4.8, "lgrey", "grey", "white")
+    g.rect(6, 6, 9, 4, "lgrey")
+    g.rect(6, 6, 9, 1, "white")
+    g.rect(6, 9, 9, 1, "grey")
+    g.rect(14, 6, 1, 4, "grey")
+    g.rect(7, 6, 3, 1, None)
+    g.rect(7, 7, 3, 1, "dslate")
+    for x, y in ((4, 9), (6, 9), (3, 10), (7, 10)):
         g.p(x, y, "dred")
-    g.rect(4, 12, 3, 2, "dred")
+    g.rect(4, 11, 3, 2, "dred")
     return g
 
 
