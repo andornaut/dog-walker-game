@@ -22,7 +22,7 @@ import { DEBUFF_BAR } from "./walkHud";
 // What a line is about, and the icon that leads it; or a walk effect, such as a gear, a perk or
 // an upgrade, led by its 16x16 icon.
 export const MESSAGE_ICONS = {
-  achievement: "icon-lucky",
+  achievement: "icon-badge",
   bump: "icon-bump",
   fired: "icon-fired",
   hint: "icon-hint",
