@@ -1,0 +1,112 @@
+{ "frames": {
+   "food-cart-vendor@81 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 39, "h": 59 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 59 },
+    "sourceSize": { "w": 39, "h": 59 },
+    "duration": 160
+   },
+   "food-cart-vendor@81 1.aseprite": {
+    "frame": { "x": 39, "y": 0, "w": 39, "h": 59 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 59 },
+    "sourceSize": { "w": 39, "h": 59 },
+    "duration": 160
+   },
+   "food-cart-vendor@81 2.aseprite": {
+    "frame": { "x": 78, "y": 0, "w": 39, "h": 59 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 59 },
+    "sourceSize": { "w": 39, "h": 59 },
+    "duration": 160
+   },
+   "food-cart-vendor@81 3.aseprite": {
+    "frame": { "x": 117, "y": 0, "w": 39, "h": 59 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 59 },
+    "sourceSize": { "w": 39, "h": 59 },
+    "duration": 160
+   },
+   "food-cart-vendor@81 4.aseprite": {
+    "frame": { "x": 156, "y": 0, "w": 39, "h": 59 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 59 },
+    "sourceSize": { "w": 39, "h": 59 },
+    "duration": 250
+   },
+   "food-cart-vendor@81 5.aseprite": {
+    "frame": { "x": 195, "y": 0, "w": 39, "h": 59 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 59 },
+    "sourceSize": { "w": 39, "h": 59 },
+    "duration": 250
+   },
+   "food-cart-vendor@81 6.aseprite": {
+    "frame": { "x": 234, "y": 0, "w": 39, "h": 59 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 59 },
+    "sourceSize": { "w": 39, "h": 59 },
+    "duration": 250
+   },
+   "food-cart-vendor@81 7.aseprite": {
+    "frame": { "x": 273, "y": 0, "w": 39, "h": 59 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 59 },
+    "sourceSize": { "w": 39, "h": 59 },
+    "duration": 250
+   },
+   "food-cart-vendor@81 8.aseprite": {
+    "frame": { "x": 312, "y": 0, "w": 39, "h": 59 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 59 },
+    "sourceSize": { "w": 39, "h": 59 },
+    "duration": 200
+   },
+   "food-cart-vendor@81 9.aseprite": {
+    "frame": { "x": 351, "y": 0, "w": 39, "h": 59 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 59 },
+    "sourceSize": { "w": 39, "h": 59 },
+    "duration": 200
+   },
+   "food-cart-vendor@81 10.aseprite": {
+    "frame": { "x": 390, "y": 0, "w": 39, "h": 59 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 59 },
+    "sourceSize": { "w": 39, "h": 59 },
+    "duration": 200
+   },
+   "food-cart-vendor@81 11.aseprite": {
+    "frame": { "x": 429, "y": 0, "w": 39, "h": 59 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 39, "h": 59 },
+    "sourceSize": { "w": 39, "h": 59 },
+    "duration": 200
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "food-cart-vendor@81.png",
+  "format": "RGBA8888",
+  "size": { "w": 468, "h": 59 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "push", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "idle", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "cue", "from": 8, "to": 11, "direction": "forward" }
+  ]
+ }
+}

@@ -4866,6 +4866,87 @@
       }
     },
     {
+      "key": "food-cart-vendor",
+      "png": "sprites/food-cart-vendor.png",
+      "json": "sprites/food-cart-vendor.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "food-cart-vendor@50",
+      "png": "sprites/food-cart-vendor@50.png",
+      "json": "sprites/food-cart-vendor@50.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "food-cart-vendor@56",
+      "png": "sprites/food-cart-vendor@56.png",
+      "json": "sprites/food-cart-vendor@56.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "food-cart-vendor@62",
+      "png": "sprites/food-cart-vendor@62.png",
+      "json": "sprites/food-cart-vendor@62.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "food-cart-vendor@69",
+      "png": "sprites/food-cart-vendor@69.png",
+      "json": "sprites/food-cart-vendor@69.json",
+      "anchor": {
+        "feetY": 48,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "food-cart-vendor@75",
+      "png": "sprites/food-cart-vendor@75.png",
+      "json": "sprites/food-cart-vendor@75.json",
+      "anchor": {
+        "feetY": 51,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "food-cart-vendor@81",
+      "png": "sprites/food-cart-vendor@81.png",
+      "json": "sprites/food-cart-vendor@81.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "food-cart-vendor@88",
+      "png": "sprites/food-cart-vendor@88.png",
+      "json": "sprites/food-cart-vendor@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "food-cart-vendor@94",
+      "png": "sprites/food-cart-vendor@94.png",
+      "json": "sprites/food-cart-vendor@94.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 41
+      }
+    },
+    {
       "key": "fx-bark",
       "png": "sprites/fx-bark.png",
       "json": "sprites/fx-bark.json"

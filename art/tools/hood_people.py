@@ -76,6 +76,17 @@ ice-cream-bike      48x72   The Beaches; an ice cream vendor's front-loading tri
                             strawberry cone held out in the screen-right hand, lifted 1px as the rider
                             breathes; cue (2 frames, 150ms): ringing the bell, the bell rocking and
                             amber ring marks flashing out over it
+food-cart-vendor    48x72   Kensington Market; a stop-and-go mover pushing a churro cart down its lane
+                            at the player, the cart in front of him, facing it: a flat awning striped
+                            turquoise and cream on two poles, the vendor in a white paper cap, a lime
+                            tee and a white apron, a cup of sugared churros and a silver counter bell
+                            on the counter, a violet cart with a chalk menu board on its front, two
+                            black tires edge-on and his jeans walking under it (unlike the stainless
+                            hot-dog-cart under its red and yellow umbrella); push (4 frames, 160ms,
+                            the stroller's pace): road.PERSON_WALK's stride and bob, the tread rolling
+                            down the tires; idle (4 frames, 250ms): wiping the counter, the cloth out
+                            and back, breathing; cue (4 frames, 200ms): the hand up over the bell and
+                            down on it as it rings, twice
 
 Each has depth variants at every step in minis.STEPS (@94 to @50), redrawn at the
 step on a Mini at road.SCALE x the step, with the original's tags, frame counts
@@ -94,7 +105,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import Grid, edged, main, raster, scale_of  # noqa: E402
+from pixel import Grid, K, edged, main, raster, scale_of  # noqa: E402
 import minis  # noqa: E402
 import road  # noqa: E402
 from hazards import CYCLIST_RIDE, sway_rows  # noqa: E402
@@ -932,6 +943,137 @@ def ice_cream_bike(lf=42.5, rf=42.5, roll=None, sway=0, offer=False, lift=0, bob
         # the ring marks: three short strokes out from the bell, up, up-left and left, further out on ring 2
         bitmap_at(g, RING[ring - 1], 0, 19.5, K["amber"])
     return rim(g, ICE_RIM)
+# ---------- food-cart-vendor: pushing a churro cart down a lane at the player ----------
+
+# Pushing the cart: road.PERSON_WALK's stride under the cart and the 1px bob, the stroller's pace, while the
+# tires' tread rolls down a row a frame (tread, in the drawn grid's own pixels). 4 frames at 160ms.
+CART_PUSH = tuple(dict(lf=q.get("lf", 0), rf=q.get("rf", 0), bob=q.get("bob", 0)) for q in road.PERSON_WALK)
+CART_PUSH_MS = 160
+# Stopped: wiping the counter, the cloth out to the middle and back, breathing (frame 0 the rest pose); 4
+# frames at 250ms.
+CART_IDLE = (dict(wipe=0), dict(wipe=3), dict(wipe=6, bob=-1), dict(wipe=3, bob=-1))
+CART_IDLE_MS = 250
+# Setting off again: the hand up over the counter bell, then down on it as it rings, twice. 4 frames at 200ms.
+CART_CUE = (dict(bell="up"), dict(bell="ring"), dict(bell="up"), dict(bell="ring"))
+CART_CUE_MS = 200
+CART_RIM = {**LIT, "violet": ("lilac", None), "dturq": ("turquoise", None), "moss": ("lime", None)}
+
+
+def tread_rows(g, x, y0, y1, phase, c):
+    """Tread marks on an edge-on tire spanning design columns x to x + 1 and rows y0 to y1, in the drawn grid's
+    own pixels so they stay 1px at every step: every fourth row, rolling down a row each phase."""
+    s, px = scale_of(g), raster(g)
+    x0, x1 = scaled(x, s), max(scaled(x + 1, s), scaled(x, s) + 1)
+    for y in range(scaled(y0, s), scaled(y1, s)):
+        if (y - phase) % 4 == 0:
+            for xx in range(x0, x1):
+                if px.px[y][xx]:
+                    px.p(xx, y, c)
+
+
+def food_cart_vendor(lf=0, rf=0, bob=0, wipe=None, bell=None, tread=0):
+    """A Kensington churro vendor pushing a snack cart down the road at the player, the cart in front of him:
+    a flat awning striped turquoise and cream on two poles, a scalloped valance under it; the vendor behind
+    the counter in a white paper cap over dark hair, a lime tee and a white apron; on the counter a paper cup
+    of sugared churros (left) and a silver counter bell (right); the violet cart's front a chalk menu board
+    with a churro and three lines of writing; two black tires edge-on at its corners and his jeans and brown
+    shoes walking under it. wipe (design columns) puts his right hand (screen right) on the counter with a
+    cloth; bell "up" lifts that hand over the bell, "ring" rings it; otherwise both hands are on the push bar behind
+    the cart. The road outline and the lit rim."""
+    g = edged(Grid(32, 48))
+    b = bob
+    # the legs walking under the cart, behind it: jeans and brown shoes
+    for x, f in ((11, lf), (17, rf)):
+        g.rect(x, 36, 4, 6 + f, "blue")
+        g.rect(x + 3, 36, 1, 6 + f, "navy")
+        g.rect(x, 42 + f, 4, 2, "brown")
+        g.rect(x, 43 + f, 4, 1, "dbrown")
+    # the tires, edge-on at the cart's front corners, under steel brackets
+    for cx in (6, 26):
+        g.rect(cx - 0.5, 36, 1, 3, "slate")
+        g.ell(cx, 41.5, 1.8, 4, "ink")
+        tread_rows(g, cx - 0.5, 38, 45.5, tread, K["dslate"])
+    # the arms: sleeves, the screen-left forearm down to the push bar behind the counter
+    g.rect(5, 22 + b, 4, 3, "lime")
+    g.rect(8, 22 + b, 1, 3, "moss")
+    g.rect(6, 25 + b, 3, 3, "skin1")
+    g.rect(23, 22 + b, 4, 3, "lime")
+    g.rect(26, 22 + b, 1, 3, "moss")
+    # the lime tee, shaded down its right, the white apron's bib over it on a strap round the neck
+    g.rect(9, 21 + b, 14, 7, "lime")
+    g.rect(20, 21 + b, 3, 7, "moss")
+    g.p(9, 21 + b, None)
+    g.p(22, 21 + b, None)
+    g.rect(12, 23 + b, 8, 5, "white")
+    g.rect(19, 23 + b, 1, 5, "lgrey")
+    g.rect(12, 21 + b, 1, 2, "white")
+    g.rect(19, 21 + b, 1, 2, "white")
+    # head: dark hair at the sides, the face, the white paper cap
+    g.rect(8.5, 11 + b, 2, 6, "dbrown")
+    g.rect(21.5, 11 + b, 2, 6, "dbrown")
+    g.rect(14, 19 + b, 4, 2, "skin1")
+    face_disc(g, 16, 14.5 + b, 7, 6, "skin1", "skin2")
+    g.cel(16, 10 + b, 7.5, 2.5, "white", "lgrey")
+    g.rect(8.5, 10.5 + b, 15, 1.5, "white")
+    g.rect(8.5, 11.5 + b, 15, 1, "lgrey")
+    road.face_front(g, 16, 14 + b)
+    g.p(10, 17 + b, "pink")
+    g.p(22, 17 + b, "pink")
+    # the screen-right hand: down to the push bar, out on the counter with the cloth, or at the bell
+    if wipe is not None:
+        x = 22 - wipe
+        g.rect(x, 25 + b, 27 - x, 2, "skin1")
+        g.rect(x - 1, 26, 5, 1, "turquoise")
+        g.rect(x - 1, 26, 5, 0.67, "foam")
+        g.rect(x, 24.5 + b, 3, 2, "skin1")
+        g.rect(x + 2, 24.5 + b, 1, 2, "skin2")
+    elif bell:
+        y = 22 if bell == "up" else 24
+        g.rect(24, y, 3, 3, "skin1")
+        g.rect(26, y, 1, 3, "skin2")
+    else:
+        g.rect(23, 25 + b, 3, 3, "skin1")
+        g.rect(25, 25 + b, 1, 3, "skin2")
+    # the counter bell, ringing on "ring": two short marks out either side of it
+    g.cel(26, 26.5, 2, 1.5, "lgrey", "grey", "white")
+    if bell != "up":
+        g.rect(25.5, 24.5, 1, 1, "grey")
+    if bell == "ring":
+        g.rect(29, 23, 1, 1, "white")
+        g.rect(30, 24.5, 1, 1.5, "white")
+    # the paper cup of churros, sugared, fanned out of a turquoise band
+    for x, top in ((4, 19.5), (6, 18), (8, 19.5)):
+        g.rect(x, top, 1, 6, "ochre")
+        g.p(x, top, "cream")
+    g.rect(3.5, 23.5, 6, 3.5, "white")
+    g.rect(8.5, 23.5, 1, 3.5, "lgrey")
+    g.rect(3.5, 24.5, 6, 1, "turquoise")
+    # the counter's white lip, then the violet cart lit down its left and shaded down its right
+    g.rect(3, 27, 26, 1, "white")
+    g.rect(3, 28, 26, 0.67, "lgrey")
+    g.rect(4, 28.5, 24, 8, "violet")
+    g.rect(4, 28.5, 1, 8, "lilac")
+    g.rect(25, 28.5, 3, 8, "purple")
+    # the menu board: a slate chalkboard framed in brown, a churro drawn on the left
+    g.rect(8, 29.5, 15, 6, "brown")
+    g.rect(9, 30.5, 13, 4, "dslate")
+    for k in range(4):
+        g.rect(10 + k, 33.5 - k, 2, 1, "ochre")
+    g.p(13, 30.5, "cream")
+    # three lines of writing; a smaller board, too short to keep them apart, two
+    for y, w in ((31, 6), (32.5, 4), (34, 5)) if scale_of(g) >= 1.3 else ((31, 6), (33.5, 5)):
+        g.rect(15, y, w, 0.67, "cream")
+    # the awning: poles up from the cart's front corners, the canopy striped turquoise and cream, lit along
+    # the top, its right in shade, a scallop under each stripe
+    for x in (3, 28):
+        g.rect(x, 8, 1, 19, "grey")
+    for i in range(7):
+        x0, light = 2 + 4 * i, i < 4
+        col = ("turquoise" if light else "dturq") if i % 2 == 0 else ("cream" if light else "tan")
+        g.rect(x0, 1, 4, 6, col)
+        g.rect(x0, 1, 4, 1, ("foam" if i % 2 == 0 else "white") if light else col)
+        g.cel(x0 + 2, 7, 2, 1.6, col)
+    return rim(g, CART_RIM)
 
 
 # ---------- every sprite at a depth step ----------
@@ -980,6 +1122,11 @@ def steps(suffix, s):
     yield f"ice-cream-bike{suffix}", [("push", [bike(q) for q in ICE_PUSH], ICE_PUSH_MS),
                                       ("idle", [bike(q) for q in ICE_IDLE], ICE_IDLE_MS),
                                       ("cue", [bike(q) for q in ICE_CUE], ICE_CUE_MS)]
+    cart = [minis.small(here, p, food_cart_vendor, tread=k, **posed(q, p)).outlined()
+            for k, q in enumerate(CART_PUSH)]
+    yield f"food-cart-vendor{suffix}", [("push", cart, CART_PUSH_MS),
+                                        ("idle", [own(food_cart_vendor, q) for q in CART_IDLE], CART_IDLE_MS),
+                                        ("cue", [own(food_cart_vendor, q) for q in CART_CUE], CART_CUE_MS)]
 
 
 def sprites():
