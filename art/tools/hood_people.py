@@ -19,7 +19,7 @@ couple              112x72  Distillery District, 2 lanes; two people strolling a
                             their inner arms hooked together between them; walk (4 frames, 160ms, the
                             stroller's pace): road.PERSON_WALK, in step, the outer arms swinging; idle
                             (2 frames, 400ms): road.BREATH
-busker              48x72   Kensington Market and Yonge Street; a fixed busker facing the player,
+busker              48x72   Yonge Street; a fixed busker facing the player,
                             playing an acoustic guitar behind its open case: curly brown hair and a
                             beard, an olive plaid shirt, the case lying open at his feet, lined in red
                             plush, holding a page of sheet music and a cardboard sign
