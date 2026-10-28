@@ -59,6 +59,7 @@ import { faceMood } from "../rules/treats";
 import { clampHearts } from "../rules/units";
 import type { PullPose } from "../runner/pulls";
 import type { CardSource } from "../state/runState";
+import { awaitsArt } from "../testing/awaitingArt";
 import { testState } from "../testing/runState";
 import { FEEDBACK_ART } from "./feedbackArt";
 import { hitBurstKey, hitLook } from "./hitMoment";
@@ -466,7 +467,7 @@ describe("road object art", () => {
     gameData.encounters[kind as EncounterId].kind === "lucky";
   it("tags every moving road item's sprite with a tag of its movement, at every step", () => {
     const moving = roadKinds.flatMap(({ art, entry, kind }) => {
-      if (!drawn(kind)) {
+      if (!drawn(kind) || awaitsArt(hasSprite, art)) {
         return [];
       }
       const movement = "movement" in entry ? entry.movement : undefined;

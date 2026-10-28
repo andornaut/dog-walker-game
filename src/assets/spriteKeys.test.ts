@@ -5,6 +5,7 @@ import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { SHOP_GEAR } from "../data/shop";
 import type { GearId, MinorObstacleId } from "../data/types";
 import { WORLD } from "../data/world";
+import { AWAITING_ART } from "../testing/awaitingArt";
 import { animationKey, animationSpecs } from "./asepriteAnimations";
 import {
   backdropKey,
@@ -39,12 +40,19 @@ describe("key names", () => {
   });
 
   // A mover plays its movement's tag while it moves and its idle between moves; a stalker drawn
-  // with a lunge (step) lunges on each step and stalks (walk) between them, and one drawn
-  // without steps on walk and stands idle between.
+  // with a lunge (step) lunges on each step and stalks (stalk, else walk) between them, and one
+  // drawn without steps on walk and stands idle between.
   it("plays a mover's movement tag while it moves and its idle or stalk between", () => {
     const cases = [
       { movement: "approach", moving: true, tags: ["idle", "walk", "step"], want: "step" },
       { movement: "approach", moving: false, tags: ["idle", "walk", "step"], want: "walk" },
+      { movement: "approach", moving: true, tags: ["idle", "walk", "stalk", "step"], want: "step" },
+      {
+        movement: "approach",
+        moving: false,
+        tags: ["idle", "walk", "stalk", "step"],
+        want: "stalk",
+      },
       { movement: "approach", moving: true, tags: ["idle", "walk", "flee"], want: "walk" },
       { movement: "approach", moving: false, tags: ["idle", "walk", "flee"], want: "idle" },
       { movement: "hop", moving: true, tags: ["idle", "hop"], want: "hop" },
@@ -91,7 +99,7 @@ describe("the art manifest", () => {
         ),
         SKUNK_CLOUD_KEY,
         CARD_FRAME_KEY,
-      ].filter((key) => !spriteKeys.has(key)),
+      ].filter((key) => !spriteKeys.has(key) && !AWAITING_ART.has(key)),
       ...WORLD.zones
         .flatMap((zone) => [
           backdropKey(zone),

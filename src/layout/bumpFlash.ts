@@ -87,6 +87,7 @@ export const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>
   gardener: "green",
   goose: "white",
   hedge: "green",
+  hopscotchKid: "pink",
   hotDogCart: "amber",
   iceCreamBike: "white",
   iceCreamTruck: "pink",

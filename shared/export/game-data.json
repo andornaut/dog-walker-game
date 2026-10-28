@@ -1868,6 +1868,28 @@
       "spriteKey": "hedge"
     },
     {
+      "id": "hopscotchKid",
+      "movement": {
+        "hops": {
+          "max": 4,
+          "min": 2
+        },
+        "kind": "bounce",
+        "pauseSeconds": 0.6
+      },
+      "name": "Hopscotch kid",
+      "onFoot": true,
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "snoozeCrescent",
+        "shops"
+      ],
+      "spriteKey": "hopscotch-kid"
+    },
+    {
       "id": "hotDogCart",
       "name": "Hot dog cart",
       "shape": {
@@ -2780,6 +2802,7 @@
           "gardener": 2,
           "goose": 0,
           "hedge": 3.5,
+          "hopscotchKid": 2,
           "hotDogCart": 0,
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
@@ -2880,6 +2903,7 @@
           "gardener": 0,
           "goose": 3,
           "hedge": 8,
+          "hopscotchKid": 0,
           "hotDogCart": 0,
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
@@ -2980,6 +3004,7 @@
           "gardener": 0,
           "goose": 0,
           "hedge": 0,
+          "hopscotchKid": 0,
           "hotDogCart": 3,
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
@@ -3080,6 +3105,7 @@
           "gardener": 0,
           "goose": 0,
           "hedge": 0,
+          "hopscotchKid": 2,
           "hotDogCart": 3.75,
           "iceCreamBike": 0,
           "iceCreamTruck": 1,
@@ -3180,6 +3206,7 @@
           "gardener": 0,
           "goose": 3,
           "hedge": 3.75,
+          "hopscotchKid": 0,
           "hotDogCart": 3.75,
           "iceCreamBike": 2,
           "iceCreamTruck": 0,
@@ -3280,6 +3307,7 @@
           "gardener": 0,
           "goose": 0,
           "hedge": 0,
+          "hopscotchKid": 0,
           "hotDogCart": 12.5,
           "iceCreamBike": 0,
           "iceCreamTruck": 2,

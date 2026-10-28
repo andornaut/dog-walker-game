@@ -140,6 +140,13 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   hedge: { name: "Hedge", shape: { lanes: 3, rows: 1 } },
+  hopscotchKid: {
+    movement: { hops: { max: 4, min: 2 }, kind: "bounce", pauseSeconds: 0.6 },
+    name: "Hopscotch kid",
+    onFoot: true,
+    shape: { lanes: 1, rows: 1 },
+    zones: ["snoozeCrescent", "shops"],
+  },
   hotDogCart: { name: "Hot dog cart", shape: { lanes: 2, rows: 1 } },
   iceCreamBike: {
     movement: {

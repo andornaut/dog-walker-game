@@ -235,7 +235,7 @@ export const STANDING_TAGS = {
 // The tag a mover's body plays, of those has says its sprite has: its pose, if it holds one;
 // while it moves, its movement's first tag, else its idle; otherwise its idle, else that movement
 // tag; and failing both, what a standing item would play. A stalker drawn with a step (a lunge)
-// for its steps stalks between them, playing walk.
+// for its steps stalks between them, playing stalk, else walk.
 export function moverBodyTag(
   has: (tag: string) => boolean,
   movement: MovementKind,
@@ -243,7 +243,7 @@ export function moverBodyTag(
   pose: MoverPose | null = null,
 ): string | undefined {
   const motion = MOVING_TAGS[movement];
-  const stalking = movement === "approach" && has("step") ? ["walk"] : [];
+  const stalking = movement === "approach" && has("step") ? ["stalk", "walk"] : [];
   const posed = pose === null ? [] : [pose];
   const tags = moving
     ? [...posed, ...motion, IDLE_TAG, ...STANDING_TAGS.walking]
