@@ -28,7 +28,7 @@ reads on them.
   Pocket sections and Start walk. The street sign's board (300,72 54x11, a
   52x9 navy face) sits at the right edge, clear of the walker's speech bubble;
   the game prints homeText.gateSign on it in font-body, white, centred at
-  327,75. The yard sign (SIGN_AT 6,138, a 128x38 board on two posts, left of
+  327,75. The yard sign (SIGN_AT 6,140, a 128x38 board on two posts, left of
   the gate path, where the pack never stands) carries ARCHIE'S over DOG WALKS
   in the sign letters at 2x, yellow. The yard's right lot is left for ui-pet-shop. The scene holds no
   strong green, so the Pet shop's board and Start walk stand out.
@@ -140,7 +140,7 @@ from ui import STATES  # noqa: E402
 W, H = 360, 560
 LOGO_W, LOGO_H = 145, 41
 SIGN_W, SIGN_H = 128, 38
-SIGN_AT = (6, 138)
+SIGN_AT = (6, 140)
 PET_SHOP_W, PET_SHOP_H = 120, 108
 PET_SHOP_AT = (234, 86)
 # The PET SHOP board in the sprite: ui-button's go state 114x22, its bottom 2 rows over the parapet.
