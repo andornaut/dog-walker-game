@@ -21,7 +21,7 @@ import type {
 } from "../data/types";
 import { HOME_TEXT_FIELDS, homeLine } from "../home/homeText";
 import { assertNever } from "../lib/assertNever";
-import { fillLine, fillNames } from "../lib/lines";
+import { fillLine, fillNames, MINUS, signedText } from "../lib/lines";
 import type { ModifiedValue } from "./modified";
 import { modifiersOf, modifierValue } from "./modifiers";
 import { type Cents, cents, read } from "./units";
@@ -36,8 +36,6 @@ export const SIZE_NAMES: { readonly [S in Size]: string } = {
   small: "small",
 };
 
-const MINUS = "−";
-
 // Names joined for a sentence by the words' joins: "Jason", "Jason and Rosa", "Jason, Rosa and
 // Kim".
 export function sentenceList(words: HomeText["sentenceList"], names: readonly string[]): string {
@@ -46,21 +44,24 @@ export function sentenceList(words: HomeText["sentenceList"], names: readonly st
   return head.length === 0 ? last : `${head.join(words.between)}${words.beforeLast}${last}`;
 }
 
-// The sign an amount is shown with: "−" or "+".
-export function sign(value: number): string {
-  return value < 0 ? MINUS : "+";
-}
-
 // Whole dollars without cents, as "$5"; otherwise "$1.50".
 export function formatDollars(amount: Cents): string {
   const dollars = Math.abs(amount) / 100;
   return `$${Number.isInteger(dollars) ? dollars : dollars.toFixed(2)}`;
 }
 
+// A money effect's amount, signed by its change: "+$5", "−$1.50".
+function moneyChangeText(change: MoneyEffect["change"], amount: Cents): string {
+  return `${change === "gain" ? "+" : MINUS}${formatDollars(amount)}`;
+}
+
+// A change in hearts, signed: "+3♥", "−1♥".
+export function heartsChangeText(amount: number): string {
+  return signedText(amount, `${Math.abs(amount)}♥`);
+}
+
 function moneyText(data: TextData, effect: MoneyEffect): string {
-  const amount = read(data.tuning, "money", effect.amount);
-  const signText = effect.change === "gain" ? "+" : MINUS;
-  return `${signText}${formatDollars(amount)}`;
+  return moneyChangeText(effect.change, read(data.tuning, "money", effect.amount));
 }
 
 // A dodge chance as one in so many, rounded: 0.25 as "4".
@@ -79,7 +80,7 @@ function dodgeText(data: TextData, effect: DodgeEffect): string {
 }
 
 function heartsText(words: EffectWords, effect: HeartsEffect): string {
-  const hearts = `${sign(effect.amount)}${Math.abs(effect.amount)}♥`;
+  const hearts = heartsChangeText(effect.amount);
   const key = effect.target.kind === "lead" ? "heartsLead" : "heartsEach";
   return fillLine(HOME_TEXT_FIELDS.effect, words, key, { hearts });
 }
@@ -87,7 +88,7 @@ function heartsText(words: EffectWords, effect: HeartsEffect): string {
 // Hearts shared by the pack, by their signed total: "+3♥ shared by the pack".
 function sharedHeartsText(data: TextData, effect: SharedHeartsEffect): string {
   const total = read(data.tuning, "hearts", effect.amount);
-  const hearts = `${sign(total)}${Math.abs(total)}♥`;
+  const hearts = heartsChangeText(total);
   return fillLine(HOME_TEXT_FIELDS.effect, data.homeText.effect, "heartsShared", { hearts });
 }
 
@@ -98,7 +99,7 @@ function percentMagnitude(fraction: number): string {
 
 // A fraction as a signed whole percent: 0.3 as "+30%", -0.5 as "−50%".
 function percentText(fraction: number): string {
-  return `${sign(Math.round(fraction * 100))}${percentMagnitude(fraction)}`;
+  return signedText(Math.round(fraction * 100), percentMagnitude(fraction));
 }
 
 // An agility as a signed whole percent against the base lane-change speed, an agility of 1:
@@ -141,11 +142,11 @@ function addedText(modifier: Modifier, value: number): string {
     case "agility":
       return percentText(value);
     case "tipValue":
-      return `${sign(value)}${formatDollars(cents(value))}`;
+      return signedText(value, formatDollars(cents(value)));
     case "treatReach":
-      return `${sign(value)}${Math.abs(value)} ${Math.abs(value) === 1 ? "lane" : "lanes"}`;
+      return signedText(value, `${Math.abs(value)} ${Math.abs(value) === 1 ? "lane" : "lanes"}`);
     default:
-      return `${sign(value)}${Math.abs(value)}`;
+      return signedText(value, String(Math.abs(value)));
   }
 }
 
@@ -320,7 +321,7 @@ function cardHeartsText(
   effect: HeartsEffect,
 ): string | undefined {
   const hearts = String(Math.abs(effect.amount));
-  const change = `${sign(effect.amount)}${hearts}♥`;
+  const change = heartsChangeText(effect.amount);
   const names = context.dogs(effect.target).map((id) => {
     const dog = data.dogs[id].name;
     return effect.amount < 0 && context.forgiven(id)
@@ -351,9 +352,7 @@ function cardPhrase(
     case "money": {
       const { amount, modified } = context.money(effect);
       return {
-        text: isWaived(modified)
-          ? data.runText.card.free
-          : `${effect.change === "gain" ? "+" : MINUS}${formatDollars(amount)}`,
+        text: isWaived(modified) ? data.runText.card.free : moneyChangeText(effect.change, amount),
       };
     }
     default:

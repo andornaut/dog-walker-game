@@ -28,11 +28,16 @@ export function fillLine<Table extends FlatFieldTable, K extends keyof Table & s
   return fillNames(lines[key], fields);
 }
 
-const MINUS = "−";
+export const MINUS = "−";
 
-// magnitude, the text of amount's size, after amount's sign: a real minus sign or a plus.
+// The sign an amount is shown with: a real minus sign or a plus.
+function signText(amount: number): string {
+  return amount < 0 ? MINUS : "+";
+}
+
+// magnitude, the text of amount's size, after amount's sign (signText).
 export function signedText(amount: number, magnitude: string): string {
-  return `${amount < 0 ? MINUS : "+"}${magnitude}`;
+  return `${signText(amount)}${magnitude}`;
 }
 
 // Text broken at spaces into lines no wider than maxWidth, as width measures a line. A word

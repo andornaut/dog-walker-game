@@ -1,8 +1,8 @@
 import type { DogId, GameData, GearId } from "../data/types";
 import { assertNever } from "../lib/assertNever";
-import { fillNames } from "../lib/lines";
+import { fillNames, signedText } from "../lib/lines";
 import type { ActiveModifier, EffectSource, ModifierSource } from "../state/runState";
-import { sign } from "./effectText";
+import { heartsChangeText } from "./effectText";
 import type { Contribution } from "./modifiers";
 import { type Cents, type Hearts, roundDollars } from "./units";
 
@@ -160,9 +160,7 @@ function wholeDollarText(amount: number): string {
 
 // A signed amount in the change's unit, such as "−2♥" or "+$2".
 export function amountText(kind: Change["kind"], amount: number): string {
-  return kind === "hearts"
-    ? `${sign(amount)}${Math.abs(amount)}♥`
-    : `${sign(amount)}${wholeDollarText(amount)}`;
+  return kind === "hearts" ? heartsChangeText(amount) : signedText(amount, wholeDollarText(amount));
 }
 
 // A card choice's own effects need no name: the player just picked them. A change cancelled
