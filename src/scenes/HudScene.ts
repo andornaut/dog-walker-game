@@ -813,11 +813,13 @@ export class HudScene extends Scene {
     }
   }
 
+  // The run the HUD shows, while a walk is shown.
+  private shownRun(): RunState | undefined {
+    return this.walk().hudView()?.run;
+  }
+
   private slotOf(dog: DogId): number | undefined {
-    const index =
-      this.walk()
-        .hudView()
-        ?.run.pack.findIndex((slot) => slot.dog === dog) ?? -1;
+    const index = this.shownRun()?.pack.findIndex((slot) => slot.dog === dog) ?? -1;
     return index < 0 ? undefined : index;
   }
 
@@ -848,7 +850,7 @@ export class HudScene extends Scene {
   private forgive(cue: ForgivenCue): void {
     const slot = this.slotOf(cue.dog);
     const rect = slot === undefined ? undefined : LAYOUT.dogSlots[slot];
-    const run = this.walk().hudView()?.run;
+    const run = this.shownRun();
     if (rect === undefined || run === undefined) {
       return;
     }
@@ -862,7 +864,7 @@ export class HudScene extends Scene {
 
   // The well of a buff that just changed the walk glints, as its charm pops.
   private glint(item: EffectItem): void {
-    const run = this.walk().hudView()?.run;
+    const run = this.shownRun();
     if (run === undefined) {
       return;
     }
@@ -988,7 +990,7 @@ export class HudScene extends Scene {
   // Each owner's quip on the message strip, led by their face, in the mood their hearts give,
   // and their name.
   private sayQuips(quips: readonly OwnerQuip[]): void {
-    const run = this.walk().hudView()?.run;
+    const run = this.shownRun();
     if (run === undefined) {
       return;
     }
