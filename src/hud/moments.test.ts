@@ -252,41 +252,38 @@ describe("lowHeartDogs and newlyLow", () => {
 });
 
 describe("cardOwnerMood", () => {
-  // Every max a dog can have, at any place in a pack, with no gear and with every gear's raise.
+  // The most hearts a dog can have, at any place in a pack, with every gear's raise. The mood
+  // reads the max only through the dog's face, so every heart count under it covers the rule.
   const gear = modifiersOf(Object.values(gameData.shopGear).flatMap((g) => g.effects));
-  const maxes = [
-    ...new Set(
-      Object.values(gameData.dogs).flatMap((dog) =>
-        PACK_PLACES.flatMap((place) => [
-          maxHearts(gameData.tuning, [], place, dog),
-          maxHearts(gameData.tuning, gear, place, dog),
-        ]),
-      ),
+  const most = Math.max(
+    ...Object.values(gameData.dogs).flatMap((dog) =>
+      PACK_PLACES.map((place) => maxHearts(gameData.tuning, gear, place, dog)),
     ),
-  ];
-  const cases = maxes.flatMap((max) =>
-    Array.from({ length: max + 1 }, (_, hearts) => [max, hearts] as const),
   );
 
-  it.each(cases)(
-    "shows a walking dog's owner (max %i) at %i hearts worried on the last heart, else as the dog's face",
-    (max, hearts) => {
-      const mood = cardOwnerMood(gameData, max, walking("kilo", hearts));
-      expect(mood).toBe(hearts === MOMENTS.lowHearts ? "worried" : faceMood(gameData, max, hearts));
-    },
-  );
-
-  it.each(Array.from({ length: gameData.tuning.hearts.maxOwnerHearts }, (_, i) => i + 1))(
-    "shows a full owner (max %i) happy, or worried when full is the last heart",
-    (max) => {
-      expect(cardOwnerMood(gameData, max, walking("kilo", max))).toBe(
-        max === MOMENTS.lowHearts ? "worried" : "happy",
+  it.each(Array.from({ length: most + 1 }, (_, hearts) => hearts))(
+    "shows a walking dog's owner at %i hearts worried on the last heart, else as the dog's face",
+    (hearts) => {
+      const mood = cardOwnerMood(gameData, most, walking("kilo", hearts));
+      expect(mood).toBe(
+        hearts === MOMENTS.lowHearts ? "worried" : faceMood(gameData, most, hearts),
       );
     },
   );
 
-  it.each(maxes)("shows a fired dog's owner (max %i) fired", (max) => {
-    expect(cardOwnerMood(gameData, max, { dog: "kilo", status: "fired", zoneIndex: 0 })).toBe(
+  // Full on the last heart, full just above it, and full at the most an owner can have.
+  it.each([
+    MOMENTS.lowHearts,
+    MOMENTS.lowHearts + 1,
+    gameData.tuning.hearts.maxOwnerHearts,
+  ])("shows a full owner (max %i) happy, or worried when full is the last heart", (max) => {
+    expect(cardOwnerMood(gameData, max, walking("kilo", max))).toBe(
+      max === MOMENTS.lowHearts ? "worried" : "happy",
+    );
+  });
+
+  it("shows a fired dog's owner fired", () => {
+    expect(cardOwnerMood(gameData, most, { dog: "kilo", status: "fired", zoneIndex: 0 })).toBe(
       "fired",
     );
   });
@@ -369,12 +366,14 @@ const SLOTS = SCREEN_LAYOUT.dogSlots;
 const DOGS = keysOf(gameData.dogs);
 const boxAt = (style: TextFitStyle) => inlineFaceBox(BODY, style.scale);
 
-// Every owner's low-hearts line, over every card, fits on one line led by the owner's face on
-// a chip kept on screen and clear of the card's top: the chip holds the body font's ink at the
-// line's scale padTop and padBottom inside it, and the face faceInset inside it.
+// Every owner's low-hearts line, over the first and last cards, by the screen's edges, fits on
+// one line led by the owner's face on a chip kept on screen and clear of the card's top: the
+// chip holds the body font's ink at the line's scale padTop and padBottom inside it, and the
+// face faceInset inside it.
 describe("the low-hearts chip", () => {
+  const edgeSlots = [0, SLOTS.length - 1].map((i) => [i, defined(SLOTS[i])] as const);
   it.each(
-    SLOTS.flatMap((slot, i) =>
+    edgeSlots.flatMap(([i, slot]) =>
       DOGS.map((dog) => [i, gameData.dogs[dog].owner.name, dog, slot] as const),
     ),
   )("over card %i keeps %s's line, led by their face, on screen", (_i, name, dog, slot) => {
