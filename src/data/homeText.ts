@@ -16,7 +16,7 @@ export const HOME_TEXT = {
   detail: {
     dogKind: "{size} · {hearts}♥",
     dogLarge: "Large: −{speed} lane change speed",
-    dogOwner: "Owner {owner}, {role}",
+    dogOwner: "{role}",
     dogSmall: "Small: dodges 1 in {dodgeIn} bumps",
     dogStatus: "Your client",
     gearEquipped: "In your Pocket",
