@@ -1,5 +1,5 @@
 import type { Silhouette } from "../layout/packFormation";
-import { distanceAtY, scaleAt, screenYAt } from "../layout/projection";
+import { distanceAtY, roadXAt, scaleAt, screenXAt, screenYAt } from "../layout/projection";
 import type { ScaledBox } from "./collision";
 
 // An obstacle's hit box is what it draws, as the pack's parts are: the bounding box of its
@@ -49,7 +49,7 @@ export function drawnObstacleBox(
     const projected = scaleAt(lens, distance);
     const drawn = Math.min(1, projected);
     const feetRow = screenYAt(lens, distance);
-    const centre = lens.centreX + (place.x + dx - lens.centreX) * projected;
+    const centre = screenXAt(lens, projected, place.x + dx);
     top = Math.min(top, feetRow - silhouette.above * drawn + inset);
     bottom = Math.max(bottom, feetRow - inset);
     left = Math.min(left, centre + silhouette.left * drawn + inset);
@@ -57,7 +57,7 @@ export function drawnObstacleBox(
   }
   // Columns go back to road pixels at the scale of the near edge's row.
   const scale = scaleAt(lens, lens.footY - place.feetY);
-  const across = (column: number) => lens.centreX + (column - lens.centreX) / scale;
+  const across = (column: number) => roadXAt(lens, scale, column);
   return {
     bottom: lens.footY - distanceAtY(lens, bottom),
     left: across(left),

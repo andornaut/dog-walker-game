@@ -1,7 +1,7 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { gameData } from "../../data";
-import { project, screenYAt } from "../../layout/projection";
+import { project, screenXAt, screenYAt } from "../../layout/projection";
 import type { Box, ScaledBox } from "../../runner/collision";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import { isObstacle, obstacleHitBox, packBoxes, type Walk, walkItemBox } from "../../runner/walk";
@@ -81,8 +81,7 @@ export class HitBoxView {
     if (near >= far) {
       return;
     }
-    const centreX = LAYOUT.road.x + LAYOUT.road.width / 2;
-    const across = (x: number) => centreX + (LAYOUT.road.x + x - centreX) * box.scale;
+    const across = (x: number) => screenXAt(PROJECTION, box.scale, LAYOUT.road.x + x);
     const top = screenYAt(PROJECTION, far);
     const left = across(box.left);
     this.graphics.strokeRect(

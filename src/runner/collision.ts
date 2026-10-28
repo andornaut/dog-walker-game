@@ -1,3 +1,4 @@
+import { screenXAt } from "../layout/projection";
 import type { RoadItem } from "./roadItems";
 
 // A box in road pixels: x across the road from its left edge, y down the screen.
@@ -46,7 +47,8 @@ export interface LanedBox extends ScaledBox {
 // never reaches a part settled in another lane however wide the projection draws it; a box its
 // lanes cut away entirely touches nothing. Boxes that only meet at an edge do not touch.
 function touchesAsDrawn(centreX: number, part: ScaledBox, item: LanedBox): boolean {
-  const across = (scale: number, x: number) => centreX + (x - centreX) * scale;
+  const road = { centreX };
+  const across = (scale: number, x: number) => screenXAt(road, scale, x);
   const left = Math.max(across(item.scale, item.left), across(part.scale, item.lanes.left));
   const right = Math.min(across(item.scale, item.right), across(part.scale, item.lanes.right));
   return (

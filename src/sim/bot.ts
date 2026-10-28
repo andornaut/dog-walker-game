@@ -1,5 +1,6 @@
 import type { DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
+import { screenXAt } from "../layout/projection";
 import { getOrInsert } from "../lib/maps";
 import { chance, type Random } from "../lib/random";
 import type { LanedBox, ScaledBox } from "../runner/collision";
@@ -199,7 +200,8 @@ function touchesBetween(
   from: MoverSample,
   to: MoverSample,
 ): boolean {
-  const across = (scale: number, x: number) => centreX + (x - centreX) * scale;
+  const road = { centreX };
+  const across = (scale: number, x: number) => screenXAt(road, scale, x);
   const a = from.box;
   const b = to.box;
   // Clear of the part all the way along: the box between them stays within both samples'.

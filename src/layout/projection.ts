@@ -98,12 +98,21 @@ export function project(
   const scale = scaleAt(projection, point.distance);
   return {
     scale,
-    x: projection.centreX + (point.x - projection.centreX) * scale,
+    x: screenXAt(projection, scale, point.x),
     y: screenYAt(projection, point.distance),
   };
 }
 
-// The inverse of project's x: the road x drawn at screenX on a row of this scale.
+// The screen x road x is drawn at on a row of this scale: the road spreads from its centre line.
+export function screenXAt(
+  projection: Pick<RoadProjection, "centreX">,
+  scale: number,
+  x: number,
+): number {
+  return projection.centreX + (x - projection.centreX) * scale;
+}
+
+// The inverse of screenXAt: the road x drawn at screenX on a row of this scale.
 export function roadXAt(
   projection: Pick<RoadProjection, "centreX">,
   scale: number,
@@ -126,9 +135,8 @@ export function columnSpan(
   x1: number,
 ): ColumnSpan | null {
   const scale = rowScale(projection, row);
-  const { centreX } = projection;
-  const first = Math.ceil(centreX + (x0 - centreX) * scale - 0.5);
-  const last = Math.ceil(centreX + (x1 - centreX) * scale - 0.5) - 1;
+  const first = Math.ceil(screenXAt(projection, scale, x0) - 0.5);
+  const last = Math.ceil(screenXAt(projection, scale, x1) - 0.5) - 1;
   return last >= first ? { first, last } : null;
 }
 
@@ -138,6 +146,5 @@ export function lineColumn(
   row: number,
   x: number,
 ): number {
-  const { centreX } = projection;
-  return Math.floor(centreX + (x - centreX) * rowScale(projection, row));
+  return Math.floor(screenXAt(projection, rowScale(projection, row), x));
 }
