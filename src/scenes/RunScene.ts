@@ -416,8 +416,6 @@ export class RunScene extends Scene implements HudRun {
     );
   }
 
-  // Takes the session's next state and plays its events, then ends the walk, or previews the
-  // badges earned so far and shows the card it opened.
   // Ends the walk with what is banked, as the Home answer or a replayed one does.
   private headHome(): void {
     if (this.session !== undefined) {
@@ -425,6 +423,8 @@ export class RunScene extends Scene implements HudRun {
     }
   }
 
+  // Takes the session's next state and plays its events, then ends the walk, or previews the
+  // badges earned so far and shows the card it opened.
   private apply(step: SessionStep): void {
     const before = this.session?.walk.run;
     this.session = step.session;
