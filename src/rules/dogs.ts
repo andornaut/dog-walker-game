@@ -20,10 +20,27 @@ export function sizeHearts(tuning: LiveTuning, dog: Pick<Dog, "size">): number {
   return readTable(tuning, "hearts", "maxBySize", dog.size);
 }
 
+// A dog's place in the pack the walk set out with, fired dogs included, for its owner's max.
+export function placeInPack(state: Pick<RunState, "pack">, dog: DogId): PackPlace {
+  return packPlace(
+    state.pack.map((slot) => slot.dog),
+    dog,
+  );
+}
+
 // The hearts a dog's place adds to its owner's max, before the cap: hearts.packSizeBonus for
 // the pack's size to the lead dog's owner, and none to any other.
 export function packSizeBonus(tuning: LiveTuning, place: PackPlace): number {
   return place.lead ? readTable(tuning, "hearts", "packSizeBonus", place.size) : 0;
+}
+
+// A dog's owner's max before modifiers and the cap: by its size plus its pack-size bonus.
+export function baseMaxHearts(
+  tuning: LiveTuning,
+  place: PackPlace,
+  dog: Pick<Dog, "size">,
+): number {
+  return sizeHearts(tuning, dog) + packSizeBonus(tuning, place);
 }
 
 // A max of base hearts after the maxHearts modifiers, held to hearts.maxOwnerHearts.
@@ -42,7 +59,7 @@ export function maxHearts(
   place: PackPlace,
   dog: Pick<Dog, "size">,
 ): number {
-  return cappedMax(tuning, modifiers, sizeHearts(tuning, dog) + packSizeBonus(tuning, place));
+  return cappedMax(tuning, modifiers, baseMaxHearts(tuning, place, dog));
 }
 
 // The cap on this dog's owner's meter on the walk: its maxHearts at its place in the pack the
@@ -52,11 +69,7 @@ export function ownerMaxHearts(
   run: Pick<RunState, "modifiers" | "pack">,
   dog: DogId,
 ): number {
-  const place = packPlace(
-    run.pack.map((slot) => slot.dog),
-    dog,
-  );
-  return maxHearts(data.tuning, run.modifiers, place, data.dogs[dog]);
+  return maxHearts(data.tuning, run.modifiers, placeInPack(run, dog), data.dogs[dog]);
 }
 
 // How many hearts the pack-size bonus raises this dog's owner's max by, once capped.

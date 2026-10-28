@@ -17,7 +17,6 @@ import type {
   WalkerPerkId,
 } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
-import { placeInPack } from "../state/pack";
 import {
   type CardSource,
   type EffectSource,
@@ -29,7 +28,7 @@ import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
 import { TEST_WORLD } from "../testing/world";
 import { cardFor, chooseOption, openCard } from "./choices";
-import { maxHearts } from "./dogs";
+import { maxHearts, placeInPack } from "./dogs";
 import { applyEffects } from "./effects";
 import type { ModifiedValue } from "./modified";
 import { currentZone } from "./route";

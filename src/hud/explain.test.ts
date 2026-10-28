@@ -2,9 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { fillLine, fillNames } from "../lib/lines";
-import { maxHearts } from "../rules/dogs";
+import { maxHearts, placeInPack } from "../rules/dogs";
 import { read } from "../rules/units";
-import { placeInPack } from "../state/pack";
 import { testState } from "../testing/runState";
 import { newPlayerSave } from "../testing/saves";
 import { explainDetail } from "./explain";

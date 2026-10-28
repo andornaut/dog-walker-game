@@ -9,7 +9,6 @@ import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
 import type { CardOption, DogId, Effect, EncounterId, UpgradeId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
-import { placeInPack } from "../state/pack";
 import { type CardSource, newRun, type RunState } from "../state/runState";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
@@ -25,7 +24,7 @@ import {
   offerUpgrades,
   openCard,
 } from "./choices";
-import { startHearts } from "./dogs";
+import { placeInPack,startHearts } from "./dogs";
 import { cents, read } from "./units";
 
 const data = {

@@ -1,7 +1,7 @@
 import type { GameData, Stat } from "../data/types";
-import { packDogs, placeInPack } from "../state/pack";
+import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
-import { packSizeBonus, sizeHearts } from "./dogs";
+import { baseMaxHearts, placeInPack } from "./dogs";
 import { type ModifiedSubject, type ModifiedValue, statModified } from "./modified";
 import { currentZone } from "./route";
 import { read } from "./units";
@@ -27,8 +27,7 @@ export function reachModified(
 function maxHeartsModified(data: StandingData, run: StandingRun): ModifiedValue[] {
   const cap = read(data.tuning, "hearts", "maxOwnerHearts");
   return packDogs(run).flatMap((dog) => {
-    const place = placeInPack(run, dog);
-    const base = sizeHearts(data.tuning, data.dogs[dog]) + packSizeBonus(data.tuning, place);
+    const base = baseMaxHearts(data.tuning, placeInPack(run, dog), data.dogs[dog]);
     const modified = statModified(
       data.tuning,
       run.modifiers,

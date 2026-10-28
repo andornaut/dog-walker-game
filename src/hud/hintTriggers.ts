@@ -1,7 +1,6 @@
 import type { HintTrigger, LiveTuning } from "../data/types";
-import { packSizeBonus } from "../rules/dogs";
+import { packSizeBonus, placeInPack } from "../rules/dogs";
 import type { MoverTell } from "../runner/movers";
-import { placeInPack } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
 import { lowHeartDogs } from "./moments";
 
