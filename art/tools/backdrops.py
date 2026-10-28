@@ -10,8 +10,10 @@ The band, the approach and the camera come from the game's layout export. The ba
 no static scenery on the near corners or the stub's verges, where the game's road begins and
 its items spawn: only the verge's ground.
 
-Rows, in band rows (0 to 157): the sky is one flat colour above row 45 (CALM), under the
-message strip (Yonge Street's skyline, moon and stars rise above it); the far side's ground row
+Rows, in band rows (0 to 157): the sky is one flat colour above row 45 (CALM), under the message
+strip (band rows 6 to 57 while a message shows), but any neighbourhood's skyline may rise above
+it (Cabbagetown's old trees, chapel spire, far downtown towers and stars; and Yonge Street's
+skyline, moon and stars); the far side's ground row
 115 (BASE), the far sidewalk 119 to 122, the far curb 123 to 124, the cross street 125 to 133
 with its centre line on row 129, the near curb 134 to 135 (none where the cross street has
 none), the near sidewalk 136 to 138, and the stub from row 139 (STUB, the approach) to the
@@ -332,9 +334,11 @@ FAR_WALK, FAR_CURB, CROSS = STUB - 20, STUB - 16, STUB - 14
 LINE = STUB - 10               # the cross street's centre line
 CORNER = 5                     # the near corners' curb radius, in pixels
 BASE = STUB - 24               # the far side's ground row: the houses stand on it
-# The sky above row CALM, 70 rows over the far side's ground row, is one flat colour with no
-# clouds, stars or scenery: the debuff bars and the message strip lie over it. Yonge Street is the
-# exception: its skyline, moon and stars rise above it.
+# The sky above row CALM, 70 rows over the far side's ground row, is one flat colour: the debuff bars and the
+# message strip (band rows 6 to 57 while a message shows) lie over it, so each neighbourhood's main read stays
+# below it. Any neighbourhood's skyline may rise above it, reading half covered while a message shows:
+# Cabbagetown's old trees, chapel spire, far downtown towers and stars; and Yonge Street's skyline, moon and
+# stars.
 CALM = BASE - 70
 
 
@@ -795,10 +799,10 @@ def bay_gable(cv, cx, w, wall, roof, door, base, trim="white", curtains=None):
     cv.fill(bx - 1, top + roof_h + 14, bw + 2, 1, trim)
 
 
-def necropolis(cv, cx, top, base):
+def necropolis(cv, cx, top, base, spire=26):
     """The Necropolis chapel's tower between the roofs, from row top down to row base: red brick banded in
-    stone under its belfry, buttresses below, lit lancets, a pinnacle on each corner, a tall slate spire and a
-    cream cross."""
+    stone under its belfry, buttresses below, lit lancets, a pinnacle on each corner, a slate spire spire rows
+    tall narrowing in steps, and a cream cross."""
     cv.fill(cx - 4, top, 9, base - top, "brick")
     cv.fill(cx + 3, top, 2, base - top, "dbrick")
     for y in (top + 2, top + 12, top + 13):
@@ -811,33 +815,70 @@ def necropolis(cv, cx, top, base):
     cv.fill(cx - 5, top - 1, 11, 2, "dslate")
     for x in (cx - 5, cx + 5):
         cv.fill(x, top - 5, 1, 4, "dslate")
-    for k in range(17):
-        half = 3 - k // 5
+    for k in range(spire):
+        half = 3 - (k * 4) // (spire + 1)
         cv.fill(cx - half, top - 2 - k, 2 * half + 1, 1, "dslate")
         cv.fill(cx - half, top - 2 - k, 1, 1, "slate")
-    cv.fill(cx, top - 22, 1, 4, "cream")
-    cv.fill(cx - 1, top - 21, 3, 1, "cream")
+    cv.fill(cx, top - spire - 5, 1, 4, "cream")
+    cv.fill(cx - 1, top - spire - 4, 3, 1, "cream")
+
+
+def old_tree(cv, cx, top, r, base, leaf="canopy", shade="pine", trunk="bark"):
+    """A mature street tree on row base: a 4-wide trunk under a wide crown of three lobes whose top row is
+    top, the big one radius r over two smaller ones low on each side, shaded lower right."""
+    cy = top + r
+    lobes = ((cx, cy, r), (cx - round(r * 0.75), cy + round(r * 0.45), round(r * 0.7)),
+             (cx + round(r * 0.75), cy + round(r * 0.5), round(r * 0.68)))
+    cv.fill(cx - 2, cy, 4, base - cy, trunk)
+    for px in range(cx - 2 * r, cx + 2 * r + 1):
+        for py in range(top, cy + 2 * r):
+            if any((px + 0.5 - lx) ** 2 + (py + 0.5 - ly) ** 2 <= lr * lr for lx, ly, lr in lobes):
+                lit = (px - cx) + 1.2 * (py - cy)
+                cv.fill(px, py, 1, 1, shade if lit > r * 0.55 else leaf)
+
+
+def downtown(cv, base, col="violet"):
+    """The downtown towers far off to the southwest, one flat silhouette of col standing on row base:
+    flat-topped slabs of differing heights and the CN Tower's antenna, SkyPod, main pod and shaft."""
+    for x, w, top in ((100, 8, 56), (108, 6, 50), (124, 8, 46), (132, 6, 52), (138, 8, 44), (146, 6, 54),
+                      (152, 8, 48), (160, 6, 56), (166, 8, 52), (174, 10, 58)):
+        cv.fill(x, top, w, base - top, col)
+    tx = 118
+    cv.fill(tx - 1, 34, 2, base - 34, col)
+    cv.fill(tx - 4, 36, 8, 3, col)
+    cv.fill(tx - 3, 35, 6, 1, col)
+    cv.fill(tx - 3, 39, 6, 1, col)
+    cv.fill(tx - 2, 26, 4, 3, col)
+    cv.fill(tx - 1, 29, 2, 5, col)
+    cv.fill(tx - 1, 12, 1, 14, col)
 
 
 CHAPEL = 87   # the Necropolis chapel's column: the gap between the second and third houses, left treeless
+# the old trees behind the houses, in the gaps between them: (column, crown's top row, radius)
+OLD_TREES = ((25, 42, 15), (211, 44, 14), (273, 40, 16), (335, 44, 14))
+YOUNG_TREE = 149   # the gap in front of the downtown towers, a young tree that leaves them in view
 
 
 def cabbagetown():
     cv = sn.Canvas(W, H)
-    # a lavender dusk, a last gold glow behind the roofs, a crescent moon and the first stars
-    rows = sunset(cv, ("lilac", "pink", "peach", "gold"), BASE)
+    # a lavender dusk, a last gold glow over the hills, a crescent moon and the first stars
+    cv.fill(0, 0, W, CALM, "lilac")
+    rows = bands(cv, CALM, BASE - 36, ("lilac", "pink", "peach", "gold"))
+    cv.fill(0, BASE - 36, W, 36, "gold")
     for dy in range(-6, 7):
         for dx in range(-6, 7):
             if dx * dx + dy * dy <= 36 and (dx + 3) ** 2 + (dy - 2) ** 2 > 25:
                 cv.fill(CX - 128 + dx, CALM + 10 + dy, 1, 1, "cream")
     for x, y in ((40, 4), (96, 9), (162, 2), (212, 7), (262, 1), (344, 11), (120, 16), (300, 14), (186, 12)):
-        if CALM + y < rows[0][1] - 6:
-            cv.fill(x, CALM + y, 1, 1, "white")
-    # the old neighbourhood behind: brick roofs up a leafy rise, the Necropolis chapel's spire
+        if CALM - 12 + y < rows[0][1] - 6:
+            cv.fill(x, CALM - 12 + y, 1, 1, "white")
+    # far off, the downtown towers; then the old neighbourhood: brick roofs up a leafy rise, the Necropolis
+    # chapel's spire
+    downtown(cv, BASE - 30)
     hills(cv, BASE - 40, BASE, "canopy", "olive", 3.1, 6)
     roofline(cv, BASE - 28, ((10, 16, 8), (40, 14, 6), (150, 16, 8), (212, 16, 9), (258, 16, 7),
                              (282, 14, 9), (326, 18, 8)), "dbrick")
-    necropolis(cv, CHAPEL, BASE - 46, BASE)
+    necropolis(cv, CHAPEL, BASE - 56, BASE)
 
     def road(x, z, span, px, py):
         if abs(x) >= ROAD - 4:
@@ -848,12 +889,11 @@ def cabbagetown():
              (118, 46, "brick", "dslate", "navy", "gold"), (180, 48, "dbrick", "shale", "forest", "gold"),
              (242, 46, "brick", "slate", "navy", None), (304, 44, "clay", "shale", "ttc", "gold"),
              (366, 44, "brick", "dslate", "forest", None))
-    for k in range(len(homes) - 1):
-        cx = (homes[k][0] + homes[k + 1][0]) // 2
-        if cx == CHAPEL:
-            continue
+    for cx, top, r in OLD_TREES:
         lift = crescent_bend(cx)
-        tree(cv, cx, BASE - 34 - lift, "canopy", "pine", r=11, base=BASE - lift, girth=4)
+        old_tree(cv, cx, top - lift, r, BASE - lift)
+    lift = crescent_bend(YOUNG_TREE)
+    tree(cv, YOUNG_TREE, BASE - 34 - lift, "canopy", "pine", r=11, base=BASE - lift, girth=4)
     for cx, w, wall_c, roof, door, curtains in homes:
         lift = crescent_bend(cx)
         bay_gable(cv, cx, w, wall_c, roof, door, BASE - lift, curtains=curtains)
