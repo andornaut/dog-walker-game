@@ -30,9 +30,9 @@ reads on them.
   the game prints homeText.gateSign on it in font-body, white, centred at
   327,75. The yard sign (SIGN_AT 6,138, a 128x38 board on two posts, left of
   the gate path, where the pack never stands) carries ARCHIE'S over DOG WALKS
-  in the sign letters at 2x, yellow, centred on its face. The yard's right lot
-  is left for ui-pet-shop. The scene holds no strong green, so the Pet shop's
-  board and Start walk stand out.
+  in the sign letters at 2x, yellow, the letters centred on its face. The
+  yard's right lot is left for ui-pet-shop. The scene holds no strong green, so
+  the Pet shop's board and Start walk stand out.
 - screen-stats: evening indoors. A panelled den wall that leaves the top left
   clear for the title (12,12 to 68,22); then, between the title and the close
   button and above the tabs (y 56), a framed dog photo, a low window onto
@@ -540,8 +540,8 @@ def home():
         cv.fill(px - 1, 194, 5, 1, "dstone")
     board(cv, *SIGN_AT, SIGN_W, SIGN_H)
     top, bottom = (fonts.sign(t, 2, "yellow")[0] for t in ("ARCHIE'S", "DOG WALKS"))
-    # the lettering centred down the dark face: 3 rows of face above and below it
-    y = SIGN_AT[1] + 5
+    # the inked letters centred down the dark face, 4 rows above and below, their shadow in the bottom margin
+    y = SIGN_AT[1] + 6
     for line in (top, bottom):
         w, h = extent(line)
         lettering(line, cv, SIGN_AT[0] + (SIGN_W - w) // 2 + 1, y)
