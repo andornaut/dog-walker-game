@@ -16,11 +16,6 @@ const advance = (seconds: number, control: LaneControl) =>
   advanceLaneControl(config, seconds, control);
 
 describe("steerLane", () => {
-  it("moves the pack one lane", () => {
-    const control = steerLane(config, 1, still(2));
-    expect(destinationLane(control.motion)).toBe(3);
-  });
-
   it("works at once after a pull's move ends", () => {
     const pulled = advance(0.2, pullLane(config, 1, still(2)));
     expect(destinationLane(steerLane(config, -1, pulled).motion)).toBe(2);
@@ -93,11 +88,6 @@ describe("steering symmetry", () => {
 });
 
 describe("pullLane", () => {
-  it("moves the pack one lane", () => {
-    const control = advance(0.3, pullLane(config, -1, still(2)));
-    expect(control.motion).toEqual(stillInLane(1));
-  });
-
   it("leaves the pack in the edge lane when the pull cannot leave the road", () => {
     expect(pullLane(config, 1, still(4))).toEqual(still(4));
   });

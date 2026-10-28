@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import type { CardSource } from "../data/types";
-import { STEP_SECONDS } from "./fixedStep";
 import { type HitStop, hitStopLength, startHitStop, tickHitStop } from "./hitStop";
 
 const LENGTHS = { encounter: 1, minor: 0.6 };
@@ -36,29 +35,8 @@ describe("startHitStop", () => {
   });
 });
 
+// The walk's hit stop tests count the steps a stop holds; this checks what it holds.
 describe("tickHitStop", () => {
-  // Ticks a stop a fixed step at a time, counting the steps until it lets go.
-  const stepsHeld = (seconds: number) => {
-    let stop: HitStop | null = startHitStop(false, seconds, { cards: [CARD], zoneEnded: false });
-    let steps = 0;
-    while (stop !== null) {
-      const ticked = tickHitStop(STEP_SECONDS, stop);
-      steps += 1;
-      if ("released" in ticked) {
-        expect(ticked.released).toEqual({ cards: [CARD], zoneEnded: false });
-        stop = null;
-      } else {
-        stop = ticked.stop;
-      }
-    }
-    return steps;
-  };
-
-  it("lets go after exactly the stop's length of steps, despite rounding", () => {
-    expect(stepsHeld(1)).toBe(60);
-    expect(stepsHeld(0.6)).toBe(36);
-  });
-
   it("keeps what it holds until it lets go", () => {
     const stop: HitStop = { cards: [CARD], firing: false, seconds: 0.5, zoneEnded: true };
     expect(tickHitStop(0.2, stop)).toEqual({ stop: { ...stop, seconds: 0.3 } });

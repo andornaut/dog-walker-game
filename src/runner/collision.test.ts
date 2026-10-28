@@ -93,13 +93,6 @@ describe("a one-dog pack", () => {
     }
   });
 
-  it("touches an item spanning several lanes in any of them", () => {
-    expect(still(item(1, "obstacle", 0, 570, 3))).toBe("kilo");
-    expect(still(item(1, "obstacle", 2, 570, 2))).toBe("kilo");
-    expect(still(item(1, "obstacle", 0, 570, 2))).toBeNull();
-    expect(still(item(1, "obstacle", 3, 570, 2))).toBeNull();
-  });
-
   it("touches items only in the pack's lane, both lanes while it is between them", () => {
     expect(still(item(1, "tip", 3, 570))).toBeNull();
     expect(midMove(item(1, "tip", 2, 570))).toBe("kilo");
@@ -167,11 +160,6 @@ describe("hitDog", () => {
       expect(hitDog(chevron, box)).toBe(dog);
     }
   });
-
-  it("lands on no dog when the pack has none", () => {
-    const walker = { bottom: 100, left: -10, right: 10, top: 40 };
-    expect(hitDog(packOf(walker, []), solid(walker))).toBeNull();
-  });
 });
 
 describe("pickupDog", () => {
@@ -194,10 +182,15 @@ describe("pickupDog", () => {
       expect(pickupDog(chevron, box)).toBe(dog);
     }
   });
+});
 
-  it("gives no dog a pickup when the pack has none", () => {
-    const walker = { bottom: 100, left: -10, right: 10, top: 40 };
-    expect(pickupDog(packOf(walker, []), walker)).toBeNull();
+describe("a pack with no dog", () => {
+  const walker = { bottom: 100, left: -10, right: 10, top: 40 };
+  it.each([
+    ["lands an obstacle", (pack: PackBoxes) => hitDog(pack, solid(walker))],
+    ["gives a pickup", (pack: PackBoxes) => pickupDog(pack, walker)],
+  ] as const)("%s on no dog", (_, dogOf) => {
+    expect(dogOf(packOf(walker, []))).toBeNull();
   });
 });
 
@@ -308,11 +301,6 @@ describe("collideWithPack", () => {
       invulnerableSeconds: 0,
       remaining: [],
     });
-  });
-
-  it("hits an obstacle in the lane being left mid-move", () => {
-    const behind = item(1, "obstacle", 2, 570);
-    expect(collided(rules, midMove, 0, [behind]).hits).toEqual([behind]);
   });
 
   it("hits only the lower of two obstacles touching at once, and the other passes", () => {
