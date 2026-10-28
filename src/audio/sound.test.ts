@@ -2,24 +2,18 @@ import { describe, expect, it } from "vitest";
 
 import {
   admitPlay,
-  advanceMusic,
   clampVolume,
   effectiveVolumes,
   hitCue,
   INITIAL_MIX,
   MAX_PLAYS_PER_WINDOW,
   type Mix,
-  MUSIC_FADE_MS,
-  MUSIC_STOPPED,
-  type MusicState,
   PAUSED_MUSIC_DUCK,
   PLAY_WINDOW_MS,
   type RecentPlays,
   type SoundCue,
   soundKeyFor,
   soundKeysOf,
-  startMusic,
-  stopMusic,
 } from "./sound";
 
 const mix = (overrides: Partial<Mix>): Mix => ({
@@ -27,13 +21,6 @@ const mix = (overrides: Partial<Mix>): Mix => ({
   volumes: { music: 0.8, sfx: 0.6 },
   ...overrides,
 });
-
-const fading = (level: number, toward: "playing" | "stopped"): MusicState => ({
-  kind: "fading",
-  level,
-  toward,
-});
-const PLAYING: MusicState = { kind: "playing" };
 
 describe("soundKeysOf", () => {
   it("plays a cue's own sound, an obstacle hit's falling back to the bump", () => {
@@ -101,56 +88,6 @@ describe("effectiveVolumes", () => {
       expect(effectiveVolumes(mix(overrides)), name).toEqual(expected);
     }
     expect(clampVolume(Number.NaN)).toBe(0);
-  });
-});
-
-describe("music state machine", () => {
-  it("starts, stops and turns a fade around from its level, ignoring a repeat", () => {
-    const cases: [string, (state: MusicState) => MusicState, MusicState, MusicState][] = [
-      ["fades in from silence when started", startMusic, MUSIC_STOPPED, fading(0, "playing")],
-      ["ignores a start while playing", startMusic, PLAYING, PLAYING],
-      [
-        "ignores a start while fading in",
-        startMusic,
-        fading(0.3, "playing"),
-        fading(0.3, "playing"),
-      ],
-      ["fades out from full when stopped while playing", stopMusic, PLAYING, fading(1, "stopped")],
-      ["ignores a stop while stopped", stopMusic, MUSIC_STOPPED, MUSIC_STOPPED],
-      [
-        "ignores a stop while fading out",
-        stopMusic,
-        fading(0.3, "stopped"),
-        fading(0.3, "stopped"),
-      ],
-      [
-        "turns a fade-out around from its level",
-        startMusic,
-        fading(0.4, "stopped"),
-        fading(0.4, "playing"),
-      ],
-      [
-        "turns a fade-in around from its level",
-        stopMusic,
-        fading(0.4, "playing"),
-        fading(0.4, "stopped"),
-      ],
-    ];
-    for (const [name, apply, from, expected] of cases) {
-      expect(apply(from), name).toEqual(expected);
-    }
-  });
-
-  it("fades in and out at a constant rate until it settles, then holds", () => {
-    const halfway = advanceMusic(fading(0, "playing"), MUSIC_FADE_MS / 2);
-    expect(halfway).toEqual(fading(0.5, "playing"));
-    expect(advanceMusic(halfway, MUSIC_FADE_MS / 2)).toEqual(PLAYING);
-    const quarter = advanceMusic(fading(1, "stopped"), (MUSIC_FADE_MS * 3) / 4);
-    expect(quarter).toEqual(fading(0.25, "stopped"));
-    expect(advanceMusic(quarter, MUSIC_FADE_MS)).toEqual(MUSIC_STOPPED);
-    expect(advanceMusic(PLAYING, 100)).toEqual(PLAYING);
-    expect(advanceMusic(MUSIC_STOPPED, 100)).toEqual(MUSIC_STOPPED);
-    expect(advanceMusic(fading(0.5, "playing"), -100)).toEqual(fading(0.5, "playing"));
   });
 });
 

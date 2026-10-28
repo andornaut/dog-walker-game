@@ -3,7 +3,6 @@
 
 import { kebabCase } from "../assets/spriteKeys";
 import type { Encounter, EncounterId } from "../data/types";
-import { assertNever } from "../lib/assertNever";
 
 export type BaseCue =
   "badge" | "bark" | "bump" | "cardOpen" | "fired" | "newBest" | "tip" | "treat";
@@ -53,14 +52,9 @@ export function soundKeyFor(isLoaded: (key: string) => boolean, cue: SoundCue): 
   return soundKeysOf(cue).find(isLoaded);
 }
 
-export const MUSIC_KEY = "music-walk";
-
 // The music plays at this fraction of the player's music volume while the player has paused the
 // walk (the pause menu, Settings, Help, the Home question or a strip bubble).
 export const PAUSED_MUSIC_DUCK = 0.3;
-
-// A full fade between silence and full music volume.
-export const MUSIC_FADE_MS = 500;
 
 // At most this many plays of one effect start within the window, so a burst does not stack.
 export const MAX_PLAYS_PER_WINDOW = 2;
@@ -104,56 +98,6 @@ export function effectiveVolumes(mix: Mix): Volumes {
     music: clampVolume(mix.volumes.music) * master * (mix.paused ? PAUSED_MUSIC_DUCK : 1),
     sfx: clampVolume(mix.volumes.sfx) * master * (mix.paused ? 0 : 1),
   };
-}
-
-// level is the fade's current gain, from 0 (silent) to 1 (full).
-export type MusicState =
-  | { kind: "fading"; level: number; toward: "playing" | "stopped" }
-  | { kind: "playing" }
-  | { kind: "stopped" };
-
-export const MUSIC_STOPPED: MusicState = { kind: "stopped" };
-
-export function musicLevel(state: MusicState): number {
-  switch (state.kind) {
-    case "fading":
-      return state.level;
-    case "playing":
-      return 1;
-    case "stopped":
-      return 0;
-    default:
-      return assertNever(state);
-  }
-}
-
-// Starting mid fade-out turns the fade around from the current level rather than jumping.
-export function startMusic(state: MusicState): MusicState {
-  if (state.kind === "playing" || (state.kind === "fading" && state.toward === "playing")) {
-    return state;
-  }
-  return { kind: "fading", level: musicLevel(state), toward: "playing" };
-}
-
-export function stopMusic(state: MusicState): MusicState {
-  if (state.kind === "stopped" || (state.kind === "fading" && state.toward === "stopped")) {
-    return state;
-  }
-  return { kind: "fading", level: musicLevel(state), toward: "stopped" };
-}
-
-// Moves a fade at a constant rate, so reversing halfway takes half a fade to undo.
-export function advanceMusic(state: MusicState, elapsedMs: number): MusicState {
-  if (state.kind !== "fading") {
-    return state;
-  }
-  const step = Math.max(0, elapsedMs) / MUSIC_FADE_MS;
-  if (state.toward === "playing") {
-    const level = state.level + step;
-    return level >= 1 ? { kind: "playing" } : { ...state, level };
-  }
-  const level = state.level - step;
-  return level <= 0 ? MUSIC_STOPPED : { ...state, level };
 }
 
 // The start times of recent plays, per cue.

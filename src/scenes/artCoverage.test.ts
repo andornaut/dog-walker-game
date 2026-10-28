@@ -32,7 +32,8 @@ import {
   ZONE_CELEBRATION_ART,
   ZONE_PIPS_KEY,
 } from "../assets/spriteKeys";
-import { hitCue, MUSIC_KEY, SOUND_KEYS, soundKeysOf } from "../audio/sound";
+import { musicKeysOf } from "../audio/music";
+import { hitCue, SOUND_KEYS, soundKeysOf } from "../audio/sound";
 import { gameData } from "../data";
 import type {
   DebuffId,
@@ -594,10 +595,17 @@ describe("depth variants", () => {
 describe("sound art", () => {
   const sounds = new Map(manifest.sounds.map((sound) => [sound.key, sound]));
 
-  it("names a manifest sound for every cue, and a looping walk music", () => {
+  it("names a manifest sound for every cue", () => {
     expect(Object.values(SOUND_KEYS).filter((key) => !sounds.has(key))).toEqual([]);
-    expect(sounds.get(MUSIC_KEY)?.loop).toBe(true);
   });
+
+  it.each(gameData.world.zones.map((zone) => [zone.art, zone] as const))(
+    "plays a looping music in %s",
+    (_art, zone) => {
+      const key = musicKeysOf(zone).find((candidate) => sounds.has(candidate)) ?? "";
+      expect(sounds.get(key)?.loop).toBe(true);
+    },
+  );
 
   it("has its own hit sound for every encounter with a hit moment", () => {
     const hits = ENCOUNTERS.filter((id) => hitLabel(gameData.encounters[id]) !== null);

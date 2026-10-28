@@ -1,5 +1,6 @@
 import { Scene } from "phaser";
 
+import { musicKeysOf } from "../audio/music";
 import { gameData } from "../data";
 import { LANE_COUNT } from "../data/screen";
 import type { DogId } from "../data/types";
@@ -47,7 +48,7 @@ import {
 } from "../runner/session";
 import { startRoad, type Walk } from "../runner/walk";
 import { checkpointOf, runResultOf } from "../save/runSlices";
-import { type Loadout, newRun } from "../state/runState";
+import { type Loadout, newRun, type RunState } from "../state/runState";
 import { colourFromHex } from "../ui/phaser/palette";
 import type { HudSceneData } from "./HudScene";
 import type { HudRun, RunHudView } from "./hudWalk";
@@ -185,9 +186,8 @@ export class RunScene extends Scene implements HudRun {
     const hud: HudSceneData = { run: this };
     this.scene.launch(SCENE_KEYS.hud, hud);
     sound.setPaused(false);
-    sound.startMusic();
     startWakeLock();
-    this.world.banner.show(this.session.walk.run, this.reducedMotion());
+    this.startZone(this.session.walk.run);
     // The HUD this launches hears the walk's start a frame later.
     const { moments } = this.world;
     const started = this.session.walk.run;
@@ -536,9 +536,16 @@ export class RunScene extends Scene implements HudRun {
         return;
       case "zonePlanned":
         if (this.session !== undefined) {
-          world.banner.show(this.session.walk.run, this.reducedMotion());
+          this.startZone(this.session.walk.run);
         }
     }
+  }
+
+  // A zone starts with its banner and its own music loop, which plays until the next zone's
+  // banner: through the celebration and the fork.
+  private startZone(run: RunState): void {
+    this.world?.banner.show(run, this.reducedMotion());
+    soundboardOf(this).playMusic(musicKeysOf(currentZone(gameData, run)));
   }
 
   private showCard(view: CardView): void {

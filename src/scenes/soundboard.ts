@@ -1,23 +1,24 @@
 import { Core, type Game, type Scene, Sound } from "phaser";
 
+import {
+  advanceDeck,
+  type MusicDeck,
+  NO_MUSIC,
+  playMusic,
+  stopAllMusic,
+  trackVolume,
+} from "../audio/music";
 import { shouldResumeAudio } from "../audio/resume";
 import {
   admitPlay,
-  advanceMusic,
   clampVolume,
   effectiveVolumes,
   INITIAL_MIX,
   type Mix,
-  MUSIC_KEY,
-  MUSIC_STOPPED,
-  musicLevel,
-  type MusicState,
   type RecentPlays,
   type SoundCue,
   soundKeyFor,
   soundKeysOf,
-  startMusic,
-  stopMusic,
   type Volumes,
 } from "../audio/sound";
 import { AUDIO_UNLOCK_EVENTS, PHONE_EVENTS } from "../pwa";
@@ -29,8 +30,8 @@ type AdjustableSound = Sound.BaseSound & { setVolume(value: number): unknown };
 // A key that did not load is skipped and logged once; no method throws.
 class Soundboard {
   private mix: Mix = INITIAL_MIX;
-  private music: MusicState = MUSIC_STOPPED;
-  private musicSound: AdjustableSound | undefined;
+  private music: MusicDeck = NO_MUSIC;
+  private readonly musicSounds = new Map<string, AdjustableSound>();
   private recentPlays: RecentPlays = {};
   private readonly reportedKeys = new Set<string>();
 
@@ -61,11 +62,18 @@ class Soundboard {
     });
   }
 
-  startMusic(): void {
-    this.guard("start music", () => {
-      this.music = startMusic(this.music);
-      const sound = this.ensureMusicSound();
-      if (sound !== undefined && !sound.isPlaying) {
+  // Fades in the first of keys that loaded, fading out any other loop.
+  playMusic(keys: readonly string[]): void {
+    this.guard("play music", () => {
+      const key = keys.find((candidate) => this.game.cache.audio.exists(candidate));
+      if (key === undefined) {
+        const names = keys.join(" or ");
+        this.reportOnce(names, `Sound ${names} did not load; playing nothing in its place.`);
+        return;
+      }
+      this.music = playMusic(key, this.music);
+      const sound = this.musicSoundOf(key);
+      if (!sound.isPlaying) {
         sound.play({ loop: true, volume: 0 });
       }
       this.applyMusicVolume();
@@ -74,7 +82,7 @@ class Soundboard {
 
   stopMusic(): void {
     this.guard("stop music", () => {
-      this.music = stopMusic(this.music);
+      this.music = stopAllMusic(this.music);
       this.applyMusicVolume();
     });
   }
@@ -106,35 +114,34 @@ class Soundboard {
   }
 
   private step(deltaMs: number): void {
-    if (this.music.kind !== "fading") {
+    if (this.music.every(({ state }) => state.kind !== "fading")) {
       return;
     }
     this.guard("fade music", () => {
-      this.music = advanceMusic(this.music, deltaMs);
+      const { deck, ended } = advanceDeck(deltaMs, this.music);
+      this.music = deck;
       this.applyMusicVolume();
-      if (this.music.kind === "stopped") {
-        this.musicSound?.stop();
+      for (const key of ended) {
+        this.musicSounds.get(key)?.stop();
       }
     });
   }
 
   private applyMusicVolume(): void {
-    this.musicSound?.setVolume(effectiveVolumes(this.mix).music * musicLevel(this.music));
+    for (const track of this.music) {
+      this.musicSounds.get(track.key)?.setVolume(trackVolume(this.mix, track));
+    }
   }
 
-  private ensureMusicSound(): AdjustableSound | undefined {
-    if (this.musicSound === undefined && this.isLoaded(MUSIC_KEY)) {
-      this.musicSound = this.game.sound.add(MUSIC_KEY) as AdjustableSound;
+  // Each loop's sound, added on first play and kept for the next.
+  private musicSoundOf(key: string): AdjustableSound {
+    const existing = this.musicSounds.get(key);
+    if (existing !== undefined) {
+      return existing;
     }
-    return this.musicSound;
-  }
-
-  private isLoaded(key: string): boolean {
-    if (this.game.cache.audio.exists(key)) {
-      return true;
-    }
-    this.reportOnce(key, `Sound ${key} did not load; playing nothing in its place.`);
-    return false;
+    const sound = this.game.sound.add(key) as AdjustableSound;
+    this.musicSounds.set(key, sound);
+    return sound;
   }
 
   // Phaser unlocks Web Audio on the first gesture, but a phone can stop the context again (a
