@@ -218,7 +218,6 @@ One word per moment, 2 to 7 letters, readable at 1×, built like the sign logo: 
 - Each neighbourhood has its own road objects, drawn in `art/tools/hood_parks.py` (Cabbagetown, High Park), `hood_markets.py` (Distillery District, Kensington Market) and `hood_city.py` (The Beaches, Yonge Street), and its own road people in `hood_people.py`. Each reads apart from the object it could be taken for:
   - `barrel-stack` is three barrels in a pyramid on a pallet, their ochre heads to the camera in silver hoops, unlike the lone upright `curb-barrel` on the verge and the single dark brown head of `rolling-barrel`.
   - `cargo-bike`'s flower box hides the rider's legs, unlike `cyclist` and `kid-on-bike`.
-  - `cheese-crates` stands upright, heaped with gold cheese under stink wisps, unlike the tipped, icy `fish-crates`.
   - `dropped-cone`'s cone lies on its side, unlike `cone`.
   - `fallen-log` is dark ridged bark with a pale ringed sawn end and no legs, unlike the tan slatted `bench` and the green `hedge`.
   - `green-bin` lies knocked over on its front, its lid propped open and a wheel up, scraps and a banana peel spilling out, unlike the upright `trash-can`.

@@ -656,24 +656,6 @@ def _(g):
     g.rect(13, 16, 2, 3, "pink")
 
 
-# A fish side on, facing left: B its sky body, D the blue back, W the white belly, F the blue fins and tail,
-# I its eye.
-FISH = ["......DDDD.......", "....DDDDDDDD...FF", "..BBBBBBBBBBB.FFF", ".BIBBBBBBBBBBBFFF", "BBBBBBBBBBBBBBFF.",
-        ".BBWWWWWWWBBBBFFF", "..WWWWWWWWWBB.FFF", "....WWWWWW.....FF"]
-
-
-@icon("fishmongers-friend")
-def _(g):
-    """A fish off the spilled crates with an amber price tag tied on, a dbrown $ on it."""
-    bitmap(g, 6, 8, FISH, {"B": "sky", "D": "blue", "W": "white", "F": "blue", "I": "ink"})
-    line(g, (19, 14), (18, 17), "plum")
-    g.rect(14, 18, 9, 9, "amber")
-    g.rect(14, 18, 9, 1, "yellow")
-    g.rect(22, 18, 1, 9, "orange")
-    g.p(18, 18, "plum")
-    bitmap(g, 17, 20, DOLLAR, {"1": "dbrown"})
-
-
 # The porch cat's fish treat: b brown, d its dbrown eye and tail edge.
 TREAT = [".bbbb.d", "bdbbbbd", ".bbbb.d"]
 
@@ -749,7 +731,7 @@ BADGES = {
     "tag-team": "collection", "whole-city": "collection",
     "big-screen": "silly", "bird-brain": "silly", "burned-bridges": "silly", "cat-whisperer": "silly",
     "clean-streets": "silly", "close-shave": "silly", "eau-de-skunk": "silly", "fender-bender": "silly", "finders-keepers": "silly",
-    "fishmongers-friend": "silly", "mud-season": "silly", "paparazzi": "silly", "popular-pack": "silly",
+    "mud-season": "silly", "paparazzi": "silly", "popular-pack": "silly",
     "say-cheese": "silly", "snack-attack": "silly", "sniff-test": "silly", "squirrel": "silly",
     "sugar-rush": "silly", "trash-panda": "silly", "yoink": "silly", "youre-fired": "silly",
     "zookeeper": "silly", "zoomies": "silly",

@@ -1088,11 +1088,6 @@
       "json": "sprites/badge-finders-keepers.json"
     },
     {
-      "key": "badge-fishmongers-friend",
-      "png": "sprites/badge-fishmongers-friend.png",
-      "json": "sprites/badge-fishmongers-friend.json"
-    },
-    {
       "key": "badge-five-star-service",
       "png": "sprites/badge-five-star-service.png",
       "json": "sprites/badge-five-star-service.json"
@@ -5276,87 +5271,6 @@
       }
     },
     {
-      "key": "fish-crates",
-      "png": "sprites/fish-crates.png",
-      "json": "sprites/fish-crates.json",
-      "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 48
-      }
-    },
-    {
-      "key": "fish-crates@50",
-      "png": "sprites/fish-crates@50.png",
-      "json": "sprites/fish-crates@50.json",
-      "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 24
-      }
-    },
-    {
-      "key": "fish-crates@56",
-      "png": "sprites/fish-crates@56.png",
-      "json": "sprites/fish-crates@56.json",
-      "anchor": {
-        "feetY": 26,
-        "opaqueWidth": 27
-      }
-    },
-    {
-      "key": "fish-crates@62",
-      "png": "sprites/fish-crates@62.png",
-      "json": "sprites/fish-crates@62.json",
-      "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 30
-      }
-    },
-    {
-      "key": "fish-crates@69",
-      "png": "sprites/fish-crates@69.png",
-      "json": "sprites/fish-crates@69.json",
-      "anchor": {
-        "feetY": 31,
-        "opaqueWidth": 33
-      }
-    },
-    {
-      "key": "fish-crates@75",
-      "png": "sprites/fish-crates@75.png",
-      "json": "sprites/fish-crates@75.json",
-      "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 36
-      }
-    },
-    {
-      "key": "fish-crates@81",
-      "png": "sprites/fish-crates@81.png",
-      "json": "sprites/fish-crates@81.json",
-      "anchor": {
-        "feetY": 37,
-        "opaqueWidth": 39
-      }
-    },
-    {
-      "key": "fish-crates@88",
-      "png": "sprites/fish-crates@88.png",
-      "json": "sprites/fish-crates@88.json",
-      "anchor": {
-        "feetY": 40,
-        "opaqueWidth": 42
-      }
-    },
-    {
-      "key": "fish-crates@94",
-      "png": "sprites/fish-crates@94.png",
-      "json": "sprites/fish-crates@94.json",
-      "anchor": {
-        "feetY": 43,
-        "opaqueWidth": 45
-      }
-    },
-    {
       "key": "food-cart-vendor",
       "png": "sprites/food-cart-vendor.png",
       "json": "sprites/food-cart-vendor.json",
@@ -5516,11 +5430,6 @@
       "key": "fx-hit-dropped-cone",
       "png": "sprites/fx-hit-dropped-cone.png",
       "json": "sprites/fx-hit-dropped-cone.json"
-    },
-    {
-      "key": "fx-hit-fish-crates",
-      "png": "sprites/fx-hit-fish-crates.png",
-      "json": "sprites/fx-hit-fish-crates.json"
     },
     {
       "key": "fx-hit-green-bin",
@@ -13056,18 +12965,6 @@
       "png": "images/card-dropped-cone-walk-on-by.png"
     },
     {
-      "key": "card-fish-crates-hurry-past",
-      "png": "images/card-fish-crates-hurry-past.png"
-    },
-    {
-      "key": "card-fish-crates-pay",
-      "png": "images/card-fish-crates-pay.png"
-    },
-    {
-      "key": "card-fish-crates-wade-through",
-      "png": "images/card-fish-crates-wade-through.png"
-    },
-    {
       "key": "card-good-leash",
       "png": "images/card-good-leash.png"
     },
@@ -13762,11 +13659,6 @@
       "key": "sfx-hit-dropped-cone",
       "ogg": "sounds/sfx-hit-dropped-cone.ogg",
       "m4a": "sounds/sfx-hit-dropped-cone.m4a"
-    },
-    {
-      "key": "sfx-hit-fish-crates",
-      "ogg": "sounds/sfx-hit-fish-crates.ogg",
-      "m4a": "sounds/sfx-hit-fish-crates.m4a"
     },
     {
       "key": "sfx-hit-green-bin",

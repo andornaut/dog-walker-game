@@ -34,11 +34,6 @@ barrel-stack        48x48   minor, 1 lane: three whisky barrels stacked as a pyr
 
 Kensington Market:
 
-fish-crates         48x48   card obstacle, 1 lane: a fishmonger's wooden crate tipped onto its side,
-                            its open face to the camera, ice and fish spilling out across the road
-                            in front of it: a silver fish left, a red snapper right. idle (4 frames,
-                            350ms): the snapper flops, its tail flipping up on frame 2 and its head
-                            on frame 3
 green-bin           48x48   card obstacle, 1 lane: a Toronto green bin knocked over onto its front, seen
                             side on, its lid propped open up and back off the mouth, a wheel up in the air
                             at the bottom's back corner, scraps, a lettuce leaf and a banana peel spilling
@@ -61,28 +56,22 @@ fx-hit-cheese-crates 77x77  play (8 frames, 70ms): a gold impact star, then a pu
 fx-hit-wedding-shoot 77x77  play (8 frames, 70ms): a lilac impact star, then a camera flash flaring
                             and fading while the bouquet flies up out of it, tumbling, and petals
                             scatter and drift down
-fx-hit-fish-crates  77x77   play (8 frames, 70ms): a shallow impact star, then a fish leaping up out
-                            of a splash, flipping as it arcs over and falls, ice chips and drops
-                            thrown out either side
 fx-hit-green-bin    77x77   play (8 frames, 70ms): a green impact star, then a comic splat of olive slop
                             swelling and shrinking, drops flying off its arms, the banana peel flung up
                             out of it tumbling over, scraps thrown out either side
 sfx-hit-cheese-crates 0.40s a soft wooden thunk, a squish, then a rising plop that sags as it settles
 sfx-hit-wedding-shoot 0.58s a flash charging up, the shutter's double click, then a triangle
                             "ding dong" of wedding bells
-sfx-hit-fish-crates 0.46s   a wooden thunk, ice chips clattering, then two wet flops
 sfx-hit-green-bin   0.44s   a hollow plastic thunk, the lid clattering down in three shrinking knocks,
                             then a soft squelch and a gloop
 
 Cards (75x56), one per option, composed from the sprites above and the pack's exports:
 card-cheese-crates-sniff, -buy and -hurry-on at a brick shopfront's wooden door, which fits both the
-neighbourhoods it stands in; card-wedding-shoot-pose, -walk-around and -reshoot on the Distillery
-District's road; card-fish-crates-pay, -hurry-past and -wade-through on Kensington Market's, the last
-with Archie wading through the crate's spilt fish slime; card-green-bin-hurry-past, -pay and
--wade-through on Kensington Market's, the last with Archie wading through the bin's slop, the banana peel on
-his head. The paid options show a bill (icon-bill) changing hands: the photographer reaching out to take it,
-the fishmonger in a white apron, the cheesemonger in an ochre shirt and white apron and the shopkeeper in a
-lilac shirt and cream apron, broom in hand, holding it up.
+neighbourhoods it stands in; card-wedding-shoot-pose, -walk-around and -reshoot on the Distillery District's
+road; card-green-bin-hurry-past, -pay and -wade-through on Kensington Market's, the last with Archie wading
+through the bin's slop, the banana peel on his head. The paid options show a bill (icon-bill) changing hands:
+the photographer reaching out to take it, the cheesemonger in an ochre shirt and white apron and the
+shopkeeper in a lilac shirt and cream apron, broom in hand, holding it up.
 
 The road sprites take the road outline rule (pixel.road_edge) and road.LIT's rim on their dark
 colours, so their silhouettes hold 3:1 on every road. People, movers and the card obstacles are laid
@@ -505,64 +494,6 @@ def barrel_stack(glint=None):
 STACK_IDLE = (None, None, 235, 200), 400
 
 
-# ---------- the fish crate spill ----------
-
-def fish(g, x, y, length, back, belly, flip=False, tail=0.0, head=0.0, eye="ink"):
-    """A fish lying on its side, x to x + length along row y: back over belly, a forked tail at the left
-    (right when flip) and an eye at the head end. tail and head lift those ends that many design units."""
-    d = -1 if flip else 1
-    mid = x + length / 2
-    g.cel(mid, y, length / 2 - 1, 1.8, back)
-    g.rect(mid - length / 2 + 2, y + 0.5, length - 4, 1.2, belly)
-    tx = x if not flip else x + length
-    g.tri((tx + d * 2, y - tail), (tx - d * 1, y - 2.2 - tail), (tx - d * 1, y + 1.5 - tail), back)
-    hx = x + length - 2 if not flip else x + 2
-    g.cel(hx, y - head * 0.5, 1.6, 1.6, back)
-    g.p(hx + d * 0.5, y - 0.8 - head, eye)
-
-
-def fish_crates(flop=0):
-    """A fishmonger's crate tipped onto its side, its open face to the camera, on the 32-unit grid: the
-    tan rim lit cream on its upper left and shaded brown, the bark inside with walnut slat gaps, ice and a
-    silver fish still in it; in front, ice chips (white, shaded foam) spilt across the road with a silver
-    fish lying at the left and a red snapper at the right. flop 1 flips the snapper's tail up 1px, 2 its
-    head."""
-    g = edged(Grid(32, 32))
-    u = unit(g)
-    # the crate, open face toward us, wider than it is deep
-    g.rect(4, 9, 24, 17, "tan")
-    g.rect(4, 9, 24, 1, "cream")
-    g.rect(4, 9, 1, 17, "cream")
-    g.rect(26, 10, 2, 16, "brown")
-    g.rect(6, 11, 20, 13, "bark")
-    for y in (15, 19):
-        g.rect(6, y, 20, 1, "walnut")
-    g.rect(6, 11, 20, 1, "walnut")
-    for x in (4, 15, 26):
-        g.rect(x + (1 if x == 4 else 0), 10, 1, 1, "brown")
-    # the ice heaped in it, a mound of crushed ice shaded foam with a few chunks' edges in it, and a fish
-    # still lying on top
-    g.cel(16, 22, 10, 3.5, "white", "foam")
-    g.rect(6, 22, 20, 2, "white")
-    for x, y in ((9, 20), (14, 19.5), (20, 20), (11, 22.5), (17, 22.5), (23, 22.5)):
-        g.rect(x, y, 2, 1, "foam")
-        g.rect(x + 2, y - 1, 1, 1, "foam")
-    fish(g, 9, 17.5, 12, "grey", "lgrey", flip=True)
-    # the spill across the road in front: ice chips under the fish
-    g.cel(16, 27.5, 13, 2.6, "white", "lgrey")
-    for x, y, w, h in ((1, 27, 2, 2), (29, 26.5, 2, 2), (6, 24.5, 2.5, 2), (22, 24.5, 3, 2)):
-        g.rect(x, y, w, h, "white")
-        g.rect(x + w - 1, y + 1, 1, h - 1, "lgrey")
-    fish(g, 2, 25, 12, "slate", "lgrey", eye="ink")
-    t = (0, u, 0)[flop]
-    h = (0, 0, u)[flop]
-    fish(g, 17, 24, 13, "red", "pink", flip=True, tail=t, head=h)
-    return lit(g, dict(bark=("clay", None), walnut=("bark", None)))
-
-
-FISH_IDLE = (0, 0, 1, 2), 350
-
-
 # ---------- the green bin spill ----------
 
 def poly(g, pts, c):
@@ -899,8 +830,6 @@ def road_sprites(s=1):
                              ("run", frames(p, rolling_barrel, [dict(turn=a, dust=d) for a, d in run]), run_ms)]
     args, ms = STACK_IDLE
     yield "barrel-stack", [("idle", frames(o, barrel_stack, [dict(glint=a) for a in args]), ms)]
-    args, ms = FISH_IDLE
-    yield "fish-crates", [("idle", frames(p, fish_crates, [dict(flop=a) for a in args]), ms)]
     args, ms = BIN_IDLE
     yield BIN, [("idle", frames(p, green_bin, [dict(rock=a) for a in args]), ms)]
     args, ms = CHEESE_IDLE
@@ -959,66 +888,6 @@ def hit_wedding_shoot(step):
     by = (0, 30, 20, 14, 12, 13, 16, 20)[step]
     tilt = (0, 0, 1, 0, -1, 0, 1, 0)[step]
     hits.piece(g, lambda p: bouquet(p, cx, by, tilt))
-    return g
-
-
-def leaping_fish(g, cx, cy, angle):
-    """The red snapper in the air round design point cx, cy, 20 design units nose to tail, facing right and
-    turned angle degrees clockwise (negative is nose up): a red back over a pink belly, a dred dorsal fin, a
-    forked tail and an ink eye. Drawn pixel for pixel at the grid's scale, so it keeps its shape at any
-    angle."""
-    px, s = raster(g), scale_of(g)
-    a = math.radians(angle)
-    ox, oy, ln, th = cx * s, cy * s, 7.5 * s, 2.8 * s
-    ex, ey = 0.62 * ln, -0.3 * th
-    for y in range(px.h):
-        for x in range(px.w):
-            dx, dy = x + 0.5 - ox, y + 0.5 - oy
-            u = dx * math.cos(a) + dy * math.sin(a)
-            v = -dx * math.sin(a) + dy * math.cos(a)
-            c = None
-            if (u / ln) ** 2 + (v / th) ** 2 <= 1:
-                c = "pink" if v > th * 0.3 else "red"
-                if abs(u - ex) < 1 and abs(v - ey) < 1:
-                    c = "ink"
-            elif -0.25 * ln < u < 0.3 * ln and -1.55 * th < v < 0 and v > -th - (0.3 * ln - u) * 0.35:
-                c = "dred"
-            elif -1.35 * ln < u < -0.8 * ln and abs(v) < (-u - 0.8 * ln) * 1.1 + 1:
-                c = "red" if abs(v) > 0.35 * th or u > -1.1 * ln else None
-            if c:
-                px.p(x, y, c)
-
-
-def hit_fish_crates(step):
-    """A shallow impact star, then a splash of white water thrown up either side, the snapper leaping up
-    out of it, flipping as it arcs over and falls, ice chips and drops flying out and falling."""
-    g = hits.Grid(64, 64)
-    cx, cy = 32, 42
-    if step == 0:
-        hits.impact(g, "shallow", cx, cy - 4)
-        return hits.rim(g)
-    h = (0, 0.6, 1, 0.8, 0.5, 0.25, 0, 0)[step]
-    if h:
-        def splash(p):
-            for dx, top in ((-9, 14), (-4, 20), (0, 16), (4, 20), (9, 14)):
-                n = round(top * h)
-                if n:
-                    p.tri((cx + dx - 2.5, cy + 2), (cx + dx + 2.5, cy + 2), (cx + dx * 1.3, cy + 2 - n), "foam")
-                    p.tri((cx + dx - 1, cy + 2), (cx + dx + 1, cy + 2), (cx + dx * 1.3, cy + 2 - n * 0.8), "white")
-            p.ell(cx, cy + 2, 12 * h + 2, 2.5, "shallow", "lake")
-        hits.piece(g, splash)
-    t = step - 0.5
-    for i, (vx, vy) in enumerate(((-9, -8), (9, -7), (-12, -3), (12, -4), (-5, -10), (6, -10))):
-        x, y = cx + vx * t * 0.8, cy - 4 + vy * t * 0.8 + 1.3 * t * t
-        if 3 <= x < 60 and 3 <= y < 60 and step >= 1:
-            if i % 2:
-                hits.piece(g, lambda p: p.rect(x, y, 1, 2, "cyan"))
-            else:
-                hits.piece(g, lambda p: (p.rect(x, y, 3, 3, "white"), p.rect(x + 2, y + 1, 1, 2, "foam")))
-    fy = (0, 31, 20, 14, 12, 14, 19, 26)[step]
-    fx_ = (0, 28, 29, 31, 33, 35, 37, 39)[step]
-    angle = (0, -60, -35, -10, 15, 40, 60, 75)[step]
-    hits.piece(g, lambda p: leaping_fish(p, fx_, fy, angle))
     return g
 
 
@@ -1118,7 +987,7 @@ def hit_green_bin(step):
     return g
 
 
-HIT_BURSTS = {"fx-hit-wedding-shoot": (hit_wedding_shoot, 8), "fx-hit-fish-crates": (hit_fish_crates, 8),
+HIT_BURSTS = {"fx-hit-wedding-shoot": (hit_wedding_shoot, 8),
               f"fx-hit-{CHEESE}": (hit_cheese_crates, 8), f"fx-hit-{BIN}": (hit_green_bin, 8)}
 
 
@@ -1214,64 +1083,9 @@ def crate_image(draw):
     return to_image(drawn(PERSON, draw).outlined())
 
 
-def fishmonger_top(g, b):
-    """The fishmonger facing the player: a blue shirt under a long white apron, a navy flat cap, the near
-    hand (screen left) raised beside the face to hold up the fee, the other arm at the side."""
-    g.rect(9, 21 + b, 14, 13, "blue")
-    g.rect(20, 21 + b, 3, 13, "navy")
-    g.rect(11, 23 + b, 10, 12, "white")
-    g.rect(19, 23 + b, 2, 12, "lgrey")
-    g.rect(11, 21 + b, 1, 2, "white")
-    g.rect(20, 21 + b, 1, 2, "lgrey")
-    g.rect(5, 22 + b, 4, 4, "blue")
-    g.rect(4, 15 + b, 4, 8, "blue")
-    g.rect(4, 13 + b, 4, 3, "skin1")
-    road.back_arm(g, 23, 4, 22 + b, ((8, "blue", "navy"), (3, "skin1", None)))
-    face_disc(g, 16, 13.5 + b, 7.5, 7.5, "skin1", "skin2")
-    face_front(g, 16, 14 + b)
-    g.cel(16, 8 + b, 7.5, 3, "navy", "ink", "blue")
-    g.rect(10, 9 + b, 14, 1.5, "navy")
-
-
-def card_fish_pay():
-    """Pay for the fish: the spilt crate at the left with Archie sitting by it, and the fishmonger at the
-    right holding up the bill he has been paid."""
-    import cards
-    a = cards.Art()
-    a.ground("shops")
-    a.put("fish-crates", "idle", 22, 40)
-    monger = to_image(road.drawn(PERSON, road.dressed, fishmonger_top, legs="slate", shoes="white").outlined())
-    a.paste(monger, 38, -4)
-    a.paste(cards.sn.image("icon-bill"), 38, 4)
-    c = a.dog("archie", "idle", 30, 58)
-    a.lead(30, c, 36)
-    return a
-
-
-def card_fish_hurry_past():
-    """Hurry past: the spilt crate at the right and Archie pulled away to the left, the leash taut off the
-    bottom, a red ! by the fish."""
-    import cards
-    a = cards.Art()
-    a.ground("shops")
-    a.put("fish-crates", "idle", 54, 38)
-    c = a.dog("archie", "pull", 22, 56, flip=True)
-    a.lead(22, c, 6)
-    a.fill(66, 4, 2, 5, "red")
-    a.fill(66, 10, 2, 2, "red")
-    return a
-
-
-def loose_fish(back, belly, flip=False, tail=0.0):
-    """One spilt fish lying loose on the road, on a 16x6 design grid, as fish draws it."""
-    g = edged(Grid(16, 6))
-    fish(g, 1.5, 3, 13, back, belly, flip=flip, tail=tail)
-    return lit(g)
-
-
 def slime(a, blobs):
-    """The fish slime spilt across the cobbles: the union of the ellipses blobs (cx, cy, rx, ry), olive with
-    a dolive rim and moss in its depths."""
+    """The green bin's slop spilt across the cobbles: the union of the ellipses blobs (cx, cy, rx, ry),
+    olive with a dolive rim and moss in its depths."""
     def inside(x, y, inset):
         return any(((x + 0.5 - cx) / (rx - inset)) ** 2 + ((y + 0.5 - cy) / (ry - inset)) ** 2 <= 1
                    for cx, cy, rx, ry in blobs if rx > inset and ry > inset)
@@ -1280,23 +1094,6 @@ def slime(a, blobs):
         for x in range(AW):
             if inside(x, y, 0):
                 a.fill(x, y, 1, 1, "moss" if inside(x, y, 3.5) else "olive" if inside(x, y, 1.2) else "dolive")
-
-
-def card_fish_wade_through():
-    """Wade through: the spilt crate at the right, as the other fish cards show it, its fish slime running
-    down to the left in one olive pool with a dolive rim. Archie wades through it at the left, his paws
-    sunk in the slime and two drops kicked up either side of him."""
-    import cards
-    a = cards.Art()
-    a.ground("shops")
-    slime(a, [(50, 40, 16, 5), (30, 48, 30, 8)])
-    a.put("fish-crates", "idle", 58, 36)
-    cx, foot = 26, 53
-    c = a.dog("archie", "walk", cx, foot, 1, shadow=False)
-    slime(a, [(cx, foot - 2, 12, 3.5)])
-    a.lead(cx, c, cx + 6)
-    a.drops([(cx - 15, foot - 9), (cx - 18, foot - 5), (cx + 14, foot - 10), (cx + 17, foot - 6)], "lime")
-    return a
 
 
 def head_peel():
@@ -1515,9 +1312,6 @@ CARDS = {
     "card-wedding-shoot-pose": card_wedding_pose,
     "card-wedding-shoot-walk-around": card_wedding_walk_around,
     "card-wedding-shoot-reshoot": card_wedding_reshoot,
-    "card-fish-crates-pay": card_fish_pay,
-    "card-fish-crates-hurry-past": card_fish_hurry_past,
-    "card-fish-crates-wade-through": card_fish_wade_through,
     f"card-{CHEESE}-sniff": card_cheese_sniff,
     f"card-{CHEESE}-buy": card_cheese_buy,
     f"card-{CHEESE}-hurry-on": card_cheese_hurry_on,
@@ -1575,20 +1369,6 @@ EFFECTS = {
         ("square", 0.2, "E5", 0.2, dict(vol=0.15, duty=25, low=2500, release=0.85)),
         ("triangle", 0.28, "C6", 0.3, dict(vol=0.9, release=0.9)),
         ("square", 0.28, "C5", 0.3, dict(vol=0.15, duty=25, low=2500, release=0.9)),
-    ],
-    # the crate's thunk, ice chips clattering, then two wet flops
-    "sfx-hit-fish-crates": [
-        ("triangle", 0.16, (330, 130), 0, dict(vol=0.4, attack=0.003, release=0.85)),
-        ("square", 0.12, (330, 150), 0, dict(vol=0.7, low=1000, attack=0.003, release=0.8, shape="h")),
-        ("pinknoise", 0.06, None, 0, dict(vol=0.3, low=1200, high=250, attack=0.002, release=0.9)),
-        ("triangle", 0.04, "C#7", 0.05, dict(vol=0.5, low=3500, attack=0.002, release=0.7)),
-        ("triangle", 0.04, "G#6", 0.09, dict(vol=0.45, low=3500, attack=0.002, release=0.7)),
-        ("triangle", 0.04, "E7", 0.13, dict(vol=0.4, low=3500, attack=0.002, release=0.7)),
-        ("triangle", 0.04, "A6", 0.18, dict(vol=0.3, low=3500, attack=0.002, release=0.7)),
-        ("pinknoise", 0.07, None, 0.25, dict(vol=0.5, low=1600, high=300, attack=0.003, release=0.8)),
-        ("triangle", 0.08, (440, 200), 0.25, dict(vol=0.9, attack=0.003, release=0.8, shape="h")),
-        ("pinknoise", 0.07, None, 0.38, dict(vol=0.4, low=1400, high=300, attack=0.003, release=0.8)),
-        ("triangle", 0.08, (400, 180), 0.38, dict(vol=0.72, attack=0.003, release=0.8, shape="h")),
     ],
     # the bin's hollow plastic thunk, its lid clattering down in three shrinking knocks, then a soft squelch
     # and a gloop as the scraps settle
