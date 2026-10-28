@@ -1,21 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { paletteColour } from "../assets/housePalette";
 import { SCREEN_CONFIG } from "../data/screen";
+import { WORLD } from "../data/world";
 import { itemAt } from "../lib/arrays";
 import { PAVED_VERGE } from "../testing/verges";
 import {
   curbBand,
   curbFits,
   isLawn,
-  POOL_STEP,
-  poolAlong,
-  poolHalfWidth,
   sidewalkTo,
   vergeBase,
   vergeFrom,
   VERGES_BY_ART,
-  type VergeSide,
   walkFrom,
 } from "./roadside";
 
@@ -24,7 +20,10 @@ const VERGE_ARTS = Object.entries(VERGES_BY_ART);
 
 const PAVED = PAVED_VERGE;
 const POOL = itemAt(PAVED.pools, 0);
-const poolEntry = (change: Partial<typeof POOL>) => ({ ...PAVED, pools: [{ ...POOL, ...change }] });
+const poolEntry = (change: Record<string, unknown>) => ({
+  ...PAVED,
+  pools: [{ ...POOL, ...change }],
+});
 
 describe("vergeFrom", () => {
   it("reads colours by palette name and a null walkTo as paving out to the screen's edges", () => {
@@ -33,23 +32,21 @@ describe("vergeFrom", () => {
     expect(verge.walkDots[0]?.colours).toEqual([verge.seamColour]);
   });
 
-  it("reads a verge's pools with their colours by palette name, and none where it lists none", () => {
+  it("reads a verge's lights, by zone where it names zones, and none where it lists none", () => {
     const { pools, ...plain } = PAVED;
-    expect(vergeFrom(PAVED).pools).toEqual(
-      pools.map((pool) => ({
-        ...pool,
-        coreColour: paletteColour(pool.coreColour),
-        edgeColour: paletteColour(pool.edgeColour),
-      })),
+    const zone = itemAt(WORLD.zones, 0).id;
+    expect(vergeFrom({ ...PAVED, pools: [{ ...POOL, zones: [zone] }] }).pools).toEqual(
+      pools.map((pool) => ({ ...pool, zones: [zone] })),
     );
+    expect(vergeFrom(PAVED).pools).toEqual(pools.map((pool) => ({ ...pool, zones: null })));
     expect(vergeFrom(plain).pools).toEqual([]);
   });
 
-  // A pool per lamp: a long period, one pool ending where its period does, beside another.
+  // A light per lamp: a long period, one light at its period's end, beside another.
   it.each([
-    ["a period of many joints", [{ ...POOL, every: 3360 }]],
-    ["a pool ending at its period's end", [{ ...POOL, offset: { left: 80, right: 0 } }]],
-    ["several pools", [POOL, { ...POOL, every: 1120, offset: { left: 1072, right: 0 } }]],
+    ["a long period", [{ ...POOL, every: 3360 }]],
+    ["a light at its period's end", [{ ...POOL, offset: { left: 127, right: 0 } }]],
+    ["several lights", [POOL, { ...POOL, every: 1120, offset: { left: 1072, right: 0 } }]],
   ])("reads %s", (_, pools) => {
     expect(vergeFrom({ ...PAVED, pools }).pools).toHaveLength(pools.length);
   });
@@ -59,74 +56,16 @@ describe("vergeFrom", () => {
     ["a lawn kind it does not know", { ...PAVED, lawn: "meadow" }],
     ["a lawn with no colours", { ...PAVED, lawn: "mown", walkTo: 208 }],
     ["lawn colours with no lawn", { ...PAVED, lawnColours: ["grey", "grey", "grey"] }],
-    ["a pool colour not on the palette", poolEntry({ coreColour: "no-such-colour" })],
-    ["a pool shape it does not know", poolEntry({ shape: "star" })],
-    ["a pool period not a multiple of 32", poolEntry({ every: 112 })],
-    ["a pool longer than its period", poolEntry({ every: 32, offset: { left: 0, right: 0 } })],
+    ["a pool naming no light", poolEntry({ light: "no-such-light" })],
+    ["a pool with a field it does not know", poolEntry({ colour: "cream" })],
+    ["a pool naming no zone", poolEntry({ zones: ["no-such-zone"] })],
+    ["a pool with no zones listed", poolEntry({ zones: [] })],
     ["a pool offset past its period", poolEntry({ offset: { left: 0, right: 128 } })],
-    ["a pool size off the 2 px steps", poolEntry({ length: 47 })],
-    ["a pool reaching onto the road", poolEntry({ from: 158 })],
-    ["a pool ending where it starts", poolEntry({ from: 200 })],
-    ["a pool reaching past the sidewalk", { ...poolEntry({ to: 220 }), walkTo: 208 }],
-    ["a pool whose edge leaves no core", poolEntry({ edgeWidth: 16 })],
+    ["a pool on the road", poolEntry({ across: ROAD_HALF - 1 })],
+    ["a pool past the sidewalk", { ...poolEntry({ across: 210 }), walkTo: 208 }],
+    ["a pool at a fraction of a px", poolEntry({ across: 184.5 })],
   ])("throws on %s", (_, entry) => {
     expect(() => vergeFrom(entry)).toThrow();
-  });
-});
-
-describe("pools", () => {
-  const pool = itemAt(vergeFrom(PAVED).pools, 0);
-  const band = { ...pool, shape: "band" as const };
-
-  // The left side's pools start at 0 and the right's at 64, each 48 long, every 128.
-  it.each<[VergeSide, number, number]>([
-    ["left", 0, 0],
-    ["left", 47.5, 47.5],
-    ["left", 48, -1],
-    ["left", 127, -1],
-    ["left", 130, 2],
-    ["left", -10, -1],
-    ["right", 0, -1],
-    ["right", 64, 0],
-    ["right", 100, 36],
-    ["right", 112, -1],
-    ["right", 200, 8],
-  ])("lies %s at z %d, %d along its pool", (side, z, along) => {
-    expect(poolAlong(pool, side, z)).toBe(along);
-  });
-
-  // The outline at each along, as half its width: the ellipse's widest in the middle and
-  // narrowing to its ends, the band's the same all along; the core the same inset by the edge.
-  it.each([
-    ["ellipse", pool, 0, 0, 4],
-    ["ellipse", pool, 23, 0, 16],
-    ["ellipse", pool, 24, 0, 16],
-    ["ellipse", pool, 47, 0, 4],
-    ["ellipse", pool, 48, 0, 0],
-    ["ellipse", pool, 3, 4, 0],
-    ["ellipse", pool, 4, 4, 4],
-    ["ellipse", pool, 24, 4, 12],
-    ["ellipse", pool, 44, 4, 0],
-    ["band", band, 0, 0, 16],
-    ["band", band, 47, 0, 16],
-    ["band", band, 3, 4, 0],
-    ["band", band, 4, 4, 12],
-    ["band", band, 44, 4, 0],
-  ])("gives the %s %d along, inset %d, a half width of %d", (_, shape, along, inset, half) => {
-    expect(poolHalfWidth(shape, along, inset)).toBe(half);
-  });
-
-  it.each([
-    ["edge", 0],
-    ["core", pool.edgeWidth],
-  ])("steps the ellipse's %s 2 px at a time, along and across", (_, inset) => {
-    const halves = Array.from({ length: pool.length * 4 }, (__, i) =>
-      poolHalfWidth(pool, i / 4, inset),
-    );
-    halves.forEach((half, i) => {
-      expect(half % POOL_STEP).toBe(0);
-      expect(half).toBe(halves[Math.floor(i / (4 * POOL_STEP)) * 4 * POOL_STEP]);
-    });
   });
 });
 

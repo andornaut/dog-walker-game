@@ -35,6 +35,8 @@ export const DEPTH = {
   banner: 3100,
   decal: 2,
   fx: 2500,
+  // Lights add over the road, the backdrop's approach and the shadows, under every sprite.
+  light: 3.5,
   popup: 3000,
   road: 0,
   // Roadside props lie under every road sprite and ambient mover, so nothing on the road, the

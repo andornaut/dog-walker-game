@@ -25,7 +25,7 @@ import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../p
 import { AmbientView } from "../road/phaser/ambientView";
 import { BackdropView } from "../road/phaser/backdropView";
 import { type CardView, type Choice, outcomeChanges } from "../rules/choices";
-import { currentZone, currentZoneId, previousZone } from "../rules/route";
+import { currentZone, currentZoneId, previousZone, previousZoneId } from "../rules/route";
 import {
   type FixedStepLimits,
   frameSteps,
@@ -68,6 +68,7 @@ import { DistractionView } from "./run/distractionView";
 import { HitBoxView } from "./run/hitBoxView";
 import { blendWalk, leadWalk, stepAlpha } from "./run/interpolate";
 import { ensureRoadPlaceholders, ItemViews } from "./run/itemViews";
+import { LightsView } from "./run/lightsView";
 import { MenuFlow } from "./run/menuFlow";
 import { PackView } from "./run/packView";
 import { ZoneBanner, zoneBannerMs } from "./run/roadBanners";
@@ -115,6 +116,7 @@ interface RunWorld {
   hitBoxes: HitBoxView;
   input: RunInput;
   items: ItemViews;
+  lights: LightsView;
   menus: MenuFlow;
   moments: RunMoments;
   pack: PackView;
@@ -229,6 +231,7 @@ export class RunScene extends Scene implements HudRun {
     const ambient = new AmbientView(this, random.ambient);
     const road = new RoadView(this, this.roadArt, LAYOUT.rasterView);
     const roadside = new RoadsideView(this);
+    const lights = new LightsView(this);
     const distractions = new DistractionView(this, random.distractions);
     const pack = new PackView(
       this,
@@ -251,6 +254,7 @@ export class RunScene extends Scene implements HudRun {
         walk: () => this.session?.walk,
       }),
       items,
+      lights,
       menus: new MenuFlow(this, {
         dropPress: () => this.world?.input.dropPress(),
         headHome: () => this.headHome(),
@@ -667,12 +671,19 @@ export class RunScene extends Scene implements HudRun {
       travelled: distanceBeforeZone + walk.run.zoneDistance,
     });
     world.road.draw(walk, zone, distanceBeforeZone);
+    const previous = previousZone(gameData, walk.run);
     world.roadside.draw(
       zone.art,
-      previousZone(gameData, walk.run)?.art ?? null,
+      previous?.art ?? null,
       distanceBeforeZone,
       distanceBeforeZone + walk.run.zoneDistance,
       { ms: ambientMs, still },
+    );
+    world.lights.draw(
+      zoneId,
+      previousZoneId(gameData, walk.run),
+      distanceBeforeZone,
+      distanceBeforeZone + walk.run.zoneDistance,
     );
     const shadow = world.shadows.frame(colourFromHex(zone.roadShadowColour));
     world.items.draw(walk, held, still, shadow);

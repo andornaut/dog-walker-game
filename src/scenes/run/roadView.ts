@@ -16,7 +16,7 @@ import {
 import { getOrInsertComputed } from "../../lib/maps";
 import type { Rect } from "../../lib/rect";
 import { previousZone } from "../../rules/route";
-import { type Walk, zoneLength } from "../../runner/walk";
+import type { Walk } from "../../runner/walk";
 import { colourFromHex } from "../../ui/phaser/palette";
 import { DEPTH, LAYOUT, PROJECTION } from "./stage";
 
@@ -143,7 +143,6 @@ export class RoadView {
       previous !== null && textures.exists(startKey) && textures.exists(roadTileKey(previous))
         ? {
             previous: this.art.look(previous, roadTileKey(previous)),
-            previousStart: zoneStart - zoneLength(gameData),
             start: this.art.look(zone, startKey),
           }
         : null;

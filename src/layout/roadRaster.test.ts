@@ -15,13 +15,10 @@ import {
   dottedBands,
   isLawn,
   mownAt,
-  poolAlong,
-  poolHalfWidth,
   seamRow,
   type Verge,
   vergeBase,
   VERGES,
-  type VergeSide,
   walkFrom,
 } from "../road/roadside";
 import { roadProjection, rowScale } from "./projection";
@@ -242,17 +239,8 @@ describe("the verge beside the road", () => {
     expect(dotColour(DOTS, value)).toBe(colour);
   });
 
-  // Whether a pool of the verge covers across on a row at z along the zone's road, on a side.
-  const pooled = (verge: Verge, side: VergeSide, z: number, across: number) =>
-    verge.pools.some((pool) => {
-      const along = poolAlong(pool, side, z);
-      const half = along < 0 ? 0 : poolHalfWidth(pool, along, 0);
-      const middle = (pool.from + pool.to) / 2;
-      return half > 0 && across >= middle - half && across < middle + half;
-    });
-
   // Every dotted band's dots over the rows below the approach, at a few scrolls: the share of
-  // a band's pixels in each dot's colours, leaving out the paving's seam rows and its pools.
+  // a band's pixels in each dot's colours, leaving out the paving's seam rows.
   const dotted = ZONES.flatMap((zone) =>
     dottedBands(VERGES[zone]).flatMap((band) =>
       band.dots.map((dot) => ({ ...dot, from: band.from, to: Math.min(band.to, 1e6), zone })),
@@ -270,11 +258,8 @@ describe("the verge beside the road", () => {
         if (y < raster.approachRows || seamRow(verge, scroll + row.distance, row.span)) {
           return;
         }
-        // Pools count from the zone's start strip, visibleDistance past the frame's zoneStart, 0.
-        const zoneZ = scroll + row.distance - raster.visibleDistance;
         row.across.forEach((across, i) => {
-          const side = i < row.roadStart ? "left" : "right";
-          if (across >= dot.from && across < dot.to && !pooled(verge, side, zoneZ, across)) {
+          if (across >= dot.from && across < dot.to) {
             band += 1;
             const word = out[y * view.width + i] ?? 0;
             if (words.includes(word)) {
@@ -420,7 +405,7 @@ describe("drawRoad", () => {
           frameOf({
             current,
             scroll: 5000 + zoneDistance,
-            transition: { previous, previousStart: 0, start },
+            transition: { previous, start },
             zoneStart: 5000,
           }),
         ),
@@ -452,12 +437,7 @@ describe("drawRoad", () => {
       const zoneStart = 5000;
       const along = STRIP.height - 1 - stripRow;
       const scroll = zoneStart + raster.visibleDistance + along + 0.5 - row.distance;
-      const frame = frameOf({
-        current: start,
-        scroll,
-        transition: { previous, previousStart: 0, start },
-        zoneStart,
-      });
+      const frame = frameOf({ current: start, scroll, transition: { previous, start }, zoneStart });
       return draw(frame)[(y - view.y) * view.width + curbX];
     };
     expect(vergeAt(START_STRIP_ZONE_ROWS - 1)).not.toBe(pixelWord(VERGES.street.curbColour));

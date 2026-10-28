@@ -1,0 +1,48 @@
+{
+  "defs": {
+    "neon-blue": {
+      "colour": "blue",
+      "height": 20,
+      "rings": [
+        {
+          "scale": 1,
+          "strength": 0.15
+        }
+      ],
+      "shape": "band",
+      "width": 6
+    },
+    "neon-purple": {
+      "colour": "purple",
+      "height": 20,
+      "rings": [
+        {
+          "scale": 1,
+          "strength": 0.15
+        }
+      ],
+      "shape": "band",
+      "width": 6
+    },
+    "yonge-lamp": {
+      "colour": "cream",
+      "height": 16,
+      "rings": [
+        {
+          "scale": 1,
+          "strength": 0.08
+        },
+        {
+          "scale": 0.66,
+          "strength": 0.15
+        },
+        {
+          "scale": 0.33,
+          "strength": 0.25
+        }
+      ],
+      "shape": "ellipse",
+      "width": 48
+    }
+  }
+}

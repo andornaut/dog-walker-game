@@ -73,6 +73,14 @@ export function currentZoneId(data: RouteData, run: Pick<RunState, "route" | "zo
   return zoneIdAt(data, run.route, run.zoneIndex);
 }
 
+// The id of the zone the run walked before its current one, or null in its first.
+export function previousZoneId(
+  data: RouteData,
+  run: Pick<RunState, "route" | "zoneIndex">,
+): ZoneId | null {
+  return run.zoneIndex === 0 ? null : zoneIdAt(data, run.route, run.zoneIndex - 1);
+}
+
 // The zones not yet walked this run, in world order: easiest first.
 export function unwalkedZones(data: RouteData, route: readonly ZoneId[]): ZoneId[] {
   return data.world.zones.flatMap((zone) =>

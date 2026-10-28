@@ -1,24 +1,18 @@
-// A paved verge as art writes it in shared/verges.json, with colours by palette name and pools
-// of light staggered between the sides: an ellipse with a stone edge round a cream core.
+import { itemAt } from "../lib/arrays";
+import { LIGHTS } from "../road/lights";
+
+// A light art sets out, whichever it is, so the fixture follows renames.
+export const SOME_LIGHT = itemAt([...LIGHTS.keys()], 0);
+
+// A paved verge as art writes it in shared/verges.json, with colours by palette name and a light
+// every 128 along its paving, staggered between the sides.
 export const PAVED_VERGE = {
   curbColour: "stone",
   curbTo: 164,
   lawn: "none",
   lawnColours: null,
   leaves: false,
-  pools: [
-    {
-      coreColour: "cream",
-      edgeColour: "dstone",
-      edgeWidth: 4,
-      every: 128,
-      from: 168,
-      length: 48,
-      offset: { left: 0, right: 64 },
-      shape: "ellipse",
-      to: 200,
-    },
-  ],
+  pools: [{ across: 170, every: 128, light: SOME_LIGHT, offset: { left: 0, right: 64 } }],
   seamColour: "grey",
   seamEvery: 32,
   strips: [],
