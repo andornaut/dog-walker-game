@@ -176,7 +176,7 @@ keg-dolly-worker    48x72   Distillery District, 1 lane; a brewery worker pushin
                             top chime ring and a slate bottom chime, a navy band between them and the
                             top one's lid and spear showing; the hand truck's navy rails up both sides
                             of the kegs from its nose plate to handles that rise clear of the top keg
-                            and angle out, a black tire on a stub of the axle well out either side;
+                            and angle out, a small black tire behind each rail's foot;
                             the worker behind, head and shoulders over the handles with his hands on
                             them, in a navy toque, a short brown beard, a white tee and a green apron
                             to the knee, its bib between the handles and its hem, navy trousers and
@@ -2088,16 +2088,16 @@ KEG_CUE = (dict(bob=1), dict(bob=1, tip=KEG_TIP / 2), dict(tip=KEG_TIP, tilt=KEG
            dict(tip=KEG_TIP, tilt=KEG_TILT, bob=-1))
 KEG_CUE_MS = 200
 KEG_RIM = {**LIT, "green": ("green", None)}
-# The kegs' columns and height, the hand truck's rails either side of them, and the wheels' centres and radii
-# outside the rails.
-KEG_X0, KEG_X1 = 11, 21
+# The kegs' columns and height, the hand truck's rails just outside them, and the wheels' centres and radii:
+# small, tucked in behind the rails' feet beside the bottom keg, as on a real hand truck.
+KEG_X0, KEG_X1 = 9.5, 22.5
 KEG_H = 6.5
 # The dark band between the kegs, in rows.
 KEG_GAP = 1.5
-DOLLY_RAILS = (9, 21)
+DOLLY_RAILS = (7.5, 22.5)
 RAIL_W = 2
-DOLLY_WHEELS = (3.5, 28.5)
-WHEEL_RX, WHEEL_RY = 2, 4.5
+DOLLY_WHEELS = (7, 25)
+WHEEL_RX, WHEEL_RY = 2.2, 4
 
 
 def keg(g, y0, top):
@@ -2119,7 +2119,7 @@ def keg_dolly_worker(lf=0, rf=0, bob=0, tip=0, tilt=0, roll=0, steady=None):
     """A brewery worker facing the player, pushing two steel kegs stacked on a hand truck in front of him: a
     navy toque, a short brown beard, a white tee and a green apron to the knee, navy trousers and black boots;
     the hand truck's navy rails up both sides of the kegs from its nose plate to handles that rise clear of
-    the top keg and angle out, his hands on them, and a black tire on an axle stub either side. tip lifts the
+    the top keg and angle out, his hands on them, and a small black tire behind each rail's foot. tip lifts the
     nose plate and the kegs that many rows as he rocks the dolly back onto its wheels, and tilt lifts the top
     keg and the handles that many rows more, the stack's top tipped back toward him; roll moves the tires'
     tread down a pixel; steady puts his screen-right hand on the top keg's lid, lifted that many rows off it."""
@@ -2141,12 +2141,10 @@ def keg_dolly_worker(lf=0, rf=0, bob=0, tip=0, tilt=0, roll=0, steady=None):
     g.rect(11.5, 21.5 + b, 9, high - 21.5 - b, "green")
     for x in (11.5, 18.5):
         g.rect(x, 19.5 + b, 2, 2, "green")
-    # the wheels, edge-on outside the rails on stubs of the axle, their tread rolling
-    for cx in DOLLY_WHEELS:
+    # the wheels, edge-on behind the rails' feet, their tread rolling down the outer half that shows
+    for cx, side in zip(DOLLY_WHEELS, (-1.5, 0.5)):
         g.ell(cx, 45 - WHEEL_RY, WHEEL_RX, WHEEL_RY, "ink")
-        tread_rows(g, cx - 0.5, 45 - 2 * WHEEL_RY + 1, 45, roll, K["slate"])
-    g.rect(DOLLY_WHEELS[0] + 1, 40, DOLLY_RAILS[0] + RAIL_W - DOLLY_WHEELS[0] - 1, 1.5, "navy")
-    g.rect(DOLLY_RAILS[1], 40, DOLLY_WHEELS[1] - 1 - DOLLY_RAILS[1], 1.5, "navy")
+        tread_rows(g, cx + side, 45 - 2 * WHEEL_RY + 1, 45, roll, K["slate"])
     # the kegs, a dark band between them, and the nose plate under them
     keg(g, low, False)
     keg(g, high, True)
