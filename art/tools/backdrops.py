@@ -584,14 +584,15 @@ def sunburst(cv, cx, cy, n, a, b, y1, w=W, r=None):
             cv.fill(px, py, 1, 1, a if math.floor(ang / (math.pi / (2 * n)) + 0.5) % 2 else b)
 
 
-def bunting(cv, x0, x1, y, sag, cols, line="plum"):
-    """A string of pennants hung from x0 to x1 on row y, sagging sag rows in the middle."""
+def bunting(cv, x0, x1, y, sag, cols, line="plum", every=7):
+    """A string of pennants hung from x0 to x1 on row y, sagging sag rows in the middle, one every
+    every columns."""
     k = 0
     for x in range(x0, x1):
         t = (x - x0) / max(1, x1 - x0 - 1)
         yy = round(y + sag * 4 * t * (1 - t))
         cv.fill(x, yy, 1, 1, line)
-        if (x - x0) % 7 == 1 and x + 5 <= x1:
+        if (x - x0) % every == 1 and x + 5 <= x1:
             for r in range(4):
                 cv.fill(x + r // 2, yy + 1 + r, 5 - r // 2 * 2, 1, cols[k % len(cols)])
             k += 1
@@ -658,7 +659,8 @@ def crescent_bend(px):
 # the curb to curbTo, the strips (each to its to), the sidewalk or paving with a seam every
 # seamEvery to walkTo (None: paving on out, with no lawn), then the lawn, mown or rough. lawnColours
 # are the lawn's base, its mown stripes and rough patches, and its 2-row tufts, which draw their own
-# colour rather than darkening the pixel under them; None where there is no lawn.
+# colour rather than darkening the pixel under them; None where there is no lawn. walkDots are single
+# pixels that shimmer as the road scrolls, so together they cover 6% or less of the paving.
 VERGES = {
     "cabbagetown": dict(curbColour="dstone", curbTo=CURB, strips=[], walkColour="stone", walkDots=[],
                         seamColour="dstone", seamEvery=32, walkTo=WALK, lawn="mown",
@@ -667,22 +669,22 @@ VERGES = {
                       seamColour="pine", seamEvery=32, walkTo=160, lawn="rough",
                       lawnColours=("pine", "bark", "fir"), leaves=False),
     "distillery-district": dict(curbColour="dstone", curbTo=164, strips=[], walkColour="brown",
-                                walkDots=[dict(colours=["brick"], share=0.1), dict(colours=["dbrown"], share=0.04),
-                                          dict(colours=["rust"], share=0.02)],
+                                walkDots=[dict(colours=["brick"], share=0.036), dict(colours=["dbrown"], share=0.015),
+                                          dict(colours=["rust"], share=0.008)],
                                 seamColour="dbrown", seamEvery=32, walkTo=None, lawn="none",
                                 lawnColours=None, leaves=False),
     "kensington-market": dict(curbColour="stone", curbTo=162, strips=[dict(colour="mauve", dots=[], to=166)],
                               walkColour="grey",
-                              walkDots=[dict(colours=["lgrey"], share=0.03), dict(colours=["slate"], share=0.03),
+                              walkDots=[dict(colours=["lgrey"], share=0.01), dict(colours=["slate"], share=0.012),
                                         dict(colours=["pink", "lime", "lilac", "cyan"], share=0.016)],
                               seamColour="slate", seamEvery=32, walkTo=None, lawn="none",
                               lawnColours=None, leaves=False),
     "the-beaches": dict(curbColour="clay", curbTo=164, strips=[], walkColour="driftwood",
-                        walkDots=[dict(colours=["stone"], share=0.05), dict(colours=["white"], share=0.008)],
+                        walkDots=[dict(colours=["stone"], share=0.025)],
                         seamColour="driftwood", seamEvery=32, walkTo=None, lawn="none",
                         lawnColours=None, leaves=False),
     "yonge-street": dict(curbColour="grey", curbTo=164, strips=[], walkColour="dslate",
-                         walkDots=[dict(colours=["slate"], share=0.02)], seamColour="navy", seamEvery=32,
+                         walkDots=[dict(colours=["slate"], share=0.012)], seamColour="navy", seamEvery=32,
                          walkTo=None, lawn="none", lawnColours=None, leaves=False),
 }
 
@@ -1435,25 +1437,9 @@ def crates(cv, x, base, fruit):
             cv.fill(cx + 2, y - 2, 1, 1, "white")
 
 
-# An eighth note: a 2x2 head, its stem and a flag.
-NOTE = (".xx.", ".xxx", ".x.x", ".x..", "xx..", "xx..")
-
-
-def note(cv, x, y, col, edge="plum"):
-    """An eighth note 4x6 from x, y in col inside a 1px edge, so it holds on any wall."""
-    pts = {(i, j) for j, r in enumerate(NOTE) for i, ch in enumerate(r) if ch == "x"}
-    for i, j in pts:
-        for di in (-1, 0, 1):
-            for dj in (-1, 0, 1):
-                if (i + di, j + dj) not in pts:
-                    cv.fill(x + i + di, y + j + dj, 1, 1, edge)
-    for i, j in pts:
-        cv.fill(x + i, y + j, 1, 1, col)
-
-
 def busker(cv, x, base):
-    """A busker's pitch with no one at it, on row base: an amp, a guitar leaning on it beside its open
-    case, and music notes rising over them, below the shop's sign board."""
+    """A busker's pitch with no one at it, on row base: an amp and a guitar leaning on it beside its open
+    case, below the shop's sign board."""
     cv.fill(x, base - 8, 8, 8, "coal")
     cv.fill(x + 1, base - 7, 6, 5, "ash")
     cv.fill(x + 3, base - 5, 2, 2, "coal")
@@ -1468,8 +1454,6 @@ def busker(cv, x, base):
     cv.fill(gx - 3, base - 18, 2, 2, "walnut")
     cv.fill(x + 15, base - 3, 12, 3, "walnut")
     cv.fill(x + 16, base - 2, 10, 1, "dred")
-    for nx, ny, c in ((-1, -15, "white"), (8, -20, "gold"), (17, -14, "white")):
-        note(cv, x + nx, base + ny, c)
 
 
 def patio(cv, cx, base, a, b):
@@ -1497,15 +1481,16 @@ def kensington():
             (CX + 69, 60, "olive", "dolive", "red", "CHEESE", "dbrick", "gold"),
             (313, 56, "mauve", "plum", "lake", "TACOS", "coal", "cream")):
         market_house(cv, cx, w, wall_c, roof, awn, sign, board, letters)
-    # pennants zig-zagging across the street between the house fronts
+    # pennants zig-zagging across the street between the house fronts, spaced out so the strings stay
+    # quieter than the sign boards under them
     pennants = ("red", "gold", "dturq", "lilac", "lime", "orange")
     for i, (x0, x1, y) in enumerate(((0, 90, BASE - 44), (90, 180, BASE - 40), (180, 270, BASE - 44),
                                      (270, W, BASE - 40))):
-        bunting(cv, x0, x1, y, 5, pennants[i:] + pennants[:i])
+        bunting(cv, x0, x1, y, 5, pennants[i:] + pennants[:i], every=12)
 
     ground = verge_paving("kensington-market")
     yard(cv, BASE, FAR_WALK, ground)
-    # out front: produce, the Garden Car, a stall, a vintage rail, a busker's pitch, bikes and a patio
+    # out front: produce, the Garden Car, a stall, a vintage rail, a busker's pitch, two bikes and a patio
     crates(cv, 4, FAR_WALK - 1, ("red", "lime", "orange"))
     garden_car(cv, 58, FAR_WALK - 1)
     umbrella(cv, CX - 64, FAR_WALK - 1, "gold", "dturq")
@@ -1514,7 +1499,6 @@ def kensington():
     bike(cv, CX + 40, FAR_WALK - 1, "lilac")
     basket_bike(cv, CX + 56, FAR_WALK - 1, "lime", flip=True)
     patio(cv, CX + 96, FAR_WALK - 1, "red", "cream")
-    bike(cv, 250, FAR_WALK - 1, "gold", flip=True)
     # the laneway walls at both ends of the street, painted with murals
     for x0 in (0, W - 16):
         mural(cv, x0, BASE - 66, FAR_WALK, x0 > 0)

@@ -43,19 +43,19 @@
         "colours": [
           "brick"
         ],
-        "share": 0.1
+        "share": 0.036
       },
       {
         "colours": [
           "dbrown"
         ],
-        "share": 0.04
+        "share": 0.015
       },
       {
         "colours": [
           "rust"
         ],
-        "share": 0.02
+        "share": 0.008
       }
     ],
     "seamColour": "dbrown",
@@ -81,13 +81,13 @@
         "colours": [
           "lgrey"
         ],
-        "share": 0.03
+        "share": 0.01
       },
       {
         "colours": [
           "slate"
         ],
-        "share": 0.03
+        "share": 0.012
       },
       {
         "colours": [
@@ -116,13 +116,7 @@
         "colours": [
           "stone"
         ],
-        "share": 0.05
-      },
-      {
-        "colours": [
-          "white"
-        ],
-        "share": 0.008
+        "share": 0.025
       }
     ],
     "seamColour": "driftwood",
@@ -142,7 +136,7 @@
         "colours": [
           "slate"
         ],
-        "share": 0.02
+        "share": 0.012
       }
     ],
     "seamColour": "navy",
