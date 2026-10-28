@@ -20,7 +20,7 @@ export const MINOR_OBSTACLES = {
   },
   bench: { name: "Bench", shape: { lanes: 2, rows: 1 } },
   breweryDray: {
-    movement: { kind: "stopAndGoAcross", speed: 0.6, stopSeconds: 1.3, stops: [[1, 3]] },
+    movement: { kind: "stopAndGoAcross", speed: 0.5, stopSeconds: 1.3, stops: [[1, 3]] },
     name: "Brewery dray",
     shape: { lanes: 3, rows: 1 },
     zones: ["street"],
