@@ -1,48 +1,56 @@
 {
   "defs": {
-    "neon-blue": {
-      "colour": "blue",
-      "height": 20,
+    "neon-azure": {
+      "colour": "azure",
+      "height": 40,
       "rings": [
         {
           "scale": 1,
-          "strength": 0.15
+          "strength": 0.16
+        },
+        {
+          "scale": 0.5,
+          "strength": 0.32
         }
       ],
       "shape": "band",
-      "width": 6
+      "width": 8
     },
-    "neon-purple": {
-      "colour": "purple",
-      "height": 20,
+    "neon-mauve": {
+      "colour": "mauve",
+      "height": 40,
       "rings": [
         {
           "scale": 1,
-          "strength": 0.15
+          "strength": 0.16
+        },
+        {
+          "scale": 0.5,
+          "strength": 0.32
         }
       ],
       "shape": "band",
-      "width": 6
+      "width": 8
     },
-    "yonge-lamp": {
+    "street-lamp-pool": {
       "colour": "cream",
-      "height": 16,
+      "height": 36,
       "rings": [
         {
           "scale": 1,
-          "strength": 0.08
+          "strength": 0.07
         },
         {
           "scale": 0.66,
-          "strength": 0.15
+          "strength": 0.13
         },
         {
           "scale": 0.33,
-          "strength": 0.25
+          "strength": 0.19
         }
       ],
       "shape": "ellipse",
-      "width": 48
+      "width": 144
     }
   }
 }

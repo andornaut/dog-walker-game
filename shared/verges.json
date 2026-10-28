@@ -147,8 +147,8 @@
     "leaves": false,
     "pools": [
       {
-        "light": "yonge-lamp",
-        "across": 198,
+        "light": "street-lamp-pool",
+        "across": 243,
         "every": 3360,
         "offset": {
           "left": 140,
@@ -156,8 +156,8 @@
         }
       },
       {
-        "light": "yonge-lamp",
-        "across": 198,
+        "light": "street-lamp-pool",
+        "across": 243,
         "every": 3360,
         "offset": {
           "left": 420,
@@ -165,8 +165,8 @@
         }
       },
       {
-        "light": "yonge-lamp",
-        "across": 198,
+        "light": "street-lamp-pool",
+        "across": 243,
         "every": 3360,
         "offset": {
           "left": 1260,
@@ -174,8 +174,8 @@
         }
       },
       {
-        "light": "yonge-lamp",
-        "across": 198,
+        "light": "street-lamp-pool",
+        "across": 243,
         "every": 3360,
         "offset": {
           "left": 1820,
@@ -183,8 +183,8 @@
         }
       },
       {
-        "light": "yonge-lamp",
-        "across": 198,
+        "light": "street-lamp-pool",
+        "across": 243,
         "every": 3360,
         "offset": {
           "left": 2100,
@@ -192,8 +192,8 @@
         }
       },
       {
-        "light": "yonge-lamp",
-        "across": 198,
+        "light": "street-lamp-pool",
+        "across": 243,
         "every": 3360,
         "offset": {
           "left": 2940,
@@ -201,7 +201,7 @@
         }
       },
       {
-        "light": "neon-purple",
+        "light": "neon-mauve",
         "across": 209,
         "every": 3360,
         "offset": {
@@ -210,7 +210,7 @@
         }
       },
       {
-        "light": "neon-blue",
+        "light": "neon-azure",
         "across": 209,
         "every": 3360,
         "offset": {

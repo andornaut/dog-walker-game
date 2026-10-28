@@ -655,38 +655,16 @@ def crescent_bend(px):
 # darkness ranges from the open sand of The Beaches to Yonge Street's evening and Kensington
 # Market's Pedestrian Sunday at twilight, and each has its own sky.
 
-# A pool of light on a verge (its pools): an ellipse, or a band, of core inside an edge ring edge_width wide,
-# lying from to to across, length long, repeating every road px along each side from its offset there.
-# Every size and place is a whole number of POOL_STEP and every a whole number of the road's 32 px joints.
-POOL_STEP = 2
-
-
-def pool(core, edge, edge_width, every, start, end, length, left, right, shape="ellipse"):
-    return {"coreColour": core, "edgeColour": edge, "edgeWidth": edge_width, "every": every, "from": start,
-            "length": length, "offset": {"left": left, "right": right}, "shape": shape, "to": end}
-
-
-def pool_along(p, side, z):
-    """How far into the pool on this side the road at z lies, along from its near end, or -1 between pools."""
-    into = z - p["offset"][side]
-    along = into - math.floor(into / p["every"]) * p["every"]
-    return along if along < p["length"] else -1
-
-
-def pool_half(p, along, inset):
-    """Half the pool's width across at along, inset road px inside its edge, or 0 where it does not reach:
-    the outline steps POOL_STEP at a time, each step along taking the width at its middle, rounded to the
-    nearest step without passing the pool's own (as the game's poolHalfWidth)."""
-    half_length = p["length"] / 2 - inset
-    half_width = (p["to"] - p["from"]) / 2 - inset
-    step = (math.floor(along / POOL_STEP) + 0.5) * POOL_STEP
-    if half_length <= 0 or half_width <= 0:
-        return 0
-    t = (step - p["length"] / 2) / half_length
-    if abs(t) >= 1:
-        return 0
-    half = half_width if p["shape"] == "band" else half_width * math.sqrt(1 - t * t)
-    return min(half_width, math.floor(half / POOL_STEP + 0.5) * POOL_STEP)
+# A pool of light on a verge (its pools): the light def keyed light (shared/lights.json), centred across from
+# the road's centre line, repeating every road px along each side from its offset there, counted from the
+# zone's start strip as the roadside slots are; every is a whole number of the road's 32 px joints. zones,
+# when given, lists the zone ids it shows in. The game draws it (src/road/lightPlaces.ts); the stub rows
+# paint none, since the light layer draws over the backdrop's approach.
+def pool(light, across, every, left, right, zones=None):
+    p = {"light": light, "across": across, "every": every, "offset": {"left": left, "right": right}}
+    if zones is not None:
+        p["zones"] = list(zones)
+    return p
 
 
 def prop_slots(zone, key):
@@ -708,41 +686,23 @@ def prop_slots(zone, key):
     return period, zs["left"], zs["right"]
 
 
-def under_lamps(zone, length, start, end, core, edge, edge_width, shape="band"):
-    """Pools centred under a zone's street lamps, one entry per lamp of a period of its placement (each
-    entry's every that period), pairing the sides' lamps in order."""
+def under_lamps(zone, light):
+    """A light under each of a zone's street lamps, at the lamps' across, one entry per lamp of a period of its
+    placement (each entry's every that period), pairing the sides' lamps in order."""
     period, left, right = prop_slots(zone, "street-lamp")
-    return [pool(core, edge, edge_width, period, start, end, length, (lz - length // 2) % period,
-                 (rz - length // 2) % period, shape)
-            for lz, rz in zip(left, right)]
+    across = next(p for g in roadside.PLACEMENT[zone]["gaps"] for p in g if p[0] == "roadside-street-lamp")[1]
+    return [pool(light, across, period, lz, rz) for lz, rz in zip(left, right)]
 
 
-def between_lamps(zone, length, start, end, colours, gap=560):
-    """Thin neon bands midway between a zone's street lamps where they stand gap road px or more apart on a
-    side, one entry per colour in turn, pairing the sides' wide gaps in order."""
+def between_lamps(zone, lights, across, gap=560):
+    """Lights midway between a zone's street lamps where they stand gap road px or more apart on a side, one
+    entry per light in turn, pairing the sides' wide gaps in order."""
     period, left, right = prop_slots(zone, "street-lamp")
 
     def middles(zs):
         return [round((z + (zs[(i + 1) % len(zs)] - z) % period / 2) % period / 2) * 2
                 for i, z in enumerate(zs) if (zs[(i + 1) % len(zs)] - z) % period >= gap]
-    return [pool(c, c, 2, period, start, end, length, (lz - length // 2) % period, (rz - length // 2) % period, "band")
-            for c, lz, rz in zip(colours, middles(left), middles(right))]
-
-
-def pooled(pools, x, z):
-    """The colour of the verge's pools at x across (signed) and z along, the later pools over the earlier,
-    or None."""
-    side, a, c = ("left" if x < 0 else "right"), abs(x), None
-    for p in pools:
-        along = pool_along(p, side, z)
-        if along < 0:
-            continue
-        middle = (p["from"] + p["to"]) / 2
-        for inset, col in ((0, p["edgeColour"]), (p["edgeWidth"], p["coreColour"])):
-            half = pool_half(p, along, inset)
-            if half > 0 and middle - half <= a < middle + half:
-                c = col
-    return c
+    return [pool(light, across, period, lz, rz) for light, lz, rz in zip(lights, middles(left), middles(right))]
 
 
 # The game's verge beside each road, keyed by art id, with colours
@@ -752,7 +712,7 @@ def pooled(pools, x, z):
 # are the lawn's base, its mown stripes and rough patches, and its 2-row tufts, which draw their own
 # colour rather than darkening the pixel under them; None where there is no lawn. walkDots are single
 # pixels that shimmer as the road scrolls, so together they cover 6% or less of the paving. pools, where
-# a verge has them, are pools of light over the curb, strips and sidewalk or paving, under its seams (pool).
+# a verge has them, are lights the game draws along it (pool).
 VERGES = {
     "cabbagetown": dict(curbColour="dstone", curbTo=CURB, strips=[], walkColour="stone", walkDots=[],
                         seamColour="dstone", seamEvery=32, walkTo=WALK, lawn="mown",
@@ -778,8 +738,8 @@ VERGES = {
     "yonge-street": dict(curbColour="grey", curbTo=164, strips=[], walkColour="dslate",
                          walkDots=[dict(colours=["slate"], share=0.012)], seamColour="navy", seamEvery=32,
                          walkTo=None, lawn="none", lawnColours=None, leaves=False,
-                         pools=under_lamps("yonge-street", 96, 182, 214, "dstone", "ash", 6)
-                         + between_lamps("yonge-street", 64, 206, 212, ("purple", "blue"))),
+                         pools=under_lamps("yonge-street", "street-lamp-pool")
+                         + between_lamps("yonge-street", ("neon-mauve", "neon-azure"), 209)),
 }
 
 
@@ -808,7 +768,6 @@ def verge(zone, road, patches=()):
     verge (VERGES), with rough patches as world (x, z, rx, rz) ellipses."""
     v = VERGES[zone]
     walk_to = 10 ** 6 if v["walkTo"] is None else v["walkTo"]
-    pools = v.get("pools", ())
 
     def ground(x, z, span):
         a = abs(x)
@@ -819,17 +778,14 @@ def verge(zone, road, patches=()):
                 return dotted(strip["dots"], noise(math.floor(x), math.floor(z))) or strip["colour"]
         if span < 16 and crosses(z, span, v["seamEvery"]):
             return v["seamColour"]
-        return pooled(pools, x, z) or dotted(v["walkDots"], noise(math.floor(x), math.floor(z))) or v["walkColour"]
+        return dotted(v["walkDots"], noise(math.floor(x), math.floor(z))) or v["walkColour"]
 
     def paint(x, z, span, px, py):
         a = abs(x)
         if a < ROAD:
             return road(x, z, span, px, py)
         if a < walk_to:
-            c = ground(x, z, span)
-            if a < v["curbTo"] or any(a < strip["to"] for strip in v["strips"]):
-                c = pooled(pools, x, z) or c
-            return c
+            return ground(x, z, span)
         lawn, dark, tufted = v["lawnColours"]
         s = F / (F + z)
         c = lawn
