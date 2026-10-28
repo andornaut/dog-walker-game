@@ -1,5 +1,5 @@
 import { moverPlace, moverY, stopsOnVerge } from "../../runner/movers";
-import type { WalkItem } from "../../runner/walk";
+import type { RoadGeometry, WalkItem } from "../../runner/walk";
 
 // A dart that stops on the verge leaves the walk as it leaves the road, so it collides with
 // nothing from then on, and is kept as scenery: the item as the walk last had it, and the zone
@@ -25,7 +25,7 @@ export function goesToVerge(laneCount: number, item: WalkItem): boolean {
 // kept, crossing on to its stop and then coming down the road with it; or null once it lies
 // wholly past roadBottom, as the walk drops an item there, or the walk is in another zone.
 export function vergeNow(
-  road: { readonly laneCount: number; readonly roadBottom: number; readonly roadTop: number },
+  road: Pick<RoadGeometry, "laneCount" | "roadBottom" | "roadTop">,
   run: RoadPlace,
   kept: VergeItem,
 ): WalkItem | null {

@@ -20,7 +20,13 @@ import { itemAt } from "../../lib/arrays";
 import { struckBy, type StruckItem, struckNow } from "../../road/struckScenery";
 import { moverTell } from "../../runner/movers";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
-import { itemCategory, type Walk, type WalkItem, type WalkStep } from "../../runner/walk";
+import {
+  itemCategory,
+  type RoadGeometry,
+  type Walk,
+  type WalkItem,
+  type WalkStep,
+} from "../../runner/walk";
 import { walkGeometry } from "../../runner/walkGeometry";
 import { PALETTE } from "../../ui/phaser/palette";
 import { addStandingSprite, ensurePlaceholder } from "../sprites";
@@ -119,7 +125,8 @@ export class ItemViews {
   draw(walk: Walk, halted: boolean, still: boolean, shadow: Shadow): void {
     const seen = new Set<number>();
     const frame = { shadow, still, tags: halted ? STANDING_TAGS.halted : STANDING_TAGS.walking };
-    const { roadTop } = screenRoadGeometry(walk.run);
+    const geometry = screenRoadGeometry(walk.run);
+    const { roadTop } = geometry;
     for (const item of walk.road.items) {
       seen.add(item.id);
       const view = this.views.get(item.id) ?? this.addView(item);
@@ -158,32 +165,29 @@ export class ItemViews {
         this.vergeBound.delete(id);
       }
     }
-    this.drawStruck(walk, roadTop, frame);
-    this.drawVerge(walk, halted, frame);
+    this.drawStruck(walk, geometry, frame);
+    this.drawVerge(walk, geometry, halted, frame);
   }
 
   // Each dart kept on the verge where its path and the road's scroll put it, drawn as a live
   // road sprite is, beside the road; dropped once off the road's bottom.
-  private drawVerge(walk: Walk, halted: boolean, frame: StandFrame): void {
-    const { roadBottom, roadTop } = screenRoadGeometry(walk.run);
-    const road = { laneCount: LANE_COUNT, roadBottom, roadTop };
+  private drawVerge(walk: Walk, geometry: RoadGeometry, halted: boolean, frame: StandFrame): void {
     for (const [id, { kept, view }] of this.verge) {
-      const item = vergeNow(road, walk.run, kept);
+      const item = vergeNow(geometry, walk.run, kept);
       if (item?.mover === undefined) {
         view.parts.forEach(({ sprite }) => sprite.destroy());
         this.verge.delete(id);
         continue;
       }
-      drawMover({ ...item, mover: item.mover }, view, roadTop, halted, frame);
+      drawMover({ ...item, mover: item.mover }, view, geometry.roadTop, halted, frame);
     }
   }
 
   // Each dart kept on the verge as it stands now.
   vergeItems(walk: Walk): WalkItem[] {
-    const { roadBottom, roadTop } = screenRoadGeometry(walk.run);
-    const road = { laneCount: LANE_COUNT, roadBottom, roadTop };
+    const geometry = screenRoadGeometry(walk.run);
     return [...this.verge.values()]
-      .map(({ kept }) => vergeNow(road, walk.run, kept))
+      .map(({ kept }) => vergeNow(geometry, walk.run, kept))
       .filter((item) => item !== null);
   }
 
@@ -209,8 +213,8 @@ export class ItemViews {
 
   // Each struck obstacle where the road has scrolled it, a mover stopped and its cue hidden,
   // moved by its offset, under every live road sprite and the pack; dropped once off the road.
-  private drawStruck(walk: Walk, roadTop: number, frame: StandFrame): void {
-    const { roadBottom } = screenRoadGeometry(walk.run);
+  private drawStruck(walk: Walk, geometry: RoadGeometry, frame: StandFrame): void {
+    const { roadBottom, roadTop } = geometry;
     for (const [id, kept] of this.struck) {
       const item = struckNow(roadBottom, walk.run, kept.struck);
       const { parts } = kept.view;
