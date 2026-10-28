@@ -199,7 +199,7 @@ def ralph_top(wave):
         g.p(20, 27 + b, "yellow")
         g.p(20, 28 + b, "amber")
         # the ponytail behind the head, hanging from the nape down behind the left shoulder, with a dbrown tie
-        for x, y, r, c in ((7.8, 16.5, 1.5, "tan"), (6.6, 18.7, 1.4, "tan"), (5.5, 20.7, 1.1, "brown")):
+        for x, y, r, c in ((7.8, 16.5, 1.5, "driftwood"), (6.6, 18.7, 1.4, "driftwood"), (5.5, 20.7, 1.1, "brown")):
             g.ell(x, y + b, r, r + 0.3, c)
         g.p(6, 18 + b, "lgrey")
         g.rect(7, 15 + b, 2, 1, "dbrown")
@@ -226,9 +226,9 @@ def ralph_top(wave):
         # the strong jaw, squared off under the face, with stubble shading its edge
         g.blob(16, 17 + b, 7, 3.5, "skin1", power=3)
         g.rect(12, 20 + b, 8, 1, "skin2")
-        # the hair pulled back tight over the crown and temples: sandy tan lit cream and shaded brown, off a
-        # receding hairline, gone grey at the temples, with a lgrey streak combed back through it
-        g.cel(16, 7 + b, 8.8, 4.5, "tan", "brown", "cream")
+        # the hair pulled back tight over the crown and temples: greying sand in driftwood lit cream and shaded
+        # brown, off a receding hairline, gone grey at the temples, with a lgrey streak combed back through it
+        g.cel(16, 7 + b, 8.8, 4.5, "driftwood", "brown", "cream")
         g.rect(11, 4 + b, 1, 2, "cream")
         g.rect(18, 3 + b, 2, 1, "cream")
         g.ell(16, 10.5 + b, 5.5, 2.5, "skin1")
@@ -237,7 +237,7 @@ def ralph_top(wave):
         g.rect(13, 4 + b, 1, 3, "lgrey")
         g.rect(14, 3 + b, 2, 1, "lgrey")
         # the hairline a shade darker, so the sandy hair stands apart from the fair forehead, as on his face
-        hairline(g, "tan", "skin1", "brown")
+        hairline(g, "driftwood", "skin1", "brown")
         face_front(g, 16, 13 + b)
         # heavy brows, two rows deep and pulled low over the eyes, and a big nose
         g.rect(10, 10 + b, 4, 2, "brown")

@@ -212,7 +212,7 @@ def ralph(mood):
     jacket with a cream fleece collar over a white shirt, and gold wings pinned on the chest."""
     g = face()
     # the ponytail behind the head, hanging from the nape down behind the left shoulder, with a dbrown tie
-    for x, y, r, c in ((8, 20.5, 1.8, "tan"), (6.8, 23, 1.7, "tan"), (5.6, 25.5, 1.4, "tan"),
+    for x, y, r, c in ((8, 20.5, 1.8, "driftwood"), (6.8, 23, 1.7, "driftwood"), (5.6, 25.5, 1.4, "driftwood"),
                        (4.8, 27.5, 1, "brown")):
         g.ell(x, y, r, r + 0.3, c)
     if not isinstance(g, minis.Mini):
@@ -240,9 +240,10 @@ def ralph(mood):
     g.rect(21, 29, 5, 1, "amber")
     g.p(23, 29, "yellow")
     g.p(23, 30, "amber")
-    # the hair pulled back tight over the crown and temples: sandy tan lit cream and shaded brown, off a
-    # receding hairline, gone grey at the temples, with a lgrey streak combed back through it
-    g.cel(16, 10.5, 9, 5, "tan", "brown", "cream")
+    # the hair pulled back tight over the crown and temples: greying sand in driftwood, which holds apart from the
+    # tan quip well, lit cream and shaded brown, off a receding hairline, gone grey at the temples, with a lgrey
+    # streak combed back through it
+    g.cel(16, 10.5, 9, 5, "driftwood", "brown", "cream")
     g.rect(11, 7, 1, 2, "cream")
     g.rect(18, 6, 2, 1, "cream")
     g.ell(16, 14.5, 6.5, 3.5, "skin1")
@@ -251,7 +252,7 @@ def ralph(mood):
     g.rect(13, 7, 1, 3, "lgrey")
     g.rect(14, 6, 2, 1, "lgrey")
     # the hairline a shade darker, so the sandy hair stands apart from the fair forehead
-    hairline(g, "tan", "skin1", "brown")
+    hairline(g, "driftwood", "skin1", "brown")
     # the brows a step darker at 20px, where they are one pixel deep
     expression(g, mood, brow="dbrown" if isinstance(g, minis.Mini) else "brown")
     if not isinstance(g, minis.Mini):
