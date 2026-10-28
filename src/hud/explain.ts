@@ -146,8 +146,7 @@ export function explainDetail(
       };
     }
     case "dog": {
-      const slot = run.pack.find(({ dog }) => dog === target.dog);
-      if (slot === undefined) {
+      if (!run.pack.some(({ dog }) => dog === target.dog)) {
         return undefined;
       }
       const home = dogDetail(data, save.owned, save.bankCents, target.dog);
