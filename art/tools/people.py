@@ -170,9 +170,10 @@ def ryan_top(wave):
         head(g, b, "skin2", "brown")
         g.rect(8, 8 + b, 2, 6, "amber")
         g.rect(22, 8 + b, 2, 6, "orange")
-        # the hard hat: a white dome with a ridge down the middle over a full brim
-        g.cel(16, 4.5 + b, 8, 4.5, "white", "lgrey")
-        g.rect(15, 0 + b, 2, 6, "lgrey")
+        # the hard hat: a white dome with a ridge down the middle over a full brim, its crown from row 2, so
+        # the outline closes over it on the breath's raised frame
+        g.cel(16, 5.5 + b, 8, 3.5, "white", "lgrey")
+        g.rect(15, 2 + b, 2, 5, "lgrey")
         g.rect(5, 7 + b, 22, 2, "white")
         g.rect(17, 8 + b, 10, 1, "lgrey")
         g.rect(9, 9 + b, 6, 1, "amber")
@@ -272,7 +273,10 @@ def tara_top(wave):
         g.rect(5, 31 + b, 4, 3, "skin1")
         head(g, b, "skin1", "skin2")
         g.cel(16, 7.5 + b, 9, 4.5, "navy", "ink", "dslate")
-        g.cel(16, 2.5 + b, 5, 2.5, "navy", "ink", "dslate")
+        # the bun, round and narrower than the crown, from row 2, so the outline closes over it on the
+        # breath's raised frame, tucked in with an ink line where it meets the crown
+        g.cel(16, 3.5 + b, 4, 1.6, "navy", "ink", "dslate")
+        g.rect(14, 5 + b, 4, 1, "ink")
         g.rect(8, 9 + b, 2, 8, "navy")
         g.rect(22, 9 + b, 2, 8, "navy")
         g.p(7, 17 + b, "amber")
@@ -335,8 +339,9 @@ def kiwi_top(wave):
         g.rect(17, 21 + b, 1, 12, "lgrey")
         g.rect(11, 24 + b, 2, 2, "green")
         g.p(11, 24 + b, "yellow")
-        # the curls round the head first, so a raised arm and its hand pass in front of them
-        for cx, cy in ((8, 11), (24, 11), (9, 6.5), (23, 6.5), (12.5, 3.5), (19.5, 3.5), (16, 3)):
+        # the curls round the head first, so a raised arm and its hand pass in front of them; the top ones from
+        # row 2, so the outline closes over them on the breath's raised frame
+        for cx, cy in ((8, 11), (24, 11), (9, 7), (23, 7), (12.5, 5), (19.5, 5), (16, 4.8)):
             g.cel(cx, cy + b, 2.6, 2.6, "white", "lgrey")
         arms(g, b, wave, "blue", "navy", "brown")
         g.rect(5, 22 + b, 1, 9, "sky")
@@ -366,7 +371,8 @@ def aunt_judy_top(wave):
     white tennis dress with a cyan V neck, armholes and hem, a cyan sweatband on the right wrist, white socks and
     shoes, and her racket held up in her left hand."""
     def top(g, b):
-        g.cel(25, 6 + b, 3, 6, "lgrey", "grey", "white")
+        # the high ponytail, from row 2, so the outline closes over it on the breath's raised frame
+        g.cel(25, 7 + b, 3, 5, "lgrey", "grey", "white")
         # the pleated skirt, flared past the hips, with its cyan hem
         g.rect(8, 33 + b, 16, 4, "white")
         g.rect(20, 33 + b, 4, 4, "lgrey")
@@ -450,8 +456,9 @@ def gadget_top(wave):
         g.rect(8, 8 + b, 2, 6, "navy")
         g.rect(22, 8 + b, 2, 6, "ink")
         # the hat: a pinched crown with a dred band over a wide brim
-        g.cel(16, 3.5 + b, 6, 3.5, "brown", "dbrown", "tan")
-        g.rect(15, 0 + b, 2, 1, "dbrown")
+        # the crown from row 2, so the outline closes over it on the breath's raised frame
+        g.cel(16, 4.5 + b, 6, 2.6, "brown", "dbrown", "tan")
+        g.rect(15, 2 + b, 2, 1, "dbrown")
         g.rect(10, 5 + b, 12, 1, "dred")
         g.rect(5, 6 + b, 22, 2, "brown")
         g.rect(16, 7 + b, 10, 1, "dbrown")

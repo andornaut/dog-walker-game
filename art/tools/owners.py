@@ -10,7 +10,7 @@ expressions go. Left and right are the viewer's.
 face-owner-<dog>-20: 20x20, the same owner and tags for the walk's dog card. The hair, clothes and props
 are the 32x32 drawing rasterized at 20x20 by minis.Mini, with its own ink line; the expression is drawn
 natively at 20x20, one pixel per feature, and Tara's bun, Aunt Judy's ponytail, Gadget's collar points and
-Clare's fringe shade are redrawn by hand.
+hat's pinch and Clare's fringe shade are redrawn by hand.
 
 face-walker-<name>: 32x32 portraits for the walker picker. Tags: happy, neutral.
 
@@ -273,7 +273,8 @@ def tara(mood):
     for x in range(11, 22, 2):
         g.p(x, 27, "white")
     g.cel(16, 10, 9, 5, "navy", "ink", "dslate")
-    g.cel(16, 3.5, 5, 3.5, "navy", "ink", "dslate")
+    # the bun, round and narrower than the crown, from row 1, so the outline closes over it
+    g.cel(16, 4, 4.5, 3, "navy", "ink", "dslate")
     g.rect(8, 10, 2, 8, "navy")
     g.rect(22, 10, 2, 8, "navy")
     # amber drop earrings, two pixels long so they show, as on her figure
@@ -548,15 +549,19 @@ def judy_small_ponytail(g):
         g.g.p(17, y, "grey")
 
 
-def gadget_small_collar(g):
+def gadget_small(g):
     """His collar's points filled in against the neck at 20px, where the scaled points stop a pixel short and
-    leave a gap ringed in ink beside the jaw."""
+    leave a gap ringed in ink beside the jaw, and his hat's pinch dropped from the frame's top row into the
+    crown's, so the outline closes over it."""
     g.g.p(6, 15, "cream")
     g.g.p(13, 15, "tan")
+    for x in (9, 10):
+        g.g.px[0][x] = None
+        g.g.p(x, 1, "dbrown")
 
 
 # Fixes drawn after the scaled owner, for shapes that do not survive the scale.
-SMALL_FIXES = {"biscuit": clare_small_fringe, "penny": gadget_small_collar, "pierre": tara_small_bun,
+SMALL_FIXES = {"biscuit": clare_small_fringe, "penny": gadget_small, "pierre": tara_small_bun,
                "snowball": judy_small_ponytail}
 
 
