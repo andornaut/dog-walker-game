@@ -777,7 +777,9 @@ NEWS_BOXES = ((3, 11, 11, "sky", "blue", "blue"), (26, 11, 12, "yellow", "amber"
 def news_box_front(g, x, w, top, body, shade, bar):
     """One vending box standing on the pad (its foot on row 35): a lid lit along its top, a white masthead
     band with an unreadable bar, a window onto a folded paper, a coin panel with its slot and a pull
-    handle (left off below obstacles.TEXTURE_MIN), a coal plinth, the body shaded down its right."""
+    handle, a coal plinth, the body shaded down its right. Below obstacles.TEXTURE_MIN the paper shows only
+    its headline and the handle is left off, so the small steps keep a white page in each window."""
+    fine = scale_of(g) >= obstacles.TEXTURE_MIN
     g.rect(x, top, w, 35 - top, body)
     g.rect(x + w - 2, top, 2, 35 - top, shade)
     # the lid, overhanging a pixel each side
@@ -790,13 +792,14 @@ def news_box_front(g, x, w, top, body, shade, bar):
     g.rect(x + 1, top + 6, w - 3, 8, "navy")
     g.rect(x + 2, top + 7, w - 5, 6, "white")
     g.rect(x + 2, top + 7, w - 5, 1, "ink")
-    g.rect(x + 2, top + 9, 3, 2, "red" if body == "sky" else "sky")
-    g.rect(x + 6, top + 9, w - 9, 1, "grey")
-    g.rect(x + 2, top + 11, w - 5, 1, "grey")
+    if fine:
+        g.rect(x + 2, top + 9, 3, 2, "red" if body == "sky" else "sky")
+        g.rect(x + 6, top + 9, w - 9, 1, "grey")
+        g.rect(x + 2, top + 11, w - 5, 1, "grey")
     # the coin panel, its slot, and the pull handle beside it
     g.rect(x + w - 6, top + 15, 3, 3, "lgrey")
     g.rect(x + w - 5, top + 15.5, 1, 2, "ink")
-    if scale_of(g) >= obstacles.TEXTURE_MIN:
+    if fine:
         g.rect(x + 2, top + 16, 3, 1, "lgrey")
     # the plinth
     g.rect(x, 33, w, 2, "coal")
