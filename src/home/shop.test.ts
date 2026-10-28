@@ -356,8 +356,17 @@ describe("a shop row's text", () => {
     expect(offenders).toEqual([]);
   });
 
-  // A tab's names share one size, so each name, a dog's, a gear item's or a slot's, fits at 2x.
-  it.each(rows.map((row) => [row.name, row.id, row] as const))(
+  // A tab's names share one size, so each name, a dog's, a gear item's or a slot's, fits at 2x:
+  // each row for sale or owned, whichever leaves its name the least room.
+  const tightest = rows.filter((row) =>
+    rows.every(
+      (other) =>
+        other.id !== row.id ||
+        rightWidth(other) < rightWidth(row) ||
+        (rightWidth(other) === rightWidth(row) && rows.indexOf(other) >= rows.indexOf(row)),
+    ),
+  );
+  it.each(tightest.map((row) => [row.name, row.id, row] as const))(
     "sets %j (%s) at 2x",
     (_name, _id, row) => {
       const room = shopRowTextRoom(SHOP_LAYOUT.row.scrollWidth, rightWidth(row));
