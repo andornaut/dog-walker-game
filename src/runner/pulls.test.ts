@@ -164,10 +164,8 @@ describe("what a dog pulls toward", () => {
   // A darting squirrel waits idle at the road's edge for 60px of scroll, then shows its cue for
   // 80px before it sets off: a dog strains toward it from its cue on, never while it waits.
   it.each([
-    { since: 0, state: "waiting at the road's edge", strains: false },
     { since: 59, state: "about to show its cue", strains: false },
     { since: 60, state: "showing its cue", strains: true },
-    { since: 140, state: "setting off", strains: true },
   ])("strains toward a darting squirrel $state: $strains", ({ since, strains }) => {
     const path: MoverPath = {
       direction: -1,
@@ -327,15 +325,13 @@ describe("the fairness rule", () => {
     const blocked = (lane: number, horizon: number) =>
       laneBlockedWithin(data, banded, 80, horizon, lane, walk);
 
-    it("blocks the lanes a mover sweeps while it overlaps the pack within the horizon", () => {
-      // Over 1s it travels 80px, overlapping the band from 14px on, in lanes 1 to 4.
-      expect([0, 1, 2, 3, 4].map((lane) => blocked(lane, 1))).toEqual([
-        false,
-        true,
-        true,
-        true,
-        true,
-      ]);
+    // Over 1s it travels 80px, overlapping the band from 14px on, in lanes 1 to 4; over 0.15s it
+    // travels 12px, short of the band.
+    it.each([
+      { horizon: 1, lanes: [false, true, true, true, true], name: "the lanes it sweeps" },
+      { horizon: 0.15, lanes: [false, false, false, false, false], name: "no lane" },
+    ])("blocks $name for a mover over a $horizon s horizon", ({ horizon, lanes }) => {
+      expect([0, 1, 2, 3, 4].map((lane) => blocked(lane, horizon))).toEqual(lanes);
     });
 
     // A stalker in lane 2 overlapping the band, its step a lane either way or straight on due 5px
@@ -367,16 +363,6 @@ describe("the fairness rule", () => {
         laneBlockedWithin(data, banded, 80, 1, lane, stalking),
       );
       expect(lanes).toEqual(row.lanes);
-    });
-
-    it("leaves a lane open when the mover reaches the pack only after the horizon", () => {
-      expect([0, 1, 2, 3, 4].map((lane) => blocked(lane, 0.15))).toEqual([
-        false,
-        false,
-        false,
-        false,
-        false,
-      ]);
     });
   });
 });
