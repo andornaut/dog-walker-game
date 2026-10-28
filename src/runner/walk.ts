@@ -450,6 +450,18 @@ function positiveWeights<Id extends string>(weights: Readonly<Record<Id, number>
     .filter(([, weight]) => weight > 0);
 }
 
+// The road's scroll speed in pixels per second: the zone's (walkScrollSpeed) at the road's
+// speedFactor.
+export function roadScrollSpeed(
+  data: Pick<GameData, "tuning" | "world">,
+  walk: {
+    readonly road: Pick<Road, "speedFactor">;
+    readonly run: Pick<RunState, "route" | "zoneIndex">;
+  },
+): number {
+  return walkScrollSpeed(data, walk.run) * walk.road.speedFactor;
+}
+
 // The minor obstacles that may appear in the run's current zone, with their weights.
 export function minorObstacleWeights(
   data: Pick<GameData, "world">,
@@ -1368,7 +1380,7 @@ export function stepWalk(
   let zoneDistance: number = run.zoneDistance;
   let zoneEnded = false;
   if (stepSeconds > 0) {
-    const step = walkScrollSpeed(data, run) * road.speedFactor * stepSeconds;
+    const step = roadScrollSpeed(data, walk) * stepSeconds;
     zoneEnded = !(step < length - zoneDistance);
     zoneDistance = zoneEnded ? length : zoneDistance + step;
   }

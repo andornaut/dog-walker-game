@@ -28,13 +28,13 @@ import {
   type WalkStep,
   zoneLength,
 } from "./walk";
-import { stepZoomies, type ZoomiesData } from "./zoomies";
+import { stepZoomies } from "./zoomies";
 
 // One walk's step order, shared by the run scene and the simulator: the inputs, the pulls, the
 // Zoomies' drift, the walk, the firing hold, then the queued cards, the zone's end and the next
 // zone's plan. The walk stands still while a card waits for its choice.
 
-export type SessionData = CardData & PullData & WalkData & ZoomiesData;
+export type SessionData = CardData & PullData & WalkData;
 
 // The run's random streams, each named from the seed, so a seed replays the same walk however
 // the walk is driven. Each zone is planned from streams of its own, spawns-<zone index> and

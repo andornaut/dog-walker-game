@@ -20,7 +20,7 @@ import type { RunSetup } from "../../dev/runSetup";
 import { expectedRoadMs, type ZoneClocks } from "../../dev/zoneClock";
 import { sessionRead, sessionRemove, sessionWrite } from "../../lib/sessionStore";
 import type { SessionInput } from "../../runner/session";
-import { type Walk, walkScrollSpeed, zoneLength } from "../../runner/walk";
+import { roadScrollSpeed, type Walk, zoneLength } from "../../runner/walk";
 
 // How a run starts: its setup, and the inputs that drive it when it replays a log.
 export interface RunStart {
@@ -111,7 +111,7 @@ export function emitDevState(
   if (walk === undefined || setup === undefined) {
     return;
   }
-  const scrollSpeed = walkScrollSpeed(gameData, walk.run) * walk.road.speedFactor;
+  const scrollSpeed = roadScrollSpeed(gameData, walk);
   const state: DevState = {
     run: walk.run,
     scrollSpeed,

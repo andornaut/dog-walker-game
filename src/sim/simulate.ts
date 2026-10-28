@@ -31,11 +31,11 @@ import {
   blocksLane,
   laneMoveSeconds,
   type RoadGeometry,
+  roadScrollSpeed,
   startRoad,
   type Walk,
   type WalkData,
   type WalkItemKind,
-  walkScrollSpeed,
   type WalkStep,
 } from "../runner/walk";
 import { packDogs } from "../state/pack";
@@ -335,12 +335,11 @@ function noteChoice(
 
 // What the bot reads of the road: its geometry for the pack and the zone's scroll speed.
 function botRoadOf(data: SimData, walk: Walk): BotRoad & { readonly pack: RunState["pack"] } {
-  const speed = walkScrollSpeed(data, walk.run) * walk.road.speedFactor;
   return {
     data,
     geometry: screenRoadGeometry(walk.run),
     pack: walk.run.pack,
-    speed,
+    speed: roadScrollSpeed(data, walk),
   };
 }
 

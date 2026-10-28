@@ -16,9 +16,9 @@ import {
   laneMoveSeconds,
   packBoxes,
   type RoadGeometry,
+  roadScrollSpeed,
   type Walk,
   type WalkItem,
-  walkScrollSpeed,
 } from "./walk";
 
 // Every dog pulls toward squirrels, and only toward squirrels. One dog strains at a time, the
@@ -259,12 +259,28 @@ export function pullHorizon(
   return move + read(data.tuning, "seconds", "pullReactionWindow") + move;
 }
 
+// Whether a lane has an obstacle too close to react to once the pack is pulled or drifts into it:
+// one reaching the pack within pullHorizon at the road's speed (laneBlockedWithin).
+export function laneBlockedForPull(
+  data: PullData,
+  geometry: PullGeometry,
+  lane: number,
+  walk: Walk,
+): boolean {
+  return laneBlockedWithin(
+    data,
+    geometry,
+    roadScrollSpeed(data, walk),
+    pullHorizon(data, walk),
+    lane,
+    walk,
+  );
+}
+
 // Whether the lane a strain would pull into has an obstacle too close to react to.
 function pullBlocked(data: PullData, geometry: PullGeometry, strain: Strain, walk: Walk): boolean {
   const lane = destinationLane(walk.road.control.motion) + strain.direction;
-  const speed = walkScrollSpeed(data, walk.run) * walk.road.speedFactor;
-  const horizon = pullHorizon(data, walk);
-  return laneBlockedWithin(data, geometry, speed, horizon, lane, walk);
+  return laneBlockedForPull(data, geometry, lane, walk);
 }
 
 const NOTHING = { failed: [], leashed: [], pulled: [], tells: [] } as const;

@@ -1,9 +1,8 @@
-import type { GameData } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { read } from "../rules/units";
 import { SECONDS_EPSILON } from "./fixedStep";
-import { laneBlockedWithin, type PullGeometry, pullHorizon } from "./pulls";
-import { steerWalk, type Walk, walkScrollSpeed } from "./walk";
+import { laneBlockedForPull, type PullData, type PullGeometry } from "./pulls";
+import { steerWalk, type Walk } from "./walk";
 
 // While the pack has the Zoomies, every seconds.zoomiesDriftSeconds of walking it drifts one
 // lane in the direction it last moved, toward the right before it has moved. Steering still
@@ -11,11 +10,6 @@ import { steerWalk, type Walk, walkScrollSpeed } from "./walk";
 // with that lane blocked, or past the road's edge, it turns and drifts the other way, and with
 // both closed it stays. The walk's own state and the seed decide every drift, so a replay
 // drifts alike.
-
-export type ZoomiesData = Pick<
-  GameData,
-  "debuffs" | "dogs" | "encounters" | "minorObstacles" | "tuning" | "walkers" | "world"
->;
 
 // seconds is the walking time since the last drift, or since the Zoomies began. drifted is the
 // way the pack drifted this step, or null.
@@ -31,21 +25,13 @@ export function hasZoomies(walk: Walk): boolean {
 
 // The way the pack drifts from its target lane: its heading, else the other way, or null when
 // it stays.
-function driftDirection(
-  data: ZoomiesData,
-  geometry: PullGeometry,
-  walk: Walk,
-): LaneDirection | null {
+function driftDirection(data: PullData, geometry: PullGeometry, walk: Walk): LaneDirection | null {
   const { control } = walk.road;
   const heading = control.heading ?? 1;
-  const speed = walkScrollSpeed(data, walk.run) * walk.road.speedFactor;
-  const horizon = pullHorizon(data, walk);
   const open = (direction: LaneDirection) => {
     const lane = control.target + direction;
     return (
-      lane >= 0 &&
-      lane < geometry.laneCount &&
-      !laneBlockedWithin(data, geometry, speed, horizon, lane, walk)
+      lane >= 0 && lane < geometry.laneCount && !laneBlockedForPull(data, geometry, lane, walk)
     );
   };
   if (open(heading)) {
@@ -59,7 +45,7 @@ function driftDirection(
 // clock runs, and each time it reaches zoomiesDriftSeconds the pack drifts a lane. Without
 // the debuff the clock rests at 0.
 export function stepZoomies(
-  data: ZoomiesData,
+  data: PullData,
   geometry: PullGeometry,
   stepSeconds: number,
   seconds: number,
