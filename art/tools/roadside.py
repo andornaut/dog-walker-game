@@ -188,7 +188,8 @@ def garden_car():
     """The Garden Car on Augusta Avenue from the front: an old rust sedan painted in patches of mural colour,
     round headlights either side of a chrome grille, sunflowers rising from the trunk behind, leaves inside its
     windshield, its roof and hood heaped with plants in flower and its wheels sunk in a bank of greenery, in
-    backdrops.garden_car's colours."""
+    backdrops.garden_car's colours but for its turquoise patch, a step lighter than the backdrop's dturq: a patch
+    in the paving's dturq reads as a hole through the car."""
     w, h = 72, 64
 
     def leaves(g, lobes):
@@ -220,7 +221,7 @@ def garden_car():
         g.rect(61, 26, 6, 3, "dbrown")
         # the front: a body in mural patches, round headlights, the grille and a chrome bumper
         g.rect(4, 32, 64, 16, "rust")
-        for x, y, ww, hh, c in ((4, 32, 14, 9, "gold"), (54, 32, 14, 9, "dturq"), (18, 41, 10, 7, "lilac"),
+        for x, y, ww, hh, c in ((4, 32, 14, 9, "gold"), (54, 32, 14, 9, "turquoise"), (18, 41, 10, 7, "lilac"),
                                 (44, 41, 10, 7, "moss"), (28, 32, 8, 2, "pink"), (40, 32, 6, 2, "gold")):
             g.rect(x, y, ww, hh, c)
         g.rect(65, 32, 3, 16, "dbrown")
