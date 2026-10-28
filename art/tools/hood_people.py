@@ -53,6 +53,18 @@ gardener            48x72   Cabbagetown; a slow rider coming down a lane at the 
                             road.BREATH with the barrow tipped forward onto its nose, the handles up at
                             the chest and a leaf or two over the lip; cue (4 frames, 200ms): righting
                             the barrow before a restart, tipped, halfway, level, then braced to push
+ranger-cart         48x72   High Park, 1 lane; a park ranger's small utility cart, a stop-and-go mover
+                            riding its lane at the player, facing it as pedicab does: a white roof on
+                            two posts with an amber light on top, a fan rake's head over the roof from
+                            the bed, a kraft paper bag of leaves behind the passenger seat, the ranger
+                            at the wheel in an olive uniform with a gold badge and a tan flat-brimmed
+                            campaign hat, a green cowl with two headlights and a white plate, a black
+                            bumper and the front tires under green fenders; push (4 frames, 100ms):
+                            the tread falling down the tires 1px a frame, the body dipping 1px onto
+                            them on frames 1 and 2; idle (4 frames, 400ms): stopped, the amber light
+                            flashing on frames 1 and 3 while the ranger looks left, then right; cue
+                            (4 frames, 120ms): restarting, the ranger's free hand raised pointing
+                            ahead, jabbing 1px higher on frames 1 and 3, the light flashing on 0 and 2
 
 Each has depth variants at every step in minis.STEPS (@94 to @50), redrawn at the
 step on a Mini at road.SCALE x the step, with the original's tags, frame counts
@@ -76,6 +88,7 @@ import minis  # noqa: E402
 import road  # noqa: E402
 from hazards import CYCLIST_RIDE, sway_rows  # noqa: E402
 from minis import STEPS, scaled, snap  # noqa: E402
+from obstacles import treads, unit  # noqa: E402
 from road import LIT, SCALE, face_disc, lean, rim, stair, swung  # noqa: E402
 
 # ---------- tourist: facing the player, a stepper like the mail carrier ----------
@@ -640,6 +653,135 @@ def gardener(lf=0, rf=0, bob=0, roll="0", tilt="0"):
     g.p(10, 17 + b, "pink")
     g.p(22, 17 + b, "pink")
     return rim(g, GARDENER_RIM)
+# ---------- ranger-cart: a park ranger's utility cart, facing the player, stop and go ----------
+
+# Driving: the front tires' tread falls 1px a frame and the body dips 1px onto them on frames 1 and 2; 4 frames
+# at 100ms, as every drive. Stopped: the amber light blinks while the ranger looks left, then right; 4 frames at
+# 400ms. Restarting: the ranger jabs a finger ahead, the light flashing; 4 frames at 120ms.
+RANGER_PUSH = [dict(roll=r) for r in range(4)]
+RANGER_PUSH_MS = 100
+RANGER_IDLE = (dict(), dict(light=1, look=-1), dict(), dict(light=1, look=1))
+RANGER_IDLE_MS = 400
+RANGER_CUE = (dict(point=1, light=1), dict(point=2), dict(point=1, light=1), dict(point=2))
+RANGER_CUE_MS = 120
+RANGER_RIM = {**LIT, "olive": ("moss", None), "dolive": ("olive", None)}
+
+
+def ranger_cart(roll=None, light=0, look=0, point=0):
+    """A park ranger's small utility cart coming down its lane at the pack, facing the player, laid out on
+    32x48 and drawn at road.SCALE as the pedicab is: a white roof on two posts with an amber light on top, the
+    ranger at the wheel on the cart's left (screen right) in an olive uniform and a tan flat-brimmed campaign
+    hat, a kraft paper bag of leaves standing in the bed behind the passenger seat and a fan rake's head over
+    the roof, the green cowl with two headlights and a white plate with a red maple leaf, a black bumper and
+    the front tires under their fenders. roll (0 to 3) is a drive frame: the tread falls down the tires (still
+    at rest) and the body dips 1px onto them on frames 1 and 2. light lights the amber beacon, look turns the
+    ranger's eyes (-1 screen left, 1 right) and point raises his free hand pointing ahead (2 a pixel higher)."""
+    g = edged(Grid(32, 48))
+    px = raster(g)
+    u = unit(g)[1]
+    # the front tires, front on under the fenders, their tread falling as they roll at the player
+    for x in (4.5, 27.5):
+        g.blob(x, 41.5, 3, 5.5, "ink")
+        g.rect(x - 2.5, 38, 1, 7, "dslate")
+        treads(g, x - 1, 37, 3, 9, roll or 0, u, back=True)
+    wheels = [row[:] for row in px.px]
+    px.px = [[None] * px.w for _ in range(px.h)]
+    dip = 1 if roll in (1, 2) else 0
+    # the rake standing in the bed, its fan head over the roof's left end: grey tines spreading from the
+    # handle's top, a clay handle down into the roof
+    g.tri((5, 4.5), (0.5, 0), (9.5, 0), "grey")
+    for k in range(4):
+        g.rect(2 + 2 * k, 0, 1, 1.5 + k % 2, None)
+    g.rect(4.5, 3, 1, 2, "clay")
+    # the amber light on the roof: a dome on a black base, lit yellow with a white core and two rays
+    g.rect(13.5, 4, 5, 1, "ink")
+    if light:
+        g.cel(16, 3, 2.5, 2, "yellow", "amber", "white")
+        g.p(12, 2, "yellow")
+        g.p(19, 2, "yellow")
+        g.p(15.5, 0, "yellow")
+    else:
+        g.cel(16, 3, 2.5, 2, "amber", "orange", "yellow")
+    # the roof: white, lit along its top, shaded down its right and along its underside
+    g.rect(1, 5, 30, 3, "white")
+    g.rect(27, 5, 4, 3, "lgrey")
+    g.rect(1, 7, 30, 1, "lgrey")
+    # the cab: the shade under the roof, the posts either side, the seat back across
+    g.rect(4, 8, 24, 18, "navy")
+    for x in (2.5, 27.5):
+        g.rect(x, 8, 2, 19, "dslate")
+        g.rect(x, 8, 1, 19, "slate")
+    # the kraft paper leaf bag in the bed behind the passenger seat (screen left), leaves over its rolled top
+    g.rect(5, 14, 7, 6, "tan")
+    g.rect(10, 14, 2, 6, "brown")
+    g.rect(5, 14, 1, 6, "cream")
+    g.rect(5, 14, 7, 1, "brown")
+    for x, y, c in ((5.5, 12.5, "orange"), (7.5, 12, "red"), (9.5, 12.5, "amber"), (6.5, 13, "rust"),
+                    (10, 13, "ochre")):
+        g.rect(x, y, 2, 1.5, c)
+    g.rect(4, 19, 24, 7, "dslate")
+    g.rect(4, 19, 24, 1, "slate")
+    # the ranger at the wheel (screen right): olive shoulders, a collar and a gold badge
+    g.cel(20, 23.5, 6.5, 4.5, "olive", "dolive", "moss", power=3)
+    g.rect(18, 19.5, 4, 1.5, "skin2")
+    g.rect(18.5, 20, 1, 1.5, "dolive")
+    g.rect(20.5, 20, 1, 1.5, "dolive")
+    g.rect(16, 22, 1.5, 1.5, "gold")
+    # his free hand (screen left): on the wheel, or raised over the leaf bag pointing ahead, a pixel higher
+    # on point 2
+    if point:
+        n = point - 1
+        for k in range(5):
+            g.rect(13.5 - 0.8 * k, 19.5 - 1.6 * k - n, 2.5, 2.5, "olive")
+        g.rect(13.5, 19.5 - n, 1, 2.5, "dolive")
+        g.rect(9.5, 10 - n, 3, 3, "skin1")
+        g.rect(11.5, 10 - n, 1, 3, "skin2")
+        g.rect(10, 8.5 - n, 1.5, 1.5, "skin1")
+    # the steering wheel edge on in front of his chest, his hands on its rim, the column down into the dash
+    g.rect(14.5, 24.5, 11, 1.5, "ink")
+    g.rect(19.5, 26, 1, 1, "ink")
+    for x in (14, 23.5):
+        if x == 14 and point:
+            continue
+        g.rect(x, 23.5, 2.5, 2.5, "skin1")
+        g.rect(x + 1.5, 23.5, 1, 2.5, "skin2")
+    # his face under the campaign hat: a tan crown pinched to a peak, a brown band, the flat brim
+    face_disc(g, 20, 15.5, 4.5, 4.5, "skin1", "skin2")
+    road.face_front(g, 20 + look, 15, spread=2.5, mouth=3)
+    g.rect(17, 9, 6, 3, "tan")
+    g.rect(18, 8, 4, 1, "tan")
+    g.rect(17, 9, 1, 2, "cream")
+    g.rect(22, 9, 1, 2, "brown")
+    g.rect(16.5, 11, 7, 1, "dbrown")
+    g.rect(13.5, 12, 13, 1.5, "tan")
+    g.rect(23.5, 12, 3, 1.5, "brown")
+    g.rect(13.5, 13, 13, 0.75, "brown")
+    # the cowl: green, lit along its top, shaded down its right, over the dash
+    g.rect(3, 26, 26, 2, "dgreen")
+    g.rect(3, 26, 26, 1, "green")
+    g.rect(3.5, 28, 25, 7, "green")
+    g.rect(3.5, 28, 25, 1, "lime")
+    g.rect(25, 28, 3.5, 7, "dgreen")
+    g.rect(5, 34, 22, 1, "dgreen")
+    for x in (3.5, 27.5):
+        g.p(x, 28, None)
+    # the fenders over the tires
+    for x in (1, 24.5):
+        g.rect(x, 35, 6.5, 2.5, "green")
+        g.rect(x, 37, 6.5, 0.75, "dgreen")
+    g.rect(29, 35, 2.5, 2.5, "dgreen")
+    # the headlights and the white Ontario plate, its number in blue
+    for x in (8.5, 23.5):
+        g.cel(x, 31, 2.2, 2.2, "white", "lgrey")
+    g.rect(13, 30.5, 6, 3.5, "white")
+    g.rect(13, 33, 6, 1, "lgrey")
+    g.rect(14, 31.5, 4, 1, "blue")
+    # the black bumper between the fenders
+    g.rect(8, 35, 16, 2, "ink")
+    g.rect(8, 35, 16, 1, "dslate")
+    body = px.px
+    px.px = [[(body[y - dip][x] if y >= dip else None) or wheels[y][x] for x in range(px.w)] for y in range(px.h)]
+    return rim(g, RANGER_RIM)
 
 
 # ---------- every sprite at a depth step ----------
@@ -675,6 +817,9 @@ def steps(suffix, s):
     yield f"gardener{suffix}", [("push", [own(gardener, q) for q in GARDENER_PUSH], GARDENER_PUSH_MS),
                                 ("idle", [own(gardener, q) for q in GARDENER_IDLE], road.BREATH_MS),
                                 ("cue", [own(gardener, q) for q in GARDENER_CUE], GARDENER_CUE_MS)]
+    yield f"ranger-cart{suffix}", [("push", [own(ranger_cart, q) for q in RANGER_PUSH], RANGER_PUSH_MS),
+                                   ("idle", [own(ranger_cart, q) for q in RANGER_IDLE], RANGER_IDLE_MS),
+                                   ("cue", [own(ranger_cart, q) for q in RANGER_CUE], RANGER_CUE_MS)]
 
 
 def sprites():
