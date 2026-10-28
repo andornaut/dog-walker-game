@@ -105,7 +105,7 @@ export function dogDetail(data: DetailData, owned: Owned, bank: Cents, dog: DogI
         size: capitalize(SIZE_NAMES[size]),
       }),
       ...sizeRow(data, dog),
-      fillLine(FIELDS, text, "dogOwner", { owner: owner.name, role: owner.role }),
+      fillLine(FIELDS, text, "dogOwner", { role: owner.role }),
     ],
     locked: isLocked(data, owned, bank, purchase),
     owner: dog,

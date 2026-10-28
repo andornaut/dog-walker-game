@@ -90,6 +90,7 @@ const KEY_FUNCTIONS: Readonly<Record<string, () => readonly string[]>> = {
   isPauseKey: none,
   laneDirectionForKey: none,
   onKey: none,
+  ownerCardFaceKey: () => dogs.map((dog) => spriteKeys.ownerCardFaceKey(gameData, dog)),
   ownerFaceKey: () => dogs.map((dog) => spriteKeys.ownerFaceKey(gameData, dog)),
   ownerSpriteKey: () => dogs.map((dog) => ownerSpriteKey(gameData, dog)),
   perkIconKey: keysStarting("icon-perk-"),
