@@ -97,15 +97,16 @@ def fanny_pack(g):
     g.rect(0.4, 5, 2.2, 3.6, "ink")
     g.rect(1, 5.8, 1, 2, "slate")
     # the pouch, lit along its top
-    g.blob(8, 8.8, 5.4, 4.4, "dgreen", "forest", "green", power=3)
+    g.blob(8, 9, 5.4, 4.4, "dgreen", "forest", "green", power=3)
     g.rect(2.8, 4.6, 10.4, 3, "dgreen")
     g.rect(3.4, 4.6, 9.2, 0.8, "green")
     # the zip and its pull
     g.rect(3.6, 6.4, 8.8, 0.8, "ink")
     g.rect(11.4, 6.4, 0.8, 2.6, "ink")
-    # the logo patch
+    # the logo patch, its navy mark only where it has room, so it never splits into two white dots
     g.rect(4.4, 9.4, 3, 1.6, "white")
-    g.rect(5, 10, 1.8, 0.6, "navy")
+    if getattr(g, "s", 1) >= 1.5:
+        g.rect(5, 10, 1.8, 0.6, "navy")
 
 
 def hall_pass(g):

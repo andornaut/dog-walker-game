@@ -270,6 +270,7 @@ def _(g):
     g.ell(12, 13, 4, 2.5, "dgreen", "forest")
     g.rect(8, 9, 8, 1, "green")
     g.rect(9, 11, 6, 1, "ink")
+    g.rect(14, 12, 1, 1, "ink")
     g.rect(9, 13, 2, 1, "white")
     g.ell(21, 10, 5, 4, "red", "dred")
     g.ell(21, 9.5, 3, 2, None)
