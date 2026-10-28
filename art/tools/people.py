@@ -3,8 +3,8 @@
 
 owner-<dog>: 32x48, chibi, front view, in the house palette with the road outline
 and the lit rim, like the forced-stop people in road.py. Each owner's hair, skin
-and clothes match their face-owner-<dog> portrait in owners.py, and their job
-shows in a prop held in the left hand. They stand at the gate on the
+and clothes match their face-owner-<dog> portrait in owners.py, and all but
+Eve hold a prop for their job in the left hand. They stand at the gate on the
 start screen before the first walk and wave the pack home on the end screen.
 Tags: idle (2 frames at 400ms: they breathe, the body 1px higher on the second
 with the feet planted) and wave (2 frames at 300ms: the right arm raised, the
@@ -85,8 +85,8 @@ def cheeks(g, b, c="pink"):
 def eve_top(wave):
     """Eve, social media influencer, dramatic: really small, her head and body drawn 6 rows lower than the
     others' over shorter legs, and slighter, with a narrower torso and arms. Long blonde hair past the shoulders
-    with a swept fringe, gold hoop earrings, a bright pink puffer jacket over a white top, a denim-blue skirt, white
-    sneakers, and her phone held up in her left hand for a selfie, its camera to the viewer."""
+    with a swept fringe, gold hoop earrings, a bright pink puffer jacket over a white top, a denim-blue skirt and white
+    sneakers, her hands empty."""
     def top(g, b):
         # the skirt, flared at the hem
         g.rect(10, 34 + b, 12, 4, "blue")
@@ -130,18 +130,13 @@ def eve_top(wave):
             g.rect(26, 19 + b, 1, 4, "mauve")
             g.rect(25, 16 + b, 3, 3, "skin1")
             g.p(24, 17 + b, "skin1")
+        # the left arm hanging, as narrow as the right
+        g.rect(7, 26 + b, 3, 6, "pink")
+        g.rect(9, 26 + b, 1, 6, "mauve")
+        g.rect(7, 32 + b, 3, 2, "skin1")
         # the ends falling over the shoulders, in front of the arms
         g.rect(9, 24 + b, 2, 5, "yellow")
         g.rect(22, 24 + b, 2, 5, "amber")
-        # the left arm raised, bent at the elbow, the phone held up in the fist
-        g.rect(7, 22 + b, 3, 5, "pink")
-        g.rect(5, 18 + b, 3, 5, "pink")
-        g.rect(7, 18 + b, 1, 5, "mauve")
-        g.rect(3, 8 + b, 5, 8, "hot")
-        g.rect(7, 8 + b, 1, 8, "dred")
-        g.rect(4, 9 + b, 2, 2, "ink")
-        g.p(4, 9 + b, "white")
-        g.rect(4, 15 + b, 4, 3, "skin1")
     return top
 
 
