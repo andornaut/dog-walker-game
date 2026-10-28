@@ -27,6 +27,7 @@ roadside-hot-dog-stand   90x126   a red park kiosk under a flat white roof, a ho
 roadside-ice-cream-stand 90x126   a foam beach kiosk under a flat turquoise roof, a soft-serve cone on top
 roadside-leuty           96x156   the Leuty Lifeguard Station on driftwood stilts
 roadside-love-lock       78x90    the Distillery's red steel heart of padlocks on a post
+roadside-mural-wall      120x96   a Kensington brick wall between piers, painted with a dog's face and tags
 roadside-street-lamp     60x180   a downtown street light, an arm each way, lit gold beneath
 roadside-transit-stop    42x150   a TTC stop pole with its sign and a timetable box
 roadside-tree-maple      114x156  a street maple in lobes over a trunk
@@ -65,6 +66,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
+from backdrops import MURAL  # noqa: E402
 from minis import STEPS, Mini, scaled  # noqa: E402
 from pixel import K, dk, edged, main, raster, scale_of  # noqa: E402
 
@@ -339,6 +341,78 @@ def love_lock():
                           (25, 27, "pink"), (18, 26, "amber"), (30, 31, "lgrey"), (25, 15, "amber")):
             g.rect(x, y + 1, 3, 3, col)
             g.rect(x + 1, y, 1, 1, "grey")
+    return w, h, draw
+
+
+def mural_wall():
+    """A Kensington Market mural wall: a free-standing brick wall between two piers capped in stone, its face
+    painted under a walnut coping as the backdrop's laneway murals are, in diagonal bands of their paint
+    with a cartoon dog's face looking out of them, its tongue out, tags sprayed round it, and the paint stopping short of
+    a stone footing, bare brick below."""
+    w, h = 80, 64
+    x0, x1, top, paint = 11, 69, 9, 52
+
+    def bands(x, y):
+        if x0 <= x < x1 and top <= y < paint:
+            return MURAL[int((x - x0 + y) // 6) % len(MURAL)]
+        return None
+
+    def draw(g, f=0):
+        base = h - 2
+        # the wall: brick courses between the piers, the footing under them
+        g.rect(x0, top, x1 - x0, base - 3 - top, "brick")
+        for y in range(paint + 2, base - 3, 3):
+            g.rect(x0, y, x1 - x0, 1, "dbrick")
+        for x in (3, 69):
+            walls(g, x, 8, 6, base - 3, "brick")
+            for y in range(9, base - 3, 4):
+                g.rect(x, y, 8, 1, "dbrick")
+            g.rect(x - 1, 3, 10, 3, "stone")
+            g.rect(x - 1, 3, 10, 1, "lgrey")
+            g.rect(x + 7, 3, 2, 3, "dstone")
+        g.rect(2, base - 3, 76, 4, "stone")
+        g.rect(2, base - 3, 76, 1, "lgrey")
+        g.rect(74, base - 3, 4, 4, "dstone")
+        field(g, bands)
+        g.rect(x0, top - 2, x1 - x0, 2, "walnut")
+        # drips of paint run onto the bare brick
+        for x, n, c in ((16, 3, "dred"), (31, 2, "olive"), (47, 4, "violet"), (60, 2, "ochre")):
+            g.rect(x, paint, 1, n, c)
+        # the dog: a cream face outlined in coal, a brown ear flopped down each side, a brown patch round
+        # its right eye, a white muzzle, a coal nose and its tongue out
+        cx, cy = 40, 29
+        g.ell(cx, cy, 13, 12, "coal")
+        for s in (-1, 1):
+            g.ell(cx + s * 13, cy - 1, 5.5, 9.5, "coal")
+        g.ell(cx, cy, 11.5, 10.5, "cream")
+        for s in (-1, 1):
+            g.ell(cx + s * 13, cy - 1, 4, 8, "brown")
+        g.ell(cx + 5, cy - 4, 4, 4, "brown")
+        g.ell(cx, cy + 5, 7, 4.5, "white")
+        for s in (-1, 1):
+            g.rect(cx + s * 5 - 1, cy - 5, 3, 3, "coal")
+            g.rect(cx + s * 5 - 1, cy - 5, 1, 1, "white")
+        g.ell(cx, cy + 2, 3, 2, "coal")
+        g.rect(cx, cy + 4, 1, 3, "coal")
+        g.rect(cx - 3, cy + 7, 7, 1, "coal")
+        g.ell(cx + 0.5, cy + 11, 3.5, 4, "coal")
+        g.ell(cx + 0.5, cy + 10.5, 2.5, 3, "pink")
+        g.rect(cx, cy + 8, 1, 4, "mauve")
+        # the tags: white scrawls top left, a gold crown top right, a lime lightning bolt with a coal drop shadow low left
+        # and a pink heart low right
+        for x, y in ((14, 13), (19, 15)):
+            g.rect(x, y, 4, 1, "white")
+            g.rect(x, y, 1, 4, "white")
+            g.rect(x + 3, y + 3, 3, 1, "white")
+        g.rect(57, 14, 8, 3, "gold")
+        for x in (57, 60.5, 64):
+            g.tri((x - 1, 14), (x + 1, 14), (x, 11), "gold")
+        for d, c in ((1, "coal"), (0, "lime")):
+            g.tri((23 + d, 36 + d), (16 + d, 43 + d), (22 + d, 43 + d), c)
+            g.tri((19 + d, 41 + d), (26 + d, 41 + d), (17 + d, 49 + d), c)
+        g.ell(57.5, 44, 2, 2, "pink")
+        g.ell(61.5, 44, 2, 2, "pink")
+        g.tri((55.5, 44.5), (63.5, 44.5), (59.5, 49), "pink")
     return w, h, draw
 
 
@@ -714,6 +788,7 @@ PROPS = {
     "roadside-ice-cream-stand": (ice_cream_stand(), (0,), STILL_MS, True),
     "roadside-love-lock": (love_lock(), (0,), STILL_MS, True),
     "roadside-leuty": (leuty(), (0,), STILL_MS, True),
+    "roadside-mural-wall": (mural_wall(), (0,), STILL_MS, True),
     **{f"roadside-beach-umbrella-{c}": (beach_umbrella(c), (0,), STILL_MS, True) for c in BEACH_STRIPES},
     **{f"roadside-beach-chair-{c}": (beach_chair(c), (0,), STILL_MS, True) for c in BEACH_STRIPES},
     "roadside-cafe-patio": (cafe_patio(), (0,), STILL_MS, True),

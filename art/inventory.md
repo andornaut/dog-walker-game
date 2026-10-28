@@ -186,6 +186,7 @@ Placed by the style guide's Roadside table (`shared/roadside.json`): the lawn pr
 | `roadside-ice-cream-stand`            | 90×126  | A foam beach kiosk, a soft-serve cone on its roof                |
 | `roadside-leuty`                      | 96×156  | The Leuty Lifeguard Station                                      |
 | `roadside-love-lock`                  | 78×90   | The Distillery's heart of padlocks on a plinth                   |
+| `roadside-mural-wall`                 | 120×96  | A Kensington brick wall painted with a dog's face and tags       |
 | `roadside-street-lamp`                | 60×180  | A downtown street light, lit both ways                           |
 | `roadside-transit-stop`               | 42×150  | A TTC stop pole                                                  |
 | `roadside-tree-maple`                 | 114×156 | A street maple                                                   |

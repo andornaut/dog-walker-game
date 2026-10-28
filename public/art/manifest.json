@@ -8676,6 +8676,87 @@
       }
     },
     {
+      "key": "roadside-mural-wall",
+      "png": "sprites/roadside-mural-wall.png",
+      "json": "sprites/roadside-mural-wall.json",
+      "anchor": {
+        "feetY": 95,
+        "opaqueWidth": 116
+      }
+    },
+    {
+      "key": "roadside-mural-wall@50",
+      "png": "sprites/roadside-mural-wall@50.png",
+      "json": "sprites/roadside-mural-wall@50.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 58
+      }
+    },
+    {
+      "key": "roadside-mural-wall@56",
+      "png": "sprites/roadside-mural-wall@56.png",
+      "json": "sprites/roadside-mural-wall@56.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "roadside-mural-wall@62",
+      "png": "sprites/roadside-mural-wall@62.png",
+      "json": "sprites/roadside-mural-wall@62.json",
+      "anchor": {
+        "feetY": 59,
+        "opaqueWidth": 73
+      }
+    },
+    {
+      "key": "roadside-mural-wall@69",
+      "png": "sprites/roadside-mural-wall@69.png",
+      "json": "sprites/roadside-mural-wall@69.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 80
+      }
+    },
+    {
+      "key": "roadside-mural-wall@75",
+      "png": "sprites/roadside-mural-wall@75.png",
+      "json": "sprites/roadside-mural-wall@75.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 87
+      }
+    },
+    {
+      "key": "roadside-mural-wall@81",
+      "png": "sprites/roadside-mural-wall@81.png",
+      "json": "sprites/roadside-mural-wall@81.json",
+      "anchor": {
+        "feetY": 77,
+        "opaqueWidth": 94
+      }
+    },
+    {
+      "key": "roadside-mural-wall@88",
+      "png": "sprites/roadside-mural-wall@88.png",
+      "json": "sprites/roadside-mural-wall@88.json",
+      "anchor": {
+        "feetY": 83,
+        "opaqueWidth": 101
+      }
+    },
+    {
+      "key": "roadside-mural-wall@94",
+      "png": "sprites/roadside-mural-wall@94.png",
+      "json": "sprites/roadside-mural-wall@94.json",
+      "anchor": {
+        "feetY": 89,
+        "opaqueWidth": 109
+      }
+    },
+    {
       "key": "roadside-street-lamp",
       "png": "sprites/roadside-street-lamp.png",
       "json": "sprites/roadside-street-lamp.json",
