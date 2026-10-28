@@ -44,6 +44,8 @@ import {
   ownerNameLines,
   ownerPhotoRect,
   ownerTabRect,
+  SPARE_TREAT_PIP,
+  spareTreatPipAt,
   TITLE_CAP_ROWS,
   WALK_BAR,
   WALK_BAR_BUTTONS,
@@ -129,6 +131,8 @@ describe("the walk bar", () => {
       const { icon, iconSize } = WALK_BAR.effects;
       const art = { height: iconSize, width: iconSize, x: well.x + icon, y: well.y + icon };
       expect(inside(art, well)).toBe(true);
+      const { size } = SPARE_TREAT_PIP;
+      expect(inside({ height: size, width: size, ...spareTreatPipAt(well) }, art)).toBe(true);
     }
     BAR.effectWells.forEach((well, i) => {
       const hold = BAR.effectHolds[i];

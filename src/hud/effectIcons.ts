@@ -3,8 +3,9 @@ import type { GameData, GearId, UpgradeId, WalkerId, WalkerPerkId } from "../dat
 import { gearSourceName } from "../rules/causes";
 import { gearShort, perkEffect } from "../rules/effectText";
 import { walkLength } from "../rules/route";
+import { spareTreatSource } from "../rules/spareTreats";
 import { read } from "../rules/units";
-import type { RunState } from "../state/runState";
+import type { EffectSource, RunState } from "../state/runState";
 
 // An effect in force on the walk, shown as an icon in the walk bar's effect wells. Holding one
 // explains it. A gear drop's charm is its gear, found, which has no well of its own.
@@ -132,6 +133,25 @@ export function effectLine(
 // The 20x20 icon each item shows in the walk bar's effect wells: its 16x16 key and -20.
 export function walkBarIconKey(item: EffectItem): string {
   return `${effectIconKey(item)}-20`;
+}
+
+// The index among items, the walk's effectItems, of the gear source names, whose well shows it;
+// -1 for none, or a source that is no gear.
+export function gearWell(items: readonly EffectItem[], source: EffectSource | undefined): number {
+  if (source?.kind !== "gear") {
+    return -1;
+  }
+  const key = effectIconKey(source);
+  return items.findIndex((item) => effectIconKey(item) === key);
+}
+
+// The index among items of the gear holding a spare treat, such as the Fanny pack, whose well
+// shows it; -1 with none held.
+export function spareTreatWell(
+  items: readonly EffectItem[],
+  run: Pick<RunState, "modifiers" | "spareTreats">,
+): number {
+  return run.spareTreats.held === 0 ? -1 : gearWell(items, spareTreatSource(run));
 }
 
 export function effectItemsKey(items: readonly EffectItem[]): string {

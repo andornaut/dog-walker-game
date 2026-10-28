@@ -17,6 +17,9 @@ export const FIRING_EVENT = "firing";
 export const FORGIVEN_EVENT = "heart-forgiven";
 export const PAYOUT_EVENT = "payout";
 export const TREAT_EVENT = "treat-grabbed";
+// A spare treat given back (SpareTreatCue): it flies from its gear's well to the dog's card,
+// then plays as a treat grabbed.
+export const SPARE_TREAT_EVENT = "spare-treat";
 
 // seconds is how long the firing holds the walk.
 export interface FiringCue {
@@ -44,6 +47,12 @@ export interface TreatCue {
   labels: ChangeLabel[];
 }
 
+// well is the index of the walk bar's effect well it flies from (spareTreatWell), or -1 for
+// none, where it plays as a treat grabbed at once.
+export interface SpareTreatCue extends TreatCue {
+  well: number;
+}
+
 export const MOMENTS = {
   // The firing moment: the owner's face pops in over popMs and the "FIRED!" plate drops in over
   // plateMs as the hold starts, and the face, pop, plate and fired line fade out over fadeMs.
@@ -55,6 +64,9 @@ export const MOMENTS = {
   // pixels right of the straight line, and takes flightMs to reach the bank; the amount rises
   // from the header and fades over chipMs.
   payout: { bow: 48, chipMs: 900, flightMs: 650, roof: { x: 60, y: 10 }, staggerMs: 200 },
+  // A spare treat given back flies from its gear's well to its dog's face on the card over
+  // flyMs, peaking about peak pixels over the well.
+  spareTreat: { flyMs: 500, peak: 12 },
   // The owner smiles this long over a treat grabbed.
   treat: { smileMs: 900 },
 } as const;

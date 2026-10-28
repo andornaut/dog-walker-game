@@ -8,6 +8,7 @@ import type { DogId } from "../data/types";
 import { type MoneyTick, retarget, tickShown } from "../hud/feedback";
 import type { ChangeLabel } from "../hud/hudView";
 import {
+  arcControl,
   bowRightControl,
   downTail,
   FIRED_LINE,
@@ -32,6 +33,8 @@ import {
   type PayoutFlight,
   payoutFlights,
   payoutTagTop,
+  SPARE_TREAT_EVENT,
+  type SpareTreatCue,
   TOP_BAR_POINTS,
   TREAT_EVENT,
   type TreatCue,
@@ -75,6 +78,7 @@ const PAYOUT_LABEL = { cap: 8, inkX: 9, inkY: 3, key: "ui-payout-label" };
 const PAYOUT_LABEL_END = 5;
 const COIN = { key: "fx-coin-fly", tag: "spin" };
 const TREAT_POP = { fallback: "fx-sparkle", key: "fx-treat-pop", tag: "play" };
+const SPARE_TREAT_ICON = "icon-treat";
 const RIM = { minAlpha: 0.35, pulseMs: 600, width: 2 };
 
 interface FiredLine {
@@ -83,10 +87,19 @@ interface FiredLine {
   text: string;
 }
 
-// The callbacks the HUD gives the moments: floatLabels shows change labels, popping a heart
-// change's owner in for ownerMs, firingShown runs once a firing moment is on screen, and
-// popOwner pops a dog's owner in on its card, in a mood, for ms.
+// The centre of the dog's face on the card in rect, its 32x32 face at 1x.
+function dogFaceCentre(rect: Rect): Point {
+  const half = FACE.size / 2;
+  const { dogFace } = DOG_CARD;
+  return { x: rect.x + dogFace.x + half, y: rect.y + dogFace.y + half };
+}
+
+// The callbacks the HUD gives the moments: effectWell is the walk bar's effect well at an index,
+// floatLabels shows change labels, popping a heart change's owner in for ownerMs, firingShown
+// runs once a firing moment is on screen, and popOwner pops a dog's owner in on its card, in a
+// mood, for ms.
 interface HudFeedbackHooks {
+  effectWell: (index: number) => Rect | undefined;
   firingShown: () => void;
   floatLabels: (ownerMs: number, labels: ChangeLabel[]) => void;
   popOwner: (dog: DogId, mood: string, ms: number) => void;
@@ -142,6 +155,9 @@ export class HudFeedback {
     onSceneEvent(scene, run.events, FIRING_EVENT, (cue: FiringCue) => this.playFiring(cue));
     onSceneEvent(scene, run.events, PAYOUT_EVENT, (cues: PayoutCue[]) => this.playPayout(cues));
     onSceneEvent(scene, run.events, TREAT_EVENT, (cue: TreatCue) => this.playTreat(cue));
+    onSceneEvent(scene, run.events, SPARE_TREAT_EVENT, (cue: SpareTreatCue) =>
+      this.playSpareTreat(cue),
+    );
   }
 
   update(run: RunState, pause: RunPause): void {
@@ -509,6 +525,32 @@ export class HudFeedback {
       .setDepth(HUD_DEPTH.moment + 1);
   }
 
+  // A spare treat given back flies, as icon-treat, from its gear's well to the dog's face on its
+  // card, then plays as a treat grabbed. With reduced motion, or no well or card to fly between,
+  // it plays as a treat grabbed at once.
+  private playSpareTreat(cue: SpareTreatCue): void {
+    const rect = this.slotOf(cue.dog);
+    const well = this.hooks.effectWell(cue.well);
+    if (
+      rect === undefined ||
+      well === undefined ||
+      this.run.reducedMotion() ||
+      !this.scene.textures.exists(SPARE_TREAT_ICON)
+    ) {
+      this.playTreat(cue);
+      return;
+    }
+    const from = { x: well.x + well.width / 2, y: well.y + well.height / 2 };
+    const to = dogFaceCentre(rect);
+    const treat = this.scene.add.image(from.x, from.y, SPARE_TREAT_ICON);
+    treat.setDepth(HUD_DEPTH.moment + 1);
+    const { flyMs, peak } = MOMENTS.spareTreat;
+    this.fly(treat, { control: arcControl(from, to, peak), from, to }, flyMs, () => {
+      treat.destroy();
+      this.playTreat(cue);
+    });
+  }
+
   // A treat grabbed pops over the dog's face on its card, the owner pops in smiling and the
   // heart label floats.
   private playTreat(cue: TreatCue): void {
@@ -518,9 +560,7 @@ export class HudFeedback {
       this.hooks.floatLabels(smileMs, cue.labels);
       return;
     }
-    const half = FACE.size / 2;
-    const { dogFace } = DOG_CARD;
-    const at = { x: rect.x + dogFace.x + half, y: rect.y + dogFace.y + half };
+    const at = dogFaceCentre(rect);
     const key = this.scene.textures.exists(TREAT_POP.key) ? TREAT_POP.key : TREAT_POP.fallback;
     playEffect(this.scene, key, TREAT_POP.tag, at, HUD_DEPTH.moment);
     this.hooks.popOwner(cue.dog, "happy", smileMs);

@@ -12,6 +12,7 @@ import {
   effectItems,
   effectItemsKey,
   perkIconKey,
+  spareTreatWell,
 } from "../hud/effectIcons";
 import { explainDetail } from "../hud/explain";
 import { FEEDBACK } from "../hud/feedback";
@@ -60,6 +61,8 @@ import {
   leadSlot,
   ownerNameLines,
   slotShown,
+  SPARE_TREAT_PIP,
+  spareTreatPipAt,
   WALK_BAR,
   WALK_BAR_BUTTONS,
   type WalkBarButtonId,
@@ -226,6 +229,8 @@ export class HudScene extends Scene {
   private pauseGlyph: GameObjects.Graphics | undefined;
   private pauseIcon: GameObjects.Image | undefined;
   private soundHolder: GameObjects.Container | undefined;
+  // The spare treat held, shown in its gear's effect well.
+  private spareTreatPip: GameObjects.Sprite | undefined;
   private picture: HudWalk | undefined;
   private run: HudRun | undefined;
   private tip: ShowingTip | undefined;
@@ -254,6 +259,7 @@ export class HudScene extends Scene {
     this.drawn = {};
     this.debuffBars = [];
     this.effectParts = [];
+    this.spareTreatPip = undefined;
     this.tip = undefined;
     this.explained = NOT_EXPLAINED;
     this.messages = new MessageStrip();
@@ -315,6 +321,7 @@ export class HudScene extends Scene {
     const firingRects = () => this.feedback?.firingRects() ?? [];
     this.owners = new OwnerTabs(this, { group: this.labels, still: () => run.reducedMotion() });
     this.feedback = new HudFeedback(this, run, {
+      effectWell: (index) => BAR.effectWells[index],
       firingShown: () => this.hearts?.clearWay(),
       floatLabels: (ownerMs, labels) => this.floatLabels(ownerMs, labels),
       popOwner: (dog, mood, ms) => this.popOwner(dog, mood, ms),
@@ -529,6 +536,7 @@ export class HudScene extends Scene {
       pack: view.run.pack,
       pauseIcon: pauseButtonIcon(pause),
       route: view.run.route,
+      spareTreat: spareTreatWell(effects, view.run),
       zone: view.run.zoneIndex,
     };
     if (Object.keys(state).some((key) => state[key] !== this.drawn[key])) {
@@ -537,6 +545,9 @@ export class HudScene extends Scene {
       }
       if (state.effects !== this.drawn.effects) {
         this.showEffects(effects);
+      }
+      if (state.effects !== this.drawn.effects || state.spareTreat !== this.drawn.spareTreat) {
+        this.showSpareTreat(spareTreatWell(effects, view.run));
       }
       this.drawn = state;
       this.showPauseIcon(pause);
@@ -571,6 +582,19 @@ export class HudScene extends Scene {
       const item = effects[i];
       return item === undefined ? [] : [addCharm(this, item, well, { lit: false })];
     });
+  }
+
+  // The spare treat held, as the road's smallest treat in the corner of the well at index
+  // (spareTreatWell), over its charm; none at -1, as when it is given back.
+  private showSpareTreat(index: number): void {
+    this.spareTreatPip?.destroy();
+    this.spareTreatPip = undefined;
+    const well = BAR.effectWells[index];
+    if (well === undefined || !this.textures.exists(SPARE_TREAT_PIP.key)) {
+      return;
+    }
+    const at = spareTreatPipAt(well);
+    this.spareTreatPip = this.add.sprite(at.x, at.y, SPARE_TREAT_PIP.key).setOrigin(0);
   }
 
   // A bar per debuff under the walk bar, in the order they began, rebuilt as they come and go;

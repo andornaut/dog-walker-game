@@ -3,7 +3,7 @@ import { fillLine, fillNames } from "../lib/lines";
 import { cents } from "../lib/units";
 import { type Change, type HeartChange, heartsForgiven, type MoneyChange } from "../rules/causes";
 import { debuffFields, formatDollars } from "../rules/effectText";
-import { spareTreatSource } from "../rules/spareTreats";
+import { spareTreatGiver, spareTreatSource } from "../rules/spareTreats";
 import type { FaceMood } from "../rules/treats";
 import { read } from "../rules/units";
 import type { ActiveDebuff, EffectSource, RunState } from "../state/runState";
@@ -155,9 +155,8 @@ export function spareTreatSavedLine(
 
 // A spare treat given back to the owner who just lost a heart, who keeps it.
 export function spareTreatUsedLine(data: StripData, change: HeartChange): MessageLine {
-  const [base] = change.causes;
   return {
-    icon: spareTreatIcon(base?.kind === "effect" ? base.source : undefined),
+    icon: spareTreatIcon(spareTreatGiver(change)),
     ...ownerLine(data, "spareTreatUsed", change.dog, {}),
   };
 }

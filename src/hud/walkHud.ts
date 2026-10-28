@@ -101,6 +101,16 @@ export const WALK_BAR = {
   },
 } as const;
 
+// A spare treat held shows as the road's smallest treat (key, size square) in the bottom-right
+// corner of its gear's effect well, inset pixels in from the well's edges.
+export const SPARE_TREAT_PIP = { inset: 1, key: "treat@50", size: 12 } as const;
+
+// The top-left of the spare treat pip in well.
+export function spareTreatPipAt(well: Rect): Point {
+  const { inset, size } = SPARE_TREAT_PIP;
+  return { x: well.x + well.width - inset - size, y: well.y + well.height - inset - size };
+}
+
 // The walk's place beside the neighbourhood's name: the zone at zoneIndex's number of the walk's.
 export function zoneProgressText(
   data: Pick<GameData, "runText" | "world">,

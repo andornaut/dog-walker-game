@@ -4,7 +4,7 @@ import { hitCue } from "../../audio/sound";
 import { gameData } from "../../data";
 import type { DogId, HintId, HintTrigger, MinorObstacleId } from "../../data/types";
 import { type BuffPop, leashPops, popsOf, stepValues, walkStartMarks } from "../../hud/buffMarks";
-import type { EffectItem } from "../../hud/effectIcons";
+import { type EffectItem, effectItems, gearWell } from "../../hud/effectIcons";
 import { heartPopFrame } from "../../hud/feedback";
 import { changeLabels } from "../../hud/hudView";
 import type { MessageLine } from "../../hud/messageStrip";
@@ -19,6 +19,8 @@ import {
   type PayoutCue,
   payoutFlights,
   payoutMs,
+  SPARE_TREAT_EVENT,
+  type SpareTreatCue,
   TREAT_EVENT,
   type TreatCue,
 } from "../../hud/moments";
@@ -33,6 +35,8 @@ import {
   lowHeartsLines,
   luckyLine,
   pullLine,
+  spareTreatSavedLine,
+  spareTreatUsedLine,
   treatLine,
 } from "../../hud/stripLines";
 import { BUFF_POP, CHARM, charmByWalkerRect, charmOverRect } from "../../layout/buffLayout";
@@ -60,6 +64,7 @@ import { type ChoiceOutcome, outcomeChanges, type QuipCue, quipLine } from "../.
 import { hitWord } from "../../rules/encounters";
 import { hintFor } from "../../rules/hints";
 import { walkLength } from "../../rules/route";
+import { spareTreatGiver, spareTreatSource } from "../../rules/spareTreats";
 import { read } from "../../rules/units";
 import type { PullStep } from "../../runner/pulls";
 import type { EncounterCard, MinorBump, WalkStep } from "../../runner/walk";
@@ -70,7 +75,7 @@ import {
   previewAchievements,
 } from "../../save/achievementPreview";
 import type { RunResult } from "../../save/checkpoint";
-import type { RunState } from "../../state/runState";
+import type { EffectSource, RunState } from "../../state/runState";
 import { fillRect } from "../../ui/phaser/draw";
 import { PALETTE } from "../../ui/phaser/palette";
 import { pixelLinePoints } from "../../ui/pixelShapes";
@@ -282,8 +287,14 @@ export class RunMoments {
         this.hint({ kind: "treat" });
       }
     }
-    // A treat cheers the owner of the dog that grabbed it.
-    for (const { change, dog } of step.treats) {
+    // A treat cheers the owner of the dog that grabbed it, or with every owner at their max goes
+    // into the gear that holds spare treats, such as the Fanny pack, whose well glints.
+    for (const { change, dog, stored } of step.treats) {
+      if (stored) {
+        this.say(spareTreatSavedLine(gameData, step.walk.run));
+        this.glintGear(spareTreatSource(step.walk.run));
+        continue;
+      }
       this.say(treatLine(gameData, change));
       if (change !== null) {
         this.changes.push(change);
@@ -314,7 +325,11 @@ export class RunMoments {
       this.playBumpLabel(kind, step, pack);
       this.hint({ kind: "minorBump" });
     }
-    this.sayLowHearts(step.bumps.flatMap(({ change }) => (change === null ? [] : [change])));
+    this.sayLowHearts(
+      step.bumps.flatMap(({ change }) => (change === null ? [] : [change])),
+      step.spareTreat,
+    );
+    this.spareTreatSpent(step.spareTreat, step.walk.run);
     // A contact obstacle, such as a puddle, plays its own hit sound, a splash at the touching
     // dog's feet, its edge flash and the bump's flash, with a plain obstacle's stop; the walker
     // stumbles and every dog reacts and shakes off.
@@ -371,17 +386,46 @@ export class RunMoments {
     debuffLines(gameData, debuffChanges(before, after)).forEach((line) => this.say(line));
   }
 
-  // The owners' quips at a choice or find, the firings it brought about, and the owners it left
-  // on their last heart.
+  // The owners' quips at a choice or find, the spare treat it spent, the firings it brought
+  // about, and the owners it left on their last heart.
   afterOutcome(outcome: ChoiceOutcome): void {
     this.sayQuips(outcome.quips);
-    this.sayLowHearts(outcome.heartChanges);
+    this.sayLowHearts(outcome.heartChanges, outcome.spareTreat);
+    this.spareTreatSpent(outcome.spareTreat, outcome.state);
     this.fired(outcome.fired, outcome.state);
   }
 
-  // The owners changes left on their last heart.
-  private sayLowHearts(changes: readonly Change[]): void {
-    lowHeartsLines(gameData, changes).forEach((line) => this.say(line));
+  // The owners changes left on their last heart, after the spare treat given back with them.
+  private sayLowHearts(changes: readonly Change[], spare: HeartChange | null): void {
+    const given = changes.map((change) =>
+      spare !== null && change.kind === "hearts" && change.dog === spare.dog
+        ? { ...change, after: spare.after }
+        : change,
+    );
+    lowHeartsLines(gameData, given).forEach((line) => this.say(line));
+  }
+
+  // A spare treat given back: its strip line, and the treat flying from its gear's well to the
+  // dog's card, where it plays as a treat grabbed (SpareTreatCue).
+  private spareTreatSpent(change: HeartChange | null, run: RunState): void {
+    if (change === null) {
+      return;
+    }
+    this.changes.push(change);
+    this.say(spareTreatUsedLine(gameData, change));
+    const cue: SpareTreatCue = {
+      dog: change.dog,
+      labels: changeLabels(gameData, this.pack ?? { x: 0, y: 0 }, [change]),
+      well: gearWell(effectItems(gameData, run), spareTreatGiver(change)),
+    };
+    this.scene.events.emit(SPARE_TREAT_EVENT, cue);
+  }
+
+  // The walk bar well of the gear source names glints.
+  private glintGear(source: EffectSource | undefined): void {
+    if (source?.kind === "gear") {
+      this.scene.events.emit(BUFF_GLINT_EVENT, source);
+    }
   }
 
   // Each owner who fired you has their dog trot off the road over the firing's hold, with

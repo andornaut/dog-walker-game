@@ -52,6 +52,12 @@ export function spareTreatSource(run: Pick<RunState, "modifiers">): EffectSource
   return source === undefined || source.kind === "debuff" ? undefined : source;
 }
 
+// What gave a spare treat spendSpareTreat gave back: its change's base cause's source.
+export function spareTreatGiver(change: HeartChange): EffectSource | undefined {
+  const [base] = change.causes;
+  return base?.kind === "effect" ? base.source : undefined;
+}
+
 // After changes made at once, such as a step's bumps or a card's hearts, a held spare treat goes
 // to an owner whose meter they lowered and who is still walking below their max: the one left
 // with the fewest hearts, ties to the dog nearer the front. Their owner gains hearts.treat back,

@@ -265,9 +265,11 @@ function everyStripLine(): (FaceText & Pick<MessageLine, "names">)[] {
     line("luckyNeighbour", { gains: longestGains, hearts: "10" }),
     line("fullPackHome", { amount }),
     line("luckyWallet", { amount }),
+    line("spareTreatSaved", {}),
     ...dogs.flatMap(({ dog, owner }) => [
       line("fired", { dog, owner }),
       line("secondChance", { owner }),
+      line("spareTreatUsed", { owner }),
       line("lowHearts", { owner }),
       line("pull", { dog }),
       line("treat", { dog, hearts: "10", owner }),
