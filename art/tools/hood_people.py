@@ -120,6 +120,18 @@ volleyball-player   48x72   The Beaches; a beach volleyball player darting acros
                             out of the frame; idle (4 frames, 400ms): lying on the belly where they
                             landed, propped on the elbows with the feet up behind, the face turned to the
                             player: at rest, a breath, then a thumbs up over two frames
+carriage            112x72  Distillery District, 2 lanes; a horse-drawn tour carriage coming down its lanes
+                            at the player, stopping and going: in front a dapple grey horse in black
+                            blinkers, a dred brow band and a black collar with brass hames, white
+                            feathering over its hooves; behind it the driver on the box in a black top
+                            hat and a red coat, the reins in cream gloves, two passengers on the dred
+                            back seat, the black lacquered body with brass rails, red pinstripes and
+                            brass lamps, and four red-spoked wheels at the sides (laid out on 112/1.5 x
+                            48 as the couple is); push (4 frames, 150ms): the horse walking, a front
+                            hoof lifted, the head nodding, the spokes turning; idle (4 frames, 400ms):
+                            the rest pose, the head dipping with an ear turned back, the tail swishing
+                            out past the right flank; cue (3 frames, 120ms): the driver lifting and
+                            flicking the reins, the horse's head coming up
 
 Each has depth variants at every step in minis.STEPS (@94 to @50), redrawn at the
 step on a Mini at road.SCALE x the step, with the original's tags, frame counts
@@ -1521,6 +1533,196 @@ def volleyball_player(pose="run-reach", bob=0, tail=0):
     for x, y, r in q.get("sand", ()):
         g.cel(x, y, r, r, "tan", "brown", "cream")
     return rim(g, VOLLEY_RIM)
+# ---------- carriage: a horse-drawn tour carriage coming at the player, two lanes ----------
+
+# The carriage's design grid: 112 px wide at road.SCALE, as the couple's, 48 rows; C is its centre column.
+CARRIAGE_W = 112 / SCALE
+C = CARRIAGE_W / 2
+# The walk: a front hoof lifted, both down as the horse rises 1px over them, the other hoof lifted, passing
+# again; the head nods down on each footfall. roll is the wheels' frame, the spokes falling 1px a frame as
+# they turn toward the player. 4 frames at 150ms, the horse's slow walk.
+CARRIAGE_PUSH = (dict(lf=-2, nod=1, roll=0), dict(bob=-1, roll=1), dict(rf=-2, nod=1, roll=2),
+                 dict(bob=-1, roll=3))
+CARRIAGE_PUSH_MS = 150
+# Stopped: the rest pose, then the head dipping with the left ear turned back, then the tail swishing out
+# past the horse's flank (screen right). 4 frames at 400ms.
+CARRIAGE_IDLE = (dict(), dict(), dict(nod=1, ear=1), dict(tail=1))
+CARRIAGE_IDLE_MS = 400
+# Restarting: the driver lifts the reins, flicks them (a wave runs down each to the bit, the horse's head
+# coming up), and settles them taut again. 3 frames at 120ms.
+CARRIAGE_CUE = (dict(hands=-2, slack=-2), dict(slack=2, nod=-1), dict())
+CARRIAGE_CUE_MS = 120
+CARRIAGE_RIM = {**LIT, "brown": ("tan", None), "dred": ("pink", None)}
+
+
+def strand(g, pts, c):
+    """A 1px line in drawn pixels through the design points pts, so a rein stays one pixel at any scale."""
+    s, px = scale_of(g), raster(g)
+    sy = getattr(g, "sy", s)
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        a, b = (math.floor(x0 * s), math.floor(y0 * sy)), (math.floor(x1 * s), math.floor(y1 * sy))
+        n = max(abs(b[0] - a[0]), abs(b[1] - a[1]), 1)
+        for k in range(n + 1):
+            px.p(round(a[0] + (b[0] - a[0]) * k / n), round(a[1] + (b[1] - a[1]) * k / n), c)
+
+
+def carriage_wheel(g, cx, cy, rx, ry, roll):
+    """A spoked wheel at the carriage's side, turned nearly edge-on: an iron tire round a deep red felloe and
+    eight red spokes (four on a small wheel) out from a brass hub, open between them, turning a quarter of a
+    spoke's spacing a frame (roll, 0 to 3) so the loop is seamless."""
+    s, px = scale_of(g), raster(g)
+    sy = getattr(g, "sy", s)
+    x0, y0, ax, ay = cx * s, cy * sy, rx * s, ry * sy
+
+    def inside(x, y, t):
+        return ((x + 0.5 - x0) / (ax - t)) ** 2 + ((y + 0.5 - y0) / (ay - t)) ** 2 <= 1
+
+    for y in range(px.h):
+        for x in range(px.w):
+            if inside(x, y, 0) and not inside(x, y, 2):
+                px.p(x, y, "red" if inside(x, y, 1.1) else "ink")
+    # a wheel under 5px across its half width keeps four spokes, which still turn a seamless quarter
+    n = 4 if ax >= 5 else 2
+    for k in range(n):
+        a = math.pi / n * (k + roll / 4)
+        dx, dy = (rx - 1) * math.cos(a), (ry - 1) * math.sin(a)
+        strand(g, [(cx - dx, cy - dy), (cx + dx, cy + dy)], "red")
+    g.rect(cx - 1, cy - 1.5, 2, 3, "amber")
+    g.p(cx - 1, cy - 1.5, "yellow")
+
+
+def carriage_side(g, x, flip):
+    """One side of the carriage body, x its outer edge and flip -1 for the screen-right side: a black lacquered
+    panel under a brass rail with a red pinstripe, and a brass carriage lamp on its post."""
+    def at(v, w=1):
+        return x + v if flip == 1 else x - v - w
+
+    g.rect(at(0, 18), 22, 18, 11, "navy")
+    g.rect(at(0, 18), 22, 18, 1, "amber")
+    g.rect(at(1, 16), 24, 16, 1, "dred")
+    g.rect(at(1, 16), 31, 16, 1, "dred")
+    # the lamp: a post up from the rail, a brass case, cream glass, a brass cap
+    g.rect(at(2.5, 1), 17, 1, 5, "ink")
+    g.rect(at(1, 4), 12, 4, 5.5, "amber")
+    g.rect(at(1.5, 3), 13, 3, 3.5, "cream")
+    g.p(at(1.5), 13, "white")
+    g.rect(at(0.5, 5), 11, 5, 1, "orange")
+
+
+def carriage(lf=0, rf=0, bob=0, nod=0, roll=0, ear=0, tail=0, hands=0, slack=0):
+    """The tour carriage facing the player: up behind, two passengers on the back seat and the driver on the
+    box in a black top hat and a red coat with the reins in his hands; below him the carriage's black panels
+    with brass rails and lamps and its red-spoked wheels at the sides; in front, the dapple grey horse in blinkers and
+    a black collar, with white feathering over its hooves. lf and rf lift the front hooves, bob lifts the horse, nod
+    lowers its head, ear turns the left ear back, tail swings the tail out past its flank, hands lifts the
+    driver's hands and slack bows the reins up (negative) or down."""
+    g = edged(Grid(CARRIAGE_W, 48))
+    b, h = bob, bob + nod
+    # the back seat's dred upholstered back, then the passengers on it behind the driver: on the left gold hair
+    # and a teal top, on the right a lilac sweater and a red knit hat
+    g.cel(C, 12, 21, 4, "dred", "plum", "red", power=3)
+    for x, top, dark in ((C - 14, "teal", "ink"), (C + 14, "lilac", "violet")):
+        g.cel(x, 18.5, 5, 3.5, top, dark, power=3)
+        face_disc(g, x, 13, 3.5, 3.5, "skin1", "skin2")
+        road.face_front(g, x, 12.5, spread=2, mouth=2)
+    g.cel(C - 14, 10.5, 4, 2.2, "gold", "amber", "yellow")
+    g.rect(C - 18, 10.5, 1.5, 4, "gold")
+    g.rect(C - 11.5, 10.5, 1.5, 4, "amber")
+    g.cel(C + 14, 10, 3.8, 2.5, "red", "dred", "pink")
+    g.rect(C + 10.5, 11, 7, 1, "dred")
+    g.p(C + 14, 7, "white")
+    # the driver on the box: a red coat with a white cravat, his arms out to the reins in cream gloves
+    g.rect(C - 7, 13.5, 14, 9, "red")
+    g.rect(C + 4, 13.5, 3, 9, "dred")
+    g.rect(C - 7, 14.5, 1, 7, "pink")
+    g.p(C - 7, 13.5, None)
+    g.p(C + 6, 13.5, None)
+    g.rect(C - 1.5, 13.5, 3, 2, "white")
+    for x, shade in ((C - 10, "red"), (C + 7, "dred")):
+        g.rect(x, 14.5, 3, 4.5 + hands, "red")
+        g.rect(x + 2, 14.5, 1, 4.5 + hands, shade)
+        g.rect(x, 19 + hands, 3, 2, "cream")
+        g.rect(x + 2, 19 + hands, 1, 2, "tan")
+    # his face, rosy, with a white moustache, under the black top hat with a dred band
+    face_disc(g, C, 9.5, 4, 3.8, "skin1", "skin2")
+    road.face_front(g, C, 8.5, spread=2, mouth=3)
+    g.rect(C - 2.5, 10.5, 5, 1, "white")
+    g.p(C - 3, 11, "white")
+    g.p(C + 2, 11, "lgrey")
+    g.p(C - 3.5, 10, "pink")
+    g.p(C + 2.5, 10, "pink")
+    g.rect(C - 4, 0.5, 8, 5, "ink")
+    g.rect(C - 4, 0.5, 1, 4, "dslate")
+    g.rect(C - 4, 4, 8, 1, "dred")
+    g.rect(C - 6, 5, 12, 1.5, "ink")
+    # the dashboard's brass rail across the front of the box, then the carriage's sides and lamps
+    g.rect(C - 12, 22, 24, 1.5, "navy")
+    g.rect(C - 12, 22, 24, 1, "amber")
+    carriage_side(g, 9, 1)
+    carriage_side(g, CARRIAGE_W - 9, -1)
+    # the axle under the body, the big back wheels at the outer edges and the small front ones inboard
+    g.rect(4, 33, CARRIAGE_W - 8, 2, "ink")
+    for cx in (5, CARRIAGE_W - 5):
+        carriage_wheel(g, cx, 34.5, 4.5, 11.5, roll)
+    for cx in (13.5, CARRIAGE_W - 13.5):
+        carriage_wheel(g, cx, 39, 3.5, 7, roll)
+    # the shafts, black poles from the carriage to the horse's shoulders, brass tipped
+    for x in (C - 14, C + 10):
+        g.rect(x, 30 + b, 4, 1.5, "ink")
+        g.p(x + (0 if x < C else 3), 30 + b, "amber")
+    # the tail, swished out past the right flank
+    if tail:
+        g.rect(C + 9, 29 + b, 2, 2, "grey")
+        g.rect(C + 10, 31 + b, 2, 5, "lgrey")
+        g.rect(C + 11, 35 + b, 2, 4, "lgrey")
+        g.rect(C + 12, 31 + b, 1, 8, "grey")
+    # the horse: grey forelegs, white feathering over the hooves, dark hooves, each lifted by lf or rf
+    for x, f in ((C - 6, lf), (C + 2, rf)):
+        g.rect(x, 37 + b, 4, 5 + f - b, "lgrey")
+        g.rect(x + 3, 37 + b, 1, 5 + f - b, "grey")
+        g.rect(x - 0.5, 41.5 + f, 5, 2.5, "white")
+        g.rect(x + 3.5, 41.5 + f, 1, 2.5, "lgrey")
+        g.rect(x - 0.5, 44 + f, 5, 2, "dslate")
+    # the chest under the breast strap, the black collar round the neck's base with its brass hames
+    g.cel(C, 33 + b, 9.5, 5.5, "lgrey", "grey", "white")
+    g.rect(C - 9, 33 + b, 18, 1, "ink")
+    g.rect(C - 1, 32.5 + b, 2, 2, "amber")
+    g.cel(C, 30 + b, 9, 2.5, "ink", None, "dslate", power=3)
+    for x in (C - 8.5, C + 7.5):
+        g.rect(x, 26 + b, 1, 5, "amber")
+    # the head: pricked ears (the left turned back by ear), a broad pale grey brow over big dark eyes, a long
+    # face narrowing to a grey muzzle with dark nostrils, a slate forelock
+    for x, back in ((C - 5, ear), (C + 4, 0)):
+        g.tri((x - 1.5, 17 + h), (x + 2.5, 17 + h), (x + 0.5 - back, 11.5 + h + back), "lgrey")
+        g.rect(x, 14 + h, 1, 3, "slate")
+    g.cel(C, 20 + h, 5.5, 5.5, "lgrey", "grey", "white", power=2.6)
+    g.blob(C, 26.5 + h, 4, 4.5, "lgrey", "grey")
+    g.cel(C, 29 + h, 3.5, 2, "grey", "slate", power=3)
+    g.p(C - 2.5, 29 + h, "dslate")
+    g.p(C + 1.5, 29 + h, "dslate")
+    g.rect(C - 1.5, 14.5 + h, 3, 2.5, "slate")
+    for x in (C - 4, C + 2):
+        g.rect(x, 19.5 + h, 2, 2, "ink")
+        g.p(x, 19.5 + h, "white")
+    # the bridle: a dred brow band with a brass rosette, the blinkers beside the eyes, cheek straps, a
+    # noseband and brass bit rings at the mouth
+    g.rect(C - 5, 17 + h, 10, 1, "dred")
+    g.rect(C - 0.5, 17 + h, 1, 1, "amber")
+    g.rect(C - 7.5, 17.5 + h, 2.5, 5, "ink")
+    g.rect(C + 5, 17.5 + h, 2.5, 5, "ink")
+    g.p(C - 6.5, 19.5 + h, "amber")
+    g.p(C + 5.5, 19.5 + h, "amber")
+    for x in (C - 5, C + 4):
+        g.rect(x, 22.5 + h, 1, 4.5, "ink")
+    g.rect(C - 4, 26 + h, 8, 1, "ink")
+    for x in (C - 5, C + 4):
+        g.rect(x, 27.5 + h, 1, 1.5, "amber")
+    # the reins from the driver's hands down to the bit, bowed by slack
+    for x0, x1 in ((C - 9, C - 5), (C + 8.5, C + 4.5)):
+        y0, y1 = 20.5 + hands, 28.5 + h
+        mid = ((x0 + x1) / 2 + (x0 - x1) / 2, (y0 + y1) / 2 + slack)
+        strand(g, [(x0, y0), mid, (x1, y1)], "dbrown")
+    return rim(g, CARRIAGE_RIM)
 
 
 # ---------- every sprite at a depth step ----------
@@ -1590,6 +1792,15 @@ def steps(suffix, s):
     yield f"volleyball-player{suffix}", [("run", [own(volleyball_player, q) for q in VOLLEY_RUN], VOLLEY_RUN_MS),
                                          ("dive", [own(volleyball_player, q) for q in VOLLEY_DIVE], VOLLEY_DIVE_MS),
                                          ("idle", [own(volleyball_player, q) for q in VOLLEY_IDLE], VOLLEY_IDLE_MS)]
+    def wheeled(q):
+        """The carriage in pose q, its wheels' roll a frame index, not an offset to snap."""
+        pose = {k: v for k, v in q.items() if k != "roll"}
+        return minis.small(here, p, carriage, roll=q.get("roll", 0), **posed(pose, p)).outlined()
+
+    yield f"carriage{suffix}", [(tag, [wheeled(q) for q in poses], ms)
+                                for tag, poses, ms in (("push", CARRIAGE_PUSH, CARRIAGE_PUSH_MS),
+                                                       ("idle", CARRIAGE_IDLE, CARRIAGE_IDLE_MS),
+                                                       ("cue", CARRIAGE_CUE, CARRIAGE_CUE_MS))]
 
 
 def sprites():
