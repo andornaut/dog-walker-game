@@ -78,9 +78,11 @@ Cards (75x56), one per option, composed from the sprites above and the pack's ex
 card-cheese-crates-sniff, -buy and -hurry-on at a brick shopfront's wooden door, which fits both the
 neighbourhoods it stands in; card-wedding-shoot-pose, -walk-around and -reshoot on the Distillery
 District's road; card-fish-crates-pay, -hurry-past and -wade-through on Kensington Market's, the last
-with Archie wading through the crate's spilt fish slime. The paid options
-show a bill (icon-bill) changing hands: the photographer reaching out to take it, the fishmonger in a
-white apron and the cheesemonger in an ochre shirt and white apron holding it up.
+with Archie wading through the crate's spilt fish slime; card-green-bin-hurry-past, -pay and
+-wade-through on Kensington Market's, the last with Archie wading through the bin's slop, the banana peel on
+his head. The paid options show a bill (icon-bill) changing hands: the photographer reaching out to take it,
+the fishmonger in a white apron, the cheesemonger in an ochre shirt and white apron and the shopkeeper in a
+lilac shirt and cream apron, broom in hand, holding it up.
 
 The road sprites take the road outline rule (pixel.road_edge) and road.LIT's rim on their dark
 colours, so their silhouettes hold 3:1 on every road. People, movers and the card obstacles are laid
@@ -1297,6 +1299,102 @@ def card_fish_wade_through():
     return a
 
 
+def head_peel():
+    """The banana peel draped over a dog's head, tipped to one side, on a 22x18 design grid, as flying_peel draws
+    it."""
+    g = edged(Grid(22, 18))
+    flying_peel(g, 11, 10, 20)
+    return lit(g)
+
+
+def scrap(col):
+    """One 3x2 scrap of compost lying on the road, outlined two ramp steps darker."""
+    import cards
+    return cards.pixmap(["xxx", "xx."], {"x": col})
+
+
+def card_bin_wade_through():
+    """Wade through: the toppled green bin drawn small up the road at the left, its olive slop running down
+    across the cobbles with clay and green scraps lying in it, and Archie wading through it at the right, the
+    banana peel draped over his head and brown splats on his coat."""
+    import cards
+    a = cards.Art()
+    a.ground("shops")
+    slime(a, [(18, 24, 11, 3), (28, 34, 20, 5), (40, 45, 30, 8), (42, 54, 34, 5)])
+    bin_ = to_image(drawn(PERSON * 0.6, green_bin).outlined())
+    a.paste(bin_, 16 - bin_.width // 2, 26 - bin_.height)
+    for x, y, col in ((24, 33, "green"), (8, 43, "clay"), (62, 38, "clay"), (18, 51, "green"), (66, 51, "clay")):
+        a.paste(scrap(col), x, y)
+    cx, foot = 44, 56
+    c = a.dog("archie", "walk", cx, foot, 1)
+    dog = cards.sn.frame("dog-archie", "walk", 1)
+    peel = to_image(drawn(PERSON * 0.45, head_peel).outlined())
+    a.paste(peel, cx - peel.width // 2 + 1, foot - dog.height + dog.getbbox()[1] - 6)
+    for x, y in ((37, 40), (50, 44), (41, 48)):
+        a.fill(x, y, 2, 2, "brown")
+        a.fill(x + 1, y + 1, 1, 1, "dbrown")
+    a.lead(cx, c, 52)
+    return a
+
+
+def sweeper_top(g, b):
+    """The shopkeeper come out to sweep up, facing the player: a lilac shirt under a long cream apron, short
+    dbrown hair, the near hand (screen left) raised beside the face to hold up the fee and the other holding a
+    broom upright by its clay handle, its tan head of bristles hanging just under the hand."""
+    g.rect(9, 21 + b, 14, 13, "lilac")
+    g.rect(20, 21 + b, 3, 13, "violet")
+    g.rect(11, 23 + b, 10, 12, "cream")
+    g.rect(19, 23 + b, 2, 12, "tan")
+    g.rect(11, 21 + b, 1, 2, "cream")
+    g.rect(20, 21 + b, 1, 2, "tan")
+    g.rect(5, 22 + b, 4, 4, "lilac")
+    g.rect(4, 15 + b, 4, 8, "lilac")
+    g.rect(4, 13 + b, 4, 3, "skin1")
+    road.back_arm(g, 23, 4, 22 + b, ((8, "lilac", "violet"), (3, "skin1", None)))
+    line(g, [(28.5, 12 + b), (25.5, 35 + b)], 1.5, "clay")
+    g.tri((22, 40 + b), (30, 40 + b), (25.5, 34 + b), "tan")
+    g.rect(23.5, 34 + b, 4, 1.5, "brown")
+    g.rect(24, 31 + b, 3, 3, "skin1")
+    face_disc(g, 16, 13.5 + b, 7.5, 7.5, "skin1", "skin2")
+    face_front(g, 16, 14 + b)
+    g.cel(16, 8 + b, 7.5, 3.5, "dbrown", "plum", "brown")
+    g.rect(8.5, 8 + b, 2, 4, "dbrown")
+    g.rect(21.5, 8 + b, 2, 4, "dbrown")
+
+
+def card_bin_pay():
+    """Pay for cleanup: the toppled green bin at the left with Archie sitting by it, and the shopkeeper at the
+    right, broom in hand, holding up the bill he has been paid."""
+    import cards
+    a = cards.Art()
+    a.ground("shops")
+    bin_ = to_image(drawn(PERSON * 0.75, green_bin).outlined())
+    a.shadow(18, 34, bin_.width)
+    a.paste(bin_, 18 - bin_.width // 2, 34 - bin_.height)
+    keeper = to_image(road.drawn(PERSON, road.dressed, sweeper_top, legs="slate", shoes="ink").outlined())
+    a.paste(keeper, 31, -4)
+    a.paste(cards.sn.image("icon-bill"), 31, 4)
+    c = a.dog("archie", "idle", 22, 60)
+    a.lead(22, c, 28)
+    return a
+
+
+def card_bin_hurry_past():
+    """Hurry past: the toppled green bin up the road at the right, Duchess pulling the pack away to the left
+    and Archie behind her pulling back toward the bin, both leashes taut off the bottom."""
+    import cards
+    a = cards.Art()
+    a.ground("shops")
+    bin_ = to_image(drawn(PERSON * 0.75, green_bin).outlined())
+    a.shadow(56, 36, bin_.width)
+    a.paste(bin_, 56 - bin_.width // 2, 36 - bin_.height)
+    c = a.dog("duchess", "pull", 14, 54, flip=True)
+    a.lead(14, c, 4)
+    c = a.dog("archie", "pull", 40, 58)
+    a.lead(40, c, 26)
+    return a
+
+
 def shop_door(a):
     """The cheese crate's setting, the same in both neighbourhoods it stands in: a red brick shopfront in a
     running bond of dbrick mortar across the top, a bark wooden door in a dbrown frame with a gold knob over a
@@ -1423,6 +1521,9 @@ CARDS = {
     f"card-{CHEESE}-sniff": card_cheese_sniff,
     f"card-{CHEESE}-buy": card_cheese_buy,
     f"card-{CHEESE}-hurry-on": card_cheese_hurry_on,
+    f"card-{BIN}-hurry-past": card_bin_hurry_past,
+    f"card-{BIN}-pay": card_bin_pay,
+    f"card-{BIN}-wade-through": card_bin_wade_through,
 }
 
 

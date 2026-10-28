@@ -13072,6 +13072,18 @@
       "png": "images/card-good-leash.png"
     },
     {
+      "key": "card-green-bin-hurry-past",
+      "png": "images/card-green-bin-hurry-past.png"
+    },
+    {
+      "key": "card-green-bin-pay",
+      "png": "images/card-green-bin-pay.png"
+    },
+    {
+      "key": "card-green-bin-wade-through",
+      "png": "images/card-green-bin-wade-through.png"
+    },
+    {
       "key": "card-lost-wallet-keep",
       "png": "images/card-lost-wallet-keep.png"
     },
