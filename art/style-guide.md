@@ -48,7 +48,7 @@ The rules for drawing and placing the art. Exact sizes, tags, timings and coordi
 | Stones, dark slates | stone 8a857c, dstone 625e58; ash 57606a, shale 353b45, coal 26292f                     |
 | TTC red             | ttc da291c                                                                             |
 
-- A sprite in the Toronto colours carries them after Endesga 32 (and the neutral greys, when it uses them) in its Aseprite palette. UI rims that lighten (`LIGHTER` in `art/tools/ui.py`) step up the Endesga ramps; a Toronto road colour steps up its own ramp, then onto Endesga. `python3 art/tools/pixel.py palette` writes `shared/palette.json`, which the game's dark ramp reads.
+- A sprite in the Toronto colours carries them after Endesga 32 (and the neutral greys, when it uses them) in its Aseprite palette. A zone pip's rim (`pip_rim` in `art/tools/ui.py`) steps its well's colour down its ramp (`DARKER`) until it holds 3:1 on the end screen's cream panel. `python3 art/tools/pixel.py palette` writes `shared/palette.json`, which the game's dark ramp reads.
 - The neutral greys (`NEUTRAL` in `pixel.py`: nlgrey d8d8d8, ngrey a4a4a4, nslate 727272, ndslate 4a4a4a, ink as their darkest step) are for disabled and locked UI only: Endesga's greys are cool, and disabled UI reads as neutral grey.
 - `deepAmber` (fc9124), outside the house palette and drawn only in code, is the box behind a picked tile's picture only: Endesga's amber sits too close to the tan box of an unpicked one.
 - Darkening (shadows, the dimmed road) maps each colour one step down its ramp (`DARKER`), never a blend with black.
