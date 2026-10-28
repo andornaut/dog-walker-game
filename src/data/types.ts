@@ -890,6 +890,8 @@ export interface RunText {
   readonly lowHearts: string;
   // A debuff's length in seconds on a road chip, such as the "4s" Quick recovery leaves.
   readonly seconds: string;
+  // The road chip over a buff's charm when it waived a card option's cost, as Sweet talker does.
+  readonly waivedCost: string;
   // The zone celebration as a walker joins, the first time a walk finishes the zone that
   // unlocks them: its headline (a big title of about 14 characters over a subtitle of about
   // 28), their agility over their perk under their greeting (no agility line for a walker at

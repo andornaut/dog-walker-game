@@ -495,10 +495,9 @@ export class RunMoments {
     marks.glints.forEach((item) => this.scene.events.emit(BUFF_GLINT_EVENT, item));
   }
 
-  // Each buff's pop: its well glinting, its charm, lit, unless the pop shows none, a chip of the
-  // value it made (over the charm, or just over the item where no charm shows), a reach's
-  // dotted line, and a forgiven bump's heart turning from loss to gain as its charm shows beside
-  // the walker.
+  // Each buff's pop: its well glinting, its charm, lit, a chip of the value it made over the
+  // charm, if any, a reach's dotted line, and a forgiven bump's heart turning from loss to gain
+  // as its charm shows beside the walker.
   private popBuffs(pops: readonly BuffPop[]): void {
     const still = this.deps.still();
     for (const pop of pops) {
@@ -509,13 +508,10 @@ export class RunMoments {
       const at = { x: rect.x - pop.index * (CHARM.size + CHARM.gap), y: rect.y };
       const shownAtMs = pop.forgiven === null ? 0 : BUFF_POP.switchMs;
       const show = () => {
-        if (pop.charm) {
-          popCharm(this.scene, { depth: DEPTH.fx, shownAtMs, still }, pop.item, at);
-        }
+        popCharm(this.scene, { depth: DEPTH.fx, shownAtMs, still }, pop.item, at);
         this.scene.events.emit(BUFF_GLINT_EVENT, pop.item);
         if (pop.chip !== null) {
-          const lineBottom = pop.charm ? at.y - BUFF_POP.gap : at.y + CHARM.size;
-          const anchor = { centreX: at.x + CHARM.size / 2, lineBottom };
+          const anchor = { centreX: at.x + CHARM.size / 2, lineBottom: at.y - BUFF_POP.gap };
           floatValue(this.scene, { depth: DEPTH.fx + 1, shownAtMs, still }, anchor, pop.chip);
         }
       };

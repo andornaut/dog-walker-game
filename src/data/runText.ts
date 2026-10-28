@@ -94,6 +94,7 @@ export const RUN_TEXT = {
     spareTreatUsed: "Spare treat! {owner} keeps the ♥",
     treat: "{dog} got a treat! {owner} +{hearts}♥",
   },
+  waivedCost: "Free",
   zoneBanner: "{world}, neighbourhood {n}",
   zoneDone: {
     button: "Onward!",

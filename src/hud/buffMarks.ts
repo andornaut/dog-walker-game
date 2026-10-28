@@ -55,12 +55,13 @@ function heartsText(hearts: number): string {
   return hearts === 0 ? "0♥" : amountText("hearts", hearts);
 }
 
-// The value a buff made, as a chip over the road says it: a money change ("+$2") or a
-// debuff's seconds ("4s"). Null for any other value.
+// The value a buff made, as a chip over the road says it: a card option's cost it waived
+// ("Free") or a debuff's seconds ("4s"). Null for any other value, such as a tip Big tipper
+// raised, whose label by the cash shows the money.
 function chipText(data: Pick<GameData, "runText">, value: ModifiedValue): string | null {
   switch (value.subject.kind) {
     case "money":
-      return amountText("money", value.after);
+      return value.before < 0 && value.after === 0 ? data.runText.waivedCost : null;
     case "debuffSeconds":
       return fillNames(data.runText.seconds, { seconds: String(Math.round(value.after)) });
     default:
@@ -211,14 +212,12 @@ type PopAt =
   | { readonly kind: "pack" }
   | { readonly kind: "walker" };
 
-// One buff's pop over the road at at (index-th of the step's pops there): its charm unless
-// charm is false, as for a money value, and a chip of the value it made. Each pop glints the
-// buff's walk bar well. forgiven is a bump the walker's perk forgave, whole or in part,
+// One buff's pop over the road at at (index-th of the step's pops there): its charm, and a chip
+// of the value it made, if any. Each pop glints the buff's walk bar well. forgiven is a bump the walker's perk forgave, whole or in part,
 // whose heart pop turns from loss to gain as the charm shows; reach is a pickup grabbed by
 // Long reach, with a dotted line from its dog (the pack's lead when null) to the item.
 export interface BuffPop {
   readonly at: PopAt;
-  readonly charm: boolean;
   readonly chip: string | null;
   readonly forgiven: { readonly dog: DogId; readonly whole: boolean } | null;
   readonly index: number;
@@ -238,7 +237,7 @@ type UnplacedPop = Omit<BuffPop, "index">;
 
 // A pop of a charm over a place, with no chip, forgiven bump or reach line.
 function charmPop(at: PopAt, item: EffectItem): UnplacedPop {
-  return { at, charm: true, chip: null, forgiven: null, item, reach: null };
+  return { at, chip: null, forgiven: null, item, reach: null };
 }
 
 function placeKey(at: PopAt): string {
@@ -258,9 +257,9 @@ function stacked(pops: readonly UnplacedPop[]): BuffPop[] {
 
 // One pop per modifier with a charm on each value: a forgiven bump's by the walker's head, a
 // pickup grabbed by reach over the item with its dotted line, any other over its dog, its item
-// or the pack. A money value, such as a tip Big tipper raised, shows no charm, and its first
-// pop carries a chip of the new amount; a shortened debuff's first pop carries a chip of its
-// new seconds beside the charm.
+// or the pack. A waived cost's first pop carries a "Free" chip, and a shortened debuff's a chip
+// of its new seconds, over the charm; any other money value, such as a tip Big tipper raised,
+// has its charm alone, as its label by the cash shows the money.
 export function popsOf(
   data: Pick<GameData, "runText" | "walkers">,
   values: readonly PoppedValue[],
@@ -292,7 +291,6 @@ export function popsOf(
           case "immune":
             return [{ ...plain, at: item === null ? place : { item: item.id, kind: "item" } }];
           case "money":
-            return [{ ...plain, charm: false, chip }];
           case "debuffSeconds":
             return [{ ...plain, chip }];
           default:

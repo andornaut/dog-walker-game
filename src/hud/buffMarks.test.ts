@@ -112,7 +112,7 @@ describe("popsOf", () => {
     laneSpan: 1,
     y: 0,
   });
-  const plain = { charm: true, chip: null, forgiven: null, index: 0, reach: null };
+  const plain = { chip: null, forgiven: null, index: 0, reach: null };
   const big = { kind: "upgrade", upgrade: "bigTipper" } as const;
   const hallPass = { gear: "hallPass", kind: "gear" } as const;
   it.each<{ expected: BuffPop[]; name: string; popped: PoppedValue }>([
@@ -134,16 +134,8 @@ describe("popsOf", () => {
       },
     },
     {
-      expected: [
-        {
-          ...plain,
-          at: { item: 1, kind: "item" },
-          charm: false,
-          chip: "+$2",
-          item: big,
-        },
-      ],
-      name: "a tip Big tipper raised, as the new amount's chip with no charm",
+      expected: [{ ...plain, at: { item: 1, kind: "item" }, item: big }],
+      name: "a tip Big tipper raised, as its charm with no chip",
       popped: {
         bump: false,
         dog: null,
@@ -153,10 +145,10 @@ describe("popsOf", () => {
     },
     {
       expected: [
-        { ...plain, at: { item: 1, kind: "item" }, charm: false, chip: "+$3", item: big },
-        { ...plain, at: { item: 1, kind: "item" }, charm: false, index: 1, item: hallPass },
+        { ...plain, at: { item: 1, kind: "item" }, item: big },
+        { ...plain, at: { item: 1, kind: "item" }, index: 1, item: hallPass },
       ],
-      name: "a tip two buffs raised, as one chip with no charm",
+      name: "a tip two buffs raised, as their charms with no chip",
       popped: {
         bump: false,
         dog: null,
@@ -203,6 +195,23 @@ describe("popsOf", () => {
         value: value({ debuff: "muddy", kind: "debuffSeconds" }, 8, [
           [-4, { kind: "walker", walker: "ada" }],
         ]),
+      },
+    },
+    {
+      expected: [
+        {
+          ...plain,
+          at: { kind: "pack" },
+          chip: gameData.runText.waivedCost,
+          item: { kind: "upgrade", upgrade: "sweetTalker" },
+        },
+      ],
+      name: "a card option's cost Sweet talker waived, with its charm and the waived cost's chip",
+      popped: {
+        bump: false,
+        dog: null,
+        item: null,
+        value: value({ kind: "money" }, -300, [[300, SWEET_TALKER]]),
       },
     },
     {
