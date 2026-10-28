@@ -24,6 +24,8 @@ music-distillery-district 35.53s 16 bars swung at about 108 BPM in F, loops seam
                           square lead with vibrato, triangle walking bass, rolled seventh chords, brushes
 music-high-park    30.72s 24 bars of 6/8 at about 94 BPM in F, loops seamlessly: breathy triangle
                           flute, narrow-pulse oboe, triangle harp and bass, birdsong trills, wooden tick
+music-kensington-market 34.30s 16 bars at about 112 BPM in D mixolydian, loops seamlessly:
+                          accordion calls and marimba answers over a tresillo bass and hand drums
 
 Each sound ships as mono 44.1kHz Ogg Vorbis plus AAC (.m4a), since iOS Safari
 cannot play Ogg.
