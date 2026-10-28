@@ -185,7 +185,7 @@ interface TipGrab {
 
 // A gear drop the pack grabbed: its gear, now the found item, and the found item it replaced,
 // which went back, or null.
-export interface GearFind {
+interface GearFind {
   gear: GearId;
   item: WalkItem;
   replaced: GearId | null;

@@ -17,7 +17,7 @@ export interface OwnerFace {
 }
 
 // An owner's name in a text: text[at, at + length), led by their face.
-export interface FaceMark extends OwnerFace {
+interface FaceMark extends OwnerFace {
   readonly at: number;
   readonly length: number;
 }

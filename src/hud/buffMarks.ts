@@ -142,7 +142,7 @@ function forgivenMarks(
 
 // Where a pop shows over the road: over a dog, over an item, over the pack's lead, or beside
 // the walker's head.
-export type PopAt =
+type PopAt =
   | { readonly dog: DogId; readonly kind: "dog" }
   | { readonly item: number; readonly kind: "item" }
   | { readonly kind: "pack" }

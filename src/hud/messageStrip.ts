@@ -44,7 +44,7 @@ export interface OwnerLead {
 }
 
 // What leads a line: its icon, or an owner's face and name.
-export type MessageLead = MessageIcon | OwnerLead;
+type MessageLead = MessageIcon | OwnerLead;
 
 export function isOwnerLead(lead: MessageLead): lead is OwnerLead {
   return typeof lead === "object" && lead.kind === "owner";
@@ -158,12 +158,12 @@ export function messageLinePanel(
 }
 
 // The top of a one-row line's capitals at scale, centred on its icon's rows.
-export function messageLineTop(body: FontMetrics, line: MessageLinePanel, scale: number): number {
+function messageLineTop(body: FontMetrics, line: MessageLinePanel, scale: number): number {
   return line.icon.y + Math.floor((MESSAGE_STRIP.icon.size - body.capHeight * scale) / 2);
 }
 
 // A line's rows as set: how many, at what scale, and whether they show a face.
-export interface LineSet {
+interface LineSet {
   readonly faced: boolean;
   readonly rows: number;
   readonly scale: number;

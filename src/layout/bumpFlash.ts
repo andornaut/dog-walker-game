@@ -21,7 +21,7 @@ export const BUMP_FLASH = {
 
 // The colours a border may take, each a PALETTE name the scene draws it in: each reads against
 // the HUD's dark panels.
-export type BorderColour =
+type BorderColour =
   | "amber"
   | "cream"
   | "cyan"
@@ -36,7 +36,7 @@ export type BorderColour =
   | "yellow";
 
 // An encounter's flash colour, which names its ui-hit-flash-<colour> edge flash strip.
-export type FlashColour = "amber" | "mauve" | "orange" | "pink" | "sky";
+type FlashColour = "amber" | "mauve" | "orange" | "pink" | "sky";
 
 export const FLASH_COLOURS: Readonly<Partial<Record<EncounterId, FlashColour>>> = {
   capybara: "amber",
@@ -147,7 +147,7 @@ export function encounterFlashColour(encounter: EncounterId): FlashColour {
   return FLASH_COLOURS[encounter] ?? "amber";
 }
 
-export interface BumpFlash {
+interface BumpFlash {
   readonly colour: BorderColour;
   readonly nudge: boolean;
 }

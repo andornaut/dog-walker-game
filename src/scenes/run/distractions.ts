@@ -29,7 +29,7 @@ import { footprintOf, type WalkItem, type WalkItemKind } from "../../runner/walk
 // allows, where it is skipped. It sorts with the props by row, so a prop nearer the walker stands
 // in front of it.
 
-export type DistractionPattern = "edge" | "leave" | "visit";
+type DistractionPattern = "edge" | "leave" | "visit";
 
 // One distraction. key is its sprite. row is the zone distance its row comes into view at, the
 // one it waits for until placed. side is the side it tries first, -1 left and 1 right, and placed
@@ -51,11 +51,11 @@ interface DistractionState {
   zoneIndex: number | null;
 }
 
-export type DistractionData = Pick<GameData, "encounters" | "minorObstacles" | "tuning">;
+type DistractionData = Pick<GameData, "encounters" | "minorObstacles" | "tuning">;
 
 // What the distractions are placed against, in flat road pixels: the road's centre line and lane
 // 0's middle, the roadside props' table, and the width of each sprite's drawn pixels at full size.
-export interface DistractionStage {
+interface DistractionStage {
   readonly centreX: number;
   readonly firstLaneX: number;
   readonly roadside: RoadsideTable;

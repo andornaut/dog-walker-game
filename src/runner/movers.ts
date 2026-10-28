@@ -99,7 +99,7 @@ export type MoverPath = {
 
 // A merging rider's lane change: lanes across, over length of scroll from at, a scroll since its
 // cue appeared, after its own cue, cue long.
-export interface RideMerge {
+interface RideMerge {
   readonly at: number;
   readonly cue: number;
   readonly lanes: LaneDirection;
@@ -166,7 +166,7 @@ type CrossPath = Extract<MoverPath, { motion: "cross" }>;
 
 // A crosser's stop partway across: after lanes crossed, length of scroll standing, the last cue of
 // it showing its cue.
-export interface CrossPause {
+interface CrossPause {
   readonly after: number;
   readonly cue: number;
   readonly length: number;

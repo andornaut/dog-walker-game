@@ -89,7 +89,7 @@ export interface SpawnPlan<Kind extends string> {
 
 // A kind of fixed obstacle in the zone: its footprint, its drawn hit length (SpawnQuota) and its
 // weight in the zone's draw.
-export interface FixedKind<Kind extends string> {
+interface FixedKind<Kind extends string> {
   footprint: Footprint;
   hitLength?: number;
   kind: Kind;

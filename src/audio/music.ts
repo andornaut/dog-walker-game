@@ -79,7 +79,7 @@ export function advanceMusic(elapsedMs: number, state: MusicState): MusicState {
 }
 
 // One loop and its fade.
-export interface MusicTrack {
+interface MusicTrack {
   key: string;
   state: MusicState;
 }

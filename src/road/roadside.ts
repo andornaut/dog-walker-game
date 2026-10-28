@@ -333,7 +333,7 @@ export function noise(a: number, b: number): number {
 // A mark on the verge, 2 rows tall: a tuft of grass on the lawn or a fallen leaf on the
 // sidewalk or lawn. x is across, signed; keep decides, against markShows, whether it shows on
 // a row, so marks thin out with distance.
-export interface VergeMark {
+interface VergeMark {
   readonly keep: number;
   readonly kind: "leaf" | "tuft";
   readonly shape: number;

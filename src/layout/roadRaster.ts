@@ -251,7 +251,7 @@ export function stripLines(strip: PixelImage): StripLines {
 // column's run of seam rows is one seam: starts holds its row count at its nearest pixel (its
 // last row in the strip, the first along the road), and 0 elsewhere. rows flags the strip rows
 // holding a seam pixel (SEAM_PIXEL) and a seam's nearest pixel (SEAM_START).
-export interface StripSeams {
+interface StripSeams {
   readonly mask: Uint8Array;
   readonly rows: Uint8Array;
   readonly starts: Uint8Array;
