@@ -1,11 +1,27 @@
 { "frames": {
-   "roadside-leuty@88.aseprite": {
+   "roadside-leuty@88 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 84, "h": 137 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 84, "h": 137 },
     "sourceSize": { "w": 84, "h": 137 },
-    "duration": 1000
+    "duration": 1800
+   },
+   "roadside-leuty@88 1.aseprite": {
+    "frame": { "x": 84, "y": 0, "w": 84, "h": 137 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 84, "h": 137 },
+    "sourceSize": { "w": 84, "h": 137 },
+    "duration": 300
+   },
+   "roadside-leuty@88 2.aseprite": {
+    "frame": { "x": 168, "y": 0, "w": 84, "h": 137 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 84, "h": 137 },
+    "sourceSize": { "w": 84, "h": 137 },
+    "duration": 300
    }
  },
  "meta": {
@@ -13,10 +29,10 @@
   "version": "1.2.30-x64",
   "image": "roadside-leuty@88.png",
   "format": "RGBA8888",
-  "size": { "w": 84, "h": 137 },
+  "size": { "w": 252, "h": 137 },
   "scale": "1",
   "frameTags": [
-   { "name": "idle", "from": 0, "to": 0, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 2, "direction": "forward" }
   ]
  }
 }

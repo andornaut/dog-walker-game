@@ -54,6 +54,7 @@ the game starts each placed prop at its own point in the loop. The drawings each
 
 roadside-street-lamp     0 1 2 3 2 1   2400 300 250 900 250 300   the lenses fade off and on (LAMP_LENS)
 roadside-gas-lamp        0 1 2 1       2600 250 350 250           the flame dips and recovers (GAS_FLAME)
+roadside-leuty           0 1 2         1800 300 300               a fold runs out along the flag (LEUTY_FOLD)
 roadside-shopfront-*     0 1 2 1       2400 300 600 300           the sign's letters dim and relight (SHOP_LETTERS)
 
 The ground row is the last opaque row; the frame keeps a clear ring for the outline. Outlines are road_edge;
@@ -566,9 +567,15 @@ def shopfront(wall, awning, sign, rail):
     return w, h, draw
 
 
+# The Leuty's flag at each idle frame: the column, in design units, of a fold's shadow 3 units wide running
+# out along it from the pole, or None when it hangs flat.
+LEUTY_FOLD = (None, 35, 39)
+
+
 def leuty():
     """The Leuty Lifeguard Station: a white clapboard house on driftwood stilts under a red hipped roof,
-    a windowed lookout on top under its own red cap, the flag up."""
+    a windowed lookout on top under its own red cap, the flag up. Frame f draws the flag with its fold at
+    LEUTY_FOLD[f]: flat (0), then a ripple running out from the pole (1, 2)."""
     w, h = 64, 104
 
     def draw(g, f=0):
@@ -599,6 +606,8 @@ def leuty():
         g.rect(19, 24, 26, 2, "dred")
         g.rect(31, 4, 2, 11, "coal")
         g.rect(33, 4, 9, 5, "ttc")
+        if LEUTY_FOLD[f] is not None:
+            g.rect(LEUTY_FOLD[f], 4, 3, 5, "dred")
     return w, h, draw
 
 
@@ -983,7 +992,7 @@ PROPS = {
     "roadside-hot-dog-stand": (hot_dog_stand(), (0,), STILL_MS, True),
     "roadside-ice-cream-stand": (ice_cream_stand(), (0,), STILL_MS, True),
     "roadside-love-lock": (love_lock(), (0,), STILL_MS, True),
-    "roadside-leuty": (leuty(), (0,), STILL_MS, True),
+    "roadside-leuty": (leuty(), (0, 1, 2), (1800, 300, 300), True),
     "roadside-mural-wall": (mural_wall(), (0,), STILL_MS, True),
     "roadside-shopfront-ochre": (shopfront("ochre", "red", "forest",
                                            ("cyan", "lilac", "cream", "pink", "lime", "red", "violet")),
