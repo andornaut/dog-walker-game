@@ -18,7 +18,6 @@ import {
   type PathChange,
   pathReach,
   type PlannedSpawns,
-  planSpawns,
   rowSpacing,
   type SpawnEvent,
   type SpawnPlan,
@@ -26,6 +25,7 @@ import {
   takeDueSpawns,
   WIDE_LANES,
 } from "./spawning";
+import { planSpawns } from "./zonePlanner";
 
 type Kind =
   | "bench"

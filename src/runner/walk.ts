@@ -110,13 +110,13 @@ import { awayHop, nextShyChoiceAt, shyChoices, type ShyPath, takeHop } from "./s
 import {
   type Footprint,
   type PathRow,
-  planSpawns,
   SINGLE_CELL,
   type SpawnEvent,
   type SpawnQuota,
   takeDueSpawns,
 } from "./spawning";
 import { spacedStretch } from "./stretches";
+import { planSpawns } from "./zonePlanner";
 
 export type WalkData = Pick<
   GameData,
