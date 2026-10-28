@@ -183,21 +183,25 @@ granny-cart-shopper 48x72   Kensington Market; an older market shopper, a steppe
                             back before a step, braced, halfway and over
 keg-dolly-worker    48x72   Distillery District, 1 lane; a brewery worker pushing two steel pony kegs
                             stacked on a hand truck down a lane at the player, stopping and going,
-                            facing it as gardener does: the kegs in front, light grey drums lit down
-                            the left with stepped chimes and a slate rolling ring each, the top one's
-                            lid and spear showing; the worker behind them, head and shoulders over the
-                            stack, in a navy toque, a short brown beard, a white tee and a green apron
-                            to the knee, the hands on the hand truck's black grips; its nose plate under
-                            the kegs, a black tire edge-on either side on its axle, the apron's hem,
-                            navy trousers and black boots under the plate
-                            (48x72, as the other one-lane people: two kegs reach the chest, leaving the
-                            head and shoulders clear); push (4 frames, 160ms, the gardener's pace): the
-                            dolly rocked back onto its wheels, the kegs riding steady, road.PERSON_WALK's
-                            stride and bob under and behind them, the tread rolling down the tires;
-                            idle (2 frames, 400ms): road.BREATH with the dolly stood on its plate, the
-                            screen-right hand flat on the top keg's lid steadying the stack; cue (4
-                            frames, 200ms): restarting, both hands on the grips braced low, rocking the
-                            dolly back onto its wheels, halfway and over, then braced to push
+                            facing it as gardener does: the kegs in front, straight-sided light grey
+                            drums lit down the left and shaded slate down the right, each with a lit
+                            top chime ring and a slate bottom chime, a navy band between them and the
+                            top one's lid and spear showing; the hand truck's navy rails up both sides
+                            of the kegs from its nose plate to handles that rise clear of the top keg
+                            and angle out, a black tire on a stub of the axle well out either side;
+                            the worker behind, head and shoulders over the handles with his hands on
+                            them, in a navy toque, a short brown beard, a white tee and a green apron
+                            to the knee, its bib between the handles and its hem, navy trousers and
+                            black boots under the plate (48x72, as the other one-lane people: two kegs
+                            reach the chest, leaving the head and shoulders clear); push (4 frames,
+                            160ms, the gardener's pace): the dolly rocked back onto its wheels, its
+                            top tipped a row further back toward him, the kegs riding steady,
+                            road.PERSON_WALK's stride and bob behind them, the tread rolling down the
+                            tires; idle (2 frames, 400ms): road.BREATH with the dolly stood upright on
+                            its plate, the screen-right hand flat on the top keg's lid steadying the
+                            stack; cue (4 frames, 200ms): restarting, both hands on the handles braced
+                            low, rocking the dolly back onto its wheels, halfway and over, then braced
+                            to push
 
 Each has depth variants at every step in minis.STEPS (@94 to @50), redrawn at the
 step on a Mini at road.SCALE x the step, with the original's tags, frame counts
@@ -2268,118 +2272,113 @@ def granny_cart_shopper(lf=0, rf=0, bob=0, tip=0, roll="0", nod=0):
 
 # ---------- keg-dolly-worker: facing the player, pushing two steel kegs on a hand truck ----------
 
-# Pushing: the dolly tipped back onto its wheels (tip KEG_TIP), the kegs riding steady while the worker walks
-# behind with road.PERSON_WALK's stride and bob, the tires' tread rolling 1 drawn pixel down a frame (roll). 4
-# frames at 160ms, as the gardener's push.
-KEG_TIP = 4.5
-KEG_PUSH = tuple(dict(lf=q.get("lf", 0), rf=q.get("rf", 0), bob=q.get("bob", 0), tip=KEG_TIP, roll=n)
-                 for n, q in enumerate(road.PERSON_WALK))
+# Pushing: the dolly rocked back onto its wheels, its nose plate tip rows off the road and its top tilt rows
+# further back toward the worker, the kegs riding steady while he walks behind with road.PERSON_WALK's stride
+# and bob, the tires' tread rolling 1 drawn pixel down a frame (roll). 4 frames at 160ms, as the gardener's
+# push.
+KEG_TIP, KEG_TILT = 3.5, 1
+KEG_PUSH = tuple(dict(lf=q.get("lf", 0), rf=q.get("rf", 0), bob=q.get("bob", 0), tip=KEG_TIP, tilt=KEG_TILT,
+                      roll=n) for n, q in enumerate(road.PERSON_WALK))
 KEG_PUSH_MS = 160
-# Stopped: the dolly stood on its nose plate, the screen-right hand flat on the top keg's lid steadying the
-# stack, breathing: road.BREATH, the hand staying on the lid. 2 frames at road.BREATH_MS.
+# Stopped: the dolly stood upright on its nose plate, the screen-right hand flat on the top keg's lid steadying
+# the stack, breathing: road.BREATH, the hand staying on the lid. 2 frames at road.BREATH_MS.
 KEG_IDLE = tuple(dict(steady=0, bob=b) for b in road.BREATH)
-# Restarting: both hands on the grips, braced low, then rocking the dolly back onto its wheels, halfway and
+# Restarting: both hands on the handles, braced low, then rocking the dolly back onto its wheels, halfway and
 # over, then braced to push. 4 frames at 200ms, as the gardener's cue.
-KEG_CUE = (dict(bob=1), dict(bob=1, tip=KEG_TIP / 2), dict(tip=KEG_TIP), dict(tip=KEG_TIP, bob=-1))
+KEG_CUE = (dict(bob=1), dict(bob=1, tip=KEG_TIP / 2), dict(tip=KEG_TIP, tilt=KEG_TILT),
+           dict(tip=KEG_TIP, tilt=KEG_TILT, bob=-1))
 KEG_CUE_MS = 200
 KEG_RIM = {**LIT, "green": ("green", None)}
-# The kegs' columns and height, and the wheels' centres outside them.
-KEG_X0, KEG_X1 = 9, 23
-KEG_H = 7.5
-DOLLY_WHEELS = (4, 28)
+# The kegs' columns and height, the hand truck's rails either side of them, and the wheels' centres and radii
+# outside the rails.
+KEG_X0, KEG_X1 = 11, 21
+KEG_H = 6.5
+# The dark band between the kegs, in rows.
+KEG_GAP = 1.5
+DOLLY_RAILS = (9, 21)
+RAIL_W = 2
+DOLLY_WHEELS = (3.5, 28.5)
+WHEEL_RX, WHEEL_RY = 2, 4.5
 
 
 def keg(g, y0, top):
-    """A steel pony keg standing upright, its top row y0: a light grey drum lit down its left and shaded down
-    its right, its chimes stepped in at top and bottom, a slate rolling ring round its middle and a hand hole
-    in its top chime; top shows the lid from above, a lit rim round a grey lid with the slate spear in its
-    middle."""
+    """A steel pony keg standing upright, its top row y0, with straight sides: a light grey drum lit down its
+    left and shaded slate down its right, a lit top chime ring and a slate bottom chime; top shows its lid
+    from above, light grey with the slate spear in its middle."""
     x0, x1, w = KEG_X0, KEG_X1, KEG_X1 - KEG_X0
-    g.rect(x0 + 1, y0, w - 2, KEG_H, "lgrey")
-    g.rect(x0, y0 + 2, w, KEG_H - 3, "lgrey")
-    g.rect(x1 - 3.5, y0 + 2, 3.5, KEG_H - 3, "grey")
-    g.rect(x1 - 4, y0, 3, KEG_H, "grey")
-    g.rect(x0 + 2, y0 + 1, 2, KEG_H - 2, "white")
-    g.rect(x0, y0 + 4, w - 1, 1, "slate")
+    g.rect(x0, y0, w, KEG_H, "lgrey")
+    g.rect(x1 - 2, y0, 2, KEG_H, "slate")
+    g.rect(x0 + 1.5, y0 + 1, 2, KEG_H - 2, "white")
+    g.rect(x0 + 0.5, y0, w - 1, 1, "white")
+    g.rect(x0 + 0.5, y0 + KEG_H - 1, w - 1, 1, "slate")
     if top:
-        g.rect(x0 + 1, y0 - 1.5, w - 2, 2, "grey")
-        g.rect(x0 + 2, y0 - 2, w - 4, 1, "white")
-        g.rect(x0 + 1, y0, w - 2, 1, "white")
+        g.rect(x0 + 1, y0 - 1.5, w - 2, 1.5, "lgrey")
         g.rect(15, y0 - 1.5, 2, 1.5, "slate")
 
 
-def keg_dolly_worker(lf=0, rf=0, bob=0, tip=0, roll=0, steady=None):
+def keg_dolly_worker(lf=0, rf=0, bob=0, tip=0, tilt=0, roll=0, steady=None):
     """A brewery worker facing the player, pushing two steel kegs stacked on a hand truck in front of him: a
-    navy toque, a short brown beard, a white tee and a green apron to the knee, navy trousers and black
-    boots; the hand truck's slate rails
-    up behind the kegs to two black rubber grips, its nose plate under the bottom keg and a black tire
-    edge-on either side of it. tip lifts the nose plate and the kegs that many rows as he rocks the dolly
-    back onto its wheels; roll moves the tires' tread down a pixel; steady puts his screen-right hand on the
-    top keg's lid, lifted that many rows off it."""
+    navy toque, a short brown beard, a white tee and a green apron to the knee, navy trousers and black boots;
+    the hand truck's navy rails up both sides of the kegs from its nose plate to handles that rise clear of
+    the top keg and angle out, his hands on them, and a black tire on an axle stub either side. tip lifts the
+    nose plate and the kegs that many rows as he rocks the dolly back onto its wheels, and tilt lifts the top
+    keg and the handles that many rows more, the stack's top tipped back toward him; roll moves the tires'
+    tread down a pixel; steady puts his screen-right hand on the top keg's lid, lifted that many rows off it."""
     g = edged(Grid(32, 48))
-    b, t = bob, tip
-    plate = 43.5 - t
-    low, high = plate - KEG_H, plate - 2 * KEG_H
-    grip = 20.5
+    b = bob
+    plate = 43.5 - tip
+    low = plate - KEG_H
+    high = low - KEG_GAP - KEG_H - tilt
+    handle = high - 4
     # the legs under the tipped dolly: navy trousers and black boots
     for x, f in ((11, lf), (17, rf)):
         g.rect(x, 34 + b, 4, 9.5 + f - b, "navy")
         g.rect(x + 3, 34 + b, 1, 9.5 + f - b, "ink")
         g.rect(x, 43.5 + f, 4, 1.5, "ink")
     # the green apron's skirt to the knee, its hem showing under the tipped dolly's plate
-    g.rect(10.5, 34 + b, 11, 8 - b, "green")
-    g.rect(19.5, 34 + b, 2, 8 - b, "dgreen")
-    # the body above the stack (the kegs' stepped chimes show clear road either side below it): the white
-    # tee, the green apron's bib on its straps
-    g.rect(9, 19.5 + b, 14, high - 19.5 - b, "white")
-    g.rect(21, 19.5 + b, 2, high - 19.5 - b, "lgrey")
-    g.rect(11, 21.5 + b, 10, high - 21.5 - b, "green")
-    g.rect(19, 21.5 + b, 2, high - 21.5 - b, "dgreen")
-    for x in (11, 19):
+    g.rect(11, 34 + b, 10, 8 - b, "green")
+    # the body over the stack: the white tee, the green apron's bib on its straps between the handles
+    g.rect(9.5, 19.5 + b, 13, high - 19.5 - b, "white")
+    g.rect(11.5, 21.5 + b, 9, high - 21.5 - b, "green")
+    for x in (11.5, 18.5):
         g.rect(x, 19.5 + b, 2, 2, "green")
-    # the rails up from behind the stack to the grips
-    for x in (9.5, 21):
-        g.rect(x, grip, 1.5, high - grip, "slate")
-    # the wheels, edge-on either side of the nose plate on stubs of its axle, their tread rolling
-    g.rect(DOLLY_WHEELS[0], 41, 5, 1.5, "slate")
-    g.rect(DOLLY_WHEELS[1] - 5, 41, 5, 1.5, "slate")
+    # the wheels, edge-on outside the rails on stubs of the axle, their tread rolling
     for cx in DOLLY_WHEELS:
-        g.ell(cx, 41.5, 1.8, 3.5, "ink")
-        tread_rows(g, cx - 0.5, 38.5, 45, roll, K["dslate"])
-    # the kegs, a shadow between them, and the nose plate under them
+        g.ell(cx, 45 - WHEEL_RY, WHEEL_RX, WHEEL_RY, "ink")
+        tread_rows(g, cx - 0.5, 45 - 2 * WHEEL_RY + 1, 45, roll, K["slate"])
+    g.rect(DOLLY_WHEELS[0] + 1, 40, DOLLY_RAILS[0] + RAIL_W - DOLLY_WHEELS[0] - 1, 1.5, "navy")
+    g.rect(DOLLY_RAILS[1], 40, DOLLY_WHEELS[1] - 1 - DOLLY_RAILS[1], 1.5, "navy")
+    # the kegs, a dark band between them, and the nose plate under them
     keg(g, low, False)
     keg(g, high, True)
-    g.rect(KEG_X0 + 1, low - 0.5, KEG_X1 - KEG_X0 - 2, 1, "slate")
-    g.rect(8, plate, 16, 1.5, "grey")
-    g.rect(8, plate, 16, 1, "lgrey")
-    # the grips, black rubber out from the rails' tops, and the arms: white sleeves, hands on the grips (or one
-    # on the lid)
-    g.rect(4.5, grip, 6.5, 1.5, "ink")
-    g.rect(21, grip, 6.5, 1.5, "ink")
-    g.rect(6, 18 + b, 3.5, 3, "white")
-    g.rect(6, grip - 1, 3, 3, "skin1")
-    g.rect(8, grip - 1, 1, 3, "skin2")
+    g.rect(KEG_X0, high + KEG_H, KEG_X1 - KEG_X0, low - high - KEG_H, "navy")
+    g.rect(DOLLY_RAILS[0], plate, DOLLY_RAILS[1] + RAIL_W - DOLLY_RAILS[0], 1.5, "lgrey")
+    # the rails up both sides of the kegs, then the handles angling out above the top keg
+    for x, out in ((DOLLY_RAILS[0], -2.5), (DOLLY_RAILS[1], 2.5)):
+        g.rect(x, high, RAIL_W, plate - high, "navy")
+        limb(g, x + RAIL_W / 2, high + 0.5, x + RAIL_W / 2 + out, handle, RAIL_W, ((1, "navy"),))
+    # the arms: white sleeves from the shoulders down and out to the hands on the handles (or one on the lid)
+    lx, rx = DOLLY_RAILS[0] + RAIL_W / 2 - 2.5, DOLLY_RAILS[1] + RAIL_W / 2 + 2.5
+    limb(g, 9.5, 20.5 + b, lx + 0.5, handle - 1, 2.5, ((0.5, "white"), (1, "skin1")))
+    g.rect(lx - 1.25, handle - 1.5, 2.5, 2.5, "skin1")
     if steady is None:
-        g.rect(22.5, 18 + b, 3.5, 3, "white")
-        g.rect(24.5, 18 + b, 1.5, 3, "lgrey")
-        g.rect(23, grip - 1, 3, 3, "skin1")
-        g.rect(25, grip - 1, 1, 3, "skin2")
+        limb(g, 22.5, 20.5 + b, rx - 0.5, handle - 1, 2.5, ((0.5, "white"), (1, "skin1")))
+        g.rect(rx - 1.25, handle - 1.5, 2.5, 2.5, "skin1")
+        g.rect(rx + 0.5, handle - 1.5, 0.75, 2.5, "skin2")
     else:
-        hy = high - 2.5 - steady
-        g.rect(22.5, 18 + b, 3, 3, "white")
-        g.rect(24.5, 18 + b, 1, 3, "lgrey")
-        limb(g, 23.5, 21 + b, 21.5, hy, 2.5, ((1, "skin1"),))
-        g.rect(18.5, hy, 4, 2, "skin1")
+        hy = high - 3 - steady
+        limb(g, 22.5, 20.5 + b, 21, hy, 2.5, ((0.4, "white"), (1, "skin1")))
+        g.rect(18, hy, 4.5, 2, "skin1")
         g.rect(21.5, hy, 1, 2, "skin2")
     # head: the face under a navy toque with a turned-up cuff, a short brown beard round the jaw
     face_disc(g, 16, 12.5 + b, 7, 7, "skin1", "skin2")
-    g.cel(16, 18.3 + b, 5.5, 2.2, "brown", "dbrown")
+    g.cel(16, 18.3 + b, 5.5, 2.2, "brown")
     g.rect(9, 10 + b, 1.5, 4, "brown")
-    g.rect(21.5, 10 + b, 1.5, 4, "dbrown")
+    g.rect(21.5, 10 + b, 1.5, 4, "brown")
     g.cel(16, 7 + b, 6.5, 4.5, "navy", None, "slate")
     g.rect(9, 7.5 + b, 14, 2.5, "navy")
     g.rect(9, 7.5 + b, 14, 1, "slate")
-    road.face_front(g, 16, 12.5 + b, lips="dbrown", mouth=4)
+    road.face_front(g, 16, 12.5 + b, lips="ink", mouth=4)
     return rim(g, KEG_RIM)
 
 

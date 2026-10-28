@@ -6418,7 +6418,7 @@
       "json": "sprites/keg-dolly-worker.json",
       "anchor": {
         "feetY": 68,
-        "opaqueWidth": 44
+        "opaqueWidth": 46
       }
     },
     {
@@ -6427,7 +6427,7 @@
       "json": "sprites/keg-dolly-worker@50.json",
       "anchor": {
         "feetY": 34,
-        "opaqueWidth": 22
+        "opaqueWidth": 23
       }
     },
     {
@@ -6436,7 +6436,7 @@
       "json": "sprites/keg-dolly-worker@56.json",
       "anchor": {
         "feetY": 39,
-        "opaqueWidth": 25
+        "opaqueWidth": 26
       }
     },
     {
@@ -6445,7 +6445,7 @@
       "json": "sprites/keg-dolly-worker@62.json",
       "anchor": {
         "feetY": 43,
-        "opaqueWidth": 28
+        "opaqueWidth": 29
       }
     },
     {
@@ -6454,7 +6454,7 @@
       "json": "sprites/keg-dolly-worker@69.json",
       "anchor": {
         "feetY": 48,
-        "opaqueWidth": 30
+        "opaqueWidth": 31
       }
     },
     {
@@ -6463,7 +6463,7 @@
       "json": "sprites/keg-dolly-worker@75.json",
       "anchor": {
         "feetY": 51,
-        "opaqueWidth": 33
+        "opaqueWidth": 34
       }
     },
     {
@@ -6472,7 +6472,7 @@
       "json": "sprites/keg-dolly-worker@81.json",
       "anchor": {
         "feetY": 56,
-        "opaqueWidth": 35
+        "opaqueWidth": 37
       }
     },
     {
@@ -6481,7 +6481,7 @@
       "json": "sprites/keg-dolly-worker@88.json",
       "anchor": {
         "feetY": 60,
-        "opaqueWidth": 38
+        "opaqueWidth": 40
       }
     },
     {
@@ -6490,7 +6490,7 @@
       "json": "sprites/keg-dolly-worker@94.json",
       "anchor": {
         "feetY": 65,
-        "opaqueWidth": 41
+        "opaqueWidth": 43
       }
     },
     {
