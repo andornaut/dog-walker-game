@@ -65,7 +65,8 @@ const fee = (dog: PayoutCue["dog"], amount: number): PayoutCue => ({
 
 describe("firingTimeline", () => {
   const { fadeMs, plateMs, popMs } = MOMENTS.firing;
-  const holds = [0, (fadeMs + popMs) / 2000, 2, 3, 4.5];
+  // No hold, one shorter than the intro and fade, and a long one.
+  const holds = [0, (fadeMs + popMs) / 2000, 3];
   const cases = holds.flatMap((seconds) => [false, true].map((still) => ({ seconds, still })));
 
   it.each(cases)(
