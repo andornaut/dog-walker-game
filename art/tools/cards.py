@@ -809,8 +809,8 @@ def kensington_view():
     paving = flecked("dturq", "turquoise", 23)
     a = ZoneView("kensington-market", flecked("dbrick", "brick", 41), paving, "gold", (3, 6), curb="stone",
                  walk="dturq", lawn=paving, walk_fleck="turquoise", edge="dred")
-    bd.sunburst(a, AW / 2, FAR_Y + 2, 5, "peach", "pink", FAR_Y, w=AW)
-    for x, w, wall_c, roof, awn in ((-14, 28, "dturq", "navy", "dred"), (14, 26, "violet", "purple", "ochre"),
+    bd.sunburst(a, AW / 2, FAR_Y + 2, 5, "purple", "violet", FAR_Y, w=AW)
+    for x, w, wall_c, roof, awn in ((-14, 28, "dturq", "navy", "dred"), (14, 26, "violet", "plum", "ochre"),
                                     (40, 26, "ochre", "dbrick", "dturq"), (66, 26, "olive", "dolive", "red")):
         for k in range(w // 2 + 2):
             a.fill(x - 1 + k, 7 - k // 2, w + 2 - 2 * k, 1, roof)

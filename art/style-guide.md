@@ -291,18 +291,18 @@ Backdrops are 360×158 on screen rows 48 to 205 (`art/tools/backdrops.py`); band
 
 ## Skies
 
-- Each neighbourhood has its own sky, flat above `CALM` (70 rows over the far side's ground row) but for Yonge Street's towers. Ink edges hold 3:1 or more on every sky.
+- Each neighbourhood has its own sky, flat above `CALM` (70 rows over the far side's ground row) but for Yonge Street's towers. Ink edges hold 3:1 or more on every sky but Kensington Market's violet (2.8:1), where a sky mover reads by its fills.
 
-| Sky                               | Bands or colours                                                    | Where                                          |
-| --------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------- |
-| Cabbagetown (dusk)                | lilac, pink, peach, gold bands; a crescent moon and the first stars | `backdrop-cabbagetown`, `screen-end` (no moon) |
-| Distillery District (golden hour) | peach, orange, amber bands; a sun low over Trinity Square, gulls    | `backdrop-distillery-district`                 |
-| High Park (deep clear blue)       | azure over sky, white clouds                                        | `backdrop-high-park`                           |
-| Kensington Market (rosy sunburst) | flat peach rays over pink from the end of the street (`sunburst`)   | `backdrop-kensington-market`                   |
-| The Beaches (late afternoon)      | gold over yellow, small clouds and gulls                            | `backdrop-the-beaches`                         |
-| Toronto at night                  | navy, purple, mauve bands; a crescent moon, stars in the navy band  | `screen-loading`                               |
-| Toronto autumn day                | foam over haze                                                      | `screen-home`                                  |
-| Yonge Street (evening)            | slate, dslate, purple, mauve bands; a full moon and stars           | `backdrop-yonge-street`                        |
+| Sky                                   | Bands or colours                                                     | Where                                          |
+| ------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------- |
+| Cabbagetown (dusk)                    | lilac, pink, peach, gold bands; a crescent moon and the first stars  | `backdrop-cabbagetown`, `screen-end` (no moon) |
+| Distillery District (golden hour)     | peach, orange, amber bands; a sun low over Trinity Square, gulls     | `backdrop-distillery-district`                 |
+| High Park (deep clear blue)           | azure over sky, white clouds                                         | `backdrop-high-park`                           |
+| Kensington Market (twilight sunburst) | flat purple rays over violet from the end of the street (`sunburst`) | `backdrop-kensington-market`                   |
+| The Beaches (late afternoon)          | gold over yellow, small clouds and gulls                             | `backdrop-the-beaches`                         |
+| Toronto at night                      | navy, purple, mauve bands; a crescent moon, stars in the navy band   | `screen-loading`                               |
+| Toronto autumn day                    | foam over haze                                                       | `screen-home`                                  |
+| Yonge Street (evening)                | slate, dslate, purple, mauve bands; a full moon and stars            | `backdrop-yonge-street`                        |
 
 - A zone card repeats its backdrop's sky, bands and sun included.
 - Banded skies are hard-edged horizontal bands of flat colour (`bands`), each 0.7 times the height of the band above it. Above each seam the lower band's colour runs a 1-row line 2 rows up, and another 5 rows up on a band 12 rows or taller. No gradients, no dither.

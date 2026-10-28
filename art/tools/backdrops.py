@@ -202,7 +202,7 @@ HOUSE = (6, 12, 10, 18)
 # SLIM is the slim house's windows and door: tall windows either side of the door.
 SLIM = (4, 8, 10, 13)
 # The lit left edge of a roof, a ramp step lighter than the roof.
-RAKE = dict(slate="grey", dslate="slate", navy="dslate", purple="mauve", dred="red", brown="tan")
+RAKE = dict(slate="grey", dslate="slate", navy="dslate", purple="mauve", plum="purple", dred="red", brown="tan")
 
 
 def house(cv, x, w, wall, roof, door="dred", top=40, base=104, roof_h=26, parts=HOUSE, curtains=None,
@@ -1469,18 +1469,18 @@ def patio(cv, cx, base, a, b):
 
 def kensington():
     cv = sn.Canvas(W, H)
-    # a Pedestrian Sunday afternoon: a rosy sunburst of peach rays from the end of the street, flat pink
+    # a Pedestrian Sunday at twilight: a sunburst of purple rays from the end of the street, flat violet
     # beyond its arc
-    sunburst(cv, CX, BASE + 6, 7, "peach", "pink", FAR_WALK, r=(W * 0.65, BASE + 6 - CALM))
+    sunburst(cv, CX, BASE + 6, 7, "purple", "violet", FAR_WALK, r=(W * 0.65, BASE + 6 - CALM))
     # rooftops of the back lanes behind the houses
-    roofline(cv, BASE - 34, ((24, 18, 10), (76, 16, 8), (228, 18, 9), (300, 16, 10)), "brick")
+    roofline(cv, BASE - 34, ((24, 18, 10), (76, 16, 8), (228, 18, 9), (300, 16, 10)), "dbrick")
     # painted houses turned shops across the street
     for cx, w, wall_c, roof, awn, sign, board, letters in (
             (47, 56, "dturq", "navy", "dred", "FRUIT", "forest", "gold"),
-            (CX - 69, 60, "violet", "purple", "ochre", "RECORDS", "navy", "gold"),
+            (CX - 69, 60, "violet", "plum", "ochre", "RECORDS", "navy", "gold"),
             (CX, 68, "ochre", "dbrick", "dturq", "VINTAGE", "purple", "cream"),
             (CX + 69, 60, "olive", "dolive", "red", "CHEESE", "dbrick", "gold"),
-            (313, 56, "mauve", "purple", "lake", "TACOS", "coal", "cream")):
+            (313, 56, "mauve", "plum", "lake", "TACOS", "coal", "cream")):
         market_house(cv, cx, w, wall_c, roof, awn, sign, board, letters)
     # pennants zig-zagging across the street between the house fronts
     pennants = ("red", "gold", "dturq", "lilac", "lime", "orange")

@@ -54,7 +54,7 @@ ambient-kite              17x28  a diamond kite on its string; fly 4 x 200ms (th
 
 The sky movers fly far back, so each is at full size only with no depth variants, faces right, and has
 one fly tag. Each is a few large shapes that read at 1x on its sky (Yonge Street's slate, then azure,
-pink, lilac, peach and gold), with one ink line round every fill except the geese's and the bats'. A line
+violet, lilac, peach and gold), with one ink line round every fill except the geese's and the bats'. A line
 one pixel thin, a rope, a string, a contrail, a skid or a rotor blur, is drawn past the outline so the ink
 does not thicken it.
 - The plane is a white fuselage over a grey belly with one row of windows, a rounded nose with cockpit
