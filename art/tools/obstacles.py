@@ -392,11 +392,12 @@ def delivery_truck(puff=0, roll=None):
     return lit(g)
 
 
-# 3x5 letters for the streetcar's route sign and wordmark, one string per row, 1 for a lit pixel.
+# 5-row letters for the streetcar's route sign and wordmark and the taxi's roof light, one string per row, 1 for
+# a lit pixel: 3 columns wide, the I 1.
 LETTERS = {"0": ("111", "101", "101", "101", "111"), "4": ("101", "101", "111", "001", "001"),
-           "5": ("111", "100", "111", "001", "111"), "C": ("111", "100", "100", "100", "111"),
-           "T": ("111", "010", "010", "010", "010"), "A": ("010", "101", "111", "101", "101"),
-           "I": ("111", "010", "010", "010", "111"), "X": ("101", "101", "010", "101", "101")}
+           "5": ("111", "100", "111", "001", "111"), "A": ("010", "101", "111", "101", "101"),
+           "C": ("111", "100", "100", "100", "111"), "I": ("1", "1", "1", "1", "1"),
+           "T": ("111", "010", "010", "010", "010"), "X": ("101", "101", "010", "101", "101")}
 # The streetcar's idle: a spark at the pantograph on frame 2.
 STREETCAR_IDLE = (False, False, True, False), 400
 # Its drive's sideways sway, in drawn pixels per frame, as the bogies roll under it.
@@ -406,20 +407,21 @@ STREETCAR_SWAY = (0, 1, 0, -1)
 def lettering(g, cx, y, text, c, bar=None):
     """text in LETTERS centred on layout column cx with its top on layout row y, drawn pixel for pixel on the
     grid holding g's pixels, 1px apart. Where the grid is too small for it to sit inside the layout's 5 rows
-    and 4 columns a letter, bar draws a 1px line of that colour across its middle instead, or nothing."""
+    and its letters' columns, bar draws a 1px line of that colour across its middle instead, or nothing."""
     px = raster(g)
     s, sy = scale_of(g), getattr(g, "sy", scale_of(g))
-    w = 4 * len(text) - 1
+    w = sum(len(LETTERS[ch][0]) + 1 for ch in text) - 1
     if s < 0.85 or sy * 5 < 5:
         if bar:
             px.rect(math.floor((cx - w / 2) * s + 0.5), math.floor((y + 2.5) * sy), max(1, round(w * s)), 1, bar)
         return
     x0, y0 = math.floor(cx * s + 0.5) - w // 2, math.floor((y + 2.5) * sy + 0.5) - 2
-    for i, ch in enumerate(text):
+    for ch in text:
         for j, row in enumerate(LETTERS[ch]):
             for k, on in enumerate(row):
                 if on == "1":
-                    px.p(x0 + 4 * i + k, y0 + j, c)
+                    px.p(x0 + k, y0 + j, c)
+        x0 += len(LETTERS[ch][0]) + 1
 
 
 def streetcar(spark=False, roll=None):
@@ -506,7 +508,7 @@ def taxi(roll=None, signal=False, turn=False):
     and left edges and shaded amber down its right, the dark rear window between the pillars, the trunk lid's
     lip, tail light clusters in ink housings at the outer corners (red inside, the indicator outside), a white
     plate, a black rocker band and bumper and both rear tires, mirrors at the window's base. signal lights the
-    right indicator amber and the repeater on the right mirror; unlit they are dbrown and ochre. roll (0 to 3)
+    right indicator amber and the repeater on the right mirror; unlit they are dbrown and dslate. roll (0 to 3)
     is a drive frame: tread lines climb the tires 1px a frame (treads). turn angles it right, changing lanes:
     the rear face narrows and slides left, the roof light and cabin lean 2px further right, and the right flank
     shows down the right edge in amber, its side window, its mirror and repeater, and the right rear tire side
@@ -526,8 +528,6 @@ def taxi(roll=None, signal=False, turn=False):
     for x in (6, 42):
         r(x, 26, 8, 8, "ink")
         r(x, 26, 2, 7, "dslate")
-        if roll is not None:
-            treads(g, X(x + 2), 29, 6 * k, 5, roll, uy)
     if turn:
         # the right flank: the beltline and rocker rising toward the front, the rear tire side on
         g.tri((X(52), 17), (54, 16), (54, 26), "amber")
@@ -553,12 +553,12 @@ def taxi(roll=None, signal=False, turn=False):
     r(25, 7, 6, 1, "dslate", 1)
     r(19, 1, 18, 6, "white", 1)
     r(19, 6, 18, 1, "lgrey", 1)
-    r(35, 2, 2, 4, "lgrey", 1)
-    lettering(g, X(28, 1), 1.3, "TAXI", "dred", "dred")
+    r(36, 2, 1, 4, "lgrey", 1)
+    lettering(g, X(27, 1), 1, "TAXI", "dred", "dred")
     # black mirrors at the window's base; the right one carries the indicator's repeater
     r(3, 13, 5, 3, "ink")
     mx, my = (50, 12) if turn else (X(48), 13)
-    g.rect(mx, my, 5 * k if not turn else 5, 3, "ink")
+    g.rect(mx, my, 5, 3, "ink")
     g.rect(mx + 1, my + 1, 3, 2, "amber" if signal else "dslate")
     if signal:
         g.rect(mx + 1, my + 1, 3, 1, "yellow")
@@ -588,8 +588,12 @@ def taxi(roll=None, signal=False, turn=False):
         # the tail light housing wraps round the corner onto the flank
         g.rect(X(52), 20, 1, 6, "ink")
     r(4, 26, 48, 1, "ink")
-    r(3, 27, 50, 3, "ink")
+    r(3, 27, 50, 2, "ink")
     r(3, 27, 50, 1, "dslate")
+    # tread lines on the tires' 5 rows under the bumper, as the parked car's
+    if roll is not None:
+        for x in (6, 42):
+            treads(g, X(x + 2), 29, 6 * k, 5, roll, uy)
     return lit(g)
 
 
