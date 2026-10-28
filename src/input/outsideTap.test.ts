@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { SCREEN_CONFIG } from "../data/screen";
-import { screenLayout } from "../layout/screenLayout";
+import { SCREEN_LAYOUT } from "../data/screen";
 import type { Point, Rect } from "../lib/rect";
 import {
   isOutside,
@@ -38,7 +37,7 @@ describe("isOutside", () => {
 });
 
 describe("screenArea", () => {
-  const { screen } = screenLayout(SCREEN_CONFIG);
+  const { screen } = SCREEN_LAYOUT;
   const panel = { height: 40, width: 40, x: 30, y: 30 };
   // A full-screen page covers the screen itself.
   it("decides each point", () => {

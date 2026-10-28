@@ -1,7 +1,6 @@
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import { isMuteKey, isPauseKey } from "../input/keyBindings";
 import type { PressMode } from "../input/pointerTracking";
-import { screenLayout } from "../layout/screenLayout";
 import { containsPoint, type Point } from "../lib/rect";
 import { type BarButton, WALK_BAR_BUTTONS, type WalkBarButtonId, walkBarLayout } from "./walkHud";
 
@@ -9,7 +8,7 @@ import { type BarButton, WALK_BAR_BUTTONS, type WalkBarButtonId, walkBarLayout }
 // button's and never a road gesture. "sound" toggles mute, as the M key and the Settings switch
 // do.
 export const TOP_BAR_BUTTONS: Readonly<Record<WalkBarButtonId, BarButton>> = walkBarLayout(
-  screenLayout(SCREEN_CONFIG).topBar,
+  SCREEN_LAYOUT.topBar,
 ).buttons;
 
 // Where the button's icon sits on its face.

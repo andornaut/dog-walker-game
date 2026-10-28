@@ -1,6 +1,5 @@
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import type { DogId } from "../data/types";
-import { screenLayout } from "../layout/screenLayout";
 import { clamp01 } from "../lib/numbers";
 import type { Point, Rect } from "../lib/rect";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
@@ -86,7 +85,7 @@ interface MessageStripLayout {
 }
 
 // The walk bar the strip hangs under.
-const WALK_BAR_RECT = screenLayout(SCREEN_CONFIG).topBar;
+const WALK_BAR_RECT = SCREEN_LAYOUT.topBar;
 
 function stripTop(bar: Rect): number {
   return bar.y + bar.height + MESSAGE_STRIP.gap;

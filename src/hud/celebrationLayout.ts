@@ -1,6 +1,5 @@
 import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
-import { SCREEN_CONFIG } from "../data/screen";
-import { screenLayout } from "../layout/screenLayout";
+import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { FontMetrics } from "../ui/fontMetrics";
 import { type TextFitStyle, textFitStylesOnLines } from "../ui/textFit";
 
@@ -21,7 +20,7 @@ const TITLE_OVER_SUBTITLE = 38;
 // The celebration moves with the road, its rows set from the road's top row: the dim from 72
 // rows over it, and each version's walker's feet line under it, with the new walker's bubble
 // 6 rows under its feet line and the parts in the bubble from the bubble's top.
-const ROAD_TOP = screenLayout(SCREEN_CONFIG).roadView.y;
+const ROAD_TOP = SCREEN_LAYOUT.roadView.y;
 const DIM = { height: 316, width: SCREEN_WIDTH, x: 0, y: ROAD_TOP - 72 };
 const NEW_WALKER_FEET = ROAD_TOP + 104;
 const BUBBLE_TOP = NEW_WALKER_FEET + 6;

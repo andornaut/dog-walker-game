@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import { distanceAtY } from "../layout/projection";
-import { screenLayout } from "../layout/screenLayout";
 import { randomStream } from "../lib/random";
 import { startAmbient, stepAmbient } from "../road/ambient";
 import { newRoadsidePlaces, placeRoadside, ROADSIDE } from "../road/roadsideProps";
@@ -24,7 +23,7 @@ import { startRoad, zoneLength } from "./walk";
 import { walkProjection } from "./walkGeometry";
 
 const STEPS = 60 * 90;
-const LAYOUT = screenLayout(SCREEN_CONFIG);
+const LAYOUT = SCREEN_LAYOUT;
 const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
 const STAGE = { band: LAYOUT.backdrop, projection: PROJECTION };
 

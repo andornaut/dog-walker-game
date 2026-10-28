@@ -3,9 +3,8 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { ENCOUNTERS } from "../data/encounters";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
-import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_CAMERA, SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { screenYAt } from "../layout/projection";
-import { screenLayout } from "../layout/screenLayout";
 import { keysOf } from "../lib/records";
 import { testState } from "../testing/runState";
 import { hitDog, itemBox, pickupDog } from "./collision";
@@ -15,7 +14,7 @@ import { isObstacle, itemHeight, obstacleHitBox, packBoxes, type WalkItemKind } 
 import { walkProjection } from "./walkGeometry";
 
 const DATA = { encounters: ENCOUNTERS, minorObstacles: MINOR_OBSTACLES };
-const LAYOUT = screenLayout(SCREEN_CONFIG);
+const LAYOUT = SCREEN_LAYOUT;
 const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
 const ROAD_VIEW_BOTTOM = LAYOUT.roadView.y + LAYOUT.roadView.height;
 // How finely the road's scroll is sampled, in road pixels.

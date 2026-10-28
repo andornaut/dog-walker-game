@@ -10,7 +10,7 @@ import {
   shownArtKey,
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import { type OptionMarks, optionMarks } from "../hud/buffMarks";
 import { largeBodyText, type PlaqueSize, plaqueTexts, smallCardText } from "../hud/cardText";
 import { type HoldPress, type HoldRule, startHold, tickHold } from "../input/hold";
@@ -28,7 +28,6 @@ import {
   largeCardRect,
   plaqueRoom,
 } from "../layout/cardLayout";
-import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
 import { insetRect, type Rect } from "../lib/rect";
 import {
@@ -176,7 +175,7 @@ export class CardScene extends Scene {
     this.headerParts = [];
     this.homeParts = [];
     this.refusing = false;
-    const { walkView } = screenLayout(SCREEN_CONFIG);
+    const { walkView } = SCREEN_LAYOUT;
     addRampDim(this, walkView);
 
     this.entries = [
@@ -368,7 +367,7 @@ export class CardScene extends Scene {
     const height = largeCardHeight(measured.height + LARGE_BODY_GAP);
     // The rows under the body move up by what it gave up.
     const shift = height - LARGE.height;
-    const { walkView } = screenLayout(SCREEN_CONFIG);
+    const { walkView } = SCREEN_LAYOUT;
     const { x, y } = largeCardRect(walkView, height);
     const before = this.children.list.length;
     const tag = cardFrameTag(view.source);

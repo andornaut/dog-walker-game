@@ -8,7 +8,7 @@ import {
   walkerPortraitKey,
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import type { DogId, GearId, WalkerId } from "../data/types";
 import { clearRunOverrides } from "../dev/pageRunSetup";
 import { startWalkOpensHelp } from "../help/helpSeen";
@@ -93,7 +93,6 @@ import { HOLD, type HoldPress, moveHold, releaseHold, startHold, tickHold } from
 import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { screenArea } from "../input/outsideTap";
 import type { PackPlacement } from "../layout/packFormation";
-import { screenLayout } from "../layout/screenLayout";
 import { clampIndex, itemAt } from "../lib/arrays";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import { addFigure, PackFigures } from "../pack/phaser/packFigures";
@@ -193,7 +192,7 @@ import {
   tileTextureKey,
 } from "./uiKit";
 
-const SCREEN = screenLayout(SCREEN_CONFIG).screen;
+const SCREEN = SCREEN_LAYOUT.screen;
 const GATE = HOME_LAYOUT.gate;
 const PATH = HOME_LAYOUT.path;
 const WALKER_AT_GATE = HOME_LAYOUT.walkerAtGate;

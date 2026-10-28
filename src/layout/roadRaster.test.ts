@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { decodePng } from "../assets/atlas/atlasBuild";
 import { roadTileKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_CAMERA, SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { ZoneId } from "../data/types";
 import { itemAt } from "../lib/arrays";
 import { keysOf } from "../lib/records";
@@ -38,9 +38,9 @@ import {
   stripLines,
   stripSeams,
 } from "./roadRaster";
-import { screenLayout, walkerFootY } from "./screenLayout";
+import { walkerFootY } from "./screenLayout";
 
-const { approach, junction, rasterView: view, road } = screenLayout(SCREEN_CONFIG);
+const { approach, junction, rasterView: view, road } = SCREEN_LAYOUT;
 // The road's far row, nearest row and middle row, and the backdrop's bottom row above the far
 // row.
 const FAR_Y = road.y;

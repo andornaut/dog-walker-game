@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import type { PressMode } from "../input/pointerTracking";
-import { screenLayout } from "../layout/screenLayout";
 import { containsPoint } from "../lib/rect";
 import {
   gameplayAllowed,
@@ -156,7 +155,7 @@ describe("topBarButtonForKey", () => {
 
 describe("the walk bar's buttons", () => {
   it("sets each face in a thumb-wide hit area, left to right, none over the next or the wells", () => {
-    const { topBar } = screenLayout(SCREEN_CONFIG);
+    const { topBar } = SCREEN_LAYOUT;
     const bar = walkBarLayout(topBar);
     const hits = WALK_BAR_BUTTONS.map((id) => TOP_BAR_BUTTONS[id].hit);
     hits.slice(1).forEach((hit, i) => {

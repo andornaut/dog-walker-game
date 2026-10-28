@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { SCREEN_CONFIG } from "../data/screen";
-import { screenLayout } from "../layout/screenLayout";
+import { SCREEN_LAYOUT } from "../data/screen";
 import { fadeIn, rowsAboveJuncture, rowsHidden } from "./roadClip";
 
-const { approach, junction, road } = screenLayout(SCREEN_CONFIG);
+const { approach, junction, road } = SCREEN_LAYOUT;
 const JUNCTURE = junction.y;
 
 describe("rowsAboveJuncture", () => {

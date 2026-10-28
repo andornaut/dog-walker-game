@@ -1,11 +1,10 @@
 import { type GameObjects, Scene, Scenes } from "phaser";
 
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import { DEV_STATE_EVENT, devOverlayLines, type DevState } from "../dev/devOverlay";
 import { cheatsFrom, DEV_CHEATS_KEY } from "../dev/devPanelModel";
 import { pageRunSetup } from "../dev/pageRunSetup";
 import { runSetupLink } from "../dev/runSetup";
-import { screenLayout } from "../layout/screenLayout";
 import { onSceneEvent } from "./overlay";
 import { SCENE_KEYS } from "./sceneKeys";
 
@@ -40,7 +39,7 @@ export class DevOverlayScene extends Scene {
   }
 
   create(): void {
-    const { road } = screenLayout(SCREEN_CONFIG);
+    const { road } = SCREEN_LAYOUT;
     this.wanted = this.cheatOn();
     this.runActive = this.scene.isActive(SCENE_KEYS.run);
     this.text = this.add.text(road.x + INSET, road.y + INSET, "", TEXT_STYLE);

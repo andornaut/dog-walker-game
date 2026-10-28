@@ -2,10 +2,9 @@ import type { GameObjects, Scene } from "phaser";
 
 import { ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import type { DogId } from "../data/types";
 import { OWNER_TAB, ownerTabRect } from "../hud/walkHud";
-import { screenLayout } from "../layout/screenLayout";
 import type { Rect } from "../lib/rect";
 import { drawFramedRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
@@ -14,7 +13,7 @@ import { playFirstTag } from "./sprites";
 import type { TimedGroup } from "./timedGroup";
 import { fadeAway } from "./uiKit";
 
-const LAYOUT = screenLayout(SCREEN_CONFIG);
+const LAYOUT = SCREEN_LAYOUT;
 // Over the cards and their heart-loss flash, under the HUD's moments (depth 50 on), its
 // parts stacked from here.
 const DEPTH = 30;

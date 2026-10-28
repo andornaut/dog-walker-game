@@ -24,6 +24,9 @@ export const SCREEN_CONFIG: ScreenConfig = {
   zoneProgressHeight: 4,
 };
 
+// The screen's regions, laid out for SCREEN_CONFIG.
+export const SCREEN_LAYOUT = screenLayout(SCREEN_CONFIG);
+
 export const LANE_COUNT = 5;
 
 // The pseudo-3D road's camera: the screen row the road's vanishing point sits on, and the
@@ -32,7 +35,7 @@ export const LANE_COUNT = 5;
 // backdrops, drawn to continue the road at their bottom row, keep their join. The rest of the
 // camera derives from the band's bottom edge and the walker's feet.
 export const ROAD_FAR_SCALE = 0.5;
-const { road } = screenLayout(SCREEN_CONFIG);
+const { road } = SCREEN_LAYOUT;
 export const ROAD_CAMERA = roadCameraFor({
   farScale: ROAD_FAR_SCALE,
   farY: road.y,

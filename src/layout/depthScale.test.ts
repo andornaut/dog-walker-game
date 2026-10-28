@@ -5,14 +5,13 @@ import { DEPTH_STEPS, splitDepthKey, stepSize } from "../assets/depthSteps";
 import { parseManifest } from "../assets/manifest";
 import { depthVariantKey, dogSpriteKey, standsOnGround } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import { itemAt } from "../lib/arrays";
 import { keysOf } from "../lib/records";
 import { walkProjection } from "../runner/walkGeometry";
 import { type DepthArt, depthDraw } from "./depthScale";
 import { PACK_DEPTH } from "./packFormation";
 import { SCALE_STEPS, scaleAt } from "./projection";
-import { screenLayout } from "./screenLayout";
 
 const manifest = parseManifest(shippedManifest);
 const sprites = new Map(manifest.sprites.map((entry) => [entry.key, entry]));
@@ -73,7 +72,7 @@ function stepSets(keys: readonly string[]): DepthArt[][] {
   return keys.flatMap((key) => [artsOf(key), withEveryStep(artsOf(key))]);
 }
 
-const projection = walkProjection(ROAD_CAMERA, screenLayout(SCREEN_CONFIG).road);
+const projection = walkProjection(ROAD_CAMERA, SCREEN_LAYOUT.road);
 // A slow approach: the road's projected scales from the far edge to just past the walker's
 // feet, a quarter road pixel apart.
 const approach = Array.from({ length: 4 * (Math.ceil(projection.visibleDistance) + 12) }, (_, i) =>

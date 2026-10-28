@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { ROAD_CAMERA, ROAD_FAR_SCALE, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_CAMERA, ROAD_FAR_SCALE, SCREEN_LAYOUT } from "../data/screen";
 import { TUNING } from "../data/tuning";
 import {
   COLLAR_HEIGHTS,
@@ -14,12 +14,12 @@ import {
   WALKER_HANDS,
   WALKER_SILHOUETTES,
 } from "../layout/packFormation";
-import { screenLayout, walkerFootY } from "../layout/screenLayout";
+import { walkerFootY } from "../layout/screenLayout";
 import { walkProjection } from "../runner/walkGeometry";
 import { layoutExport } from "./layoutExport";
 
 const layout = layoutExport(gameData);
-const { road } = screenLayout(SCREEN_CONFIG);
+const { road } = SCREEN_LAYOUT;
 const footY = walkerFootY(road);
 const projection = walkProjection(ROAD_CAMERA, road);
 const lookAhead = TUNING.seconds.lookAheadSeconds * TUNING.pixels.roadScrollSpeed;

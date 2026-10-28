@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import type { ZoneId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
-import { screenLayout } from "../layout/screenLayout";
 import { seededRandom } from "../lib/random";
 import { read } from "../rules/units";
 import { newRun, type RunState } from "../state/runState";
@@ -19,7 +18,7 @@ import { hasZoomies, stepZoomies } from "./zoomies";
 
 // The game's road for the pack of three the drift test walks; walkIn's lone Kilo leads it.
 const ROAD = (() => {
-  const road = screenLayout(SCREEN_CONFIG).road;
+  const road = SCREEN_LAYOUT.road;
   const pack = { dogs: ["kilo", "biscuit", "duchess"], walker: "casey" } as const;
   return walkGeometry(LANE_COUNT, pack, walkProjection(ROAD_CAMERA, road), road);
 })();

@@ -1,13 +1,12 @@
-import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import { formationOrder } from "../layout/packFormation";
-import { screenLayout } from "../layout/screenLayout";
 import { getOrInsert } from "../lib/maps";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
 import type { RoadGeometry } from "./walk";
 import { walkGeometry, walkProjection } from "./walkGeometry";
 
-const ROAD = screenLayout(SCREEN_CONFIG).road;
+const ROAD = SCREEN_LAYOUT.road;
 const VIEW = walkProjection(ROAD_CAMERA, ROAD);
 const GEOMETRIES = new Map<string, RoadGeometry>();
 

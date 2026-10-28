@@ -6,9 +6,8 @@ import { describe, expect, it } from "vitest";
 import shippedManifest from "../../public/art/manifest.json";
 import { DEPTH_STEPS } from "../assets/depthSteps";
 import { gameData } from "../data";
-import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import { distanceAtY } from "../layout/projection";
-import { screenLayout } from "../layout/screenLayout";
 import { walkProjection } from "../runner/walkGeometry";
 import { curbBand, curbFits, VERGES, VERGES_BY_ART, walkFrom } from "./roadside";
 import {
@@ -27,7 +26,7 @@ import {
   START_STRIP_LENGTH,
 } from "./roadsideProps";
 
-const LAYOUT = screenLayout(SCREEN_CONFIG);
+const LAYOUT = SCREEN_LAYOUT;
 const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
 const MANIFEST_KEYS = new Set(shippedManifest.sprites.map(({ key }) => key));
 const ZONE_ARTS = Object.keys(ROADSIDE.zones);

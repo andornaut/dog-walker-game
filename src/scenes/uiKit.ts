@@ -2,9 +2,8 @@ import type { GameObjects, Scene, Tweens } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
 import { disabledTextureKey } from "../assets/phaser/greyTextures";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import { FEEDBACK, loopFrame } from "../home/feedback";
-import { screenLayout } from "../layout/screenLayout";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import type { CloseControl } from "../ui/closeControl";
 import {
@@ -708,7 +707,7 @@ export function addScreenBackdrop(scene: Scene, key?: string): void {
   if (key !== undefined && scene.textures.exists(key)) {
     scene.add.image(0, 0, key).setOrigin(0);
   } else {
-    fillRect(scene.add.graphics(), PALETTE.darkBrown, screenLayout(SCREEN_CONFIG).screen);
+    fillRect(scene.add.graphics(), PALETTE.darkBrown, SCREEN_LAYOUT.screen);
   }
 }
 

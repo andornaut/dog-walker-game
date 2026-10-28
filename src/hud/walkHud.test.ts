@@ -6,10 +6,9 @@ import { decodePng } from "../assets/atlas/atlasBuild";
 import { opaqueRect } from "../assets/atlas/atlasPixels";
 import { dogFaceKey, ownerCardFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
 import { dollarAmountText } from "../home/home";
-import { screenLayout } from "../layout/screenLayout";
 import { keysOf } from "../lib/records";
 import { type Point, type Rect, rectsOverlap } from "../lib/rect";
 import { maxHearts } from "../rules/dogs";
@@ -51,7 +50,7 @@ import {
   zoneShare,
 } from "./walkHud";
 
-const LAYOUT = screenLayout(SCREEN_CONFIG);
+const LAYOUT = SCREEN_LAYOUT;
 const { dogSlots, topBar } = LAYOUT;
 const BAR = walkBarLayout(topBar);
 const WELLS = BAR.effectWells.length;

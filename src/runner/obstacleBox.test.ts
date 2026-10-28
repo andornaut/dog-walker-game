@@ -6,13 +6,12 @@ import { decodePng } from "../assets/atlas/atlasBuild";
 import { spriteSource } from "../assets/atlas/atlasLayout";
 import { depthVariantKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import type { DogId, EncounterId, MinorObstacleId } from "../data/types";
 import { type DepthArt, depthDraw } from "../layout/depthScale";
 import { obstacleParts } from "../layout/obstacleArt";
 import { everyPack, PART_INSET } from "../layout/packFormation";
 import { project, SCALE_STEPS, screenYAt } from "../layout/projection";
-import { screenLayout } from "../layout/screenLayout";
 import { keysOf } from "../lib/records";
 import { testState } from "../testing/runState";
 import { undrawn } from "../testing/undrawnArt";
@@ -25,7 +24,7 @@ import { walkProjection } from "./walkGeometry";
 
 type Kind = EncounterId | MinorObstacleId;
 
-const ROAD = screenLayout(SCREEN_CONFIG).road;
+const ROAD = SCREEN_LAYOUT.road;
 const PROJECTION = walkProjection(ROAD_CAMERA, ROAD);
 const GEOMETRY = screenRoadGeometry(testState({ kilo: 3 }));
 const { cell, lens } = GEOMETRY;

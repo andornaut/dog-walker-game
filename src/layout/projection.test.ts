@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ROAD_CAMERA, ROAD_FAR_SCALE, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_CAMERA, ROAD_FAR_SCALE, SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { TUNING } from "../data/tuning";
 import {
   columnSpan,
@@ -13,9 +13,9 @@ import {
   scaleAt,
   screenYAt,
 } from "./projection";
-import { screenLayout, walkerFootY } from "./screenLayout";
+import { walkerFootY } from "./screenLayout";
 
-const { backdrop, road } = screenLayout(SCREEN_CONFIG);
+const { backdrop, road } = SCREEN_LAYOUT;
 const projection = roadProjection(ROAD_CAMERA, walkerFootY(road), road);
 // The backdrop's bottom row, which the art draws as the road's continuation.
 const bandRow = backdrop.y + backdrop.height - 1;

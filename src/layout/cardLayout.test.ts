@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import { itemAt } from "../lib/arrays";
 import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
 import { MAX_CARD_OPTIONS } from "../rules/choices";
@@ -16,7 +16,6 @@ import {
   largeCardHeight,
   largeCardRect,
 } from "./cardLayout";
-import { screenLayout } from "./screenLayout";
 
 describe("largeCardHeight", () => {
   it("shrinks the large card by its empty body rows, in whole rows, up to the full card", () => {
@@ -53,7 +52,7 @@ describe("the card's band label", () => {
   });
 });
 
-const SCREEN = screenLayout(SCREEN_CONFIG);
+const SCREEN = SCREEN_LAYOUT;
 const WALK = SCREEN.walkView;
 const bottom = (rect: Rect) => rect.y + rect.height;
 const right = (rect: Rect) => rect.x + rect.width;

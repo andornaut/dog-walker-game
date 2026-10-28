@@ -6,7 +6,7 @@ import { decodePng } from "../assets/atlas/atlasBuild";
 import { spriteSource } from "../assets/atlas/atlasLayout";
 import { dogSpriteKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import type { DogId, Size, WalkerId } from "../data/types";
 import { itemAt } from "../lib/arrays";
 import { keysOf } from "../lib/records";
@@ -34,9 +34,8 @@ import {
   WALKER_SILHOUETTES,
 } from "./packFormation";
 import { distanceAtY, project, scaleAt, screenYAt } from "./projection";
-import { screenLayout } from "./screenLayout";
 
-const ROAD = screenLayout(SCREEN_CONFIG).road;
+const ROAD = SCREEN_LAYOUT.road;
 // The game's projection, its feet on the walker's feet line.
 const PROJECTION = walkProjection(ROAD_CAMERA, ROAD);
 const LANE_XS = laneCentreXs(LANE_COUNT, ROAD);

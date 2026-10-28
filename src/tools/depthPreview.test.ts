@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { blankImage } from "../assets/atlas/atlasPixels";
-import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import { depthDraw } from "../layout/depthScale";
 import { project } from "../layout/projection";
-import { screenLayout } from "../layout/screenLayout";
 import { walkProjection } from "../runner/walkGeometry";
 import { type PreviewArt, sweepDistances, sweepRow } from "./depthPreview";
 
-const { road } = screenLayout(SCREEN_CONFIG);
+const { road } = SCREEN_LAYOUT;
 const lens = walkProjection(ROAD_CAMERA, road);
 
 function art(key: string, size: number): PreviewArt {

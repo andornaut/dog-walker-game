@@ -1,7 +1,7 @@
 import { Core, Scene } from "phaser";
 
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import type { HomeNoteLine } from "../hud/homeQuestion";
 import {
   HOME_QUESTION_ANSWERS,
@@ -15,7 +15,6 @@ import {
 } from "../hud/pauseMenu";
 import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
 import { withKeyNumber } from "../input/keyNumbers";
-import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
 import { sentences } from "../lib/lines";
 import { insetRect } from "../lib/rect";
@@ -77,7 +76,7 @@ export class PauseScene extends Scene {
   create(data: PauseSceneData): void {
     const { onHeadHome, onResume } = data;
     this.pressed = undefined;
-    const { walkView } = screenLayout(SCREEN_CONFIG);
+    const { walkView } = SCREEN_LAYOUT;
     addRampDim(this, walkView);
     const headHome = () => {
       soundboardOf(this).stopMusic();

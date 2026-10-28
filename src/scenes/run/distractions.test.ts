@@ -5,10 +5,9 @@ import { describe, expect, it } from "vitest";
 import shippedManifest from "../../../public/art/manifest.json";
 import { minorObstacleSpriteKey } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
-import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../../data/screen";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../../data/screen";
 import type { MinorObstacleId } from "../../data/types";
 import { laneCentreXs } from "../../layout/lanes";
-import { screenLayout } from "../../layout/screenLayout";
 import { randomStream } from "../../lib/random";
 import {
   eachRoadsideProp,
@@ -45,7 +44,7 @@ import {
   stepDistractions,
 } from "./distractions";
 
-const LAYOUT = screenLayout(SCREEN_CONFIG);
+const LAYOUT = SCREEN_LAYOUT;
 const CENTRE_X = walkProjection(ROAD_CAMERA, LAYOUT.road).centreX;
 const FIRST_LANE_X = defined(laneCentreXs(LANE_COUNT, LAYOUT.road)[0]);
 const RUN = newRun(gameData, 3, { dogs: ["kilo", "biscuit"], gear: null, walker: "casey" });

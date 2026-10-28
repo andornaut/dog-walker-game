@@ -1,11 +1,10 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import type { DetailCard, DetailPicture } from "../home/detail";
 import { CARD_TEXT_ROOM, cardBand, detailCardLayout, HOME_LAYOUT } from "../home/homeLayout";
 import { withNamePills } from "../hud/effectNames";
-import { screenLayout } from "../layout/screenLayout";
 import { insetRect, type Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
 import { addDim, drawFramedRect, drawRing } from "../ui/phaser/draw";
@@ -33,7 +32,7 @@ import {
 // player can afford something in it, and the detail card that opens over the screen. Positions
 // inside a piece are the art's, from the style guide.
 
-const SCREEN = screenLayout(SCREEN_CONFIG).screen;
+const SCREEN = SCREEN_LAYOUT.screen;
 
 function text(
   scene: Scene,

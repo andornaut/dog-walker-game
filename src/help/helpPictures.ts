@@ -1,8 +1,7 @@
-import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { DogId, EncounterId, GameData, HelpPictureId, MinorObstacleId } from "../data/types";
 import { cardRowIn } from "../layout/cardLayout";
 import { laneCentreXs } from "../layout/lanes";
-import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
 import { keysOf } from "../lib/records";
 import type { Point, Rect } from "../lib/rect";
@@ -41,7 +40,7 @@ import { HELP_LAYOUT } from "./helpLayout";
 // screen's rows, top to bottom. This module says which rows, and what the walk holds at that
 // moment, built by the game's rules, so every name and number in a picture is the game's.
 
-const SCREEN = screenLayout(SCREEN_CONFIG);
+const SCREEN = SCREEN_LAYOUT;
 const PROJECTION = walkProjection(ROAD_CAMERA, SCREEN.road);
 const LANES = laneCentreXs(LANE_COUNT, SCREEN.road);
 

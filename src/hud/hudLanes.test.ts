@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
-import { screenLayout } from "../layout/screenLayout";
+import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { keysOf } from "../lib/records";
 import { type Rect, rectsOverlap } from "../lib/rect";
 import { firedByText } from "../rules/causes";
@@ -19,7 +18,7 @@ import {
 import { messageStripLayout } from "./messageStrip";
 import { DOG_CARD, ownerTabRect } from "./walkHud";
 
-const layout = screenLayout(SCREEN_CONFIG);
+const layout = SCREEN_LAYOUT;
 const BODY = fontFileMetrics("font-body");
 const lanes = hudLanes(layout);
 const messages = messageStripLayout(BODY).panel;

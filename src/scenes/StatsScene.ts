@@ -2,7 +2,7 @@ import { type GameObjects, Scene } from "phaser";
 
 import { dogFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import {
   BADGE_TEXT_COLOURS,
   badgeProgress,
@@ -48,7 +48,6 @@ import {
   scrollMax,
   stepScroll,
 } from "../input/listScroll";
-import { screenLayout } from "../layout/screenLayout";
 import { clampIndex } from "../lib/arrays";
 import { fillLine } from "../lib/lines";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
@@ -110,7 +109,7 @@ const SCROLL = STATS_LAYOUT.scroll;
 // A screen-sized texture, white over the view: the mask that clips each tab's content to it.
 const VIEW_MASK_KEY = "stats-view-mask";
 const DETAIL: Rect = STATS_LAYOUT.detail;
-const SCREEN = screenLayout(SCREEN_CONFIG).screen;
+const SCREEN = SCREEN_LAYOUT.screen;
 const DETAIL_TEXT = STATS_LAYOUT.detailText;
 // The badge and its confetti are drawn at 2x, so the burst shows around the bigger badge.
 const DETAIL_BADGE_SCALE = 2;

@@ -1,5 +1,4 @@
-import { SCREEN_CONFIG } from "../data/screen";
-import { screenLayout } from "../layout/screenLayout";
+import { SCREEN_LAYOUT } from "../data/screen";
 import { containsPoint, type Point, type Rect } from "../lib/rect";
 import { exceedsTapDistance } from "./gestures";
 
@@ -13,7 +12,7 @@ export interface OutsideArea {
 // The area around covered on a dim over the whole screen. A full-screen page covers the screen
 // itself, so no point on the canvas is outside it.
 export function screenArea(covered: readonly Rect[]): OutsideArea {
-  return { covered, dim: screenLayout(SCREEN_CONFIG).screen };
+  return { covered, dim: SCREEN_LAYOUT.screen };
 }
 
 export interface OutsidePress {

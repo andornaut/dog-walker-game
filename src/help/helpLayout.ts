@@ -1,11 +1,10 @@
-import { SCREEN_CONFIG } from "../data/screen";
-import { screenLayout } from "../layout/screenLayout";
+import { SCREEN_LAYOUT } from "../data/screen";
 import { containsPoint, type Point, type Rect } from "../lib/rect";
 import { closeTopOnBar, pageCloseControl } from "../ui/closeControl";
 import { rectIndexAt } from "../ui/grid";
 import type { HelpAction } from "./helpPaging";
 
-const { screen: SCREEN, topBar: TOP_BAR } = screenLayout(SCREEN_CONFIG);
+const { screen: SCREEN, topBar: TOP_BAR } = SCREEN_LAYOUT;
 const { height, width } = SCREEN;
 
 // The smallest tap target, in render pixels: at least 44 CSS px on a phone 360 CSS px wide.

@@ -2,13 +2,12 @@ import { Events, Scene, Scenes } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import type { HelpPictureId } from "../data/types";
 import { type HelpPicture, helpPicture, TOUCH_DRAG } from "../help/helpPictures";
 import { changeLabels } from "../hud/hudView";
 import { NOTHING_PAUSED } from "../hud/topBar";
 import { DOG_REACTIONS } from "../layout/hitEffects";
-import { screenLayout } from "../layout/screenLayout";
 import type { Rect } from "../lib/rect";
 import { currentZone } from "../rules/route";
 import { laneMotionX } from "../runner/laneMotion";
@@ -28,7 +27,7 @@ import { SCENE_KEYS } from "./sceneKeys";
 import { freezeScene, type ScenePicture, showAsPicture } from "./scenePicture";
 import { tagFrame } from "./uiKit";
 
-const LAYOUT = screenLayout(SCREEN_CONFIG);
+const LAYOUT = SCREEN_LAYOUT;
 const ROAD_TEXTURE = "help-road";
 // The frame a still picture shows of an animation, where not its first: the heart a bump
 // knocks off is at its fullest.

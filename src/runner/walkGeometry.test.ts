@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
-import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import { TUNING } from "../data/tuning";
 import { tallestPackLength } from "../layout/packFormation";
-import { screenLayout, walkerFootY } from "../layout/screenLayout";
+import { walkerFootY } from "../layout/screenLayout";
 import { walkGeometry, walkProjection } from "./walkGeometry";
 
-const gameRoad = screenLayout(SCREEN_CONFIG).road;
+const gameRoad = SCREEN_LAYOUT.road;
 const projection = walkProjection(ROAD_CAMERA, gameRoad);
 const PACKS = [
   { dogs: ["kilo"], walker: "ada" },

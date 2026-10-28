@@ -3,7 +3,7 @@ import { type GameObjects, Scene } from "phaser";
 import { debuffIconKey } from "../assets/iconKeys";
 import { dogCardTag, dogFaceKey, ownerCardFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { AchievementId, DebuffId, DogId, HintTrigger } from "../data/types";
 import { dollarAmountText } from "../home/home";
 import {
@@ -71,7 +71,6 @@ import {
   zoneProgressText,
   zoneShare,
 } from "../hud/walkHud";
-import { screenLayout } from "../layout/screenLayout";
 import type { Point, Rect } from "../lib/rect";
 import { ownerMaxHearts } from "../rules/dogs";
 import { debuffLasting } from "../rules/durations";
@@ -136,7 +135,7 @@ import {
   soundIcon,
 } from "./uiKit";
 
-const LAYOUT = screenLayout(SCREEN_CONFIG);
+const LAYOUT = SCREEN_LAYOUT;
 const BAR = walkBarLayout(LAYOUT.topBar);
 
 const LABEL = { ms: 1100 };

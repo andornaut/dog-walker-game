@@ -6,11 +6,10 @@ import shippedManifest from "../../public/art/manifest.json";
 import { parseManifest } from "../assets/manifest";
 import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import type { AmbientMover, ZoneId } from "../data/types";
 import { CROSS_STREET } from "../layout/crossStreet";
 import { scaleAtY } from "../layout/projection";
-import { screenLayout } from "../layout/screenLayout";
 import { randomStream } from "../lib/random";
 import { keysOf } from "../lib/records";
 import { walkProjection } from "../runner/walkGeometry";
@@ -31,7 +30,7 @@ import {
 } from "./ambient";
 import { curbBand, VERGES } from "./roadside";
 
-const LAYOUT = screenLayout(SCREEN_CONFIG);
+const LAYOUT = SCREEN_LAYOUT;
 const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
 const STAGE: AmbientStage = { band: LAYOUT.backdrop, projection: PROJECTION };
 const FRAME_SECONDS = 1 / 60;

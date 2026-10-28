@@ -1,9 +1,9 @@
 import type { GameObjects } from "phaser";
 
 import { gameData } from "../../data";
-import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../../data/screen";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../../data/screen";
 import { laneCentreXs } from "../../layout/lanes";
-import { screenLayout, walkerFootY } from "../../layout/screenLayout";
+import { walkerFootY } from "../../layout/screenLayout";
 import { itemAt } from "../../lib/arrays";
 import type { Point } from "../../lib/rect";
 import { fadeIn, rowsHidden } from "../../road/roadClip";
@@ -14,7 +14,7 @@ import { walkProjection } from "../../runner/walkGeometry";
 
 // The walk's fixed screen geometry and draw order, shared by the run scene's views.
 
-export const LAYOUT = screenLayout(SCREEN_CONFIG);
+export const LAYOUT = SCREEN_LAYOUT;
 // Every road sprite, the road and its verge are drawn through this one projection.
 export const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
 export const LANE_XS = laneCentreXs(LANE_COUNT, LAYOUT.road);

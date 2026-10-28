@@ -1,18 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_CAMERA, SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { HelpPictureId } from "../data/types";
 import { cardRowIn } from "../layout/cardLayout";
 import { screenYAt } from "../layout/projection";
-import { screenLayout } from "../layout/screenLayout";
 import { currentZoneId, forkPaths } from "../rules/route";
 import { walkProjection } from "../runner/walkGeometry";
 import { cardHeader } from "../ui/cardRow";
 import { HELP_LAYOUT } from "./helpLayout";
 import { HELP_SCENES, helpPicture, type PictureStrip } from "./helpPictures";
 
-const SCREEN = screenLayout(SCREEN_CONFIG);
+const SCREEN = SCREEN_LAYOUT;
 const PROJECTION = walkProjection(ROAD_CAMERA, SCREEN.road);
 const IDS = gameData.help.map((page) => page.art);
 const shows = (strips: readonly PictureStrip[], row: number) =>

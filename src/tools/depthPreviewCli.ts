@@ -13,7 +13,7 @@ import { blankImage, type RgbaImage } from "../assets/atlas/atlasPixels";
 import type { AssetManifest } from "../assets/manifest";
 import { backdropKey, depthVariantKey, roadTileKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { Zone } from "../data/types";
 import { laneCentreXs } from "../layout/lanes";
 import { SCALE_STEPS } from "../layout/projection";
@@ -26,7 +26,6 @@ import {
   solidStrip,
   STRIP,
 } from "../layout/roadRaster";
-import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
 import { walkProjection } from "../runner/walkGeometry";
 import { GLYPH_HEIGHT } from "../ui/pixelFont";
@@ -117,7 +116,7 @@ if (zones.length === 0) {
   process.exit(1);
 }
 
-const layout = screenLayout(SCREEN_CONFIG);
+const layout = SCREEN_LAYOUT;
 const { backdrop, dogRow, rasterView, road } = layout;
 const projection = walkProjection(ROAD_CAMERA, road);
 const laneX = itemAt(laneCentreXs(LANE_COUNT, road), Math.floor(LANE_COUNT / 2));

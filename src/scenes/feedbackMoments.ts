@@ -3,7 +3,7 @@ import type { Animations, GameObjects, Scene, Tweens, Types } from "phaser";
 import { animationKey } from "../assets/asepriteAnimations";
 import { ownerFaceKey, WARNING_KEY, WARNING_TAG } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { DogId } from "../data/types";
 import { type MoneyTick, retarget, tickShown } from "../hud/feedback";
 import type { ChangeLabel } from "../hud/hudView";
@@ -40,7 +40,6 @@ import {
 } from "../hud/moments";
 import { playerPaused, type RunPause, walkPaused } from "../hud/topBar";
 import { DOG_CARD } from "../hud/walkHud";
-import { screenLayout } from "../layout/screenLayout";
 import type { Point, Rect } from "../lib/rect";
 import { type Cents, cents } from "../rules/units";
 import type { RunState } from "../state/runState";
@@ -60,7 +59,7 @@ import { firstTag, playEffect, playTag } from "./sprites";
 import { TimedGroup } from "./timedGroup";
 import { addPanel, artFits, tagFrame } from "./uiKit";
 
-const LAYOUT = screenLayout(SCREEN_CONFIG);
+const LAYOUT = SCREEN_LAYOUT;
 // Over the cards, labels and owners' tabs the HUD draws.
 const DEPTH = 50;
 // The owner's 32x32 face is drawn at 2x. The pop shows no face on its first frame, the face

@@ -1,16 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import type { DogId } from "../data/types";
 import { END_LAYOUT } from "../home/endLayout";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { everyPack, formationOrder, packDogOf, packPlacements } from "../layout/packFormation";
-import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
 import { walkProjection } from "../runner/walkGeometry";
 import { type Feet, packLayers, type StandingDog } from "./packDraw";
 
-const PROJECTION = walkProjection(ROAD_CAMERA, screenLayout(SCREEN_CONFIG).road);
+const PROJECTION = walkProjection(ROAD_CAMERA, SCREEN_LAYOUT.road);
 const WALKER: Feet = { footY: 100, x: 180 };
 
 // Each dog standing at its placement from the walker's feet.

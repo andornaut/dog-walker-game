@@ -1,13 +1,12 @@
 // The walk tests' view of the spawn planner on the game's road: the real data, the game's
 // road and pack, and each lane-blocking spawn's spans and contact with the pack.
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
-import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import { TUNING } from "../data/tuning";
 import type { WalkerId, World, Zone, ZoneId } from "../data/types";
 import { DEFAULT_WALKER, WALKERS } from "../data/walkers";
 import { WORLD } from "../data/world";
 import { type PackSprites, PART_INSET } from "../layout/packFormation";
-import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
 import { keysOf } from "../lib/records";
 import { read } from "../rules/units";
@@ -38,7 +37,7 @@ export type Real = Omit<typeof REAL, "world"> & { world: World };
 export const ZONE_IDS = WORLD.zones.map(({ id }) => id);
 // The game's road, as RunScene lays it out for realRun's pack.
 export const GAME_ROAD = (() => {
-  const road = screenLayout(SCREEN_CONFIG).road;
+  const road = SCREEN_LAYOUT.road;
   const pack: PackSprites = { dogs: ["duchess", "biscuit", "kilo"], walker: DEFAULT_WALKER };
   return walkGeometry(LANE_COUNT, pack, walkProjection(ROAD_CAMERA, road), road);
 })();

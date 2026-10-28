@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
-import { screenLayout } from "../layout/screenLayout";
 import { keysOf } from "../lib/records";
 import { applyEffects } from "../rules/effects";
 import { read } from "../rules/units";
@@ -21,7 +20,7 @@ const PACK = Object.fromEntries(
     .map((dog) => [dog, 5]),
 );
 const GEOMETRY = (() => {
-  const road = screenLayout(SCREEN_CONFIG).road;
+  const road = SCREEN_LAYOUT.road;
   const pack = { dogs: keysOf<DogId>(PACK), walker: data.defaultWalker };
   return walkGeometry(LANE_COUNT, pack, walkProjection(ROAD_CAMERA, road), road);
 })();

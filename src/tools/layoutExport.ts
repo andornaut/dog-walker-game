@@ -1,6 +1,12 @@
 import { DEPTH_STEPS } from "../assets/depthSteps";
 import { ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
-import { LANE_COUNT, ROAD_CAMERA, ROAD_FAR_SCALE, SCREEN_CONFIG } from "../data/screen";
+import {
+  LANE_COUNT,
+  ROAD_CAMERA,
+  ROAD_FAR_SCALE,
+  SCREEN_CONFIG,
+  SCREEN_LAYOUT,
+} from "../data/screen";
 import type { GameData } from "../data/types";
 import { dotRects, HELP_LAYOUT } from "../help/helpLayout";
 import { END_LAYOUT } from "../home/endLayout";
@@ -58,7 +64,7 @@ import {
   type RoadProjection,
   rowScale,
 } from "../layout/projection";
-import { screenLayout, walkerFootY } from "../layout/screenLayout";
+import { walkerFootY } from "../layout/screenLayout";
 import type { Rect } from "../lib/rect";
 import { MAX_CARD_OPTIONS } from "../rules/choices";
 import { read } from "../rules/units";
@@ -98,7 +104,7 @@ function withIcon(button: BarButton) {
 export function layoutExport(
   data: Pick<GameData, "dogs" | "help" | "menuText" | "shopGear" | "walkers" | "tuning">,
 ) {
-  const regions = screenLayout(SCREEN_CONFIG);
+  const regions = SCREEN_LAYOUT;
   const { backdrop, rasterView, road, walkView } = regions;
   const projection = walkProjection(ROAD_CAMERA, road);
   const scrollSpeed = read(data.tuning, "pixels", "roadScrollSpeed");

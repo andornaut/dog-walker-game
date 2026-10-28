@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
-import { screenLayout } from "../layout/screenLayout";
+import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { keysOf } from "../lib/records";
 import type { Rect } from "../lib/rect";
 import { maxHearts } from "../rules/dogs";
@@ -106,7 +105,7 @@ describe("firingTimeline", () => {
 });
 
 describe("firingLayout", () => {
-  const { dogSlots: cards, screen: whole, walkView: screen } = screenLayout(SCREEN_CONFIG);
+  const { dogSlots: cards, screen: whole, walkView: screen } = SCREEN_LAYOUT;
   const { popSize } = FIRING_PARTS;
 
   const FACE_HALF = 32;
@@ -294,7 +293,7 @@ describe("cardOwnerMood", () => {
 });
 
 describe("payoutTagTop", () => {
-  const { dogSlots } = screenLayout(SCREEN_CONFIG);
+  const { dogSlots } = SCREEN_LAYOUT;
 
   it.each(dogSlots.map((slot, i) => [i, slot] as const))(
     "starts slot %i's tag above its roof, clear of its faces and hearts",
@@ -366,7 +365,7 @@ describe("curvePoint", () => {
 });
 
 const BODY = fontFileMetrics("font-body");
-const SLOTS = screenLayout(SCREEN_CONFIG).dogSlots;
+const SLOTS = SCREEN_LAYOUT.dogSlots;
 const DOGS = keysOf(gameData.dogs);
 const boxAt = (style: TextFitStyle) => inlineFaceBox(BODY, style.scale);
 
@@ -418,7 +417,7 @@ describe("the low-hearts chip", () => {
 // over the face, stays under the lowest the message strip reaches, under any count of debuff
 // bars.
 describe("a fired line's bubble", () => {
-  const { topBar } = screenLayout(SCREEN_CONFIG);
+  const { topBar } = SCREEN_LAYOUT;
   const bars = Array.from({ length: Object.keys(gameData.debuffs).length + 1 }, (_, i) => i);
   const panels = bars.flatMap((count) => linePanels(BODY, count, topBar));
   const stripBottom = Math.max(...panels.map((panel) => panel.y + panel.height));
@@ -430,7 +429,7 @@ describe("a fired line's bubble", () => {
     expect(fitted.widest).toBeLessThanOrEqual(FIRED_LINE_FIT.room);
     for (const slot of SLOTS) {
       const top =
-        firingLayout(screenLayout(SCREEN_CONFIG).walkView, slot).line.y -
+        firingLayout(SCREEN_LAYOUT.walkView, slot).line.y -
         firedLineHeight(BODY, fitted.lines.length);
       expect(top).toBeGreaterThanOrEqual(stripBottom);
     }

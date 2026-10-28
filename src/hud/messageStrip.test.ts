@@ -3,9 +3,8 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import type { QuipMoment } from "../data/types";
-import { screenLayout } from "../layout/screenLayout";
 import { fillNames } from "../lib/lines";
 import { keysOf } from "../lib/records";
 import { type Rect } from "../lib/rect";
@@ -184,7 +183,7 @@ describe("messageIconKey", () => {
 describe("messageStripLayout", () => {
   it("keeps the strip in the backdrop band under the walk bar, with its icon and rows inside", () => {
     const strip = messageStripLayout(BODY);
-    const { backdrop, topBar } = screenLayout(SCREEN_CONFIG);
+    const { backdrop, topBar } = SCREEN_LAYOUT;
     const rowRect = (top: number): Rect => ({
       height: inkRowsFromCapTop(BODY) * MESSAGE_STRIP.scale,
       width: strip.room,
@@ -206,7 +205,7 @@ describe("messageLinePanel", () => {
   it.each([1, 2].flatMap((bars) => [false, true].map((faced) => [bars, faced] as const)))(
     "puts the one-row strip under %i debuff bars, in the band (faced: %s)",
     (bars, faced) => {
-      const { backdrop, topBar } = screenLayout(SCREEN_CONFIG);
+      const { backdrop, topBar } = SCREEN_LAYOUT;
       const one = messageLinePanel(BODY, bars, faced);
       const last = debuffBarRects(topBar, bars).at(-1);
       expect(one.panel.y).toBeGreaterThanOrEqual((last?.y ?? 0) + (last?.height ?? 0));
@@ -377,7 +376,7 @@ describe("an owner's lead", () => {
           "text past the panel's right",
           lead.textX + lead.room > right(panel) - MESSAGE_STRIP.padRight,
         ],
-        ["panel outside the band", !inside(panel, screenLayout(SCREEN_CONFIG).backdrop)],
+        ["panel outside the band", !inside(panel, SCREEN_LAYOUT.backdrop)],
       ];
       expect(problems.filter(([, hit]) => hit).map(([problem]) => problem)).toEqual([]);
     },
@@ -485,7 +484,7 @@ function shownQuip(bars: number, ink: number, text: string): Shown {
 function cramped({ faces, panel }: Shown): boolean {
   const bottom = panel.y + panel.height;
   return (
-    !inside(panel, screenLayout(SCREEN_CONFIG).backdrop) ||
+    !inside(panel, SCREEN_LAYOUT.backdrop) ||
     faces.some(
       (face) =>
         face.y - panel.y < STRIP_FACE_PAD.top ||

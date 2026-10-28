@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import { dollarText } from "../home/home";
-import { screenLayout } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
 import { fillNames, sentences, wrapWords } from "../lib/lines";
 import { walkLength } from "../rules/route";
@@ -22,7 +21,7 @@ import {
 } from "./pauseMenu";
 import { TOP_BAR_BUTTONS } from "./topBar";
 
-const { walkView } = screenLayout(SCREEN_CONFIG);
+const { walkView } = SCREEN_LAYOUT;
 const BODY = fontFileMetrics("font-body");
 // A line's width at the note's scale.
 const bodyWidth = (line: string) => bodyTextWidth(NOTE_PLATE.scale, line);

@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
-import { screenLayout } from "../layout/screenLayout";
+import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { rectsOverlap } from "../lib/rect";
 import { amountText, causeLabel } from "../rules/causes";
 import { payFor } from "../rules/run";
@@ -27,7 +26,7 @@ import { WALK_BAR, walkBarLayout } from "./walkHud";
 
 const BODY = fontFileMetrics("font-body");
 const { width: SCREEN_WIDTH } = SCREEN_CONFIG;
-const { road, topBar: TOP_BAR } = screenLayout(SCREEN_CONFIG);
+const { road, topBar: TOP_BAR } = SCREEN_LAYOUT;
 const ROAD_MIDDLE = { x: road.x + road.width / 2, y: road.y + road.height / 2 };
 const ONE_LINE = { lines: 1, scale: 2, width: 40 };
 const CHIP = moneyChipPlace(BODY, SCREEN_WIDTH, { x: 0, y: 0 }, 0, ONE_LINE).chip;

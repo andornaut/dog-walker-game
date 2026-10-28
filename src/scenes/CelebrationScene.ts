@@ -1,11 +1,10 @@
 import { Scene } from "phaser";
 
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_LAYOUT } from "../data/screen";
 import type { AchievementId, DogId } from "../data/types";
 import { CELEBRATION_PANEL } from "../home/badgesView";
 import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
-import { screenLayout } from "../layout/screenLayout";
 import type { Rect } from "../lib/rect";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { addBadgeCelebration, addCheeringFace } from "./badges";
@@ -22,7 +21,7 @@ export interface CelebrationSceneData {
   resume: SceneKey;
 }
 
-const SCREEN = screenLayout(SCREEN_CONFIG).screen;
+const SCREEN = SCREEN_LAYOUT.screen;
 const PANEL = CELEBRATION_PANEL;
 const FACES = { pitch: 44, size: 32, top: 4 };
 // 44 game pixels tall: 48 CSS pixels on a 390px-wide phone, 12 under the panel.
