@@ -46,8 +46,17 @@ describe("lightsFrom", () => {
     const zone = "homeStretch";
     const read = (attach: Record<string, unknown>) =>
       lightsFrom(tableOf(DEF, attach)).attach.get("some-sprite");
-    expect(read(ATTACHED)).toEqual([{ ...ATTACHED, angle: 90, pulse: null, zones: null }]);
-    const beam = { ...ATTACHED, angle: 0, light: "beam", pulse: [1, 0.5], zones: [zone] };
+    expect(read(ATTACHED)).toEqual([
+      { ...ATTACHED, angle: 90, facesRoad: false, pulse: null, zones: null },
+    ]);
+    const beam = {
+      ...ATTACHED,
+      angle: 0,
+      facesRoad: true,
+      light: "beam",
+      pulse: [1, 0.5],
+      zones: [zone],
+    };
     expect(read(beam)).toEqual([beam]);
   });
 
@@ -151,9 +160,9 @@ describe("LIGHT_ATTACHMENTS", () => {
         depthSteps.steps
           .filter(({ suffix }) => ANCHORS.has(`${key}${suffix}`))
           .flatMap(({ scale, suffix }) =>
-            [false, true].map((flipX) => ({
+            [false, true].map((leftOfRoad) => ({
               attachment,
-              flipX,
+              leftOfRoad,
               scale,
               step: `${key}${suffix}`,
               zone: attachment.zones?.[0] ?? itemAt(WORLD.zones, 0).id,
@@ -162,7 +171,7 @@ describe("LIGHT_ATTACHMENTS", () => {
       ),
   );
   it.each(cones.length > 0 ? cones : [null])(
-    "shines $attachment.light from a lit bulb of $step, mirrored $flipX",
+    "shines $attachment.light from a lit bulb of $step, left of the road $leftOfRoad",
     (cone) => {
       if (cone === null) {
         return;
@@ -173,9 +182,10 @@ describe("LIGHT_ATTACHMENTS", () => {
       const { frames, idle } = sheetOf(cone.step);
       const { frame, sourceSize, spriteSourceSize } = itemAt(frames, idle.from);
       const anchor = {
-        flipX: cone.flipX,
+        flipX: false,
         frame: 0,
         key: cone.step.replace(/@\d+$/, ""),
+        leftOfRoad: cone.leftOfRoad,
         scale: cone.scale,
         x: sourceSize.w / 2,
         y: ANCHORS.get(cone.step) ?? 0,

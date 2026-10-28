@@ -30,7 +30,8 @@
         "dy": 0,
         "light": "gas-lamp-pool",
         "pulse": [1, 0.8, 0.6, 0.8],
-        "zones": ["shops", "street"]
+        "zones": ["shops", "street"],
+        "facesRoad": true
       },
       {
         "angle": 125,
@@ -38,14 +39,16 @@
         "dy": -126,
         "light": "gas-lamp-cone",
         "pulse": [1, 0.8, 0.6, 0.8],
-        "zones": ["shops", "street"]
+        "zones": ["shops", "street"],
+        "facesRoad": true
       },
       {
         "dx": -4,
         "dy": 0,
         "light": "gas-lamp-pool-dusk",
         "pulse": [1, 0.8, 0.6, 0.8],
-        "zones": ["snoozeCrescent"]
+        "zones": ["snoozeCrescent"],
+        "facesRoad": true
       },
       {
         "angle": 125,
@@ -53,7 +56,8 @@
         "dy": -126,
         "light": "gas-lamp-cone-dusk",
         "pulse": [1, 0.8, 0.6, 0.8],
-        "zones": ["snoozeCrescent"]
+        "zones": ["snoozeCrescent"],
+        "facesRoad": true
       }
     ],
     "roadside-shopfront-ochre": [
@@ -78,7 +82,8 @@
         "dy": 0,
         "light": "street-lamp-pool",
         "pulse": [1, 0.75, 0.5, 0.2, 0.5, 0.75],
-        "zones": ["homeStretch"]
+        "zones": ["homeStretch"],
+        "facesRoad": true
       },
       {
         "angle": 125,
@@ -86,7 +91,8 @@
         "dy": -157,
         "light": "street-lamp-cone",
         "pulse": [1, 0.75, 0.5, 0.2, 0.5, 0.75],
-        "zones": ["homeStretch"]
+        "zones": ["homeStretch"],
+        "facesRoad": true
       }
     ],
     "stink-garbage-truck": [

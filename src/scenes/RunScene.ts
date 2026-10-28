@@ -679,13 +679,6 @@ export class RunScene extends Scene implements HudRun {
       distanceBeforeZone + walk.run.zoneDistance,
       { ms: ambientMs, still },
     );
-    world.lights.draw(
-      zoneId,
-      previousZoneId(gameData, walk.run),
-      distanceBeforeZone,
-      distanceBeforeZone + walk.run.zoneDistance,
-      world.roadside.anchors(),
-    );
     const shadow = world.shadows.frame(colourFromHex(zone.roadShadowColour));
     world.items.draw(walk, held, still, shadow);
     world.distractions.draw(walk, world.items.vergeItems(walk), { halted: held, still });
@@ -699,5 +692,12 @@ export class RunScene extends Scene implements HudRun {
     const cheats = cheatsFrom(this.registry.get(DEV_CHEATS_KEY));
     world.hitBoxes.draw(walk, cheats.hitBoxes);
     world.shadows.hideUnused();
+    // Last, so the lights follow every sprite where this frame has drawn it.
+    world.lights.draw(
+      zoneId,
+      previousZoneId(gameData, walk.run),
+      distanceBeforeZone,
+      distanceBeforeZone + walk.run.zoneDistance,
+    );
   }
 }

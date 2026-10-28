@@ -5,7 +5,6 @@ import { IDLE_TAG } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import { distanceAtY } from "../../layout/projection";
 import { getOrInsertComputed } from "../../lib/maps";
-import type { LightAnchor } from "../../road/lightPlaces";
 import {
   idleFrame,
   newRoadsidePlaces,
@@ -26,9 +25,6 @@ import { DEPTH, JUNCTURE_Y, LAYOUT, PROJECTION, ROW_DEPTH, sceneryFade, showOnRo
 // on the walk's ambient clock, set each frame rather than played: the pool hands a sprite to
 // another prop as props scroll out, and every depth step shows the same frame.
 export class RoadsideView {
-  // The props drawn this frame, as anchors for the lights they carry, and the pool they take.
-  private readonly anchorPool: LightAnchor[];
-  private readonly drawnAnchors: LightAnchor[] = [];
   private readonly frame: RoadsideFrame = {
     current: "",
     currentStart: 0,
@@ -50,14 +46,6 @@ export class RoadsideView {
   };
 
   constructor(scene: Scene) {
-    this.anchorPool = this.places.map(() => ({
-      flipX: false,
-      frame: 0,
-      key: "",
-      scale: 1,
-      x: 0,
-      y: 0,
-    }));
     this.shadows = new ShadowPool(scene);
     this.sprites = this.places.map(() =>
       scene.add.sprite(0, 0, "__DEFAULT").setVisible(false).setDepth(DEPTH.roadside),
@@ -83,7 +71,6 @@ export class RoadsideView {
     frame.scroll = scroll;
     const count = placeRoadside(this.stage, frame, places);
     const shadow = this.shadows.frameInColours();
-    this.drawnAnchors.length = 0;
     for (let i = 0; i < sprites.length; i++) {
       const sprite = sprites[i];
       const place = places[i];
@@ -97,25 +84,14 @@ export class RoadsideView {
       }
       const drawn = showAtDepth(sprite, place.key, place.scale);
       const loop = this.loop(sprite.scene, drawn.key);
-      const index =
-        loop === null ? 0 : idleFrame(motion.still, loop.durations, place.phase, motion.ms);
-      const name = loop?.frames[index];
-      if (name !== undefined && sprite.frame.name !== name) {
-        sprite.setFrame(name);
+      if (loop !== null) {
+        const shown = loop.frames[idleFrame(motion.still, loop.durations, place.phase, motion.ms)];
+        if (shown !== undefined && sprite.frame.name !== shown) {
+          sprite.setFrame(shown);
+        }
       }
       const x = Math.round(place.x);
       const y = Math.round(place.y);
-      const anchor = this.anchorPool[i];
-      if (anchor !== undefined) {
-        // Props are never flipped; their lights are set out as for one on the road's right.
-        anchor.flipX = place.x < PROJECTION.centreX;
-        anchor.frame = index;
-        anchor.key = place.key;
-        anchor.scale = place.scale;
-        anchor.x = x;
-        anchor.y = y;
-        this.drawnAnchors.push(anchor);
-      }
       sprite.setPosition(x, y).setDepth(DEPTH.roadside + y * ROW_DEPTH);
       const alpha = sceneryFade(y);
       showOnRoad(y, alpha, sprite);
@@ -124,11 +100,6 @@ export class RoadsideView {
       }
     }
     this.shadows.hideUnused();
-  }
-
-  // The props drawn this frame, as anchors for the lights they carry.
-  anchors(): readonly LightAnchor[] {
-    return this.drawnAnchors;
   }
 
   // An art step's idle tag as frame names and durations, read once; null with no tag or a

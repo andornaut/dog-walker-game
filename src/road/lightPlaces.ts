@@ -120,20 +120,23 @@ function placeLight(
 }
 
 // A sprite lights may attach to, as drawn this frame: its key, its anchor (its feet) on screen,
-// its projected scale, whether it is flipped, and the place in its idle tag of the frame it
-// shows.
+// its scale against its full size, whether it is flipped, whether it stands left of the road's
+// centre line, and the place in its idle tag of the frame it shows.
 export interface LightAnchor {
   flipX: boolean;
   frame: number;
   key: string;
+  leftOfRoad: boolean;
   scale: number;
   x: number;
   y: number;
 }
 
-// An attached light as drawn: its place, its rotation in radians, its strength this frame, and
-// the screen row of its sprite's feet, which it fades in and is cut off by.
+// An attached light as drawn: its place, its rotation in radians, its strength this frame, the
+// screen row of its sprite's feet, which it fades in and is cut off by, and the index of the
+// anchor it follows.
 export interface AttachedLightPlace extends LightPlace {
+  anchor: number;
   groundY: number;
   rotation: number;
   strength: number;
@@ -144,6 +147,7 @@ export const ATTACHED_LIGHT_LIMIT = 48;
 
 export function newAttachedLightPlaces(): AttachedLightPlace[] {
   return Array.from({ length: ATTACHED_LIGHT_LIMIT }, () => ({
+    anchor: 0,
     groundY: 0,
     key: "",
     rotation: 0,
@@ -155,16 +159,16 @@ export function newAttachedLightPlaces(): AttachedLightPlace[] {
 }
 
 // Writes the lights the anchors carry in zone into out, at most out.length of them, and returns
-// how many: each offset from its anchor by its dx and dy at the anchor's scale, mirrored with a
-// flipped sprite, a cone turned to its angle, and at its pulse's strength for the anchor's
-// frame.
+// how many: each offset from its anchor by its dx and dy at the anchor's scale, a cone turned to
+// its angle, both mirrored with a flipped sprite, or for a light that faces the road on a sprite
+// left of the road, and at its pulse's strength for the anchor's frame.
 export function placeAttachedLights(
   zone: ZoneId,
   anchors: readonly LightAnchor[],
   out: AttachedLightPlace[],
 ): number {
   let count = 0;
-  for (const anchor of anchors) {
+  for (const [index, anchor] of anchors.entries()) {
     for (const attachment of LIGHT_ATTACHMENTS.get(anchor.key) ?? NO_ATTACHMENTS) {
       const place = out[count];
       const def = LIGHTS.get(attachment.light);
@@ -174,9 +178,11 @@ export function placeAttachedLights(
       if (attachment.zones !== null && !attachment.zones.includes(zone)) {
         continue;
       }
-      const mirror = anchor.flipX ? -1 : 1;
-      const angle = anchor.flipX ? 180 - attachment.angle : attachment.angle;
+      const mirrored = anchor.flipX !== (attachment.facesRoad && anchor.leftOfRoad);
+      const mirror = mirrored ? -1 : 1;
+      const angle = mirrored ? 180 - attachment.angle : attachment.angle;
       const { pulse } = attachment;
+      place.anchor = index;
       place.groundY = anchor.y;
       place.key = attachment.light;
       place.rotation = def.shape === "cone" ? ((angle - CONE_DOWN) * Math.PI) / 180 : 0;
@@ -196,4 +202,46 @@ const NO_ATTACHMENTS: readonly LightAttachment[] = [];
 
 function mod(value: number, by: number): number {
   return ((value % by) + by) % by;
+}
+
+// A sprite as a view has drawn it: its position, origin, scale and flip.
+export interface DrawnSprite {
+  readonly flipX: boolean;
+  readonly originX: number;
+  readonly originY: number;
+  readonly scaleX: number;
+  readonly scaleY: number;
+  readonly x: number;
+  readonly y: number;
+}
+
+// The art a sprite is drawn from (one of its key's depth steps): its frame's size and its feet's
+// row in it; fullHeight is the frame height of the key's full-size art.
+export interface DrawnFrame {
+  readonly feetY: number;
+  readonly fullHeight: number;
+  readonly height: number;
+  readonly width: number;
+}
+
+// Sets anchor to a sprite of key as drawn: its feet on screen (the middle of its frame across,
+// its feet's row down), its scale against its full-size art, and whether it stands left of the
+// road's centre line, centreX.
+export function anchorSprite(
+  centreX: number,
+  key: string,
+  drawn: DrawnSprite,
+  frame: DrawnFrame,
+  idleFrame: number,
+  anchor: LightAnchor,
+): void {
+  const scaleX = Math.abs(drawn.scaleX);
+  const scaleY = Math.abs(drawn.scaleY);
+  anchor.flipX = drawn.flipX;
+  anchor.frame = idleFrame;
+  anchor.key = key;
+  anchor.scale = (frame.height * scaleY) / frame.fullHeight;
+  anchor.x = drawn.x + (0.5 - drawn.originX) * frame.width * scaleX;
+  anchor.y = drawn.y + (frame.feetY - drawn.originY * frame.height) * scaleY;
+  anchor.leftOfRoad = anchor.x < centreX;
 }

@@ -13,14 +13,15 @@ import { WORLD } from "../data/world";
 // ring does. An ellipse or band is centred on its anchor; a cone's apex is on its anchor, and it
 // widens to width at height away, pointing down as drawn, its rings scaled toward the apex.
 // A light is drawn on its own along a verge (a verge's pools), or attached to a sprite: the
-// table's attach lists, by sprite key, the lights every sprite of that key carries, each dx and
-// dy px at full size from its anchor (its feet), as for the sprite as drawn, or for a roadside
-// prop on the road's right: a flipped sprite, or a prop on the left, mirrors them. A cone's angle
-// is the way it points, in degrees as drawn (0 right, 90 down, 180 left), mirrored likewise, so
-// a lamp's cone set down and to the left, from its bulb, shines toward the road from either side.
-// A pulse lists the strength the light shows at each frame of its sprite's idle tag, by the
-// frame's place in the tag; with none it shows at full strength. zones lists the zone ids it
-// shows in, or null for every zone. Drawing only: nothing in the walk reads them.
+// table's attach lists, by sprite key, the lights every sprite of that key carries, wherever any
+// view draws it, each dx and dy px at full size from its anchor (its feet) as the sprite is
+// drawn. A cone's angle is the way it points, in degrees as drawn (0 right, 90 down, 180 left):
+// a sprite drawn facing the pack shines down at 90. A flipped sprite mirrors its lights' dx and
+// angle; a roadside prop is never flipped, so a light with facesRoad is set out as for a prop on
+// the road's right and mirrored for one on its left, so a lamp's beam shines toward the road from
+// either side. A pulse lists the strength the light shows at each frame of its sprite's idle
+// tag, by the frame's place in the tag; with none it shows at full strength. zones lists the
+// zone ids it shows in, or null for every zone. Drawing only: nothing in the walk reads them.
 
 export type LightShape = "band" | "cone" | "ellipse";
 
@@ -79,6 +80,7 @@ export interface LightAttachment {
   readonly angle: number;
   readonly dx: number;
   readonly dy: number;
+  readonly facesRoad: boolean;
   readonly light: string;
   readonly pulse: readonly number[] | null;
   readonly zones: readonly ZoneId[] | null;
@@ -90,6 +92,7 @@ const attachmentSchema = v.strictObject({
   angle: v.optional(v.number()),
   dx: whole,
   dy: whole,
+  facesRoad: v.optional(v.boolean()),
   light: v.string(),
   pulse: v.optional(
     v.pipe(v.array(v.pipe(v.number(), v.minValue(0), v.maxValue(1))), v.minLength(1)),
@@ -134,6 +137,7 @@ export function lightsFrom(table: unknown): LightTable {
           angle: entry.angle ?? CONE_ANGLE,
           dx: entry.dx,
           dy: entry.dy,
+          facesRoad: entry.facesRoad ?? false,
           light: entry.light,
           pulse: entry.pulse ?? null,
           zones: zonesOf(entry.zones),
