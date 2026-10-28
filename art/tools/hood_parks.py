@@ -28,12 +28,14 @@ hen                 a Riverdale Farm hen got loose, a Rhode Island Red: a plump 
 
 Minor obstacles, laid out in obstacles.py's pixels (40 for one lane, 30 rows for a
 lane-spanning one) and drawn at obstacles.SCALE (1.2) on a minis.Mini:
-fallen-log          112x36  2 lanes, a fallen oak trunk lying across the path: ridged bark, a sawn end
-                            at the right showing growth rings, a splintered broken end at the left, a
-                            branch stub, moss, two tan-capped mushrooms and fallen leaves along its foot;
+fallen-log          112x36  2 lanes, a fallen oak trunk lying across the path: five long bark ridges, a
+                            sawn end at the right showing growth rings, a splintered broken end at the
+                            left, a branch stub, two moss patches and two tan-capped mushrooms on its
+                            back and four fallen leaves along its foot;
                             idle (4 frames, 450ms): a leaf on its back stirs 1px on frame 2
-leaf-pile           48x48   1 lane, a raked dome of overlapping autumn leaves in orange, amber,
-                            ochre, red, brick and gold, a red maple leaf on top; idle (4 frames,
+leaf-pile           48x48   1 lane, a raked dome of autumn leaves cel shaded orange, lit amber and
+                            shaded rust, its rim ragged with gold, amber and rust leaves and a few more
+                            over its face, a red maple leaf on top; idle (4 frames,
                             400ms): the maple leaf lifts 1px and turns over on frame 2
 little-free-library 48x48   1 lane, a little free library: a turquoise cabinet shaped like a tiny
                             house under a brick-shingled gable with a cream bargeboard and finial,
@@ -41,7 +43,7 @@ little-free-library 48x48   1 lane, a little free library: a turquoise cabinet s
                             on a cream post set in a wooden planter of leaves; idle (4 frames,
                             400ms): a glint crosses the glass, its left half on frame 2 and its
                             right half on frame 3
-picnic-blanket      112x36  2 lanes, a red and white checked blanket on the road with a wicker basket
+picnic-blanket      112x36  2 lanes, a red and white checked blanket on the road with a plain ochre basket
                             on it, a baguette leaning out of the basket, a lemonade jug and two
                             apples; idle (4 frames, 450ms): the blanket's near right corner lifts
                             1px in a breeze on frame 2
@@ -349,6 +351,12 @@ SIZE, ROW = obstacles.SIZE, obstacles.ROW
 # the light) to the darkest (its lower right).
 LEAF_COLOURS = (("gold", "amber"), ("amber", "ochre"), ("orange", "rust"), ("ochre", "brown"), ("rust", "dbrick"),
                 ("brown", "dbrown"))
+# The heap's leaves: (fill, shade) on its lit upper left, its orange middle and its rust lower right.
+PILE_COLOURS = (("gold", "amber"), ("amber", "ochre"), ("rust", "dbrick"))
+# The rows of leaves along the heap's rim, RIM_STEP apart, and the ones over its face: (left column, top row,
+# tone).
+RIM_STEP = 3
+FACE_LEAVES = ((11, 29, 0), (17, 34, 1), (21, 28, 1), (27, 33, 2))
 # The heap: a dome, centre (PILE_X, PILE_Y), radii PILE_R, laid out in leaves LEAF wide in rows ROW_STEP apart.
 PILE_X, PILE_Y, PILE_R = 20, 39, (18, 17)
 LEAF = 7
@@ -379,41 +387,31 @@ def maple(g, cx, bottom, lift, flip):
                 px.p(x0 + i, y0 + j, "ttc" if ch == "r" else "dred")
 
 
-def scatter(a, b):
-    """A fixed pseudo-random number in 0 to 96 for the pair (a, b)."""
-    return (a * 73856093 ^ b * 19349663) % 97
-
-
 def pile_leaves():
-    """(x, y, colour index) for every leaf in the heap, back rows first: each row's leaves spread across the
-    dome's width there, the outer ones' tips on its rim so it is ragged, the inner ones nudged a pseudo-random
-    pixel so no two rows line up into a weave. Each leaf takes the colour its place on the dome faces the
-    light with, give or take a step."""
+    """(x, y, colour index into PILE_COLOURS) for every leaf drawn on the heap, back rows first: the two at each
+    row's ends, their tips on the dome's rim so it is ragged all round, then a few over its face, each in the
+    tone of the band it lies on."""
     out = []
     rx, ry = PILE_R
-    for r, y in enumerate(range(PILE_Y - ry + 1, PILE_Y - 3, ROW_STEP)):
+    for y in range(PILE_Y - ry + 1, PILE_Y - 3, RIM_STEP):
         half = rx * math.sqrt(max(0, 1 - ((y + 2 - PILE_Y) / ry) ** 2))
-        n = max(1, round(2 * half / (LEAF - 1)))
-        step = (2 * half - LEAF) / max(1, n - 1)
-        for i in range(n):
-            nudge = 0 if i in (0, n - 1) else scatter(r, i) % 3 - 1
-            x = PILE_X - half + i * step + nudge if n > 1 else PILE_X - LEAF / 2
-            light = 0.55 * (x + LEAF / 2 - PILE_X + rx) / (2 * rx) + 0.45 * (y - PILE_Y + ry) / ry
-            k = round(light * (len(LEAF_COLOURS) - 1)) + scatter(r, i + 5) % 3 - 1
-            out.append((x, y + (scatter(i, r) % 2) * 0.5, max(0, min(len(LEAF_COLOURS) - 1, k))))
-    return out
+        if 2 * half < 2 * LEAF:
+            out.append((PILE_X - LEAF / 2, y, 0))
+            continue
+        out += [(PILE_X - half, y, 0), (PILE_X + half - LEAF, y, 2 if y > PILE_Y - ry / 2 else 1)]
+    return out + list(FACE_LEAVES)
 
 
 def leaf_pile(lift=0):
-    """A raked heap of autumn leaves: a low dome built of overlapping leaves in gold, amber, orange, ochre,
-    rust and brick, lighter where the dome faces the light, each shaded on its lower half, so the heap reads
-    as leaves and its rim is ragged with their tips; a red maple leaf lies on top, its edge lit red rather than
-    pink so it never reads as a heart. lift raises the maple leaf 1 drawn pixel and turns it over."""
+    """A raked heap of autumn leaves: a low dome cel shaded orange, lit amber on its upper left and shaded rust
+    on its lower right, a few big leaves along its rim standing proud so its edge is ragged with their tips and
+    a few more over its face, each lit on its upper half; a red maple leaf lies on top, its edge lit red rather
+    than pink so it never reads as a heart. lift raises the maple leaf 1 drawn pixel and turns it over."""
     g = edged(Grid(SIZE, SIZE))
     rx, ry = PILE_R
-    g.cel(PILE_X, PILE_Y, rx - 2, ry - 2, "rust", "dbrick")
+    g.cel(PILE_X, PILE_Y, rx - 2, ry - 2, "orange", "rust", "amber")
     for x, y, k in pile_leaves():
-        lens(g, x, y, *LEAF_COLOURS[k])
+        lens(g, x, y, *PILE_COLOURS[k])
     maple(g, 20, 23.7, lift, lift)
     return lit(g, dict(dred=("red", None)))
 
@@ -429,17 +427,19 @@ COURSE, BRICK = 2, 5
 
 def porch_steps(flicker=0):
     """A short flight of three brick steps up to a porch, a front elevation, so the flight never tapers like
-    a tiered cake: each a lit stone tread with a dstone nosing over a red brick riser laid in dbrick courses;
+    a tiered cake: each a lit stone tread with a dstone nosing over a red brick riser laid in dbrick courses
+    (below obstacles.TEXTURE_MIN, one course line and no joints);
     tall white newel posts under ball caps either side. A jack-o'-lantern sits on the top step, its eyes and
     grin cut dark with a candle glowing amber inside; flicker 1 dims the glow to orange, 2 flares it
     yellow."""
     g = edged(Grid(SIZE, SIZE))
+    fine = scale_of(g) >= obstacles.TEXTURE_MIN
     for top, x0, x1 in STEPS_ROWS:
         bottom = top + (8 if top == STEPS_ROWS[0][0] else 7)
         g.rect(x0, top + 3, x1 - x0, bottom - top - 3, "brick")
-        for y in range(top + 3 + COURSE, bottom, COURSE + 1):
+        for y in range(top + 3 + COURSE, bottom, COURSE + 1) if fine else (top + 5,):
             g.rect(x0, y, x1 - x0, 1, "dbrick")
-        for y in range(top + 3, bottom, COURSE + 1):
+        for y in range(top + 3, bottom, COURSE + 1) if fine else ():
             for x in range(x0 + 2 + (y // (COURSE + 1) % 2) * 2, x1 - 2, BRICK):
                 g.rect(x, y, 1, COURSE, "dbrick")
         g.rect(x1 - 2, top + 3, 2, bottom - top - 3, "dbrick")
@@ -469,16 +469,17 @@ def porch_steps(flicker=0):
 # The library's idle: rest, rest, a glint crossing the glass door's left half, then its right half.
 LIBRARY_IDLE = (0, 0, 1, 2), 400
 # The book spines on each shelf, left to right: (colour, top row). Each is 2 layout pixels wide.
-UPPER_BOOKS = (("ttc", 15), ("gold", 16), ("sky", 15), ("cream", 16), ("green", 15), ("mauve", 16),
-               ("orange", 15), ("lilac", 16), ("azure", 15))
-LOWER_BOOKS = (("amber", 21), ("cobalt", 20), ("pink", 21), ("lime", 20), ("ttc", 21), ("cream", 20),
-               ("sky", 21), ("gold", 20), ("green", 21))
+# Four colours in turn; below obstacles.TEXTURE_MIN each pair of spines is drawn as one, so no spine is 1px.
+UPPER_BOOKS = (("ttc", 15), ("gold", 16), ("sky", 15), ("green", 16), ("ttc", 15), ("gold", 16),
+               ("sky", 15), ("green", 16), ("ttc", 15))
+LOWER_BOOKS = (("sky", 21), ("green", 20), ("ttc", 21), ("gold", 20), ("sky", 21), ("green", 20),
+               ("ttc", 21), ("gold", 20), ("sky", 21))
 
 
 def little_free_library(glint=0):
     """A little free library: a turquoise cabinet shaped like a tiny house, a front elevation, its pitched
     roof's gable edged in brick shingles over a cream bargeboard, an open book painted in the gable, a finial
-    at the peak. Its cream-framed glass door shows two shelves of book spines in bright colours on a dark teal
+    at the peak. Its cream-framed glass door shows two shelves of book spines in four bright colours on a dark teal
     back, a gold knob at its right. It stands on a cream post with brackets under its sill, the post set in a
     small wooden planter of leaves.
     glint 1 and 2 run a white glint across the glass, left then right, 2px wide down to obstacles.TEXTURE_MIN;
@@ -504,10 +505,12 @@ def little_free_library(glint=0):
     # the door: a cream frame round the glass, the books on two shelves inside on a dark teal back
     g.rect(10, 13, 19, 11, "cream")
     g.rect(11, 14, 17, 9, "teal")
+    fine = scale_of(g) >= obstacles.TEXTURE_MIN
     for books in (UPPER_BOOKS, LOWER_BOOKS):
         for i, (c, top) in enumerate(books):
             x = 11 + i * 2
             bottom = 19 if books is UPPER_BOOKS else 23
+            c, top = books[i if fine else i // 2 * 2]
             g.rect(x, top, min(2, 28 - x), bottom - top, c)
     g.rect(11, 19, 17, 1, "brown")
     g.rect(27, 17, 1, 2, "gold")
@@ -544,7 +547,7 @@ CHECK = 6
 
 def picnic_blanket(lift=0, w=obstacles.span(2)):
     """A checked picnic blanket spread on the road, seen from a low camera: a band of red and white checks
-    narrowing to its far edge, with a wicker basket standing on it under its arched handle, a baguette
+    narrowing to its far edge, with an ochre basket standing on it under its arched handle, a baguette
     leaning out from under the lid, a jug of lemonade at the left and two apples at the right. lift raises the
     near right corner 1 drawn pixel and folds it back, showing its dred underside."""
     g = edged(Grid(w, ROW))
@@ -574,22 +577,17 @@ def picnic_blanket(lift=0, w=obstacles.span(2)):
         g.cel(x, 22.5, 3, 2.8, "red", "dred")
         g.rect(x - 0.5, 18.5, 1, 1.5, "bark")
         g.rect(x + 0.5, 18.5, 1.5, 1, "green")
-    # the baguette, leaning out from under the lid at the right, scored across its crust
+    # the baguette, leaning out from under the lid at the right
     bx, bw = w / 2 - 9, 18
     bar(g, (bx + 11, 15), (bx + 20, 6), 3, "tan")
     bar(g, (bx + 12, 15.5), (bx + 21, 6.5), 1, "brown")
-    for k in (0.35, 0.6, 0.85):
-        g.rect(bx + 11 + 9 * k, 15 - 9 * k - 1, 1, 1, "cream")
     # the handle, an arch over the lid
     for k in range(13):
         t = math.pi * k / 12
         g.rect(w / 2 - 0.75 - math.cos(t) * 7, 13 - math.sin(t) * 8, 1.5, 1.5, "dbrown")
-    # the basket: woven ochre, shaded at its right, its lid a brown band lit along its top
+    # the basket: ochre, shaded at its right, its lid a brown band lit along its top
     g.rect(bx, 16, bw, 9, "ochre")
     g.rect(bx + bw - 3, 16, 3, 9, "rust")
-    for y in range(18, 24, 2):
-        for x in range(int(bx) + 1 + (y // 2 % 2), int(bx + bw) - 3, 2):
-            g.rect(x, y, 1, 1, "brown")
     g.rect(bx - 1, 13, bw + 2, 3, "brown")
     g.rect(bx - 1, 13, bw + 2, 1, "tan")
     g.rect(bx + bw - 2, 14, 3, 2, "dbrown")
@@ -603,12 +601,10 @@ FALLEN_LOG_IDLE = ((0, 0), (0, 0), (1, -1), (0, 0)), 450
 LOG_TOP, LOG_BOTTOM, LOG_LEFT = 11, 27, 9
 # The bark's ridges along the trunk: (row, from, to) as fractions of the trunk's length, lit brown on its upper
 # half and dbrown below.
-RIDGES = ((13, 0.05, 0.3), (13, 0.42, 0.68), (15, 0.18, 0.5), (15, 0.6, 0.92), (17, 0.02, 0.22),
-          (17, 0.34, 0.58), (19, 0.12, 0.4), (19, 0.66, 0.9), (21, 0.28, 0.62), (23, 0.06, 0.3), (23, 0.72, 0.96))
+RIDGES = ((14, 0.08, 0.45), (14, 0.6, 0.92), (18, 0.25, 0.7), (22, 0.05, 0.35), (22, 0.55, 0.9))
 # The fallen leaves drifted in pairs against its foot: (column as a fraction of the frame's width less 1.5px
 # margin each side, row, colour index).
-LOG_LEAVES = ((0.0, 25, 4), (0.05, 26, 0), (0.3, 25, 2), (0.36, 26, 1), (0.6, 25, 3), (0.66, 26, 0),
-              (0.88, 25, 2), (0.94, 26, 1))
+LOG_LEAVES = ((0.05, 26, 0), (0.36, 26, 1), (0.66, 26, 0), (0.94, 26, 1))
 
 
 def fallen_log(leaf=(0, 0), w=obstacles.span(2)):
@@ -651,8 +647,7 @@ def fallen_log(leaf=(0, 0), w=obstacles.span(2)):
         g.ell(cut, cy, (rx - 1) * k - 0.8, (ry - 1) * k - 0.8, "cream")
     g.ell(cut, cy, 1.2, 1.6, "brown")
     # moss over its back and down its side, lit lime on top
-    for x, y, mx, my in ((40, LOG_TOP + 0.5, 7, 2), (66, LOG_TOP + 0.5, 5, 1.8), (19, 20.5, 4, 1.6),
-                       (23.5, 22, 3, 1.4)):
+    for x, y, mx, my in ((40, LOG_TOP + 0.5, 7, 2), (66, LOG_TOP + 0.5, 5, 1.8)):
         g.cel(x, y, mx, my, "moss", "olive", "lime")
     # two mushrooms on its back: cream stems under tan caps, lit cream and shaded ochre
     for x, h, cx, cyy in ((51, 3, 3.2, 1.8), (56.5, 2, 2.4, 1.4)):
@@ -665,7 +660,7 @@ def fallen_log(leaf=(0, 0), w=obstacles.span(2)):
     g.p(x + 5, y + 1, "rust")
     # the fallen leaves along its foot
     for f, y, k in LOG_LEAVES:
-        lens(g, 1.5 + f * (w - LEAF - 3), y, *LEAF_COLOURS[k])
+        lens(g, 1.5 + f * (w - LEAF - 3), y, *PILE_COLOURS[k])
     return lit(g, dict(bark=("clay", None), walnut=("bark", None)))
 
 
