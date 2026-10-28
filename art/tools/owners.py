@@ -151,7 +151,7 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
 
 
 def eve(mood):
-    """Social media influencer, dramatic: long blonde hair past the shoulders with a swept fringe, gold hoop
+    """YouTuber, dramatic: long blonde hair past the shoulders with a swept fringe, gold hoop
     earrings, a bright pink puffer jacket over a white top."""
     g = face()
     # the hair behind the face, down past the jaw

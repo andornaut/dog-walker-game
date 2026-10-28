@@ -7417,7 +7417,7 @@
       "json": "sprites/owner-duchess.json",
       "anchor": {
         "feetY": 45,
-        "opaqueWidth": 20
+        "opaqueWidth": 26
       }
     },
     {
