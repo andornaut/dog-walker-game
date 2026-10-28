@@ -251,9 +251,18 @@ describe("LIGHT_ATTACHMENTS", () => {
       const places = out.slice(0, placeAttachedLights(cone.zone, [anchor], out));
       const apex = places.find(({ key: light }) => light === cone.attachment.light);
       expect(apex).toBeDefined();
-      const x = Math.floor(apex?.x ?? 0) - sheetFrame.spriteSourceSize.x;
-      const y = Math.floor(apex?.y ?? 0) - sheetFrame.spriteSourceSize.y;
-      const colour = colourAt(data, width, sheetFrame);
+      // A lamp dims with its light's pulse and stays where it is, so it is looked for on the
+      // frame its light shows brightest.
+      const pulse = cone.attachment.pulse ?? [1];
+      const strength = (frame: number) => pulse[frame % pulse.length] ?? 1;
+      const brightest = framesOf(cone.step).reduce(
+        (best, _, frame) => (strength(frame) > strength(best) ? frame : best),
+        cone.frame,
+      );
+      const lampFrame = itemAt(framesOf(cone.step), brightest);
+      const x = Math.floor(apex?.x ?? 0) - lampFrame.spriteSourceSize.x;
+      const y = Math.floor(apex?.y ?? 0) - lampFrame.spriteSourceSize.y;
+      const colour = colourAt(data, width, lampFrame);
       const near = [-1, 0, 1].flatMap((dx) => [-1, 0, 1].map((dy) => [x + dx, y + dy] as const));
       expect(near.some(([nx, ny]) => isLampCore(colour, nx, ny))).toBe(true);
     },
