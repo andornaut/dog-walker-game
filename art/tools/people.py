@@ -490,13 +490,14 @@ def jason_top(wave):
         arms(g, b, wave, "olive", "dolive", "skin2", short=True)
         gloves(g, b, wave, "amber", "orange")
         # the leaf blower: a turquoise engine hanging from the fist by its handle, a dark intake on its face,
-        # and a grey nozzle angled down to the grass, two leaves blowing off its end
+        # and a grey nozzle angled down to the grass, two leaves blowing off its end: orange and moss, which the
+        # lit rim leaves alone, and clear of the frame's edge so each keeps its outline
         g.cel(4.5, 36 + b, 3.5, 2.5, "turquoise", "dturq")
         g.rect(4, 35 + b, 2, 2, "teal")
         g.rect(6, 34 + b, 2, 1, "dturq")
         g.rect(2, 38 + b, 2, 3, "grey")
         g.rect(1, 41 + b, 2, 2, "grey")
-        g.p(0, 44, "ochre")
+        g.p(1, 44, "orange")
         g.p(4, 44, "moss")
         g.rect(5, 31 + b, 4, 3, "amber")
         g.rect(5, 31 + b, 4, 1, "orange")
