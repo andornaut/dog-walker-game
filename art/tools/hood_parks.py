@@ -811,6 +811,9 @@ CROWN = ((-16, 27, 8.5, 5, False), (16, 27.5, 8.5, 4.5, False),
 # How far each lobe's pink sits up and left inside its mauve, leaving a crescent at least 2 drawn pixels deep
 # along its lower right.
 CLUSTER_SHADE = (0.8, 1.2)
+# How far every lobe stays inside the frame's sides, in layout pixels: an end tree's outer lobes are narrowed from
+# their outer side to it, so the crown's outline stays in the frame with a clear column outside it at every depth step.
+CROWN_MARGIN = 3
 # Where each trunk's bare part starts, under the crown's middle lobes, and its two limbs, as (from, to, width)
 # from the trunk's centre column, the second mirrored on the middle tree.
 TRUNK_TOP = 24
@@ -841,6 +844,8 @@ def cherry_trees(pose=0, w=obstacles.span(3)):
     for k, cx in enumerate(centres):
         for dx, cy, rx, ry, sways in CROWN:
             x = cx + (-dx if k == 1 else dx) + (sway * ux if sways else 0)
+            left, right = max(x - rx, CROWN_MARGIN), min(x + rx, w - CROWN_MARGIN)
+            x, rx = (left + right) / 2, (right - left) / 2
             g.cel(x, cy, rx, ry, "mauve")
             g.cel(x - CLUSTER_SHADE[0], cy - CLUSTER_SHADE[1], rx - CLUSTER_SHADE[0], ry - CLUSTER_SHADE[1], "pink")
     # the curb: stone lipped in driftwood, shaded dstone along its foot
