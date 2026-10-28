@@ -67,7 +67,7 @@ export const MINOR_OBSTACLES = {
     name: "Couple",
     onFoot: true,
     shape: { lanes: 2, rows: 1 },
-    zones: ["park", "pawsPromenade"],
+    zones: ["park", "pawsPromenade", "shops"],
   },
   coyote: {
     movement: { kind: "approach", steps: { max: 4, min: 3 } },
@@ -305,7 +305,7 @@ export const MINOR_OBSTACLES = {
     name: "Tourist",
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
-    zones: ["street", "homeStretch"],
+    zones: ["homeStretch", "shops", "street"],
   },
   touristTrain: {
     movement: { kind: "stopAndGoAcross", speed: 0.55, stopSeconds: 1 },

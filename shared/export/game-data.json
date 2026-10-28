@@ -1779,7 +1779,8 @@
       },
       "zones": [
         "park",
-        "pawsPromenade"
+        "pawsPromenade",
+        "shops"
       ],
       "spriteKey": "couple"
     },
@@ -2487,8 +2488,9 @@
         "rows": 1
       },
       "zones": [
-        "street",
-        "homeStretch"
+        "homeStretch",
+        "shops",
+        "street"
       ],
       "spriteKey": "tourist"
     },
@@ -3266,15 +3268,15 @@
           "bunny": 0,
           "busker": 0,
           "car": 0,
-          "cargoBike": 2,
+          "cargoBike": 3,
           "carriage": 0,
           "cat": 3,
-          "clothingRack": 2,
+          "clothingRack": 3.75,
           "cone": 3.75,
-          "couple": 0,
+          "couple": 2,
           "coyote": 0,
           "cyclist": 7,
-          "deliveryCyclist": 2,
+          "deliveryCyclist": 3,
           "deliveryTruck": 2,
           "ducklings": 0,
           "foodCartVendor": 2,
@@ -3285,7 +3287,7 @@
           "grannyCartShopper": 3,
           "hedge": 0,
           "hopscotchKid": 2,
-          "hotDogCart": 3.75,
+          "hotDogCart": 0,
           "iceCreamBike": 0,
           "iceCreamTruck": 1,
           "jogger": 0,
@@ -3299,7 +3301,7 @@
           "picnicBlanket": 0,
           "pigeons": 2.25,
           "porchSteps": 0,
-          "produceCrates": 5.75,
+          "produceCrates": 7.75,
           "raccoon": 2,
           "rangerCart": 0,
           "rollerblader": 0,
@@ -3310,12 +3312,12 @@
           "seagull": 0,
           "signSpinner": 0,
           "stiltWalker": 3,
-          "streetcar": 2,
-          "stroller": 7,
+          "streetcar": 0,
+          "stroller": 3,
           "strollingBusker": 5,
           "taxi": 0,
           "tourGroup": 0,
-          "tourist": 0,
+          "tourist": 2,
           "touristTrain": 0,
           "trashCan": 3.75,
           "ttcBus": 0,
