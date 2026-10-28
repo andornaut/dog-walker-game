@@ -78,11 +78,10 @@ describe("cheatsInUse", () => {
       setCheat(id, true, CHEATS_OFF),
       true,
     ]),
-    ...SPEEDS.map(({ id }): [string, Cheats, boolean] => [
-      `only the ${id} speed`,
-      setSpeed(id, CHEATS_OFF),
-      id !== CHEATS_OFF.speed,
-    ]),
+    // Every speed but the one every cheat off already has.
+    ...SPEEDS.filter(({ id }) => id !== CHEATS_OFF.speed).map(
+      ({ id }): [string, Cheats, boolean] => [`only the ${id} speed`, setSpeed(id, CHEATS_OFF), true],
+    ),
   ])("with %s: %s", (_, cheats, inUse) => {
     expect(cheatsInUse(cheats)).toBe(inUse);
   });
