@@ -1,10 +1,11 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { kebabCase } from "../assets/spriteKeys";
+import { SCREEN_CONFIG } from "../data/screen";
 import type { Encounter, EncounterId } from "../data/types";
 import { encounterFlashColour } from "../layout/bumpFlash";
 import { burstWordPlace, COMIC_WORDS } from "../layout/comicWords";
-import type { Point, Rect } from "../lib/rect";
+import { type Point, type Rect, rectAboveIn } from "../lib/rect";
 import { addDisplayText } from "../ui/phaser/displayText";
 import { PALETTE } from "../ui/phaser/palette";
 import { letterEffect, loadedComicWordWidth } from "./comicWord";
@@ -13,7 +14,7 @@ import { addNineSlice, tagFrame } from "./uiKit";
 
 // An encounter hit's moment, played over the hit stop before its card: a burst over the pack
 // lettered with the obstacle's word, a flash down both edges of the field, the encounter's
-// label on a plate above the pack, and the caught dogs shaking off. A lucky find's moment has
+// label on a plate over the burst, kept on screen, and the caught dogs shaking off. A lucky find's moment has
 // no word, no flash and no shake. Reduced motion keeps the flash (one still frame, faded out),
 // the label (set in place) and the burst (its first frame, held), and drops the word and the
 // shake.
@@ -29,8 +30,6 @@ interface HitMoment {
   // The flash runs down this rect's left and right edges.
   field: Rect;
   label: string;
-  // The plate's centre x.
-  labelX: number;
   // How long the hit stop lasts: everything is gone before the card opens.
   seconds: number;
   still: boolean;
@@ -98,7 +97,7 @@ export function playHitMoment(scene: Scene, moment: HitMoment): void {
 // hit's label shows.
 export function playMinorHitLabel(
   scene: Scene,
-  moment: Pick<HitMoment, "centre" | "depth" | "label" | "labelX" | "seconds" | "still">,
+  moment: Pick<HitMoment, "centre" | "depth" | "label" | "seconds" | "still">,
 ): void {
   const totalMs = momentMs(moment.seconds);
   showLabel(scene, moment, "normal", totalMs);
@@ -168,16 +167,25 @@ export function playEdgeFlash(
   scene.time.delayedCall(FLASH.frames * FLASH.frameMs, done);
 }
 
-// The plate sits centred on labelX, its bottom a gap above the burst.
+// The plate sits centred over the burst, its bottom a gap above it, moved in to stay on screen
+// as it drops in.
 function showLabel(
   scene: Scene,
-  moment: Pick<HitMoment, "centre" | "depth" | "label" | "labelX" | "still">,
+  moment: Pick<HitMoment, "centre" | "depth" | "label" | "still">,
   plate: string,
   totalMs: number,
 ): void {
-  const top = Math.round(moment.centre.y - BURST.size / 2 - BURST.gap - PLATE.height);
-  const left = Math.round(moment.labelX - PLATE.width / 2);
-  const label = scene.add.container(left, top).setDepth(moment.depth + 2);
+  const { height, width } = SCREEN_CONFIG;
+  const place = rectAboveIn(
+    { height: height - LABEL.dropIn, width, x: 0, y: LABEL.dropIn },
+    {
+      bottom: Math.round(moment.centre.y - BURST.size / 2 - BURST.gap),
+      x: Math.round(moment.centre.x),
+    },
+    PLATE,
+  );
+  const top = place.y;
+  const label = scene.add.container(place.x, top).setDepth(moment.depth + 2);
   const slice = addNineSlice(
     scene,
     PLATE.key,
