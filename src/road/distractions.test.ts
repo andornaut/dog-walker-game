@@ -381,21 +381,13 @@ function walk(
 }
 
 describe("distraction movers in a walk", { timeout: 60_000 }, () => {
-  it.each([1, 2, 3])("leave seed %i's walk unchanged", (seed) => {
-    const plain = walk(seed, false);
-    const stepped = walk(seed, true);
-    expect(stepped.out).toBeGreaterThan(0);
-    expect(stepped.session).toEqual(plain.session);
-    expect(stepped.events).toEqual(plain.events);
-  });
-
   it.each([1, 2, 3])(
-    "draw seed %i's only on an edge lane or the verge, clear of the road's items and props' footprints, until gone",
+    "leave seed %i's walk unchanged, drawn on an edge lane or the verge clear of items and props, until gone",
     (seed) => {
       const { cell, laneCount, roadTop } = GEOMETRY;
       const misses = { inside: 0, late: 0, onProp: 0, overItem: 0 };
       const roadside = defined(ROADSIDE.zones[currentZone(gameData, RUN).art]);
-      walk(seed, true, (key, items, zoneDistance, { lanePosition, y }) => {
+      const stepped = walk(seed, true, (key, items, zoneDistance, { lanePosition, y }) => {
         misses.inside += lanePosition > 0 && lanePosition < RIGHT ? 1 : 0;
         misses.late += y - roadTop >= END ? 1 : 0;
         for (const item of items) {
@@ -419,6 +411,10 @@ describe("distraction movers in a walk", { timeout: 60_000 }, () => {
         });
       });
       expect(misses).toEqual({ inside: 0, late: 0, onProp: 0, overItem: 0 });
+      const plain = walk(seed, false);
+      expect(stepped.out).toBeGreaterThan(0);
+      expect(stepped.session).toEqual(plain.session);
+      expect(stepped.events).toEqual(plain.events);
     },
   );
 });
