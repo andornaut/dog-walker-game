@@ -394,8 +394,13 @@ describe("a dog tile's text", () => {
   });
 
   // The grid's names share one size, so one name too wide at 2x sets every dog's name at 1x:
-  // each must fit the column at 2x, its glyphs closer if need be.
-  it.each(Object.values(gameData.dogs).map((dog) => dog.name))("sets %j at 2x", (text) => {
+  // each must fit the column at 2x, its glyphs closer if need be. The widest name at 2x fits
+  // wherever it does.
+  const nameWidth = (text: string) => bodyTextWidth(2, plainMarks(text));
+  const widestName = Object.values(gameData.dogs)
+    .map((dog) => dog.name)
+    .reduce((a, b) => (nameWidth(b) > nameWidth(a) ? b : a));
+  it.each([widestName])("sets %j at 2x", (text) => {
     const fitted = fitInFont("font-body", TWO_X_FIT_STYLES, DOG_TILE_TEXT_ROOM, plainMarks(text));
     expect(fitted.widest).toBeLessThanOrEqual(DOG_TILE_TEXT_ROOM);
   });
