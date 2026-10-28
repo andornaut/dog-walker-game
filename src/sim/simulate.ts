@@ -11,7 +11,7 @@ import type {
 import type { InputEvent } from "../dev/inputLog";
 import { type Random, randomStream } from "../lib/random";
 import { earnedByRun, runCountersOf, type RunFacts } from "../rules/achievements";
-import { type CardView, type Choice, type ChoiceData, type ChoiceOutcome } from "../rules/choices";
+import { type CardView, type Choice, type ChoiceData } from "../rules/choices";
 import { currentZoneId } from "../rules/route";
 import { addCents, type Cents, cents } from "../rules/units";
 import { STEP_SECONDS } from "../runner/fixedStep";
@@ -95,6 +95,7 @@ export interface ItemCount {
   touched: number;
 }
 
+// Items by kind, and movers by the kind they meet the pack as.
 type ItemCounts = Partial<Record<WalkItemKind, ItemCount>>;
 
 // Obstacle hits, minor ones and movers included, and those of them that came while a pull's move,
@@ -120,9 +121,6 @@ export interface DebuffCost {
 
 export type DebuffCosts = Record<DebuffId, DebuffCost>;
 
-// Movers are counted by the kind they meet the pack as.
-type MoverCounts = Partial<Record<WalkItemKind, ItemCount>>;
-
 export interface RunResult {
   // The achievements the run earns on its own facts, whatever the profile holds.
   readonly badges: readonly AchievementId[];
@@ -145,7 +143,7 @@ export interface RunResult {
   readonly pullsMoved: number;
   // Items that do not move, by kind, and movers, by mover.
   readonly items: ItemCounts;
-  readonly movers: MoverCounts;
+  readonly movers: ItemCounts;
   // The zones walked, in order.
   readonly route: readonly ZoneId[];
   // The run as it ended.
@@ -169,7 +167,7 @@ interface Tally {
   readonly inputs: InputEvent[];
   pullsMoved: number;
   readonly items: ItemCounts;
-  readonly movers: MoverCounts;
+  readonly movers: ItemCounts;
   // What the card policy draws from, kept apart from the game's and the bot's draws so the
   // policies that never draw play identical runs.
   readonly policyRandom: Random;
@@ -192,8 +190,8 @@ function countItem(
   counts[key] = count;
 }
 
-function recordFirings(tally: Tally, before: RunState, outcome: ChoiceOutcome): void {
-  for (const dog of outcome.fired) {
+function recordFirings(tally: Tally, before: RunState, fired: readonly DogId[]): void {
+  for (const dog of fired) {
     tally.firings.push({ dog, zoneIndex: before.zoneIndex });
   }
 }
@@ -324,7 +322,7 @@ function noteChoice(
   event: Extract<SessionEvent, { kind: "chosen" }>,
 ): void {
   const { choice, outcome, view } = event;
-  recordFirings(tally, run, outcome);
+  recordFirings(tally, run, outcome.fired);
   if (view.source.kind === "fork") {
     return;
   }
@@ -347,20 +345,14 @@ function botRoadOf(data: SimData, walk: Walk): BotRoad & { readonly pack: RunSta
 // game steps it: its lane moves are the steps' inputs, and the policies choose each
 // card as it opens. The inputs are logged as the game logs them, so the run's seed and log
 // replay it in the game.
-function playBySkill(
-  data: SimData,
-  seed: number,
-  config: SimConfig,
-  player: SimPlayer,
-  tally: Tally,
-): void {
+function playBySkill(data: SimData, seed: number, config: SimConfig, tally: Tally): void {
+  const { player } = config;
   const streams = runStreams(seed);
   const bot = newBot(randomStream(seed, "bot"), player.sight, player.skill);
   const start = { road: startRoad(LANE_COUNT), run: tally.run };
   let session = startSession(data, streams, screenRoadGeometry, start);
   noteZonePlan(data, tally, session.walk);
   let road = botRoadOf(data, session.walk);
-  bot.replan = true;
   while (session.walk.run.phase.kind !== "ended") {
     const { card, walk } = session;
     const clock = bot.clock;
@@ -412,11 +404,9 @@ function playBySkill(
           countLeaving(data, tally, road.geometry, pulledFrom, pulledWalk, event.step.walk);
           noteDebuffCosts(data, tally.debuffCosts, pulledWalk.run, event.step);
           for (const { outcome } of [...event.step.contacts, ...event.step.instants]) {
-            recordFirings(tally, pulledWalk.run, outcome);
+            recordFirings(tally, pulledWalk.run, outcome.fired);
           }
-          for (const dog of event.step.fired) {
-            tally.firings.push({ dog, zoneIndex: pulledWalk.run.zoneIndex });
-          }
+          recordFirings(tally, pulledWalk.run, event.step.fired);
           tally.tips = event.step.tips.reduce(
             (sum, tip) => addCents(sum, tip.change.amount),
             tally.tips,
@@ -473,7 +463,7 @@ export function simulateRun(data: SimData, seed: number, config: SimConfig): Run
     tips: cents(0),
     zones: [],
   };
-  playBySkill(data, seed, config, config.player, tally);
+  playBySkill(data, seed, config, tally);
   const facts: RunFacts = {
     ...runCountersOf(tally.run),
     dogsHome: packDogs(tally.run).length,
