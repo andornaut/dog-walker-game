@@ -152,7 +152,8 @@ function finishedWalk(facts: RunFacts, zones: number): boolean {
   return walkedFromTheStart(facts) && facts.zonesFinished >= zones;
 }
 
-function needed(all: number, threshold: Threshold): number {
+// The count a threshold asks for out of all.
+export function needed(all: number, threshold: Threshold): number {
   return threshold === "all" ? all : threshold;
 }
 

@@ -2,7 +2,7 @@ import { ACHIEVEMENTS } from "../data/achievements";
 import type { AchievementCondition, AchievementId, DogId, Threshold, ZoneId } from "../data/types";
 import { assertNever } from "../lib/assertNever";
 import { keysOf } from "../lib/records";
-import { type AchievementData, picksOf, type RunFacts } from "../rules/achievements";
+import { type AchievementData, needed, picksOf, type RunFacts } from "../rules/achievements";
 import { walkLength } from "../rules/route";
 import { type Cents, cents, dollarsToCents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
@@ -19,10 +19,6 @@ export function earningsGoal(id: AchievementId): Cents {
     throw new Error(`${id} has no earnings condition`);
   }
   return dollarsToCents(condition.dollars);
-}
-
-function needed(all: number, threshold: Threshold): number {
-  return threshold === "all" ? all : threshold;
 }
 
 function conditionsOf(
