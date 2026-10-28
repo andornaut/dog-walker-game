@@ -42,6 +42,7 @@ import { playerPaused, type RunPause, walkPaused } from "../hud/topBar";
 import { DOG_CARD } from "../hud/walkHud";
 import type { Point, Rect } from "../lib/rect";
 import { type Cents, cents } from "../rules/units";
+import { slotIndexOf } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { addDisplayText } from "../ui/phaser/displayText";
 import { addFilledRect, drawFramedRect, drawRing } from "../ui/phaser/draw";
@@ -221,7 +222,7 @@ export class HudFeedback {
   }
 
   private slotOf(dog: DogId): Rect | undefined {
-    const index = this.run.hudView()?.run.pack.findIndex((slot) => slot.dog === dog) ?? -1;
+    const index = slotIndexOf(this.run.hudView()?.run.pack ?? [], dog);
     return LAYOUT.dogSlots[index];
   }
 

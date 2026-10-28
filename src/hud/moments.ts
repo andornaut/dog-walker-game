@@ -3,6 +3,7 @@ import type { DogId, GameData } from "../data/types";
 import type { Point, Rect } from "../lib/rect";
 import { type FaceMood, faceMood } from "../rules/treats";
 import type { Cents } from "../rules/units";
+import { slotIndexOf } from "../state/pack";
 import type { Pack, PackSlot } from "../state/runState";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
@@ -322,7 +323,7 @@ export function payoutFlights(
 ): PayoutFlight[] {
   const { flightMs, staggerMs } = MOMENTS.payout;
   return cues
-    .map((cue) => ({ ...cue, slot: pack.findIndex((slot) => slot.dog === cue.dog) }))
+    .map((cue) => ({ ...cue, slot: slotIndexOf(pack, cue.dog) }))
     .filter((cue) => cue.slot >= 0)
     .sort((a, b) => a.slot - b.slot)
     .map((cue, order) => {

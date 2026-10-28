@@ -43,6 +43,11 @@ export function heartsOf(state: Pick<RunState, "pack">, dog: DogId): Hearts | un
   return slot?.status === "walking" ? slot.hearts : undefined;
 }
 
+// The index of dog's slot in pack, or -1 when it has none.
+export function slotIndexOf(pack: readonly PackSlot[], dog: DogId): number {
+  return pack.findIndex((slot) => slot.dog === dog);
+}
+
 // map keeps the length, so the result is a pack of the same size.
 export function mapPack(update: (slot: PackSlot) => PackSlot, pack: Pack): Pack {
   return pack.map(update) as readonly PackSlot[] as Pack;

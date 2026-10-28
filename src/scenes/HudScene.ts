@@ -78,7 +78,7 @@ import { hintFor, hintJumpsQueue } from "../rules/hints";
 import { currentZone } from "../rules/route";
 import { faceMood } from "../rules/treats";
 import { type Cents, cents, read } from "../rules/units";
-import { heartsOf } from "../state/pack";
+import { heartsOf, slotIndexOf } from "../state/pack";
 import type { PackSlot, RunState } from "../state/runState";
 import {
   addFilledRect,
@@ -841,7 +841,7 @@ export class HudScene extends Scene {
   }
 
   private slotOf(dog: DogId): number | undefined {
-    const index = this.shownRun()?.pack.findIndex((slot) => slot.dog === dog) ?? -1;
+    const index = slotIndexOf(this.shownRun()?.pack ?? [], dog);
     return index < 0 ? undefined : index;
   }
 

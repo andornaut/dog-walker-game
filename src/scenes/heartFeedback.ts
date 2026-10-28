@@ -14,6 +14,7 @@ import {
 import type { ChangeLabel } from "../hud/hudView";
 import { arcControl, curvePoint } from "../hud/moments";
 import { insetRect, type Point, type Rect } from "../lib/rect";
+import { slotIndexOf } from "../state/pack";
 import { drawFramedRect, drawRing } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText } from "../ui/phaser/pixelText";
@@ -320,7 +321,7 @@ export function heartPops(
       return [];
     }
     const { dog } = label.target;
-    const slot = pack.findIndex((packSlot) => packSlot.dog === dog);
+    const slot = slotIndexOf(pack, dog);
     const lane = hud.lanes[slot];
     const view = slotOf(slot);
     if (lane === undefined || view === undefined) {
