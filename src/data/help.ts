@@ -28,9 +28,9 @@ export const HELP_PAGES = [
     art: "cards",
     body:
       "Skunks, thieves, dogs and more open cards. " +
-      "Each option costs cash, hearts or a debuff, and one always costs no cash. " +
-      "A puddle makes the pack Muddy. Debuffs wear off after {debuffSeconds}s. " +
-      "Hold a card, an icon or a bar for details.",
+      "Each option costs cash, hearts or a debuff; one never costs cash. " +
+      "Puddles and potholes make the pack Muddy. Debuffs wear off in time. " +
+      "Hold a card, icon or bar for details.",
     title: "Some obstacles bring cards",
   },
   {

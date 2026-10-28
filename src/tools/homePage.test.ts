@@ -28,6 +28,8 @@ function pageFacts(): [string, string][] {
   const zoneName = (zoneId: string) => world.zones[zoneIndex(zoneId)]?.name ?? zoneId;
   const count = (n: number) => NUMBER_WORDS[n] ?? String(n);
   const sizes = ["small", "medium", "large"] as const;
+  const debuffSeconds = Object.values(debuffs).map(({ seconds }) => tuning.seconds[seconds]);
+  const [shortest, longest] = [Math.min(...debuffSeconds), Math.max(...debuffSeconds)];
   const perSize = sizes.map(
     (size) => `${count(Object.values(dogs).filter((dog) => dog.size === size).length)} ${size}`,
   );
@@ -56,10 +58,10 @@ function pageFacts(): [string, string][] {
       `A small dog dodges 1 in ${1 / tuning.probability.smallDodgeChance} bumps`,
     ],
     [
-      "the debuffs and their durations, as Help gives them",
+      "the debuffs and their durations, shortest to longest",
       `leaves the pack ${debuffs.muddy.name}, and a cheap way out can bring ${debuffs.spotlight.name}, ` +
         `${debuffs.stinky.name} or ${debuffs.zoomies.name}, each for ` +
-        `${helpBodyValues(gameData).debuffSeconds} seconds.`,
+        `${shortest === longest ? shortest : `${shortest} to ${longest}`} seconds.`,
     ],
     [
       "the Walk bonus",

@@ -1,6 +1,5 @@
 import type { GameData, HelpPage } from "../data/types";
 import { fillNames } from "../lib/lines";
-import { keysOf } from "../lib/records";
 import { dodgeInText, formatDollars } from "../rules/effectText";
 import { read, readTable } from "../rules/units";
 
@@ -8,7 +7,6 @@ import { read, readTable } from "../rules/units";
 // so a tuning change never leaves a stale number.
 export const HELP_BODY_FIELDS = [
   "bumpHearts",
-  "debuffSeconds",
   "dodgeIn",
   "largeHearts",
   "loneBonus",
@@ -24,21 +22,14 @@ export const HELP_BODY_FIELDS = [
 
 type HelpBodyField = (typeof HELP_BODY_FIELDS)[number];
 
-// Each field's text. debuffSeconds is the debuffs' length, or their shortest to longest when
-// they differ; dodgeIn is the small dogs' dodge chance as one in so many; loneBonus and pairBonus
-// are the lead owner's extra hearts walking one dog and walking two.
+// Each field's text. dodgeIn is the small dogs' dodge chance as one in so many; loneBonus and
+// pairBonus are the lead owner's extra hearts walking one dog and walking two.
 export function helpBodyValues(data: GameData): Readonly<Record<HelpBodyField, string>> {
   const { tuning, world } = data;
   const hearts = (size: "large" | "medium" | "small") =>
     String(readTable(tuning, "hearts", "maxBySize", size));
-  const seconds = keysOf(data.debuffs).map((debuff) =>
-    read(tuning, "seconds", data.debuffs[debuff].seconds),
-  );
-  const shortest = Math.min(...seconds);
-  const longest = Math.max(...seconds);
   return {
     bumpHearts: String(read(tuning, "hearts", "bump")),
-    debuffSeconds: shortest === longest ? String(shortest) : `${shortest} to ${longest}`,
     dodgeIn: dodgeInText(tuning, "smallDodgeChance"),
     largeHearts: hearts("large"),
     loneBonus: String(readTable(tuning, "hearts", "packSizeBonus", 1)),

@@ -4,14 +4,11 @@ import { gameData } from "../data";
 import { placeholders } from "../lib/lines";
 import { HELP_BODY_FIELDS, helpBody, helpBodyValues } from "./helpBody";
 
-const { debuffs, tuning } = gameData;
-const debuffSeconds = Object.values(debuffs).map(({ seconds }) => tuning.seconds[seconds]);
+const { tuning } = gameData;
 
 describe("helpBodyValues", () => {
-  it("fills the debuff seconds as one value or a range, and the dodge chance as one in n", () => {
+  it("fills the dodge chance as one in n", () => {
     const values = helpBodyValues(gameData);
-    const [least, most] = [Math.min(...debuffSeconds), Math.max(...debuffSeconds)];
-    expect(values.debuffSeconds).toBe(least === most ? String(least) : `${least} to ${most}`);
     expect(values.dodgeIn).toBe(String(Math.round(1 / tuning.probability.smallDodgeChance)));
   });
 });
