@@ -931,7 +931,8 @@ function moveLength(
   return length * (1 + variation.lengthShare * (2 * (draws.lengths[index] ?? 0.5) - 1));
 }
 
-function within(range: readonly [number, number], draw: number): number {
+// The value a draw from 0 up to 1 picks in a range, from its low end to its high end.
+function rangeAt(range: readonly [number, number], draw: number): number {
   return range[0] + (range[1] - range[0]) * draw;
 }
 
@@ -994,14 +995,14 @@ function crossPlacements(
     geometry;
   const warning = spec.warningSeconds * scrollSpeed;
   const cueOnRoad = 1 - (warning + cellLength) / sightLength;
-  const tilt = within(crossTilts(motion, scrollSpeed, sightLength, cueOnRoad), draws.tilt);
+  const tilt = rangeAt(crossTilts(motion, scrollSpeed, sightLength, cueOnRoad), draws.tilt);
   if (tilt <= -1) {
     throw new Error("A crosser's tilt must keep it coming down the road");
   }
   const lanesPerPixel = (motion.lanesPerSecond * speedFactor(spec.variation, draws)) / scrollSpeed;
   const outcome = dartOutcome(motion, draws.turn);
   const turnAfter =
-    outcome === "turn" ? within(motion.turnAtShare, draws.turnAt) * laneCount : null;
+    outcome === "turn" ? rangeAt(motion.turnAtShare, draws.turnAt) * laneCount : null;
   // It stops in the middle of the stopLanes-th lane from its edge, half a lane short of that many.
   const stopLanes = drawnCount(motion.stopLanes, draws.turnAt);
   // One that stops on the verge stops DART_VERGE_LANES past the far edge.
@@ -1057,8 +1058,8 @@ function crossPlacements(
   if (highest < lowest) {
     return [];
   }
-  const drawn = within([lowest, highest], draws.start);
-  const ahead = within([drawn, cueOnRoad], lift) * sightLength;
+  const drawn = rangeAt([lowest, highest], draws.start);
+  const ahead = rangeAt([drawn, cueOnRoad], lift) * sightLength;
   const enterTravel = sightLength - ahead;
   const scrollTo = (travel: number) => crossScrollTo(along, travel - enterTravel);
   // The scroll from setting off to reaching the pack's rows, and to leaving the road or sight:
@@ -1080,9 +1081,14 @@ function crossPlacements(
   // leaving the road, which one that stops never does.
   const inset = geometry.laneInset / cellLength;
   const touching = crossed(across + 0.5 - inset);
-  const contact = crosses
-    ? Math.max(0, Math.min(window / (1 + tilt), touching - reaches))
-    : scrollTo(sightLength + window) - reaches;
+  // Its contact with the pack's rows, a window long: while it crosses, the travel its window
+  // takes at its tilt, cut short where its hit box leaves the road; once it stops, until the
+  // window has passed.
+  const contactOver = (length: number) =>
+    crosses
+      ? Math.max(0, Math.min(length / (1 + tilt), touching - reaches))
+      : scrollTo(sightLength + length) - reaches;
+  const contact = contactOver(window);
   // The row offset it is level with, moving away from its own as it drifts against the road while
   // it crosses, and keeping level with one row once it stops.
   const drift = (scroll: number) => tilt * Math.min(scroll, crossingScroll(along));
@@ -1095,9 +1101,7 @@ function crossPlacements(
   const rows = rowsCovering(geometry, 1, crosses ? 1 / (1 + tilt) : contact / window);
   // Its contact as drawn, for its stand: its own hit length and the pack's hit boxes.
   const drawnWindow = drawnHitLength(geometry, spec) + geometry.packHitLength;
-  const drawnContact = crosses
-    ? Math.max(0, Math.min(drawnWindow / (1 + tilt), touching - reaches))
-    : scrollTo(sightLength + drawnWindow) - reaches;
+  const drawnContact = contactOver(drawnWindow);
   return ([1, -1] as const).map((direction): MoverPlacement => {
     const path: MoverPath = {
       ...along,
@@ -1434,12 +1438,13 @@ function approachPlacements(
   const steps = drawnCount(motion.steps, draws.count);
   const pending: ApproachTiming[] = [
     {
-      at: height + (within(motion.firstDelaySeconds, draws.delays[0] ?? 0) * scrollSpeed + warning),
+      at:
+        height + (rangeAt(motion.firstDelaySeconds, draws.delays[0] ?? 0) * scrollSpeed + warning),
       kind: "after",
     },
     ...Array.from({ length: steps - 1 }, (): ApproachTiming => ({
       kind: "near",
-      travel: sightLength - within(motion.secondRoadShare, draws.share) * roadLength,
+      travel: sightLength - rangeAt(motion.secondRoadShare, draws.share) * roadLength,
     })),
   ];
   const travels = Array.from({ length: steps + 1 }, (_, row) => row * cellLength);
@@ -1745,9 +1750,9 @@ export function placeMovers<Kind extends string>(
   const nearestLater = (
     starts: readonly (readonly MoverPlacement[])[],
     first: number,
-    last: number,
+    end: number,
   ) => {
-    for (let row = first; row < last; row++) {
+    for (let row = first; row < end; row++) {
       const inRow = firstFitting(starts, row, row + 1);
       if (inRow.length > 0) {
         return inRow;
@@ -1770,13 +1775,11 @@ export function placeMovers<Kind extends string>(
         const stretch = firstFitting(starts, first, end);
         return stretch.length > 0 ? stretch : nearestLater(starts, end, to);
       };
-      let fitting = fittingAt(draws);
-      if (fitting.length === 0) {
-        for (const retry of dartRetries(spec, draws)) {
-          fitting = fittingAt(retry);
-          if (fitting.length > 0) {
-            break;
-          }
+      let fitting: Spot[] = [];
+      for (const tried of [draws, ...dartRetries(spec, draws)]) {
+        fitting = fittingAt(tried);
+        if (fitting.length > 0) {
+          break;
         }
       }
       if (fitting.length === 0) {
