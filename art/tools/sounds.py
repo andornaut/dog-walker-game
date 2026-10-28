@@ -20,6 +20,8 @@ music-cabbagetown  31.28s 12 bars at about 92 BPM in F, loops seamlessly: triang
                           lead, fingerpicked pulse guitar, triangle walking bass, brushed tick
 music-walk         28.77s 12 bars at about 100 BPM in C, loops seamlessly: square lead,
                           triangle walking bass, thin square arpeggio, soft kick and tick
+music-distillery-district 35.53s 16 bars swung at about 108 BPM in F, loops seamlessly: muted
+                          square lead with vibrato, triangle walking bass, rolled seventh chords, brushes
 
 Each sound ships as mono 44.1kHz Ogg Vorbis plus AAC (.m4a), since iOS Safari
 cannot play Ogg.
