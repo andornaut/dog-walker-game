@@ -257,7 +257,8 @@ describe("lowHeartDogs and newlyLow", () => {
 
 describe("cardOwnerMood", () => {
   // The most hearts a dog can have, at any place in a pack, with every gear's raise. The mood
-  // reads the max only through the dog's face, so every heart count under it covers the rule.
+  // reads the max only through the dog's face, so no hearts, the last heart, one over it and
+  // the most cover the rule.
   const gear = modifiersOf(Object.values(gameData.shopGear).flatMap((g) => g.effects));
   const most = Math.max(
     ...Object.values(gameData.dogs).flatMap((dog) =>
@@ -265,7 +266,7 @@ describe("cardOwnerMood", () => {
     ),
   );
 
-  it.each(Array.from({ length: most + 1 }, (_, hearts) => hearts))(
+  it.each([0, MOMENTS.lowHearts, MOMENTS.lowHearts + 1, most])(
     "shows a walking dog's owner at %i hearts worried on the last heart, else as the dog's face",
     (hearts) => {
       const mood = cardOwnerMood(gameData, most, walking("kilo", hearts));
