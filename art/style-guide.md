@@ -252,6 +252,7 @@ After zones 1 to 3, over the road view dimmed as under a card: the walker cheers
 | People    | 2      | 400ms        | Breathing: the body 1px higher on frame 2, feet planted, arms at rest                                                 |
 
 - A performer's idle is its act, at the act's own frames and pace: the buskers strum, `sign-spinner` twirls its sign, `stilt-walker` waves.
+- `cheese-crates` is the one obstacle with no rest in its `idle`: its stink wisps rise a quarter wave every frame, since the smell is what the card is about.
 
 ## Depth scaling
 
