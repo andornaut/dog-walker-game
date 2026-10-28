@@ -386,7 +386,7 @@ describe("the dog cards", () => {
   const card = { ...DOG_CARD.size, x: 0, y: 0 };
   const lead = { ...pngSize("images/ui-lead-tag.png"), ...DOG_CARD.lead };
   const { face } = DOG_CARD.owner;
-  const ownerPhoto = ownerPhotoRect(face);
+  const ownerPhoto = ownerPhotoRect(face.size, face);
   const heartRects = (max: number) =>
     cardHearts(max, max).map((cell) => ({ ...HEART_SIZE, x: cell.x, y: cell.y }));
 

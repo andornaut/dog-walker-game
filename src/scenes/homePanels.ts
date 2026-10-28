@@ -1,6 +1,6 @@
 import type { GameObjects, Scene } from "phaser";
 
-import { ownerCardFaceKey } from "../assets/spriteKeys";
+import { ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
 import type { DogId } from "../data/types";
@@ -15,7 +15,6 @@ import {
   OWNER_ROW,
 } from "../home/homeLayout";
 import { withNamePills } from "../hud/effectNames";
-import { DOG_CARD, ownerNameLines } from "../hud/walkHud";
 import { insetRect, type Point, type Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
 import { addDim, drawFramedRect, drawRing } from "../ui/phaser/draw";
@@ -24,9 +23,7 @@ import {
   addPixelText,
   fitPixelText,
   type FontRole,
-  inkSpan,
   pixelFontMetrics,
-  setPixelText,
   wrapPixelText,
 } from "../ui/phaser/pixelText";
 import { AFFORD_OUTSET } from "../ui/selection";
@@ -162,30 +159,22 @@ export function addDetailWell(scene: Scene, parent: GameObjects.Container, rect:
   parent.add(g);
 }
 
-// The photo and name of dog's owner as the walk's dog card draws them, the photo's top-left at
-// at: the neutral face in its white mat and ink frame, and the name beside it in the body font
-// at the walk card's scale, in the detail card's owner colour.
+// The photo and name of dog's owner, the photo's top-left at at: the neutral face-owner-<art>
+// face in the walk card's white mat and ink frame, and the name beside it.
 function addDetailOwner(scene: Scene, parent: GameObjects.Container, at: Point, dog: DogId): void {
-  const style = { colour: PALETTE[CARD.ownerNameColour], scale: DOG_CARD.owner.scale };
-  const probe = addPixelText(scene, 0, 0, "", style);
-  const rightEdge = (line: string) => {
-    setPixelText(probe, line);
-    return inkSpan(probe).right;
-  };
-  const owner = detailOwner(at, ownerNameLines(rightEdge, gameData.dogs[dog].owner.name));
-  probe.destroy();
+  const owner = detailOwner(pixelFontMetrics(scene, "body"), at);
   const g = scene.add.graphics();
   drawFramedRect(g, { border: PALETTE.ink, fill: PALETTE.white }, owner.photo);
   parent.add(g);
-  const key = ownerCardFaceKey(gameData, dog);
+  const key = ownerFaceKey(gameData, dog);
   if (scene.textures.exists(key)) {
     const face = scene.add.sprite(owner.face.x, owner.face.y, key).setOrigin(0);
     playFirstTag(face, key, ["neutral"]);
     parent.add(face);
   }
-  owner.names.forEach((line) =>
-    parent.add(addPixelText(scene, line.x, line.top, line.text, style)),
-  );
+  text(scene, parent, owner.name, gameData.dogs[dog].owner.name, {
+    colour: PALETTE[CARD.owner.nameColour],
+  });
 }
 
 // A held dog's, walker's or gear item's detail card over a dim layer, as tall as what it

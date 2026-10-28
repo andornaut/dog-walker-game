@@ -53,7 +53,7 @@ describe("dogDetail", () => {
       row: [fillNames(text.dogSmall, { dodgeIn: dodgeInText(data.tuning, "smallDodgeChance") })],
     },
   ])(
-    "gives $id's breed, size and hearts, its size row, and owner, with their photo",
+    "gives $id's breed, size and hearts, its size row, and its owner for their photo",
     ({ id, row }) => {
       const card = dogDetail(data, { ...owned, dogs: [id] }, dollars(0), id);
       const dog = data.dogs[id];
@@ -65,7 +65,6 @@ describe("dogDetail", () => {
           size: capitalize(SIZE_NAMES[dog.size]),
         }),
         ...row,
-        fillNames(text.dogOwner, { owner: dog.owner.name, role: dog.owner.role }),
       ]);
       expect(card.owner).toBe(id);
       expect(card.status).toBe(text.dogStatus);

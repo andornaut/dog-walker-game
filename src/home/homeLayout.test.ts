@@ -2,17 +2,11 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
+import { ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { WalkerId } from "../data/types";
-import {
-  cashLeft,
-  DOG_CARD,
-  ownerNameLines,
-  ownerPhotoRect,
-  WALK_BAR,
-  WALK_BAR_BUTTONS,
-} from "../hud/walkHud";
+import { cashLeft, ownerPhotoRect, WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
 import { wrapWords } from "../lib/lines";
 import { keysOf } from "../lib/records";
 import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
@@ -453,9 +447,9 @@ describe("a detail card", () => {
     },
   );
 
-  // The columns a line inks in the body font at the walk card's owner scale.
+  // The columns a line inks in 2x body text.
   const nameInk = (line: string) =>
-    fontInk("font-body", { letterSpacing: 0, scale: DOG_CARD.owner.scale }, plainMarks(line));
+    fontInk("font-body", { letterSpacing: 0, scale: 2 }, plainMarks(line));
   const dogCards = cards.flatMap(([kind, card]) =>
     kind === "dog" && card.owner !== undefined
       ? [[card.title, gameData.dogs[card.owner].owner.name, card] as const]
@@ -463,21 +457,18 @@ describe("a detail card", () => {
   );
 
   it.each(dogCards)(
-    "sets the photo and name of %s's owner, %s, inside the card, clear of its other parts",
+    "sets the photo and name of %s's owner, %s, inside the card on one line, clear of its other parts",
     (_title, name, card) => {
       const rows = rowsOf("dog", card);
       const layout = detailCardLayout(BODY, rows);
       const ownerIndex = rows.beside.indexOf(OWNER_ROW);
-      const owner = detailOwner(
-        { x: besideX, y: layout.beside[ownerIndex] ?? 0 },
-        ownerNameLines((line) => nameInk(line).right, name),
-      );
-      const names = owner.names.map((line) => ({
-        height: inkRowsFromCapTop(BODY) * DOG_CARD.owner.scale,
-        width: nameInk(line.text).right,
-        x: line.x,
-        y: line.top,
-      }));
+      const owner = detailOwner(BODY, { x: besideX, y: layout.beside[ownerIndex] ?? 0 });
+      const nameRect = {
+        height: inkRowsFromCapTop(BODY) * 2,
+        width: nameInk(name).right,
+        x: owner.name.x,
+        y: owner.name.y,
+      };
       const band = cardBand({ height: layout.height, width, x: 0, y: 0 });
       const room = {
         height: layout.height - pad - (band.y + band.height),
@@ -498,36 +489,32 @@ describe("a detail card", () => {
         ...textRows(besideX, CARD_TEXT_ROOM.beside, rows.beside, layout.beside),
         ...textRows(pad, CARD_TEXT_ROOM.full, rows.below, layout.below),
       ];
-      const parts = [owner.photo, ...names];
+      const parts = [owner.photo, nameRect];
+      expect(nameRect.width).toBeLessThanOrEqual(CARD_TEXT_ROOM.ownerName);
       expect(parts.filter((part) => !inside(part, room))).toEqual([]);
       expect(parts.filter((part) => others.some((other) => rectsOverlap(part, other)))).toEqual([]);
-      expect(names.filter((line) => rectsOverlap(line, owner.photo))).toEqual([]);
+      expect(rectsOverlap(nameRect, owner.photo)).toBe(false);
     },
   );
 
-  // A part's offset from the owner's photo.
-  const offset = (photo: Rect, part: { x: number; y: number }) => ({
-    dx: part.x - photo.x,
-    dy: part.y - photo.y,
+  const { face } = HOME_LAYOUT.card.owner;
+  it.each(dogs)("has a %s owner face the photo's size", (dog) => {
+    const sheet = JSON.parse(
+      readFileSync(
+        new URL(`../../public/art/sprites/${ownerFaceKey(gameData, dog)}.json`, import.meta.url),
+        "utf8",
+      ),
+    ) as { frames: Record<string, { sourceSize: { h: number; w: number } }> };
+    const size = Object.values(sheet.frames)[0]?.sourceSize;
+    expect(size).toEqual({ h: face, w: face });
   });
-  const walkPhoto = ownerPhotoRect(DOG_CARD.owner.face);
-  const { oneLine, twoLines } = DOG_CARD.owner.tops;
-  it.each([
-    ["one line", [{ text: "Ab", top: oneLine }]],
-    [
-      "two lines",
-      [
-        { text: "Ab", top: twoLines[0] },
-        { text: "Cd", top: twoLines[1] },
-      ],
-    ],
-  ])("sets the face and a name on %s as the walk's dog card does", (_case, lines) => {
-    const owner = detailOwner({ x: besideX, y: 40 }, lines);
-    expect(owner.photo).toEqual({ ...walkPhoto, x: besideX, y: 40 });
-    expect(offset(owner.photo, owner.face)).toEqual(offset(walkPhoto, DOG_CARD.owner.face));
-    expect(owner.names.map((line) => offset(owner.photo, { x: line.x, y: line.top }))).toEqual(
-      lines.map((line) => offset(walkPhoto, { x: DOG_CARD.owner.x, y: line.top })),
-    );
+
+  it("frames the face as the walk's dog card does, with the name's capitals centred down the photo", () => {
+    const owner = detailOwner(BODY, { x: besideX, y: 40 });
+    expect(owner.photo).toEqual(ownerPhotoRect(face, owner.face));
+    const capsTop = owner.name.y - owner.photo.y;
+    const capsBottom = owner.photo.height - capsTop - BODY.capHeight * 2;
+    expect(Math.abs(capsTop - capsBottom)).toBeLessThanOrEqual(1);
   });
 });
 

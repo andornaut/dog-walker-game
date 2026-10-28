@@ -1662,7 +1662,11 @@
         },
         "besideDy": 4,
         "besideX": 90,
-        "ownerNameColour": "plum",
+        "owner": {
+          "face": 32,
+          "gap": 6,
+          "nameColour": "plum"
+        },
         "pad": 12,
         "rowGap": 8,
         "well": {

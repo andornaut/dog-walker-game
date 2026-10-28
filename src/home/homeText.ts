@@ -8,7 +8,6 @@ export const HOME_TEXT_FIELDS = {
   detail: {
     dogKind: ["hearts", "size"],
     dogLarge: ["speed"],
-    dogOwner: ["role"],
     dogSmall: ["dodgeIn"],
     priceBuy: ["price"],
     priceLocked: ["price"],

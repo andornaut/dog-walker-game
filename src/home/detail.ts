@@ -93,9 +93,9 @@ function sizeRow(data: DetailData, dog: DogId): readonly string[] {
   }
 }
 
-// A dog's breed, its size and hearts, its size row, and its owner, whose photo it shows.
+// A dog's breed, its size and hearts, its size row, and its owner, for their photo and name.
 export function dogDetail(data: DetailData, owned: Owned, bank: Cents, dog: DogId): DetailCard {
-  const { breed, name, owner, size } = data.dogs[dog];
+  const { breed, name, size } = data.dogs[dog];
   const purchase: Purchase = { dog, kind: "dog" };
   const text = data.homeText.detail;
   return {
@@ -105,7 +105,6 @@ export function dogDetail(data: DetailData, owned: Owned, bank: Cents, dog: DogI
         size: capitalize(SIZE_NAMES[size]),
       }),
       ...sizeRow(data, dog),
-      fillLine(FIELDS, text, "dogOwner", { role: owner.role }),
     ],
     locked: isLocked(data, owned, bank, purchase),
     owner: dog,
