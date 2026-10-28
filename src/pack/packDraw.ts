@@ -1,13 +1,9 @@
 import type { DogId } from "../data/types";
 import { COLLAR_HEIGHTS, leashHand, type PackPlacement } from "../layout/packFormation";
+import type { Point } from "../lib/rect";
 
 // How every screen draws the pack: the walk, the start screen's gate and the end screen's return
 // home stand it through these, so their leashes and draw order agree.
-
-export interface Point {
-  x: number;
-  y: number;
-}
 
 // Where a figure stands: the middle of its feet, in screen pixels.
 export interface Feet {
