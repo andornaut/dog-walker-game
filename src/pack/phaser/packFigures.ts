@@ -13,7 +13,7 @@ import { type Feet, type LeashLine, leashLine, packLayers, type StandingDog } fr
 
 // The leashes' colour off the road, at the start screen's gate and on the end screen's walk
 // home; on the road each zone sets its own.
-export const YARD_LEASH_COLOUR = PALETTE.darkRed;
+const YARD_LEASH_COLOUR = PALETTE.darkRed;
 
 export interface Figure {
   key: string;
