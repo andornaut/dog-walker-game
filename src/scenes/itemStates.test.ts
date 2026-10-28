@@ -105,9 +105,13 @@ const inkWidth = (style: TextFitStyle, text: string) => {
   return ink.right - ink.left;
 };
 
-// Every walker's name, owned or not, shows on the goal plate at 2x.
+// Every walker's name, owned or not, shows on the goal plate at 2x: the widest name fits
+// wherever it does.
 describe("a walker tile's name plate", () => {
-  it.each(WALKERS)("sets %s's name inside its tile", (walker) => {
+  const nameWidth = (walker: (typeof WALKERS)[number]) =>
+    bodyTextWidth(2, gameData.walkers[walker].name);
+  const widest = WALKERS.reduce((a, b) => (nameWidth(b) > nameWidth(a) ? b : a));
+  it.each([widest])("sets %s's name inside its tile", (walker) => {
     const { name } = gameData.walkers[walker];
     const { walkerTile: tile, walkerTiles } = HOME_LAYOUT;
     expect(bodyTextWidth(2, name) + 2 * PLATE_PAD).toBeLessThanOrEqual(walkerTiles.cellWidth);
@@ -122,15 +126,34 @@ describe("the text of an item not owned fits", () => {
   const fitted = (status: string) =>
     fittingText(WRAPPING_TEXT_FIT_STYLES, inkWidth, besideRoom, status);
 
-  it.each(GEAR)("sets %s's price on its plate inside its Pocket tile", (gear) => {
+  // The gear item whose price is widest on its plate.
+  const priceWidth = (gear: (typeof GEAR)[number]) =>
+    bodyTextWidth(
+      2,
+      dollarText(purchasePrice(gameData, OWNED, { gear, kind: "gear" }) ?? cents(0)),
+    );
+  const dearest = GEAR.reduce((a, b) => (priceWidth(b) > priceWidth(a) ? b : a));
+  it.each([dearest])("sets %s's price on its plate inside its Pocket tile", (gear) => {
     const { cells, tileInset } = HOME_LAYOUT.pocket;
-    const cost = purchasePrice(gameData, OWNED, { gear, kind: "gear" }) ?? cents(0);
-    const plate = bodyTextWidth(2, dollarText(cost)) + 2 * PLATE_PAD;
+    const plate = priceWidth(gear) + 2 * PLATE_PAD;
     expect(plate).toBeLessThanOrEqual(cells.cellWidth - 2 * tileInset);
   });
 
-  it.each(forSale)("sets $dog's status on one line at 2x when $state", ({ bank, dog }) => {
-    const shown: DetailCard = dogDetail(gameData, OWNED, bank, dog);
+  // Of each state's statuses, the widest at 2x: a narrower one fits wherever it does.
+  const statusOf = ({ bank, dog }: (typeof forSale)[number]) =>
+    dogDetail(gameData, OWNED, bank, dog).status;
+  const statusWidth = (row: (typeof forSale)[number]) =>
+    inkWidth({ letterSpacing: 0, scale: 2 }, statusOf(row));
+  const widestStatus = forSale.filter((row) =>
+    forSale.every(
+      (other) =>
+        other.state !== row.state ||
+        statusWidth(other) < statusWidth(row) ||
+        (statusWidth(other) === statusWidth(row) && forSale.indexOf(other) >= forSale.indexOf(row)),
+    ),
+  );
+  it.each(widestStatus)("sets $dog's status on one line at 2x when $state", (row) => {
+    const shown: DetailCard = dogDetail(gameData, OWNED, row.bank, row.dog);
     const { lines, style } = fitted(shown.status);
     expect({ lines: lines.length, scale: style.scale }).toEqual({ lines: 1, scale: 2 });
   });
