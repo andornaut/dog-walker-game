@@ -87,9 +87,10 @@ describe("dogDetail", () => {
 });
 
 describe("gearDetail", () => {
-  it("gives the effect, and whether it is equipped", () => {
+  it("gives the effect, and whether it is equipped, with no owner", () => {
     const card = gearDetail(data, owned, dollars(0), { gear: "luckyCollar" }, "luckyCollar");
     expect(card.title).toBe(data.shopGear.luckyCollar.name);
+    expect(card.owner).toBeUndefined();
     expect(card.lines.join(" ").toLowerCase()).toContain(
       effectText(data, data.shopGear.luckyCollar.effects).toLowerCase(),
     );

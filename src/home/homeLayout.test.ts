@@ -462,13 +462,6 @@ describe("a detail card", () => {
     },
   );
 
-  it.each(cards.map(([kind, card]) => [card.title, kind, card] as const))(
-    "shows %s's owner on a dog's card alone",
-    (_, kind, card) => {
-      expect(card.owner !== undefined).toBe(kind === "dog");
-    },
-  );
-
   // The columns a line inks in the body font at scale.
   const inkRight = (scale: number, line: string) =>
     fontInk("font-body", { letterSpacing: 0, scale }, plainMarks(line)).right;
