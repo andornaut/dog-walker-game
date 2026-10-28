@@ -1,3 +1,4 @@
+import { WIDE_BUTTON } from "../layout/screenLayout";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 
 // The end screen's geometry, with every text at 2x.
@@ -7,8 +8,7 @@ const RIBBON = { x: 144, y: 102 };
 export const END_LAYOUT = {
   badges: { height: 92, width: 344, x: 8, y: 416 },
   breakdown: { amountRight: 196, label: 40, pitch: 18, top: PANEL.y + 42 },
-  // 44 game pixels tall: 48 CSS pixels on a 390px-wide phone.
-  button: { height: 44, width: 264, x: 48, y: 512 },
+  button: { ...WIDE_BUTTON, y: 512 },
   logo: { x: 116, y: 8 },
   panel: PANEL,
   // An owner's row, mirroring the home screen's bubble: a speech bubble from x with its tail

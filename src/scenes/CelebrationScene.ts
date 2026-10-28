@@ -5,6 +5,7 @@ import { SCREEN_LAYOUT } from "../data/screen";
 import type { AchievementId, DogId } from "../data/types";
 import { CELEBRATION_PANEL } from "../home/badgesView";
 import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
+import { WIDE_BUTTON } from "../layout/screenLayout";
 import type { Rect } from "../lib/rect";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { addBadgeCelebration, addCheeringFace } from "./badges";
@@ -24,8 +25,8 @@ export interface CelebrationSceneData {
 const SCREEN = SCREEN_LAYOUT.screen;
 const PANEL = CELEBRATION_PANEL;
 const FACES = { pitch: 44, size: 32, top: 4 };
-// 44 game pixels tall: 48 CSS pixels on a 390px-wide phone, 12 under the panel.
-const BUTTON = { gap: 12, height: 44, width: 264, x: 48 };
+// 12 under the panel.
+const BUTTON = { ...WIDE_BUTTON, gap: 12 };
 
 // Badges earned away from a run's end, on launch or by a purchase, over the dimmed home screen:
 // the badges burst in and the owners cheer. Nice! returns to the screen below.

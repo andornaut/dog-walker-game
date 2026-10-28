@@ -1,5 +1,6 @@
 import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
+import { WIDE_BUTTON } from "../layout/screenLayout";
 import type { FontMetrics } from "../ui/fontMetrics";
 import { type TextFitStyle, textFitStylesOnLines } from "../ui/textFit";
 
@@ -27,7 +28,7 @@ const BUBBLE_TOP = NEW_WALKER_FEET + 6;
 const ZONE_DONE_FEET = ROAD_TOP + 148;
 const PLATE_TOP = ZONE_DONE_FEET + 10;
 // Each version's button, 8 rows under its bubble or plate.
-const BUTTON = { height: 44, width: 264, x: 48 };
+const BUTTON = WIDE_BUTTON;
 
 // A version's headline from its feet line: the walker's frame at WALKER_SCALE, centred on
 // CENTRE_X, standing on feetY; the burst behind it; and the small line's top subtitleGap rows

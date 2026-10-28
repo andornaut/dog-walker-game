@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import { MIN_TAP_SIZE } from "../help/helpLayout";
+import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { cents } from "../rules/units";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { inside } from "../testing/rects";

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { wrapWords } from "../lib/lines";
 import { rectsOverlap } from "../lib/rect";
 import { bodyTextWidth } from "../testing/bodyFont";
@@ -9,14 +10,7 @@ import { inside } from "../testing/rects";
 import { closeFace } from "../ui/closeControl";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { helpBody } from "./helpBody";
-import {
-  CLOSE_HIT_RECT,
-  dotRects,
-  HELP_LAYOUT,
-  helpActionAt,
-  MIN_TAP_SIZE,
-  tapRect,
-} from "./helpLayout";
+import { CLOSE_HIT_RECT, dotRects, HELP_LAYOUT, helpActionAt, tapRect } from "./helpLayout";
 import type { HelpAction } from "./helpPaging";
 
 describe("tapRect", () => {

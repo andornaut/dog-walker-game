@@ -1,4 +1,5 @@
 import { SCREEN_LAYOUT } from "../data/screen";
+import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { containsPoint, type Point, type Rect } from "../lib/rect";
 import { closeTopOnBar, pageCloseControl } from "../ui/closeControl";
 import { rectIndexAt } from "../ui/grid";
@@ -6,9 +7,6 @@ import type { HelpAction } from "./helpPaging";
 
 const { screen: SCREEN, topBar: TOP_BAR } = SCREEN_LAYOUT;
 const { height, width } = SCREEN;
-
-// The smallest tap target, in render pixels: at least 44 CSS px on a phone 360 CSS px wide.
-export const MIN_TAP_SIZE = 44;
 
 // The help screen's geometry at the render resolution. A text position is the top-left of
 // its first line.
