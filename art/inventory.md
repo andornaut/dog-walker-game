@@ -178,6 +178,7 @@ Placed by the style guide's Roadside table (`shared/roadside.json`): the lawn pr
 | `curb-urn`                            | 33×42   | A cast-iron urn heaped with geraniums                            |
 | `roadside-beach-chair-<colourway>`    | 42×36   | blue, coral, green; a folding beach chair slung with stripes     |
 | `roadside-beach-umbrella-<colourway>` | 72×72   | blue, coral, green; a striped beach umbrella planted in the sand |
+| `roadside-cafe-patio`                 | 72×72   | A bistro table and two chairs under a red and cream umbrella     |
 | `roadside-dune-grass`                 | 60×48   | A tuft of dune grass                                             |
 | `roadside-fruit-stand`                | 108×84  | Fruit crates under a striped awning on two posts                 |
 | `roadside-gas-lamp`                   | 36×150  | A heritage lamp lit gold                                         |

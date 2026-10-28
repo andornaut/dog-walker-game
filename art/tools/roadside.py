@@ -18,6 +18,8 @@ roadside-beach-chair-*   42x36    a folding beach chair slung with stripes: blue
                                   (turquoise and pink) or green (green and yellow)
 roadside-beach-umbrella-* 72x72   a beach umbrella planted in the sand, leaning a little left, its panels in the
                                   same three colourways
+roadside-cafe-patio      72x72    a café patio: a bistro table with a coffee cup and a potted flower under a red and
+                                  cream market umbrella, a bentwood chair each side
 roadside-dune-grass      60x48    a tuft of dune grass, moss and olive blades with gold tips
 roadside-fruit-stand     108x84   a tiered fruit stand under a little striped awning
 roadside-gas-lamp        36x150   a heritage street lamp, its lantern lit gold
@@ -451,6 +453,72 @@ def beach_chair(stripes):
     return w, h, draw
 
 
+def cafe_patio():
+    """A café patio set: a round marble bistro table on a coal pedestal, a coffee cup and a potted flower
+    on it, under an upright market umbrella of red and cream panels with a scalloped valance, and a walnut
+    bentwood chair each side facing it, caned seats, lit from the left."""
+    w, h = 48, 48
+    cx, apex, eave, reach = 24, 4, 15, 20
+    # the ribs of an eight-panel canopy seen front on, across from the pole as a share of its reach
+    ribs = [math.sin(math.radians(a)) for a in (-67.5, -22.5, 22.5, 67.5)]
+
+    def canopy(x, y):
+        lx = x - cx
+        if apex + 1 <= y <= eave:
+            half = reach * (y - apex) / (eave - apex)
+        elif eave < y <= eave + 3:
+            half = reach
+        else:
+            return None
+        if abs(lx) > half:
+            return None
+        j = sum(lx > r * half for r in ribs)
+        if y > eave:
+            # the valance: a scallop per panel hanging from the eave
+            lo = [-half] + [r * half for r in ribs]
+            hi = [r * half for r in ribs] + [half]
+            d = min(1, abs(2 * lx - lo[j] - hi[j]) / max(hi[j] - lo[j], 1))
+            if y - eave > 1 + 2 * (1 - d * d) ** 0.5:
+                return None
+        c = "red" if j % 2 == 0 else "cream"
+        return dk(c) if j == 4 else c
+
+    def chair(g, back, front, wood, shade):
+        """A bentwood chair, its back post at column back and its front leg at column front."""
+        lo = min(back, front)
+        g.rect(back, 25, 2, 21, wood)
+        g.rect(min(back, back + 3 * (1 if front > back else -1)), 25, 4, 2, wood)
+        g.rect(lo, 34, abs(front - back) + 2, 2, "tan")
+        g.rect(lo, 36, abs(front - back) + 2, 1, wood)
+        g.rect(front, 37, 2, 9, shade)
+        g.rect(back + (2 if front > back else -2), 27, 2, 7, "tan")
+        g.rect(back + (2 if front > back else -2), 30, 2, 1, "ochre")
+
+    def draw(g, f=0):
+        base = h - 2
+        g.rect(cx - 1, eave + 3, 2, 12, "walnut")
+        chair(g, 4, 13, "walnut", "bark")
+        chair(g, 42, 33, "bark", "walnut")
+        g.rect(cx - 1, 32, 2, base - 32, "coal")
+        g.rect(cx - 6, base - 1, 12, 2, "coal")
+        g.rect(cx - 9, 30, 18, 2, "lgrey")
+        g.rect(cx - 9, 30, 18, 1, "white")
+        g.rect(cx + 7, 30, 2, 2, "stone")
+        # the coffee cup on its saucer, and the flower in its clay pot
+        g.rect(cx - 7, 29, 5, 1, "white")
+        g.rect(cx - 6, 26, 3, 3, "white")
+        g.rect(cx - 6, 26, 3, 1, "brown")
+        g.rect(cx - 3, 27, 1, 1, "lgrey")
+        g.rect(cx + 3, 26, 4, 4, "clay")
+        g.rect(cx + 2, 25, 6, 1, "clay")
+        g.rect(cx + 4, 22, 1, 3, "moss")
+        g.ell(cx + 4.5, 21, 2, 2, "pink")
+        g.p(cx + 4, 21, "yellow")
+        field(g, canopy)
+        g.rect(cx - 1, 1, 2, 3, "walnut")
+    return w, h, draw
+
+
 # ---------- the curb props: street furniture on the sidewalk or paving, in design units ----------
 
 
@@ -648,6 +716,7 @@ PROPS = {
     "roadside-leuty": (leuty(), (0,), STILL_MS, True),
     **{f"roadside-beach-umbrella-{c}": (beach_umbrella(c), (0,), STILL_MS, True) for c in BEACH_STRIPES},
     **{f"roadside-beach-chair-{c}": (beach_chair(c), (0,), STILL_MS, True) for c in BEACH_STRIPES},
+    "roadside-cafe-patio": (cafe_patio(), (0,), STILL_MS, True),
     "curb-barrel": (barrel(), (0,), STILL_MS, True),
     "curb-bike-ring": (bike_ring(), (0,), STILL_MS, True),
     "curb-bollard": (bollard(), (0,), STILL_MS, True),

@@ -8028,6 +8028,87 @@
       }
     },
     {
+      "key": "roadside-cafe-patio",
+      "png": "sprites/roadside-cafe-patio.png",
+      "json": "sprites/roadside-cafe-patio.json",
+      "anchor": {
+        "feetY": 71,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "roadside-cafe-patio@50",
+      "png": "sprites/roadside-cafe-patio@50.png",
+      "json": "sprites/roadside-cafe-patio@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "roadside-cafe-patio@56",
+      "png": "sprites/roadside-cafe-patio@56.png",
+      "json": "sprites/roadside-cafe-patio@56.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "roadside-cafe-patio@62",
+      "png": "sprites/roadside-cafe-patio@62.png",
+      "json": "sprites/roadside-cafe-patio@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "roadside-cafe-patio@69",
+      "png": "sprites/roadside-cafe-patio@69.png",
+      "json": "sprites/roadside-cafe-patio@69.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 43
+      }
+    },
+    {
+      "key": "roadside-cafe-patio@75",
+      "png": "sprites/roadside-cafe-patio@75.png",
+      "json": "sprites/roadside-cafe-patio@75.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 47
+      }
+    },
+    {
+      "key": "roadside-cafe-patio@81",
+      "png": "sprites/roadside-cafe-patio@81.png",
+      "json": "sprites/roadside-cafe-patio@81.json",
+      "anchor": {
+        "feetY": 58,
+        "opaqueWidth": 50
+      }
+    },
+    {
+      "key": "roadside-cafe-patio@88",
+      "png": "sprites/roadside-cafe-patio@88.png",
+      "json": "sprites/roadside-cafe-patio@88.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "roadside-cafe-patio@94",
+      "png": "sprites/roadside-cafe-patio@94.png",
+      "json": "sprites/roadside-cafe-patio@94.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 58
+      }
+    },
+    {
       "key": "roadside-dune-grass",
       "png": "sprites/roadside-dune-grass.png",
       "json": "sprites/roadside-dune-grass.json",
