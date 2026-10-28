@@ -684,6 +684,7 @@ export class RunScene extends Scene implements HudRun {
       previousZoneId(gameData, walk.run),
       distanceBeforeZone,
       distanceBeforeZone + walk.run.zoneDistance,
+      world.roadside.anchors(),
     );
     const shadow = world.shadows.frame(colourFromHex(zone.roadShadowColour));
     world.items.draw(walk, held, still, shadow);

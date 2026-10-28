@@ -12,7 +12,15 @@ import { WORLD } from "../data/world";
 // scaled by its scale and adds its strength of the colour to every pixel it covers that no inner
 // ring does. An ellipse or band is centred on its anchor; a cone's apex is on its anchor, and it
 // widens to width at height away, pointing down as drawn, its rings scaled toward the apex.
-// Drawing only: nothing in the walk reads them.
+// A light is drawn on its own along a verge (a verge's pools), or attached to a sprite: the
+// table's attach lists, by sprite key, the lights every sprite of that key carries, each dx and
+// dy px at full size from its anchor (its feet), as for the sprite as drawn, or for a roadside
+// prop on the road's right: a flipped sprite, or a prop on the left, mirrors them. A cone's angle
+// is the way it points, in degrees as drawn (0 right, 90 down, 180 left), mirrored likewise, so
+// a lamp's cone set down and to the left, from its bulb, shines toward the road from either side.
+// A pulse lists the strength the light shows at each frame of its sprite's idle tag, by the
+// frame's place in the tag; with none it shows at full strength. zones lists the zone ids it
+// shows in, or null for every zone. Drawing only: nothing in the walk reads them.
 
 export type LightShape = "band" | "cone" | "ellipse";
 
@@ -46,36 +54,124 @@ const lightSchema = v.strictObject({
   width: size,
 });
 
-const tableSchema = v.strictObject({ defs: v.record(v.string(), lightSchema) });
+const ZONE_IDS: readonly string[] = WORLD.zones.map((zone) => zone.id);
 
-// The light defs of a table as art writes it, by key: each colour a palette name, each ring
-// inside the last and brighter, and each ring covering at least one pixel at full size. Anything
-// else, an unknown field included, throws.
-export function lightsFrom(table: unknown): ReadonlyMap<string, LightDef> {
-  const { defs } = parseOrThrow("shared/lights.json", tableSchema, table);
-  return new Map(
-    Object.entries(defs).map(([key, entry]) => {
-      const def: LightDef = { ...entry, colour: paletteColour(entry.colour) };
-      const rings = def.rings;
-      rings.slice(1).forEach((ring, k) => {
-        const outer = rings[k];
-        if (outer !== undefined && (ring.scale >= outer.scale || ring.strength <= outer.strength)) {
-          throw new Error(`Light ${key}'s rings are not each inside the last and brighter`);
-        }
-      });
-      const baked = bakeLight(def);
-      rings.forEach((_, k) => {
-        if (!baked.rings.includes(k)) {
-          throw new Error(`Light ${key}'s ring ${k} covers no pixel at full size`);
-        }
-      });
-      return [key, def];
-    }),
-  );
+// The zones a light shows in, by id, each one in the world; left out for every zone.
+export const lightZonesSchema = v.optional(
+  v.pipe(
+    v.array(
+      v.pipe(
+        v.string(),
+        v.check((id) => ZONE_IDS.includes(id), "names no zone"),
+      ),
+    ),
+    v.minLength(1),
+  ),
+);
+
+export function zonesOf(ids: readonly string[] | undefined): readonly ZoneId[] | null {
+  return ids === undefined
+    ? null
+    : WORLD.zones.map((zone) => zone.id).filter((id) => ids.includes(id));
 }
 
-export const LIGHTS: ReadonlyMap<string, LightDef> = lightsFrom(lightTable);
+export interface LightAttachment {
+  readonly angle: number;
+  readonly dx: number;
+  readonly dy: number;
+  readonly light: string;
+  readonly pulse: readonly number[] | null;
+  readonly zones: readonly ZoneId[] | null;
+}
 
+const whole = v.pipe(v.number(), v.integer());
+
+const attachmentSchema = v.strictObject({
+  angle: v.optional(v.number()),
+  dx: whole,
+  dy: whole,
+  light: v.string(),
+  pulse: v.optional(
+    v.pipe(v.array(v.pipe(v.number(), v.minValue(0), v.maxValue(1))), v.minLength(1)),
+  ),
+  zones: lightZonesSchema,
+});
+
+const tableSchema = v.strictObject({
+  attach: v.optional(v.record(v.string(), v.array(attachmentSchema))),
+  defs: v.record(v.string(), lightSchema),
+});
+
+// A cone points down as drawn.
+const CONE_ANGLE = 90;
+
+export interface LightTable {
+  // The lights each sprite carries, by sprite key.
+  readonly attach: ReadonlyMap<string, readonly LightAttachment[]>;
+  readonly defs: ReadonlyMap<string, LightDef>;
+}
+
+// A light table as art writes it: each def's colour a palette name, each ring inside the last
+// and brighter, and each ring covering at least one pixel at full size; each attachment naming
+// a def, with an angle only on a cone. Anything else, an unknown field included, throws.
+export function lightsFrom(table: unknown): LightTable {
+  const parsed = parseOrThrow("shared/lights.json", tableSchema, table);
+  const defs = new Map(
+    Object.entries(parsed.defs).map(([key, entry]) => [key, defFrom(key, entry)]),
+  );
+  const attach = new Map(
+    Object.entries(parsed.attach ?? {}).map(([sprite, entries]) => [
+      sprite,
+      entries.map((entry) => {
+        const def = defs.get(entry.light);
+        if (def === undefined) {
+          throw new Error(`${sprite}'s light ${entry.light} names no light`);
+        }
+        if (entry.angle !== undefined && def.shape !== "cone") {
+          throw new Error(`${sprite}'s light ${entry.light} takes an angle, but is no cone`);
+        }
+        return {
+          angle: entry.angle ?? CONE_ANGLE,
+          dx: entry.dx,
+          dy: entry.dy,
+          light: entry.light,
+          pulse: entry.pulse ?? null,
+          zones: zonesOf(entry.zones),
+        };
+      }),
+    ]),
+  );
+  return { attach, defs };
+}
+
+function defFrom(key: string, entry: v.InferOutput<typeof lightSchema>): LightDef {
+  const def: LightDef = { ...entry, colour: paletteColour(entry.colour) };
+  const rings = def.rings;
+  rings.slice(1).forEach((ring, k) => {
+    const outer = rings[k];
+    if (outer !== undefined && (ring.scale >= outer.scale || ring.strength <= outer.strength)) {
+      throw new Error(`Light ${key}'s rings are not each inside the last and brighter`);
+    }
+  });
+  const baked = bakeLight(def);
+  rings.forEach((_, k) => {
+    if (!baked.rings.includes(k)) {
+      throw new Error(`Light ${key}'s ring ${k} covers no pixel at full size`);
+    }
+  });
+  return def;
+}
+
+const TABLE = lightsFrom(lightTable);
+
+export const LIGHTS: ReadonlyMap<string, LightDef> = TABLE.defs;
+export const LIGHT_ATTACHMENTS: ReadonlyMap<string, readonly LightAttachment[]> = TABLE.attach;
+
+// A light key that must name a def.
+export const lightKeySchema = v.pipe(
+  v.string(),
+  v.check((key) => LIGHTS.has(key), "names no light"),
+);
 // A light baked at full size: each pixel's ring (-1 outside the light), its RGBA bytes (the
 // ring's strength of the colour, opaque, for an additive blend; clear outside), and the anchor
 // as a share of its width and height.
@@ -143,30 +239,3 @@ export function bakeLight(def: LightDef): BakedLight {
 export function lightTextureKey(key: string): string {
   return `light-${key}`;
 }
-
-const ZONE_IDS: readonly string[] = WORLD.zones.map((zone) => zone.id);
-
-// The zones a light shows in, by id, each one in the world, or null for every zone.
-export const lightZonesSchema = v.optional(
-  v.pipe(
-    v.array(
-      v.pipe(
-        v.string(),
-        v.check((id) => ZONE_IDS.includes(id), "names no zone"),
-      ),
-    ),
-    v.minLength(1),
-  ),
-);
-
-export function zonesOf(ids: readonly string[] | undefined): readonly ZoneId[] | null {
-  return ids === undefined
-    ? null
-    : WORLD.zones.map((zone) => zone.id).filter((id) => ids.includes(id));
-}
-
-// A light key that must name a def.
-export const lightKeySchema = v.pipe(
-  v.string(),
-  v.check((key) => LIGHTS.has(key), "names no light"),
-);

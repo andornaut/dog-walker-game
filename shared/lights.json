@@ -1,5 +1,79 @@
 {
+  "attach": {
+    "roadside-gas-lamp": [
+      {
+        "dx": -4,
+        "dy": 0,
+        "light": "gas-lamp-pool",
+        "zones": ["homeStretch", "shops", "snoozeCrescent", "street"]
+      },
+      {
+        "angle": 125,
+        "dx": -4,
+        "dy": -126,
+        "light": "gas-lamp-cone",
+        "zones": ["homeStretch", "shops", "snoozeCrescent", "street"]
+      }
+    ],
+    "roadside-street-lamp": [
+      {
+        "dx": -18,
+        "dy": 0,
+        "light": "street-lamp-pool",
+        "pulse": [1, 0.75, 0.5, 0.2, 0.5, 0.75],
+        "zones": ["homeStretch", "shops", "snoozeCrescent", "street"]
+      },
+      {
+        "angle": 125,
+        "dx": -18,
+        "dy": -157,
+        "light": "street-lamp-cone",
+        "pulse": [1, 0.75, 0.5, 0.2, 0.5, 0.75],
+        "zones": ["homeStretch", "shops", "snoozeCrescent", "street"]
+      }
+    ]
+  },
   "defs": {
+    "gas-lamp-cone": {
+      "colour": "amber",
+      "height": 154,
+      "rings": [
+        {
+          "scale": 1,
+          "strength": 0.07
+        },
+        {
+          "scale": 0.66,
+          "strength": 0.13
+        },
+        {
+          "scale": 0.33,
+          "strength": 0.19
+        }
+      ],
+      "shape": "cone",
+      "width": 72
+    },
+    "gas-lamp-pool": {
+      "colour": "amber",
+      "height": 24,
+      "rings": [
+        {
+          "scale": 1,
+          "strength": 0.07
+        },
+        {
+          "scale": 0.66,
+          "strength": 0.13
+        },
+        {
+          "scale": 0.33,
+          "strength": 0.19
+        }
+      ],
+      "shape": "ellipse",
+      "width": 96
+    },
     "neon-azure": {
       "colour": "azure",
       "height": 40,
@@ -31,6 +105,26 @@
       ],
       "shape": "band",
       "width": 8
+    },
+    "street-lamp-cone": {
+      "colour": "amber",
+      "height": 192,
+      "rings": [
+        {
+          "scale": 1,
+          "strength": 0.07
+        },
+        {
+          "scale": 0.66,
+          "strength": 0.13
+        },
+        {
+          "scale": 0.33,
+          "strength": 0.19
+        }
+      ],
+      "shape": "cone",
+      "width": 96
     },
     "street-lamp-pool": {
       "colour": "cream",

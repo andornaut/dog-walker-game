@@ -1,6 +1,6 @@
 import type { ZoneId } from "../data/types";
 import { project, type RoadProjection } from "../layout/projection";
-import { LIGHTS } from "./lights";
+import { LIGHT_ATTACHMENTS, type LightAttachment, LIGHTS } from "./lights";
 import { type VergePool, VERGES } from "./roadside";
 import { START_STRIP_LENGTH } from "./roadsideProps";
 
@@ -117,4 +117,83 @@ function placeLight(
   place.x = placed.x;
   place.y = placed.y;
   return count + 1;
+}
+
+// A sprite lights may attach to, as drawn this frame: its key, its anchor (its feet) on screen,
+// its projected scale, whether it is flipped, and the place in its idle tag of the frame it
+// shows.
+export interface LightAnchor {
+  flipX: boolean;
+  frame: number;
+  key: string;
+  scale: number;
+  x: number;
+  y: number;
+}
+
+// An attached light as drawn: its place, its rotation in radians, its strength this frame, and
+// the screen row of its sprite's feet, which it fades in and is cut off by.
+export interface AttachedLightPlace extends LightPlace {
+  groundY: number;
+  rotation: number;
+  strength: number;
+}
+
+// At most this many attached lights are drawn at once.
+export const ATTACHED_LIGHT_LIMIT = 48;
+
+export function newAttachedLightPlaces(): AttachedLightPlace[] {
+  return Array.from({ length: ATTACHED_LIGHT_LIMIT }, () => ({
+    groundY: 0,
+    key: "",
+    rotation: 0,
+    scale: 1,
+    strength: 1,
+    x: 0,
+    y: 0,
+  }));
+}
+
+// Writes the lights the anchors carry in zone into out, at most out.length of them, and returns
+// how many: each offset from its anchor by its dx and dy at the anchor's scale, mirrored with a
+// flipped sprite, a cone turned to its angle, and at its pulse's strength for the anchor's
+// frame.
+export function placeAttachedLights(
+  zone: ZoneId,
+  anchors: readonly LightAnchor[],
+  out: AttachedLightPlace[],
+): number {
+  let count = 0;
+  for (const anchor of anchors) {
+    for (const attachment of LIGHT_ATTACHMENTS.get(anchor.key) ?? NO_ATTACHMENTS) {
+      const place = out[count];
+      const def = LIGHTS.get(attachment.light);
+      if (place === undefined || def === undefined) {
+        return count;
+      }
+      if (attachment.zones !== null && !attachment.zones.includes(zone)) {
+        continue;
+      }
+      const mirror = anchor.flipX ? -1 : 1;
+      const angle = anchor.flipX ? 180 - attachment.angle : attachment.angle;
+      const { pulse } = attachment;
+      place.groundY = anchor.y;
+      place.key = attachment.light;
+      place.rotation = def.shape === "cone" ? ((angle - CONE_DOWN) * Math.PI) / 180 : 0;
+      place.scale = anchor.scale;
+      place.strength = pulse === null ? 1 : (pulse[mod(anchor.frame, pulse.length)] ?? 1);
+      place.x = anchor.x + mirror * attachment.dx * anchor.scale;
+      place.y = anchor.y + attachment.dy * anchor.scale;
+      count += 1;
+    }
+  }
+  return count;
+}
+
+// A cone is baked pointing down.
+const CONE_DOWN = 90;
+const NO_ATTACHMENTS: readonly LightAttachment[] = [];
+
+function mod(value: number, by: number): number {
+  return ((value % by) + by) % by;
 }
