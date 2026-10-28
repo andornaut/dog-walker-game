@@ -174,7 +174,13 @@ describe("an owner's row", () => {
     expect(face.y).toBeGreaterThanOrEqual(well.y);
   });
 
-  it.each(Object.values(gameData.dogs).map(({ owner }) => [owner.name] as const))(
+  // The widest owner's name, centred under the well, reaches nearest the bubble and the frame.
+  const nameWidth = (name: string) => inkWidth("font-body", { letterSpacing: 0, scale: 1 }, name);
+  const widestName = Object.values(gameData.dogs)
+    .map(({ owner }) => owner.name)
+    .sort((a, b) => nameWidth(b) - nameWidth(a))
+    .slice(0, 1);
+  it.each(widestName.map((name) => [name] as const))(
     "sets %s under the well, inside the frame and clear of the bubble",
     (name) => {
       const width = inkWidth("font-body", { letterSpacing: 0, scale: 1 }, name);
