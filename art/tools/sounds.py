@@ -26,6 +26,8 @@ music-high-park    30.72s 24 bars of 6/8 at about 94 BPM in F, loops seamlessly:
                           flute, narrow-pulse oboe, triangle harp and bass, birdsong trills, wooden tick
 music-kensington-market 34.30s 16 bars at about 112 BPM in D mixolydian, loops seamlessly:
                           accordion calls and marimba answers over a tresillo bass and hand drums
+music-the-beaches  34.90s 16 bars at about 110 BPM in F, loops seamlessly: calypso steel pan lead,
+                          bouncing triangle bass, offbeat pulse strums, kick, hand drums and shaker
 
 Each sound ships as mono 44.1kHz Ogg Vorbis plus AAC (.m4a), since iOS Safari
 cannot play Ogg.
