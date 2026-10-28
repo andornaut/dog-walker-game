@@ -8,6 +8,7 @@ import type {
   MinorObstacleId,
   Movement,
   ObstacleEncounterId,
+  StopLanes,
   ZoneId,
 } from "../data/types";
 import { WORLD } from "../data/world";
@@ -72,6 +73,14 @@ const moverAt = (kind: WalkItem["kind"], path: MoverPath, since: number): WalkIt
 // and fails only when the most seeds a search plans turn up none.
 const SEARCH_ENOUGH = 8;
 const SEARCH_SEEDS_MOST = 40;
+
+// A stop-and-go across standing in its stop: the stops that leave the path open on its row, the
+// lanes it covers, and whether it stands on whole lanes.
+interface StandingStop {
+  readonly open: readonly StopLanes[];
+  readonly stands: StopLanes;
+  readonly whole: boolean;
+}
 
 describe("movers", { timeout: 120_000 }, () => {
   const OBSTACLE_KINDS = [...OBSTACLE_IDS, ...MINOR_OBSTACLE_IDS] as WalkItem["kind"][];
@@ -504,7 +513,8 @@ describe("movers", { timeout: 120_000 }, () => {
 
   // A stop-and-go across, planned in its zones at the first zone's pace and the last's with every
   // mover moving: the lanes it covers while it stands, first and last, whether it stands on whole
-  // lanes, and whether they take in the path's lane on its row.
+  // lanes, and its kind's stops that leave open the lanes the path holds on its row: the path's
+  // lane there and, where the path changes lane after it, every lane the change crosses.
   const stopKinds = OBSTACLE_KINDS.filter(
     (kind) => movementOf(kind)?.kind === "stopAndGoAcross" && zonesOf(kind).length > 0,
   );
@@ -512,7 +522,7 @@ describe("movers", { timeout: 120_000 }, () => {
     const movement = movementOf(kind);
     return movement?.kind === "stopAndGoAcross" ? movement.stops : [];
   };
-  const stopsOn = (kind: WalkItem["kind"], seed: number) =>
+  const stopsOn = (kind: WalkItem["kind"], seed: number): StandingStop[] =>
     zonesOf(kind).flatMap((zone) =>
       [0, WORLD.walkLength - 1].flatMap((zoneIndex) => {
         const run = inZone(realRun(everyMover, FASTEST_WALKER), zone, zoneIndex);
@@ -530,14 +540,30 @@ describe("movers", { timeout: 120_000 }, () => {
           const left = laneAt(lanePosition);
           // Its row comes on screen enterTravel less its cue before it does.
           const row = distance - mover.enterTravel + mover.warning;
-          const pathLane = road.path.find((held) => Math.abs(held.distance - row) < 1e-6)?.lane;
-          expect(pathLane).toBeDefined();
-          const closes = pathLane !== undefined && pathLane >= left && pathLane < left + span;
+          const at = road.path.findIndex((held) => Math.abs(held.distance - row) < 1e-6);
+          expect(at).toBeGreaterThanOrEqual(0);
+          const lane = road.path[at]?.lane ?? Number.NaN;
+          const next = road.path[at + 1]?.lane ?? lane;
+          const [low, high] = [Math.min(lane, next), Math.max(lane, next)];
+          const open = stopsOf(kind).filter(([first, last]) => last < low || first > high);
           const whole = Math.abs(lanePosition - left) < 1e-9;
-          return [{ closes, stands: [left, left + span - 1], whole }];
+          return [{ open, stands: [left, left + span - 1] as const, whole }];
         });
       }),
     );
+  // Plans a seed at a time from seed 1 until found holds of the stops or the search has planned
+  // its most seeds.
+  const STOP_SEEDS_MOST = 200;
+  const searchStops = (
+    kind: WalkItem["kind"],
+    found: (stops: readonly StandingStop[]) => boolean,
+  ): StandingStop[] => {
+    const stops: StandingStop[] = [];
+    for (let seed = 1; seed <= STOP_SEEDS_MOST && !found(stops); seed++) {
+      stops.push(...stopsOn(kind, seed));
+    }
+    return stops;
+  };
   it.each(stopKinds)(
     "gives each of %s's stops as many lanes as it is wide, on the road",
     (kind) => {
@@ -550,29 +576,27 @@ describe("movers", { timeout: 120_000 }, () => {
       }
     },
   );
-  const STOP_SEEDS = [1, 2, 3, 4, 5, 6];
   // On whole lanes, so it covers only as many lanes as it is wide: a 2-lane one never straddles
-  // three.
+  // three; and in a stop that leaves the path open on its row.
   it.each(stopKinds)("stands each %s in one of its stops, never over the path's lane", (kind) => {
-    const stops = STOP_SEEDS.flatMap((seed) => stopsOn(kind, seed));
+    const stops = searchStops(kind, (found) => found.length >= SEARCH_ENOUGH);
     expect(stops.length).toBeGreaterThan(0);
-    for (const { closes, stands, whole } of stops) {
-      expect(stopsOf(kind)).toContainEqual(stands);
+    for (const { open, stands, whole } of stops) {
       expect(whole).toBe(true);
-      expect(closes).toBe(false);
+      expect(open).toContainEqual(stands);
     }
   });
-  // Over the seeds, a kind with several stops stands in each about as often as each other: drawn
-  // evenly among those that leave the path's lane open.
+  // A kind with several stops draws one, each as likely, and stands in it on a row where it leaves
+  // the path open, so where a row leaves several open, the row does not fix which: across seeds
+  // each stop is stood in on some row where another was open too. Searched until each has been.
   const severalStops = stopKinds.filter((kind) => stopsOf(kind).length > 1);
-  it.each(severalStops)("stands %s in each of its stops about evenly across seeds", (kind) => {
-    const stands = STOP_SEEDS.flatMap((seed) => stopsOn(kind, seed).map((stop) => stop.stands));
-    const stops = stopsOf(kind);
-    for (const stop of stops) {
-      const share = stands.filter(([first]) => first === stop[0]).length / stands.length;
-      expect(share).toBeGreaterThan(0.5 / stops.length);
-      expect(share).toBeLessThan(1.5 / stops.length);
-    }
+  const choseOver = (stop: StopLanes, found: readonly StandingStop[]) =>
+    found.some(({ open, stands }) => stands[0] === stop[0] && open.length > 1);
+  it.each(severalStops)("stands %s in each of its stops where another is open too", (kind) => {
+    const stops = searchStops(kind, (found) =>
+      stopsOf(kind).every((stop) => choseOver(stop, found)),
+    );
+    expect(stopsOf(kind).filter((stop) => !choseOver(stop, stops))).toEqual([]);
   });
 
   // Its first move is cued: a dive's arrow before it sets off, a stop-and-go across's before it
