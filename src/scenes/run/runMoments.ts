@@ -105,6 +105,11 @@ function stopMs(step: WalkStep): number {
   return 1000 * (seconds ?? read(gameData.tuning, "seconds", "minorHitStopSeconds"));
 }
 
+// Where a hit's moment and label play: a little over the pack's point, for the step's hit stop.
+function hitPlace(step: WalkStep, pack: Point): { centre: Point; seconds: number } {
+  return { centre: { x: pack.x, y: pack.y - 20 }, seconds: step.walk.road.hitStop?.seconds ?? 0 };
+}
+
 // A hit's edge flash runs down the road and the backdrop band beside it.
 function hitField(): Rect {
   const { backdrop, roadView } = LAYOUT;
@@ -592,14 +597,13 @@ export class RunMoments {
   private playHit(hit: EncounterCard, step: WalkStep, pack: Point): void {
     playHitMoment(this.scene, {
       caught: this.deps.pack.sprites(hit.affected),
-      centre: { x: pack.x, y: pack.y - 20 },
+      ...hitPlace(step, pack),
       depth: DEPTH.popup,
       encounter: hit.encounter,
       field: hitField(),
       kind: gameData.encounters[hit.encounter].kind,
       label: hitLabelOf(gameData.encounters[hit.encounter]),
       labelX: PROJECTION.centreX,
-      seconds: step.walk.road.hitStop?.seconds ?? 0,
       still: this.deps.still(),
       word: hitWord(gameData.encounters[hit.encounter]),
     });
@@ -648,11 +652,10 @@ export class RunMoments {
       return;
     }
     playMinorHitLabel(this.scene, {
-      centre: { x: pack.x, y: pack.y - 20 },
+      ...hitPlace(step, pack),
       depth: DEPTH.popup,
       label,
       labelX: PROJECTION.centreX,
-      seconds: step.walk.road.hitStop?.seconds ?? 0,
       still: this.deps.still(),
     });
   }
