@@ -8,6 +8,19 @@ The rules for drawing and placing the art. Exact sizes, tags, timings and coordi
 - Chibi: heads about as big as bodies, so a breed reads from head shape, ears and markings on its road sprite and 32×32 face. Dogs come in three sizes: large dogs (54×54) are drawn narrower than their frame's scale, about 30px wide (Penny 28), medium dogs (48×48) at their frame's scale, and small dogs (38×38) larger inside theirs, about 20px wide and 31 to 32 tall, so the widths step about 30, 24 and 20. Faces and portraits keep one frame for every dog, the dog drawn by size but less than on the road, sat on the bottom edge. Each dog is drawn at the size that brings its inked area to its class's target (about 17, 21.3 and 25.5px square on faces, 35, 40 and 46px on portraits), so the classes step evenly whatever a breed's ears, ruff or topknot fill. The large dogs fill the frame, their faces zoomed past it as far as Kilo's ears fit, so they fill their tiles. A dog's coat and accessory read on both its road sprite and its face.
 - Everything, UI included, is pixel art at the 360×560 base resolution, scaled up with no smoothing.
 
+## Quality bar
+
+Every piece is very readable, clean and not busy, judged at the size it's shown: the `@50` depth step for road sprites, 1× for cards and UI.
+
+- **Silhouette first:** filled solid black, the piece still says what it is. Fix the shape before the detail.
+- **Value contrast:** the subject separates from the ground it appears on (see Contrast), and its main parts (head and body, rider and vehicle, figure and background) separate by lightness, not only by hue. Check in greyscale.
+- **Colour budget:** about 6 to 8 fill colours plus the outline and rim, with one accent that draws the eye. Merge near-duplicate shades.
+- **Detail budget:** pixel clusters of 2px or more. No mark under 2px at the smallest size, no single-pixel noise, speckle or dithering on small sprites, and no texture that turns to noise at `@50` or shimmers as the road scrolls.
+- **One focal point:** each card picture, sprite and screen has one thing the eye goes to first. Scene filler (flecks, bunting, extra props, extra dogs) stays sparse, and backgrounds sit lower in contrast and saturation than the subject.
+- **Clean lines:** a closed 1px outline, no doubled or broken edges, no orphan pixels, curves without jaggies, and the top-left light everywhere.
+- **Consistency:** within a set, and across sets seen together, the same proportions, outline weight, palette, rim, facing and detail density.
+- **Look-alikes:** an obstacle's colours and shapes never read as a pickup (a round gold or orange blob reads as a tip coin), and obstacles in one neighbourhood have distinct silhouettes.
+
 ## Layout and sizes
 
 | Band     | Screen rows | Contents                                                              |
@@ -334,5 +347,8 @@ Backdrops are 360×158 on screen rows 48 to 205 (`art/tools/backdrops.py`); band
 ## Sound
 
 - Soft chiptune: square and triangle waves through gentle low-pass filters, short envelopes, nothing harsh.
-- Hits and pickups under about 0.6s; `sfx-fired`, `sfx-badge` and `sfx-new-best` up to 2s; the walk loop at about 100 BPM.
+- Hits and pickups under about 0.6s; `sfx-fired`, `sfx-badge` and `sfx-new-best` up to 2s.
+- Clear on phone speakers: nothing shrill above 4 kHz, short tails. Each effect says what happened and differs from the others.
+- Effects sit in one loudness band, with `sfx-fired`, `sfx-badge` and `sfx-new-best` a little louder.
+- Each neighbourhood has its own walk loop (`music-<zone>`), 24 to 36s of whole bars and whole AAC frames, seamless, and within 0.5 dB RMS of the others so switching neighbourhoods doesn't jump. A loop has a clear melody, at most 3 or 4 voices at once, and no fatiguing hi-hat, so it stays pleasant over an 8-minute walk.
 - Files: effects under 50kB, music under 1MB, peaks below −1 dBFS after encoding, silence at both ends.
