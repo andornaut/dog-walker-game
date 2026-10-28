@@ -82,16 +82,23 @@ describe("labelPills", () => {
 });
 
 describe("addPixelText", () => {
-  // Every first glyph at 1x, and at 2x, where the shift scales with the label, one whose title
-  // ink starts right of its origin and one whose ink starts at it.
-  const titleLeft = (first: string) =>
-    fontInk(FONTS.title, { letterSpacing: 0, scale: 1 }, `${first}OW`).left;
+  // The shift reads only where the first glyph's ink starts in each font, so at 1x the first
+  // glyph of each pair of title and body ink starts covers every glyph; and at 2x, where the
+  // shift scales with the label, one whose title ink starts right of its origin and one whose
+  // ink starts at it.
+  const inkStart = (font: FontRole, first: string) =>
+    fontInk(FONTS[font], { letterSpacing: 0, scale: 1 }, font === "title" ? `${first}OW` : first)
+      .left;
+  const starts = (first: string) => `${inkStart("title", first)},${inkStart("body", first)}`;
+  const oneX = FIRSTS.filter(
+    (first, i) => FIRSTS.findIndex((other) => starts(other) === starts(first)) === i,
+  );
   const twoX = [
-    FIRSTS.find((first) => titleLeft(first) > 0),
-    FIRSTS.find((first) => titleLeft(first) === 0),
+    FIRSTS.find((first) => inkStart("title", first) > 0),
+    FIRSTS.find((first) => inkStart("title", first) === 0),
   ].flatMap((first) => (first === undefined ? [] : [first]));
   it.each([
-    ...FIRSTS.map((first) => ({ scale: 1, text: `${first}ow` })),
+    ...oneX.map((first) => ({ scale: 1, text: `${first}ow` })),
     ...twoX.map((first) => ({ scale: 2, text: `${first}ow` })),
   ])(
     "starts left-aligned title and body $text's ink in one column at scale $scale",
