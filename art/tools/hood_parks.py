@@ -39,13 +39,13 @@ hen                a Riverdale Farm hen got loose, a Rhode Island Red: a plump r
                     down and back while the legs run
 
 Minor obstacles, laid out in obstacles.py's pixels (40 for one lane, 30 rows for a
-lane-spanning one) and drawn at obstacles.SCALE (1.2) on a minis.Mini:
-cherry-trees        176x36  3 lanes, High Park's own: its sakura grove, three low cherry trees in blossom
-                            in a row in a stone planter, wide crowns of pink lobes shaded mauve along
-                            their lower right over short dark bark trunks, the planter's stone blocks
-                            lipped in driftwood; idle (4 frames, 500ms): the crowns' top lobes sway 1px
-                            right on frame 2, and on frame 3 a petal drifts down between the first two
-                            trees (left out at @62 and smaller, where the gap is too narrow)
+lane-spanning one, 60 for the cherry grove) and drawn at obstacles.SCALE (1.2) on a minis.Mini:
+cherry-trees        176x72  3 lanes, High Park's own: its sakura grove, three cherry trees in blossom in a
+                            row on a low stone curb lipped in driftwood, lifted crowns of pink lobes shaded
+                            mauve along their lower right, meeting edge to edge, over bare dark bark trunks
+                            that fork into two limbs showing under each crown; idle (4 frames, 500ms): the
+                            crowns' top lobes sway 1px right on frame 2, and on frame 3 a petal drifts down
+                            between the first two trunks
 fallen-log          112x36  2 lanes, a fallen oak trunk lying across the path: five long bark ridges, a
                             sawn end at the right showing growth rings, a splintered broken end at the
                             left, a branch stub, two moss patches and two tan-capped mushrooms on its
@@ -787,57 +787,60 @@ def fallen_log(leaf=(0, 0), w=obstacles.span(2)):
 
 # The grove's idle: rest, rest, the crowns' tops swayed 1px right, then a petal drifting down.
 CHERRY_IDLE = (0, 0, 1, 2), 500
-# The drifting petal, in layout pixels at full size: its top left, in the gap between the first two trees.
-PETAL = (47.5, 17.5)
-# Below this scale the gap between the crowns is too narrow for the petal's outline to stay clear of them and the
-# planter, so the far steps leave it out.
-PETAL_MIN = 0.8
+# The grove's height and the curb's top row, in layout pixels: taller than a lane-spanning obstacle's ROW, so each
+# tree stands on a bare trunk under a lifted crown, drawn at obstacles.SCALE to exactly 72 rows, so each depth step
+# is its scale of the full size.
+GROVE_H = 60
+CURB_TOP = 56
+# The drifting petal, in layout pixels at full size: its top left, under the crowns between the first two trunks.
+PETAL = (46, 38)
 # Each crown's lobes, the lowest row first, as (dx, cy, rx, ry, sways) from its tree's centre column, in layout
-# pixels at full size: two low lobes either side of the trunk, three across the middle and two on top, the ones
-# on top swaying in the idle.
-CROWN = ((-9, 14.5, 9, 4, False), (9, 14.5, 9, 4, False),
-         (-14.5, 10, 7, 4.5, False), (0, 9.5, 9, 5, False), (14.5, 10, 7, 4.5, False),
-         (-7, 4.5, 8.5, 4.5, True), (7.5, 4, 8, 4.5, True))
+# pixels at full size: two low lobes either side of the trunk, leaving a notch under the crown where its limbs
+# show, two at the outer edges, two across the middle and three on top, the ones on top swaying in the idle.
+CROWN = ((-16, 27, 8.5, 5, False), (16, 27.5, 8.5, 4.5, False),
+         (-18, 19, 6.5, 6, False), (18, 19.5, 6.5, 6, False),
+         (-7, 16.5, 10, 7, False), (8, 17, 9.5, 6.5, False),
+         (-11, 10, 9, 6.5, True), (11, 10.5, 8.5, 6, True), (0, 6.5, 9.5, 6, True))
 # How far each lobe's pink sits up and left inside its mauve, leaving a crescent at least 2 drawn pixels deep
 # along its lower right.
 CLUSTER_SHADE = (0.8, 1.2)
-# The planter's top row and its stone joints, as fractions of its length.
-PLANTER_TOP = 23
-JOINTS = (0.22, 0.5, 0.78)
+# Where each trunk's bare part starts, under the crown's middle lobes, and its two limbs, as (from, to, width)
+# from the trunk's centre column, the second mirrored on the middle tree.
+TRUNK_TOP = 24
+LIMBS = (((0, 33), (-11, 20), 3.5), ((0, 31), (10, 21), 3))
 
 
 def cherry_trees(pose=0, w=obstacles.span(3)):
-    """High Park's cherry grove in blossom, three low trees in a row standing in a stone planter across the
-    road, front elevation: each a wide crown of pink lobes, every lobe shaded mauve along its lower right so
-    the blossom clusters read, the middle crown mirrored, over a short dark bark trunk flared at its foot,
-    forking into the crown and shaded walnut down its right; the planter a long box of stone blocks lipped in
-    driftwood and shaded dstone along its foot. pose 1 sways each crown's top lobes 1 drawn pixel right, and
-    pose 2 shows one petal, 2 drawn pixels square, drifting down between the first two trees, left out
-    below PETAL_MIN."""
-    g = edged(Grid(w, ROW))
+    """High Park's cherry grove in blossom, three cherry trees in a row across the road on a low stone curb, front
+    elevation: each a lifted crown of pink lobes, every lobe shaded mauve along its lower right so the blossom
+    clusters read, the middle tree mirrored, over a bare dark bark trunk flared at its foot and shaded walnut
+    down its right, forking into two limbs that show in a notch under the crown; the crowns meet edge to edge,
+    so the grove spans its lanes. The curb is stone lipped in driftwood and shaded dstone along its foot. pose 1
+    sways each crown's top lobes 1 drawn pixel right, and pose 2 shows one petal, 2 drawn pixels square,
+    drifting down between the first two trunks."""
+    g = edged(Grid(w, GROVE_H))
     ux, uy = obstacles.unit(g)
     sway = pose == 1
     centres = [w * (2 * k + 1) / 6 for k in range(3)]
-    # the trunks: short and dark, flared at the foot, forking into two limbs under the crown
-    for cx in centres:
-        bar(g, (cx, 19), (cx - 8, 9), 3, "bark")
-        bar(g, (cx, 19), (cx + 8, 10), 3, "bark")
-        g.rect(cx - 3, 13, 6, PLANTER_TOP - 13, "bark")
-        g.rect(cx - 4.5, PLANTER_TOP - 2, 9, 2, "bark")
-        g.rect(cx + 1.5, 13, 1.5, PLANTER_TOP - 13, "walnut")
+    # the trunks: bare from the curb to the crown, flared at the foot, forking into two limbs under the crown
+    for k, cx in enumerate(centres):
+        m = -1 if k == 1 else 1
+        g.rect(cx - 2.5, TRUNK_TOP, 5, CURB_TOP - TRUNK_TOP, "bark")
+        g.rect(cx + 1, TRUNK_TOP, 1.5, CURB_TOP - TRUNK_TOP, "walnut")
+        g.tri((cx - 5, CURB_TOP), (cx + 5, CURB_TOP), (cx, CURB_TOP - 6), "bark")
+        for (x0, y0), (x1, y1), t in LIMBS:
+            bar(g, (cx + m * x0, y0), (cx + m * x1, y1), t, "bark")
     # the crowns, lobe by lobe from the lowest row up, so each lobe's mauve underside lies on the pink below it
     for k, cx in enumerate(centres):
         for dx, cy, rx, ry, sways in CROWN:
             x = cx + (-dx if k == 1 else dx) + (sway * ux if sways else 0)
             g.cel(x, cy, rx, ry, "mauve")
             g.cel(x - CLUSTER_SHADE[0], cy - CLUSTER_SHADE[1], rx - CLUSTER_SHADE[0], ry - CLUSTER_SHADE[1], "pink")
-    # the planter: a stone box lipped in driftwood, its blocks jointed in dstone, shaded dstone along its foot
-    g.rect(1, PLANTER_TOP, w - 2, ROW - PLANTER_TOP, "stone")
-    g.rect(0.5, PLANTER_TOP, w - 1, 2, "driftwood")
-    g.rect(1, ROW - 1.5, w - 2, 1.5, "dstone")
-    for f in JOINTS:
-        g.rect(1 + f * (w - 2), PLANTER_TOP + 2, 1, ROW - PLANTER_TOP - 3.5, "dstone")
-    if pose == 2 and scale_of(g) >= PETAL_MIN:
+    # the curb: stone lipped in driftwood, shaded dstone along its foot
+    g.rect(1, CURB_TOP, w - 2, GROVE_H - CURB_TOP, "stone")
+    g.rect(0.5, CURB_TOP, w - 1, 1.5, "driftwood")
+    g.rect(1, GROVE_H - 1.5, w - 2, 1.5, "dstone")
+    if pose == 2:
         g.rect(PETAL[0], PETAL[1], 2 * ux, 2 * uy, "pink")
     return lit(g, dict(bark=("clay", None), walnut=("bark", None), stone=("driftwood", None)))
 
