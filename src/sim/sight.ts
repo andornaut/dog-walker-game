@@ -9,6 +9,7 @@ import {
   isSliding,
   type MoverPath,
   type MoverStep,
+  SIDESTEPS,
   type StepShape,
   turnedBack,
 } from "../runner/movers";
@@ -217,11 +218,6 @@ export function sightPaths(road: SightRoad, since: number, item: WalkItem): read
     }));
 }
 
-const SIDEWAYS: readonly StepShape[] = [
-  { lanes: -1, travel: 0 },
-  { lanes: 1, travel: 0 },
-];
-
 // The shapes a stepping mover's cued step may take, as a player who knows its kind reads it after
 // the steps started, and the step's length at its kind's: a hopper's hops; a bounce's and a sway's
 // way back from its last step sideways, or either way before one; a follower's either way; a
@@ -236,12 +232,12 @@ function nextShapes(
     read(tuning, "seconds", key) * road.speed;
   const last = started.filter((step) => step.lanes !== 0).at(-1)?.lanes;
   const back: readonly StepShape[] =
-    last === undefined ? SIDEWAYS : [{ lanes: -Math.sign(last), travel: 0 }];
+    last === undefined ? SIDESTEPS : [{ lanes: -Math.sign(last), travel: 0 }];
   switch (movement?.kind) {
     case "bounce":
       return { length: seconds("moverHopSeconds"), shapes: back };
     case "follow":
-      return { length: seconds("moverStepSeconds"), shapes: SIDEWAYS };
+      return { length: seconds("moverStepSeconds"), shapes: SIDESTEPS };
     case "hop":
       return {
         length: seconds("moverHopSeconds"),

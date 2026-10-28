@@ -100,6 +100,7 @@ import {
   moverY,
   type PlannerStreams,
   type RoadPoint,
+  SIDESTEPS,
   type StepShape,
 } from "./movers";
 import { drawnObstacleBox, exitLength, type PlacedPart, type RoadLens } from "./obstacleBox";
@@ -557,12 +558,6 @@ export const STEP_SHAPES: readonly StepShape[] = [
 function countsOf(range: MoveCount): number[] {
   return Array.from({ length: range.max - range.min + 1 }, (_, i) => range.min + i);
 }
-
-// A lane to one side.
-const SIDESTEPS: readonly StepShape[] = [
-  { lanes: -1, travel: 0 },
-  { lanes: 1, travel: 0 },
-];
 
 // Steps steps a lane to one side and back in turn, starting toward direction.
 function swayed(direction: -1 | 1, steps: number): StepShape[] {

@@ -649,22 +649,19 @@ export interface StepShape {
   readonly travel: number;
 }
 
+// A step a lane to either side, left first.
+export const SIDESTEPS: readonly StepShape[] = [
+  { lanes: -1, travel: 0 },
+  { lanes: 1, travel: 0 },
+];
+
 // Every hop of 1 to most spots one way: lanes to either side or, unless sideways, a row up the
 // road, away from the pack, or diagonally up. A hop never goes down toward the pack. The planner
 // picks among those that keep the road passable.
 export function hopShapes(most: number, sideways: boolean): StepShape[] {
   const ways: readonly StepShape[] = sideways
-    ? [
-        { lanes: -1, travel: 0 },
-        { lanes: 1, travel: 0 },
-      ]
-    : [
-        { lanes: -1, travel: 0 },
-        { lanes: 1, travel: 0 },
-        { lanes: 0, travel: -1 },
-        { lanes: -1, travel: -1 },
-        { lanes: 1, travel: -1 },
-      ];
+    ? SIDESTEPS
+    : [...SIDESTEPS, { lanes: 0, travel: -1 }, { lanes: -1, travel: -1 }, { lanes: 1, travel: -1 }];
   return Array.from({ length: most }, (_, i) => i + 1).flatMap((spots) =>
     ways.map(({ lanes, travel }) => ({ lanes: lanes * spots, travel: travel * spots })),
   );
