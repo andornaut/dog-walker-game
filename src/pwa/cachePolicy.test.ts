@@ -145,15 +145,16 @@ describe("the game's art", () => {
     "sounds/sfx-tip.ogg",
   ].map(hashedUrl);
 
-  // An immutable name: a new deploy's code names new files, which no older cache holds.
-  it.each(hashed)("serves %s cache-first, precached or not", (pathname) => {
-    expect(fetchOf(pathname)).toBe("cache-first");
-    expect(strategyFor(new Set(), { isNavigation: false, pathname })).toBe("cache-first");
-  });
-
-  it.each(hashed)("lets the HTTP cache answer the precache's fetch of %s", (pathname) => {
-    expect(precacheFetchOptions(pathname)).toEqual({ cache: "default" });
-  });
+  // An immutable name: a new deploy's code names new files, which no older cache holds, so
+  // the worker and the precache's fetch both take any copy they have.
+  it.each(hashed)(
+    "serves %s cache-first, precached or not, and lets the HTTP cache answer its precache fetch",
+    (pathname) => {
+      expect(fetchOf(pathname)).toBe("cache-first");
+      expect(strategyFor(new Set(), { isNavigation: false, pathname })).toBe("cache-first");
+      expect(precacheFetchOptions(pathname)).toEqual({ cache: "default" });
+    },
+  );
 
   it.each([
     ["/art/manifest.json", "network-first"],
