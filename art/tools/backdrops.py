@@ -404,8 +404,8 @@ def corner_depth(px, py):
 
 
 def slabs(px, py):
-    """The cross street's plain sidewalk, without seams."""
-    return "lgrey"
+    """Cabbagetown's cross street sidewalk, plain stone without seams, as its verge's."""
+    return "stone"
 
 
 def grass(lawn="green", rate=0.03):
@@ -657,27 +657,27 @@ def crescent_bend(px):
 # are the lawn's base, its mown stripes and rough patches, and its 2-row tufts, which draw their own
 # colour rather than darkening the pixel under them; None where there is no lawn.
 VERGES = {
-    "cabbagetown": dict(curbColour="stone", curbTo=CURB, strips=[], walkColour="lgrey", walkDots=[],
-                        seamColour="grey", seamEvery=32, walkTo=WALK, lawn="mown",
-                        lawnColours=("dgreen", "canopy", "pine"), leaves=False),
+    "cabbagetown": dict(curbColour="dstone", curbTo=CURB, strips=[], walkColour="stone", walkDots=[],
+                        seamColour="dstone", seamEvery=32, walkTo=WALK, lawn="mown",
+                        lawnColours=("olive", "dolive", "fir"), leaves=False),
     "high-park": dict(curbColour="pine", curbTo=160, strips=[], walkColour="pine", walkDots=[],
                       seamColour="pine", seamEvery=32, walkTo=160, lawn="rough",
-                      lawnColours=("pine", "fir", "fir"), leaves=False),
-    "distillery-district": dict(curbColour="stone", curbTo=164, strips=[], walkColour="brown",
-                                walkDots=[dict(colours=["brick"], share=0.05), dict(colours=["rust"], share=0.02)],
-                                seamColour="brick", seamEvery=16, walkTo=None, lawn="none",
+                      lawnColours=("pine", "bark", "fir"), leaves=False),
+    "distillery-district": dict(curbColour="dstone", curbTo=164, strips=[], walkColour="brown",
+                                walkDots=[dict(colours=["brick"], share=0.1), dict(colours=["dbrown"], share=0.04),
+                                          dict(colours=["rust"], share=0.02)],
+                                seamColour="dbrown", seamEvery=16, walkTo=None, lawn="none",
                                 lawnColours=None, leaves=False),
-    "kensington-market": dict(curbColour="stone", curbTo=162, strips=[dict(colour="clay", dots=[], to=166)],
-                              walkColour="skin2", walkDots=[dict(colours=["clay"], share=0.05),
-                                                           dict(colours=["brown"], share=0.03)],
-                              seamColour="clay", seamEvery=32, walkTo=None, lawn="none",
+    "kensington-market": dict(curbColour="stone", curbTo=162, strips=[dict(colour="teal", dots=[], to=166)],
+                              walkColour="dturq", walkDots=[dict(colours=["turquoise"], share=0.05)],
+                              seamColour="teal", seamEvery=32, walkTo=None, lawn="none",
                               lawnColours=None, leaves=False),
-    "the-beaches": dict(curbColour="driftwood", curbTo=164, strips=[], walkColour="skin1",
-                        walkDots=[dict(colours=["tan"], share=0.05), dict(colours=["white"], share=0.008)],
-                        seamColour="skin1", seamEvery=32, walkTo=None, lawn="none",
+    "the-beaches": dict(curbColour="clay", curbTo=164, strips=[], walkColour="driftwood",
+                        walkDots=[dict(colours=["stone"], share=0.05), dict(colours=["white"], share=0.008)],
+                        seamColour="driftwood", seamEvery=32, walkTo=None, lawn="none",
                         lawnColours=None, leaves=False),
-    "yonge-street": dict(curbColour="stone", curbTo=164, strips=[], walkColour="dstone",
-                         walkDots=[dict(colours=["shale"], share=0.015)], seamColour="shale", seamEvery=32,
+    "yonge-street": dict(curbColour="grey", curbTo=164, strips=[], walkColour="dslate",
+                         walkDots=[dict(colours=["slate"], share=0.02)], seamColour="navy", seamEvery=32,
                          walkTo=None, lawn="none", lawnColours=None, leaves=False),
 }
 
@@ -839,7 +839,7 @@ def cabbagetown():
     for cx, w, wall_c, roof, door, curtains in homes:
         lift = crescent_bend(cx)
         bay_gable(cv, cx, w, wall_c, roof, door, BASE - lift, curtains=curtains)
-    lawn = grass("dgreen")
+    lawn = grass("olive")
     yard(cv, BASE, FAR_WALK, lawn)
     for px in range(W):
         for py in range(BASE - crescent_bend(px), BASE):
@@ -853,7 +853,7 @@ def cabbagetown():
         fence_cat(cv, x, FAR_WALK - 9 - crescent_bend(x + 3), col, lit)
     for x in (CX - 150, CX - 30, CX + 92):
         gas_lamp(cv, x, FAR_WALK + 1 - crescent_bend(x))
-    cross(cv, flat(road), "stone", slabs, bend=crescent_bend)
+    cross(cv, flat(road), "stone", slabs, curb="dstone", bend=crescent_bend)
     cross_line(cv, "white", dash=(8, 64), bend=crescent_bend)
     street(cv, verge("cabbagetown", road))
     lanes(cv, "white", "slate", dash=(12, 64))
@@ -1492,7 +1492,7 @@ def kensington():
         bunting(cv, x0, x1, y, 5, pennants[i:] + pennants[:i])
 
     def paving(px, py):
-        return "clay" if hashed(px, py, 23) else "skin2"
+        return "turquoise" if hashed(px, py, 23) else "dturq"
 
     yard(cv, BASE, FAR_WALK, paving)
     # out front: produce, the Garden Car, a stall, a vintage rail, a busker's pitch, bikes and a patio
@@ -1693,7 +1693,7 @@ def beaches():
             cv.fill(sx, sy - 2 + k, 1 + k // 2, 1, "white")
         cv.fill(sx - 1, sy - 3, 1, 9, "coal")
     for py in range(BASE - 12, BASE):
-        cv.fill(0, py, W, 1, "foam" if py == BASE - 12 else "skin1")
+        cv.fill(0, py, W, 1, "foam" if py == BASE - 12 else "driftwood")
     for px in range(W):
         if hashed(px, BASE - 11, 5):
             cv.fill(px, BASE - 11, 1, 1, "foam")
@@ -1710,7 +1710,7 @@ def beaches():
     volleyball(cv, CX - 82, BASE - 1)
 
     def sand(px, py):
-        return "tan" if hashed(px, py, 43) else "white" if hashed(px, py + 7, 150) else "skin1"
+        return "stone" if hashed(px, py, 43) else "white" if hashed(px, py + 7, 150) else "driftwood"
 
     yard(cv, BASE, FAR_WALK, sand)
 
@@ -2168,7 +2168,7 @@ def yonge():
     word(cv, "TTC", sx + 1, BASE - 12, "white")
 
     def paving(px, py):
-        return "shale" if hashed(px, py, 67) else "dstone"
+        return "slate" if hashed(px, py, 67) else "dslate"
 
     yard(cv, BASE, FAR_WALK, paving)
     # a side street jammed with traffic between the TD tower and the glass, down to the far sidewalk
@@ -2181,7 +2181,7 @@ def yonge():
             return "coal"
         return "ash" if hashed(px, py, 41) else "shale"
 
-    cross(cv, flat(road), "dstone", paving, curb="stone")
+    cross(cv, flat(road), "dstone", paving, curb="grey")
     cross_line(cv, "amber", "coal", dash=(14, 64))
     # crosswalks over the cross street from the stub's two sidewalks
     for mid in (94, 266):

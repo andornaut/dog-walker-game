@@ -1,18 +1,18 @@
 {
   "cabbagetown": {
-    "curbColour": "stone",
+    "curbColour": "dstone",
     "curbTo": 164,
     "strips": [],
-    "walkColour": "lgrey",
+    "walkColour": "stone",
     "walkDots": [],
-    "seamColour": "grey",
+    "seamColour": "dstone",
     "seamEvery": 32,
     "walkTo": 208,
     "lawn": "mown",
     "lawnColours": [
-      "dgreen",
-      "canopy",
-      "pine"
+      "olive",
+      "dolive",
+      "fir"
     ],
     "leaves": false
   },
@@ -28,13 +28,13 @@
     "lawn": "rough",
     "lawnColours": [
       "pine",
-      "fir",
+      "bark",
       "fir"
     ],
     "leaves": false
   },
   "distillery-district": {
-    "curbColour": "stone",
+    "curbColour": "dstone",
     "curbTo": 164,
     "strips": [],
     "walkColour": "brown",
@@ -43,7 +43,13 @@
         "colours": [
           "brick"
         ],
-        "share": 0.05
+        "share": 0.1
+      },
+      {
+        "colours": [
+          "dbrown"
+        ],
+        "share": 0.04
       },
       {
         "colours": [
@@ -52,7 +58,7 @@
         "share": 0.02
       }
     ],
-    "seamColour": "brick",
+    "seamColour": "dbrown",
     "seamEvery": 16,
     "walkTo": null,
     "lawn": "none",
@@ -64,27 +70,21 @@
     "curbTo": 162,
     "strips": [
       {
-        "colour": "clay",
+        "colour": "teal",
         "dots": [],
         "to": 166
       }
     ],
-    "walkColour": "skin2",
+    "walkColour": "dturq",
     "walkDots": [
       {
         "colours": [
-          "clay"
+          "turquoise"
         ],
         "share": 0.05
-      },
-      {
-        "colours": [
-          "brown"
-        ],
-        "share": 0.03
       }
     ],
-    "seamColour": "clay",
+    "seamColour": "teal",
     "seamEvery": 32,
     "walkTo": null,
     "lawn": "none",
@@ -92,14 +92,14 @@
     "leaves": false
   },
   "the-beaches": {
-    "curbColour": "driftwood",
+    "curbColour": "clay",
     "curbTo": 164,
     "strips": [],
-    "walkColour": "skin1",
+    "walkColour": "driftwood",
     "walkDots": [
       {
         "colours": [
-          "tan"
+          "stone"
         ],
         "share": 0.05
       },
@@ -110,7 +110,7 @@
         "share": 0.008
       }
     ],
-    "seamColour": "skin1",
+    "seamColour": "driftwood",
     "seamEvery": 32,
     "walkTo": null,
     "lawn": "none",
@@ -118,19 +118,19 @@
     "leaves": false
   },
   "yonge-street": {
-    "curbColour": "stone",
+    "curbColour": "grey",
     "curbTo": 164,
     "strips": [],
-    "walkColour": "dstone",
+    "walkColour": "dslate",
     "walkDots": [
       {
         "colours": [
-          "shale"
+          "slate"
         ],
-        "share": 0.015
+        "share": 0.02
       }
     ],
-    "seamColour": "shale",
+    "seamColour": "navy",
     "seamEvery": 32,
     "walkTo": null,
     "lawn": "none",

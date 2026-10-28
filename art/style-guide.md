@@ -252,7 +252,7 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 
 The game draws the verge beside each road: the curb, any strips, the sidewalk or paving with a seam across it every `seamEvery` road px, then the lawn. They are `VERGES` in `art/tools/backdrops.py`, keyed by art id with colours by `K` name; `backdrops.py build` and `verges --write` write them to `shared/verges.json`, which the game reads, and each backdrop's approach rows paint the same verge.
 
-An ambient person or lawn animal holds 3:1 on its edge pixels (within 1%) on the light verges, the Distillery District's brick, Cabbagetown's lawn and Kensington Market's skin2, and on 74% or more on High Park's pine, where the light rim carries it.
+Each neighbourhood's verge has its own colour family: Cabbagetown stone sidewalks and olive lawns, High Park pine woods with bark patches, the Distillery District brown pavers in dbrown courses, Kensington Market dturq paving with a teal strip, The Beaches driftwood sand and Yonge Street dslate pavement. A verge's base is a mid tone or among the darkest. An ambient person or lawn animal holds 3:1 on 87% or more of its edge pixels (opaque pixels beside a clear one) on the mid tones (stone, olive, brown, dturq) and on all of them on driftwood. On the darkest (pine, bark, dslate) its outline does not hold and the light rim or fill just inside it holds on 59% or more. A tone between them (brick, dbrown, dolive, dstone, ash, slate, violet) holds neither, so it is kept to seams, flecks and Cabbagetown's mown stripes.
 
 ## Roadside
 
@@ -267,12 +267,12 @@ The verges stay clean: bare lawn or paving beyond the sidewalks with the odd pro
 
 | Neighbourhood       | Gap 0         | Gap 3           | Curb                       | Shadow |
 | ------------------- | ------------- | --------------- | -------------------------- | ------ |
-| Cabbagetown         | `tree-maple`  | `gas-lamp`      | `hydrant`, `urn`           | canopy |
+| Cabbagetown         | `tree-maple`  | `gas-lamp`      | `hydrant`, `urn`           | dolive |
 | Distillery District | `gas-lamp`    | `love-lock`     | `barrel`, `bollard`        | dbrown |
 | High Park           | `tree-oak`    | `hot-dog-stand` |                            | fir    |
-| Kensington Market   | `tree-maple`  | `fruit-stand`   | `bike-ring`, `news-box`    | brown  |
-| The Beaches         | `leuty`       | `dune-grass`    | `rope-posts`, `life-ring`  | skin2  |
-| Yonge Street        | `street-lamp` | `transit-stop`  | `pay-station`, `bike-ring` | coal   |
+| Kensington Market   | `tree-maple`  | `fruit-stand`   | `bike-ring`, `news-box`    | teal   |
+| The Beaches         | `leuty`       | `dune-grass`    | `rope-posts`, `life-ring`  | stone  |
+| Yonge Street        | `street-lamp` | `transit-stop`  | `pay-station`, `bike-ring` | navy   |
 
 ## Ambient
 

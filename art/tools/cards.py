@@ -721,8 +721,8 @@ class ZoneView(Art):
 # ---------- the Toronto neighbourhoods' path cards, after their backdrops ----------
 
 def cabbagetown_view():
-    a = ZoneView("cabbagetown", flecked("grey", "slate", 53), tufted("dgreen"), "white", (2, 6), curb="stone",
-                 lawn=tufted("dgreen"))
+    a = ZoneView("cabbagetown", flecked("grey", "slate", 53), tufted("olive"), "white", (2, 6), curb="dstone",
+                 walk="stone", lawn=tufted("olive"), walk_fleck="dstone")
     bd.bands(a, 0, FAR_Y, ("lilac", "pink", "peach", "gold"), w=AW)
     for dy in range(-4, 5):
         for dx in range(-4, 5):
@@ -806,9 +806,9 @@ def distillery_view():
 
 
 def kensington_view():
-    paving = flecked("skin2", "clay", 23)
+    paving = flecked("dturq", "turquoise", 23)
     a = ZoneView("kensington-market", flecked("dbrick", "brick", 41), paving, "gold", (3, 6), curb="stone",
-                 walk="skin2", lawn=paving, walk_fleck="clay", edge="dred")
+                 walk="dturq", lawn=paving, walk_fleck="turquoise", edge="dred")
     bd.sunburst(a, AW / 2, FAR_Y + 2, 5, "peach", "pink", FAR_Y, w=AW)
     for x, w, wall_c, roof, awn in ((-14, 28, "dturq", "navy", "dred"), (14, 26, "violet", "purple", "ochre"),
                                     (40, 26, "ochre", "dbrick", "dturq"), (66, 26, "olive", "dolive", "red")):
@@ -832,8 +832,9 @@ def kensington_view():
 
 
 def beaches_view():
-    sand = flecked("skin1", "tan", 43)
-    a = ZoneView("the-beaches", boards, sand, "dbrown", (4, 9), curb=None, walk="skin1", lawn=sand, walk_fleck="tan")
+    sand = flecked("driftwood", "stone", 43)
+    a = ZoneView("the-beaches", boards, sand, "dbrown", (4, 9), curb=None, walk="driftwood", lawn=sand,
+                 walk_fleck="stone")
     a.sky("gold", "yellow")
     bd.cloud(a, 26, 5, 16, 2, 4)
     for py in range(8, 17):
@@ -842,7 +843,7 @@ def beaches_view():
             if bd.hashed(px // 3, py, 9) and py % 2 == 0:
                 c = "foam"
             a.fill(px, py, 1, 1, c)
-    a.fill(0, 17, AW, FAR_Y - 17, "skin1")
+    a.fill(0, 17, AW, FAR_Y - 17, "driftwood")
     a.fill(0, 17, AW, 1, "foam")
     a.fill(40, 10, 1, 4, "white")
     a.fill(41, 11, 2, 3, "white")
@@ -864,9 +865,9 @@ def beaches_view():
 
 
 def yonge_view():
-    paving = flecked("dstone", "shale", 67)
-    a = ZoneView("yonge-street", flecked("shale", "ash", 41), paving, "amber", (4, 8), curb="stone", walk="dstone",
-                 lawn=paving, edge="coal", walk_fleck="shale")
+    paving = flecked("dslate", "slate", 67)
+    a = ZoneView("yonge-street", flecked("shale", "ash", 41), paving, "amber", (4, 8), curb="grey", walk="dslate",
+                 lawn=paving, edge="coal", walk_fleck="slate")
     bd.bands(a, 0, FAR_Y, bd.YONGE_SKY, w=AW)
     for x, y in ((30, 1), (50, 3), (70, 2)):
         a.fill(x, y, 1, 1, "white")
