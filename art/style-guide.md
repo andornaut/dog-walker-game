@@ -272,7 +272,7 @@ After zones 1 to 3, over the road view dimmed as under a card: the walker cheers
 
 Road sprites have redrawn depth variants at the steps in `shared/depth-steps.json`, every 1/16 from 15/16 down to 1/2: `<key>@94`, `@88`, `@81`, `@75`, `@69`, `@62`, `@56` and `@50`, each floor(size × scale + 0.5) with the original's tags, frames and durations, a full 1px outline, and 1px motion kept at 1px. The game draws a sprite smoothly from the smallest of its steps at least its true size, scaled down by at most 1, so it never swaps to a smaller step as it approaches.
 
-`art/tools/pixel.py` settles every variant as it builds, larger steps first, so no variant is bigger than its ideal (the full size at its scale, rounded half up) or than a larger step, and its feet line moves less than 1px at a switch (the rules are in `depth_settled`). A set whose variants depend on another set's (`hazards.py` and `depths.py`) settles on that set's exports, so after changing either, build both again until neither changes.
+`art/tools/pixel.py` settles every variant as it builds, larger steps first, so no variant is bigger than its ideal (the full size at its scale, rounded half up) or than a larger step, a fill pixel that a row or column it takes out leaves touching transparency takes the outline colour beside it (unless that would take out a 1px feature, such as a sparkle's centre), and its feet line moves less than 1px at a switch (the rules are in `depth_settled`). A set whose variants depend on another set's (`hazards.py` and `depths.py`) settles on that set's exports, so after changing either, build both again until neither changes.
 
 ## Road strips
 

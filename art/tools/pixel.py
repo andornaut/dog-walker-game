@@ -407,11 +407,56 @@ def depth_envelope(w, h, scales):
     return out
 
 
+class _Lined(str):
+    """A fill pixel a cut left on the rim (see _without_rows): it compares as its fill, so the cuts after it
+    are chosen as if it were not there, and it is drawn in line, the outline colour beside it."""
+
+    def __new__(cls, fill, line):
+        out = super().__new__(cls, fill)
+        out.line = line
+        return out
+
+
+def _shown(c):
+    """The colour pixel c is drawn in (see _Lined)."""
+    return getattr(c, "line", c)
+
+
+def _opened(frames, r):
+    """The pixels that taking row r out of frames leaves newly touching a clear one across the cut and that
+    are not outline pixels, as (frame, row, column, the outline colour the cut takes from beside it). An
+    outline pixel is one already on the art's rim, or one the colour of that outline pixel, so the outline
+    carries on. A pixel is left as it is where drawing it in the outline colour would take a feature out: one
+    of a colour none of its other neighbours has (a sparkle's centre, an eye), or one with that outline
+    colour behind it, the last fill across a part 1px thin. Rows r - 1 and r + 1 meet at the cut, and
+    nothing else moves relative to its neighbours."""
+    h, out = len(frames[0]), []
+    for i, f in enumerate(frames):
+        w = len(f[0])
+        above, cut, under = f[r - 1] if r > 0 else None, f[r], f[r + 1] if r + 1 < h else None
+        for x in range(w):
+            a, b = above and above[x], under and under[x]
+            if bool(a) == bool(b) or not cut[x]:
+                continue
+            y, c, away = (r - 1, a, r - 2) if a else (r + 1, b, r + 2)
+            line = _shown(cut[x])
+            if _shown(c) == line or x in (0, w - 1) or not (f[y][x - 1] and f[y][x + 1]):
+                continue
+            if not (0 <= away < h and f[away][x]):
+                continue
+            if _shown(f[away][x]) == line or _shown(c) not in {_shown(f[y][x - 1]), _shown(f[y][x + 1]),
+                                                                 _shown(f[away][x])}:
+                continue
+            out.append((i, y, x, line))
+    return out
+
+
 def _without_rows(frames, n, first=False, below=None):
     """frames with n rows taken out from inside their opaque bounds (frame 0's when first), or from the rows
     past row below to their last opaque row, then as many clear rows added on top. Each goes where the art
     changes least: the row most like the one above it in every frame and crossing the fewest features 2 rows
-    thin or less, in the longest run of equal rows, nearest the middle."""
+    thin or less, in the longest run of equal rows, nearest the middle. The outline stays closed: a fill pixel
+    the cut leaves on the rim is drawn in the outline colour it lost (see _opened and _Lined)."""
     for _ in range(n):
         top, bottom = opaque_rows(frames[:1] if first else frames)
         rows = range(top + 1, bottom)
@@ -463,7 +508,12 @@ def _without_rows(frames, n, first=False, below=None):
             return diff + thin(r), -run(r), abs(r - mid)
 
         r = min(rows, key=score)
+        opened = _opened(frames, r)
         frames = [[[None] * len(f[0])] + f[:r] + f[r + 1:] for f in frames]
+        for i, y, x, line in opened:
+            y += y < r
+            frames[i][y] = frames[i][y][:]
+            frames[i][y][x] = _Lined(frames[i][y][x], line)
         assert all(len(f) == h for f in frames)
     return frames
 
@@ -620,7 +670,10 @@ def depth_settled(sprites, originals=None, apart=()):
             tags = seated(key, tags, math.ceil(feet_f * side / side_f - 1e-9))
         settled[key] = tags[0][1][0]
         full[key] = tags
-    return [(key, full[key] if key in settled else tags) for key, tags in sprites]
+    def drawn(tags):
+        return [(tag, [[[_shown(c) for c in row] for row in f] for f in fs], ms) for tag, fs, ms in tags]
+
+    return [(key, drawn(full[key]) if key in settled else tags) for key, tags in sprites]
 
 
 def _middle(tags):
