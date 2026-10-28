@@ -87,9 +87,9 @@ describe("shy paths", () => {
     const choices = shyChoices(path);
     expect(choices.length).toBeGreaterThan(0);
     for (const { lanes, travel } of choices) {
-      expect(path.lane + lanes).toBeGreaterThanOrEqual(1);
-      expect(path.lane + lanes).toBeLessThan(4);
-      expect(travel).toBeGreaterThanOrEqual(-1);
+      expect(path.lane + lanes).toBeGreaterThanOrEqual(path.reach.first);
+      expect(path.lane + lanes).toBeLessThan(path.reach.first + path.reach.count);
+      expect(travel).toBeGreaterThanOrEqual(-path.rise);
     }
   });
 
