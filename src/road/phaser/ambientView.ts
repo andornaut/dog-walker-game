@@ -4,7 +4,7 @@ import { animationKey } from "../../assets/asepriteAnimations";
 import { AMBIENT_VARIANTS, IDLE_TAG } from "../../assets/spriteKeys";
 import type { AmbientMover, ZoneId } from "../../data/types";
 import type { Random } from "../../lib/random";
-import { clipToRoad, DEPTH, LAYOUT, PROJECTION } from "../../scenes/run/stage";
+import { DEPTH, LAYOUT, PROJECTION, showOnRoad } from "../../scenes/run/stage";
 import { firstTag, playTag, showAtDepth } from "../../scenes/sprites";
 import {
   type AmbientDeps,
@@ -90,9 +90,12 @@ export class AmbientView {
           place.band ? DEPTH.bandMover + place.y * BAND_ROW_DEPTH : DEPTH.sprite + place.y + 1,
         );
       if (!place.band) {
-        clipToRoad(Math.round(place.y), sprite);
-      } else if (sprite.isCropped) {
-        sprite.setCrop();
+        showOnRoad(Math.round(place.y), 1, sprite);
+      } else {
+        sprite.setAlpha(1);
+        if (sprite.isCropped) {
+          sprite.setCrop();
+        }
       }
       this.animate(sprite, drawn.key, slot.mover.tag, place.moving && !walk.halted);
     }

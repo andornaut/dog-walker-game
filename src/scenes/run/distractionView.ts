@@ -20,7 +20,7 @@ import {
   startDistractions,
   stepDistractions,
 } from "./distractions";
-import { clipToRoad, DEPTH, LANE_XS, LAYOUT, PROJECTION } from "./stage";
+import { DEPTH, LANE_XS, LAYOUT, PROJECTION, showOnRoad } from "./stage";
 
 // The tags a distraction moves in, the first its art has: it walks, or hops.
 const MOVING_TAGS = ["walk", "hop", "run"] as const;
@@ -105,9 +105,8 @@ export class DistractionView {
     sprite
       .setPosition(Math.round(placed.x), Math.round(placed.y))
       .setFlipX(place.flip)
-      .setAlpha(place.alpha)
       .setDepth(DEPTH.roadside + (Math.round(placed.y) + 0.5) * ROW_DEPTH);
-    clipToRoad(Math.round(placed.y), sprite);
+    showOnRoad(Math.round(placed.y), place.alpha, sprite);
     this.animate(sprite, drawn.key, place.moving, halted);
   }
 

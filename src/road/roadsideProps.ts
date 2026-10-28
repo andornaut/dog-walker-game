@@ -199,11 +199,13 @@ export function newRoadsidePlaces(): RoadsidePlace[] {
 }
 
 // What the props are placed against: the placement table, the road's projection, the screen's
-// width, and a prop's frame width at full size, to leave out props wholly off the screen's
-// sides.
+// width, a prop's frame width at full size, to leave out props wholly off the screen's sides,
+// and reach, how far ahead of the feet props stand: to the cross street, past the road's far
+// edge, so they come into view there rather than at the far edge.
 export interface RoadsideStage {
   readonly frameWidth: (key: string) => number;
   readonly projection: RoadProjection;
+  readonly reach: number;
   readonly table: RoadsideTable;
   readonly width: number;
 }
@@ -266,7 +268,7 @@ function placeZone(art: string | null, start: number, from: number, to: number):
 }
 
 // Writes the props in view into out, at most out.length of them, and returns how many: every
-// prop from the feet to the road's far edge, on the zone whose road lies there. Past its start
+// prop from the feet to the stage's reach, on the zone whose road lies there. Past its start
 // strip a zone shows its own props; short of it, the zone before it's, or with none, its own.
 export function placeRoadside(
   stage: RoadsideStage,
@@ -278,7 +280,7 @@ export function placeRoadside(
   placing.scroll = frame.scroll;
   placing.stage = stage;
   const from = frame.scroll;
-  const to = frame.scroll + stage.projection.visibleDistance + 1;
+  const to = frame.scroll + stage.reach + 1;
   if (frame.previous === null) {
     placeZone(frame.current, frame.currentStart, from, to);
   } else {

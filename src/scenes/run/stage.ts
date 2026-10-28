@@ -4,7 +4,7 @@ import { gameData } from "../../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../../data/screen";
 import { laneCentreXs } from "../../layout/lanes";
 import { screenLayout, walkerFootY } from "../../layout/screenLayout";
-import { rowsHidden } from "../../road/roadClip";
+import { fadeIn, rowsHidden } from "../../road/roadClip";
 import { read } from "../../rules/units";
 import { laneMotionX } from "../../runner/laneMotion";
 import type { Walk } from "../../runner/walk";
@@ -18,7 +18,7 @@ export const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
 export const LANE_XS = laneCentreXs(LANE_COUNT, LAYOUT.road);
 
 // The backdrop band, the road's approach drawn over it and the band's movers lie under the
-// road and its sprites: an item standing on the road draws whole over them, and clipToRoad cuts
+// road and its sprites: an item standing on the road draws whole over them, and showOnRoad cuts
 // one standing past the juncture off at it, so nothing of it shows past the cross street.
 export const DEPTH = {
   approach: -2,
@@ -44,9 +44,16 @@ export const DEPTH = {
 // The row where the road's junction meets the band's cross street.
 export const JUNCTURE_Y = LAYOUT.junction.y;
 
-// Hides the part of a road sprite, placed and sized, with its ground on screen row groundY,
-// that lies above the juncture, unless it stands on the road below it.
-export function clipToRoad(groundY: number, sprite: GameObjects.Sprite): void {
+// The opacity of scenery with its ground on screen row groundY, fading in from the juncture to
+// the road's far edge. Movers and items come into view at the far edge, opaque.
+export function sceneryFade(groundY: number): number {
+  return fadeIn(JUNCTURE_Y, LAYOUT.road.y, groundY);
+}
+
+// Shows a road sprite, placed and sized, with its ground on screen row groundY, at opacity
+// alpha, with the part above the juncture hidden unless it stands on the road below it.
+export function showOnRoad(groundY: number, alpha: number, sprite: GameObjects.Sprite): void {
+  sprite.setAlpha(alpha);
   const { height } = sprite;
   const scale = Math.abs(sprite.scaleY);
   const top = sprite.y - sprite.originY * height * scale;

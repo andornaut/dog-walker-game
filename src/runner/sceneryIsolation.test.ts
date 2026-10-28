@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { distanceAtY } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
 import { randomStream } from "../lib/random";
 import { startAmbient, stepAmbient } from "../road/ambient";
@@ -68,6 +69,7 @@ const LAYERS: Readonly<Record<string, (seed: number) => Layer>> = {
     const stage = {
       frameWidth: () => 0,
       projection: PROJECTION,
+      reach: distanceAtY(PROJECTION, LAYOUT.junction.y),
       table,
       width: LAYOUT.roadView.width,
     };

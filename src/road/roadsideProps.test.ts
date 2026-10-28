@@ -7,6 +7,7 @@ import shippedManifest from "../../public/art/manifest.json";
 import { DEPTH_STEPS } from "../assets/depthSteps";
 import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { distanceAtY } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
 import { walkProjection } from "../runner/walkGeometry";
 import { curbBand, curbFits, VERGES, VERGES_BY_ART, walkFrom } from "./roadside";
@@ -109,8 +110,11 @@ const TABLES: readonly (readonly [string, RoadsideTable])[] = [
   ],
 ];
 
+// Props stand up to the cross street, the junction's top row.
+const REACH = distanceAtY(PROJECTION, LAYOUT.junction.y);
+
 function stageOf(table: RoadsideTable): RoadsideStage {
-  return { frameWidth, projection: PROJECTION, table, width: LAYOUT.roadView.width };
+  return { frameWidth, projection: PROJECTION, reach: REACH, table, width: LAYOUT.roadView.width };
 }
 
 function frame(overrides: Partial<RoadsideFrame>): RoadsideFrame {
@@ -292,7 +296,7 @@ describe("placeRoadside", () => {
       expect(props.length).toBeLessThan(ROADSIDE_LIMIT);
       for (const place of props) {
         const half = (frameWidth(place.key) * Math.min(1, place.scale)) / 2;
-        expect(place.y).toBeGreaterThanOrEqual(PROJECTION.farY - 1);
+        expect(place.y).toBeGreaterThanOrEqual(LAYOUT.junction.y - 1);
         expect(place.y).toBeLessThanOrEqual(PROJECTION.footY);
         expect(place.x + half).toBeGreaterThan(0);
         expect(place.x - half).toBeLessThan(LAYOUT.roadView.width);
@@ -329,19 +333,35 @@ describe("placeRoadside", () => {
     expect([...signs].sort()).toEqual([-1, 1]);
   });
 
+  // A prop comes into view on the cross street, where it fades in, not at the road's far edge.
+  const PROPPED = ZONES.filter(([, zone]) => propCount(zone) > 0);
+  it.each(PROPPED)("places %s's props up to the cross street", (art, zone) => {
+    const rows = new Set<number>();
+    for (let scroll = 0; scroll < repeatSlots(zone) * zone.slot; scroll += 3) {
+      for (const place of placed(ROADSIDE, frame({ current: art, scroll }))) {
+        rows.add(Math.round(place.y));
+      }
+    }
+    expect(Math.abs(Math.min(...rows) - LAYOUT.junction.y)).toBeLessThanOrEqual(1);
+    expect([...rows].some((y) => y > LAYOUT.junction.y && y < PROJECTION.farY)).toBe(true);
+  });
+
   it("places nothing for a zone with no table", () => {
     expect(placed(ROADSIDE, frame({ current: BARE }))).toEqual([]);
   });
 
+  // As a zone begins, its start strip lies on the road's far edge: the zone before's props
+  // stand short of it, and the zone's own beyond it.
   it.each(TABLES)("keeps the zone before's props in view as a zone begins, %s", (_, table) => {
     const zone = zoneOf(table);
+    const onRoad = (props: RoadsidePlace[]) => props.filter(({ y }) => y >= PROJECTION.farY);
     for (let length = 4000; length < 4000 + repeatSlots(zone) * zone.slot; length += SLOT) {
       const before = placed(table, frame({ scroll: length }));
       const after = placed(
         table,
         frame({ current: BARE, currentStart: length, previous: ART, scroll: length }),
       );
-      expect(after).toEqual(before);
+      expect(after).toEqual(onRoad(before));
     }
   });
 

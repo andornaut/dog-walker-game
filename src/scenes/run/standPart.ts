@@ -2,7 +2,7 @@ import { project } from "../../layout/projection";
 import type { WalkItem } from "../../runner/walk";
 import { playFirstTag, showAtDepth } from "../sprites";
 import type { ItemPart } from "./itemViews";
-import { clipToRoad, DEPTH, PROJECTION, type Shadow } from "./stage";
+import { DEPTH, PROJECTION, type Shadow, showOnRoad } from "./stage";
 
 // What a frame draws standing items with: the first of tags each sprite has plays, the walk's
 // halted or walking tags.
@@ -27,7 +27,7 @@ export function standPart(
   const x = Math.round(placed.x);
   const y = Math.round(placed.y);
   part.sprite.setPosition(x, y - Math.round(part.lift * drawn.depth));
-  clipToRoad(y, part.sprite);
+  showOnRoad(y, 1, part.sprite);
   playFirstTag(part.sprite, drawn.key, tags, still);
   if (part.lift > 0) {
     part.sprite.setDepth(DEPTH.sprite + placed.y + 1);

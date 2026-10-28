@@ -4,9 +4,10 @@ import { shadowTexture } from "../../ui/phaser/draw";
 import { spriteMetrics } from "../sprites";
 import { DEPTH, type Shadow } from "./stage";
 
-// A Shadow placer that takes each shadow's colour.
+// A Shadow placer that takes each shadow's colour and opacity.
 type ColouredShadow = (
   colour: number,
+  alpha: number,
   key: string,
   depth: number,
   x: number,
@@ -16,11 +17,11 @@ type ColouredShadow = (
 // Shadow images, reused frame to frame: the first `used` are in use this frame.
 export class ShadowPool {
   private colour = 0;
-  private readonly colouredPlacer: ColouredShadow = (colour, key, depth, x, footY) =>
-    this.place(colour, key, depth, x, footY);
+  private readonly colouredPlacer: ColouredShadow = (colour, alpha, key, depth, x, footY) =>
+    this.place(colour, alpha, key, depth, x, footY);
   private readonly images: GameObjects.Image[] = [];
   private readonly placer: Shadow = (key, depth, x, footY) =>
-    this.place(this.colour, key, depth, x, footY);
+    this.place(this.colour, 1, key, depth, x, footY);
   private readonly scene: Scene;
   private used = 0;
 
@@ -48,9 +49,16 @@ export class ShadowPool {
     }
   }
 
-  // A shadow under a sprite, centred on its x a pixel above its feet. It is sized from the
-  // sprite's 1x art at its depth, whichever art step draws it.
-  private place(colour: number, key: string, depth: number, x: number, footY: number): void {
+  // A shadow under a sprite, centred on its x a pixel above its feet, at opacity alpha. It is
+  // sized from the sprite's 1x art at its depth, whichever art step draws it.
+  private place(
+    colour: number,
+    alpha: number,
+    key: string,
+    depth: number,
+    x: number,
+    footY: number,
+  ): void {
     const width = spriteMetrics(key).opaqueWidth * depth;
     const { anchor, key: texture } = shadowTexture(this.scene, colour, width, depth);
     let image = this.images[this.used];
@@ -62,6 +70,7 @@ export class ShadowPool {
     image
       .setTexture(texture)
       .setPosition(Math.round(x) - anchor.x, Math.round(footY) - 1 - anchor.y)
+      .setAlpha(alpha)
       .setVisible(true);
   }
 }

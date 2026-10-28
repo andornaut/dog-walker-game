@@ -32,7 +32,7 @@ import {
 import { itemCategory, type WalkItem } from "../../runner/walk";
 import { firstTag, playTag, showAtDepth } from "../sprites";
 import type { ItemPart, ItemView } from "./itemViews";
-import { clipToRoad, DEPTH, JUNCTURE_Y, LANE_XS, LAYOUT, PROJECTION } from "./stage";
+import { DEPTH, JUNCTURE_Y, LANE_XS, LAYOUT, PROJECTION, showOnRoad } from "./stage";
 import { type StandFrame, standPart } from "./standPart";
 
 // A mover's cue, in road pixels before projection: its sign inset from the road's edge, or
@@ -140,7 +140,7 @@ export function drawMover(
         .setPosition(x, y)
         .setDepth(DEPTH.sprite + placed.y)
         .setFlipX(leftward);
-      clipToRoad(y, body.sprite);
+      showOnRoad(y, 1, body.sprite);
       if (tag !== undefined) {
         const standing = hasStopped(path, since) && !has(IDLE_TAG);
         playTag(body.sprite, drawn.key, tag, still || standing, ONCE_POSES.has(tag));

@@ -1,6 +1,7 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { gameData } from "../../data";
+import { distanceAtY } from "../../layout/projection";
 import {
   newRoadsidePlaces,
   placeRoadside,
@@ -11,7 +12,7 @@ import {
 import { zoneLength } from "../../runner/walk";
 import { showAtDepth, spriteMetrics } from "../sprites";
 import { ShadowPool } from "./shadowPool";
-import { clipToRoad, DEPTH, LAYOUT, PROJECTION } from "./stage";
+import { DEPTH, JUNCTURE_Y, LAYOUT, PROJECTION, sceneryFade, showOnRoad } from "./stage";
 
 // Each screen row adds this much to a prop's depth, so nearer props stand in front and every
 // prop stays under the road's sprites.
@@ -34,6 +35,7 @@ export class RoadsideView {
   private readonly stage: RoadsideStage = {
     frameWidth: (key) => spriteMetrics(key).frameWidth,
     projection: PROJECTION,
+    reach: distanceAtY(PROJECTION, JUNCTURE_Y),
     table: ROADSIDE,
     width: LAYOUT.roadView.width,
   };
@@ -72,9 +74,10 @@ export class RoadsideView {
       const x = Math.round(place.x);
       const y = Math.round(place.y);
       sprite.setPosition(x, y).setDepth(DEPTH.roadside + y * ROW_DEPTH);
-      clipToRoad(y, sprite);
+      const alpha = sceneryFade(y);
+      showOnRoad(y, alpha, sprite);
       if (place.shadow !== null) {
-        shadow(place.shadow, place.key, drawn.depth, x, y);
+        shadow(place.shadow, alpha, place.key, drawn.depth, x, y);
       }
     }
     this.shadows.hideUnused();

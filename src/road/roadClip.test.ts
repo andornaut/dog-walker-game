@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "../layout/screenLayout";
-import { rowsAboveJuncture, rowsHidden } from "./roadClip";
+import { fadeIn, rowsAboveJuncture, rowsHidden } from "./roadClip";
 
 const { approach, junction, road } = screenLayout(SCREEN_CONFIG);
 const JUNCTURE = junction.y;
@@ -42,4 +42,25 @@ describe("rowsHidden", () => {
       expect(rowsHidden(JUNCTURE, ground, drawn)).toBe(hidden);
     },
   );
+});
+
+describe("fadeIn", () => {
+  const span = road.y - JUNCTURE;
+  it.each([
+    { alpha: 0, ground: JUNCTURE - 4, name: "past the juncture" },
+    { alpha: 0, ground: JUNCTURE, name: "on the juncture's row" },
+    { alpha: 0.25, ground: JUNCTURE + span / 4, name: "a quarter of the way to the far edge" },
+    { alpha: 0.5, ground: JUNCTURE + span / 2, name: "halfway to the far edge" },
+    { alpha: 1, ground: road.y, name: "on the road's far edge" },
+    { alpha: 1, ground: road.y + 100, name: "nearer" },
+  ])("shows a sprite standing $name at $alpha", ({ alpha, ground }) => {
+    expect(fadeIn(JUNCTURE, road.y, ground)).toBeCloseTo(alpha);
+  });
+
+  it("rises row by row from the juncture to the far edge", () => {
+    const alphas = Array.from({ length: span + 1 }, (_, k) =>
+      fadeIn(JUNCTURE, road.y, JUNCTURE + k),
+    );
+    expect(alphas.every((alpha, k) => k === 0 || alpha > (alphas[k - 1] ?? 1))).toBe(true);
+  });
 });
