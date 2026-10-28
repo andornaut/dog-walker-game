@@ -4,8 +4,8 @@
 same notes, then the phrase again, closing on G C so the loop falls back onto D. A reedy accordion of two
 detuned squares calls and a triangle marimba answers, bar by bar in the phrases and half bar by half bar in the
 bridge, and they play the closing riff together. Under them: a bouncy tresillo bass with offbeat octaves, offbeat
-chord stabs over held bellows chords, low conga and high bongo hits with a slap's skin noise, a soft shaker and a
-light kick.
+chord stabs, low conga and high bongo hits with a slap's skin noise, a soft shaker on the eighths and a light
+kick.
 """
 
 from sounds import PEAK_DB, RATE, hz, mix, n, parse, sox, tone, voice
@@ -13,7 +13,7 @@ from sounds import PEAK_DB, RATE, hz, mix, n, parse, sox, tone, voice
 # One sixteenth at about 112 BPM. 5908 is a multiple of 4, so the 256 sixteenths of the loop fill whole
 # 1024-sample AAC frames.
 STEP = 5908
-SQUEEZE_DB = -12  # the compressor's threshold, with the summed layers peaking at PEAK_DB
+SQUEEZE_DB = -14  # the compressor's threshold, with the summed layers peaking at PEAK_DB
 LOOKAHEAD = 132  # samples
 
 # Notes are "name:sixteenths"; "-" is a rest. One bar per group between bars.
@@ -44,26 +44,24 @@ A2:3 A2:2 -:1 A3:2 -:2 G3:2 E3:2 B2:2 | C3:3 C3:2 -:1 C4:2 -:2 C4:2 G3:2 E3:2
 D3:3 D3:2 -:1 D4:2 -:2 D4:2 A3:2 B2:2 | C3:3 C3:2 -:1 C4:2 -:2 C4:2 G3:2 A2:2
 G2:3 G2:2 -:1 G3:2 -:2 G3:2 D3:2 A2:2 | G2:3 G2:2 -:1 G3:2 C3:2 C4:2 G3:2 E3:2
 """
-# One chord per half bar, stabbed on its two offbeat eighths and held low underneath.
+# One chord per half bar, stabbed on its two offbeat eighths.
 CHORDS = "D D C C G G D D D D C C G G C C Am Am D7 D7 Am Am C C D D C C G G G C"
 VOICINGS = {"Am": "E4 A4 C5", "C": "E4 G4 C5", "D": "F#4 A4 D5", "D7": "F#4 A4 C5", "G": "D4 G4 B4"}
-PADS = {"Am": "A3 E4", "C": "G3 E4", "D": "A3 F#4", "D7": "C4 F#4", "G": "B3 D4"}
 
-# Hand drums, one character per sixteenth: L open low conga, H high bongo, S slap, g ghost tap. The fourth
-# bar of each phrase ends in a bongo run.
-GROOVE = "g.gHS.Lgg.HLS.LL"
-FILL = "g.gHS.LgL.HLHHLL"
+# Hand drums, one character per sixteenth: L open low conga, H high bongo, S slap. The fourth bar of each phrase
+# ends in a bongo run.
+GROOVE = "...HS.L...HLS.LL"
+FILL = "...HS.L.L.HLHHLL"
 KICK = "k.......k......."
-SHAKER = "mqaqmqaqmqaqmqaq"  # accented on the offbeat eighths
+SHAKER = "m.a.m.a.m.a.m.a."  # eighths, accented on the offbeats
 
 CONGA = {  # kind: (from Hz, to Hz, seconds, volume)
     "L": (262, 220, 0.2, 0.9),
     "H": (680, 587, 0.12, 0.6),
     "S": (700, 587, 0.06, 0.7),
-    "g": (640, 587, 0.035, 0.2),
 }
-SKIN = {"L": (0.012, 0.2), "H": (0.01, 0.2), "S": (0.035, 0.7), "g": (0.008, 0.08)}
-SHAKE = {"a": 0.5, "m": 0.3, "q": 0.16}
+SKIN = {"L": (0.012, 0.2), "H": (0.01, 0.2), "S": (0.035, 0.7)}
+SHAKE = {"a": 0.5, "m": 0.3}
 
 
 def hits(bars):
@@ -105,11 +103,6 @@ def reed(cents):
     return play
 
 
-def pad_score(i):
-    """The ith note of each chord's held pair."""
-    return [(PADS[chord].split()[i], 8) for chord in CHORDS.split()]
-
-
 def music(tmp, out):
     def v(name, score, play):
         return voice(tmp, name, score, play, step=STEP)
@@ -129,8 +122,6 @@ def music(tmp, out):
         p, s, "square", note, vol=0.5, duty=25, low=500, attack=0.004, release=0.7, tail=tail)))
     comp = [v(f"km-comp{i}", comp_score(i), lambda p, length, note: tone(
         p, length, "square", note, low=1200, attack=0.01, release=0.5, shape="h")) for i in range(3)]
-    pads = [v(f"km-pad{i}", pad_score(i), lambda p, length, note: tone(
-        p, length, "square", note, low=900, attack=0.06, release=0.3, shape="h")) for i in range(2)]
     congas = v("km-conga", drums, lambda p, length, kind: tone(
         p, min(length, n(CONGA[kind][2])), "triangle", CONGA[kind][:2], vol=CONGA[kind][3], attack=0.002,
         release=0.9, tail=length - min(length, n(CONGA[kind][2]))))
@@ -144,7 +135,7 @@ def music(tmp, out):
         shape="h", tail=length - n(0.05)))
     summed = f"{tmp}/km-mix.wav"
     mix([(reeds[0], 0.96), (reeds[1], 0.4), (marimba, 0.48), (mallet, 0.48), (bass, 0.36), (growl, 0.24),
-         *((c, 0.08) for c in comp), *((c, 0.1) for c in pads), (congas, 0.24), (skin, 0.48), (kick, 0.2),
+         *((c, 0.1) for c in comp), (congas, 0.24), (skin, 0.48), (kick, 0.2),
          (shaker, 0.64)], summed)
     squeeze(summed, out)
 
