@@ -5,11 +5,11 @@ import { describe, expect, it } from "vitest";
 import manifest from "../../public/art/manifest.json";
 import depthSteps from "../../shared/depth-steps.json";
 import lightTable from "../../shared/lights.json";
-import { decodePng } from "../assets/atlas/atlasBuild";
 import { paletteColour } from "../assets/housePalette";
 import { IDLE_TAG } from "../assets/spriteKeys";
 import { WORLD } from "../data/world";
 import { itemAt } from "../lib/arrays";
+import { decodePng } from "../testing/png";
 import { newAttachedLightPlaces, placeAttachedLights } from "./lightPlaces";
 import { bakeLight, LIGHT_ATTACHMENTS, type LightDef, LIGHTS, lightsFrom } from "./lights";
 
