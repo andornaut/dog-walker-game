@@ -6,7 +6,8 @@ drop-<gear>   24x24   one per droppable gear: drop-fanny-pack, drop-hall-pass,
                       drop-lucky-collar, drop-running-shoes and drop-whistle.
                       idle (2 frames, 500ms): the sparkle beside the gear twinkles,
                       a small plus on frame 0 (the rest pose) and a four-point
-                      star on frame 1; the gear stays still.
+                      star on frame 1 (below 1.2x, a 3x3 plus flashing from
+                      yellow to white); the gear stays still.
 
 Each shows its gear in the shop art's colours and silhouette (icons.py's item-<gear>,
 glyphs.py's icon-gear-<gear>), with a yellow sparkle at a top corner so it reads as a
@@ -42,12 +43,11 @@ import road  # noqa: E402
 from minis import STEPS, Mini  # noqa: E402
 from pixel import edged, main, raster  # noqa: E402
 
-# The sparkle by its size, in drawn pixels: w white, y yellow. SPARKLES[big] is the twinkle's frame 1, the
-# one before it frame 0; sparkle() picks the pair that suits the scale.
+# The sparkle's two frames by size, in drawn pixels: w white, y yellow. From 1.2x a plus twinkles to a
+# four-point star; below it a 3x3 yellow plus flashes white, so it never shrinks to a lone pixel.
 SPARKLES = (
-    ["w"],
-    [".y.", "ywy", ".y."],
-    ["..y..", "..w..", "ywwwy", "..w..", "..y.."],
+    ([".y.", "ywy", ".y."], [".w.", "wyw", ".w."]),
+    ([".y.", "ywy", ".y."], ["..y..", "..w..", "ywwwy", "..w..", "..y.."]),
 )
 SPARKLE_COLS = {"w": "white", "y": "yellow"}
 # The idle: the sparkle small, then big.
@@ -67,10 +67,10 @@ def stamp(g, cx, cy, rows, cols):
 
 
 def sparkle(g, cx, cy, big):
-    """The pickup's sparkle centred on design point (cx, cy): from 1.2x the plus and the star, below it a
-    dot and the plus."""
+    """The pickup's sparkle centred on design point (cx, cy): from 1.2x the plus and the star, below it the
+    plus, yellow then white."""
     k = 1 if getattr(g, "s", 1) >= 1.2 else 0
-    stamp(g, cx, cy, SPARKLES[k + big], SPARKLE_COLS)
+    stamp(g, cx, cy, SPARKLES[k][big], SPARKLE_COLS)
 
 
 def paw(g, cx, cy, c="dred"):
@@ -112,13 +112,14 @@ def fanny_pack(g):
 
 def hall_pass(g):
     """A cream pass card under a red header band, its lgrey clip on a sky lanyard whose two straps (blue
-    on their inner edges) rise steeply out of the frame's top, a dred paw stamp on the left and brown lines
-    of print on the right."""
+    on their inner edges from 1.2x, solid sky below it, where the edge would break into specks) rise
+    steeply out of the frame's top, a dred paw stamp on the left and brown lines of print on the right."""
     for i in range(5):
         g.rect(5.6 - 0.45 * i, 5.2 - i, 1.4, 1, "sky")
         g.rect(8.2 + 0.45 * i, 5.2 - i, 1.4, 1, "sky")
-        g.rect(6.5 - 0.45 * i, 5.2 - i, 0.6, 1, "blue")
-        g.rect(8.2 + 0.45 * i, 5.2 - i, 0.6, 1, "blue")
+        if getattr(g, "s", 1) >= 1.2:
+            g.rect(6.5 - 0.45 * i, 5.2 - i, 0.6, 1, "blue")
+            g.rect(8.2 + 0.45 * i, 5.2 - i, 0.6, 1, "blue")
     g.rect(1, 6.5, 13, 8.5, "cream")
     g.rect(1, 6.5, 13, 2.5, "red")
     g.rect(13.3, 6.5, 0.7, 8.5, "tan")
@@ -159,16 +160,25 @@ def running_shoes(g):
 
 def whistle(g):
     """A silver sports whistle side on, lit white along its top: a round barrel, its mouthpiece running
-    right with an ink slot on top, and from 1.2x two cyan sound lines rising from the slot. The barrel's paw
+    right with a dslate slot on top, never under 2px, and from 1.2x two cyan sound lines rising from the slot. The barrel's paw
     stamp is left off: at road size it reads as a face."""
     g.ell(6.5, 10.3, 5.2, 4.7, "lgrey", "grey", "white")
     g.rect(6.5, 6.5, 8.2, 4, "lgrey")
     g.rect(6.5, 6.5, 8.2, 0.7, "white")
     g.rect(6.5, 9.8, 8.2, 0.7, "grey")
     g.rect(14, 6.5, 0.7, 4, "grey")
-    g.rect(7.6, 6.5, 2.8, 1, None)
-    g.rect(7.6, 7.5, 2.8, 0.8, "dslate")
-    if getattr(g, "s", 1) >= 1.2:
+    s = getattr(g, "s", 1)
+    if s >= 1.2:
+        g.rect(7.6, 6.5, 2.8, 1, None)
+        g.rect(7.6, 7.5, 2.8, 0.8, "dslate")
+    else:
+        # the slot in drawn pixels, a 2px notch in the mouthpiece's top over a 2px dslate slot, moved right
+        # clear of the barrel's rise, so the whistle keeps its shape at the small steps
+        x0, y0 = math.floor(10.2 * s + 0.5), math.floor(6.5 * s + 0.5)
+        for dx in range(2):
+            raster(g).p(x0 + dx, y0, None)
+            raster(g).p(x0 + dx, y0 + 1, "dslate")
+    if s >= 1.2:
         g.rect(8.6, 2, 0.7, 2.6, "cyan")
         for k in range(2):
             g.rect(11.2 + 0.7 * k, 3.9 - 0.7 * k, 0.7, 0.7, "cyan")
