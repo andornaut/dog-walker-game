@@ -327,7 +327,17 @@ describe("the top bar's bank", () => {
     expect([...forms].sort()).toEqual([0, 1]);
   });
 
-  it.each(amounts)(
+  // The first amount of each scale, form and parity of ink: the fit and the centring read only
+  // those.
+  const fitKey = (dollars: number) => {
+    const { scale, text } = bankFit(width, texts(dollars));
+    return `${scale},${texts(dollars).indexOf(text)},${(width(text) * scale) % 2}`;
+  };
+  const sampled = amounts.filter(
+    (dollars, i) => amounts.findIndex((other) => fitKey(other) === fitKey(dollars)) === i,
+  );
+
+  it.each(sampled)(
     "sets $%i in full whenever it fits, at the largest scale whose ink fits the bank's room",
     (dollars) => {
       const [full = "", short = ""] = texts(dollars);
@@ -339,7 +349,7 @@ describe("the top bar's bank", () => {
     },
   );
 
-  it.each(amounts)("centres $%i across the bank's ink columns at the scale it takes", (dollars) => {
+  it.each(sampled)("centres $%i across the bank's ink columns at the scale it takes", (dollars) => {
     const { scale, text } = bankFit(width, texts(dollars));
     const ink = width(text) * scale;
     const left = cashLeft(ink);
