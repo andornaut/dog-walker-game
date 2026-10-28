@@ -20,6 +20,7 @@ import {
   stopsOnVerge,
 } from "./movers";
 import { shyOutcomes } from "./shy";
+import { nthStretch, rowsWithin, WHOLE_ZONE } from "./stretches";
 
 // What a spawn covers: lanes across, and rows along the road of footprint.cellLength each.
 export interface Footprint {
@@ -179,17 +180,6 @@ const SCAN_ROADS = 4;
 
 // A rounding error in counting steps and moves.
 const ROUNDING = 1e-9;
-
-// The share of the zone's rows a quota without within is spread over.
-export const WHOLE_ZONE: readonly [number, number] = [0, 1];
-
-// The share of a zone the ith of count like spawns placed apart stands in, such as a zone's gear
-// drops or its lucky finds: every other one of 2 * count - 1 equal stretches, so a lone one may
-// stand anywhere and two stand in the first and last thirds, at least a third of the zone apart.
-export function spacedStretch(count: number, i: number): readonly [number, number] {
-  const stretches = 2 * count - 1;
-  return [(2 * i) / stretches, (2 * i + 1) / stretches];
-}
 
 // The scroll a walk step covers.
 function stepLength(plan: SpawnPlan<string>): number {
@@ -974,10 +964,7 @@ export function planSpawns<Kind extends string>(
   // steers across it.
   const cellsFor = (quota: SpawnQuota<Kind>, i: number): Cell[] => {
     const footprint = quota.footprint ?? SINGLE_CELL;
-    const [from, to] = (quota.within ?? WHOLE_ZONE).map((share) =>
-      Math.floor(share * rows.length),
-    ) as [number, number];
-    const span = to - from;
+    const within = rowsWithin(rows.length, quota.within ?? WHOLE_ZONE);
     const opening =
       plan.firstContactSeconds !== undefined && quota.blocksLane && i === 0 && inView()[0] === 0
         ? freeCells(quota, footprint, 0, 1)
@@ -985,13 +972,8 @@ export function planSpawns<Kind extends string>(
     const stretch =
       opening.length > 0
         ? opening
-        : freeCells(
-            quota,
-            footprint,
-            from + Math.floor((i * span) / quota.count),
-            from + Math.floor(((i + 1) * span) / quota.count),
-          );
-    return stretch.length > 0 ? stretch : freeCells(quota, footprint, from, to);
+        : freeCells(quota, footprint, ...nthStretch(quota.count, i, within));
+    return stretch.length > 0 ? stretch : freeCells(quota, footprint, ...within);
   };
   // One of cells for a spawn: a lane-blocking one toward the lanes left unblocked longest.
   const pickCell = (quota: SpawnQuota<Kind>, cells: readonly Cell[]): Cell => {

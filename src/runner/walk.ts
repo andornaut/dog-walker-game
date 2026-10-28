@@ -106,11 +106,11 @@ import {
   type PathRow,
   planSpawns,
   SINGLE_CELL,
-  spacedStretch,
   type SpawnEvent,
   type SpawnQuota,
   takeDueSpawns,
 } from "./spawning";
+import { spacedStretch } from "./stretches";
 
 export type WalkData = Pick<
   GameData,

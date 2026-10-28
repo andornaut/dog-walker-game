@@ -3,6 +3,7 @@ import type { LaneDirection } from "../layout/lanes";
 import { itemAt } from "../lib/arrays";
 import { type Random, randomInt, randomPick, seededRandom, weightedPick } from "../lib/random";
 import type { RoadItem } from "./roadItems";
+import { nthStretch, rowsWithin, WHOLE_ZONE } from "./stretches";
 
 // Moving hazards. Everything here is measured in road scroll rather than time, so a mover
 // keeps step with the road: it freezes when the road does, and a replay of the same scroll
@@ -1732,15 +1733,12 @@ export function placeMovers<Kind extends string>(
   const spawns: MoverSpawn<Kind>[] = [];
   const dropped: Kind[] = [];
   for (const { count, kind, spec, within } of quotas) {
-    const [from, to] = (within ?? [0, 1]).map((share) => Math.floor(share * rows.length)) as [
-      number,
-      number,
-    ];
+    const quotaRows = rowsWithin(rows.length, within ?? WHOLE_ZONE);
+    const [, to] = quotaRows;
     for (let i = 0; i < count; i++) {
       const draws = drawMover(streams);
       const lifts = spec.motion.kind === "cross" ? [0, ...DART_LIFTS] : [0];
-      const first = from + Math.floor((i * (to - from)) / count);
-      const end = from + Math.floor(((i + 1) * (to - from)) / count);
+      const [first, end] = nthStretch(count, i, quotaRows);
       const fittingAt = (moverDraws: MoverDraws) => {
         const starts = lifts.map((lift) => moverPlacements(geometry, spec, moverDraws, lift));
         const stretch = firstFitting(starts, first, end);

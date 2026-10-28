@@ -8,7 +8,7 @@ import { gearDropCount, gearInEffect } from "../rules/gearDrops";
 import { plannerStreams } from "../testing/movers";
 import { GAME_ROAD, inZone, REAL, realRun } from "../testing/planner";
 import { atPack, inLane, step, walkWith } from "../testing/walk";
-import { spacedStretch } from "./spawning";
+import { spacedStretch } from "./stretches";
 import { isGearDrop, planZone, spawnQuotas, startRoad, type Walk, zoneLength } from "./walk";
 
 const GEAR = Object.keys(SHOP_GEAR) as GearId[];
