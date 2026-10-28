@@ -1,7 +1,7 @@
-import type { DebuffId, DogId, EncounterId } from "../data/types";
+import type { DebuffId, DogId, EncounterId, LiveTuning, Stat } from "../data/types";
 import type { ActiveModifier, ModifierSource } from "../state/runState";
 import type { Change, ModifierCause } from "./causes";
-import type { StatParts } from "./modifiers";
+import { statParts } from "./modifiers";
 
 // What a modified value is a value of.
 export type ModifiedSubject =
@@ -74,15 +74,18 @@ export function changeModified(change: Change): ModifiedValue | null {
   return modifiedValue(subject, before, by);
 }
 
-// A stat's modified value from its parts, from base. shown is how the rules use the stat, such
-// as rounded to a whole count or held to a cap; each modifier's share is the change it makes to
-// the shown value, and one that changes nothing shown is left out.
+// A stat's modified value from base, by the modifiers that change it (statParts). shown is how the
+// rules use the stat, such as rounded to a whole count or held to a cap; each modifier's share is
+// the change it makes to the shown value, and one that changes nothing shown is left out.
 export function statModified(
+  tuning: LiveTuning,
+  modifiers: readonly ActiveModifier[],
+  stat: Stat,
   subject: ModifiedSubject,
   base: number,
-  parts: StatParts<ActiveModifier>,
   shown: (value: number) => number = (value) => value,
 ): ModifiedValue | null {
+  const parts = statParts(tuning, modifiers, stat, base);
   const before = shown(base);
   let exact = base;
   let previous = before;

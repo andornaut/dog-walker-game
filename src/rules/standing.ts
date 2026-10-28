@@ -3,7 +3,6 @@ import { packDogs, placeInPack } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { packSizeBonus, sizeHearts } from "./dogs";
 import { type ModifiedSubject, type ModifiedValue, statModified } from "./modified";
-import { statParts } from "./modifiers";
 import { currentZone } from "./route";
 import { read } from "./units";
 import { zoneStats } from "./zones";
@@ -20,8 +19,7 @@ export function reachModified(
   pickup: "tip" | "treat",
 ): ModifiedValue | null {
   const stat = pickup === "treat" ? "treatReach" : "tipReach";
-  const parts = statParts(data.tuning, run.modifiers, stat, 0);
-  return statModified({ kind: "reach", pickup }, 0, parts, Math.round);
+  return statModified(data.tuning, run.modifiers, stat, { kind: "reach", pickup }, 0, Math.round);
 }
 
 // Each walking owner's max hearts, when maxHearts modifiers, such as Lucky collar's, change it:
@@ -31,9 +29,13 @@ function maxHeartsModified(data: StandingData, run: StandingRun): ModifiedValue[
   return packDogs(run).flatMap((dog) => {
     const place = placeInPack(run, dog);
     const base = sizeHearts(data.tuning, data.dogs[dog]) + packSizeBonus(data.tuning, place);
-    const parts = statParts(data.tuning, run.modifiers, "maxHearts", base);
-    const modified = statModified({ dog, kind: "maxHearts" }, base, parts, (value) =>
-      Math.min(cap, value),
+    const modified = statModified(
+      data.tuning,
+      run.modifiers,
+      "maxHearts",
+      { dog, kind: "maxHearts" },
+      base,
+      (value) => Math.min(cap, value),
     );
     return modified === null ? [] : [modified];
   });
@@ -54,8 +56,8 @@ function spawnsModified(data: StandingData, run: StandingRun): ModifiedValue[] {
     ["treats", "treatSpawns", stats.treats],
   ];
   return counts.flatMap(([spawn, stat, base]) => {
-    const parts = statParts(data.tuning, run.modifiers, stat, base);
-    return statModified({ kind: "spawns", spawn }, base, parts, Math.round) ?? [];
+    const subject = { kind: "spawns", spawn } as const;
+    return statModified(data.tuning, run.modifiers, stat, subject, base, Math.round) ?? [];
   });
 }
 
@@ -68,17 +70,15 @@ export function standingModified(data: StandingData, run: StandingRun): Modified
   const agility = data.walkers[run.walker].agility;
   const values = [
     ...maxHeartsModified(data, run),
-    statModified(
-      { kind: "agility" },
-      agility,
-      statParts(data.tuning, run.modifiers, "agility", agility),
-    ),
+    statModified(data.tuning, run.modifiers, "agility", { kind: "agility" }, agility),
     reachModified(data, run, "tip"),
     reachModified(data, run, "treat"),
     statModified(
+      data.tuning,
+      run.modifiers,
+      "squirrelPulls",
       { kind: "squirrelPulls" },
       1,
-      statParts(data.tuning, run.modifiers, "squirrelPulls", 1),
       Math.round,
     ),
     ...spawnsModified(data, run),

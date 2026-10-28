@@ -22,7 +22,7 @@ import {
 import { ownerMaxHearts } from "./dogs";
 import { debuffLasting, lastingFor, longerLasting } from "./durations";
 import { changeModified, type ModifiedValue, modifiedValue, statModified } from "./modified";
-import { modifiedStat, statParts } from "./modifiers";
+import { modifiedStat } from "./modifiers";
 import { type Cents, cents, clampHearts, read, roundDollars } from "./units";
 
 type RulesData = Pick<GameData, "debuffs" | "dogs" | "encounters" | "tuning">;
@@ -107,9 +107,11 @@ function moneyParts(data: RulesData, state: RunState, effect: MoneyEffect): Mone
     };
   }
   const cost = statModified(
+    data.tuning,
+    state.modifiers,
+    "cardCost",
     { kind: "money" },
     amount,
-    statParts(data.tuning, state.modifiers, "cardCost", amount),
     roundDollars,
   );
   return {
@@ -324,8 +326,13 @@ function debuffSecondsModified(
   state: RunState,
 ): ModifiedValue | null {
   const base = read(data.tuning, "seconds", data.debuffs[debuff].seconds);
-  const parts = statParts(data.tuning, state.modifiers, "debuffSeconds", base);
-  return statModified({ debuff, kind: "debuffSeconds" }, base, parts);
+  return statModified(
+    data.tuning,
+    state.modifiers,
+    "debuffSeconds",
+    { debuff, kind: "debuffSeconds" },
+    base,
+  );
 }
 
 function applyEffect(
