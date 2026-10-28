@@ -1096,8 +1096,9 @@ def effect_well():
 
 
 # The dog card: 120x70 in its slot, the chrome on x 1 to 118 and rows 0 to 69, so a 1px gap runs
-# down each side and the card's foot sits on the band's last row, over the neighbourhood progress line. The cards are navy, as a neutral
-# ui-section, so the eye stays on the road and the dogs' photos and hearts carry the row.
+# down each side and the card's foot sits on the band's last row, over the neighbourhood progress
+# line. The cards are navy, as a neutral ui-section, so the eye stays on the road and the dogs'
+# photos and hearts carry the row.
 DOG_CARD = (120, 70)
 DOG_CARD_FRAME = (1, 0, 118, 70)
 # The header's rows (2 to 15) and the ink rule under it.
@@ -1186,7 +1187,7 @@ def dog_card_warn(step):
 
 def dog_card_heart_loss(step):
     """120x70, ui-dog-card's heart-loss frames, an overlay over the card and under the game's face,
-    hearts and text that fills only the hearts area (44,54 55x9, its corners cut 1px), never the
+    hearts and text that fills only the hearts area (44,51 55x9, its corners cut 1px), never the
     card's edge or header: frames 0 and 1 white (13.89:1 on navy), then white on a checkerboard and
     on one pixel in four, so the flash clears."""
     colour, every = DOG_CARD_HEART_LOSS[step]
