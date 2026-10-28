@@ -327,6 +327,7 @@ def hot_dog_stand():
         g.rect(6, 68, 48, 3, "white")
     return w, h, draw
 
+
 def ice_cream_stand():
     """A beach ice cream stand: a foam kiosk under a flat turquoise roof, a pink soft-serve cone standing on
     it, a pink and cream striped awning with a scalloped hem over the serving hatch, tubs in the freezer and
@@ -422,8 +423,8 @@ def love_lock():
 def mural_wall():
     """A Kensington Market mural wall: a free-standing brick wall between two piers capped in stone, its face
     painted under a walnut coping as the backdrop's laneway murals are, in diagonal bands of their paint
-    with a cartoon dog's face looking out of them, its tongue out, tags sprayed round it, and the paint stopping short of
-    a stone footing, bare brick below."""
+    with a cartoon dog's face looking out of them, its tongue out, tags sprayed round it, and the paint stopping
+    short of a stone footing, bare brick below."""
     w, h = 80, 64
     x0, x1, top, paint = 11, 69, 9, 52
 
@@ -473,8 +474,8 @@ def mural_wall():
         g.ell(cx + 0.5, cy + 11, 3.5, 4, "coal")
         g.ell(cx + 0.5, cy + 10.5, 2.5, 3, "pink")
         g.rect(cx, cy + 8, 1, 4, "mauve")
-        # the tags: white scrawls top left, a gold crown top right, a lime lightning bolt with a coal drop shadow low left
-        # and a pink heart low right
+        # the tags: white scrawls top left, a gold crown top right, a lime lightning bolt with a coal drop shadow
+        # low left and a pink heart low right
         for x, y in ((14, 13), (19, 15)):
             g.rect(x, y, 4, 1, "white")
             g.rect(x, y, 1, 4, "white")
@@ -532,7 +533,8 @@ BEACH_STRIPES = {"blue": ("azure", "white"), "coral": ("turquoise", "pink"), "gr
 
 
 def field(g, colour_at):
-    """Paint every pixel whose centre, in design units, colour_at(x, y) gives a colour for (a K name or hex); None leaves it."""
+    """Paint every pixel whose centre, in design units, colour_at(x, y) gives a colour for (a K name or hex);
+    None leaves it."""
     px, s = raster(g).px, scale_of(g)
     for yy, row in enumerate(px):
         for xx in range(len(row)):
@@ -936,8 +938,7 @@ def gap(*props):
 # 3 slots after the left's, so they alternate sides, one every 420 px. Kensington Market and The Beaches
 # run twelve gaps, so one prop stands every 210 px. Kensington: maples in gaps 0 and 6, the fruit stand in
 # 3, the Garden Car in 9, café patios in 1 and 7 and mural walls in 4 and 10. The Beaches: the Leuty in
-# gaps 0 and 6, dune grass in 3, the ice cream stand in 9, and beach umbrellas and chairs in 1, 4, 7 and 10. Each neighbourhood's character comes from its backdrop,
-# verges and road, not from its roadside.
+# gaps 0 and 6, dune grass in 3, the ice cream stand in 9, and beach umbrellas and chairs in 1, 4, 7 and 10.
 SIDES = dict(
     left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=1),
     right=dict(offset=1, lotStart=0, lotStride=1, gapStart=2, gapStride=1),
