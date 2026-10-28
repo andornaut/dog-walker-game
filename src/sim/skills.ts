@@ -28,14 +28,14 @@ export const SKILL_PRESETS: Readonly<Record<SkillPresetId, Skill>> = {
     reactionSeconds: 0.2,
   },
   novice: {
-    driftReactionSeconds: 0.55,
+    driftReactionSeconds: 1.2,
     errorRate: 0.12,
     laneChangeCooldown: 0.25,
     lookAheadSeconds: 1.2,
     reactionSeconds: 0.55,
   },
   typical: {
-    driftReactionSeconds: 0.35,
+    driftReactionSeconds: 0.85,
     errorRate: 0.05,
     laneChangeCooldown: 0.1,
     lookAheadSeconds: 2.2,

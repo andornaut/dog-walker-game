@@ -758,7 +758,11 @@ describe("a steering bot whose pack drifts", () => {
     observeDrift(bot, before.road.control);
     const seenAt = bot.clock;
     let reactedAt: number | null = null;
-    for (; reactedAt === null && bot.clock < seenAt + 2; bot.clock += STEP_SECONDS) {
+    for (
+      ;
+      reactedAt === null && bot.clock < seenAt + skill.driftReactionSeconds + 1;
+      bot.clock += STEP_SECONDS
+    ) {
       const { lanes } = actBot(bot, road, NO_PULLS, drifted);
       reactedAt = lanes.length > 0 || bot.plan.length > 0 ? bot.clock : null;
     }
@@ -787,14 +791,14 @@ describe("a steering bot whose pack gets Muddy", () => {
     const bot = newBot(seededRandom(1), "sight", skill);
     bot.clock = 5;
     const read: { readonly at: number; readonly seconds: number }[] = [];
-    for (; bot.clock < 6; bot.clock += STEP_SECONDS) {
+    for (; bot.clock < 5 + skill.driftReactionSeconds + 0.5; bot.clock += STEP_SECONDS) {
       observeRoad(bot, road, walk);
       actBot(bot, road, NO_PULLS, walk);
       read.push({ at: bot.clock - 5, seconds: laneMoveRead(bot, gameData, muddy) });
     }
 
     expect(slowed).toBeGreaterThan(clean);
-    expect(read.filter(({ seconds }) => seconds === clean).length).toBeGreaterThan(0);
+    expect(new Set(read.map(({ seconds }) => seconds))).toEqual(new Set([clean, slowed]));
     for (const { at, seconds } of read) {
       expect(seconds).toBe(at < skill.driftReactionSeconds - 1e-9 ? clean : slowed);
     }
