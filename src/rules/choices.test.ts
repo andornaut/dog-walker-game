@@ -118,11 +118,11 @@ describe("cardFor", () => {
     const options = resolution.kind === "card" ? resolution.options : [];
     expect(card.options.map(({ art }) => art)).toEqual(options.map(({ art }) => art));
     const letGo = options[optionWith("thief", "money")];
-    const chase = options[optionWith("thief", "hearts")];
+    const grabBack = options[optionWith("thief", "hearts")];
     const lost = `−${Math.abs(heartsOf("thief"))}♥`;
     expect(card.options[optionWith("thief", "hearts")]?.breakdown).toEqual([
-      { dog: "kilo", name: chase?.name, text: lost },
-      { dog: "reggie", name: chase?.name, text: lost },
+      { dog: "kilo", name: grabBack?.name, text: lost },
+      { dog: "reggie", name: grabBack?.name, text: lost },
     ]);
     expect(
       card.options[optionWith("thief", "money")]?.breakdown.filter(({ dog }) => dog === null),
@@ -486,7 +486,6 @@ describe("skip option", () => {
       replaced: 1,
     },
     { encounter: "otherDog", name: "no option of a card with two", replaced: null },
-    { encounter: "thief", name: "no option of a card with two", replaced: null },
   ])("takes the place of $name ($encounter)", ({ encounter: id, options, replaced }) => {
     const shown = options ?? cardOptions(id);
     const withOptions = {

@@ -304,7 +304,7 @@
       "frame": "encounter",
       "id": "let-go",
       "index": 0,
-      "name": "Let them go",
+      "name": "Let the tips go",
       "source": {
         "id": "thief",
         "kind": "encounter"
@@ -313,16 +313,29 @@
       "title": "Thief"
     },
     {
-      "art": "card-thief-chase",
+      "art": "card-thief-grab-back",
       "frame": "encounter",
-      "id": "chase",
+      "id": "grab-back",
       "index": 1,
-      "name": "Chase them off",
+      "name": "Grab it back",
       "source": {
         "id": "thief",
         "kind": "encounter"
       },
       "text": "−1♥ each",
+      "title": "Thief"
+    },
+    {
+      "art": "card-thief-give-chase",
+      "frame": "encounter",
+      "id": "give-chase",
+      "index": 2,
+      "name": "Dogs give chase",
+      "source": {
+        "id": "thief",
+        "kind": "encounter"
+      },
+      "text": "Zoomies: the pack drifts on its own for 40s",
       "title": "Thief"
     },
     {
@@ -1401,10 +1414,10 @@
               }
             ],
             "id": "letGo",
-            "name": "Let them go"
+            "name": "Let the tips go"
           },
           {
-            "art": "card-thief-chase",
+            "art": "card-thief-grab-back",
             "effects": [
               {
                 "amount": -1,
@@ -1414,8 +1427,19 @@
                 }
               }
             ],
-            "id": "chase",
-            "name": "Chase them off"
+            "id": "grabBack",
+            "name": "Grab it back"
+          },
+          {
+            "art": "card-thief-give-chase",
+            "effects": [
+              {
+                "debuff": "zoomies",
+                "kind": "debuff"
+              }
+            ],
+            "id": "giveChase",
+            "name": "Dogs give chase"
           }
         ]
       },

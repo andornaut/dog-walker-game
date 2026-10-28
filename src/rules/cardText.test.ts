@@ -16,6 +16,21 @@ const PACK: readonly DogId[] = ["kilo", "duchess", "reggie"];
 const state = testState({ duchess: 5, kilo: 5, reggie: 5 }, { money: cents(10_000) });
 const { encounterHigh, thiefLetGo } = gameData.tuning.money;
 
+// The name the data gives a card option, by its id.
+function optionName(id: EncounterId, optionId: string): string {
+  const { resolution } = gameData.encounters[id];
+  const found =
+    resolution.kind === "card"
+      ? resolution.options.find((option) => option.id === optionId)
+      : undefined;
+  if (found === undefined) {
+    throw new Error(`No option ${id}.${optionId}`);
+  }
+  return found.name;
+}
+const letGo = optionName("thief", "letGo");
+const grabBack = optionName("thief", "grabBack");
+
 const encounter = (id: EncounterId, affected: readonly DogId[]): CardSource => ({
   affected,
   encounter: id,
@@ -42,7 +57,7 @@ describe("a card's text for the dogs it catches", () => {
       {
         affected: ["duchess", "kilo"],
         id: "thief",
-        label: "Chase them off",
+        label: grabBack,
         text: heartsText(["duchess", "kilo"], -1),
         why: "names each dog it reaches, in pack order",
       },
@@ -56,7 +71,7 @@ describe("a card's text for the dogs it catches", () => {
       {
         affected: ["kilo"],
         id: "thief",
-        label: "Let them go",
+        label: letGo,
         text: `−$${thiefLetGo}`,
         why: "keeps a cost charged once for the pack",
       },
@@ -69,8 +84,8 @@ describe("a card's text for the dogs it catches", () => {
     for (const row of [
       { affected: ["kilo"], dollars: encounterHigh, id: "skunk", label: "Full groom" },
       { affected: PACK, dollars: encounterHigh, id: "skunk", label: "Full groom" },
-      { affected: PACK, dollars: thiefLetGo, id: "thief", label: "Let them go" },
-      { affected: ["kilo"], dollars: thiefLetGo, id: "thief", label: "Let them go" },
+      { affected: PACK, dollars: thiefLetGo, id: "thief", label: letGo },
+      { affected: ["kilo"], dollars: thiefLetGo, id: "thief", label: letGo },
     ] as const) {
       const view = option(encounter(row.id, row.affected), row.label);
       expect(view.cost).toBe(dollarsToCents(row.dollars));
@@ -102,7 +117,7 @@ describe("a card's text for the dogs it catches", () => {
         );
         const source = encounter("thief", ["duchess", "kilo"]);
         const view = cardFor(gameData, kind, source).options.find(
-          ({ label }) => label === "Chase them off",
+          ({ label }) => label === grabBack,
         );
         expect(view?.text).toBe(text);
       }

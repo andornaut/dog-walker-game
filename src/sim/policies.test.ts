@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { EncounterId } from "../data/types";
+import type { CardOptions, EncounterId } from "../data/types";
 import { type Random, seededRandom } from "../lib/random";
 import { cardFor } from "../rules/choices";
 import { cents } from "../rules/units";
@@ -16,11 +16,26 @@ import {
   type PolicyId,
 } from "./policies";
 
-// The thief's card: a money option and a hearts option.
+// The thief's card less its debuff option: a money option and a hearts option, and no debuff.
 const THIEF: CardSource = { affected: ["duchess"], encounter: "thief", kind: "encounter" };
-const THIEF_OPTIONS = (() => {
+const THIEF_OPTIONS = ((): CardOptions => {
   const { resolution } = gameData.encounters.thief;
-  return resolution.kind === "card" ? resolution.options : [];
+  const options = resolution.kind === "card" ? resolution.options : [];
+  const [first, second] = options.filter(({ effects }) =>
+    effects.every(({ kind }) => kind !== "debuff"),
+  );
+  if (first === undefined || second === undefined) {
+    throw new Error("The thief has no two options without a debuff");
+  }
+  return [first, second];
+})();
+const NO_DEBUFF_DATA = ((): typeof gameData => {
+  const thief = gameData.encounters.thief;
+  if (thief.kind !== "obstacle" || !("hitLabel" in thief)) {
+    throw new Error("The thief opens no card");
+  }
+  const resolution = { kind: "card", options: THIEF_OPTIONS } as const;
+  return { ...gameData, encounters: { ...gameData.encounters, thief: { ...thief, resolution } } };
 })();
 const PAY = THIEF_OPTIONS.findIndex(({ effects }) => effects.some(({ kind }) => kind === "money"));
 const HEARTS = THIEF_OPTIONS.findIndex(({ effects }) =>
@@ -40,7 +55,13 @@ const NO_DRAWS: Random = () => {
 };
 
 function thiefChoice(policy: PolicyId, state: RunState, random: Random = NO_DRAWS) {
-  return chooseCardOption(gameData, random, policy, state, cardFor(gameData, state, THIEF));
+  return chooseCardOption(
+    NO_DEBUFF_DATA,
+    random,
+    policy,
+    state,
+    cardFor(NO_DEBUFF_DATA, state, THIEF),
+  );
 }
 
 describe("chooseCardOption", () => {
@@ -80,7 +101,13 @@ describe("chooseCardOption", () => {
       const source: CardSource = { affected: ["duchess"], encounter, kind: "encounter" };
 
       expect(
-        chooseCardOption(gameData, NO_DRAWS, policy, state, cardFor(gameData, state, source)),
+        chooseCardOption(
+          NO_DEBUFF_DATA,
+          NO_DRAWS,
+          policy,
+          state,
+          cardFor(NO_DEBUFF_DATA, state, source),
+        ),
       ).toBe(expected);
     },
   );
@@ -188,11 +215,12 @@ describe("pickCardOption", () => {
     "%s on the %s card at %i hearts with %i cents fell back: %s",
     (policy, card, hearts, money, expected) => {
       const state = testState({ duchess: hearts }, { money: cents(money) });
+      const data = card === "thief" ? NO_DEBUFF_DATA : gameData;
       const encounter = card === "thief" ? "thief" : TRIPLE;
       const source: CardSource = { affected: ["duchess"], encounter, kind: "encounter" };
-      const view = cardFor(gameData, state, source);
+      const view = cardFor(data, state, source);
 
-      expect(pickCardOption(gameData, () => 0, policy, state, view).fellBack).toBe(expected);
+      expect(pickCardOption(data, () => 0, policy, state, view).fellBack).toBe(expected);
     },
   );
 });
