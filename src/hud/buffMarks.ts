@@ -1,10 +1,9 @@
 import type { CharmEffect, DogId, Effect, GameData } from "../data/types";
 import { fillLine, fillNames } from "../lib/lines";
-import { cents } from "../lib/units";
 import { amountText } from "../rules/causes";
 import type { CardView, OptionView } from "../rules/choices";
 import { isLarge, packSizeRaise, placeInPack } from "../rules/dogs";
-import { formatDollars, largeSpeedText } from "../rules/effectText";
+import { largeSpeedText } from "../rules/effectText";
 import type { ModifiedSubject, ModifiedValue } from "../rules/modified";
 import { standingModified, type StandingRun } from "../rules/standing";
 import type { WalkStep } from "../runner/walk";
@@ -79,7 +78,6 @@ export interface CardCharm {
 
 // The value each charm effect changes on a card option.
 const CHARM_EFFECT_SUBJECTS: { readonly [E in CharmEffect]: ModifiedSubject["kind"] } = {
-  cardCost: "money",
   debuffSeconds: "debuffSeconds",
   forgivenHearts: "hearts",
   freeCards: "money",
@@ -146,10 +144,10 @@ function cardCharms(
 }
 
 // What a card shows of the buffs on an option, or on the Skip a buff offers (option
-// undefined): the lit charms under the card; the plaque, the price a buff waived or cut
-// (FREE, or the lowered price), or FREE on the Skip (null leaves the plaque as the option has
-// it); and a loss the walker's perk forgives, the hearts it leaves each dog, with the perk's
-// name under them, in place of the effect text where that text says only the forgiving.
+// undefined): the lit charms under the card; the plaque, FREE on a cost a buff waived or on the
+// Skip (null leaves the plaque as the option has it); and a loss the walker's perk forgives, the
+// hearts it leaves each dog, with the perk's name under them, in place of the effect text where
+// that text says only the forgiving.
 export interface OptionMarks {
   readonly charms: readonly CardCharm[];
   readonly forgiven: { readonly name: string; readonly rows: readonly string[] } | null;
@@ -172,15 +170,10 @@ export function optionMarks(
     return charms.length === 0 ? NO_MARKS : { ...NO_MARKS, charms, plaque: free };
   }
   const charms = cardCharms(data, option.modified);
-  const waived = option.modified.find(
-    ({ after, before, subject }) => subject.kind === "money" && before < 0 && after > before,
+  const waived = option.modified.some(
+    ({ after, before, subject }) => subject.kind === "money" && before < 0 && after === 0,
   );
-  const plaque =
-    waived === undefined || option.path !== undefined
-      ? null
-      : waived.after === 0
-        ? free
-        : formatDollars(cents(-waived.after));
+  const plaque = waived && option.path === undefined ? free : null;
   return { charms, forgiven: forgivenMarks(data, option), plaque };
 }
 

@@ -66,7 +66,8 @@ function replay(log: InputLog): RunState {
 // A simulated run's seed and inputs, written as the game's input log and read back as the dev
 // panel reads a replay, play the same run in the game's replay.
 describe("a simulated run", { timeout: 60_000 }, () => {
-  // spares is how many spare treats the walk stores and spends at least, which the replay matches.
+  // spares is how many spare treats the walk stores and spends at least, which the replay matches;
+  // a tuning change that leaves its seed spending fewer needs another seed.
   it.each<{
     gear: GearId | null;
     pack: string;
@@ -88,7 +89,7 @@ describe("a simulated run", { timeout: 60_000 }, () => {
       gear: "fannyPack",
       pack: "kilo,biscuit",
       policy: "mixed",
-      seed: 1,
+      seed: 6,
       skill: "novice",
       spares: 1,
     },

@@ -5,7 +5,6 @@ import type { RunText } from "./types";
 export const RUN_TEXT = {
   card: {
     charmEffect: {
-      cardCost: "Half price",
       debuffSeconds: "Half time",
       forgivenHearts: "Safe",
       freeCards: "Free",

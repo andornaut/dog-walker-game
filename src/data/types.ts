@@ -784,10 +784,9 @@ export interface HomeText {
 }
 
 // What a perk, gear item or upgrade did to a card option, by the effect that did it, as its
-// charm under the card says it: a cardCost cut, a debuffSeconds cut, a forgivenHearts loss, a
-// freeCards cost and a skipOption Skip.
-export type CharmEffect =
-  "cardCost" | "debuffSeconds" | "forgivenHearts" | "freeCards" | "skipOption";
+// charm under the card says it: a debuffSeconds cut, a forgivenHearts loss, a freeCards cost and
+// a skipOption Skip.
+export type CharmEffect = "debuffSeconds" | "forgivenHearts" | "freeCards" | "skipOption";
 
 // The walk's own text. card is the choice cards': the titles and subtitles a card's data does not
 // name, the Skip card, and the cost plaque's words. fired is the firing plate's word, homeQuestion

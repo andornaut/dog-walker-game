@@ -16,7 +16,6 @@ import { type EffectItem, effectName } from "./effectIcons";
 const { card, seconds } = gameData.runText;
 const SWEET_TALKER: ModifierSource = { kind: "upgrade", upgrade: "sweetTalker" };
 const CASEY: ModifierSource = { kind: "walker", walker: "casey" };
-const FANNY_PACK = { gear: "fannyPack", kind: "gear" } as const;
 const caseyPerk = { kind: "perk", perk: gameData.walkers.casey.perk } as const;
 const kilo = gameData.dogs.kilo.name;
 
@@ -46,7 +45,6 @@ const option = (modified: readonly ModifiedValue[], text = "Hose it off"): Optio
 describe("optionMarks", () => {
   const forgiven = value({ dog: "kilo", kind: "hearts" }, -1, [[1, CASEY]]);
   const waived = value({ kind: "money" }, -1000, [[1000, SWEET_TALKER]]);
-  const cut = value({ kind: "money" }, -1000, [[500, FANNY_PACK]]);
   const ADA: ModifierSource = { kind: "walker", walker: "ada" };
   const adaPerk = { kind: "perk", perk: gameData.walkers.ada.perk } as const;
   const shortened = value({ debuff: "muddy", kind: "debuffSeconds" }, 30, [[-15, ADA]]);
@@ -70,11 +68,6 @@ describe("optionMarks", () => {
       view: option([waived]),
     },
     {
-      expected: { charms: [charm(FANNY_PACK, "cardCost")], forgiven: null, plaque: "$5" },
-      name: "a cost a buff cut, as the lowered price alone",
-      view: option([cut]),
-    },
-    {
       expected: {
         charms: [charm(caseyPerk, "forgivenHearts")],
         forgiven: {
@@ -93,12 +86,12 @@ describe("optionMarks", () => {
     },
     {
       expected: {
-        charms: [charm(adaPerk, "debuffSeconds"), charm(FANNY_PACK, "cardCost")],
+        charms: [charm(adaPerk, "debuffSeconds"), charm(sweetTalker, "freeCards")],
         forgiven: null,
-        plaque: "$5",
+        plaque: card.free,
       },
-      name: "a debuff the walker's perk shortened and a cut cost, a charm each in order",
-      view: option([shortened, cut]),
+      name: "a debuff the walker's perk shortened and a waived cost, a charm each in order",
+      view: option([shortened, waived]),
     },
     {
       expected: { charms: [charm(hallPass, "skipOption")], forgiven: null, plaque: card.free },
