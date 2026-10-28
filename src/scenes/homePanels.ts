@@ -24,7 +24,7 @@ import {
   wrapPixelText,
 } from "../ui/phaser/pixelText";
 import { AFFORD_OUTSET } from "../ui/selection";
-import { WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
+import { TEXT_SCALE, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 import { addNamePills } from "./effectNameColours";
 import { playFirstTag } from "./sprites";
 import {
