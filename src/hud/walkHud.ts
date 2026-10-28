@@ -163,20 +163,17 @@ export function debuffFillWidth(secondsLeft: number, seconds: number): number {
 }
 
 // The neighbourhood's progress line on the screen's last rows, under the dog cards (the
-// screen's zoneProgress strip): a track inset from the screen's left and right edges, in a
-// border on every side, and a fill that grows left to right in whole pixels with the share of
-// the neighbourhood walked, a row per fill colour, top to bottom. The strip is the borders and
-// the fill's rows tall, in the card band's body colour beside the line. Each colour is a PALETTE
-// name the scene draws it in.
+// screen's zoneProgress strip): a track the screen's full width in a border on every side, and
+// a fill that grows left to right in whole pixels with the share of the neighbourhood walked, a
+// row per fill colour, top to bottom. The strip is the borders and the fill's rows tall. Each
+// colour is a PALETTE name the scene draws it in.
 export const ZONE_PROGRESS = {
   border: 1,
   colours: {
     border: "ink",
     fill: ["yellow", "amber"],
-    strip: "plum",
     track: "darkSlate",
   },
-  inset: 4,
 } as const;
 
 type ZoneFillColour = (typeof ZONE_PROGRESS.colours.fill)[number];
@@ -201,8 +198,8 @@ interface ZoneProgressLayout {
 // The progress line in strip with share of the neighbourhood walked: the fill as wide as the
 // whole pixels of the track that share covers, so it is full only at the neighbourhood's end.
 export function zoneProgressLayout(strip: Rect, share: number): ZoneProgressLayout {
-  const { border, colours, inset } = ZONE_PROGRESS;
-  const frame = { ...strip, width: strip.width - 2 * inset, x: strip.x + inset };
+  const { border, colours } = ZONE_PROGRESS;
+  const frame = strip;
   const track = insetRect(border, frame);
   const width = Math.floor(track.width * Math.min(1, Math.max(0, share)));
   const rowHeight = track.height / colours.fill.length;

@@ -2704,42 +2704,42 @@
         "colour": "yellow",
         "height": 1,
         "width": 0,
-        "x": 5,
+        "x": 1,
         "y": 557
       },
       {
         "colour": "amber",
         "height": 1,
         "width": 0,
-        "x": 5,
+        "x": 1,
         "y": 558
       }
     ],
     "frame": {
       "height": 4,
-      "width": 352,
-      "x": 4,
+      "width": 360,
+      "x": 0,
       "y": 556
     },
     "track": {
       "height": 2,
-      "width": 350,
-      "x": 5,
+      "width": 358,
+      "x": 1,
       "y": 557
     },
     "full": [
       {
         "colour": "yellow",
         "height": 1,
-        "width": 350,
-        "x": 5,
+        "width": 358,
+        "x": 1,
         "y": 557
       },
       {
         "colour": "amber",
         "height": 1,
-        "width": 350,
-        "x": 5,
+        "width": 358,
+        "x": 1,
         "y": 558
       }
     ],
@@ -2751,10 +2751,8 @@
           "yellow",
           "amber"
         ],
-        "strip": "plum",
         "track": "darkSlate"
-      },
-      "inset": 4
+      }
     }
   }
 }

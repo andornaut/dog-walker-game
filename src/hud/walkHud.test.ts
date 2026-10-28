@@ -303,16 +303,12 @@ describe("the neighbourhood's progress line", () => {
   const strip = LAYOUT.zoneProgress;
   const empty = zoneProgressLayout(strip, 0);
   const { track } = empty;
-  const { border, colours, inset } = ZONE_PROGRESS;
+  const { border, colours } = ZONE_PROGRESS;
 
-  it("fills the strip: its borders and a row per fill colour, inset from the sides", () => {
+  it("fills the strip edge to edge: its borders and a row per fill colour", () => {
     expect(strip.height).toBe(2 * border + colours.fill.length);
-    expect(empty.frame).toEqual({
-      height: strip.height,
-      width: strip.width - 2 * inset,
-      x: strip.x + inset,
-      y: strip.y,
-    });
+    expect(strip.width).toBe(SCREEN_CONFIG.width);
+    expect(empty.frame).toEqual(strip);
     expect(track).toEqual({
       height: strip.height - 2 * border,
       width: empty.frame.width - 2 * border,

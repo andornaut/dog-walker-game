@@ -260,7 +260,6 @@ export class HudScene extends Scene {
     }
     const { colours } = ZONE_PROGRESS;
     const line = zoneProgressLayout(zoneProgress, 0);
-    fillRect(g, PALETTE[colours.strip], zoneProgress);
     fillRect(g, PALETTE[colours.border], line.frame);
     fillRect(g, PALETTE[colours.track], line.track);
     this.zoneFill = this.add.graphics();
