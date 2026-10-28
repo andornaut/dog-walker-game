@@ -55,7 +55,7 @@ export const MINOR_OBSTACLES = {
     name: "Couple",
     onFoot: true,
     shape: { lanes: 2, rows: 1 },
-    zones: ["street"],
+    zones: ["park", "pawsPromenade", "street"],
   },
   coyote: {
     movement: { kind: "approach", steps: { max: 4, min: 3 } },

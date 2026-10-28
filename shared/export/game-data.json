@@ -1659,6 +1659,8 @@
         "rows": 1
       },
       "zones": [
+        "park",
+        "pawsPromenade",
         "street"
       ],
       "spriteKey": "couple"
@@ -2624,7 +2626,7 @@
           "cat": 0,
           "clothingRack": 0,
           "cone": 8,
-          "couple": 0,
+          "couple": 2,
           "coyote": 2,
           "cyclist": 4,
           "deliveryCyclist": 0,
@@ -2891,7 +2893,7 @@
           "cat": 0,
           "clothingRack": 0,
           "cone": 3.75,
-          "couple": 0,
+          "couple": 2,
           "coyote": 2,
           "cyclist": 5,
           "deliveryCyclist": 0,
