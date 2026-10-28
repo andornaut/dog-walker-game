@@ -48,9 +48,14 @@ curb-rope-posts          36x30    two driftwood posts with a rope between
 curb-urn                 33x42    a cast-iron garden urn heaped with geraniums
 curb-utility-box         36x48    a traffic signal cabinet painted in mural bands under a pink heart
 
-Every prop has one tag, `idle`: one frame of 1000ms, no motion. The ground row is the last opaque
-row; the frame keeps a clear ring for the outline. Outlines are road_edge; there is no light rim
-(road.LIT), since the props stand on the verge, never on the road.
+Every prop has one tag, `idle`, frame 0 its rest pose; most hold that one frame for 1000ms. The props with
+a light or a flag loop a slow ease instead, the rest pose holding most of the loop, never a hard blink, and
+the game starts each placed prop at its own point in the loop. The drawings each frame shows, and its ms:
+
+roadside-street-lamp     0 1 2 3 2 1   2400 300 250 900 250 300   the lenses fade off and on (LAMP_LENS)
+
+The ground row is the last opaque row; the frame keeps a clear ring for the outline. Outlines are road_edge;
+there is no light rim (road.LIT), since the props stand on the verge, never on the road.
 
 PLACEMENT holds the per-zone placement tables and CURB the curb props' (see the style guide's
 Roadside section); `table` prints them as JSON with every prop's across offset resolved and each
@@ -125,13 +130,19 @@ def gas_lamp():
     return w, h, draw
 
 
+# The street lamp's lens beneath each head at each idle frame, lit to off: (rim, core) colours.
+LAMP_LENS = (("cream", "white"), ("cream", "cream"), ("lgrey", "cream"), ("grey", "grey"))
+
+
 def street_lamp():
     """A downtown street light: an ash pole, an arm each way, a flat lgrey head on each, white along its top,
-    lit cream and white beneath, never gold, which reads as a tip coin."""
+    lit cream and white beneath, never gold, which reads as a tip coin. Frame f draws the lenses at
+    LAMP_LENS[f], dimming from lit (0) to off (3)."""
     w, h = 40, 120
 
     def draw(g, f=0):
         base = h - 2
+        rim, core = LAMP_LENS[f]
         g.rect(18, 10, 4, base - 9, "ash")
         g.rect(18, 10, 1, base - 9, "stone")
         g.rect(15, base - 6, 10, 7, "shale")
@@ -139,8 +150,8 @@ def street_lamp():
         for x in (3, 27):
             g.rect(x, 8, 10, 5, "lgrey")
             g.rect(x, 8, 10, 1, "white")
-            g.rect(x + 1, 13, 8, 3, "cream")
-            g.rect(x + 2, 13, 6, 2, "white")
+            g.rect(x + 1, 13, 8, 3, rim)
+            g.rect(x + 2, 13, 6, 2, core)
     return w, h, draw
 
 
@@ -946,11 +957,11 @@ def pay_station():
     return w, h, draw
 
 
-# key: (design w, h, draw), idle frame arguments, ms per frame, whether it stands free and casts the
-# game's ground shadow.
+# key: (design w, h, draw), idle frame arguments, the ms of every frame (or of each frame in turn), whether it
+# stands free and casts the game's ground shadow.
 PROPS = {
     "roadside-gas-lamp": (gas_lamp(), (0,), STILL_MS, True),
-    "roadside-street-lamp": (street_lamp(), (0,), STILL_MS, True),
+    "roadside-street-lamp": (street_lamp(), (0, 1, 2, 3, 2, 1), (2400, 300, 250, 900, 250, 300), True),
     "roadside-tree-maple": (lobed_tree("canopy", "pine", "moss"), (0,), STILL_MS, True),
     "roadside-tree-oak": (lobed_tree("pine", "fir", "canopy", "bark", big=True), (0,), STILL_MS, True),
     "roadside-fruit-stand": (fruit_stand(), (0,), STILL_MS, True),

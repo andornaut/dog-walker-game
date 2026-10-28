@@ -1,11 +1,51 @@
 { "frames": {
-   "roadside-street-lamp@75.aseprite": {
+   "roadside-street-lamp@75 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 45, "h": 135 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 135 },
     "sourceSize": { "w": 45, "h": 135 },
-    "duration": 1000
+    "duration": 2400
+   },
+   "roadside-street-lamp@75 1.aseprite": {
+    "frame": { "x": 45, "y": 0, "w": 45, "h": 135 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 135 },
+    "sourceSize": { "w": 45, "h": 135 },
+    "duration": 300
+   },
+   "roadside-street-lamp@75 2.aseprite": {
+    "frame": { "x": 90, "y": 0, "w": 45, "h": 135 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 135 },
+    "sourceSize": { "w": 45, "h": 135 },
+    "duration": 250
+   },
+   "roadside-street-lamp@75 3.aseprite": {
+    "frame": { "x": 135, "y": 0, "w": 45, "h": 135 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 135 },
+    "sourceSize": { "w": 45, "h": 135 },
+    "duration": 900
+   },
+   "roadside-street-lamp@75 4.aseprite": {
+    "frame": { "x": 180, "y": 0, "w": 45, "h": 135 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 135 },
+    "sourceSize": { "w": 45, "h": 135 },
+    "duration": 250
+   },
+   "roadside-street-lamp@75 5.aseprite": {
+    "frame": { "x": 225, "y": 0, "w": 45, "h": 135 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 135 },
+    "sourceSize": { "w": 45, "h": 135 },
+    "duration": 300
    }
  },
  "meta": {
@@ -13,10 +53,10 @@
   "version": "1.2.30-x64",
   "image": "roadside-street-lamp@75.png",
   "format": "RGBA8888",
-  "size": { "w": 45, "h": 135 },
+  "size": { "w": 270, "h": 135 },
   "scale": "1",
   "frameTags": [
-   { "name": "idle", "from": 0, "to": 0, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 5, "direction": "forward" }
   ]
  }
 }
