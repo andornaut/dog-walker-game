@@ -28,13 +28,13 @@ hen                 a Riverdale Farm hen got loose, a Rhode Island Red: a plump 
 
 Minor obstacles, laid out in obstacles.py's pixels (40 for one lane, 30 rows for a
 lane-spanning one) and drawn at obstacles.SCALE (1.2) on a minis.Mini:
+fallen-log          112x36  2 lanes, a fallen oak trunk lying across the path: ridged bark, a sawn end
+                            at the right showing growth rings, a splintered broken end at the left, a
+                            branch stub, moss, two tan-capped mushrooms and fallen leaves along its foot;
+                            idle (4 frames, 450ms): a leaf on its back stirs 1px on frame 2
 leaf-pile           48x48   1 lane, a raked dome of overlapping autumn leaves in orange, amber,
                             ochre, red, brick and gold, a red maple leaf on top; idle (4 frames,
                             400ms): the maple leaf lifts 1px and turns over on frame 2
-porch-steps         48x48   1 lane, three brick steps with stone treads in a front elevation,
-                            tall white newel posts under ball caps either side,
-                            a jack-o'-lantern with a dark carved face on the top step;
-                            idle (4 frames, 400ms): its candle dims on frame 2 and flares on frame 3
 little-free-library 48x48   1 lane, a little free library: a turquoise cabinet shaped like a tiny
                             house under a brick-shingled gable with a cream bargeboard and finial,
                             its cream-framed glass door showing two shelves of bright book spines,
@@ -45,12 +45,12 @@ picnic-blanket      112x36  2 lanes, a red and white checked blanket on the road
                             on it, a baguette leaning out of the basket, a lemonade jug and two
                             apples; idle (4 frames, 450ms): the blanket's near right corner lifts
                             1px in a breeze on frame 2
-fallen-log          112x36  2 lanes, a fallen oak trunk lying across the path: ridged bark, a sawn end
-                            at the right showing growth rings, a splintered broken end at the left, a
-                            branch stub, moss, two tan-capped mushrooms and fallen leaves along its foot;
-                            idle (4 frames, 450ms): a leaf on its back stirs 1px on frame 2
+porch-steps         48x48   1 lane, three brick steps with stone treads in a front elevation,
+                            tall white newel posts under ball caps either side,
+                            a jack-o'-lantern with a dark carved face on the top step;
+                            idle (4 frames, 400ms): its candle dims on frame 2 and flares on frame 3
 
-Each of the six also has <key>@<step> for each depth step in minis.STEPS (from
+Each road sprite also has <key>@<step> for each depth step in minis.STEPS (from
 shared/depth-steps.json), redrawn at the step with the original's tags, frames and
 durations and a full outline. Road outline (pixel.road_edge) and road.LIT's rim on dark
 fills, so every one holds 3:1 on every road.
@@ -477,10 +477,10 @@ LOWER_BOOKS = (("amber", 21), ("cobalt", 20), ("pink", 21), ("lime", 20), ("ttc"
 
 def little_free_library(glint=0):
     """A little free library: a turquoise cabinet shaped like a tiny house, a front elevation, its pitched
-    roof's gable edged in brick shingles over a cream bargeboard, an open book painted in the gable, a finial at
-    the peak. Its cream-framed glass
-    door shows two shelves of book spines in bright colours on a dark teal back, a gold knob at its right. It
-    stands on a cream post with brackets under its sill, the post set in a small wooden planter of leaves.
+    roof's gable edged in brick shingles over a cream bargeboard, an open book painted in the gable, a finial
+    at the peak. Its cream-framed glass door shows two shelves of book spines in bright colours on a dark teal
+    back, a gold knob at its right. It stands on a cream post with brackets under its sill, the post set in a
+    small wooden planter of leaves.
     glint 1 and 2 run a white glint across the glass, left then right, 2px wide down to obstacles.TEXTURE_MIN;
     at rest a short glint sits in its top left corner."""
     g = edged(Grid(SIZE, SIZE))
@@ -1014,20 +1014,20 @@ def road_sprites(suffix, step):
     yield f"capybara{suffix}", [("idle", frames(a, capybara, CAPYBARA_IDLE), 300),
                                 ("walk", frames(a, capybara, CAPYBARA_WALK), CAPYBARA_WALK_MS)]
     yield f"hen{suffix}", [("idle", frames(a, hen, HEN_IDLE), 400), ("run", frames(a, hen, HEN_RUN), 80)]
-    for key, draw, (args, ms) in (("leaf-pile", leaf_pile, LEAF_PILE_IDLE),
-                                  ("porch-steps", porch_steps, PORCH_STEPS_IDLE),
+    for key, draw, (args, ms) in (("fallen-log", fallen_log, FALLEN_LOG_IDLE),
+                                  ("leaf-pile", leaf_pile, LEAF_PILE_IDLE),
                                   ("little-free-library", little_free_library, LIBRARY_IDLE),
                                   ("picnic-blanket", picnic_blanket, PICNIC_IDLE),
-                                  ("fallen-log", fallen_log, FALLEN_LOG_IDLE)):
+                                  ("porch-steps", porch_steps, PORCH_STEPS_IDLE)):
         yield f"{key}{suffix}", [("idle", [minis.small(sys.modules[__name__], o, draw, f).outlined() for f in args],
                                   ms)]
 
 
 # Where each road sprite's .aseprite source goes: the card obstacles with the encounters, the rest with the
 # obstacles.
-SOURCES = {"porch-cat": "art/encounters", "capybara": "art/encounters", "fallen-log": "art/obstacles",
+SOURCES = {"capybara": "art/encounters", "porch-cat": "art/encounters", "fallen-log": "art/obstacles",
            "hen": "art/obstacles", "leaf-pile": "art/obstacles", "little-free-library": "art/obstacles",
-           "porch-steps": "art/obstacles", "picnic-blanket": "art/obstacles"}
+           "picnic-blanket": "art/obstacles", "porch-steps": "art/obstacles"}
 
 
 def sprites():
