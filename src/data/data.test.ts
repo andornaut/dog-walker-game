@@ -290,6 +290,16 @@ describe("run, world and walkers", () => {
     expect(zones.filter((zone) => !zoneIds.includes(zone))).toEqual([]);
   });
 
+  // So the neighbourhoods stay distinct, no mover or plain obstacle appears in more than 3.
+  it.each(Object.keys(minorObstacles))("weighs %s above 0 in at most 3 zones", (id) => {
+    const weighted = world.zones.flatMap((each) =>
+      ((each.weights.minorObstacles as Readonly<Record<string, number>>)[id] ?? 0) > 0
+        ? [each.id]
+        : [],
+    );
+    expect(weighted.length, weighted.join(", ")).toBeLessThanOrEqual(3);
+  });
+
   it("fits the largest pack in the card row, one dog slot a place, the first free and the rest priced", () => {
     expect(tuning.counts.packSizeMax).toBe(SCREEN_CONFIG.dogSlotCount);
     expect(dogSlots).toHaveLength(tuning.counts.packSizeMax);
