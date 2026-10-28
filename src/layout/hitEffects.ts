@@ -36,6 +36,8 @@ export const OBSTACLE_HITS: Readonly<
   cone: { motion: "tip" },
   hedge: { debris: "leaves", motion: "shake" },
   trashCan: { debris: "litter", motion: "rock" },
+  volleyballNet2: { motion: "shake" },
+  volleyballNet3: { motion: "shake" },
 };
 
 // One effect over the road: its art, centred at a point, drawn this many steps over the fx

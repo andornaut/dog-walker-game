@@ -13,6 +13,7 @@ import { obstacleParts } from "../layout/obstacleArt";
 import { everyPack, PART_INSET } from "../layout/packFormation";
 import { project, SCALE_STEPS, screenYAt } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
+import { awaitsArt } from "../testing/awaitingArt";
 import { testState } from "../testing/runState";
 import { hitDog, type ScaledBox } from "./collision";
 import { stillInLane } from "./laneMotion";
@@ -132,10 +133,12 @@ function onScreen(box: ScaledBox) {
 describe("drawnObstacleBox", () => {
   // At each depth step, in a lane off the road's centre: each edge of a hit box lies the inset
   // inside the sprites' opaque pixels, give or take the inset again and 2 pixels for the
-  // positions' rounding and the step art's own size, which the 1x silhouette scales to.
-  const CASES = LOOKS.flatMap(({ kind, moving }) =>
-    SCALE_STEPS.map((step) => ({ kind, moving, step })),
-  );
+  // positions' rounding and the step art's own size, which the 1x silhouette scales to. A look
+  // whose art is yet to be drawn has no pixels to measure.
+  const has = (key: string) => FEET.has(key);
+  const CASES = LOOKS.filter(({ kind, moving }) =>
+    obstacleParts(gameData, has, kind, moving).every(({ key }) => !awaitsArt(has, key)),
+  ).flatMap(({ kind, moving }) => SCALE_STEPS.map((step) => ({ kind, moving, step })));
   it("hits every obstacle, moving or not, as drawn at every depth step", () => {
     for (const { kind, moving, step } of CASES) {
       const feetY = lens.footY - (lens.focal / step - lens.focal);

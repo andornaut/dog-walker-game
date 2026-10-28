@@ -67,7 +67,7 @@ export const MINOR_OBSTACLES = {
     name: "Couple",
     onFoot: true,
     shape: { lanes: 2, rows: 1 },
-    zones: ["park", "pawsPromenade", "street"],
+    zones: ["park", "pawsPromenade"],
   },
   coyote: {
     movement: { kind: "approach", steps: { max: 4, min: 3 } },
@@ -138,6 +138,13 @@ export const MINOR_OBSTACLES = {
     name: "Goose",
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
+  },
+  grannyCartShopper: {
+    movement: { kind: "step", steps: { max: 4, min: 3 } },
+    name: "Granny cart shopper",
+    onFoot: true,
+    shape: { lanes: 1, rows: 1 },
+    zones: ["shops"],
   },
   hedge: { name: "Hedge", shape: { lanes: 3, rows: 1 } },
   hopscotchKid: {
@@ -255,6 +262,13 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
     zones: ["homeStretch"],
   },
+  stiltWalker: {
+    movement: { kind: "sway", pauseSeconds: 0.25, times: { max: 3, min: 2 } },
+    name: "Stilt walker",
+    onFoot: true,
+    shape: { lanes: 1, rows: 1 },
+    zones: ["shops", "street"],
+  },
   streetcar: {
     movement: { factor: 0.7, kind: "inLane" },
     name: "Streetcar",
@@ -307,6 +321,16 @@ export const MINOR_OBSTACLES = {
     zones: ["homeStretch"],
   },
   velvetRope: { name: "Velvet rope", shape: { lanes: 2, rows: 1 }, zones: ["street"] },
+  volleyballNet2: {
+    name: "Volleyball net",
+    shape: { lanes: 2, rows: 1 },
+    zones: ["pawsPromenade"],
+  },
+  volleyballNet3: {
+    name: "Volleyball net",
+    shape: { lanes: 3, rows: 1 },
+    zones: ["pawsPromenade"],
+  },
   volleyballPlayer: {
     movement: { kind: "dive", slide: 0.4, speed: 1.5, tilt: { max: 0.3, min: 0 } },
     name: "Volleyball player",

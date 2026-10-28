@@ -95,6 +95,8 @@ const MINOR_OBSTACLE_SPRITES: Readonly<Partial<Record<MinorObstacleId, string>>>
   raccoon: "snatch-raccoon",
   scooter: "minor-scooter",
   seagull: "snatch-seagull",
+  volleyballNet2: "volleyball-net-2",
+  volleyballNet3: "volleyball-net-3",
 };
 
 export function minorObstacleSpriteKey(obstacle: MinorObstacleId): string {

@@ -83,7 +83,8 @@ const SWEEP_SEEDS = [1, 2];
 
 describe("movers", { timeout: 120_000 }, () => {
   const OBSTACLE_KINDS = [...OBSTACLE_IDS, ...MINOR_OBSTACLE_IDS] as WalkItem["kind"][];
-  // The rulebook's obstacles that never move: barriers, benches, bins, cones, hedges and puddles.
+  // The rulebook's obstacles that never move: barriers, benches, bins, cones, hedges, puddles and
+  // volleyball nets.
   const NEVER_MOVE: readonly WalkItem["kind"][] = [
     "barrier2",
     "barrier3",
@@ -92,6 +93,8 @@ describe("movers", { timeout: 120_000 }, () => {
     "cone",
     "hedge",
     "puddle",
+    "volleyballNet2",
+    "volleyballNet3",
   ];
   const movementOf = (kind: WalkItem["kind"]) => {
     if (kind === "tip" || kind === "treat") {

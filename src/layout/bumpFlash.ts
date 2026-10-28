@@ -87,6 +87,7 @@ export const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>
   garbageTruck: "green",
   gardener: "green",
   goose: "white",
+  grannyCartShopper: "cyan",
   hedge: "green",
   hopscotchKid: "pink",
   hotDogCart: "amber",
@@ -113,6 +114,7 @@ export const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>
   scooter: "cyan",
   seagull: "white",
   signSpinner: "yellow",
+  stiltWalker: "mauve",
   streetcar: "red",
   stroller: "green",
   strollingBusker: "green",
@@ -123,6 +125,8 @@ export const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>
   trashCan: "green",
   ttcBus: "red",
   velvetRope: "yellow",
+  volleyballNet2: "orange",
+  volleyballNet3: "orange",
   volleyballPlayer: "red",
 };
 

@@ -5,6 +5,7 @@ import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { SHOP_GEAR } from "../data/shop";
 import type { GearId, MinorObstacleId } from "../data/types";
 import { WORLD } from "../data/world";
+import { AWAITING_ART } from "../testing/awaitingArt";
 import { animationKey, animationSpecs } from "./asepriteAnimations";
 import {
   backdropKey,
@@ -98,7 +99,7 @@ describe("the art manifest", () => {
         ),
         SKUNK_CLOUD_KEY,
         CARD_FRAME_KEY,
-      ].filter((key) => !spriteKeys.has(key)),
+      ].filter((key) => !spriteKeys.has(key) && !AWAITING_ART.has(key)),
       ...WORLD.zones
         .flatMap((zone) => [
           backdropKey(zone),
