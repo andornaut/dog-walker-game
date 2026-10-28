@@ -49,14 +49,14 @@ produce-crates      48x48   minor, 1 lane: a pyramid of three wooden produce cra
 clothing-rack       48x48   minor, 1 lane: a rolling rack of vintage clothes on chrome uprights and
                             casters: a mustard corduroy jacket, a plain lilac dress, a denim jacket
                             and a striped tee. idle (4 frames, 450ms): the dress sways 1px on frame 2
-market-stall-2      112x36  minor, 2 lanes, Kensington Market's barrier-2: a flea market's folding tables,
+market-stall-2      112x36  minor, 2 lanes: a flea market's folding tables,
                             one per lane, under a faded teal and cream striped awning with a scalloped
                             hem on thin coal poles; each clay table stands on crossed legs, laid with
                             chunky goods: a crate of records with a black record stood up (lilac label,
                             left out at @69 and smaller, where it would fill the disc), folded clothes,
                             book spines, glass jars and a lidded box. idle (4 frames, 500ms): the hem's
                             middle half lifts 1px on frame 2
-market-stall-3      176x36  minor, 3 lanes, Kensington Market's barrier-3: the same stall, a table wider
+market-stall-3      176x36  minor, 3 lanes: the same stall, a table wider
 cargo-bike          48x72   minor mover, 1 lane by 2 rows: a cargo bike riding down a lane at the pack,
                             facing it: a wooden box of sunflowers and pink tulips out front over a
                             small front wheel with a lit headlamp on its fork, its rider behind in a
