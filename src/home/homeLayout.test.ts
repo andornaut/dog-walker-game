@@ -633,9 +633,14 @@ describe("the dog slot sign", () => {
     expect(inside(board, hit)).toBe(true);
   });
 
-  const prices = gameData.dogSlots.flatMap((slot) =>
-    slot.unlock === "shop" ? [dollarText(unlockPrice(gameData.tuning, slot))] : [],
-  );
+  // Each price once: slots at one price set the same line.
+  const prices = [
+    ...new Set(
+      gameData.dogSlots.flatMap((slot) =>
+        slot.unlock === "shop" ? [dollarText(unlockPrice(gameData.tuning, slot))] : [],
+      ),
+    ),
+  ];
   const { cream, headCapY, priceCapY, x } = slotSignText(BODY);
   const inkRows = inkRowsFromCapTop(BODY) * scale;
   const lines = [
