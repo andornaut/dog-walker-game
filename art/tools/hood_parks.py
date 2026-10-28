@@ -40,6 +40,11 @@ hen                a Riverdale Farm hen got loose, a Rhode Island Red: a plump r
 
 Minor obstacles, laid out in obstacles.py's pixels (40 for one lane, 30 rows for a
 lane-spanning one) and drawn at obstacles.SCALE (1.2) on a minis.Mini:
+cherry-trees        176x36  3 lanes, High Park's own: its sakura grove, three low cherry trees in blossom
+                            in a row in a stone planter, wide crowns of pink lobes shaded mauve along
+                            their lower right over short dark bark trunks, the planter's stone blocks
+                            lipped in driftwood; idle (2 frames, 500ms): the crowns' top lobes sway 1px
+                            right on frame 1
 fallen-log          112x36  2 lanes, a fallen oak trunk lying across the path: five long bark ridges, a
                             sawn end at the right showing growth rings, a splintered broken end at the
                             left, a branch stub, two moss patches and two tan-capped mushrooms on its
@@ -772,6 +777,53 @@ def fallen_log(leaf=(0, 0), w=obstacles.span(2)):
     return lit(g, dict(bark=("clay", None), walnut=("bark", None)))
 
 
+# The grove's idle: rest, then the crowns' tops swayed 1px right.
+CHERRY_IDLE = (0, 1), 500
+# Each crown's lobes, the lowest row first, as (dx, cy, rx, ry, sways) from its tree's centre column, in layout
+# pixels at full size: two low lobes either side of the trunk, three across the middle and two on top, the ones
+# on top swaying in the idle.
+CROWN = ((-9, 14.5, 9, 4, False), (9, 14.5, 9, 4, False),
+         (-14.5, 10, 7, 4.5, False), (0, 9.5, 9, 5, False), (14.5, 10, 7, 4.5, False),
+         (-7, 4.5, 8.5, 4.5, True), (7.5, 4, 8, 4.5, True))
+# How far each lobe's pink sits up and left inside its mauve, leaving a crescent at least 2 drawn pixels deep
+# along its lower right.
+CLUSTER_SHADE = (0.8, 1.2)
+# The planter's top row and its stone joints, as fractions of its length.
+PLANTER_TOP = 23
+JOINTS = (0.22, 0.5, 0.78)
+
+
+def cherry_trees(sway=0, w=obstacles.span(3)):
+    """High Park's cherry grove in blossom, three low trees in a row standing in a stone planter across the
+    road, front elevation: each a wide crown of pink lobes, every lobe shaded mauve along its lower right so
+    the blossom clusters read, the middle crown mirrored, over a short dark bark trunk flared at its foot,
+    forking into the crown and shaded walnut down its right; the planter a long box of stone blocks lipped in
+    driftwood and shaded dstone along its foot. sway shifts each crown's top lobes 1 drawn pixel right."""
+    g = edged(Grid(w, ROW))
+    ux = obstacles.unit(g)[0]
+    centres = [w * (2 * k + 1) / 6 for k in range(3)]
+    # the trunks: short and dark, flared at the foot, forking into two limbs under the crown
+    for cx in centres:
+        bar(g, (cx, 19), (cx - 8, 9), 3, "bark")
+        bar(g, (cx, 19), (cx + 8, 10), 3, "bark")
+        g.rect(cx - 3, 13, 6, PLANTER_TOP - 13, "bark")
+        g.rect(cx - 4.5, PLANTER_TOP - 2, 9, 2, "bark")
+        g.rect(cx + 1.5, 13, 1.5, PLANTER_TOP - 13, "walnut")
+    # the crowns, lobe by lobe from the lowest row up, so each lobe's mauve underside lies on the pink below it
+    for k, cx in enumerate(centres):
+        for dx, cy, rx, ry, sways in CROWN:
+            x = cx + (-dx if k == 1 else dx) + (sway * ux if sways else 0)
+            g.cel(x, cy, rx, ry, "mauve")
+            g.cel(x - CLUSTER_SHADE[0], cy - CLUSTER_SHADE[1], rx - CLUSTER_SHADE[0], ry - CLUSTER_SHADE[1], "pink")
+    # the planter: a stone box lipped in driftwood, its blocks jointed in dstone, shaded dstone along its foot
+    g.rect(1, PLANTER_TOP, w - 2, ROW - PLANTER_TOP, "stone")
+    g.rect(0.5, PLANTER_TOP, w - 1, 2, "driftwood")
+    g.rect(1, ROW - 1.5, w - 2, 1.5, "dstone")
+    for f in JOINTS:
+        g.rect(1 + f * (w - 2), PLANTER_TOP + 2, 1, ROW - PLANTER_TOP - 3.5, "dstone")
+    return lit(g, dict(bark=("clay", None), walnut=("bark", None), stone=("driftwood", None)))
+
+
 # ---------- hit moments ----------
 
 # The calico's fur tufts, thrown out of the scuffle.
@@ -1094,7 +1146,8 @@ def road_sprites(suffix, step):
     yield f"hen{suffix}", [("idle", frames(a, hen, HEN_IDLE), 400), ("run", frames(a, hen, HEN_RUN), 80)]
     yield f"ferrets{suffix}", [("idle", frames(a, ferrets, FERRETS_IDLE), 300),
                                ("run", frames(a, ferrets, FERRETS_RUN), 80)]
-    for key, draw, (args, ms) in (("fallen-log", fallen_log, FALLEN_LOG_IDLE),
+    for key, draw, (args, ms) in (("cherry-trees", cherry_trees, CHERRY_IDLE),
+                                  ("fallen-log", fallen_log, FALLEN_LOG_IDLE),
                                   ("leaf-pile", leaf_pile, LEAF_PILE_IDLE),
                                   ("little-free-library", little_free_library, LIBRARY_IDLE),
                                   ("picnic-blanket", picnic_blanket, PICNIC_IDLE),
@@ -1105,9 +1158,10 @@ def road_sprites(suffix, step):
 
 # Where each road sprite's .aseprite source goes: the card obstacles with the encounters, the rest with the
 # obstacles.
-SOURCES = {"capybara": "art/encounters", "porch-cat": "art/encounters", "fallen-log": "art/obstacles",
-           "ferrets": "art/obstacles", "hen": "art/obstacles", "leaf-pile": "art/obstacles", "little-free-library": "art/obstacles",
-           "picnic-blanket": "art/obstacles", "porch-steps": "art/obstacles"}
+SOURCES = {"capybara": "art/encounters", "porch-cat": "art/encounters", "cherry-trees": "art/obstacles",
+           "fallen-log": "art/obstacles", "ferrets": "art/obstacles", "hen": "art/obstacles",
+           "leaf-pile": "art/obstacles", "little-free-library": "art/obstacles", "picnic-blanket": "art/obstacles",
+           "porch-steps": "art/obstacles"}
 
 
 def sprites():

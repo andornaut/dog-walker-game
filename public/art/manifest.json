@@ -2362,6 +2362,87 @@
       }
     },
     {
+      "key": "cherry-trees",
+      "png": "sprites/cherry-trees.png",
+      "json": "sprites/cherry-trees.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 176
+      }
+    },
+    {
+      "key": "cherry-trees@50",
+      "png": "sprites/cherry-trees@50.png",
+      "json": "sprites/cherry-trees@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 88
+      }
+    },
+    {
+      "key": "cherry-trees@56",
+      "png": "sprites/cherry-trees@56.png",
+      "json": "sprites/cherry-trees@56.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 99
+      }
+    },
+    {
+      "key": "cherry-trees@62",
+      "png": "sprites/cherry-trees@62.png",
+      "json": "sprites/cherry-trees@62.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 110
+      }
+    },
+    {
+      "key": "cherry-trees@69",
+      "png": "sprites/cherry-trees@69.png",
+      "json": "sprites/cherry-trees@69.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 121
+      }
+    },
+    {
+      "key": "cherry-trees@75",
+      "png": "sprites/cherry-trees@75.png",
+      "json": "sprites/cherry-trees@75.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 132
+      }
+    },
+    {
+      "key": "cherry-trees@81",
+      "png": "sprites/cherry-trees@81.png",
+      "json": "sprites/cherry-trees@81.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 143
+      }
+    },
+    {
+      "key": "cherry-trees@88",
+      "png": "sprites/cherry-trees@88.png",
+      "json": "sprites/cherry-trees@88.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 154
+      }
+    },
+    {
+      "key": "cherry-trees@94",
+      "png": "sprites/cherry-trees@94.png",
+      "json": "sprites/cherry-trees@94.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 165
+      }
+    },
+    {
       "key": "clothing-rack",
       "png": "sprites/clothing-rack.png",
       "json": "sprites/clothing-rack.json",
