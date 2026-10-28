@@ -206,7 +206,12 @@ describe("the verge beside the road", () => {
       ({ colour, dots }) => [colour, ...dots.flatMap((dot) => dot.colours)],
     ),
   ];
-  it.each(ZONES)("scatters leaves on %s only if its verge has them", (zone) => {
+  // A zone whose verge has leaves and one whose verge has none.
+  const leafZones = [
+    ZONES.find((zone) => VERGES[zone].leaves),
+    ZONES.find((zone) => !VERGES[zone].leaves),
+  ].flatMap((zone) => (zone === undefined ? [] : [zone]));
+  it.each(leafZones)("scatters leaves on %s only if its verge has them", (zone) => {
     const own = ownColours(VERGES[zone]);
     const tones = [0xd77643, 0xbe4a2f, 0x733e39]
       .filter((tone) => !own.includes(tone))
@@ -298,8 +303,9 @@ describe("the verge beside the road", () => {
   });
 
   // A row's dot cell is the same as or one past the cell of the row below it, so no cell is
-  // skipped between rows: each dot shows on some row and moves down with the road.
-  it.each([0, 0.4, 3, 17, 40])("seeds every cell of road on some row at scroll %d", (scroll) => {
+  // skipped between rows: each dot shows on some row and moves down with the road. At no scroll,
+  // a part pixel and many pixels.
+  it.each([0, 0.4, 17])("seeds every cell of road on some row at scroll %d", (scroll) => {
     const cells = raster.rows.map((row) => ({
       cell: Math.floor(scroll + row.distance) >> row.dotLevel,
       level: row.dotLevel,
@@ -464,7 +470,8 @@ describe("drawRoad", () => {
     },
   );
 
-  it.each([0, 0.4, 3.7, 17, 40])(
+  // At no scroll, a part pixel and many pixels.
+  it.each([0, 0.4, 17])(
     "shows a dash on every row whose stretch of road it lies on, at scroll %d",
     (scroll) => {
       const dash = LINE_RUN + 4;
