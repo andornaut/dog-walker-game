@@ -113,9 +113,9 @@ def high_park_lines(g):
     """High Park's path has no lines between its lanes: a dirt path, unlike the streets."""
 
 
-# Pedestrian Sunday's painted lane lines, one colour per divider, left to right; each holds 4:1 or more
-# on Kensington Market's dbrick, and none is gold, amber or orange, which read as coins.
-LANE_PAINT = ("cream", "turquoise", "pink", "lime")
+# Pedestrian Sunday's painted lane lines, one colour per divider, left to right: dark paint, each holding 3:1
+# or more on Kensington Market's stone asphalt, and none gold, amber or orange, which read as coins.
+LANE_PAINT = ("dbrick", "navy", "fir", "plum")
 
 
 def kensington_lines(g):
@@ -353,24 +353,22 @@ def distillery_lines(g):
 
 
 def kensington_ground(g):
-    """Dark brick flagstones in offset courses between clay gutters: dbrick stones in plum joints, sparse
-    2px brick and walnut grit worn into them; clay stones on the outer 4 columns inside a bark seam, a bark
-    joint every 32 rows."""
+    """Worn stone asphalt: big dstone patches, 2px or more even in the far rows, which sample the strip shrunk
+    4x; sparse 2px dstone grit and a few dstone cracks; 2-row dstone joints across every 32 rows; dstone
+    gutters on the outer 4 columns inside a coal seam, a coal joint every 32 rows."""
     rnd = random.Random("road-kensington-market")
-    g.rect(0, 0, W, H, "dbrick")
-    # flagstones half a lane wide in courses SEAM_PERIOD rows deep, each course offset half a stone, so
-    # the lane dividers fall on joints of every other course
-    for course in range(H // SEAM_PERIOD):
-        y, off = course * SEAM_PERIOD, 16 if course % 2 else 0
-        g.rect(0, y + SEAM_PERIOD - 2, W, 2, "plum")
-        for x in range(off - 1, W, 32):
-            g.rect(x, y, 1, SEAM_PERIOD - 2, "plum")
-    grit(g, rnd, 16, ("brick", "brick", "walnut"))
+    g.rect(0, 0, W, H, "stone")
+    for x, y in scatter(rnd, 6, 10, W - 14, 14, ok=lambda x, y: 4 < (x + 2) % LANE < 52):
+        oval(g, rnd, x, y, rnd.randint(8, 12), rnd.randint(14, 22), "dstone")
+    grit(g, rnd, 24, ("dstone",))
+    cracks(g, rnd, ((40, 20, 9), (150, 50, 11), (230, 12, 8)), "dstone")
+    for y in (14, 14 + SEAM_PERIOD):
+        g.rect(0, y, W, 2, "dstone")
     for x0, inner in ((0, 4), (W - 4, W - 5)):
-        g.rect(x0, 0, 4, H, "clay")
-        g.rect(inner, 0, 1, H, "bark")
+        g.rect(x0, 0, 4, H, "dstone")
+        g.rect(inner, 0, 1, H, "coal")
         for y in range(0, H, SEAM_PERIOD):
-            g.rect(x0, y, 4, 2, "bark")
+            g.rect(x0, y, 4, 2, "coal")
 
 
 def beaches_ground(g):

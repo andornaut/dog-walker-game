@@ -61,8 +61,8 @@ DARKER.update(dict(p.split(":") for p in (
 # The contrast roads: dslate (dark, the Distillery District's), then tan, pink and skin2 (light).
 ROADS = ("3a4466", "e4a672", "f6757a", "c28569")
 # The zone roads, the preview grounds when a set names none: Cabbagetown's grey, High Park's tan, the
-# Distillery District's dslate, Kensington Market's dbrick, The Beaches' cream and Yonge Street's shale.
-ZONE_ROADS = ("8b9bb4", "e4a672", "3a4466", "5e2620", "ead4aa", "353b45")
+# Distillery District's dslate, Kensington Market's stone, The Beaches' cream and Yonge Street's shale.
+ZONE_ROADS = ("8b9bb4", "e4a672", "3a4466", "8a857c", "ead4aa", "353b45")
 
 
 def contrast(a, b):
