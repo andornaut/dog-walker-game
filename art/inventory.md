@@ -187,37 +187,37 @@ Cosmetic movers drawn by `art/tools/ambient.py` (style guide, Ambient). The cros
 
 ### Roadside props
 
-Placed by the style guide's Roadside table (`shared/roadside.json`): the lawn props beyond the sidewalks, the curb props on them. Sprites with one static `idle` frame, drawn by `art/tools/roadside.py`.
+Placed by the style guide's Roadside table (`shared/roadside.json`): the lawn props beyond the sidewalks, the curb props on them. Drawn by `art/tools/roadside.py`, each with one `idle` tag: a still frame, or for a prop with a light or a flag a slow loop that rests on frame 0 most of the time.
 
-| Key                                   | Size    | Note                                                                |
-| ------------------------------------- | ------- | ------------------------------------------------------------------- |
-| `curb-barrel`                         | 30×39   | A whisky barrel on end, oak staves                                  |
-| `curb-bike-ring`                      | 24×48   | Toronto's post-and-ring bike stand                                  |
-| `curb-bollard`                        | 18×39   | A cast-iron bollard with a gold collar                              |
-| `curb-hydrant`                        | 27×39   | A red hydrant under a silver cap                                    |
-| `curb-life-ring`                      | 27×51   | A lifebuoy on a driftwood post                                      |
-| `curb-mailbox`                        | 30×54   | A red Canada Post letter box under a dome, tagged in lime and white |
-| `curb-pay-station`                    | 21×51   | A pay-and-display machine under a P sign                            |
-| `curb-rope-posts`                     | 36×30   | Two driftwood posts with a rope between                             |
-| `curb-urn`                            | 33×42   | A cast-iron urn heaped with geraniums                               |
-| `curb-utility-box`                    | 36×48   | A traffic signal cabinet painted in mural bands under a pink heart  |
-| `roadside-beach-chair-<colourway>`    | 42×36   | blue, coral, green; a folding beach chair slung with stripes        |
-| `roadside-beach-umbrella-<colourway>` | 72×72   | blue, coral, green; a striped beach umbrella planted in the sand    |
-| `roadside-cafe-patio`                 | 72×72   | A bistro table and two chairs under a red and cream umbrella        |
-| `roadside-dune-grass`                 | 60×48   | A tuft of dune grass                                                |
-| `roadside-fruit-stand`                | 108×84  | Fruit crates under a striped awning on two posts                    |
-| `roadside-garden-car`                 | 108×96  | The Garden Car, a painted sedan heaped with flowers; not placed     |
-| `roadside-gas-lamp`                   | 36×150  | A heritage lamp lit gold                                            |
-| `roadside-hot-dog-stand`              | 90×126  | A red park kiosk, a hot dog on its sign                             |
-| `roadside-ice-cream-stand`            | 90×126  | A foam beach kiosk, a soft-serve cone on its roof                   |
-| `roadside-leuty`                      | 96×156  | The Leuty Lifeguard Station                                         |
-| `roadside-love-lock`                  | 78×90   | The Distillery's heart of padlocks on a plinth                      |
-| `roadside-mural-wall`                 | 120×96  | A Kensington brick wall painted with a dog's face and tags          |
-| `roadside-shopfront-<colourway>`      | 108×96  | ochre, violet; a vintage shop, second-hand clothes in its window    |
-| `roadside-street-lamp`                | 60×180  | A downtown street light, lit cream and white both ways              |
-| `roadside-transit-stop`               | 42×150  | A TTC stop pole                                                     |
-| `roadside-tree-maple`                 | 114×156 | A street maple                                                      |
-| `roadside-tree-oak`                   | 144×174 | A spreading park oak                                                |
+| Key                                   | Size    | Tags   | Note                                                                                                 |
+| ------------------------------------- | ------- | ------ | ---------------------------------------------------------------------------------------------------- |
+| `curb-barrel`                         | 30×39   | `idle` | A whisky barrel on end, oak staves                                                                   |
+| `curb-bike-ring`                      | 24×48   | `idle` | Toronto's post-and-ring bike stand                                                                   |
+| `curb-bollard`                        | 18×39   | `idle` | A cast-iron bollard with a gold collar                                                               |
+| `curb-hydrant`                        | 27×39   | `idle` | A red hydrant under a silver cap                                                                     |
+| `curb-life-ring`                      | 27×51   | `idle` | A lifebuoy on a driftwood post                                                                       |
+| `curb-mailbox`                        | 30×54   | `idle` | A red Canada Post letter box under a dome, tagged in lime and white                                  |
+| `curb-pay-station`                    | 21×51   | `idle` | A pay-and-display machine under a P sign; the screen's backlight dims and returns                    |
+| `curb-rope-posts`                     | 36×30   | `idle` | Two driftwood posts with a rope between                                                              |
+| `curb-urn`                            | 33×42   | `idle` | A cast-iron urn heaped with geraniums                                                                |
+| `curb-utility-box`                    | 36×48   | `idle` | A traffic signal cabinet painted in mural bands under a pink heart                                   |
+| `roadside-beach-chair-<colourway>`    | 42×36   | `idle` | blue, coral, green; a folding beach chair slung with stripes                                         |
+| `roadside-beach-umbrella-<colourway>` | 72×72   | `idle` | blue, coral, green; a striped beach umbrella planted in the sand                                     |
+| `roadside-cafe-patio`                 | 72×72   | `idle` | A bistro table and two chairs under a red and cream umbrella                                         |
+| `roadside-dune-grass`                 | 60×48   | `idle` | A tuft of dune grass                                                                                 |
+| `roadside-fruit-stand`                | 108×84  | `idle` | Fruit crates under a striped awning on two posts                                                     |
+| `roadside-garden-car`                 | 108×96  | `idle` | The Garden Car, a painted sedan heaped with flowers; not placed                                      |
+| `roadside-gas-lamp`                   | 36×150  | `idle` | A heritage lamp lit gold; the flame dips and recovers                                                |
+| `roadside-hot-dog-stand`              | 90×126  | `idle` | A red park kiosk, a hot dog on its sign                                                              |
+| `roadside-ice-cream-stand`            | 90×126  | `idle` | A foam beach kiosk, a soft-serve cone on its roof                                                    |
+| `roadside-leuty`                      | 96×156  | `idle` | The Leuty Lifeguard Station; a fold runs out along its flag                                          |
+| `roadside-love-lock`                  | 78×90   | `idle` | The Distillery's heart of padlocks on a plinth                                                       |
+| `roadside-mural-wall`                 | 120×96  | `idle` | A Kensington brick wall painted with a dog's face and tags                                           |
+| `roadside-shopfront-<colourway>`      | 108×96  | `idle` | ochre, violet; a vintage shop, second-hand clothes in its window; the sign's letters dim and relight |
+| `roadside-street-lamp`                | 60×180  | `idle` | A downtown street light, lit cream and white both ways; the lenses fade off and on                   |
+| `roadside-transit-stop`               | 42×150  | `idle` | A TTC stop pole                                                                                      |
+| `roadside-tree-maple`                 | 114×156 | `idle` | A street maple                                                                                       |
+| `roadside-tree-oak`                   | 144×174 | `idle` | A spreading park oak                                                                                 |
 
 ## Doghouse row and top bar
 
