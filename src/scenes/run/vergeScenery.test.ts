@@ -4,9 +4,10 @@ import { ROAD_SPRITE_SIZE } from "../../assets/spriteKeys";
 import { LANE_COUNT, SCREEN_CONFIG } from "../../data/screen";
 import { WORLD } from "../../data/world";
 import { curbBand, VERGES } from "../../road/roadside";
+import type { KeptScenery } from "../../road/struckScenery";
 import { DART_VERGE_LANES } from "../../runner/moverPlanning";
 import { type MoverPath, moverPlace } from "../../runner/movers";
-import { goesToVerge, type VergeItem, vergeNow } from "./vergeScenery";
+import { goesToVerge, vergeNow } from "./vergeScenery";
 
 const ROAD = { laneCount: LANE_COUNT, roadBottom: 700, roadTop: 0 };
 const KEPT_ZONE = 1;
@@ -27,7 +28,7 @@ const darting = (stopAfter: number | null): MoverPath => ({
 });
 const VERGING = darting(LANE_COUNT + DART_VERGE_LANES);
 // Kept 70px of scroll after its cue: 5.47 lanes across, just off the road.
-const kept = (path: MoverPath): VergeItem => ({
+const kept = (path: MoverPath): KeptScenery => ({
   item: {
     height: 40,
     id: 1,

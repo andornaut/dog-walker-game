@@ -6,7 +6,7 @@ import { distanceAtY } from "../layout/projection";
 import { randomStream } from "../lib/random";
 import { startAmbient, stepAmbient } from "../road/ambient";
 import { newRoadsidePlaces, placeRoadside, ROADSIDE } from "../road/roadsideProps";
-import { struckBy, type StruckItem, struckNow } from "../road/struckScenery";
+import { type KeptScenery, struckBy, struckNow } from "../road/struckScenery";
 import { currentZone, currentZoneId, zoneAt } from "../rules/route";
 import { newRun } from "../state/runState";
 import { STEP_SECONDS } from "./fixedStep";
@@ -89,7 +89,7 @@ const LAYERS: Readonly<Record<string, (seed: number) => Layer>> = {
   },
   // The obstacles hits took out of play, kept as scenery until they scroll off.
   struck: () => {
-    let kept: StruckItem[] = [];
+    let kept: KeptScenery[] = [];
     return (session, events) => {
       const { run } = session.walk;
       const { roadBottom } = screenRoadGeometry(run);

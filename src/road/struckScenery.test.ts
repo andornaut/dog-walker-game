@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { WalkItem } from "../runner/walkItems";
 import { defined } from "../testing/defined";
-import { struckBy, type StruckItem, struckNow } from "./struckScenery";
+import { type KeptScenery, struckBy, struckNow } from "./struckScenery";
 
 const ROAD_BOTTOM = 600;
 const HIT_ZONE = 1;
@@ -34,7 +34,7 @@ const CROSSING: NonNullable<WalkItem["mover"]>["path"] = {
   warning: 50,
 };
 
-function struckOne(hit: WalkItem): StruckItem {
+function struckOne(hit: WalkItem): KeptScenery {
   return defined(struckBy({ bumps: [{ item: hit }], contacts: [], walk: { run: at(0) } })[0]);
 }
 

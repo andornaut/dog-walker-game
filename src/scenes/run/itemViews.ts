@@ -18,7 +18,7 @@ import { moverHintTriggers } from "../../hud/hintTriggers";
 import { obstacleParts } from "../../layout/obstacleArt";
 import { itemAt } from "../../lib/arrays";
 import { keysOf } from "../../lib/records";
-import { struckBy, type StruckItem, struckNow } from "../../road/struckScenery";
+import { type KeptScenery, struckBy, struckNow } from "../../road/struckScenery";
 import { moverTell } from "../../runner/movers";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import { type RoadGeometry, type Walk, type WalkStep } from "../../runner/walk";
@@ -30,7 +30,7 @@ import { applyItemCue } from "./itemCueViews";
 import { drawMover, MOVER_CUE_PARTS, moverBodyKey } from "./moverView";
 import { DEPTH, LANE_XS, LAYOUT, PROJECTION, ROW_DEPTH, type Shadow } from "./stage";
 import { type StandFrame, standPart } from "./standPart";
-import { goesToVerge, type VergeItem, vergeNow } from "./vergeScenery";
+import { goesToVerge, vergeNow } from "./vergeScenery";
 
 // Road art that may be missing is drawn as a box this tall, as wide as its art: its lanes
 // less the lane's spare width beside a 1-lane sprite.
@@ -64,12 +64,12 @@ export interface StruckBody {
 
 interface StruckView {
   readonly offset: { dx: number; dy: number };
-  readonly struck: StruckItem;
+  readonly struck: KeptScenery;
   readonly view: ItemView;
 }
 
 interface VergeView {
-  readonly kept: VergeItem;
+  readonly kept: KeptScenery;
   readonly view: ItemView;
 }
 
@@ -108,7 +108,7 @@ export class ItemViews {
   // Darts that stop on the verge, kept as scenery once the walk drops them off the road, by item
   // id; and each such dart still on the road as the walk last had it.
   private readonly verge = new Map<number, VergeView>();
-  private readonly vergeBound = new Map<number, VergeItem>();
+  private readonly vergeBound = new Map<number, KeptScenery>();
   private readonly views = new Map<number, ItemView>();
 
   constructor(scene: Scene, hint: (event: HintTrigger) => void) {

@@ -1,24 +1,11 @@
+import type { KeptScenery, RoadPlace } from "../../road/struckScenery";
 import { stopsOnVerge } from "../../runner/moverPlanning";
 import { moverPlace, moverY } from "../../runner/movers";
 import type { RoadGeometry } from "../../runner/walk";
 import type { WalkItem } from "../../runner/walkItems";
 
-// A dart that stops on the verge leaves the walk as it leaves the road, so it collides with
-// nothing from then on, and is kept as scenery: the item as the walk last had it, and the zone
-// and how far into it the walk was then. Scenery is drawn only: the walk never sees it.
-export interface VergeItem {
-  readonly item: WalkItem;
-  readonly zoneDistance: number;
-  readonly zoneIndex: number;
-}
-
-// Which zone the walk is in, and how far into it.
-interface RoadPlace {
-  readonly zoneDistance: number;
-  readonly zoneIndex: number;
-}
-
-// Whether an item is a dart that stops on the verge, which is kept as scenery once off the road.
+// Whether an item is a dart that stops on the verge. It leaves the walk as it leaves the road, so
+// it collides with nothing from then on, and is kept as scenery (KeptScenery).
 export function goesToVerge(laneCount: number, item: WalkItem): boolean {
   return item.mover !== undefined && stopsOnVerge(laneCount, item.mover.path);
 }
@@ -29,7 +16,7 @@ export function goesToVerge(laneCount: number, item: WalkItem): boolean {
 export function vergeNow(
   road: Pick<RoadGeometry, "laneCount" | "roadBottom" | "roadTop">,
   run: RoadPlace,
-  kept: VergeItem,
+  kept: KeptScenery,
 ): WalkItem | null {
   const { item } = kept;
   if (run.zoneIndex !== kept.zoneIndex || item.mover === undefined) {
