@@ -31,6 +31,11 @@ barrel-stack        48x48   minor, 1 lane: three whisky barrels stacked as a pyr
                             hoop with a bark stencil (a diamond round a dot), the brown bodies showing
                             above the heads, bark wedges chocking the bottom two. idle (4 frames,
                             400ms): a glint runs down the top barrel's hoop on frames 2 and 3
+art-sculpture       48x48   minor, 1 lane, the Distillery District's cone: a big rusted iron spider
+                            on a low stone plinth, two legs a side arching from a dbrown body with a
+                            turquoise patina mark, each up to a high knee and down to the plinth.
+                            idle (4 frames, 400ms): a glint runs down the left outer shin on frames
+                            2 and 3
 
 Kensington Market:
 
@@ -495,6 +500,55 @@ def barrel_stack(glint=None):
 STACK_IDLE = (None, None, 235, 200), 400
 
 
+# ---------- the art sculpture ----------
+
+# Each leg's hip, knee and foot in layout pixels on the right of the body, mirrored for the left: the outer leg
+# arched high and wide, the inner one bent low beside the body, so the gaps between them hold open at @50.
+SPIDER_LEGS = (((25, 9), (33.5, 1), (38, 30)), ((24.5, 14), (29, 12), (26, 30)))
+
+
+def art_sculpture(glint=None):
+    """A big rusted iron spider on a low stone plinth, laid out on 40x40 with the plinth's foot on the cone's
+    row: two rust legs a side (SPIDER_LEGS), each a thigh up to its knee and a shin down to the plinth, stroked
+    on the drawn grid 2 layout pixels thick and at least 1px so they stay whole at every step, round a dbrown body, its
+    abdomen marked with a turquoise patina over a smaller head. The plinth is a stone cap lit driftwood over
+    a dstone block. glint is how far down the left outer shin, from 0 at the knee to 1 at the foot, a white
+    glint runs, or None."""
+    g = edged(Grid(ob.SIZE, ob.SIZE))
+    px, s = raster(g), scale_of(g)
+    # the plinth
+    g.rect(1, 30, 38, 2, "stone")
+    g.rect(1, 30, 38, 1, "driftwood")
+    g.rect(3, 32, 34, 4, "dstone")
+    t = max(1, round(2 * s))
+
+    def bar(a, b, c):
+        (x0, y0), (x1, y1) = (v * s for v in a), (v * s for v in b)
+        n = max(1, round(max(abs(x1 - x0), abs(y1 - y0)) * 2))
+        for k in range(n + 1):
+            x, y = x0 + (x1 - x0) * k / n, y0 + (y1 - y0) * k / n
+            px.rect(math.floor(x - t / 2 + 0.5), math.floor(y - t / 2 + 0.5), t, t, c)
+
+    for hip, knee, foot in SPIDER_LEGS:
+        for side in (1, -1):
+            pts = [(20 + side * (x - 20), y) for x, y in (hip, knee, foot)]
+            bar(pts[0], pts[1], "rust")
+            bar(pts[1], pts[2], "rust")
+    # the body: the abdomen and its patina over the head
+    g.cel(20, 9, 7, 6, "dbrown", "plum", "brown")
+    g.cel(19, 8, 3.5, 2.5, "turquoise", "dturq")
+    g.cel(20, 17, 4, 3, "dbrown", "plum", "brown")
+    if glint is not None:
+        (kx, ky), (fx, fy) = ((ob.SIZE - x, y) for x, y in SPIDER_LEGS[0][1:])
+        x, y = kx + (fx - kx) * glint, ky + (fy - ky) * glint
+        px.rect(math.floor(x * s - t / 2 + 0.5), math.floor(y * s - t / 2 + 0.5), t, t, "white")
+    return lit(g)
+
+
+# The glint runs down the left outer leg's shin on frames 2 and 3.
+SCULPTURE_IDLE = (None, None, 0.1, 0.3), 400
+
+
 # ---------- the green bin spill ----------
 
 def poly(g, pts, c):
@@ -834,6 +888,8 @@ def road_sprites(s=1):
                              ("run", frames(p, rolling_barrel, [dict(turn=a, dust=d) for a, d in run]), run_ms)]
     args, ms = STACK_IDLE
     yield "barrel-stack", [("idle", frames(o, barrel_stack, [dict(glint=a) for a in args]), ms)]
+    args, ms = SCULPTURE_IDLE
+    yield "art-sculpture", [("idle", frames(o, art_sculpture, [dict(glint=a) for a in args]), ms)]
     args, ms = BIN_IDLE
     yield BIN, [("idle", frames(p, green_bin, [dict(rock=a) for a in args]), ms)]
     args, ms = CHEESE_IDLE

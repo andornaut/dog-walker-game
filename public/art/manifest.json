@@ -1018,6 +1018,87 @@
       }
     },
     {
+      "key": "art-sculpture",
+      "png": "sprites/art-sculpture.png",
+      "json": "sprites/art-sculpture.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 48
+      }
+    },
+    {
+      "key": "art-sculpture@50",
+      "png": "sprites/art-sculpture@50.png",
+      "json": "sprites/art-sculpture@50.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "art-sculpture@56",
+      "png": "sprites/art-sculpture@56.png",
+      "json": "sprites/art-sculpture@56.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "art-sculpture@62",
+      "png": "sprites/art-sculpture@62.png",
+      "json": "sprites/art-sculpture@62.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "art-sculpture@69",
+      "png": "sprites/art-sculpture@69.png",
+      "json": "sprites/art-sculpture@69.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "art-sculpture@75",
+      "png": "sprites/art-sculpture@75.png",
+      "json": "sprites/art-sculpture@75.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "art-sculpture@81",
+      "png": "sprites/art-sculpture@81.png",
+      "json": "sprites/art-sculpture@81.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 39
+      }
+    },
+    {
+      "key": "art-sculpture@88",
+      "png": "sprites/art-sculpture@88.png",
+      "json": "sprites/art-sculpture@88.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "art-sculpture@94",
+      "png": "sprites/art-sculpture@94.png",
+      "json": "sprites/art-sculpture@94.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 45
+      }
+    },
+    {
       "key": "badge-big-payday",
       "png": "sprites/badge-big-payday.png",
       "json": "sprites/badge-big-payday.json"
