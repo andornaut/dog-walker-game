@@ -1119,32 +1119,30 @@ def card_walk_on_by():
 
 
 def beam(a, x0, x1, cx, cy, rx):
-    """A spotlight's beam from the art's top edge (x0 to x1) down to a pool round (cx, cy), rx wide, dithered
-    in gold and yellow so the road shows through it."""
+    """A spotlight's beam from the art's top edge (x0 to x1) down to a pool round (cx, cy), rx wide: the beam
+    flat ash, a step up the road's slate ramp, so it lights the road without texture, and the pool flat gold
+    with a yellow centre."""
     for y in range(0, cy + 4):
-        t = y / cy
+        t = min(1, y / cy)
         left, right = x0 + (cx - rx - x0) * t, x1 + (cx + rx - x1) * t
-        for x in range(int(left), int(right) + 1):
-            if (x + y) % 2 == 0:
-                a.fill(x, y, 1, 1, "yellow" if (x + 2 * y) % 6 == 0 else "gold")
-    for y in range(cy - 3, cy + 4):
+        a.fill(int(left), y, int(right) - int(left) + 1, 1, "ash")
+    for y in range(cy - 4, cy + 5):
         for x in range(cx - rx, cx + rx + 1):
-            if ((x - cx) / rx) ** 2 + ((y - cy) / 3.5) ** 2 <= 1:
-                a.fill(x, y, 1, 1, "yellow" if (x + y) % 2 else "gold")
+            d = ((x - cx) / rx) ** 2 + ((y - cy) / 4) ** 2
+            if d <= 1:
+                a.fill(x, y, 1, 1, "yellow" if d <= 0.4 else "gold")
 
 
 def card_wave():
-    """Archie in a spotlight's pool, the promoter filming it, flashes popping."""
+    """Archie in a spotlight's pool, the promoter filming it, a flash popping."""
     import cards
     a = cards.Art()
     a.ground("homeStretch")
-    beam(a, 0, 26, 24, 50, 19)
+    beam(a, 0, 26, 24, 52, 17)
     a.put("promo-team", "idle", 60, 68)
     c = a.dog("archie", "idle", 24, 56, shadow=False)
     a.lead(24, c, 18)
-    a.sparkle(6, 40, "white")
-    a.sparkle(40, 30, "white")
-    a.sparkle(38, 8, "white")
+    a.sparkle(42, 10, "white")
     return a
 
 

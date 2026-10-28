@@ -180,7 +180,7 @@ The walk HUD's layout is in `src/hud/walkHud.ts` and `topBar.ts`, and each piece
 ### Choice cards
 
 - Band colour by what opened the card: dred for an obstacle's encounter, purple for a fork's route.
-- Illustrations are road sprites at 1× on a scrap of the zone's ground, with no walker: a leash runs off the bottom edge.
+- Illustrations are road sprites at 1× on a scrap of the zone's ground, with no walker: a leash runs off the bottom edge. The ground keeps only its paving and joints, with no lane marks or flecks, and a path card's ground has no lone pixels. Each picture has one subject, usually Archie and the one thing he meets, with at most two small accents (hearts, a !, an arrow).
 - An encounter in more than one neighbourhood takes a setting that fits each of them: `card-cheese-crates-<option>` sets its crate at a brick shopfront's wooden door over stone paving.
 - The thief carries the walker's tip pouch he snatches, a green cloth drawstring pouch with a yellow coin on it, on his road sprite, his cards and `fx-hit-thief`, never the snatchers' grey-brown loot bundle. On the road it dangles by its drawstring from his fist inside his outline, so it never reads as a pickup, and is never smaller than 7×9, so it reads at `@50`.
 - A lucky find's popup art (`card-lost-wallet-keep`) shows the one thing found, close up and larger than its road sprite, with no person. `card-petting-neighbour-take` is the exception: the find is the neighbour. Both pop up over the road with no background, cut out on transparency with no ground or shadow, their sparkles yellow so they read on every road.

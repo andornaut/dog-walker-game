@@ -61,6 +61,9 @@ LBW, LBH = 83, 140
 # Band colours hold white labels at 7:1 or more. The game draws encounter for an obstacle and route for a
 # fork.
 BANDS = {"encounter": ("dred", "plum"), "route": ("purple", "plum")}
+# A card's ground keeps only the road strip's colours that cover this share of its scrap: the paving and
+# its joints.
+GROUND_KEEP = 0.04
 
 
 # ---------- the frame ----------
@@ -122,17 +125,24 @@ class Art(sn.Scene):
             self.img = Image.new("RGBA", (AW, AH), (0, 0, 0, 0))
 
     def ground(self, zone, x0=122):
+        """A scrap of zone's road strip, quietened: its paving and joints only. Every colour under
+        GROUND_KEEP of the scrap (lane marks, flecks, weeds) turns to the paving, so nothing in the
+        ground competes with the subject at 1x."""
         self.shade, self.leash_col = sn.ZONES[zone]["shadow"], sn.ZONES[zone]["leash"]
         tile = sn.TILES[zone].crop((x0, 0, x0 + AW, 64))
+        counts = Counter(tile.getdata())
+        paving = counts.most_common(1)[0][0]
+        keep = {c for c, n in counts.items() if n >= GROUND_KEEP * AW * 64}
+        tile.putdata([c if c in keep else paving for c in tile.getdata()])
         self.img.paste(tile, (0, -4))
 
     def grass(self):
+        """A flat lawn, with no flecks to compete with the subject."""
         self.fill(0, 0, AW, AH, "green")
-        for i in range(30):
-            self.fill((i * 23) % AW, (i * 17) % AH, 1, 2, "dgreen")
         self.shade = "dgreen"
 
-    def tiles_bg(self, col="lgrey", line="grey"):
+    def tiles_bg(self, col="grey", line="slate"):
+        """Bathroom tiles, mid grey so the white tub and bubbles hold against them."""
         self.fill(0, 0, AW, AH, col)
         for x in range(0, AW, 8):
             self.fill(x, 0, 1, AH, line)
@@ -173,10 +183,6 @@ class Art(sn.Scene):
     def hearts(self, pts):
         for x, y in pts:
             self.heart(x, y, "red", "pink")
-
-    def coins(self, pts, i=0):
-        for k, (x, y) in enumerate(pts):
-            self.paste(sn.frame("tip", "idle", i + k), x, y)
 
     def face(self, key, mood, x, y):
         self.fill(x - 1, y - 1, 34, 34, "plum")
@@ -220,7 +226,7 @@ def skunk_grooming():
     a.fill(16, 50, 43, 1, "grey")
     a.fill(20, 51, 3, 3, "grey")
     a.fill(52, 51, 3, 3, "grey")
-    for x, y in ((16, 28), (19, 20), (23, 12), (54, 26), (57, 18), (52, 10)):
+    for x, y in ((18, 22), (22, 12), (54, 24), (52, 12)):
         a.fill(x, y, 3, 3, "white")
         a.fill(x + 1, y + 1, 1, 1, "cyan")
     return a
@@ -363,27 +369,25 @@ def thief_grab_back():
 
 
 def thief_give_chase():
-    """Dogs give chase: the pack in full zoomies up the street after the thief, who runs off small in the
-    distance clutching the tip pouch. Biscuit, Archie and Duchess bound off the ground mid-leap over their
-    shadows, ears flapping, their leashes streaming back off the bottom edge, lgrey speed lines behind them
-    and dust kicked up at their paws."""
+    """Dogs give chase: Archie in full zoomies up the street after the thief, who runs off at the right
+    clutching the tip pouch. Archie bounds off the ground over his shadow, ears flapping, his leash
+    streaming back off the bottom edge, two lgrey speed lines under him and dust kicked up at his paws."""
     a = Art()
     a.ground("street")
-    s = 0.5
+    s = 0.65
     t = thief(s, road.thief_fleeing, -1, pouch=False)
-    x, y = stand(a, t, 45, 29)
+    x, y = stand(a, t, 54, 34)
     a.paste(tip_pouch(far=True), x + round(4 * s) - 3, y + round(31 * s))
     dust(a, x + 8, y + t.height - 3)
-    for lx, ly, h in ((16, 40, 12), (19, 46, 10), (45, 36, 12), (48, 43, 13), (51, 38, 10), (73, 40, 12)):
+    cx, foot = 26, 54
+    a.shadow(cx, foot, 20)
+    c = a.dog("archie", "react", cx, foot - 6, 2, shadow=False)
+    ears_flying(a, "dog-archie", "react", cx, foot - 6, 2)
+    a.lead(cx, c, cx - 6)
+    for lx, ly, h in ((cx - 15, 38, 10), (cx + 15, 36, 10)):
         a.fill(lx, ly, 1, h, "lgrey")
-    for name, cx, foot, step, i in (("biscuit", 8, 44, 75, 0), ("duchess", 63, 54, 100, 2), ("archie", 27, 55, 100, 1)):
-        key = f"dog-{name}" + ("" if step == 100 else f"@{step}")
-        a.shadow(cx, foot, 20 * step / 100)
-        c = a.dog(name, "react", cx, foot - 5, i, step=step, shadow=False)
-        ears_flying(a, key, "react", cx, foot - 5, i)
-        a.lead(cx, c, cx - 4)
-        dust(a, cx - 9, foot - 2)
-        dust(a, cx + 5, foot - 1)
+    dust(a, cx - 10, foot - 2)
+    dust(a, cx + 6, foot - 1)
     return a
 
 
@@ -585,7 +589,7 @@ def belly_rubs():
     kick(a, 14, 32, -1)
     # the leash runs from the collar off the bottom edge
     a.lead(44, 38, 52)
-    a.hearts([(4, 4), (26, 2), (54, 4), (66, 18), (4, 44)])
+    a.hearts([(4, 4), (60, 6)])
     return a
 
 
@@ -605,22 +609,19 @@ def good_leash():
 def big_tipper():
     a = Art()
     a.ground("shops")
-    for k, (x, y) in enumerate(((8, 38), (14, 34), (20, 38), (11, 30), (17, 26), (26, 36), (23, 30))):
-        a.paste(sn.frame("tip", "idle", k), x, y)
-    a.paste(sn.frame("tip", "idle"), 44, 26)
-    a.sparkle(42, 24, "white")
-    a.arrow(56, 14, -1)
+    # three coins face on, stacked two and one, under an up arrow
+    for x, y in ((8, 34), (26, 34), (17, 18)):
+        a.paste(sn.frame("tip", "idle"), x, y)
+    a.arrow(50, 10, -1)
     return a
 
 
 def rush_hour():
     a = Art()
     a.ground("street")
-    a.paste(small_puddle(), 2, 38)
-    a.put("skunk", "idle", 59, 55)
-    a.coins([(8, 4), (22, 10), (40, 4), (50, 16), (30, 22), (14, 22)])
-    # the squirrel in front of the coins, so it shows whole
-    a.put("squirrel", "idle", 38, 57)
+    a.put("skunk", "idle", 52, 55)
+    for x, y in ((4, 10), (20, 18), (6, 28)):
+        a.paste(sn.frame("tip", "idle"), x, y)
     a.arrow(62, 2, -1)
     return a
 
@@ -672,16 +673,14 @@ def sweet_talker():
 
 
 def skip():
-    """Walk on by: the skunk waits at the left while Duchess and Archie trot on past it up the street,
-    lgrey speed lines at their heels, and the Hall pass held up over them (glyphs.py's 20x20 icon)."""
+    """Walk on by: the skunk waits at the left while Archie trots on past it up the street, and the Hall
+    pass held up over them (glyphs.py's 20x20 icon)."""
     a = Art()
     a.ground("street")
-    a.put("skunk", "idle", 13, 49)
-    a.put("dog-duchess", "walk", 41, 55, 1)
-    a.put("dog-archie", "walk", 62, 49, 2)
-    for x, y, h in ((33, 47, 6), (49, 48, 5), (55, 43, 5), (70, 42, 4)):
-        a.fill(x, y, 1, h, "lgrey")
-    a.paste(glyphs.image(glyphs.gear_hall_pass20), 30, 1)
+    a.put("skunk", "idle", 16, 49)
+    c = a.put("dog-archie", "walk", 56, 58, 2)
+    a.lead(56, c, 62)
+    a.paste(glyphs.image(glyphs.gear_hall_pass20), 26, 1)
     return a
 
 
@@ -768,12 +767,25 @@ class ZoneView(Art):
         for py in range(FAR_Y, AH):
             for px in range(AW):
                 self.fill(px, py, 1, 1, self.ground_px(px, py))
+        self.despeckle(FAR_Y)
         for px in range(AW if self.mark else 0):
             if not self.dash or (px + 2) % self.dash[1] < self.dash[0]:
                 self.fill(px, LINE_Y, 1, 1, self.mark)
                 if self.edge:
                     self.fill(px, LINE_Y + 1, 1, 1, self.edge)
         self.lanes()
+
+    def despeckle(self, top):
+        """Turn every lone pixel from row top down, one whose four neighbours share another colour, to
+        that colour: the strip's and the ground painters' flecks turn to noise at 1x. Seams and dashes
+        2px or longer keep a neighbour of their own colour and stay."""
+        px = self.img.load()
+        src = self.img.copy().load()
+        for y in range(max(1, top), AH - 1):
+            for x in range(1, AW - 1):
+                around = {src[x - 1, y], src[x + 1, y], src[x, y - 1], src[x, y + 1]}
+                if len(around) == 1 and src[x, y] not in around:
+                    px[x, y] = around.pop()
 
     def walk_px(self, px, py):
         return self.walk_fleck if bd.hashed(px, py, 29) else self.walk

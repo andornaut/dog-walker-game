@@ -69,7 +69,7 @@ Cards (75x56), one per option, composed from the sprites above and the pack's ex
 card-cheese-crates-sniff, -buy and -hurry-on at a brick shopfront's wooden door, which fits both the
 neighbourhoods it stands in; card-wedding-shoot-pose, -walk-around and -reshoot on the Distillery
 District's road; card-fish-crates-pay, -hurry-past and -wade-through on Kensington Market's, the last
-with the pack slipping through the crate's spilt fish slime. The paid options
+with Archie wading through the crate's spilt fish slime. The paid options
 show a bill (icon-bill) changing hands: the photographer reaching out to take it, the fishmonger in a
 white apron and the cheesemonger in an ochre shirt and white apron holding it up.
 
@@ -1044,23 +1044,19 @@ def bezier(p0, p1, p2, n=24):
 
 
 def card_wedding_walk_around():
-    """Walk around: the shoot posing up the road, drawn small, the flash firing, while the pack swings wide round
-    it in an arc: Archie leading at the bottom, pulling out to the right, and Kilo far up the road at its widest,
-    a dashed white trail along it from the bottom edge curving back in over the top of the shoot."""
+    """Walk around: the shoot posing up the road at the left, drawn small, the flash firing, while Archie, up the road at
+    the right, pulls out wide round it, a dashed white trail curving from the bottom edge out past him and back in
+    over the top of the shoot."""
     import cards
     a = cards.Art()
     a.ground("street")
-    shoot = to_image(drawn(PERSON * 0.4, wedding_shoot, flash=True).outlined())
-    a.shadow(9, 30, 18)
-    a.shadow(29, 30, 18)
-    a.paste(shoot, 1, 30 - shoot.height)
-    pack = (("kilo", 50, 65, 30, "walk", 2), ("archie", 75, 35, 59, "pull", 0))
-    for dog, step, x, foot, tag, i in pack:
-        a.shadow(x, foot, cards.sn.frame(f"dog-{dog}@{step}", tag).width)
-    arc(a, bezier((30, 62), (104, 30), (26, -6)), "white")
-    for dog, step, x, foot, tag, i in pack:
-        c = a.dog(dog, tag, x, foot, i, step, shadow=False)
-        a.lead(x, c, 42)
+    shoot = to_image(drawn(PERSON * 0.45, wedding_shoot, flash=True).outlined())
+    a.shadow(10, 34, 20)
+    a.shadow(32, 34, 20)
+    a.paste(shoot, 1, 34 - shoot.height)
+    arc(a, bezier((40, 60), (100, 30), (34, -4)), "white")
+    c = a.dog("archie", "pull", 60, 52, step=75)
+    a.lead(60, c, 50)
     return a
 
 
@@ -1152,51 +1148,20 @@ def slime(a, blobs):
                 a.fill(x, y, 1, 1, "moss" if inside(x, y, 3.5) else "olive" if inside(x, y, 1.2) else "dolive")
 
 
-# A leg splayed out down-left to a white paw, outlined by cards.pixmap; mirrored for one splayed right.
-SPLAYED = ["....bb", "...bb.", "..bb..", "wwb...", "www..."]
-
-
 def card_fish_wade_through():
-    """Wade through: the spilt crate drawn small up the road at the left, its fish slime running down
-    across the wet cobbles under the pack, lime streaks and white glints on it. Duchess picks her way
-    through at the left, a slate fish under her paws; Archie, mid-slip at the right, tips over sideways
-    with a front leg skidding out left and a hind leg out right over a red snapper, haze skid marks behind
-    him, slime and water thrown up either side and white wobble ticks by his head. Brown mud splats on
-    both dogs."""
+    """Wade through: the spilt crate at the right, as the other fish cards show it, its fish slime running
+    down to the left in one olive pool with a dolive rim. Archie wades through it at the left, his paws
+    sunk in the slime and two drops kicked up either side of him."""
     import cards
-    from PIL import Image
     a = cards.Art()
     a.ground("shops")
-    slime(a, [(20, 22, 12, 4), (30, 31, 22, 6), (40, 42, 32, 9), (38, 53, 36, 6)])
-    crate = to_image(drawn(PERSON * 0.6, fish_crates).outlined())
-    a.paste(crate, 18 - crate.width // 2, 25 - crate.height)
-    for x, y, w in ((14, 30, 6), (40, 33, 5), (4, 41, 4), (62, 40, 6), (22, 50, 4), (62, 52, 5)):
-        a.fill(x, y, w, 1, "lime")
-    for x, y in ((19, 30), (44, 33), (67, 40), (7, 41), (65, 52)):
-        a.fill(x, y, 1, 1, "white")
-    a.paste(to_image(drawn(PERSON * 0.7, loose_fish, "slate", "lgrey").outlined()), 4, 47)
-    c = a.dog("duchess", "walk", 16, 56, 1, step=75)
-    a.lead(16, c, 12)
-    cx, foot = 48, 55
-    a.shadow(cx, foot, 28)
-    for pts in (((23, 46), (29, 47), (33, 49)), ((25, 50), (31, 51), (35, 52))):
-        for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
-            a.line(x0, y0, x1, y1, "haze")
-    a.paste(to_image(drawn(PERSON * 0.7, loose_fish, "red", "pink", flip=True, tail=1).outlined()), 52, 45)
-    archie = cards.sn.frame("dog-archie@75", "walk", 1).rotate(-24, Image.NEAREST, expand=True)
-    a.paste(archie, cx - archie.width // 2, foot - archie.height)
-    leg = cards.pixmap(SPLAYED, {"b": "brown", "w": "white"})
-    a.paste(leg, 34, 43)
-    a.paste(leg.transpose(Image.FLIP_LEFT_RIGHT), 52, 42)
-    a.lead(cx, foot - 13, 54)
-    for x, y in ((12, 41), (18, 39), (15, 47), (44, 44), (50, 33)):
-        a.fill(x, y, 2, 2, "brown")
-        a.fill(x + 1, y + 1, 1, 1, "dbrown")
-    a.drops([(33, 45), (30, 49), (66, 44), (69, 48), (64, 40)], "lime")
-    a.drops([(36, 42), (61, 37)], "foam")
-    for x, d in ((38, 1), (62, -1)):
-        a.fill(x, 22, 1, 3, "white")
-        a.fill(x + d, 20, 1, 2, "white")
+    slime(a, [(50, 40, 16, 5), (30, 48, 30, 8)])
+    a.put("fish-crates", "idle", 58, 36)
+    cx, foot = 26, 53
+    c = a.dog("archie", "walk", cx, foot, 1, shadow=False)
+    slime(a, [(cx, foot - 2, 12, 3.5)])
+    a.lead(cx, c, cx + 6)
+    a.drops([(cx - 15, foot - 9), (cx - 18, foot - 5), (cx + 14, foot - 10), (cx + 17, foot - 6)], "lime")
     return a
 
 

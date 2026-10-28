@@ -860,8 +860,8 @@ def speed_lines(a, pts, col="white", down=False):
 
 def swipe_marks(a, x, y):
     """Three white claw slashes in a plum rim, as the effects are rimmed, each falling 9 rows to the right from
-    x, y, 4px apart: the cat's swipe."""
-    pts = [(x + k * 4 + j // 2, y + j - k) for k in range(3) for j in range(9)]
+    x, y, 5px apart so 2px of ground shows between their rims: the cat's swipe."""
+    pts = [(x + k * 5 + j // 3, y + j - k) for k in range(3) for j in range(9)]
     for px, py in pts:
         a.fill(px - 1, py - 1, 3, 3, "plum")
     for px, py in pts:
@@ -870,7 +870,7 @@ def swipe_marks(a, x, y):
 
 def porch_cat_stand():
     """Stand your ground: Archie stands firm on his leash while the cat swipes up at his nose, three white
-    claw slashes across the side of his head and a red scratch on his cheek."""
+    claw slashes beside his head."""
     a = cards.Art()
     a.ground(CABBAGETOWN)
     cat = picture(drawn(ANIMAL, porch_cat, swipe=True))
@@ -878,10 +878,7 @@ def porch_cat_stand():
     a.paste(cat, 18 - cat.width / 2, 46 - cat.height)
     c = a.dog("archie", "walk", 56, 56)
     a.lead(56, c, 64)
-    swipe_marks(a, 38, 11)
-    for k in range(3):
-        a.fill(48 + k, 22 + k, 1, 1, "red")
-        a.fill(50 + k, 21 + k, 1, 1, "red")
+    swipe_marks(a, 34, 11)
     return a
 
 
@@ -956,20 +953,14 @@ def puff(a, x, y):
 
 
 def capybara_drag():
-    """Drag them away: the capybara chewing up the trail at the left, Archie and Biscuit leaning hard toward it
-    with their paws dug in, hauled away by their leashes taut off the bottom right, skid marks behind them and
-    dust kicking up at their paws."""
+    """Drag them away: the capybara chewing up the trail at the left, Archie leaning hard toward it with his
+    paws dug in, hauled away by his leash taut off the bottom right, dust kicking up at his paws."""
     a = cards.Art()
     a.ground(HIGH_PARK)
-    a.put("capybara@62", "idle", 14, 24)
-    for x0, y0, x1, y1 in ((12, 48, 20, 56), (15, 46, 23, 54), (40, 36, 46, 42), (43, 35, 50, 42)):
-        a.line(x0, y0, x1, y1, "bark")
-    c2 = a.dog("biscuit", "pull", 56, 46, step=88, flip=True)
-    c1 = a.dog("archie", "pull", 32, 58, flip=True)
-    a.lead(32, c1, 60, 2)
-    a.lead(56, c2, 70, 2)
-    for x, y in ((20, 54), (40, 55), (46, 43), (64, 44)):
-        puff(a, x, y)
+    a.put("capybara@75", "idle", 16, 34)
+    c = a.dog("archie", "pull", 48, 58, flip=True)
+    a.lead(48, c, 68, 2)
+    puff(a, 36, 53)
     return a
 
 
