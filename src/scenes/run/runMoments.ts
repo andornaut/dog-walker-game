@@ -284,9 +284,9 @@ export class RunMoments {
       sound.play("tip");
       this.hint({ kind: "tip" });
     }
-    // A tip's money changes hands at its pickup.
-    for (const { change, item } of step.tips) {
-      this.addChanges(this.itemPoint(item, pack), [change]);
+    // A tip's label pops by the cash, wherever its pickup (changeLabels).
+    for (const { change } of step.tips) {
+      this.addChanges(overPack(pack), [change]);
     }
     for (const item of step.collected) {
       playEffect(this.scene, "fx-sparkle", "play", overPack(pack), DEPTH.fx);

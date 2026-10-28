@@ -64,10 +64,32 @@ describe("changeLabels", () => {
       {
         amount: 200,
         gain: true,
-        target: { from: AT, kind: "bank" },
+        target: { kind: "cash" },
         text: `+$2 ${causes.tip}, ${gameData.upgrades.bigTipper.name}`,
       },
     ]);
+  });
+
+  it.each([
+    ["a tip", [{ amount: 100, kind: "tip" }], { kind: "cash" }],
+    [
+      "a tip Stinky zeroed",
+      [
+        { amount: 100, kind: "tip" },
+        { amount: -100, kind: "modifier", source: { debuff: "stinky", kind: "debuff" } },
+      ],
+      { kind: "cash" },
+    ],
+    ["a bump", [{ amount: -1000, kind: "bump" }], { from: AT, kind: "bank" }],
+    [
+      "a card option",
+      [{ amount: 500, kind: "effect", source: skunkIgnore }],
+      { from: AT, kind: "bank" },
+    ],
+  ] as const)("sends %s's label to %j", (_name, changeCauses, target) => {
+    const amount = cents(changeCauses.reduce((sum, cause) => sum + cause.amount, 0));
+    const change = { amount, causes: changeCauses, dog: null, kind: "money" } as const;
+    expect(changeLabels(gameData, AT, [change])[0]?.target).toEqual(target);
   });
 
   it("labels no heart change that nets nothing, such as a loss forgiven whole", () => {

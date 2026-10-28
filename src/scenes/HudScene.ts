@@ -27,7 +27,14 @@ import {
 import type { ChangeLabel } from "../hud/hudView";
 import type { MessageLine } from "../hud/messageStrip";
 import { cardOwnerMood, curvePoint, FORGIVEN_EVENT, type ForgivenCue } from "../hud/moments";
-import { MONEY_LABEL, moneyChipPlace, moneyFlightPath, stackOrders } from "../hud/moneyLabels";
+import {
+  cashChipPlace,
+  cashSlot,
+  MONEY_LABEL,
+  moneyChipPlace,
+  moneyFlightPath,
+  stackOrders,
+} from "../hud/moneyLabels";
 import { stripLine } from "../hud/stripLines";
 import {
   buttonIcon,
@@ -197,6 +204,8 @@ export type HudSceneData = { picture: { source: HudWalk; view: ScenePicture } } 
 // pop-ins and the message strip's ageing hold.
 export class HudScene extends Scene {
   private cards: CardView[] = [];
+  // The slots of the tip labels showing in the column under the cash.
+  private cashSlots: number[] = [];
   private debuffBars: DebuffBarView[] = [];
   private debuffFills: GameObjects.Graphics | undefined;
   private dollar: GameObjects.BitmapText | undefined;
@@ -243,6 +252,7 @@ export class HudScene extends Scene {
       showAsPicture(this, picture.view);
     }
     this.drawn = {};
+    this.cashSlots = [];
     this.debuffBars = [];
     this.effectParts = [];
     this.explained = NOT_EXPLAINED;
@@ -823,17 +833,33 @@ export class HudScene extends Scene {
     return index < 0 ? undefined : index;
   }
 
-  // Each change shows where it happened: a money change pops where it changed hands and flies
-  // into the cash; a heart change pops over its dog and flies into its card (heartFeedback.ts),
-  // its label then fading in place on the card's bottom rows, while its owner pops in on the
-  // card for ownerMs.
+  // Each change shows where it happened: a money change pops where it changed hands, a tip's by
+  // the cash, and flies into the cash; a heart change pops over its dog and flies into its card
+  // (heartFeedback.ts), its label then fading in place on the card's bottom rows, while its owner
+  // pops in on the card for ownerMs.
   private floatLabels(ownerMs: number, labels: ChangeLabel[]): void {
     const run = this.walk();
+    const body = pixelFontMetrics(this, "body");
     const money = labels.flatMap((label) =>
       label.target.kind === "bank" ? [{ from: label.target.from, label }] : [],
     );
     const orders = stackOrders(money.map(({ from }) => from));
-    money.forEach(({ from, label }, i) => this.showMoneyLabel(label, from, orders[i] ?? 0));
+    money.forEach(({ from, label }, i) => {
+      const order = orders[i] ?? 0;
+      this.showMoneyLabel(label, (shown) =>
+        moneyChipPlace(body, SCREEN_CONFIG.width, from, order, shown),
+      );
+    });
+    for (const label of labels) {
+      if (label.target.kind === "cash") {
+        const slot = cashSlot(this.cashSlots);
+        this.cashSlots.push(slot);
+        const free = () => {
+          this.cashSlots = this.cashSlots.filter((taken) => taken !== slot);
+        };
+        this.showMoneyLabel(label, (shown) => cashChipPlace(body, slot, shown), free);
+      }
+    }
     const pops = heartPops({ lanes: this.lanes().heartLabels, run }, labels, (slot) => {
       const view = this.cards[slot];
       return view === undefined ? undefined : { card: view.card, parts: cardParts(view) };
@@ -878,17 +904,17 @@ export class HudScene extends Scene {
     }
   }
 
-  // A money change pops on its chip from from, where it changed hands, order places up the
-  // stack of labels popping there, and holds as a heart's pop does; then it flies along a heart's
-  // arc into the cash, which counts it as it lands. Reduced motion keeps the pop and fades it in
-  // place, as a heart lands without flying.
-  private showMoneyLabel(label: ChangeLabel, from: Point, order: number): void {
-    const body = pixelFontMetrics(this, "body");
-    const chip = this.addChangeChip(label, MONEY_LABEL.room, (shown) =>
-      moneyChipPlace(body, SCREEN_CONFIG.width, from, order, shown),
-    );
+  // A money change pops on its chip where place puts it and holds as a heart's pop does; then it
+  // flies along a heart's arc into the cash, which counts it as it lands, and calls done. Reduced
+  // motion keeps the pop and fades it in place, as a heart lands without flying, then calls done.
+  private showMoneyLabel(
+    label: ChangeLabel,
+    place: (shown: { lines: number; scale: number; width: number }) => { chip: Rect; text: Point },
+    done: () => void = () => undefined,
+  ): void {
+    const chip = this.addChangeChip(label, MONEY_LABEL.room, place);
     if (this.walk().reducedMotion()) {
-      this.labels.join(fadeAway(this, chip.parts, { ms: LABEL.ms, rise: 0 }));
+      this.labels.join(fadeAway(this, chip.parts, { ms: LABEL.ms, rise: 0 }, done));
       return;
     }
     const { amount } = label;
@@ -896,6 +922,7 @@ export class HudScene extends Scene {
     const land = () => {
       this.moneyInFlight -= amount;
       chip.parts.forEach((part) => part.destroy());
+      done();
     };
     const path = moneyFlightPath(chip.rect);
     this.labels.after(this, MONEY_LABEL.holdMs, () => {

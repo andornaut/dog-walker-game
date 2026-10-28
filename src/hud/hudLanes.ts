@@ -6,8 +6,8 @@ import { OWNER_TAB } from "./walkHud";
 
 // Each transient layer of the walk's HUD keeps to its own lane, so none covers another. The
 // message strip (messageStrip.ts) runs across the top of the backdrop band under the walk bar,
-// and carries hints, badges and the walk's events. A money change pops where it changed hands
-// and flies to the cash (moneyLabels.ts), in no lane. The lanes:
+// and carries hints, badges and the walk's events. A money change pops where it changed hands,
+// a tip's by the cash, and flies to the cash (moneyLabels.ts), in no lane. The lanes:
 // - ownerTabs: the row the owners' photo tabs pop into, over the road's last rows and the cards'
 //   tops. A heart change's number keeps above it.
 // - heartLabels: a heart change, by slot, on the card's bottom rows.
