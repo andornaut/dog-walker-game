@@ -43,10 +43,10 @@ produce-crates      48x48   minor, 1 lane: a pyramid of three wooden produce cra
                             road, tomatoes on top over bok choy and eggplants, with no awning, posts
                             or wheels. idle (4 frames, 400ms): a bok choy leaf lifts 1px on frame 2
 clothing-rack       48x48   minor, 1 lane: a rolling rack of vintage clothes on chrome uprights and
-                            casters: a mustard corduroy jacket, a lilac floral dress, a denim jacket
+                            casters: a mustard corduroy jacket, a plain lilac dress, a denim jacket
                             and a striped tee. idle (4 frames, 450ms): the dress sways 1px on frame 2
 cargo-bike          48x72   minor mover, 1 lane by 2 rows: a cargo bike riding down a lane at the pack,
-                            facing it: a wooden box of sunflowers, tulips and lilac out front over a
+                            facing it: a wooden box of sunflowers and pink tulips out front over a
                             small front wheel, its rider behind in a rust beanie and a turquoise
                             jacket; the box hides the legs. ride (4 frames, 100ms): the rider sways
                             1px over the bars, the flowers jiggle and a tread line rolls down the tire
@@ -313,9 +313,9 @@ VELVET_IDLE = (None, None, 12, 19), 400
 
 def patio_rail(nod=(), w=ob.span(3)):
     """Front elevation, 3 lanes: a low wrought-iron rail in coal, lit grey along its top and down each
-    2px picket's left, between planter boxes of geraniums at each end; a chalkboard menu on a bark A-frame at
-    the middle with chalk lines on it, and the backs of two green bistro chairs over the rail. nod lists the
-    geranium clumps, by index, that dip 1px."""
+    2px picket's left (5px apart, 8 below obstacles.TEXTURE_MIN), between planter boxes of red geraniums at
+    each end; a chalkboard menu on a bark A-frame at the middle with three chalk lines on it, and the backs of
+    two green bistro chairs over the rail. nod lists the geranium clumps, by index, that dip 1px."""
     g = edged(Grid(w, ob.ROW))
     u = unit(g)
     # the chairs' backs, behind the rail: two uprights and two hoops each
@@ -328,7 +328,7 @@ def patio_rail(nod=(), w=ob.span(3)):
     # the rail: a top bar and a bottom bar with pickets between
     g.rect(2, 12, w - 4, 2, "coal")
     g.rect(2, 12, w - 4, 1, "ash")
-    for x in range(28, round(w) - 28, 5):
+    for x in range(28, round(w) - 28, 5 if scale_of(g) >= ob.TEXTURE_MIN else 8):
         g.rect(x, 14, 2, 11, "coal")
     g.rect(2, 25, w - 4, 2, "coal")
     g.rect(2, 25, w - 4, 1, "ash")
@@ -346,9 +346,7 @@ def patio_rail(nod=(), w=ob.span(3)):
             k += 1
         for i in range(5):
             dy = u if i + (0 if x == 2 else 5) in nod else 0
-            c = "red" if i % 2 == 0 else "pink"
-            g.rect(x + 2 + i * 4.5, 8.5 + (i % 2) + dy, 2, 2, c)
-            g.p(x + 3 + i * 4.5, 10.5 + (i % 2) + dy, "dred")
+            g.rect(x + 2 + i * 4.5, 8.5 + (i % 2) + dy, 2, 2, "red")
     # the chalkboard menu on its A-frame
     c = w / 2
     g.tri((c - 9, 28), (c - 6, 28), (c - 1, 3), "bark")
@@ -356,10 +354,8 @@ def patio_rail(nod=(), w=ob.span(3)):
     g.rect(c - 1, 2, 2, 3, "bark")
     g.rect(c - 7, 7, 14, 16, "clay")
     g.rect(c - 6, 8, 12, 14, "coal")
-    for y, ln in ((10, 8), (13, 6), (16, 9), (19, 5)):
+    for y, ln in ((11, 8), (15, 6), (19, 7)):
         g.rect(c - 4, y, ln, 1, "lgrey")
-    g.rect(c + 3, 13, 2, 1, "pink")
-    g.rect(c + 2, 19, 2, 1, "gold")
     return lit(g, dict(coal=("grey", None), bark=("clay", None), clay=("driftwood", None),
                        canopy=("green", None), pine=("green", None)))
 
@@ -692,9 +688,9 @@ PRODUCE_IDLE = (0, 0, 1, 0), 400
 def clothing_rack(sway=0):
     """A rolling rack of vintage clothes, laid out on 40x40: chrome uprights (lgrey lit white, grey on
     the right) on splayed feet over ink casters, a bar across the top with the hangers' hooks over it, and
-    four garments hung overlapping: a mustard corduroy jacket (ochre, amber wales), a lilac floral dress
-    (pink and white dots), a denim jacket (sky, shaded blue, white stitching) and a turquoise and cream
-    striped tee. sway 1 swings the dress's hem 1px right."""
+    four garments hung overlapping: a mustard corduroy jacket (ochre, two amber wales, none below
+    ob.TEXTURE_MIN), a plain lilac dress, a denim jacket (sky, shaded blue, cyan stitching) and a turquoise and
+    cream striped tee. sway 1 swings the dress's hem 1px right."""
     g = edged(Grid(ob.SIZE, ob.SIZE))
     u = unit(g)
     # uprights, feet and casters
@@ -713,19 +709,16 @@ def clothing_rack(sway=0):
     # the corduroy jacket
     g.tri((5, 5), (13, 5), (9, 3), "ochre")
     g.rect(5, 5, 9, 21, "ochre")
-    for x in (6, 8, 10, 12):
+    for x in (7, 11) if scale_of(g) >= ob.TEXTURE_MIN else ():
         g.rect(x, 9, 1, 16, "amber")
     g.tri((7, 5), (9, 5), (9, 12), "brown")
     g.tri((11, 5), (9, 5), (9, 12), "rust")
-    # the floral dress, its skirt flaring to the hem
+    # the dress, its skirt flaring to the hem
     s = sway * u
     g.rect(13, 5, 7, 9, "lilac")
     g.tri((13, 14), (20, 14), (11 + s, 30), "lilac")
     g.tri((20, 14), (11 + s, 30), (22 + s, 30), "lilac")
     g.tri((18, 14), (20, 14), (22 + s, 30), "violet")
-    for x, y, c in ((14, 7, "pink"), (17, 10, "white"), (15, 17, "pink"), (18, 21, "white"), (14 + s, 25, "white"),
-                    (19 + s, 27, "pink"), (16, 13, "pink")):
-        g.p(x, y, c)
     g.rect(13, 13, 7, 1, "violet")
     # the denim jacket
     g.rect(20, 5, 9, 18, "sky")
@@ -747,15 +740,17 @@ RACK_IDLE = (0, 0, 1, 0), 450
 
 # ---------- the cargo bike ----------
 
-FLOWERS = ((7.5, 25, "yellow", "amber", "dbrown"), (12, 23, "pink", "mauve", "red"),
-           (16.5, 24, "lilac", "violet", "violet"), (21, 23, "yellow", "amber", "dbrown"),
-           (25, 25, "pink", "mauve", "red"), (10, 26.5, "red", "dred", "dred"), (19, 26.5, "lilac", "violet", "violet"))
+# The flowers in the box: (centre column, row, petals, their shade, centre or None). Sunflowers with a dbrown
+# centre and pink tulips, in turn.
+FLOWERS = ((7.5, 25, "yellow", "amber", "dbrown"), (12, 23.5, "pink", "mauve", None),
+           (16.5, 24, "yellow", "amber", "dbrown"), (21, 23.5, "pink", "mauve", None),
+           (25, 25, "yellow", "amber", "dbrown"))
 
 
 def cargo_bike(sway=0, jiggle=0, roll=0):
     """A cargo bike riding down a lane at the pack, facing it, laid out on 32x48: the small front wheel
-    edge-on under a wide wooden box (tan slats lit cream, shaded brown) full of flowers, sunflowers, tulips
-    and lilac over green leaves; behind it the rider in a turquoise jacket with a rust beanie and an ochre
+    edge-on under a wide wooden box (tan slats lit cream, shaded brown) full of flowers, sunflowers (their dark
+    centres at full size and the larger steps) and pink tulips in turn over green leaves; behind it the rider in a turquoise jacket with a rust beanie and an ochre
     pompom, dark curls showing under it, hands on the wide handlebar. sway shifts the rider 1 drawn pixel
     over the bars; jiggle lifts alternate flowers 1px; roll (0 to 3) rolls a grey tread line down the tire."""
     g = edged(Grid(32, 48))
@@ -798,8 +793,9 @@ def cargo_bike(sway=0, jiggle=0, roll=0):
         g.cel(x, 27, 2.2, 2, "canopy", "pine", "green")
     for i, (x, y, c, sh, mid) in enumerate(FLOWERS):
         dy = -u if jiggle and i % 2 == jiggle - 1 else 0
-        g.cel(x, y + dy, 2.2, 2, c, sh)
-        g.p(x, y + dy, mid)
+        g.cel(x, y + dy, 2.4, 2.2, c, sh)
+        if mid and scale_of(g) >= 1:
+            g.rect(x - 0.5, y + dy - 0.5, 1, 1, mid)
     # the box: its slatted front, lit along the top and left, shaded down the right
     g.rect(4, 28, 24, 10, "tan")
     g.rect(4, 28, 24, 1, "cream")
