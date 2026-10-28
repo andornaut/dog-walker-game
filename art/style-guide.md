@@ -277,6 +277,8 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 
 `art/tools/pixel.py` settles every variant as it builds, larger steps first, so no variant is bigger than its ideal (the full size at its scale, rounded half up) or than a larger step, a fill pixel that a row or column it takes out leaves touching transparency takes the outline colour beside it (unless that would take out a 1px feature, such as a sparkle's centre), and its feet line moves less than 1px at a switch (the rules are in `depth_settled`). A set whose variants depend on another set's (`hazards.py` and `depths.py`) settles on that set's exports, so after changing either, build both again until neither changes.
 
+One step's cut is pinned (`PINNED_CUTS` in `pixel.py`): `dog-penny@69` takes out row 27. In her shake frames the collar's and the tag's outlines share one colour, whose count passes the settle's rarity cutoff, so its own choice would cut through her left ear.
+
 ## Road strips
 
 - 320×64 (`art/tools/roads.py`), tiling vertically with no seam: patterns repeat every 64 rows or a divisor of it.

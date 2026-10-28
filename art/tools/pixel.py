@@ -452,13 +452,14 @@ def _opened(frames, r):
     return out
 
 
-def _without_rows(frames, n, first=False, below=None):
+def _without_rows(frames, n, first=False, below=None, picks=()):
     """frames with n rows taken out from inside their opaque bounds (frame 0's when first), or from the rows
     past row below to their last opaque row, then as many clear rows added on top. Each goes where the art
     changes least: the row most like the one above it in every frame and crossing the fewest features 2 rows
-    thin or less, in the longest run of equal rows, nearest the middle. The outline stays closed: a fill pixel
-    the cut leaves on the rim is drawn in the outline colour it lost (see _opened and _Lined)."""
-    for _ in range(n):
+    thin or less, in the longest run of equal rows, nearest the middle. picks, when given, names the row taken
+    out at each step in its place (see PINNED_CUTS). The outline stays closed: a fill pixel the cut leaves on
+    the rim is drawn in the outline colour it lost (see _opened and _Lined)."""
+    for step in range(n):
         top, bottom = opaque_rows(frames[:1] if first else frames)
         rows = range(top + 1, bottom)
         if below is not None:
@@ -508,7 +509,8 @@ def _without_rows(frames, n, first=False, below=None):
             diff = sum(x != y for f in frames for x, y in zip(f[r], f[r - 1]))
             return diff + thin(r), -run(r), abs(r - mid)
 
-        r = min(rows, key=score)
+        r = picks[step] if step < len(picks) else min(rows, key=score)
+        assert r in rows, f"pinned cut {r} is outside rows {rows}"
         opened = _opened(frames, r)
         frames = [[[None] * len(f[0])] + f[:r] + f[r + 1:] for f in frames]
         for i, y, x, line in opened:
@@ -582,12 +584,19 @@ def opaque_cols(frames):
     return opaque_rows(_transposed(frames))
 
 
-def shortened(tags, rows):
-    """tags with frame 0's art cut to at most rows opaque rows, by taking out the rows that change it least
-    (see _without_rows)."""
+def shortened(tags, rows, picks=()):
+    """tags with frame 0's art cut to at most rows opaque rows, by taking out the rows that change it least,
+    or the rows picks names (see _without_rows)."""
     frames = [f for _, fs, _ in tags for f in fs]
     top, bottom = opaque_rows(frames[:1]) or (0, -1)
-    return _regrouped(tags, _without_rows(frames, max(0, bottom - top + 1 - rows), first=True))
+    return _regrouped(tags, _without_rows(frames, max(0, bottom - top + 1 - rows), first=True, picks=picks))
+
+
+# Depth steps whose shortening takes out pinned rows, as the row taken out at each step (see shortened), in
+# place of the settle's choice. dog-penny@69 takes out row 27: in her shake frames the collar's and the tag's
+# outlines share one colour, whose count passes _without_rows's rarity cutoff, so the settle would take out
+# row 14, through her left ear.
+PINNED_CUTS = {"dog-penny@69": (27,)}
 
 
 def depth_settled(sprites, originals=None, apart=()):
@@ -666,7 +675,8 @@ def depth_settled(sprites, originals=None, apart=()):
             left_l, right_l = opaque_cols([frame_l]) or (0, len(frame_l[0]) - 1)
             side_f = max(len(frame0_full[0]), len(frame0_full))
             side = max(len(tags[0][1][0][0]), len(tags[0][1][0]))
-            tags = shortened(tags, min(math.floor((feet_f - top_f + 1) * scale + 0.5), feet_l - top_l + 1))
+            tags = shortened(tags, min(math.floor((feet_f - top_f + 1) * scale + 0.5), feet_l - top_l + 1),
+                             PINNED_CUTS.get(key, ()))
             tags = narrowed(tags, min(math.floor((right_f - left_f + 1) * scale + 0.5), right_l - left_l + 1))
             tags = seated(key, tags, math.ceil(feet_f * side / side_f - 1e-9))
         settled[key] = tags[0][1][0]
