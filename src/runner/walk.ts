@@ -15,7 +15,14 @@ import type { LaneDirection } from "../layout/lanes";
 import { hasObstacleArt, obstacleParts, obstacleSilhouette } from "../layout/obstacleArt";
 import { formationOrder, PART_INSET } from "../layout/packFormation";
 import { itemAt } from "../lib/arrays";
-import { chance, chanceRound, type Random, randomPick, shuffled } from "../lib/random";
+import {
+  chance,
+  chanceRound,
+  type Random,
+  randomPick,
+  shuffled,
+  weightedPick,
+} from "../lib/random";
 import { countBump, countLandedBump, countTally } from "../rules/achievements";
 import { type HeartChange, modifierCauses, type MoneyChange } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
@@ -489,22 +496,6 @@ export function obstacleWeights(
   return positiveWeights(currentZone(data, run).weights.obstacles);
 }
 
-export function pickWeighted<T>(random: Random, entries: readonly (readonly [T, number])[]): T {
-  const total = entries.reduce((sum, [, weight]) => sum + weight, 0);
-  let roll = random() * total;
-  for (const [value, weight] of entries) {
-    roll -= weight;
-    if (roll < 0) {
-      return value;
-    }
-  }
-  const last = entries.at(-1);
-  if (last === undefined) {
-    throw new Error("pickWeighted needs at least one entry");
-  }
-  return last[0];
-}
-
 // The movement a drawn spawn moves with: an obstacle, minor or not, or a lucky encounter with a
 // movement comes as a mover at a chance of share. Other spawns never move and draw nothing, as
 // does any spawn at a share of 0.
@@ -799,8 +790,13 @@ export function spawnQuotas(
   const drawn = <Kind extends WalkItemKind>(
     count: number,
     weights: readonly (readonly [Kind, number])[],
-  ) =>
-    weights.length === 0 ? [] : Array.from({ length: count }, () => pickWeighted(random, weights));
+  ) => {
+    const ids = weights.map(([id]) => id);
+    const odds = weights.map(([, weight]) => weight);
+    return weights.length === 0
+      ? []
+      : Array.from({ length: count }, () => weightedPick(random, ids, odds));
+  };
   const kinds: WalkItemKind[] = [
     ...drawn(scaled("obstacleSpawns", stats.obstacles), obstacleWeights(data, run)),
     ...drawn(scaled("obstacleSpawns", stats.minorObstacles), minorObstacleWeights(data, run)),

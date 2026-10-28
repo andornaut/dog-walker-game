@@ -108,7 +108,6 @@ import {
   movementOf,
   obstacleWeights,
   opensACard,
-  pickWeighted,
   plannedCellInset,
   planZone,
   type RoadGeometry,
@@ -1649,22 +1648,5 @@ describe("obstacleWeights", () => {
       .filter(([, encounter]) => encounter.kind === "obstacle")
       .map(([id]) => id);
     expect(ids.sort()).toEqual(obstacles.sort());
-  });
-});
-
-describe("pickWeighted", () => {
-  it("picks each entry in proportion to its weight", () => {
-    const random = seededRandom(5);
-    const picks = Array.from({ length: 4000 }, () =>
-      pickWeighted(random, [
-        ["a", 3],
-        ["b", 1],
-        ["c", 0],
-      ]),
-    );
-    const share = picks.filter((pick) => pick === "a").length / picks.length;
-    expect(share).toBeGreaterThan(0.7);
-    expect(share).toBeLessThan(0.8);
-    expect(picks).not.toContain("c");
   });
 });

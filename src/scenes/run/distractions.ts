@@ -1,6 +1,6 @@
 import { minorObstacleSpriteKey } from "../../assets/spriteKeys";
 import type { GameData, MinorObstacleId, Zone } from "../../data/types";
-import type { Random } from "../../lib/random";
+import { type Random, weightedPick } from "../../lib/random";
 import { eachRoadsideProp, type RoadsideTable, START_STRIP_LENGTH } from "../../road/roadsideProps";
 import { read } from "../../rules/units";
 import {
@@ -15,7 +15,6 @@ import type { SpawnEvent } from "../../runner/spawning";
 import {
   footprintOf,
   itemHeight,
-  pickWeighted,
   type RoadGeometry,
   type WalkItem,
   type WalkItemKind,
@@ -207,7 +206,11 @@ export function planDistractions(
     if (kinds.length === 0) {
       continue;
     }
-    const key = pickWeighted(() => pick, kinds);
+    const key = weightedPick(
+      () => pick,
+      kinds.map(([kind]) => kind),
+      kinds.map(([, weight]) => weight),
+    );
     const latest = Math.min(stretch * (i + 1) - geometry.cell.length, last);
     planned.push({
       key,
