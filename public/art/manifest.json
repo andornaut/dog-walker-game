@@ -10305,6 +10305,87 @@
       }
     },
     {
+      "key": "tourist-train",
+      "png": "sprites/tourist-train.png",
+      "json": "sprites/tourist-train.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 174
+      }
+    },
+    {
+      "key": "tourist-train@50",
+      "png": "sprites/tourist-train@50.png",
+      "json": "sprites/tourist-train@50.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 87
+      }
+    },
+    {
+      "key": "tourist-train@56",
+      "png": "sprites/tourist-train@56.png",
+      "json": "sprites/tourist-train@56.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 98
+      }
+    },
+    {
+      "key": "tourist-train@62",
+      "png": "sprites/tourist-train@62.png",
+      "json": "sprites/tourist-train@62.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 109
+      }
+    },
+    {
+      "key": "tourist-train@69",
+      "png": "sprites/tourist-train@69.png",
+      "json": "sprites/tourist-train@69.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 120
+      }
+    },
+    {
+      "key": "tourist-train@75",
+      "png": "sprites/tourist-train@75.png",
+      "json": "sprites/tourist-train@75.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 131
+      }
+    },
+    {
+      "key": "tourist-train@81",
+      "png": "sprites/tourist-train@81.png",
+      "json": "sprites/tourist-train@81.json",
+      "anchor": {
+        "feetY": 51,
+        "opaqueWidth": 141
+      }
+    },
+    {
+      "key": "tourist-train@88",
+      "png": "sprites/tourist-train@88.png",
+      "json": "sprites/tourist-train@88.json",
+      "anchor": {
+        "feetY": 55,
+        "opaqueWidth": 152
+      }
+    },
+    {
+      "key": "tourist-train@94",
+      "png": "sprites/tourist-train@94.png",
+      "json": "sprites/tourist-train@94.json",
+      "anchor": {
+        "feetY": 59,
+        "opaqueWidth": 163
+      }
+    },
+    {
       "key": "tourist@50",
       "png": "sprites/tourist@50.png",
       "json": "sprites/tourist@50.json",

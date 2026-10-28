@@ -1,0 +1,104 @@
+{ "frames": {
+   "tourist-train@88 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 154, "h": 56 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 154, "h": 56 },
+    "sourceSize": { "w": 154, "h": 56 },
+    "duration": 100
+   },
+   "tourist-train@88 1.aseprite": {
+    "frame": { "x": 154, "y": 0, "w": 154, "h": 56 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 154, "h": 56 },
+    "sourceSize": { "w": 154, "h": 56 },
+    "duration": 100
+   },
+   "tourist-train@88 2.aseprite": {
+    "frame": { "x": 308, "y": 0, "w": 154, "h": 56 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 154, "h": 56 },
+    "sourceSize": { "w": 154, "h": 56 },
+    "duration": 100
+   },
+   "tourist-train@88 3.aseprite": {
+    "frame": { "x": 462, "y": 0, "w": 154, "h": 56 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 154, "h": 56 },
+    "sourceSize": { "w": 154, "h": 56 },
+    "duration": 100
+   },
+   "tourist-train@88 4.aseprite": {
+    "frame": { "x": 616, "y": 0, "w": 154, "h": 56 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 154, "h": 56 },
+    "sourceSize": { "w": 154, "h": 56 },
+    "duration": 400
+   },
+   "tourist-train@88 5.aseprite": {
+    "frame": { "x": 770, "y": 0, "w": 154, "h": 56 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 154, "h": 56 },
+    "sourceSize": { "w": 154, "h": 56 },
+    "duration": 400
+   },
+   "tourist-train@88 6.aseprite": {
+    "frame": { "x": 924, "y": 0, "w": 154, "h": 56 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 154, "h": 56 },
+    "sourceSize": { "w": 154, "h": 56 },
+    "duration": 400
+   },
+   "tourist-train@88 7.aseprite": {
+    "frame": { "x": 1078, "y": 0, "w": 154, "h": 56 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 154, "h": 56 },
+    "sourceSize": { "w": 154, "h": 56 },
+    "duration": 400
+   },
+   "tourist-train@88 8.aseprite": {
+    "frame": { "x": 1232, "y": 0, "w": 154, "h": 56 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 154, "h": 56 },
+    "sourceSize": { "w": 154, "h": 56 },
+    "duration": 120
+   },
+   "tourist-train@88 9.aseprite": {
+    "frame": { "x": 1386, "y": 0, "w": 154, "h": 56 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 154, "h": 56 },
+    "sourceSize": { "w": 154, "h": 56 },
+    "duration": 120
+   },
+   "tourist-train@88 10.aseprite": {
+    "frame": { "x": 1540, "y": 0, "w": 154, "h": 56 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 154, "h": 56 },
+    "sourceSize": { "w": 154, "h": 56 },
+    "duration": 120
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "tourist-train@88.png",
+  "format": "RGBA8888",
+  "size": { "w": 1694, "h": 56 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "push", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "idle", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "cue", "from": 8, "to": 10, "direction": "forward" }
+  ]
+ }
+}
