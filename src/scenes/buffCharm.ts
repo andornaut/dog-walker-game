@@ -91,7 +91,7 @@ export function glintWell(scene: Scene, group: TimedGroup, well: Rect, depth: nu
   }
 }
 
-// The value a buff made, as floatLabel draws a label: font-title at TITLE_SCALE in forest on
+// The value a buff made, as floatLabel draws a label: font-title at TEXT_SCALE in forest on
 // a floating chip, held until BUFF_POP's fadeAtMs, shownAtMs into its moment, then fading out,
 // rising unless motion is reduced.
 export function floatValue(

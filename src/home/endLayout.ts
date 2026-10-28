@@ -1,5 +1,6 @@
 import { WIDE_BUTTON } from "../layout/screenLayout";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
+import { TEXT_SCALE } from "../ui/textFit";
 
 // The end screen's geometry, with every text at 2x.
 const PANEL = { height: 304, width: 312, x: 24, y: 112 };
@@ -70,9 +71,6 @@ export const END_LAYOUT = {
   titleY: PANEL.y + 18,
 } as const;
 
-// Every text on the end screen is body or title at 2x, or smaller where it would not fit.
-export const END_TEXT_SCALE = 2;
-
 // How wide a fired row's header and a closing line may be: from the text column to 6px inside
 // the bubble's right edge.
 export const QUIP_TEXT_ROOM =
@@ -101,7 +99,7 @@ export function sideTotalLabelRoom(amountWidth: number): number {
 // The capitals' top of the walk's total in the 2x body font, so its capitals end on the row
 // TOTAL's end in the 2x title font, whose capitals start at side.totalY.
 export function sideTotalAmountY(body: FontMetrics, title: FontMetrics): number {
-  return END_LAYOUT.side.totalY + (title.capHeight - body.capHeight) * END_TEXT_SCALE;
+  return END_LAYOUT.side.totalY + (title.capHeight - body.capHeight) * TEXT_SCALE;
 }
 
 // An owner's row: whether the owner fired you, and how many lines its closing line takes.
@@ -112,7 +110,7 @@ export interface QuipRow {
 
 // From a line's capitals to its last line's lowest ink, on lines lines of the body font at 2x.
 function quipTextHeight(body: FontMetrics, lines: number): number {
-  return inkRowsOfLines(body, lines) * END_TEXT_SCALE;
+  return inkRowsOfLines(body, lines) * TEXT_SCALE;
 }
 
 // An owner's row's height, and its bubble's: down to the closing line's lowest ink under the

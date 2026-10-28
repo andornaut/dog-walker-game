@@ -9,6 +9,7 @@ import type { Point } from "../lib/rect";
 import { CREAM_PANEL_COLOURS, drawFramedRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
+import { TEXT_SCALE } from "../ui/textFit";
 import { letterEffect } from "./comicWord";
 import { playTagOnce } from "./sprites";
 import { fadeAway } from "./uiKit";
@@ -16,8 +17,7 @@ import { fadeAway } from "./uiKit";
 // A sidestep puff, 48x48, laid on the dog's frame and lettered with the dodge word.
 const DODGE_ART = { key: "fx-dodge", tag: "play" } as const;
 
-// A floating chip's text is font-title at 2x; the chip reaches 2px past the capitals.
-const TITLE_SCALE = 2;
+// A floating chip's text is font-title at TEXT_SCALE; the chip reaches 2px past the capitals.
 const CHIP_PAD = 2;
 
 interface PackMoment {
@@ -67,12 +67,12 @@ export function floatLabel(
   colour: number,
   timing: { holdMs: number; ms: number; rise: number },
 ): void {
-  const label = addPixelText(scene, 0, 0, text, { colour, font: "title", scale: TITLE_SCALE });
+  const label = addPixelText(scene, 0, 0, text, { colour, font: "title", scale: TEXT_SCALE });
   const title = pixelFontMetrics(scene, "title");
   const width = Math.ceil(label.width) + 2 * CHIP_PAD;
   // A glyph inked above the capitals, such as ♥, grows the chip up to hold it.
   const tops = label.getTextBounds(true).characters.flatMap((char) => (char.h > 0 ? [char.y] : []));
-  const above = Math.max(0, title.capTop - Math.min(title.capTop, ...tops)) * TITLE_SCALE;
+  const above = Math.max(0, title.capTop - Math.min(title.capTop, ...tops)) * TEXT_SCALE;
   label.setPosition(CHIP_PAD, CHIP_PAD + above + label.y);
   floatChip(
     scene,
@@ -88,7 +88,7 @@ export function floatLabel(
 }
 
 // A cream chip in a plum rim round parts, placed from its top-left: width wide, and CHIP_PAD
-// past the title font's capitals at TITLE_SCALE, above more over them. It is centred on the
+// past the title font's capitals at TEXT_SCALE, above more over them. It is centred on the
 // anchor (moved in to stay on screen) with its line's bottom there, and fades away as fade says.
 function floatChip(
   scene: Scene,
@@ -101,12 +101,12 @@ function floatChip(
   const title = pixelFontMetrics(scene, "title");
   const box = scene.add.graphics();
   drawFramedRect(box, CREAM_PANEL_COLOURS, {
-    height: title.capHeight * TITLE_SCALE + above + 2 * CHIP_PAD,
+    height: title.capHeight * TEXT_SCALE + above + 2 * CHIP_PAD,
     width,
     x: 0,
     y: 0,
   });
-  const capTop = anchor.lineBottom - (title.lineHeight - title.capTop) * TITLE_SCALE;
+  const capTop = anchor.lineBottom - (title.lineHeight - title.capTop) * TEXT_SCALE;
   const x = chipLeft(SCREEN_CONFIG.width, anchor.centreX, width);
   const y = capTop - CHIP_PAD - above;
   const chip = scene.add.container(x, y, [box, ...parts]).setDepth(depth);

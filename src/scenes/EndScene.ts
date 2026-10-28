@@ -6,7 +6,6 @@ import { SCREEN_CONFIG } from "../data/screen";
 import {
   breakdownLabelRoom,
   END_LAYOUT,
-  END_TEXT_SCALE,
   endPanelLayout,
   grantedQuipLines,
   QUIP_TEXT_ROOM,
@@ -127,9 +126,9 @@ export class EndScene extends Scene {
       ended === null ? [] : earningsBreakdown(gameData, ended.changes, walk.earnedCents);
     const closing = closingLines(gameData, Math.random, walk);
     const text = (x: number, y: number, value: string, colour: number, originX = 0) =>
-      addPixelText(this, x, y, value, { colour, originX, scale: END_TEXT_SCALE });
+      addPixelText(this, x, y, value, { colour, originX, scale: TEXT_SCALE });
     const title = (x: number, y: number, value: string, colour: number, originX = 0) =>
-      addPixelText(this, x, y, value, { colour, font: "title", originX, scale: END_TEXT_SCALE });
+      addPixelText(this, x, y, value, { colour, font: "title", originX, scale: TEXT_SCALE });
     // A label set in the first of TEXT_FIT_STYLES that fits room.
     const fitted = (label: GameObjects.BitmapText, room: number, x: number, y: number) =>
       fitPixelText(label, { room, styles: TEXT_FIT_STYLES }, x, y);
@@ -139,7 +138,7 @@ export class EndScene extends Scene {
     const wanted = closing.map((line) => {
       const { lines: shown } = withProbe(
         this,
-        { colour: PALETTE.plum, scale: END_TEXT_SCALE },
+        { colour: PALETTE.plum, scale: TEXT_SCALE },
         (probe) => {
           setPixelText(probe, line.text);
           return fitPixelText(probe, quipFit, 0, 0);
