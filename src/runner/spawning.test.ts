@@ -67,6 +67,7 @@ const plan: SpawnPlan<Kind> = {
     { blocksLane: false, count: 3, kind: "treat" },
   ],
   reactionSeconds: 0,
+  riderFollowGap: 30,
   roadLength: 1100,
   scrollSpeed: 100,
   sightLength: 1000,

@@ -1198,7 +1198,7 @@ export function screenHasRoom(
 // mover's body comes: occupy records a mover's body, at distances along the zone, for those.
 // clearOf is true when a mover's body, at distances along the zone, shares no road with a
 // lane-blocking standing spawn placed so far, which a dart may set off over. clearOfRiders is true
-// when a lane-blocking rider's hit box never meets that of one recorded by rode, which a grid of
+// when a lane-blocking rider's hit box keeps riderFollowGap from that of each recorded by rode, which a grid of
 // movers that block no lane leaves out.
 interface MoverGrid {
   block(row: number, lanes: LaneSpan, rows: number, keep: boolean, dart?: boolean): boolean;
@@ -1250,10 +1250,10 @@ function riderSpanOf(
   };
 }
 
-// Whether two riders' hit boxes meet: they share a lane and, at some moment both are on the road,
-// one's travel down it is within the other's hit length. Each one's travel grows at its speed from
-// when it enters, so the gap between them changes linearly over the moments they share.
-export function ridersMeet(a: RiderSpan, b: RiderSpan): boolean {
+// Whether two riders come within gap of each other: they share a lane and, at some moment both are
+// on the road, less than gap of road lies between their hit boxes. Each one's travel grows at its
+// speed from when it enters, so the road between them changes linearly over the moments they share.
+export function ridersMeet(gap: number, a: RiderSpan, b: RiderSpan): boolean {
   if ((a.lanes & b.lanes) === 0) {
     return false;
   }
@@ -1262,10 +1262,12 @@ export function ridersMeet(a: RiderSpan, b: RiderSpan): boolean {
   if (from >= to) {
     return false;
   }
-  // a's travel less b's: a's hit box ends at its travel and starts its length above it.
-  const gap = (scroll: number) => a.speed * (scroll - a.from) - b.speed * (scroll - b.from);
-  const [low, high] = [gap(from), gap(to)].sort((x, y) => x - y) as [number, number];
-  return low < a.length && high > -b.length;
+  // a's travel less b's: a's hit box ends at its travel and starts its length above it, so b's
+  // lies wholly above a's, gap clear, while this is at least a's length and gap, and wholly below
+  // while it is at most less b's length and gap.
+  const ahead = (scroll: number) => a.speed * (scroll - a.from) - b.speed * (scroll - b.from);
+  const [low, high] = [ahead(from), ahead(to)].sort((x, y) => x - y) as [number, number];
+  return low < a.length + gap && high > -(b.length + gap);
 }
 
 // within is the share of the zone's rows the quota's movers are spread over, from and to; the
@@ -1332,7 +1334,7 @@ function standsOf(spot: Spot): MoverStand[] {
 // steps takes fewer or more. A mover with no room at any is dropped, which uses no random draw past
 // its own draws, as the planner drops an obstacle it has no room for. A dart may take cells other
 // spawns hold, and a rider cells only darts hold (MoverGrid.isFree), or another lane-blocking rider
-// holds where their hit boxes never meet (ridersMeet, MoverGrid.clearOfRiders); no other mover
+// holds where their hit boxes keep riderFollowGap apart (ridersMeet, MoverGrid.clearOfRiders); no other mover
 // takes a cell a dart holds. A mover never stands still in place of moving. Each mover makes its
 // own draws (drawMover) before it is placed, and is placed as they have it move, so the path rule
 // holds for the speed and moments it was drawn. Of the places that fit, it takes a start lane from

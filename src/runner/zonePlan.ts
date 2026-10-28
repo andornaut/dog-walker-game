@@ -243,6 +243,7 @@ export function planZone(
     pathStart: road.path[road.path.length - 1]?.lane ?? road.control.target,
     quotas: withHitLengths(spawnQuotas(data, streams, run)),
     reactionSeconds: read(data.tuning, "seconds", "pathReactionMargin"),
+    riderFollowGap: read(data.tuning, "pixels", "riderFollowGap"),
     roadLength: geometry.roadBottom - geometry.roadTop,
     scrollSpeed: walkScrollSpeed(data, run),
     sightLength: geometry.sightLength,

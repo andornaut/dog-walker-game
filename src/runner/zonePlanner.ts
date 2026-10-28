@@ -79,7 +79,7 @@ function moverQuotas<Kind extends string>(
 }
 
 // How many kinds of cell a mover may share (moverMayTake): a stepper, hopper or stalker none, a
-// rider those only darts hold or other riders hold where they never meet, and a dart any but those
+// rider those only darts hold or other riders hold where they keep riderFollowGap apart, and a dart any but those
 // darts hold.
 function sharing(spec: MoverSpec): number {
   const { kind } = spec.motion;
@@ -411,7 +411,8 @@ class ZonePlanner<Kind extends string> {
           dart,
         ),
       clearOf: (body: MoverBody) => this.clearOfStanding(body),
-      clearOfRiders: (ride: RiderSpan) => this.riders.every((other) => !ridersMeet(ride, other)),
+      clearOfRiders: (ride: RiderSpan) =>
+        this.riders.every((other) => !ridersMeet(this.plan.riderFollowGap, ride, other)),
       clearRun: (span: LaneSpan, row: number) => lanes.clearRun(span, row),
       isFree: (motion: MoverPath["motion"], lane: number, row: number) =>
         cells.isFree(motion, lane, row, true),
@@ -813,7 +814,7 @@ class ZonePlanner<Kind extends string> {
 // (placingOrder), so each placed later, freer to share, fits around those placed before. A dart may
 // set off over cells the spawns placed before it hold, crossing over or past them, and a rider may
 // pass over cells only darts hold (moverMayTake), or another lane-blocking rider holds where their
-// hit boxes never meet on the road (ridersMeet). A stop-and-go across, a vehicle crossing side-on,
+// hit boxes keep riderFollowGap apart on the road (ridersMeet). A stop-and-go across, a vehicle crossing side-on,
 // is placed as a dart but has a body, which keeps clear of the lane-blocking standing spawns placed
 // before it. Nothing else placed after a mover takes its cells, another dart included, but a
 // lane-blocking standing spawn: one where a dart passes, which the dart then crosses over or past

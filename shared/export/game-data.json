@@ -2980,6 +2980,7 @@
       "stinkyTipValue": 0
     },
     "pixels": {
+      "riderFollowGap": 64,
       "roadScrollSpeed": 200,
       "spawnRowSpacing": 213,
       "swipeStartDistance": 16,

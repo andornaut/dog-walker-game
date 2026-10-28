@@ -182,6 +182,9 @@ export const TUNING = {
   },
   // Screen pixels at the 360x560 render size, or pixels per second for a speed.
   pixels: {
+    // Two riders in one lane keep at least this much road between their hit boxes at every moment
+    // both are on the road: a cell.
+    riderFollowGap: 64,
     roadScrollSpeed: 200,
     // Road distance between rows of spawns; a row is all spawns at one distance.
     spawnRowSpacing: 213,

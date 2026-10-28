@@ -61,7 +61,8 @@ export function quotaFootprint(quota: Pick<SpawnQuota<string>, "footprint">): Fo
 // the pack no sooner than that long after the zone starts: rows at negative distances are on the
 // road in view as the zone starts. pathStart is the lane the zone's guaranteed path starts in
 // (planSpawns). fixedKinds are the zone's fixed obstacles, which a lane-blocking standing spawn of
-// one of them with no room is swapped among (planSpawns).
+// one of them with no room is swapped among (planSpawns). riderFollowGap is the least road between
+// two lane-blocking riders' hit boxes in one lane while both are on the road (ridersMeet).
 export interface SpawnPlan<Kind extends string> {
   cellInset: number;
   cellLength: number;
@@ -80,6 +81,7 @@ export interface SpawnPlan<Kind extends string> {
   pathStart: number;
   quotas: readonly SpawnQuota<Kind>[];
   reactionSeconds: number;
+  riderFollowGap: number;
   roadLength: number;
   scrollSpeed: number;
   sightLength: number;
