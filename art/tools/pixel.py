@@ -58,8 +58,9 @@ DARKER.update(dict(p.split(":") for p in (
     "58b8c9:2f7fa6 2f7fa6:1d5576 1d5576:262b44 f9c74f:feae34 ff9e6b:f77622 cfe3ea:c0cbdc "
     "3d86e0:2654b0 2654b0:124e89"
 ).split()))
-# The contrast roads: dslate (dark, the Distillery District's), then tan, pink and skin2 (light).
-ROADS = ("3a4466", "e4a672", "f6757a", "c28569")
+# The contrast roads: dslate (dark, the Distillery District's), then the roads an outline must hold 3:1 on: tan,
+# pink and skin2 (light) and Kensington Market's stone (mid grey), which takes it nearly to ink.
+ROADS = ("3a4466", "e4a672", "f6757a", "c28569", "8a857c")
 # The zone roads, the preview grounds when a set names none: Cabbagetown's grey, High Park's tan, the
 # Distillery District's dslate, Kensington Market's stone, The Beaches' cream and Yonge Street's shale.
 ZONE_ROADS = ("8b9bb4", "e4a672", "3a4466", "8a857c", "ead4aa", "353b45")
@@ -98,7 +99,7 @@ def scale_of(g):
 
 def road_edge(c):
     """A road sprite's outline for fill c: two ramp steps darker, then on down the ramp until it holds 3:1
-    against the three light roads. The fill inside it carries the dslate road."""
+    against the light roads and the stone road (ROADS[1:]). The fill inside it carries the dslate road."""
     out = DARKER[DARKER[c]]
     while DARKER[out] != out and any(contrast(out, r) < 3 for r in ROADS[1:]):
         out = DARKER[out]
