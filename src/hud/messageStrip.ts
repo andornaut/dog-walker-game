@@ -1,6 +1,7 @@
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
+import { clamp01 } from "../lib/numbers";
 import type { Point, Rect } from "../lib/rect";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { effectIconKey, type EffectItem } from "./effectIcons";
@@ -343,5 +344,5 @@ export function stepMessageStrip(
 // How opaque the shown line is: whole, fading out over the last fadeMs of its life.
 export function lineAlpha(timing: MessageTiming, line: ShownLine): number {
   const left = (timing.lifeMs - line.ageMs) / timing.fadeMs;
-  return Math.min(1, Math.max(0, left));
+  return clamp01(left);
 }

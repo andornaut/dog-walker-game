@@ -1,4 +1,5 @@
 import { laneDirectionForKey } from "../input/keyBindings";
+import { clamp01 } from "../lib/numbers";
 import type { Rect } from "../lib/rect";
 import type { Settings } from "../save/schema";
 import { type CloseControl, closeControl } from "../ui/closeControl";
@@ -25,7 +26,7 @@ export interface SliderTrack {
 // The step a finger at x picks: the knob's centre follows the finger, held to the track.
 export function volumeStepAt(track: SliderTrack, x: number): number {
   const fraction = (x - track.x - track.knobWidth / 2) / (track.width - track.knobWidth);
-  return Math.round(Math.min(1, Math.max(0, fraction)) * VOLUME_STEPS);
+  return Math.round(clamp01(fraction) * VOLUME_STEPS);
 }
 
 // The knob's left edge at a step.

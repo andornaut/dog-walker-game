@@ -1,5 +1,6 @@
 import { minorObstacleSpriteKey } from "../../assets/spriteKeys";
 import type { GameData, MinorObstacleId, Zone } from "../../data/types";
+import { clamp01 } from "../../lib/numbers";
 import { type Random, weightedPick } from "../../lib/random";
 import { eachRoadsideProp, type RoadsideTable, START_STRIP_LENGTH } from "../../road/roadsideProps";
 import { read } from "../../rules/units";
@@ -431,7 +432,7 @@ function outAt(
   distraction: Distraction,
   share: number,
 ): { inward: boolean; moving: boolean; out: number } {
-  const ease = (from: number, span: number) => Math.min(1, Math.max(0, (share - from) / span));
+  const ease = (from: number, span: number) => clamp01((share - from) / span);
   if (distraction.pattern === "visit") {
     const { stand, stepIn, waitFrom, waitSpan } = TIMELINE.visit;
     const wait = waitFrom + waitSpan * distraction.step;
@@ -480,7 +481,7 @@ function distractionAt(
   out.moving = step.moving;
   // The art faces right: it faces left walking out on the left side or in on the right.
   out.flip = step.inward === (side === 1);
-  out.alpha = Math.min(1, Math.max(0, (VERGE_OUT + FADE_OUT - step.out) / FADE_OUT));
+  out.alpha = clamp01((VERGE_OUT + FADE_OUT - step.out) / FADE_OUT);
   return true;
 }
 

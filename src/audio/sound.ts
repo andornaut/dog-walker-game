@@ -3,6 +3,7 @@
 
 import { kebabCase } from "../assets/spriteKeys";
 import type { Encounter, EncounterId } from "../data/types";
+import { clamp01 } from "../lib/numbers";
 
 export type BaseCue =
   "badge" | "bark" | "bump" | "cardOpen" | "fired" | "newBest" | "tip" | "treat";
@@ -87,7 +88,7 @@ export function clampVolume(volume: number): number {
   if (Number.isNaN(volume)) {
     return 0;
   }
-  return Math.min(1, Math.max(0, volume));
+  return clamp01(volume);
 }
 
 // Channel volume times the master mute (silent while muted or hidden). While the player has

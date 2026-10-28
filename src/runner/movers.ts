@@ -1,6 +1,7 @@
 import type { MoveCount, MovementKind } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { itemAt } from "../lib/arrays";
+import { clamp01 } from "../lib/numbers";
 import { type Random, randomInt, randomPick, seededRandom, weightedPick } from "../lib/random";
 import type { RoadItem } from "./roadItems";
 import { nthStretch, rowsWithin, WHOLE_ZONE } from "./stretches";
@@ -112,9 +113,7 @@ export interface RideMerge {
 // and all of it after.
 function mergedLanes(path: Extract<MoverPath, { motion: "ride" }>, since: number): number {
   const { merge } = path;
-  return merge === undefined
-    ? 0
-    : merge.lanes * Math.min(1, Math.max(0, (since - merge.at) / merge.length));
+  return merge === undefined ? 0 : merge.lanes * clamp01((since - merge.at) / merge.length);
 }
 
 // Whether a rider is moving across into its merge lane, since scroll after its cue appeared.
@@ -336,7 +335,7 @@ export interface RoadPoint {
 
 // How far through a step a mover is, from 0 before it to 1 after it.
 function stepDone(step: MoverStep, since: number): number {
-  return Math.min(1, Math.max(0, (since - step.at) / step.length));
+  return clamp01((since - step.at) / step.length);
 }
 
 export function moverPlace(laneCount: number, path: MoverPath, since: number): MoverPlace {

@@ -1,3 +1,4 @@
+import { clamp01 } from "../lib/numbers";
 import type { Point, Rect } from "../lib/rect";
 
 // The loading screen's art, placed as art/tools/screens.py draws it, in screen pixels.
@@ -30,8 +31,6 @@ const PHASES: Readonly<Record<BootPhase, { from: number; to: number }>> = {
   network: { from: 0, to: 0.9 },
   processing: { from: 0.9, to: 1 },
 };
-
-const clamp01 = (value: number): number => Math.min(1, Math.max(0, value));
 
 // The whole boot's progress, from 0 to 1, given how far through its phase boot is.
 export function bootProgress(phase: BootPhase, fraction: number): number {

@@ -1,4 +1,5 @@
 import type { GameData } from "../../data/types";
+import { clamp01 } from "../../lib/numbers";
 import { pixels } from "../../rules/units";
 import { advanceLaneControl } from "../../runner/laneControl";
 import type { SessionInput } from "../../runner/session";
@@ -12,7 +13,7 @@ import { laneMotionConfig, steerWalk, type Walk, type WalkItem } from "../../run
 
 // How far toward the next step a frame is: its banked time over a step, within 0 to 1.
 export function stepAlpha(bankedMs: number, stepMs: number): number {
-  return Math.min(1, Math.max(0, bankedMs / stepMs));
+  return clamp01(bankedMs / stepMs);
 }
 
 function lerp(alpha: number, from: number, to: number): number {

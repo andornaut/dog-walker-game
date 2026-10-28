@@ -1,3 +1,4 @@
+import { clamp01 } from "../lib/numbers";
 import type { Rect } from "../lib/rect";
 
 // Beside a list longer than its view: a trackWidth-wide track at x, as tall as the view, and in
@@ -25,7 +26,7 @@ export function scrollbarRects(
   const { thumbInset, thumbMin, thumbWidth, trackWidth, x } = spec;
   const inner = view.height - 2 * thumbInset;
   const height = Math.max(thumbMin, Math.round((inner * view.height) / (view.height + max)));
-  const share = Math.min(1, Math.max(0, y / max));
+  const share = clamp01(y / max);
   return {
     thumb: {
       height,

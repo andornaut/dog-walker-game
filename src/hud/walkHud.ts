@@ -3,6 +3,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { DebuffId, DogId, GameData } from "../data/types";
 import type { ScreenLayout } from "../layout/screenLayout";
 import { fillNames } from "../lib/lines";
+import { clamp01 } from "../lib/numbers";
 import { containsPoint, insetRect, type Point, type Rect } from "../lib/rect";
 import { walkLength } from "../rules/route";
 import { zoneLength } from "../runner/walk";
@@ -158,7 +159,7 @@ export function debuffBarRects(bar: Rect, count: number): Rect[] {
 
 // The fill's width with secondsLeft of seconds to go.
 export function debuffFillWidth(secondsLeft: number, seconds: number): number {
-  const share = seconds > 0 ? Math.min(1, Math.max(0, secondsLeft / seconds)) : 0;
+  const share = seconds > 0 ? clamp01(secondsLeft / seconds) : 0;
   return Math.round(DEBUFF_BAR.fill.width * share);
 }
 
@@ -184,7 +185,7 @@ export function zoneShare(
   run: Pick<RunState, "zoneDistance">,
 ): number {
   const length = zoneLength(data);
-  return length > 0 ? Math.min(1, Math.max(0, run.zoneDistance / length)) : 0;
+  return length > 0 ? clamp01(run.zoneDistance / length) : 0;
 }
 
 interface ZoneProgressLayout {
@@ -201,7 +202,7 @@ export function zoneProgressLayout(strip: Rect, share: number): ZoneProgressLayo
   const { border, colours } = ZONE_PROGRESS;
   const frame = strip;
   const track = insetRect(border, frame);
-  const width = Math.floor(track.width * Math.min(1, Math.max(0, share)));
+  const width = Math.floor(track.width * clamp01(share));
   const rowHeight = track.height / colours.fill.length;
   const fills = colours.fill.map((colour, i) => ({
     colour,
