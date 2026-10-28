@@ -144,6 +144,50 @@
     "walkTo": null,
     "lawn": "none",
     "lawnColours": null,
-    "leaves": false
+    "leaves": false,
+    "pools": [
+      {
+        "coreColour": "dstone",
+        "edgeColour": "ash",
+        "edgeWidth": 10,
+        "every": 320,
+        "from": 166,
+        "length": 112,
+        "offset": {
+          "left": 0,
+          "right": 160
+        },
+        "shape": "ellipse",
+        "to": 206
+      },
+      {
+        "coreColour": "cobalt",
+        "edgeColour": "blue",
+        "edgeWidth": 8,
+        "every": 1280,
+        "from": 170,
+        "length": 112,
+        "offset": {
+          "left": 160,
+          "right": 320
+        },
+        "shape": "ellipse",
+        "to": 202
+      },
+      {
+        "coreColour": "mauve",
+        "edgeColour": "purple",
+        "edgeWidth": 10,
+        "every": 1280,
+        "from": 170,
+        "length": 112,
+        "offset": {
+          "left": 800,
+          "right": 960
+        },
+        "shape": "ellipse",
+        "to": 202
+      }
+    ]
   }
 }
