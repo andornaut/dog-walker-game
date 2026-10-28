@@ -265,6 +265,8 @@ function sharesRoad(a: MaskedRoad, b: MaskedRoad): boolean {
 class ZonePlanner<Kind extends string> {
   private readonly cells: SpawnCells;
   private readonly events: SpawnEvent<Kind>[] = [];
+  // The red herring crossers, scenery the walk never reads (herringSpawn).
+  private readonly herrings: SpawnEvent<Kind>[] = [];
   private readonly lanes: LaneBlocks;
   // The lane-blocking movers' bodies, as lane masks and distances along the zone.
   private readonly moverBodies: MaskedRoad[] = [];
@@ -307,8 +309,8 @@ class ZonePlanner<Kind extends string> {
     this.cells = new SpawnCells(rows.length, plan.laneCount, reserved);
   }
 
-  // Places every spawn, in the order planSpawns gives, and returns them.
-  place(): SpawnEvent<Kind>[] {
+  // Places every spawn, in the order planSpawns gives, and returns them and the red herrings.
+  place(): { events: SpawnEvent<Kind>[]; herrings: SpawnEvent<Kind>[] } {
     this.placeStanding((quota) => quota.first === true, this.placeMoving(true));
     this.placeMoving(false);
     this.placeStanding((quota) => quota.first !== true && quota.blocksLane, []);
@@ -316,7 +318,7 @@ class ZonePlanner<Kind extends string> {
     const stilledPrizes = this.placePrizes();
     this.holdRests();
     this.placeStanding((quota) => quota.first !== true && !quota.blocksLane, stilledPrizes);
-    return this.events;
+    return { events: this.events, herrings: this.herrings };
   }
 
   // A lane-blocking standing spawn's hit box, from its row up the road for its hit length, in
@@ -414,6 +416,7 @@ class ZonePlanner<Kind extends string> {
       clearOfRiders: (ride: RiderSpan) =>
         this.riders.every((other) => !ridersMeet(this.plan.riderFollowGap, ride, other)),
       clearRun: (span: LaneSpan, row: number) => lanes.clearRun(span, row),
+      heldLanes: (row: number) => lanes.heldAt(row),
       isFree: (motion: MoverPath["motion"], lane: number, row: number) =>
         cells.isFree(motion, lane, row, true),
       // Only the cells not yet taken use up room: a dart may set off over taken ones.
@@ -464,7 +467,7 @@ class ZonePlanner<Kind extends string> {
     const quotas = placingOrder(
       moverQuotas(true, plan.quotas).filter((quota) => quota.first === first),
     );
-    const { dropped, spawns } = placeMovers(
+    const { dropped, herrings, spawns } = placeMovers(
       this.streams,
       moverRoadOf(plan, this.spacing),
       plan.moverCaps,
@@ -474,6 +477,7 @@ class ZonePlanner<Kind extends string> {
       quotas,
     );
     this.events.push(...spawns);
+    this.herrings.push(...herrings);
     for (const { distance, kind, mover } of spawns) {
       const quota = quotas.find((other) => other.kind === kind);
       const footprint = quota?.spec.footprint ?? SINGLE_CELL;
@@ -859,9 +863,12 @@ export function planSpawns<Kind extends string>(
     throw new Error("The path must start on the road");
   }
   const path = drawPath(streams, plan, rows.length);
-  const events = new ZonePlanner(streams, plan, spacing, rows, path).place();
+  const { events, herrings } = new ZonePlanner(streams, plan, spacing, rows, path).place();
+  const byDistance = (a: SpawnEvent<Kind>, b: SpawnEvent<Kind>) =>
+    a.distance - b.distance || a.lane - b.lane;
   return {
-    events: events.sort((a, b) => a.distance - b.distance || a.lane - b.lane),
+    events: events.sort(byDistance),
+    herrings: herrings.sort(byDistance),
     path: path.map((lane, row) => ({ distance: itemAt(rows, row), lane })),
   };
 }

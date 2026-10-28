@@ -350,7 +350,17 @@ export const MINOR_OBSTACLES = {
     zones: ["homeStretch", "shops", "street"],
   },
   touristTrain: {
-    movement: { kind: "stopAndGoAcross", speed: 0.55, stopSeconds: 1.6 },
+    movement: {
+      herringShare: "touristTrainHerringShare",
+      kind: "stopAndGoAcross",
+      speed: 0.55,
+      stopSeconds: 1.6,
+      stops: [
+        [0, 2],
+        [1, 3],
+        [2, 4],
+      ],
+    },
     name: "Tourist train",
     shape: { lanes: 3, rows: 1 },
     zones: ["park"],
@@ -363,7 +373,7 @@ export const MINOR_OBSTACLES = {
     zones: ["homeStretch"],
   },
   ttcBusCrossing: {
-    movement: { kind: "stopAndGoAcross", speed: 0.65, stopSeconds: 1 },
+    movement: { kind: "stopAndGoAcross", speed: 0.65, stopSeconds: 1, stops: [[1, 3]] },
     name: "Crosstown bus",
     shape: { lanes: 3, rows: 1 },
     zones: ["homeStretch"],

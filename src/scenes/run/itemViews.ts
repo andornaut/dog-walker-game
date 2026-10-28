@@ -17,14 +17,17 @@ import type { EncounterId, GearId, HintTrigger, MinorObstacleId } from "../../da
 import { moverHintTriggers } from "../../hud/hintTriggers";
 import { obstacleParts } from "../../layout/obstacleArt";
 import { itemAt } from "../../lib/arrays";
+import { getOrInsertComputed } from "../../lib/maps";
 import { keysOf } from "../../lib/records";
+import { herringNow } from "../../road/herrings";
 import { type KeptScenery, struckBy, struckNow } from "../../road/struckScenery";
 import { goesToVerge, vergeNow } from "../../road/vergeScenery";
 import { moverTell } from "../../runner/movers";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
+import type { SpawnEvent } from "../../runner/spawning";
 import { type RoadGeometry, type Walk, type WalkStep } from "../../runner/walk";
 import { walkGeometry } from "../../runner/walkGeometry";
-import { itemCategory, type WalkItem } from "../../runner/walkItems";
+import { itemCategory, type WalkItem, type WalkItemKind } from "../../runner/walkItems";
 import { PALETTE } from "../../ui/phaser/palette";
 import { addStandingSprite, ensurePlaceholder } from "../sprites";
 import { applyItemCue } from "./itemCueViews";
@@ -95,12 +98,19 @@ export function ensureRoadPlaceholders(scene: Scene): void {
   add(SKUNK_CLOUD_KEY, skunk.kind === "obstacle" ? skunk.shape.lanes : 1);
 }
 
+// The flat road row an item stands on: its bottom.
+function itemBottom(shown: Pick<WalkItem, "height" | "y">): number {
+  return shown.y + shown.height;
+}
+
 // Where a mover's arrow sits among its parts: body, sign, arrow, wander mark, then any that go
 // with its body.
 const MOVER_ARROW_PART = 2;
 
 // The sprites of everything spawned on the road, by item id.
 export class ItemViews {
+  // The red herring crossers on the road, by their planned spawn.
+  private readonly herrings = new Map<SpawnEvent<WalkItemKind>, ItemView>();
   private readonly hint: (event: HintTrigger) => void;
   private readonly scene: Scene;
   // Obstacles out of play, kept as scenery until they scroll off, by item id.
@@ -163,6 +173,37 @@ export class ItemViews {
     }
     this.drawStruck(walk, geometry, frame);
     this.drawVerge(walk, geometry, halted, frame);
+    this.drawHerrings(walk, geometry, halted, frame);
+  }
+
+  // Each red herring crosser on the road now (herringNow), drawn as its mover is, with no cue; none
+  // with reduced motion, as no distraction is.
+  private drawHerrings(
+    walk: Walk,
+    geometry: RoadGeometry,
+    halted: boolean,
+    frame: StandFrame,
+  ): void {
+    const shown = new Set<SpawnEvent<WalkItemKind>>();
+    for (const herring of frame.still ? [] : walk.road.herrings) {
+      const item = herringNow(gameData, geometry, walk.run.zoneDistance, herring);
+      if (item === null) {
+        continue;
+      }
+      shown.add(herring);
+      const view = getOrInsertComputed(
+        herring,
+        () => ({ parts: this.moverParts(herring.kind) }),
+        this.herrings,
+      );
+      drawMover(item, view, geometry.roadTop, halted, frame);
+    }
+    for (const [herring, view] of this.herrings) {
+      if (!shown.has(herring)) {
+        view.parts.forEach(({ sprite }) => sprite.destroy());
+        this.herrings.delete(herring);
+      }
+    }
   }
 
   // Each dart kept on the verge where its path and the road's scroll put it, drawn as a live
@@ -257,17 +298,43 @@ export class ItemViews {
   // lucky find or a gear drop on its frame's bottom. An obstacle draws obstacleParts, which it
   // collides as.
   private addView(item: WalkItem): ItemView {
-    const { scene } = this;
-    const has = (key: string) => scene.textures.exists(key);
-    const bottom = (shown: Pick<WalkItem, "height" | "y">) => shown.y + shown.height;
+    const has = (key: string) => this.scene.textures.exists(key);
     const category = itemCategory(gameData, item.kind);
     const lucky = category === "lucky";
-    const part = (key: string, overrides: Partial<Omit<ItemPart, "key" | "sprite">> = {}) => {
+    const part = this.partMaker(item.kind);
+    let parts: ItemPart[];
+    if (item.mover !== undefined) {
+      parts = this.moverParts(item.kind);
+    } else if (item.kind === "tip" || item.kind === "treat") {
+      parts = [part(item.kind)];
+    } else if (lucky) {
+      parts = [part(encounterSpriteKey(item.kind as EncounterId))];
+    } else if (category === "gear") {
+      parts = [part(gearDropSpriteKey(item.kind as GearId))];
+    } else {
+      parts = obstacleParts(gameData, has, item.kind as EncounterId | MinorObstacleId, false).map(
+        ({ behind, dx, flat, key }) =>
+          part(key, { dx, flat, footY: (shown) => itemBottom(shown) - behind }),
+      );
+    }
+    const view = { parts };
+    this.views.set(item.id, view);
+    return view;
+  }
+
+  // Makes the sprites of an item of a kind, standing on its feet: a lucky find's and a gear drop's
+  // on its frame's bottom, anything else's on its anchor.
+  private partMaker(
+    kind: WalkItemKind,
+  ): (key: string, overrides?: Partial<Omit<ItemPart, "key" | "sprite">>) => ItemPart {
+    const { scene } = this;
+    const category = itemCategory(gameData, kind);
+    return (key, overrides = {}) => {
       const made: ItemPart = {
         dx: 0,
-        feet: lucky || category === "gear" ? "bottom" : "anchor",
+        feet: category === "lucky" || category === "gear" ? "bottom" : "anchor",
         flat: false,
-        footY: bottom,
+        footY: itemBottom,
         key,
         lift: 0,
         sprite: addStandingSprite(scene, key, 0, 0),
@@ -278,37 +345,27 @@ export class ItemViews {
       }
       return made;
     };
-    let parts: ItemPart[];
-    if (item.mover !== undefined) {
-      const kind = item.kind as EncounterId | MinorObstacleId;
-      const body = moverBodyKey(scene, kind);
-      const drawn = obstacleParts(gameData, has, kind, true);
-      const behind = drawn.find(({ key }) => key === body)?.behind ?? 0;
-      parts = [
-        part(body, { footY: (shown) => bottom(shown) - behind }),
-        part(WARNING_KEY),
-        part(WARNING_ARROW_KEY),
-        part(WARNING_WANDER_KEY),
-        ...drawn
-          .filter(({ key }) => key !== body)
-          .map(({ behind: back, dx, flat, key }) =>
-            part(key, { dx, flat, footY: (shown) => bottom(shown) - back }),
-          ),
-      ];
-    } else if (item.kind === "tip" || item.kind === "treat") {
-      parts = [part(item.kind)];
-    } else if (lucky) {
-      parts = [part(encounterSpriteKey(item.kind as EncounterId))];
-    } else if (category === "gear") {
-      parts = [part(gearDropSpriteKey(item.kind as GearId))];
-    } else {
-      parts = obstacleParts(gameData, has, item.kind as EncounterId | MinorObstacleId, false).map(
-        ({ behind, dx, flat, key }) =>
-          part(key, { dx, flat, footY: (shown) => bottom(shown) - behind }),
-      );
-    }
-    const view = { parts };
-    this.views.set(item.id, view);
-    return view;
+  }
+
+  // A mover's sprites: its body, its cue's sign, arrow and wander mark, then its other parts.
+  private moverParts(item: WalkItemKind): ItemPart[] {
+    const { scene } = this;
+    const has = (key: string) => scene.textures.exists(key);
+    const part = this.partMaker(item);
+    const kind = item as EncounterId | MinorObstacleId;
+    const body = moverBodyKey(scene, kind);
+    const drawn = obstacleParts(gameData, has, kind, true);
+    const behind = drawn.find(({ key }) => key === body)?.behind ?? 0;
+    return [
+      part(body, { footY: (shown) => itemBottom(shown) - behind }),
+      part(WARNING_KEY),
+      part(WARNING_ARROW_KEY),
+      part(WARNING_WANDER_KEY),
+      ...drawn
+        .filter(({ key }) => key !== body)
+        .map(({ behind: back, dx, flat, key }) =>
+          part(key, { dx, flat, footY: (shown) => itemBottom(shown) - back }),
+        ),
+    ];
   }
 }

@@ -2747,9 +2747,24 @@
     {
       "id": "touristTrain",
       "movement": {
+        "herringShare": "touristTrainHerringShare",
         "kind": "stopAndGoAcross",
         "speed": 0.55,
-        "stopSeconds": 1.6
+        "stopSeconds": 1.6,
+        "stops": [
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            4
+          ]
+        ]
       },
       "name": "Tourist train",
       "shape": {
@@ -2791,7 +2806,13 @@
       "movement": {
         "kind": "stopAndGoAcross",
         "speed": 0.65,
-        "stopSeconds": 1
+        "stopSeconds": 1,
+        "stops": [
+          [
+            1,
+            3
+          ]
+        ]
       },
       "name": "Crosstown bus",
       "shape": {
@@ -2995,6 +3016,7 @@
       },
       "shyHopperShare": 0.5,
       "smallDodgeChance": 0.25,
+      "touristTrainHerringShare": 0.33,
       "whistleDodgeChance": 0.25
     },
     "seconds": {

@@ -138,9 +138,17 @@ function moverMotion(
   switch (movement.kind) {
     case "stopAndGoAcross":
       return {
+        ...(movement.herringShare === undefined
+          ? {}
+          : {
+              herring: {
+                endRoadShare: read(tuning, "multipliers", "distractionEndRoadShare"),
+                share: read(tuning, "probability", movement.herringShare),
+              },
+            }),
         kind: "cross",
         lanesPerSecond: read(tuning, "counts", "dartLanesPerSecond") * movement.speed,
-        pauseSeconds: movement.stopSeconds,
+        pause: { seconds: movement.stopSeconds, stops: movement.stops },
         ...crossStart(tuning),
         stopLanes: { max: 1, min: 1 },
         stopShare: 0,
@@ -246,7 +254,8 @@ function moverMotion(
 // follower, a stop-and-go and a sway draw nothing here (patternMotion). A dive is a dart that
 // always stops in a lane, never on the verge, sliding its last lane. A merge is a rider that
 // changes lane once. A stop-and-go across is a dart as wide as its footprint that never stops for
-// good or turns back, pausing once in the middle of the road. A hopper may make
+// good or turns back, pausing once in one of its stops, and of which a share may be red
+// herrings, which the planner leaves off the road (placeMovers). A hopper may make
 // any hops it can, as many as its drawn count, of up to HOP_SEQUENCES_MOST ways for each count,
 // drawn here from the movers stream where there are more. The planner takes whichever way keeps
 // the road passable, drawing among those from the zone's seed.

@@ -126,10 +126,12 @@ export type WalkData = Pick<
 // Everything on the road that the run state does not hold. pending is this zone's spawns
 // not yet in view, at zone distances. path is this zone's guaranteed path, at zone distances,
 // empty before the first zone is planned. planned is what this zone's plan asked for from the
-// tuning counts and weights, which the simulator compares with what it placed. speedFactor scales
+// tuning counts and weights, which the simulator compares with what it placed. herrings are this
+// zone's red herring crossers, at zone distances, scenery the walk never reads. speedFactor scales
 // the scroll speed, for testing. hitStop is set while a hit or a firing holds the walk still.
 export interface Road {
   control: LaneControl;
+  herrings: readonly SpawnEvent<WalkItemKind>[];
   hitStop: HitStop | null;
   invulnerableSeconds: number;
   items: readonly WalkItem[];
@@ -375,6 +377,7 @@ export function zoneLength(data: Pick<GameData, "tuning">): Pixels {
 export function startRoad(laneCount: number, speedFactor = 1): Road {
   return {
     control: laneControlIn(stillInLane(Math.floor(laneCount / 2))),
+    herrings: [],
     hitStop: null,
     invulnerableSeconds: 0,
     items: [],

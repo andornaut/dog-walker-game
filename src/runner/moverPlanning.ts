@@ -1,5 +1,5 @@
-import type { MoveCount, MovementKind } from "../data/types";
-import type { LaneDirection } from "../layout/lanes";
+import type { MoveCount, MovementKind, StopLanes } from "../data/types";
+import { type LaneDirection, laneMask } from "../layout/lanes";
 import { itemAt } from "../lib/arrays";
 import { type Random, randomInt, randomPick, seededRandom, weightedPick } from "../lib/random";
 import {
@@ -99,7 +99,8 @@ function blockCells(
 // body is the road its hit box covers at any moment while it is on the road, by distance from its
 // row; a dart has none, as a standing spawn may stand where a dart passes, but a stop-and-go
 // across, a vehicle crossing side-on, has one. Of the placements that fit in a start lane and row,
-// the planner takes one of the highest rank, 0 when unset.
+// the planner takes one of the highest rank, 0 when unset. stop is the lanes a stop-and-go across
+// covers while it stands in its pause (crossPlacements).
 interface MoverPlacement {
   readonly appears: number;
   readonly body?: MoverBody;
@@ -111,6 +112,7 @@ interface MoverPlacement {
   readonly rows: number;
   readonly screen: readonly [number, number];
   readonly stands: readonly MoverStand[];
+  readonly stop?: LaneSpan;
 }
 
 // The lanes on the road a box overlaps anywhere from lane position low to high: as collision cuts
@@ -249,8 +251,9 @@ interface ShyHops {
 // draw (dartOutcome), it stops: at vergeShare of those on the far verge, DART_VERGE_LANES past the
 // road's far edge, out of play, and at the rest in the lane stopLanes lanes from the edge it
 // enters from, drawn per mover, standing there. With slide (a dive), it crosses its last lane
-// before that stop at slide of its speed. With pauseSeconds (a stop-and-go across), it stands that
-// long once in the middle of the road, cued again before it sets off once more.
+// before that stop at slide of its speed. With pause (a stop-and-go across), it stands for its
+// seconds once in one of its stops (stopCrossed), cued again before it sets off once more. With
+// herring, its share of them, drawn per mover (isHerring), are red herrings (herringSpawn).
 // ride: down its lane at speedMultiplier of the road's speed, above 1 toward the pack, below 1
 // away. With merge, once its travel down the road is at of the way to the pack's rows it moves a
 // lane to one side over seconds, after a cue. steps: one of the sequences as long as its count,
@@ -273,9 +276,10 @@ export type MoverMotion =
       readonly steps: MoveCount;
     }
   | {
+      readonly herring?: HerringShare;
       readonly kind: "cross";
       readonly lanesPerSecond: number;
-      readonly pauseSeconds?: number;
+      readonly pause?: { readonly seconds: number; readonly stops: readonly StopLanes[] };
       readonly reactionSeconds: number;
       readonly startRoadShare: readonly [number, number];
       readonly stopLanes: MoveCount;
@@ -302,6 +306,13 @@ export type MoverMotion =
       readonly stepSeconds: number;
     };
 
+// A red herring crosser's share of its kind, and how far down the road ahead of the pack it is gone
+// by, as a share of that road (multipliers.distractionEndRoadShare).
+interface HerringShare {
+  readonly endRoadShare: number;
+  readonly share: number;
+}
+
 // How much movers of a kind differ: each one's speed by up to speedShare of it either way, each
 // of its steps or hops up to delaySeconds later than its earliest moment, and each step's or hop's
 // length by up to lengthShare of it either way.
@@ -325,8 +336,10 @@ export interface MoverSpec {
 // One mover's draws, each from 0 up to 1, made as it is planned: how many times it moves, its
 // speed, the delay before each of its moves, the length of each of its moves, a stalker's
 // later-step road share, where a dart sets off, a dart's tilt, whether a hopper of a shy kind hops
-// shy (below its kind's share), a dart's outcome (dartOutcome), where a dart turns back or stops,
-// and which side a stalker's or shy hopper's one-sided reach favours (below a half, the left).
+// shy (below its kind's share), a dart's outcome (dartOutcome) and whether a crosser is a red
+// herring (isHerring), where a dart turns back or stops and which of the stop spots that fit a
+// stop-and-go across stands at, and which side a stalker's or shy hopper's one-sided reach favours
+// (below a half, the left).
 // EVEN_DRAWS moves it at its kind's speed and move length with no delay, at the near end of a
 // range, never shy and crossing.
 export interface MoverDraws {
@@ -425,6 +438,67 @@ export function dartOutcome(
 // the curb props on the widest sidewalk, where the ambient verge movers stop.
 export const DART_VERGE_LANES = 1.25;
 
+// Whether a crosser with a herring share is a red herring, by its outcome draw: below that share. A
+// stop-and-go across has no other outcome, so a red herring takes no draw of its own.
+export function isHerring(spec: MoverSpec, draws: MoverDraws): boolean {
+  const { motion } = spec;
+  return (
+    motion.kind === "cross" && motion.herring !== undefined && draws.turn < motion.herring.share
+  );
+}
+
+// A red herring crosser, one of its quota's in the rows from first to end: no mover on the road
+// but scenery the walk never reads, which takes no cell, blocks no lane and counts toward no cap.
+// It appears at its edge as its row comes on screen, its row the one its start draw picks among
+// those rows that let it be gone before the zone ends, each as likely, on the side its side draw
+// picks (below a half, the left), and sets off at once with no cue, crossing the whole road without
+// stopping at its drawn speed. It drifts up the road as it crosses, at the tilt that has it gone
+// past the far edge just as it is down to its share of the road ahead of the pack, or level with
+// its row where it is gone sooner. With no such row, none shows.
+export function herringSpawn<Kind extends string>(
+  geometry: MoverGeometry & { readonly zoneLength: number },
+  spec: MoverSpec,
+  draws: MoverDraws,
+  kind: Kind,
+  rows: readonly number[],
+): MoverSpawn<Kind> | null {
+  const { laneCount, scrollSpeed, sightLength, zoneLength } = geometry;
+  const { motion } = spec;
+  if (motion.kind !== "cross" || motion.herring === undefined) {
+    return null;
+  }
+  const span = spec.footprint.lanes;
+  const lanesPerPixel = (motion.lanesPerSecond * speedFactor(spec.variation, draws)) / scrollSpeed;
+  const crossing = crossLength(laneCount, span) / lanesPerPixel;
+  const gone = sightLength * (1 - motion.herring.endRoadShare);
+  const fitting = rows.filter((distance) => distance + crossing <= zoneLength);
+  if (gone <= 0 || fitting.length === 0) {
+    return null;
+  }
+  const direction: LaneDirection = draws.side < 0.5 ? 1 : -1;
+  return {
+    distance: itemAt(
+      fitting,
+      Math.min(fitting.length - 1, Math.floor(draws.start * fitting.length)),
+    ),
+    kind,
+    lane: direction === 1 ? 0 : laneCount - span,
+    mover: {
+      direction,
+      enterTravel: 0,
+      idle: 0,
+      lanesPerPixel,
+      motion: "cross",
+      movement: spec.movement,
+      ...(span === 1 ? {} : { span }),
+      stopAfter: null,
+      tilt: Math.min(0, gone / crossing - 1),
+      turnAfter: null,
+      warning: 0,
+    },
+  };
+}
+
 // Whether a dart stops on the verge, past the road's far edge: one with a stop beyond the road.
 export function stopsOnVerge(laneCount: number, path: MoverPath): boolean {
   return path.motion === "cross" && path.stopAfter !== null && path.stopAfter > laneCount;
@@ -510,9 +584,11 @@ function crossTilts(
 // row comes on screen, or at the road's top where its start is farther up the road than its row,
 // and waits idle at its edge until its cue, warningSeconds before it sets off. One with a pause, a
 // stop-and-go across, is a vehicle, not a dart: level with its row the whole time it is on screen,
-// stops included, it has a body across every lane of the road, from its row up the road for its
-// hit length, its drawn one or its footprint's planned one, whichever is longer, so no standing
-// spawn stands where it crosses.
+// stops included, it has a body in every lane its hit box touches from setting off until its hit
+// box has left the road's bottom, standing in its pause on the way, from its row up the road for
+// its hit length, its drawn one or its footprint's planned one, whichever is longer, so no standing
+// spawn stands where it crosses. It has placements for each of its stops, from either side, each
+// with the lanes it covers there.
 function crossPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -520,8 +596,7 @@ function crossPlacements(
   draws: MoverDraws,
   lift: number,
 ): MoverPlacement[] {
-  const { cellLength, laneCount, roadLength, rowSpacing, scrollSpeed, sightLength, window } =
-    geometry;
+  const { cellLength, laneCount, scrollSpeed, sightLength } = geometry;
   const warning = spec.warningSeconds * scrollSpeed;
   const cueOnRoad = 1 - (warning + cellLength) / sightLength;
   const tilt = rangeAt(crossTilts(motion, scrollSpeed, sightLength, cueOnRoad), draws.tilt);
@@ -544,21 +619,76 @@ function crossPlacements(
   // Whether it is planned as one that crosses: it never stands on the road. One that stops on the
   // verge is out of play once off the road, so it is.
   const crosses = stopAfter === null || stopAfter > laneCount;
-  // Its width, and its pause, in the middle of the road, standing with its lanes centred.
   const span = spec.footprint.lanes;
-  const pause =
-    motion.pauseSeconds === undefined
-      ? {}
-      : {
-          pause: {
-            after: (laneCount + span - 1) / 2,
-            cue: warning,
-            length: motion.pauseSeconds * scrollSpeed,
-          },
-        };
-  if (motion.pauseSeconds !== undefined && tilt !== 0) {
+  if (motion.pause !== undefined && tilt !== 0) {
     throw new Error("A crosser that pauses must cross level with the road");
   }
+  const shared = { crosses, lanesPerPixel, span, stopAfter, tilt, turnAfter, warning };
+  if (motion.pause === undefined) {
+    return crossPlacementsAt(geometry, spec, motion, draws, lift, {
+      ...shared,
+      after: null,
+      directions: [1, -1],
+    });
+  }
+  return motion.pause.stops.flatMap((stop) =>
+    ([1, -1] as const).flatMap((direction) =>
+      crossPlacementsAt(geometry, spec, motion, draws, lift, {
+        ...shared,
+        after: stopCrossed(laneCount, span, direction, stop),
+        directions: [direction],
+      }),
+    ),
+  );
+}
+
+// The lanes a stop-and-go across span lanes wide has crossed, from the edge it enters from on
+// direction's side, when it stands covering stop's lanes.
+export function stopCrossed(
+  laneCount: number,
+  span: number,
+  direction: LaneDirection,
+  stop: StopLanes,
+): number {
+  const [first, last] = stop;
+  if (last - first + 1 !== span || first < 0 || last >= laneCount) {
+    throw new Error("A stop covers as many lanes on the road as its crosser is wide");
+  }
+  return direction === 1 ? first + span - 0.5 : laneCount - 0.5 - first;
+}
+
+// What a crosser's placements share whatever its start (crossPlacements): its stop's lanes crossed,
+// if it pauses, and the sides it enters from.
+interface CrossShape {
+  readonly after: number | null;
+  readonly crosses: boolean;
+  readonly directions: readonly LaneDirection[];
+  readonly lanesPerPixel: number;
+  readonly span: number;
+  readonly stopAfter: number | null;
+  readonly tilt: number;
+  readonly turnAfter: number | null;
+  readonly warning: number;
+}
+
+// A crosser's placements from each of its sides, with its pause, if it has one, at one stop
+// (crossPlacements).
+function crossPlacementsAt(
+  geometry: MoverGeometry,
+  spec: MoverSpec,
+  motion: Extract<MoverMotion, { kind: "cross" }>,
+  draws: MoverDraws,
+  lift: number,
+  shape: CrossShape,
+): MoverPlacement[] {
+  const { cellLength, laneCount, roadLength, rowSpacing, scrollSpeed, sightLength, window } =
+    geometry;
+  const { after, crosses, lanesPerPixel, span, stopAfter, tilt, turnAfter, warning } = shape;
+  const cueOnRoad = 1 - (warning + cellLength) / sightLength;
+  const pause =
+    motion.pause === undefined || after === null
+      ? {}
+      : { pause: { after, cue: warning, length: motion.pause.seconds * scrollSpeed } };
   // Its path but for the side it enters from, which none of the distances below depend on.
   const along = {
     direction: 1,
@@ -631,17 +761,11 @@ function crossPlacements(
   // Its contact as drawn, for its stand: its own hit length and the pack's hit boxes.
   const drawnWindow = drawnHitLength(geometry, spec) + geometry.packHitLength;
   const drawnContact = contactOver(drawnWindow);
-  const body =
-    "pause" in pause
-      ? {
-          body: {
-            from: 0,
-            lanes: { count: laneCount, first: 0 },
-            to: Math.max(drawnHitLength(geometry, spec), bodyLength(geometry, spec.footprint.rows)),
-          },
-        }
-      : {};
-  return ([1, -1] as const).map((direction): MoverPlacement => {
+  const bodyTo = Math.max(
+    drawnHitLength(geometry, spec),
+    bodyLength(geometry, spec.footprint.rows),
+  );
+  return shape.directions.map((direction): MoverPlacement => {
     const path: MoverPath = {
       ...along,
       direction,
@@ -651,9 +775,14 @@ function crossPlacements(
     };
     const lanes = sweptLanes(laneCount, path, sightLength, sightLength + window);
     const touched = sweptLanes(laneCount, path, sightLength, sightLength + drawnWindow, inset);
+    const body = {
+      from: 0,
+      lanes: sweptLanes(laneCount, path, 0, roadLength + bodyTo, inset),
+      to: bodyTo,
+    };
     return {
       appears,
-      ...body,
+      ...("pause" in pause ? { body } : {}),
       cells: blockCells(firstRow, lastRow - firstRow + 1, 0, laneCount),
       lane: direction === 1 ? 0 : laneCount - span,
       lanes,
@@ -671,6 +800,17 @@ function crossPlacements(
               },
             ]
           : [],
+      ...("pause" in pause
+        ? {
+            stop: {
+              count: span,
+              first:
+                direction === 1
+                  ? 0.5 - span + pause.pause.after
+                  : laneCount - 0.5 - pause.pause.after,
+            },
+          }
+        : {}),
     };
   });
 }
@@ -1199,7 +1339,8 @@ export function screenHasRoom(
 // clearOf is true when a mover's body, at distances along the zone, shares no road with a
 // lane-blocking standing spawn placed so far, which a dart may set off over. clearOfRiders is true
 // when a lane-blocking rider's hit box keeps riderFollowGap from that of each recorded by rode, which a grid of
-// movers that block no lane leaves out.
+// movers that block no lane leaves out. heldLanes is the lane mask the path holds on a row, none
+// without it.
 interface MoverGrid {
   block(row: number, lanes: LaneSpan, rows: number, keep: boolean, dart?: boolean): boolean;
   clearOf(body: MoverBody): boolean;
@@ -1211,6 +1352,7 @@ interface MoverGrid {
   stand(stands: readonly MoverStand[]): void;
   take(dart: boolean, lane: number, row: number, rider?: boolean): void;
   clearOfRiders?(ride: RiderSpan): boolean;
+  heldLanes?(row: number): number;
   rode?(ride: RiderSpan): void;
 }
 
@@ -1286,9 +1428,11 @@ interface MoverSpawn<Kind extends string> {
   readonly mover: MoverPath;
 }
 
-// The movers placed, and the kinds of those dropped, one entry each.
+// The movers placed, the kinds of those dropped, one entry each, and the red herrings
+// (herringSpawn).
 interface PlacedMovers<Kind extends string> {
   readonly dropped: readonly Kind[];
+  readonly herrings: readonly MoverSpawn<Kind>[];
   readonly spawns: readonly MoverSpawn<Kind>[];
 }
 
@@ -1309,6 +1453,36 @@ function bodyOf(spot: Spot): MoverBody | undefined {
   return body === undefined
     ? undefined
     : { from: spot.distance + body.from, lanes: body.lanes, to: spot.distance + body.to };
+}
+
+// The stops a stop-and-go across tries in turn: the one its stop draw picks among its stops, each
+// as likely, then the others, nearest that one in its list first, the earlier first between two as
+// near. A mover with no stops tries once, with none (null).
+export function stopsToTry(spec: MoverSpec, stopDraw: number): (StopLanes | null)[] {
+  const { motion } = spec;
+  if (motion.kind !== "cross" || motion.pause === undefined) {
+    return [null];
+  }
+  const { stops } = motion.pause;
+  const drawn = Math.min(stops.length - 1, Math.floor(stopDraw * stops.length));
+  return stops
+    .map((stop, index) => ({ index, stop }))
+    .sort((a, b) => Math.abs(a.index - drawn) - Math.abs(b.index - drawn) || a.index - b.index)
+    .map(({ stop }) => stop);
+}
+
+// Whether a placement stands in stop, or has no stop where stop is null.
+function standsIn(stop: StopLanes | null, placement: MoverPlacement): boolean {
+  return stop === null
+    ? placement.stop === undefined
+    : placement.stop?.first === stop[0] && placement.stop.count === stop[1] - stop[0] + 1;
+}
+
+// Whether a placement's stop, if it has one, leaves open the lanes the path holds on its row, held
+// as a lane mask.
+export function leavesPathOpen(held: number, placement: Pick<MoverPlacement, "stop">): boolean {
+  const { stop } = placement;
+  return stop === undefined || (laneMask(stop.first, stop.count) & held) === 0;
 }
 
 function standsOf(spot: Spot): MoverStand[] {
@@ -1341,8 +1515,11 @@ function standsOf(spot: Spot): MoverStand[] {
 // the movers stream, drawn toward the lanes left unblocked longest (laneBalanceWeight), so an edge
 // lane that fits fewer of its ways comes up as often as a middle one; then, from the spawns stream,
 // a place in that lane of the highest rank in its row, so each row gives the lane the widest reach
-// that fits there. onScreen holds the movers already on screen, from an earlier call, and gains
-// each mover placed.
+// that fits there. A stop-and-go across tries the stop its stop draw picks first, each as likely,
+// on the rows where it leaves the path's lanes open (leavesPathOpen), with every retry, and only
+// then its other stops in turn (stopsToTry). A red herring crosser (isHerring) is not placed: it
+// comes as scenery in its stretch (herringSpawn), one of its quota's count, taking no room.
+// onScreen holds the movers already on screen, from an earlier call, and gains each mover placed.
 export function placeMovers<Kind extends string>(
   streams: PlannerStreams,
   geometry: MoverGeometry & { readonly zoneLength: number },
@@ -1390,7 +1567,7 @@ export function placeMovers<Kind extends string>(
       rows
         .slice(first, end)
         .map((distance, i) => ({ distance, placement, row: first + i }))
-        .filter(fits),
+        .filter((spot) => leavesPathOpen(grid.heldLanes?.(spot.row) ?? 0, placement) && fits(spot)),
     );
   // The spots that fit in the first of the starts that has any between first and end.
   const firstFitting = (
@@ -1423,6 +1600,7 @@ export function placeMovers<Kind extends string>(
 
   const spawns: MoverSpawn<Kind>[] = [];
   const dropped: Kind[] = [];
+  const herrings: MoverSpawn<Kind>[] = [];
   for (const { count, kind, spec, within } of quotas) {
     const quotaRows = rowsWithin(rows.length, within ?? WHOLE_ZONE);
     const [, to] = quotaRows;
@@ -1431,18 +1609,34 @@ export function placeMovers<Kind extends string>(
       placing = spec;
       const lifts = spec.motion.kind === "cross" ? [0, ...DART_LIFTS] : [0];
       const [first, end] = nthStretch(count, i, quotaRows);
-      const fittingAt = (moverDraws: MoverDraws) => {
-        const starts = lifts.map((lift) => moverPlacements(geometry, spec, moverDraws, lift));
+      if (isHerring(spec, draws)) {
+        const herring = herringSpawn(geometry, spec, draws, kind, rows.slice(first, end));
+        if (herring !== null) {
+          herrings.push(herring);
+        }
+        continue;
+      }
+      const fittingAt = (moverDraws: MoverDraws, stop: StopLanes | null) => {
+        const starts = lifts.map((lift) =>
+          moverPlacements(geometry, spec, moverDraws, lift).filter((placement) =>
+            standsIn(stop, placement),
+          ),
+        );
         const stretch = firstFitting(starts, first, end);
         return stretch.length > 0 ? stretch : nearestLater(starts, end, to);
       };
-      let fitting: Spot[] = [];
-      for (const tried of [draws, ...moverRetries(spec, draws)]) {
-        fitting = fittingAt(tried);
-        if (fitting.length > 0) {
-          break;
+      const firstFit = (): Spot[] => {
+        for (const stop of stopsToTry(spec, draws.turnAt)) {
+          for (const tried of [draws, ...moverRetries(spec, draws)]) {
+            const found = fittingAt(tried, stop);
+            if (found.length > 0) {
+              return found;
+            }
+          }
         }
-      }
+        return [];
+      };
+      const fitting = firstFit();
       if (fitting.length === 0) {
         dropped.push(kind);
         continue;
@@ -1497,5 +1691,5 @@ export function placeMovers<Kind extends string>(
       });
     }
   }
-  return { dropped, spawns };
+  return { dropped, herrings, spawns };
 }

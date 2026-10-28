@@ -112,9 +112,11 @@ export interface PathRow {
   lane: number;
 }
 
-// A zone's spawns, sorted by distance, and its guaranteed path, a row for each of its rows.
+// A zone's spawns, sorted by distance, its guaranteed path, a row for each of its rows, and its red
+// herring crossers, sorted by distance: scenery the walk never reads (herringSpawn).
 export interface PlannedSpawns<Kind extends string> {
   events: SpawnEvent<Kind>[];
+  herrings: SpawnEvent<Kind>[];
   path: PathRow[];
 }
 

@@ -255,6 +255,6 @@ export function planZone(
     kind,
     movement: mover?.movement ?? null,
   }));
-  const { events, path } = planSpawns(streams, plan);
-  return { road: { ...road, path, pending: events, planned }, run };
+  const { events, herrings, path } = planSpawns(streams, plan);
+  return { road: { ...road, herrings, path, pending: events, planned }, run };
 }

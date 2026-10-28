@@ -412,9 +412,12 @@ describe("movers", { timeout: 120_000 }, () => {
     }
   };
   // The planner builds each way of moving from its kind's numbers the same way, so one kind of
-  // each way of moving and footprint stands for the rest.
-  const patternKey = (kind: WalkItem["kind"]) =>
-    JSON.stringify([movementOf(kind)?.kind ?? null, footprintOf(REAL, kind)]);
+  // each way of moving, footprint and stops stands for the rest.
+  const patternKey = (kind: WalkItem["kind"]) => {
+    const movement = movementOf(kind);
+    const spots = movement?.kind === "stopAndGoAcross" ? movement.stops : null;
+    return JSON.stringify([movement?.kind ?? null, footprintOf(REAL, kind), spots]);
+  };
   const patterned = OBSTACLE_KINDS.filter(
     (kind) =>
       zonesOf(kind).length > 0 &&
@@ -434,7 +437,7 @@ describe("movers", { timeout: 120_000 }, () => {
   // slides into a lane, never turning back or stopping on the verge. A merge rides its lane and
   // merges a lane to one side on the road, wholly before it reaches the pack's rows. A stop-and-go
   // across crosses level with the road as wide as its footprint, never turning back or stopping for
-  // good, and stands once with its lanes centred on the road.
+  // good, and stands once in one of its stops.
   it.each(patterned)("moves each %s in its pattern, within its lanes", (kind) => {
     const movement = movementOf(kind);
     const pattern = patternOf(movement);
@@ -451,9 +454,8 @@ describe("movers", { timeout: 120_000 }, () => {
         ]);
         const halfway = mover.warning + (pause?.after ?? 0) / mover.lanesPerPixel + 1;
         expect(isPausing(mover, halfway)).toBe(true);
-        expect(laneAt(moverPlace(LANE_COUNT, mover, halfway).lanePosition)).toBe(
-          (LANE_COUNT - span) / 2,
-        );
+        const left = laneAt(moverPlace(LANE_COUNT, mover, halfway).lanePosition);
+        expect(movement.stops).toContainEqual([left, left + span - 1]);
         continue;
       }
       if (mover.motion === "cross") {
@@ -497,6 +499,74 @@ describe("movers", { timeout: 120_000 }, () => {
         expect(lane).toBeGreaterThanOrEqual(0);
         expect(lane + span).toBeLessThanOrEqual(LANE_COUNT);
       }
+    }
+  });
+
+  // A stop-and-go across, planned in its zones at the first zone's pace and the last's with every
+  // mover moving: the lanes it covers while it stands, first and last, and whether they take in the
+  // path's lane on its row.
+  const stopKinds = OBSTACLE_KINDS.filter(
+    (kind) => movementOf(kind)?.kind === "stopAndGoAcross" && zonesOf(kind).length > 0,
+  );
+  const stopsOf = (kind: WalkItem["kind"]) => {
+    const movement = movementOf(kind);
+    return movement?.kind === "stopAndGoAcross" ? movement.stops : [];
+  };
+  const stopsOn = (kind: WalkItem["kind"], seed: number) =>
+    zonesOf(kind).flatMap((zone) =>
+      [0, WORLD.walkLength - 1].flatMap((zoneIndex) => {
+        const run = inZone(realRun(everyMover, FASTEST_WALKER), zone, zoneIndex);
+        const { road } = planZone(everyMover, GAME_ROAD, plannerStreams(seed), {
+          road: startRoad(LANE_COUNT),
+          run,
+        });
+        const span = footprintOf(REAL, kind).lanes;
+        return road.pending.flatMap(({ distance, kind: planned, mover }) => {
+          if (planned !== kind || mover?.motion !== "cross" || mover.pause === undefined) {
+            return [];
+          }
+          const since = mover.warning + mover.pause.after / mover.lanesPerPixel + 1;
+          const left = laneAt(moverPlace(LANE_COUNT, mover, since).lanePosition);
+          // Its row comes on screen enterTravel less its cue before it does.
+          const row = distance - mover.enterTravel + mover.warning;
+          const pathLane = road.path.find((held) => Math.abs(held.distance - row) < 1e-6)?.lane;
+          expect(pathLane).toBeDefined();
+          const closes = pathLane !== undefined && pathLane >= left && pathLane < left + span;
+          return [{ closes, stands: [left, left + span - 1] }];
+        });
+      }),
+    );
+  it.each(stopKinds)(
+    "gives each of %s's stops as many lanes as it is wide, on the road",
+    (kind) => {
+      const span = footprintOf(REAL, kind).lanes;
+      expect(stopsOf(kind).length).toBeGreaterThan(0);
+      for (const [first, last] of stopsOf(kind)) {
+        expect(last - first + 1).toBe(span);
+        expect(first).toBeGreaterThanOrEqual(0);
+        expect(last).toBeLessThan(LANE_COUNT);
+      }
+    },
+  );
+  const STOP_SEEDS = [1, 2, 3, 4, 5, 6];
+  it.each(stopKinds)("stands each %s in one of its stops, never over the path's lane", (kind) => {
+    const stops = STOP_SEEDS.flatMap((seed) => stopsOn(kind, seed));
+    expect(stops.length).toBeGreaterThan(0);
+    for (const { closes, stands } of stops) {
+      expect(stopsOf(kind)).toContainEqual(stands);
+      expect(closes).toBe(false);
+    }
+  });
+  // Over the seeds, a kind with several stops stands in each about as often as each other: drawn
+  // evenly among those that leave the path's lane open.
+  const severalStops = stopKinds.filter((kind) => stopsOf(kind).length > 1);
+  it.each(severalStops)("stands %s in each of its stops about evenly across seeds", (kind) => {
+    const stands = STOP_SEEDS.flatMap((seed) => stopsOn(kind, seed).map((stop) => stop.stands));
+    const stops = stopsOf(kind);
+    for (const stop of stops) {
+      const share = stands.filter(([first]) => first === stop[0]).length / stands.length;
+      expect(share).toBeGreaterThan(0.5 / stops.length);
+      expect(share).toBeLessThan(1.5 / stops.length);
     }
   });
 

@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { TUNING } from "../data/tuning";
+import type { StopLanes } from "../data/types";
+import { laneMask } from "../layout/lanes";
 import { itemAt } from "../lib/arrays";
 import { type Random, seededRandom } from "../lib/random";
 import { read } from "../rules/units";
@@ -16,6 +18,7 @@ import {
   HOP_SEQUENCES_MOST,
   hopSequences,
   hopShapes,
+  leavesPathOpen,
   type MoverCaps,
   type MoverDraws,
   type MoverGeometry,
@@ -29,12 +32,14 @@ import {
   screenHasRoom,
   stepSpots,
   stopsOnVerge,
+  stopsToTry,
   sweptLanes,
 } from "./moverPlanning";
 import {
   facesLeft,
   hasLeftRoad,
   inMotion,
+  isPausing,
   isWarning,
   laneAt,
   type LaneSpan,
@@ -1655,7 +1660,7 @@ describe("placeMovers", () => {
       const placed = placeMovers(placing.streams, zoned, CAPS, { ...grid, ...refusal }, [], rows, [
         { count: 1, kind: "squirrel", spec: spec(cross(2, 0)) },
       ]);
-      expect(placed).toEqual({ dropped: ["squirrel"], spawns: [] });
+      expect(placed).toEqual({ dropped: ["squirrel"], herrings: [], spawns: [] });
       const own = counted();
       drawMover(own.streams);
       expect(placing.draws).toEqual(own.draws);
@@ -1804,5 +1809,224 @@ describe("placeMovers", () => {
     const own = { movers: 0, spawns: 0 };
     drawMover({ movers: () => ((own.movers += 1), 0), spawns: () => ((own.spawns += 1), 0) });
     expect(draws).toEqual(lands ? place(freeGrid().grid).draws : own);
+  });
+});
+
+describe("stop-and-go across", () => {
+  // A stop-and-go across three lanes wide at 2 lanes a second, standing a second in one of its
+  // stops, and a share of red herrings.
+  const SPAN = 3;
+  const END_SHARE = read(TUNING, "multipliers", "distractionEndRoadShare");
+  const CENTRED: readonly StopLanes[] = [[1, 3]];
+  const EVERY_STOP: readonly StopLanes[] = [
+    [0, 2],
+    [1, 3],
+    [2, 4],
+  ];
+  const stopAndGo = (
+    stops: readonly StopLanes[],
+    herringShare?: number,
+    lanesPerSecond = 2,
+  ): MoverSpec => ({
+    ...spec(
+      {
+        ...cross(lanesPerSecond, 0),
+        ...(herringShare === undefined
+          ? {}
+          : { herring: { endRoadShare: END_SHARE, share: herringShare } }),
+        pause: { seconds: 1, stops },
+      },
+      SPAN,
+    ),
+    movement: "stopAndGoAcross",
+  });
+  const { laneCount } = geometry;
+  // The lanes it covers while it stands in its pause, first and last, or null with no pause.
+  const standsIn = (path: MoverPath): StopLanes | null => {
+    if (path.motion !== "cross" || path.pause === undefined) {
+      return null;
+    }
+    const since = path.warning + path.pause.after / path.lanesPerPixel + 1;
+    expect(isPausing(path, since)).toBe(true);
+    const left = laneAt(moverPlace(laneCount, path, since).lanePosition);
+    return [left, left + SPAN - 1];
+  };
+
+  // From either side, it has a placement standing in each of its stops, which it knows.
+  it.each([
+    { name: "centred", stops: CENTRED },
+    { name: "at every lane", stops: EVERY_STOP },
+  ])("stands a stop-and-go across $name in each of its stops", ({ stops }) => {
+    const placements = moverPlacements(geometry, stopAndGo(stops));
+    for (const direction of [1, -1]) {
+      const sided = placements.filter(
+        ({ path }) => path.motion === "cross" && path.direction === direction,
+      );
+      expect(sided.map(({ path }) => standsIn(path))).toEqual(stops);
+      expect(
+        sided.map(({ stop }) =>
+          stop === undefined ? null : [stop.first, stop.first + stop.count - 1],
+        ),
+      ).toEqual(stops);
+    }
+  });
+
+  // Its body is every lane its hit box touches from setting off until its hit box has left the
+  // road's bottom, its pause included, and no other: a slow one scrolls off the road before it
+  // has crossed, leaving the far lanes free, and a fast one crosses the whole road on it.
+  it.each([
+    { lanesPerSecond: 1, whole: false },
+    { lanesPerSecond: 8, whole: true },
+  ])(
+    "gives a stop-and-go across at $lanesPerSecond lanes a second a body in the lanes it reaches",
+    ({ lanesPerSecond, whole }) => {
+      const inset = geometry.laneInset / geometry.cellLength;
+      for (const { body, path } of moverPlacements(
+        geometry,
+        stopAndGo(EVERY_STOP, undefined, lanesPerSecond),
+      )) {
+        const lanes = new Set<number>();
+        for (let since = 0; since < 10_000; since++) {
+          const place = moverPlace(laneCount, path, since);
+          const gone = place.travel - (body?.to ?? 0) >= geometry.roadLength;
+          if (gone || hasLeftRoad(laneCount, place)) {
+            break;
+          }
+          const first = Math.max(0, Math.floor(place.lanePosition - 1 + inset) + 1);
+          const last = Math.min(laneCount - 1, Math.ceil(place.lanePosition + SPAN - inset) - 1);
+          for (let lane = place.solid ? first : last + 1; lane <= last; lane++) {
+            lanes.add(lane);
+          }
+        }
+        const sorted = [...lanes].sort((a, b) => a - b);
+        expect(body?.lanes).toEqual({ count: sorted.length, first: sorted[0] ?? 0 });
+        expect(sorted.length === laneCount).toBe(whole);
+      }
+    },
+  );
+
+  // It tries the stop its stop draw picks first, each as likely, then the others nearest that one
+  // in its list first; a crosser with no stops tries once, with none.
+  it.each([
+    { draw: 0, want: [EVERY_STOP[0], EVERY_STOP[1], EVERY_STOP[2]] },
+    { draw: 0.34, want: [EVERY_STOP[1], EVERY_STOP[0], EVERY_STOP[2]] },
+    { draw: 0.99, want: [EVERY_STOP[2], EVERY_STOP[1], EVERY_STOP[0]] },
+  ])("tries its stops in the order $want at a stop draw of $draw", ({ draw, want }) => {
+    expect(stopsToTry(stopAndGo(EVERY_STOP), draw)).toEqual(want);
+  });
+  it("tries a crosser with no stops once, with none", () => {
+    expect(stopsToTry(spec(cross(2, 0)), 0.5)).toEqual([null]);
+  });
+
+  // A stop leaves the path open where none of its lanes is one the path holds on its row.
+  it.each([
+    { held: [4], open: [true, true, false] },
+    { held: [0, 1], open: [false, false, true] },
+    { held: [2], open: [false, false, false] },
+  ])("leaves the path in $held open in stops $open", ({ held, open }) => {
+    const mask = held.reduce((lanes, lane) => lanes | laneMask(lane, 1), 0);
+    const placements = moverPlacements(geometry, stopAndGo(EVERY_STOP)).filter(
+      ({ path }) => path.motion === "cross" && path.direction === 1,
+    );
+    expect(placements.map((placement) => leavesPathOpen(mask, placement))).toEqual(open);
+    expect(moverPlacements(geometry, spec(cross(2, 0))).every((p) => leavesPathOpen(mask, p))).toBe(
+      true,
+    );
+  });
+
+  // Placed on a grid whose path holds lane 4 on every row, each of a seed's movers stands in the
+  // stop its draw picks where that leaves lane 4 open, and otherwise in the nearest that does.
+  it.each([1, 2, 3, 4, 5, 6])("stands clear of the path's lane, seed %i", (seed) => {
+    const held = laneMask(4, 1);
+    const streams = plannerStreams(seed);
+    const own = drawMover(plannerStreams(seed));
+    const { spawns } = placeMovers(
+      streams,
+      { ...geometry, zoneLength: 6150 },
+      CAPS,
+      {
+        block: () => true,
+        clearOf: () => true,
+        clearRun: () => 1,
+        heldLanes: () => held,
+        isFree: () => true,
+        leavesRoom: () => true,
+        occupy: () => undefined,
+        packFits: () => true,
+        stand: () => undefined,
+        take: () => undefined,
+      },
+      [],
+      Array.from({ length: 40 }, (_, i) => (i + 1) * 150),
+      [{ count: 1, kind: "train", spec: stopAndGo(EVERY_STOP) }],
+    );
+    const [spawn] = spawns;
+    const stands = spawn === undefined ? null : standsIn(spawn.mover);
+    const tried = stopsToTry(stopAndGo(EVERY_STOP), own.turnAt);
+    expect(stands).toEqual(tried.find((stop) => stop !== null && stop[1] < 4));
+  });
+
+  // A red herring, at its share of 1, is never placed and takes no room: it blocks no lane, takes
+  // no cell and stands nowhere, and comes as scenery on one of its rows with no cue, crossing the
+  // whole road with no stop, gone past the far edge before it is down to the end share of the road
+  // ahead and before the zone ends. At a share of 0, every one is placed. Either way each draws
+  // only its own draws from the movers stream, but for a placed one's start lane.
+  const zoned = { ...geometry, zoneLength: 6150 };
+  const rows = Array.from({ length: 40 }, (_, i) => (i + 1) * 150);
+  it.each([
+    { herrings: 0, share: 0 },
+    { herrings: 3, share: 1 },
+  ])("plans $herrings of 3 as red herrings at a share of $share", ({ herrings, share }) => {
+    const held: unknown[] = [];
+    let movers = 0;
+    const seeded = plannerStreams(4);
+    const placed = placeMovers(
+      { movers: () => ((movers += 1), seeded.movers()), spawns: seeded.spawns },
+      zoned,
+      CAPS,
+      {
+        block: (row: number, _span: LaneSpan, _rows: number, keep: boolean) => {
+          if (keep) {
+            held.push(row);
+          }
+          return true;
+        },
+        clearOf: () => true,
+        clearRun: () => 1,
+        isFree: () => true,
+        leavesRoom: () => true,
+        occupy: () => undefined,
+        packFits: () => true,
+        stand: (stands: readonly MoverStand[]) => {
+          held.push(...stands);
+        },
+        take: (_dart: boolean, lane: number) => {
+          held.push(lane);
+        },
+      },
+      [],
+      rows,
+      [{ count: 3, kind: "train", spec: stopAndGo(EVERY_STOP, share) }],
+    );
+    expect(placed.herrings).toHaveLength(herrings);
+    expect(placed.spawns).toHaveLength(3 - herrings);
+    expect(held.length > 0).toBe(herrings < 3);
+    const end = geometry.sightLength * (1 - END_SHARE);
+    for (const { distance, mover } of placed.herrings) {
+      expect(rows).toContain(distance);
+      expect(mover.motion === "cross" ? mover.pause : null).toBeUndefined();
+      let since = 0;
+      for (; !hasLeftRoad(laneCount, moverPlace(laneCount, mover, since)); since++) {
+        expect(moverTell(mover, since)).toBeNull();
+        expect(moverPlace(laneCount, mover, since).travel).toBeLessThanOrEqual(end + 1e-6);
+      }
+      expect(distance + since).toBeLessThanOrEqual(zoned.zoneLength + 1);
+      expect(sweptLanes(laneCount, mover, 0, end)).toEqual({ count: laneCount, first: 0 });
+    }
+    let own = 0;
+    for (let i = 0; i < 3; i++) {
+      drawMover({ movers: () => ((own += 1), 0), spawns: () => 0 });
+    }
+    expect(movers).toBe(own + 3 - herrings);
   });
 });

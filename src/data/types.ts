@@ -403,14 +403,20 @@ interface Tilt {
 // leader's signal). stopAndGo: stops + 1 pushes down its lane at factor of the road's speed,
 // goSeconds each, standing still on the road for stopSeconds between them, each push after a cue.
 // stopAndGoAcross: across the road level with it at speed of counts.dartLanesPerSecond, set off as
-// a dart is, standing still on the road for stopSeconds once with its lanes in the middle of the
-// road, cued again before it sets off once more; it never turns back or stops for good. sway: times
-// times a step a lane to one side and back, rocking between two lanes, seconds.moverStepSeconds
-// each, pausing pauseSeconds after every step. merge: down its lane at factor of the road's speed,
-// as an in-lane mover, then once its travel down the road is mergeAt of the way to the pack's rows,
-// after a cue, a lane to one side with room over mergeSeconds, and on down that lane; it merges
-// once, and never once it has reached the pack's rows. A cue at least seconds.moverWarningSeconds
-// long precedes each move that has one.
+// a dart is, standing still on the road for stopSeconds once in one of its stops, cued again
+// before it sets off once more; it never turns back or stops for good. Each of its stops is the
+// lanes it covers while it stands there, first and last, counted on the road from 0 at the left,
+// as many as its footprint is wide. It stands in the stop drawn for it per mover, each as likely,
+// on a row where that stop leaves the path's lanes open, or failing that in the nearest other stop
+// in its list that has such a row. With herringShare, that share of them, drawn per mover, are
+// red herrings: with no cue, each crosses the whole road without stopping as its row comes on
+// screen, gone before it is down to multipliers.distractionEndRoadShare of the road ahead of the
+// pack, and blocks nothing. sway: times times a step a lane to one side and back, rocking between
+// two lanes, seconds.moverStepSeconds each, pausing pauseSeconds after every step. merge: down its
+// lane at factor of the road's speed, as an in-lane mover, then once its travel down the road is
+// mergeAt of the way to the pack's rows, after a cue, a lane to one side with room over
+// mergeSeconds, and on down that lane; it merges once, and never once it has reached the pack's
+// rows. A cue at least seconds.moverWarningSeconds long precedes each move that has one.
 // The archetypes: dash and swoop are dart (a swoop has a tilt or a turn back), wander is step,
 // stalk is approach, cruise is inLane, stop-and-go is stopAndGo down a lane and stopAndGoAcross
 // across the road, and hop, bounce, dive, follow (follow the leader), merge and sway are their own
@@ -452,9 +458,19 @@ export type Movement =
       readonly stopSeconds: number;
       readonly stops: MoveCount;
     }
-  | { readonly kind: "stopAndGoAcross"; readonly speed: number; readonly stopSeconds: number }
+  | {
+      readonly herringShare?: ProbabilityKey;
+      readonly kind: "stopAndGoAcross";
+      readonly speed: number;
+      readonly stopSeconds: number;
+      readonly stops: readonly StopLanes[];
+    }
   | { readonly kind: "sway"; readonly pauseSeconds: number; readonly times: MoveCount };
 export type MovementKind = Movement["kind"];
+
+// The lanes a stop-and-go across covers at one of its stops: its first and last, counted on the
+// road from 0 at the left (Movement).
+export type StopLanes = readonly [first: number, last: number];
 
 // The zones a neighbourhood-only obstacle appears in, by id, at least one.
 type NeighbourhoodZones = readonly [string, ...string[]];

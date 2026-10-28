@@ -64,6 +64,11 @@ export class LaneBlocks {
     this.wideRows = new Uint8Array(rowCount);
   }
 
+  // The lanes the path holds on a row (pathHeldLanes), as a lane mask.
+  heldAt(row: number): number {
+    return this.pathHeld[row] ?? 0;
+  }
+
   // Blocks the footprint's lanes where they keep clear of the path, leave minOpenLanes open in
   // every window and gap they block and leave each stretch of road open in every window they
   // block (openStretches), counting them as a dart's sweep where dart is set and as a wall

@@ -207,6 +207,9 @@ export const TUNING = {
     shyHopperShare: 0.5,
     // A hit that would land on a small dog misses it this often, costing nothing.
     smallDodgeChance: 0.25,
+    // About this share of the tourist trains a neighbourhood plans are red herrings, crossing far
+    // up the road with no bell and blocking nothing, drawn per train.
+    touristTrainHerringShare: 0.33,
     // With the Whistle, a hit that would land on a medium or large dog misses it this often,
     // costing nothing.
     whistleDodgeChance: 0.25,
