@@ -906,7 +906,7 @@ export interface RunText {
   // stake is), and the rest say what just happened on the road.
   readonly strip: {
     readonly achievement: string;
-    // A plain bump that cost cash instead of hearts, as Spotlight makes it: the {amount} lost.
+    // A plain bump that also cost cash, as Spotlight makes it; its label shows the amount.
     readonly cashHit: string;
     readonly debuffEnd: { readonly [D in DebuffId]: string };
     readonly debuffStart: { readonly [D in DebuffId]: string };

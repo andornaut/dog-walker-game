@@ -59,7 +59,7 @@ describe("bumpLines", () => {
   const dodge = fillNames(strip.dodge, { dog: kilo.name, obstacle: "cone" });
   const hit = (lost: string) =>
     fillNames(strip.plainHit, { dog: kilo.name, hearts: lost, obstacle: "cone", owner });
-  const paid = fillNames(strip.cashHit, { amount: formatDollars(cents(700)) });
+  const paid = strip.cashHit;
   // A loss forgiven whole says nothing here: its forgiven line says it.
   it.each([
     { cash: null, change: null, dodged: true, lines: [dodge], name: "a dodge" },
@@ -112,7 +112,7 @@ describe("the strip's other lines", () => {
         luckyLine(gameData, "lostWallet", [
           { amount: cents(1000), causes: [], dog: null, kind: "money" },
         ])?.text,
-        fillNames(strip.luckyWallet, { amount: "$10" }),
+        strip.luckyWallet,
       ],
       [
         "the Walk bonus",

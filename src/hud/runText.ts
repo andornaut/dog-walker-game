@@ -4,7 +4,7 @@ import type { FieldTable } from "../lib/lines";
 // are filled by debuff id.
 export const STRIP_LINE_FIELDS = {
   achievement: ["name"],
-  cashHit: ["amount"],
+  cashHit: [],
   dodge: ["dog", "obstacle"],
   effectStart: ["effect", "name"],
   fired: ["dog", "owner"],
@@ -13,7 +13,7 @@ export const STRIP_LINE_FIELDS = {
   gearSwapped: ["gear", "old"],
   largeDog: ["dog", "speed"],
   luckyNeighbour: ["hearts"],
-  luckyWallet: ["amount"],
+  luckyWallet: [],
   plainHit: ["dog", "hearts", "obstacle", "owner"],
   pull: ["dog"],
   secondChance: ["owner"],

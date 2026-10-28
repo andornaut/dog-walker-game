@@ -1,6 +1,5 @@
 import type { DebuffId, DogId, EncounterId, GameData, GearId } from "../data/types";
 import { fillLine, fillNames } from "../lib/lines";
-import { cents } from "../lib/units";
 import { type Change, type HeartChange, heartsForgiven, type MoneyChange } from "../rules/causes";
 import { debuffFields, formatDollars } from "../rules/effectText";
 import { spareTreatGiver, spareTreatSource } from "../rules/spareTreats";
@@ -93,7 +92,7 @@ export function bumpLines(
       : [
           {
             icon: "bump",
-            text: stripLine(data, "cashHit", { amount: formatDollars(cents(-cash.amount)) }),
+            text: stripLine(data, "cashHit", {}),
           },
         ];
   return [...hearts, ...paid];
@@ -201,14 +200,7 @@ export function luckyLine(
     return { icon: "lucky", text: stripLine(data, "luckyNeighbour", { hearts }) };
   }
   if (encounter === "lostWallet") {
-    const amount = changes.reduce(
-      (sum, change) => (change.kind === "money" ? sum + change.amount : sum),
-      0,
-    );
-    return {
-      icon: "lucky",
-      text: stripLine(data, "luckyWallet", { amount: formatDollars(cents(amount)) }),
-    };
+    return { icon: "lucky", text: stripLine(data, "luckyWallet", {}) };
   }
   return null;
 }

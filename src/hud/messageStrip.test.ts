@@ -265,7 +265,7 @@ function everyStripLine(): (FaceText & Pick<MessageLine, "names">)[] {
     ...Object.values(strip.debuffEnd).map((text) => ({ text })),
     line("luckyNeighbour", { hearts: "10" }),
     line("fullPackHome", { amount }),
-    line("luckyWallet", { amount }),
+    line("luckyWallet", {}),
     line("spareTreatSaved", {}),
     ...dogs.flatMap(({ dog, owner }) => [
       line("fired", { dog, owner }),
