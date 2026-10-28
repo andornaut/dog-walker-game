@@ -100,6 +100,7 @@ import {
 import { arcFlight } from "./arcFlight";
 import { addCharm, glintWell } from "./buffCharm";
 import { BumpBorder } from "./bumpBorder";
+import { changeLabelColour } from "./changeLabelColours";
 import { DEBUFF_COLOURS } from "./debuffColours";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
@@ -990,16 +991,14 @@ export class HudScene extends Scene {
     this.labels.join(fadeAway(this, chip.parts, { ms: LABEL.ms, rise: 0 }));
   }
 
-  // A change on a cream chip, so gains in forest and losses in dark red read over anything, and
-  // one of nothing, as a Stinky tip's "+$0", in grey; fitted to room by
-  // CHANGE_LABEL_STYLES, and placed by place. Its parts, and its chip's rect.
+  // A change on a cream chip in its changeLabelColour, so it reads over anything; fitted to room
+  // by CHANGE_LABEL_STYLES, and placed by place. Its parts, and its chip's rect.
   private addChangeChip(
     label: ChangeLabel,
     room: number,
     place: (shown: { lines: number; scale: number; width: number }) => { chip: Rect; text: Point },
   ): ChangeChip {
-    const colour =
-      label.amount === 0 ? PALETTE.grey : label.gain ? PALETTE.forest : PALETTE.darkRed;
+    const colour = changeLabelColour(label);
     const text = addPixelText(this, 0, 0, label.text, { colour, scale: 2 });
     const { lines, style } = fitPixelText(text, { room, styles: CHANGE_LABEL_STYLES }, 0, 0);
     const ink = inkSpan(text);

@@ -67,7 +67,7 @@ export function cashChipPlace(
 
 // The tip label showing adding up next, a tip grabbed before it flies: one label for both, their
 // total. Undefined when either is not a tip's label, or when a debuff zeroed one and not the
-// other, or zeroed them by different debuffs, so a grey "+$0" never adds up with a paying tip.
+// other, or zeroed them by different debuffs, so a zeroed "+$0" never adds up with a paying tip.
 export function mergeTips(showing: ChangeLabel, next: ChangeLabel): ChangeLabel | undefined {
   if (
     showing.target.kind !== "cash" ||

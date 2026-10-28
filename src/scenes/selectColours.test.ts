@@ -5,9 +5,16 @@ import { gameData } from "../data";
 import { BADGE_TEXT_COLOURS } from "../home/badgesView";
 import { STATS_LAYOUT } from "../home/statsLayout";
 import type { EffectNameKind } from "../hud/effectNames";
+import { changeLabels } from "../hud/hudView";
 import { keysOf } from "../lib/records";
+import type { Change } from "../rules/causes";
+import { tipValue } from "../rules/run";
+import { cents } from "../rules/units";
+import { testState } from "../testing/runState";
+import { CREAM_PANEL_COLOURS } from "../ui/phaser/draw";
 import { NEUTRAL_RAMP, PALETTE } from "../ui/phaser/palette";
 import { BUTTON_COLOURS, GREYED, pictureBox, PLATE_LOOKS, selectLook } from "../ui/selection";
+import { CHANGE_COLOURS, changeLabelColour } from "./changeLabelColours";
 import { DEBUFF_COLOURS } from "./debuffColours";
 import { EFFECT_PILLS, pillColours } from "./effectNameColours";
 
@@ -77,6 +84,12 @@ describe("interaction-state colours", () => {
         TEXT,
       ],
       ["a card's cost on its plaque", PALETTE.plum, PALETTE.cream, TEXT],
+      ...keysOf(CHANGE_COLOURS).map((kind): [string, number, number, number] => [
+        `a ${kind} change label on its chip`,
+        CHANGE_COLOURS[kind],
+        CREAM_PANEL_COLOURS.fill,
+        TEXT,
+      ]),
       ["an earned badge's name on its band", PALETTE[BADGE_TEXT_COLOURS.earned.name], BAND, TEXT],
       ["an earned badge's goal on its band", PALETTE[BADGE_TEXT_COLOURS.earned.goal], BAND, TEXT],
       ["a locked badge's name", PALETTE[BADGE_TEXT_COLOURS.locked.name], PALETTE.cream, TEXT],
@@ -98,6 +111,33 @@ describe("interaction-state colours", () => {
     );
     expect(faint.map(([what]) => what)).toEqual([]);
   });
+});
+
+describe("change label colours", () => {
+  const kilo = testState({ kilo: 5 });
+  const stinky = testState(
+    { kilo: 5 },
+    { debuffs: [{ debuff: "stinky", secondsLeft: 20, untilZone: 0 }] },
+  );
+  const bump: Change = {
+    amount: cents(-1000),
+    causes: [{ amount: -1000, kind: "bump" }],
+    dog: null,
+    kind: "money",
+  };
+
+  // A zeroed tip's "+$0" draws in the loss colour, not a grey of its own.
+  it.each([
+    ["a tip", tipValue(gameData, kilo), CHANGE_COLOURS.gain],
+    ["a Stinky tip", tipValue(gameData, stinky), CHANGE_COLOURS.loss],
+    ["a bump's cost", bump, CHANGE_COLOURS.loss],
+  ] satisfies readonly [string, Change, number][])(
+    "draws %s in its colour",
+    (_what, change, colour) => {
+      const labels = changeLabels(gameData, { x: 0, y: 0 }, [change]);
+      expect(labels.map(changeLabelColour)).toEqual([colour]);
+    },
+  );
 });
 
 describe("debuff bar colours", () => {
