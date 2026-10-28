@@ -58,7 +58,7 @@ export const RUN_TEXT_FIELDS = {
   },
   zoneBanner: ["n", "world"],
   zoneDone: {
-    earnings: ["fees", "tips"],
+    earnings: { bonus: ["amount"], fees: ["amount"], tips: ["amount"] },
     subtitle: ["zone"],
   },
   zoneProgress: ["n", "total"],

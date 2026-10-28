@@ -95,7 +95,12 @@ export const RUN_TEXT = {
   zoneBanner: "{world}, neighbourhood {n}",
   zoneDone: {
     button: "Onward!",
-    earnings: "{fees} pay · {tips} tips",
+    earnings: {
+      bonus: "{amount} Walk bonus",
+      fees: "{amount} pay",
+      separator: " · ",
+      tips: "{amount} tips",
+    },
     subtitle: "{zone}",
     title: "Well walked!",
   },
