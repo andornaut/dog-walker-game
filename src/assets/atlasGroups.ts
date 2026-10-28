@@ -2,7 +2,7 @@ import { splitDepthKey } from "./depthSteps";
 import { LOADING_ART } from "./spriteKeys";
 
 // Pages in load order: the loading screen's art first, so it shows while the rest loads.
-export const ATLAS_GROUPS = ["boot", "ui", "home", "run", "road", "cards"] as const;
+export const ATLAS_GROUPS = ["boot", "ui", "home", "run", "road"] as const;
 export type AtlasGroup = (typeof ATLAS_GROUPS)[number];
 // The groups a key belongs to by its name alone. road is split out of run by pageGroupOf.
 type KeyGroup = Exclude<AtlasGroup, "road">;
@@ -17,7 +17,6 @@ const LINEAR_GROUPS: ReadonlySet<AtlasGroup> = new Set(["road"]);
 
 const LOADING_KEYS: ReadonlySet<string> = new Set(Object.values(LOADING_ART));
 const GROUP_PREFIXES: readonly (readonly [KeyGroup, readonly string[]])[] = [
-  ["cards", ["card-"]],
   ["ui", ["badge-", "face-", "icon-", "item-", "logo", "portrait-", "screen-", "ui-"]],
 ];
 
@@ -37,7 +36,7 @@ const isHomeArt = (key: string): boolean =>
   (HOME_PREFIXES.some((prefix) => key.startsWith(prefix)) && splitDepthKey(key).base === key);
 
 // boot is the loading screen; ui the home screen, menus, HUD and icons; home the road art the
-// home screen draws too; cards the choice cards; run everything else on the road.
+// home screen draws too; run the choice cards and everything else on the road.
 export function atlasGroupOf(key: string): KeyGroup {
   if (LOADING_KEYS.has(key)) {
     return "boot";

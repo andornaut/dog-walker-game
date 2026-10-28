@@ -9,7 +9,7 @@ describe("atlasGroupOf", () => {
   it("puts each key in its group", () => {
     const cases: [string, string][] = [
       ...Object.values(LOADING_ART).map((key): [string, string] => [key, "boot"]),
-      ["card-skip", "cards"],
+      ["card-skip", "run"],
       ["screen-home", "ui"],
       ["icon-lock", "ui"],
       ["logo", "ui"],
@@ -39,7 +39,7 @@ describe("pageGroupOf", () => {
     ["fx-hit-skunk", "run", false],
     ["ambient-kite", "run", false],
     ["ui-heart", "ui", false],
-    ["card-skip", "cards", false],
+    ["card-skip", "run", false],
     [LOADING_ART.walker, "boot", false],
   ] as const)("packs %s on a %s page, filtered linearly: %s", (key, group, linear) => {
     expect(pageGroupOf(stepped, key)).toBe(group);

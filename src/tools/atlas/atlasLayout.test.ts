@@ -95,14 +95,13 @@ describe("layoutAtlases", () => {
     }
   });
 
-  it("orders pages boot, ui, home, run, road, cards, each named for its group", () => {
+  it("orders pages boot, ui, home, run, road, each named for its group", () => {
     expect(layoutAtlases(textures).pages.map(({ group, png }) => [group, png])).toEqual([
       ["boot", "atlas/boot-0.png"],
       ["ui", "atlas/ui-0.png"],
       ["home", "atlas/home-0.png"],
       ["run", "atlas/run-0.png"],
       ["road", "atlas/road-0.png"],
-      ["cards", "atlas/cards-0.png"],
     ]);
   });
 
