@@ -181,6 +181,7 @@ Placed by the style guide's Roadside table (`shared/roadside.json`): the lawn pr
 | `roadside-fruit-stand`                | 108×84  | Fruit crates under a striped awning on two posts                 |
 | `roadside-gas-lamp`                   | 36×150  | A heritage lamp lit gold                                         |
 | `roadside-hot-dog-stand`              | 90×126  | A red park kiosk, a hot dog on its sign                          |
+| `roadside-ice-cream-stand`            | 90×126  | A foam beach kiosk, a soft-serve cone on its roof                |
 | `roadside-leuty`                      | 96×156  | The Leuty Lifeguard Station                                      |
 | `roadside-love-lock`                  | 78×90   | The Distillery's heart of padlocks on a plinth                   |
 | `roadside-street-lamp`                | 60×180  | A downtown street light, lit both ways                           |

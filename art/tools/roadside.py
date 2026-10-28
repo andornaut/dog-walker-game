@@ -22,6 +22,7 @@ roadside-dune-grass      60x48    a tuft of dune grass, moss and olive blades wi
 roadside-fruit-stand     108x84   a tiered fruit stand under a little striped awning
 roadside-gas-lamp        36x150   a heritage street lamp, its lantern lit gold
 roadside-hot-dog-stand   90x126   a red park kiosk under a flat white roof, a hot dog on its sign
+roadside-ice-cream-stand 90x126   a foam beach kiosk under a flat turquoise roof, a soft-serve cone on top
 roadside-leuty           96x156   the Leuty Lifeguard Station on driftwood stilts
 roadside-love-lock       78x90    the Distillery's red steel heart of padlocks on a post
 roadside-street-lamp     60x180   a downtown street light, an arm each way, lit gold beneath
@@ -245,6 +246,55 @@ def hot_dog_stand():
             g.rect(x + 1, 48, 1, 2, col)
         g.rect(42, 53, 6, 4, "white")
         g.rect(6, 68, 48, 3, "white")
+    return w, h, draw
+
+def ice_cream_stand():
+    """A beach ice cream stand: a foam kiosk under a flat turquoise roof, a pink soft-serve cone standing on
+    it, a pink and cream striped awning with a scalloped hem over the serving hatch, tubs in the freezer and
+    cones in a rack on the counter."""
+    w, h = 60, 84
+
+    def draw(g, f=0):
+        base = h - 2
+        # the sign: a waffle cone standing on the roof, crosshatched, under three tiers of soft serve and a
+        # curled tip, each tier shaded mauve below and right
+        g.tri((20, 15), (40, 15), (30, 29), "tan")
+        g.tri((30, 15), (40, 15), (30, 29), "ochre")
+        for a in (24, 30, 36):
+            t = (40 - a) / 17
+            bar(g, (a, 15), (a + 7 * t - 1, 15 + 14 * t), "brown", 1)
+            t = (a - 20) / 17
+            bar(g, (a - 1, 15), (a - 7 * t, 15 + 14 * t), "brown", 1)
+        for cx, cy, rx, ry in ((30, 13, 13, 3), (30, 9, 10.5, 3), (30, 5.5, 7.5, 2.5)):
+            g.ell(cx, cy, rx, ry, "mauve")
+            g.ell(cx - 1, cy - 0.5, rx - 1, ry - 0.5, "pink")
+        g.tri((28, 4), (34, 4), (33, 1.5), "pink")
+        g.rect(23, 4, 3, 1, "white")
+        g.rect(21, 8, 4, 1, "white")
+        g.rect(19, 12, 4, 1, "white")
+        g.rect(2, 28, 56, 5, "turquoise")
+        g.rect(2, 32, 56, 1, "dturq")
+        walls(g, 6, 48, 33, base, "foam")
+        for i in range(0, 48, 6):
+            g.rect(6 + i, 33, 3, 7, "pink")
+            g.rect(9 + i, 33, 3, 7, "cream")
+            g.ell(7.5 + i, 40, 1.5, 1.5, "pink")
+            g.ell(10.5 + i, 40, 1.5, 1.5, "cream")
+        g.rect(10, 42, 40, 15, "dlake")
+        g.rect(12, 44, 12, 8, "cream")
+        g.ell(18, 47, 3, 2.5, "pink")
+        g.rect(17, 49, 2, 2, "tan")
+        g.rect(28, 48, 20, 1, "lgrey")
+        for x, col in ((28, "pink"), (35, "cream"), (42, "lime")):
+            g.rect(x, 45, 6, 3, "white")
+            g.rect(x, 45, 6, 1, col)
+        g.rect(8, 57, 44, 3, "white")
+        g.rect(8, 59, 44, 1, "lgrey")
+        for x, col in ((32, "pink"), (38, "cream"), (44, "lime")):
+            g.tri((x - 2, 53), (x + 2, 53), (x, 58), "tan")
+            g.ell(x, 52, 2.2, 2, col)
+        g.rect(6, 68, 48, 3, "white")
+        g.rect(6, 71, 48, 1, "pink")
     return w, h, draw
 
 
@@ -593,6 +643,7 @@ PROPS = {
     "roadside-dune-grass": (dune_grass(), (0,), STILL_MS, True),
     "roadside-transit-stop": (transit_stop(), (0,), STILL_MS, True),
     "roadside-hot-dog-stand": (hot_dog_stand(), (0,), STILL_MS, True),
+    "roadside-ice-cream-stand": (ice_cream_stand(), (0,), STILL_MS, True),
     "roadside-love-lock": (love_lock(), (0,), STILL_MS, True),
     "roadside-leuty": (leuty(), (0,), STILL_MS, True),
     **{f"roadside-beach-umbrella-{c}": (beach_umbrella(c), (0,), STILL_MS, True) for c in BEACH_STRIPES},
@@ -662,9 +713,9 @@ def gap(*props):
 # dz is road px from the slot's z, nearer negative. Each table is sparse: an empty lot and six gaps,
 # a prop in gaps 0 and 3, so each side has a prop every 6 slots (840 px): the neighbourhood's tree or
 # street furniture in gap 0, then its own prop in gap 3. The right side's gapStart of 2 puts its props
-# 3 slots after the left's, so they alternate sides, one every 420 px. The Beaches runs twelve gaps,
-# the same two props in gaps 0 and 3 and again in 6 and 9, and beach umbrellas and chairs in gaps 1, 4,
-# 7 and 10, so one prop stands every 210 px. Each neighbourhood's character comes from its backdrop,
+# 3 slots after the left's, so they alternate sides, one every 420 px. The Beaches runs twelve gaps: the
+# Leuty in gaps 0 and 6, dune grass in 3, the ice cream stand in 9, and beach umbrellas and chairs in
+# gaps 1, 4, 7 and 10, so one prop stands every 210 px. Each neighbourhood's character comes from its backdrop,
 # verges and road, not from its roadside.
 SIDES = dict(
     left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=1),
@@ -675,7 +726,7 @@ SIDES = dict(
 def sparse(tree, own, between=None):
     """A sparse table: tree alone in gap 0 and own alone in gap 3, each a (key, inner edge, dz). between, if
     given, maps more gaps to their props, each a tuple of (key, inner edge, dz): the gaps then run to 12,
-    tree and own repeating in gaps 6 and 9."""
+    tree and own repeating in gaps 6 and 9 unless between gives those gaps props of their own."""
     if between is None:
         return dict(slot=140, lots=((),), gaps=(gap(tree), (), (), gap(own), (), ()), sides=SIDES)
     gaps = [gap(tree), (), (), gap(own), (), ()] * 2
@@ -693,6 +744,7 @@ PLACEMENT = {
         1: (("beach-umbrella-blue", 225, 0), ("beach-chair-blue", 220, -12)),
         4: (("beach-umbrella-coral", 213, 0),),
         7: (("beach-umbrella-green", 225, 0), ("beach-chair-green", 220, -12)),
+        9: (("ice-cream-stand", 216, 0),),
         10: (("beach-chair-coral", 213, 0),),
     }),
     "yonge-street": sparse(("street-lamp", 213, 0), ("transit-stop", 213, 0)),

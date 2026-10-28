@@ -8271,6 +8271,87 @@
       }
     },
     {
+      "key": "roadside-ice-cream-stand",
+      "png": "sprites/roadside-ice-cream-stand.png",
+      "json": "sprites/roadside-ice-cream-stand.json",
+      "anchor": {
+        "feetY": 123,
+        "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "roadside-ice-cream-stand@50",
+      "png": "sprites/roadside-ice-cream-stand@50.png",
+      "json": "sprites/roadside-ice-cream-stand@50.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 43
+      }
+    },
+    {
+      "key": "roadside-ice-cream-stand@56",
+      "png": "sprites/roadside-ice-cream-stand@56.png",
+      "json": "sprites/roadside-ice-cream-stand@56.json",
+      "anchor": {
+        "feetY": 70,
+        "opaqueWidth": 48
+      }
+    },
+    {
+      "key": "roadside-ice-cream-stand@62",
+      "png": "sprites/roadside-ice-cream-stand@62.png",
+      "json": "sprites/roadside-ice-cream-stand@62.json",
+      "anchor": {
+        "feetY": 78,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "roadside-ice-cream-stand@69",
+      "png": "sprites/roadside-ice-cream-stand@69.png",
+      "json": "sprites/roadside-ice-cream-stand@69.json",
+      "anchor": {
+        "feetY": 85,
+        "opaqueWidth": 59
+      }
+    },
+    {
+      "key": "roadside-ice-cream-stand@75",
+      "png": "sprites/roadside-ice-cream-stand@75.png",
+      "json": "sprites/roadside-ice-cream-stand@75.json",
+      "anchor": {
+        "feetY": 93,
+        "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "roadside-ice-cream-stand@81",
+      "png": "sprites/roadside-ice-cream-stand@81.png",
+      "json": "sprites/roadside-ice-cream-stand@81.json",
+      "anchor": {
+        "feetY": 100,
+        "opaqueWidth": 70
+      }
+    },
+    {
+      "key": "roadside-ice-cream-stand@88",
+      "png": "sprites/roadside-ice-cream-stand@88.png",
+      "json": "sprites/roadside-ice-cream-stand@88.json",
+      "anchor": {
+        "feetY": 108,
+        "opaqueWidth": 75
+      }
+    },
+    {
+      "key": "roadside-ice-cream-stand@94",
+      "png": "sprites/roadside-ice-cream-stand@94.png",
+      "json": "sprites/roadside-ice-cream-stand@94.json",
+      "anchor": {
+        "feetY": 116,
+        "opaqueWidth": 81
+      }
+    },
+    {
       "key": "roadside-leuty",
       "png": "sprites/roadside-leuty.png",
       "json": "sprites/roadside-leuty.json",

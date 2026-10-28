@@ -8,6 +8,7 @@
     "roadside-dune-grass",
     "roadside-transit-stop",
     "roadside-hot-dog-stand",
+    "roadside-ice-cream-stand",
     "roadside-love-lock",
     "roadside-leuty",
     "roadside-beach-umbrella-blue",
@@ -352,8 +353,8 @@
         [],
         [
           {
-            "key": "roadside-dune-grass",
-            "across": 243,
+            "key": "roadside-ice-cream-stand",
+            "across": 261,
             "dz": 0
           }
         ],
