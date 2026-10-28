@@ -17,6 +17,9 @@
     },
     "music-walk": {
       "loop": true
+    },
+    "music-yonge-street": {
+      "loop": true
     }
   }
 }

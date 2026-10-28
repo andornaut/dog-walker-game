@@ -13338,9 +13338,39 @@
       "loop": true
     },
     {
+      "key": "music-distillery-district",
+      "ogg": "sounds/music-distillery-district.ogg",
+      "m4a": "sounds/music-distillery-district.m4a",
+      "loop": true
+    },
+    {
+      "key": "music-high-park",
+      "ogg": "sounds/music-high-park.ogg",
+      "m4a": "sounds/music-high-park.m4a",
+      "loop": true
+    },
+    {
+      "key": "music-kensington-market",
+      "ogg": "sounds/music-kensington-market.ogg",
+      "m4a": "sounds/music-kensington-market.m4a",
+      "loop": true
+    },
+    {
+      "key": "music-the-beaches",
+      "ogg": "sounds/music-the-beaches.ogg",
+      "m4a": "sounds/music-the-beaches.m4a",
+      "loop": true
+    },
+    {
       "key": "music-walk",
       "ogg": "sounds/music-walk.ogg",
       "m4a": "sounds/music-walk.m4a",
+      "loop": true
+    },
+    {
+      "key": "music-yonge-street",
+      "ogg": "sounds/music-yonge-street.ogg",
+      "m4a": "sounds/music-yonge-street.m4a",
       "loop": true
     },
     {

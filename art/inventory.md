@@ -311,4 +311,4 @@ Card keys use the data keys (`card-skunk-rinse`, `card-belly-rubs`). The neighbo
 
 ## Sounds
 
-`music-cabbagetown`, `music-distillery-district`, `music-high-park`, `music-kensington-market`, `music-the-beaches`, `music-walk`, `sfx-badge`, `sfx-bark`, `sfx-bump`, `sfx-card`, `sfx-fired`, `sfx-hit-<encounter>`, `sfx-new-best`, `sfx-tip`, `sfx-treat`.
+`music-cabbagetown`, `music-distillery-district`, `music-high-park`, `music-kensington-market`, `music-the-beaches`, `music-walk`, `music-yonge-street`, `sfx-badge`, `sfx-bark`, `sfx-bump`, `sfx-card`, `sfx-fired`, `sfx-hit-<encounter>`, `sfx-new-best`, `sfx-tip`, `sfx-treat`.

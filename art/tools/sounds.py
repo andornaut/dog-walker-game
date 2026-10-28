@@ -18,8 +18,6 @@ sfx-badge          1.00s  jingle: square D6 F#6 A6 up to a ringing D7, then a sp
 sfx-new-best       1.50s  fanfare: G4 C5 E5 G5, E5 G5 over a triangle bass, warm square
 music-cabbagetown  31.28s 12 bars at about 92 BPM in F, loops seamlessly: triangle music-box
                           lead, fingerpicked pulse guitar, triangle walking bass, brushed tick
-music-walk         28.77s 12 bars at about 100 BPM in C, loops seamlessly: square lead,
-                          triangle walking bass, thin square arpeggio, soft kick and tick
 music-distillery-district 35.53s 16 bars swung at about 108 BPM in F, loops seamlessly: muted
                           square lead with vibrato, triangle walking bass, rolled seventh chords, brushes
 music-high-park    30.72s 24 bars of 6/8 at about 94 BPM in F, loops seamlessly: breathy triangle
@@ -28,6 +26,10 @@ music-kensington-market 34.30s 16 bars at about 112 BPM in D mixolydian, loops s
                           accordion calls and marimba answers over a tresillo bass and hand drums
 music-the-beaches  34.90s 16 bars at about 110 BPM in F, loops seamlessly: calypso steel pan lead,
                           bouncing triangle bass, offbeat pulse strums, kick, hand drums and shaker
+music-walk         28.77s 12 bars at about 100 BPM in C, loops seamlessly: square lead,
+                          triangle walking bass, thin square arpeggio, soft kick and tick
+music-yonge-street 29.09s 16 bars at about 132 BPM in D dorian, loops seamlessly: pulse lead
+                          with a dotted-eighth echo, octave square bass, offbeat stabs, kick and snare
 
 Each sound ships as mono 44.1kHz Ogg Vorbis plus AAC (.m4a), since iOS Safari
 cannot play Ogg.
