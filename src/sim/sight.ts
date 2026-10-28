@@ -86,12 +86,13 @@ export function moverShows(path: MoverPath, since: number): string {
 
 // Whether a crosser's pause has begun, since scroll after its cue appeared: it is standing in it
 // or has stood.
-function pausedYet(path: MoverPath, since: number): boolean {
-  return (
-    path.motion === "cross" &&
-    path.pause !== undefined &&
-    since - path.warning >= path.pause.after / path.lanesPerPixel
-  );
+function pausedYet(path: Extract<MoverPath, { motion: "cross" }>, since: number): boolean {
+  return path.pause !== undefined && since - path.warning >= path.pause.after / path.lanesPerPixel;
+}
+
+// A move seconds long at the tuning's key, in scroll at the road's speed.
+function nominalLength(road: SightRoad, key: "moverHopSeconds" | "moverStepSeconds"): number {
+  return read(road.data.tuning, "seconds", key) * road.speed;
 }
 
 // The scroll a dart waiting at its edge is read as waiting for: longer than any road.
@@ -185,19 +186,17 @@ export function sightPaths(road: SightRoad, since: number, item: WalkItem): read
   const { cued, started } = stepsSeen(path, since);
   const { cell, laneCount } = road.geometry;
   if (path.motion === "approach") {
-    const nominal = read(tuning, "seconds", "moverStepSeconds") * road.speed;
     return approachOutcomes({
       ...path,
-      lengths: lengthsSeen(path.lengths, started.length, nominal),
+      lengths: lengthsSeen(path.lengths, started.length, nominalLength(road, "moverStepSeconds")),
       pending: cued === undefined ? [] : [{ at: cued.at, kind: "after" }],
       steps: started,
     });
   }
   if (path.motion === "shy") {
-    const nominal = read(tuning, "seconds", "moverHopSeconds") * road.speed;
     return shyOutcomes({
       ...path,
-      lengths: lengthsSeen(path.lengths, started.length, nominal),
+      lengths: lengthsSeen(path.lengths, started.length, nominalLength(road, "moverHopSeconds")),
       pending: cued === undefined ? [] : [cued.at],
       steps: started,
     });
@@ -227,20 +226,17 @@ function nextShapes(
   movement: Movement | null,
   started: readonly MoverStep[],
 ): { readonly length: number; readonly shapes: readonly StepShape[] } {
-  const { tuning } = road.data;
-  const seconds = (key: "moverHopSeconds" | "moverStepSeconds") =>
-    read(tuning, "seconds", key) * road.speed;
   const last = started.filter((step) => step.lanes !== 0).at(-1)?.lanes;
   const back: readonly StepShape[] =
     last === undefined ? SIDESTEPS : [{ lanes: -Math.sign(last), travel: 0 }];
   switch (movement?.kind) {
     case "bounce":
-      return { length: seconds("moverHopSeconds"), shapes: back };
+      return { length: nominalLength(road, "moverHopSeconds"), shapes: back };
     case "follow":
-      return { length: seconds("moverStepSeconds"), shapes: SIDESTEPS };
+      return { length: nominalLength(road, "moverStepSeconds"), shapes: SIDESTEPS };
     case "hop":
       return {
-        length: seconds("moverHopSeconds"),
+        length: nominalLength(road, "moverHopSeconds"),
         shapes: hopShapes(movement.most, movement.sideways === true),
       };
     case "stopAndGo": {
@@ -253,8 +249,8 @@ function nextShapes(
       };
     }
     case "sway":
-      return { length: seconds("moverStepSeconds"), shapes: back };
+      return { length: nominalLength(road, "moverStepSeconds"), shapes: back };
     default:
-      return { length: seconds("moverStepSeconds"), shapes: STEP_SHAPES };
+      return { length: nominalLength(road, "moverStepSeconds"), shapes: STEP_SHAPES };
   }
 }
