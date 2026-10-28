@@ -68,8 +68,8 @@ sfx-hit-fish-crates 0.46s   a wooden thunk, ice chips clattering, then two wet f
 Cards (75x56), one per option, composed from the sprites above and the pack's exports:
 card-cheese-crates-sniff, -buy and -hurry-on at a brick shopfront's wooden door, which fits both the
 neighbourhoods it stands in; card-wedding-shoot-pose, -walk-around and -reshoot on the Distillery
-District's road; card-fish-crates-sniff, -pay, -hurry-past and -wade-through on Kensington Market's, the
-last with the pack slipping through the crate's spilt fish slime. The paid options
+District's road; card-fish-crates-pay, -hurry-past and -wade-through on Kensington Market's, the last
+with the pack slipping through the crate's spilt fish slime. The paid options
 show a bill (icon-bill) changing hands: the photographer reaching out to take it, the fishmonger in a
 white apron and the cheesemonger in an ochre shirt and white apron holding it up.
 
@@ -1088,21 +1088,6 @@ def crate_image(draw):
     return to_image(drawn(PERSON, draw).outlined())
 
 
-def card_fish_sniff():
-    """Let them sniff: the spilt crate up the road and Archie nose down at the fish, wavy moss smell lines
-    rising off them and a heart."""
-    import cards
-    a = cards.Art()
-    a.ground("shops")
-    a.put("fish-crates", "idle", 40, 38)
-    c = a.dog("archie", "walk", 30, 60, 2)
-    a.lead(30, c, 36)
-    a.stink(10, 16, 2, "lime", "moss")
-    a.stink(62, 14, 2, "lime", "moss")
-    a.hearts([(46, 2)])
-    return a
-
-
 def fishmonger_top(g, b):
     """The fishmonger facing the player: a blue shirt under a long white apron, a navy flat cap, the near
     hand (screen left) raised beside the face to hold up the fee, the other arm at the side."""
@@ -1339,7 +1324,6 @@ CARDS = {
     "card-wedding-shoot-pose": card_wedding_pose,
     "card-wedding-shoot-walk-around": card_wedding_walk_around,
     "card-wedding-shoot-reshoot": card_wedding_reshoot,
-    "card-fish-crates-sniff": card_fish_sniff,
     "card-fish-crates-pay": card_fish_pay,
     "card-fish-crates-hurry-past": card_fish_hurry_past,
     "card-fish-crates-wade-through": card_fish_wade_through,
