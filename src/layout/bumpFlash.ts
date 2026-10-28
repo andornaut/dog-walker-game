@@ -129,6 +129,7 @@ const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>> = {
   signSpinner: "yellow",
   stiltWalker: "yellow",
   streetcar: "red",
+  streetcarPlatform: "red",
   stroller: "green",
   strollingBusker: "green",
   taxi: "yellow",

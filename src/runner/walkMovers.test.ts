@@ -73,7 +73,8 @@ const SWEEP_SEEDS = [1, 2];
 describe("movers", { timeout: 120_000 }, () => {
   const OBSTACLE_KINDS = [...OBSTACLE_IDS, ...MINOR_OBSTACLE_IDS] as WalkItem["kind"][];
   // The rulebook's obstacles that never move: art sculptures, benches, bins, cherry trees, cones,
-  // fallen logs, hedges, iron fences, market stalls, potholes, puddles and volleyball nets.
+  // fallen logs, hedges, iron fences, market stalls, potholes, puddles, streetcar platforms and
+  // volleyball nets.
   const NEVER_MOVE: readonly WalkItem["kind"][] = [
     "artSculpture",
     "bench",
@@ -87,6 +88,7 @@ describe("movers", { timeout: 120_000 }, () => {
     "marketStall3",
     "pothole",
     "puddle",
+    "streetcarPlatform",
     "trashCan",
     "volleyballNet2",
     "volleyballNet3",

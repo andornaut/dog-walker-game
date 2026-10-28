@@ -2637,6 +2637,18 @@
       "spriteKey": "streetcar"
     },
     {
+      "id": "streetcarPlatform",
+      "name": "Streetcar platform",
+      "shape": {
+        "lanes": 3,
+        "rows": 1
+      },
+      "zones": [
+        "homeStretch"
+      ],
+      "spriteKey": "streetcar-platform"
+    },
+    {
       "id": "stroller",
       "movement": {
         "factor": 0.6,
@@ -3276,6 +3288,7 @@
           "signSpinner": 0,
           "stiltWalker": 0,
           "streetcar": 0,
+          "streetcarPlatform": 0,
           "stroller": 3,
           "strollingBusker": 0,
           "taxi": 0,
@@ -3397,6 +3410,7 @@
           "signSpinner": 0,
           "stiltWalker": 0,
           "streetcar": 0,
+          "streetcarPlatform": 0,
           "stroller": 3,
           "strollingBusker": 0,
           "taxi": 0,
@@ -3518,6 +3532,7 @@
           "signSpinner": 0,
           "stiltWalker": 2,
           "streetcar": 0,
+          "streetcarPlatform": 0,
           "stroller": 0,
           "strollingBusker": 0,
           "taxi": 0,
@@ -3639,6 +3654,7 @@
           "signSpinner": 0,
           "stiltWalker": 3,
           "streetcar": 0,
+          "streetcarPlatform": 0,
           "stroller": 0,
           "strollingBusker": 5,
           "taxi": 0,
@@ -3760,6 +3776,7 @@
           "signSpinner": 0,
           "stiltWalker": 0,
           "streetcar": 0,
+          "streetcarPlatform": 0,
           "stroller": 4,
           "strollingBusker": 0,
           "taxi": 0,
@@ -3847,7 +3864,7 @@
           "hedge": 0,
           "hen": 0,
           "hopscotchKid": 0,
-          "hotDogCart": 12.5,
+          "hotDogCart": 9.5,
           "iceCreamBike": 0,
           "iceCreamTruck": 2,
           "ironFence2": 0,
@@ -3881,6 +3898,7 @@
           "signSpinner": 2,
           "stiltWalker": 0,
           "streetcar": 3,
+          "streetcarPlatform": 3,
           "stroller": 0,
           "strollingBusker": 0,
           "taxi": 3,

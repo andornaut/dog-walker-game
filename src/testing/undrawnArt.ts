@@ -8,6 +8,7 @@ const UNDRAWN_ART: ReadonlySet<string> = new Set([
   "iron-fence-3",
   "market-stall-2",
   "market-stall-3",
+  "streetcar-platform",
   "ttc-bus-crossing",
 ]);
 

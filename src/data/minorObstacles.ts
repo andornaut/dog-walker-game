@@ -311,6 +311,11 @@ export const MINOR_OBSTACLES = {
     name: "Streetcar",
     shape: { lanes: 1, rows: 3 },
   },
+  streetcarPlatform: {
+    name: "Streetcar platform",
+    shape: { lanes: 3, rows: 1 },
+    zones: ["homeStretch"],
+  },
   stroller: {
     movement: { factor: 0.6, kind: "inLane" },
     name: "Stroller",
