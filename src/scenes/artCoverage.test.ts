@@ -207,12 +207,15 @@ describe("walker art", () => {
 });
 
 describe("Pet shop art", () => {
-  it("names the faces and the glint the Start screen plays", () => {
-    expect(missingTags(SHOP_ART.petShop, ["glint", "normal", "pressed"])).toEqual([]);
-  });
-
-  it("names the dog slot sign's faces", () => {
-    expect(missingTags(HOME_LAYOUT.slotSign.key, ["normal", "pressed"])).toEqual([]);
+  it.each([
+    [
+      "the faces and the glint the Start screen plays",
+      SHOP_ART.petShop,
+      ["glint", "normal", "pressed"],
+    ],
+    ["the dog slot sign's faces", HOME_LAYOUT.slotSign.key, ["normal", "pressed"]],
+  ])("names %s", (_, key, tags) => {
+    expect(missingTags(key, tags)).toEqual([]);
   });
 });
 
@@ -586,13 +589,13 @@ describe("sound art", () => {
     expect(Object.values(SOUND_KEYS).filter((key) => !sounds.has(key))).toEqual([]);
   });
 
-  it.each(gameData.world.zones.map((zone) => [zone.art, zone] as const))(
-    "plays a looping music in %s",
-    (_art, zone) => {
+  it("plays a looping music in every zone", () => {
+    const silent = gameData.world.zones.filter((zone) => {
       const key = musicKeysOf(zone).find((candidate) => sounds.has(candidate)) ?? "";
-      expect(sounds.get(key)?.loop).toBe(true);
-    },
-  );
+      return sounds.get(key)?.loop !== true;
+    });
+    expect(silent.map(({ art }) => art)).toEqual([]);
+  });
 
   it("has its own hit sound for every encounter with a hit moment", () => {
     const hits = ENCOUNTERS.filter((id) => hitLabel(gameData.encounters[id]) !== null);
