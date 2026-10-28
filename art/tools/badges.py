@@ -430,8 +430,7 @@ def _(g):
 
 @icon("tip-jar")
 def _(g):
-    """A glass jar with a slot in its lid, a gold coin dropping in, loose coins piled inside."""
-    g.ell(16, 5.5, 2.6, 2.6, "amber", "orange", "yellow")
+    """A glass jar with a slot in its dslate lid, loose gold coins piled inside."""
     g.rect(10, 9, 12, 3, "dslate")
     g.rect(13, 9, 6, 1, "ink")
     g.rect(9, 12, 14, 13, "lgrey")
