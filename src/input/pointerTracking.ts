@@ -151,7 +151,7 @@ export function trackPointer<Target>(
   }
   // A hold whose time came up between frames opens, and its release steps nothing.
   const { hold } = current;
-  if (hold !== undefined && releaseHold(hold, sample.timeMs) === "hold") {
+  if (hold !== undefined && releaseHold(sample.timeMs, hold) === "hold") {
     return { actions: [], track: opened(context, hold) };
   }
   return { actions: pointerUp(context, point, current.gesture).actions, track: idleTrack };
@@ -177,10 +177,10 @@ function holdOnly<Target>(
     return track;
   }
   if (phase === "move") {
-    const moved = moveHold(hold, point);
+    const moved = moveHold(point, hold);
     return moved.state === "moved" ? idleTrack : { ...track, hold: moved };
   }
-  if (phase === "up" && releaseHold(hold, sample.timeMs) === "hold") {
+  if (phase === "up" && releaseHold(sample.timeMs, hold) === "hold") {
     return opened(context, hold);
   }
   return idleTrack;
@@ -195,7 +195,7 @@ function steered(
   if (hold === undefined) {
     return undefined;
   }
-  const press = moveHold(hold, point);
+  const press = moveHold(point, hold);
   return stepped || press.state === "moved" ? undefined : press;
 }
 
@@ -211,7 +211,7 @@ export function tickTrack<Target>(
     return idleTrack;
   }
   const { hold } = track;
-  if (hold === undefined || !tickHold(hold, nowMs).fire) {
+  if (hold === undefined || !tickHold(nowMs, hold).fire) {
     return track;
   }
   return opened(context, hold);

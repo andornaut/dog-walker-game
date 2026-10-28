@@ -264,7 +264,7 @@ export class ShopScene extends Scene {
     });
     this.input.on("pointermove", (pointer: Input.Pointer) => {
       if (this.hold !== undefined && pointer.isDown) {
-        this.hold = moveHold(this.hold, { x: pointer.x, y: pointer.y });
+        this.hold = moveHold({ x: pointer.x, y: pointer.y }, this.hold);
       }
     });
     this.listenScroll();
@@ -485,7 +485,7 @@ export class ShopScene extends Scene {
       this.moveList(flung);
     }
     if (this.hold !== undefined) {
-      const { fire, press } = tickHold(this.hold, this.time.now);
+      const { fire, press } = tickHold(this.time.now, this.hold);
       this.hold = press;
       if (fire) {
         this.presses?.cancel();

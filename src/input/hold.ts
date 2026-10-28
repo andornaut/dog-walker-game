@@ -25,7 +25,7 @@ export function startHold(rule: HoldRule, start: Point, startedMs: number): Hold
 }
 
 // A press that moves past the slop stops being a hold.
-export function moveHold(press: HoldPress, to: Point): HoldPress {
+export function moveHold(to: Point, press: HoldPress): HoldPress {
   if (press.state !== "holding") {
     return press;
   }
@@ -35,7 +35,7 @@ export function moveHold(press: HoldPress, to: Point): HoldPress {
 }
 
 // Each frame: fire tells the caller to act on the hold, once, when the hold time is up.
-export function tickHold(press: HoldPress, nowMs: number): { fire: boolean; press: HoldPress } {
+export function tickHold(nowMs: number, press: HoldPress): { fire: boolean; press: HoldPress } {
   if (press.state === "holding" && nowMs - press.startedMs >= press.rule.holdMs) {
     return { fire: true, press: { ...press, state: "held" } };
   }
@@ -44,7 +44,7 @@ export function tickHold(press: HoldPress, nowMs: number): { fire: boolean; pres
 
 // What a release does. A press that reached the hold time between frames still holds, so a
 // long press never also counts as a tap.
-export function releaseHold(press: HoldPress, nowMs: number): "hold" | "none" | "tap" {
+export function releaseHold(nowMs: number, press: HoldPress): "hold" | "none" | "tap" {
   switch (press.state) {
     case "held":
       return "none";

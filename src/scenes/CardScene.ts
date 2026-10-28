@@ -281,7 +281,7 @@ export class CardScene extends Scene {
     if (this.hold === undefined) {
       return;
     }
-    const { fire, press } = tickHold(this.hold, this.time.now);
+    const { fire, press } = tickHold(this.time.now, this.hold);
     this.hold = press;
     if (fire && this.pressed !== undefined) {
       // The hold takes the press, so its release picks nothing.

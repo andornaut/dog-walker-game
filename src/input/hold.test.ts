@@ -27,18 +27,18 @@ describe("a press on a holdable item", () => {
       number,
       string,
     ][]) {
-      let press = moveHold(startHold(rule, at, STARTED_MS), { x: at.x + moved, y: at.y });
+      let press = moveHold({ x: at.x + moved, y: at.y }, startHold(rule, at, STARTED_MS));
       if (tick !== undefined) {
-        const ticked = tickHold(press, STARTED_MS + tick);
+        const ticked = tickHold(STARTED_MS + tick, press);
         expect(ticked.fire).toBe(fires);
         press = ticked.press;
       }
-      expect(releaseHold(press, STARTED_MS + releaseMs)).toBe(release);
+      expect(releaseHold(STARTED_MS + releaseMs, press)).toBe(release);
     }
   });
 
   it("fires the hold only once", () => {
-    const fired = tickHold(startHold(TILE, at, STARTED_MS), STARTED_MS + 400).press;
-    expect(tickHold(fired, STARTED_MS + 900).fire).toBe(false);
+    const fired = tickHold(STARTED_MS + 400, startHold(TILE, at, STARTED_MS)).press;
+    expect(tickHold(STARTED_MS + 900, fired).fire).toBe(false);
   });
 });

@@ -483,7 +483,7 @@ export class StartScene extends Scene {
       },
       move: (pointer) => {
         if (this.hold !== undefined && pointer.isDown) {
-          this.hold = moveHold(this.hold, { x: pointer.x, y: pointer.y });
+          this.hold = moveHold({ x: pointer.x, y: pointer.y }, this.hold);
         }
       },
       up: (pointer, cancelled) => {
@@ -502,7 +502,7 @@ export class StartScene extends Scene {
         }
         const target = cancelled ? undefined : this.targetAt(pointer.x, pointer.y);
         const pressed = this.pressedTarget;
-        const release = this.hold === undefined ? "tap" : releaseHold(this.hold, this.time.now);
+        const release = this.hold === undefined ? "tap" : releaseHold(this.time.now, this.hold);
         this.hold = undefined;
         this.pressedTarget = undefined;
         if (this.press !== undefined) {
@@ -934,7 +934,7 @@ export class StartScene extends Scene {
   override update(): void {
     const now = this.time.now;
     if (this.hold !== undefined) {
-      const { fire, press } = tickHold(this.hold, now);
+      const { fire, press } = tickHold(now, this.hold);
       this.hold = press;
       if (fire && this.pressedTarget !== undefined) {
         this.openDetail(this.pressedTarget);
