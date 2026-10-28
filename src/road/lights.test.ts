@@ -96,13 +96,30 @@ describe("LIGHT_ATTACHMENTS", () => {
     expect(SPRITES).toContain(key);
   });
 
-  // The frames of a sprite's idle tag, by its Aseprite JSON.
-  const idleFrames = (key: string): number => {
+  // A sprite's Aseprite JSON: its frames in order, as a hash or an array, and its tags.
+  interface SheetFrame {
+    readonly frame: {
+      readonly h: number;
+      readonly w: number;
+      readonly x: number;
+      readonly y: number;
+    };
+    readonly sourceSize: { readonly h: number; readonly w: number };
+    readonly spriteSourceSize: { readonly x: number; readonly y: number };
+  }
+  const sheetOf = (key: string) => {
     const sheet = JSON.parse(readFileSync(`public/art/sprites/${key}.json`, "utf8")) as {
+      frames: SheetFrame[] | Record<string, SheetFrame>;
       meta: { frameTags: { from: number; name: string; to: number }[] };
     };
+    const frames = Array.isArray(sheet.frames) ? sheet.frames : Object.values(sheet.frames);
     const tag = sheet.meta.frameTags.find(({ name }) => name === IDLE_TAG);
-    return tag === undefined ? 1 : tag.to - tag.from + 1;
+    return { frames, idle: tag ?? { from: 0, to: 0 } };
+  };
+  // The frames of a sprite's idle tag.
+  const idleFrames = (key: string): number => {
+    const { idle } = sheetOf(key);
+    return idle.to - idle.from + 1;
   };
   const pulsed = ATTACHED_KEYS.flatMap((key) =>
     (LIGHT_ATTACHMENTS.get(key) ?? [])
@@ -150,22 +167,28 @@ describe("LIGHT_ATTACHMENTS", () => {
       if (cone === null) {
         return;
       }
+      // The idle tag's first frame, anchored as drawn: centred across its full frame, its feet
+      // on the manifest's row.
       const { data, width } = decodePng(readFileSync(`public/art/sprites/${cone.step}.png`));
-      const feetY = ANCHORS.get(cone.step) ?? 0;
-      const key = cone.step.replace(/@\d+$/, "");
+      const { frames, idle } = sheetOf(cone.step);
+      const { frame, sourceSize, spriteSourceSize } = itemAt(frames, idle.from);
       const anchor = {
         flipX: cone.flipX,
         frame: 0,
-        key,
+        key: cone.step.replace(/@\d+$/, ""),
         scale: cone.scale,
-        x: width / 2,
-        y: feetY,
+        x: sourceSize.w / 2,
+        y: ANCHORS.get(cone.step) ?? 0,
       };
       const out = newAttachedLightPlaces();
       const places = out.slice(0, placeAttachedLights(cone.zone, [anchor], out));
       const apex = places.find(({ key: light }) => light === cone.attachment.light);
       expect(apex).toBeDefined();
-      const i = (Math.floor(apex?.y ?? 0) * width + Math.floor(apex?.x ?? 0)) * 4;
+      // The apex's pixel in the frame's rect on the sheet, which may be trimmed.
+      const x = Math.floor(apex?.x ?? 0) - spriteSourceSize.x;
+      const y = Math.floor(apex?.y ?? 0) - spriteSourceSize.y;
+      expect(x >= 0 && x < frame.w && y >= 0 && y < frame.h).toBe(true);
+      const i = ((frame.y + y) * width + frame.x + x) * 4;
       const [r = 0, g = 0, b = 0, a = 0] = data.subarray(i, i + 4);
       expect(a).toBeGreaterThan(0);
       expect(Math.max(r, g, b)).toBeGreaterThanOrEqual(LIT);
