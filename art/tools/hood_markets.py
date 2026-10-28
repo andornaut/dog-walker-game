@@ -54,8 +54,8 @@ market-stall-2      112x36  minor, 2 lanes, Kensington Market's barrier-2: a fle
                             hem on thin coal poles; each clay table stands on crossed legs, laid with
                             chunky goods: a crate of records with a black record stood up (lilac label,
                             left out at @69 and smaller, where it would fill the disc), folded clothes,
-                            book spines, glass jars and a lidded box. idle (2 frames, 500ms): the hem's
-                            middle half lifts 1px on frame 1
+                            book spines, glass jars and a lidded box. idle (4 frames, 500ms): the hem's
+                            middle half lifts 1px on frame 2
 market-stall-3      176x36  minor, 3 lanes, Kensington Market's barrier-3: the same stall, a table wider
 cargo-bike          48x72   minor mover, 1 lane by 2 rows: a cargo bike riding down a lane at the pack,
                             facing it: a wooden box of sunflowers and pink tulips out front over a
@@ -923,7 +923,7 @@ def market_stall(lanes, flap=0):
                        dlake=("lake", None), teal=("dturq", None), brick=("clay", None)))
 
 
-STALL_IDLE = (0, 1), 500
+STALL_IDLE = (0, 0, 1, 0), 500
 
 
 # ---------- the cargo bike ----------
