@@ -179,12 +179,12 @@ export class HelpScene extends Scene {
 
   // The page's picture of the walk screen in frame, drawn over this scene by the picture
   // scenes; started again only when the page changes.
-  private showPicture(page: HelpPictureId, frame: Rect): void {
+  private showPicture(art: HelpPictureId, frame: Rect): void {
     if (this.picturePage === this.page) {
       return;
     }
     this.picturePage = this.page;
-    const data: HelpPictureData = { frame, page };
+    const data: HelpPictureData = { frame, page: art };
     this.scene.launch(SCENE_KEYS.helpPicture, data);
   }
 
