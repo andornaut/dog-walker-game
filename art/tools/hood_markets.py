@@ -60,7 +60,7 @@ fx-hit-wedding-shoot 77x77  play (8 frames, 70ms): a lilac impact star, then a c
 fx-hit-fish-crates  77x77   play (8 frames, 70ms): a shallow impact star, then a fish leaping up out
                             of a splash, flipping as it arcs over and falls, ice chips and drops
                             thrown out either side
-sfx-hit-cheese-crates 0.39s a soft wooden thunk, a squish, then a rising plop that sags as it settles
+sfx-hit-cheese-crates 0.40s a soft wooden thunk, a squish, then a rising plop that sags as it settles
 sfx-hit-wedding-shoot 0.58s a flash charging up, the shutter's double click, then a triangle
                             "ding dong" of wedding bells
 sfx-hit-fish-crates 0.46s   a wooden thunk, ice chips clattering, then two wet flops
@@ -100,13 +100,13 @@ import math
 import os
 import subprocess
 import sys
-import tempfile
 
 sys.path.insert(0, os.path.dirname(__file__))
 import hits  # noqa: E402
 import minis  # noqa: E402
 import obstacles as ob  # noqa: E402
 import road  # noqa: E402
+import sounds  # noqa: E402
 from minis import STEPS  # noqa: E402
 from pixel import HEART, Grid, K, ZONE_ROADS, build as build_sprites, depth_settled, edged, preview  # noqa: E402
 from pixel import raster, scale_of, to_image  # noqa: E402
@@ -1319,20 +1319,25 @@ def build_cards():
 # ---------- sounds ----------
 
 # Each is a list of sounds.tone() calls, (wave, seconds, freq, start seconds, options), as sounds.EFFECTS.
-SOUNDS = {
+EFFECTS = {
     # a soft wooden thunk, a squish, then the cheese's rising plop and a sag as it settles
     f"sfx-hit-{CHEESE}": [
-        ("triangle", 0.14, (150, 65), 0, dict(vol=0.8, attack=0.003, release=0.85)),
-        ("pinknoise", 0.05, None, 0, dict(vol=0.3, low=700, attack=0.002, release=0.9)),
-        ("pinknoise", 0.12, None, 0.14, dict(vol=0.6, low=1100, high=180, attack=0.02, release=0.7)),
-        ("triangle", 0.08, (180, 520), 0.16, dict(vol=0.4, attack=0.004, release=0.6)),
-        ("triangle", 0.12, (300, 120), 0.27, dict(vol=0.5, attack=0.01, release=0.8)),
+        ("triangle", 0.14, (320, 130), 0, dict(vol=0.3, attack=0.003, release=0.85)),
+        ("square", 0.12, (320, 150), 0, dict(vol=0.6, low=1000, attack=0.003, release=0.8, shape="h")),
+        ("pinknoise", 0.05, None, 0, dict(vol=0.2, low=1200, high=250, attack=0.002, release=0.9)),
+        ("pinknoise", 0.12, None, 0.14, dict(vol=0.4, low=1400, high=250, attack=0.02, release=0.7)),
+        ("triangle", 0.08, (260, 700), 0.16, dict(vol=0.9, attack=0.004, release=0.6, shape="h")),
+        ("triangle", 0.15, (420, 200), 0.25, dict(attack=0.01, release=0.8, shape="h")),
+        ("square", 0.15, (420, 200), 0.25, dict(vol=0.6, low=1000, attack=0.01, release=0.8, shape="h")),
     ],
     # the flash whining up, the shutter's two clicks, then two bells
     "sfx-hit-wedding-shoot": [
-        ("square", 0.12, (1800, 4200), 0, dict(vol=0.15, duty=25, low=5000, attack=0.02, release=0.3)),
-        ("pinknoise", 0.02, None, 0.12, dict(vol=0.7, high=2500, low=8000, attack=0.001, release=0.6)),
-        ("pinknoise", 0.025, None, 0.16, dict(vol=0.6, high=1800, low=6000, attack=0.001, release=0.6)),
+        ("square", 0.12, (1500, 3200), 0, dict(vol=0.15, duty=25, low=3500, attack=0.02, release=0.3,
+                                               fx=sounds.DARK)),
+        ("pinknoise", 0.02, None, 0.12, dict(vol=0.5, high=2000, low=5000, attack=0.001, release=0.6,
+                                             fx=("lowpass", "4500"))),
+        ("pinknoise", 0.025, None, 0.16, dict(vol=0.45, high=1800, low=4500, attack=0.001, release=0.6,
+                                              fx=("lowpass", "4500"))),
         ("triangle", 0.2, "E6", 0.2, dict(vol=0.9, release=0.85)),
         ("square", 0.2, "E5", 0.2, dict(vol=0.15, duty=25, low=2500, release=0.85)),
         ("triangle", 0.28, "C6", 0.3, dict(vol=0.9, release=0.9)),
@@ -1340,36 +1345,24 @@ SOUNDS = {
     ],
     # the crate's thunk, ice chips clattering, then two wet flops
     "sfx-hit-fish-crates": [
-        ("triangle", 0.16, (180, 70), 0, dict(attack=0.003, release=0.85)),
-        ("pinknoise", 0.06, None, 0, dict(vol=0.4, low=900, attack=0.002, release=0.9)),
-        ("triangle", 0.04, "C#7", 0.05, dict(vol=0.5, attack=0.002, release=0.7)),
-        ("triangle", 0.04, "G#6", 0.09, dict(vol=0.45, attack=0.002, release=0.7)),
-        ("triangle", 0.04, "E7", 0.13, dict(vol=0.4, attack=0.002, release=0.7)),
-        ("triangle", 0.04, "A6", 0.18, dict(vol=0.3, attack=0.002, release=0.7)),
-        ("pinknoise", 0.07, None, 0.25, dict(vol=0.8, low=1600, high=250, attack=0.003, release=0.8)),
-        ("triangle", 0.08, (320, 140), 0.25, dict(vol=0.6, attack=0.003, release=0.8)),
-        ("pinknoise", 0.07, None, 0.38, dict(vol=0.6, low=1400, high=250, attack=0.003, release=0.8)),
-        ("triangle", 0.08, (280, 120), 0.38, dict(vol=0.45, attack=0.003, release=0.8)),
+        ("triangle", 0.16, (330, 130), 0, dict(vol=0.4, attack=0.003, release=0.85)),
+        ("square", 0.12, (330, 150), 0, dict(vol=0.7, low=1000, attack=0.003, release=0.8, shape="h")),
+        ("pinknoise", 0.06, None, 0, dict(vol=0.3, low=1200, high=250, attack=0.002, release=0.9)),
+        ("triangle", 0.04, "C#7", 0.05, dict(vol=0.5, low=3500, attack=0.002, release=0.7)),
+        ("triangle", 0.04, "G#6", 0.09, dict(vol=0.45, low=3500, attack=0.002, release=0.7)),
+        ("triangle", 0.04, "E7", 0.13, dict(vol=0.4, low=3500, attack=0.002, release=0.7)),
+        ("triangle", 0.04, "A6", 0.18, dict(vol=0.3, low=3500, attack=0.002, release=0.7)),
+        ("pinknoise", 0.07, None, 0.25, dict(vol=0.5, low=1600, high=300, attack=0.003, release=0.8)),
+        ("triangle", 0.08, (440, 200), 0.25, dict(vol=0.9, attack=0.003, release=0.8, shape="h")),
+        ("pinknoise", 0.07, None, 0.38, dict(vol=0.4, low=1400, high=300, attack=0.003, release=0.8)),
+        ("triangle", 0.08, (400, 180), 0.38, dict(vol=0.72, attack=0.003, release=0.8, shape="h")),
     ],
 }
 
 
 def render_sounds(out_dir):
     """Write each sound into out_dir as .ogg and .m4a, as sounds.py renders its own."""
-    import sounds
-
-    os.makedirs(out_dir, exist_ok=True)
-    with tempfile.TemporaryDirectory() as tmp:
-        for key, parts in SOUNDS.items():
-            layers = []
-            for i, (wave, seconds, freq, start, opts) in enumerate(parts):
-                path = f"{tmp}/{key}-{i}.wav"
-                sounds.tone(path, sounds.n(seconds), wave, freq, start=sounds.n(start), **opts)
-                layers.append(path)
-            wav = f"{tmp}/{key}.wav"
-            sounds.mix([(path, 1 / len(layers)) for path in layers], wav)
-            sounds.encode(wav, out_dir, key)
-    print("built", ", ".join(SOUNDS))
+    print("built", ", ".join(sounds.render_effects(out_dir, EFFECTS)))
 
 
 if __name__ == "__main__":

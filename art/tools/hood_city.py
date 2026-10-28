@@ -114,7 +114,6 @@ import math
 import os
 import subprocess
 import sys
-import tempfile
 
 sys.path.insert(0, os.path.dirname(__file__))
 import depths  # noqa: E402
@@ -1203,37 +1202,28 @@ def cards_preview(out, scale=4):
 EFFECTS = {
     # a wet splat, then a sad "aww"
     "sfx-hit-dropped-cone": [
-        ("pinknoise", 0.16, None, 0, dict(vol=0.9, low=1800, high=150, attack=0.003, release=0.85)),
-        ("triangle", 0.18, (220, 70), 0, dict(vol=0.7, attack=0.003, release=0.8)),
-        ("triangle", 0.34, ("E5", "A4"), 0.2, dict(vol=0.45, attack=0.04, release=0.6, shape="h")),
-        ("square", 0.34, ("E5", "A4"), 0.2, dict(vol=0.12, duty=25, low=1500, attack=0.04, release=0.6, shape="h")),
+        ("pinknoise", 0.16, None, 0, dict(vol=0.7, low=1800, high=250, attack=0.003, release=0.85)),
+        ("triangle", 0.18, (300, 100), 0, dict(vol=0.4, attack=0.003, release=0.8)),
+        ("square", 0.14, (300, 130), 0, dict(vol=0.5, low=900, attack=0.003, release=0.8, shape="h")),
+        ("triangle", 0.34, ("E5", "A4"), 0.2, dict(vol=0.6, attack=0.04, release=0.6, shape="h")),
+        ("square", 0.34, ("E5", "A4"), 0.2, dict(vol=0.2, duty=25, low=1500, attack=0.04, release=0.6, shape="h")),
     ],
     # two shutter clicks, a flash whine rising, a bright "ta-da"
     "sfx-hit-promo-team": [
-        ("pinknoise", 0.025, None, 0.004, dict(vol=0.8, low=7000, high=2500, attack=0.001, release=0.9)),
-        ("pinknoise", 0.025, None, 0.07, dict(vol=0.7, low=7000, high=2500, attack=0.001, release=0.9)),
-        ("triangle", 0.18, (1800, 4200), 0.04, dict(vol=0.25, attack=0.02, release=0.5)),
-        ("square", 0.08, "G5", 0.24, dict(vol=0.5, duty=25, low=4000, release=0.5)),
-        ("square", 0.22, "C6", 0.32, dict(vol=0.5, duty=25, low=4000, release=0.9)),
-        ("triangle", 0.22, "C5", 0.32, dict(vol=0.6, release=0.9)),
+        ("pinknoise", 0.025, None, 0.004, dict(vol=0.3, low=5000, high=2000, attack=0.001, release=0.9,
+                                               fx=("lowpass", "4500"))),
+        ("pinknoise", 0.025, None, 0.07, dict(vol=0.27, low=5000, high=2000, attack=0.001, release=0.9,
+                                              fx=("lowpass", "4500"))),
+        ("triangle", 0.18, (1500, 3200), 0.04, dict(vol=0.25, low=3500, attack=0.02, release=0.5)),
+        ("square", 0.08, "G5", 0.24, dict(vol=0.6, duty=35, low=3000, release=0.5)),
+        ("square", 0.22, "C6", 0.32, dict(vol=0.6, duty=35, low=3000, release=0.9, shape="h")),
+        ("triangle", 0.22, "C5", 0.32, dict(vol=0.6, release=0.9, shape="h")),
     ],
 }
 
 
 def render_sounds(out_dir):
-    os.makedirs(out_dir, exist_ok=True)
-    saved = dict(sounds.EFFECTS)
-    sounds.EFFECTS.update(EFFECTS)
-    try:
-        with tempfile.TemporaryDirectory() as tmp:
-            for key in EFFECTS:
-                wav = f"{tmp}/{key}.wav"
-                sounds.effect(tmp, key, wav)
-                sounds.encode(wav, out_dir, key)
-    finally:
-        sounds.EFFECTS.clear()
-        sounds.EFFECTS.update(saved)
-    return list(EFFECTS)
+    return sounds.render_effects(out_dir, EFFECTS)
 
 
 # ---------- commands ----------

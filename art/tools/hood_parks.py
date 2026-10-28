@@ -64,10 +64,10 @@ fx-hit-porch-cat    play (8 frames, 70ms)  a hiss puff with three red claw scrat
 fx-hit-capybara     play (8 frames, 70ms)  a soft dust poof with grass blades and brown fur
                                            tufts thrown up, then a calm heart rising
 
-Sounds, made with sounds.py's tone and mix:
+Sounds, in sounds.py's format and rendered by its render_effects:
 sfx-hit-porch-cat   0.49s  a hiss of pink noise stepping down two bands, then a square "mrr" rising
                            into a falling "ow"
-sfx-hit-capybara    0.42s  a low triangle "huff", then three soft rising triangle chirps
+sfx-hit-capybara    0.44s  a low square "huff", then three soft rising triangle chirps
 
 Card illustrations, 75x56, composed from the exported sprites as cards.py composes its own:
 card-porch-cat-stand        Archie standing firm on his leash while the cat swipes up at his
@@ -87,6 +87,7 @@ Usage:
   hood_parks.py preview OUT_DIR   OUT_DIR/road.png (every road sprite and depth step on the
                                   zone roads), OUT_DIR/hits.png, OUT_DIR/cards.png (every
                                   illustration in a card frame) and the sounds
+  hood_parks.py sounds OUT_DIR    write the two sounds into OUT_DIR only
   hood_parks.py build             write the .aseprite sources (art/encounters, art/obstacles,
                                   art/hits, art/cards), export the sprites to
                                   public/art/sprites/, the illustrations to public/art/images/
@@ -101,7 +102,6 @@ import math
 import os
 import subprocess
 import sys
-import tempfile
 
 sys.path.insert(0, os.path.dirname(__file__))
 import cards  # noqa: E402
@@ -779,8 +779,10 @@ def hit_sprites():
 EFFECTS = {
     # A hiss falling from a high band to a lower one, then a "mrr" rising into a falling "ow".
     "sfx-hit-porch-cat": [
-        ("pinknoise", 0.12, None, 0, dict(vol=1.0, low=7000, high=3200, attack=0.006, release=0.5, shape="h")),
-        ("pinknoise", 0.14, None, 0.08, dict(vol=0.9, low=4500, high=1800, attack=0.02, release=0.7, shape="h")),
+        ("pinknoise", 0.12, None, 0, dict(vol=1.0, low=4500, high=2400, attack=0.006, release=0.5, shape="h",
+                                          fx=("lowpass", "4000"))),
+        ("pinknoise", 0.14, None, 0.08, dict(vol=0.9, low=3500, high=1500, attack=0.02, release=0.7, shape="h",
+                                             fx=sounds.DARK)),
         ("square", 0.1, (430, 760), 0.24, dict(vol=0.3, duty=35, low=2200, attack=0.015, release=0.3)),
         ("square", 0.16, (760, 520), 0.33, dict(vol=0.3, duty=35, low=2200, attack=0.005, release=0.8, shape="h")),
         ("triangle", 0.1, (215, 380), 0.24, dict(vol=0.45, attack=0.015, release=0.3)),
@@ -788,38 +790,20 @@ EFFECTS = {
     ],
     # A low "huff" through the nose, then three soft chirps rising, each quieter.
     "sfx-hit-capybara": [
-        ("pinknoise", 0.12, None, 0.01, dict(vol=0.5, low=900, high=150, attack=0.025, release=0.7, shape="h")),
-        ("triangle", 0.14, (180, 105), 0.01, dict(vol=0.8, attack=0.025, release=0.7, shape="h")),
-        ("triangle", 0.06, (880, 1250), 0.18, dict(vol=0.7, attack=0.012, release=0.6)),
-        ("triangle", 0.06, (940, 1330), 0.26, dict(vol=0.6, attack=0.012, release=0.6)),
-        ("triangle", 0.08, (990, 1450), 0.34, dict(vol=0.5, attack=0.012, release=0.7)),
-        ("square", 0.06, (880, 1250), 0.18, dict(vol=0.12, duty=25, low=2500, attack=0.012, release=0.6)),
+        ("pinknoise", 0.12, None, 0.01, dict(vol=0.3, low=1200, high=250, attack=0.025, release=0.7, shape="h")),
+        ("triangle", 0.14, (300, 170), 0.01, dict(vol=0.3, attack=0.025, release=0.7, shape="h")),
+        ("square", 0.14, (300, 170), 0.01, dict(vol=0.9, low=900, attack=0.025, release=0.7, shape="h")),
+        ("triangle", 0.08, (880, 1250), 0.18, dict(vol=0.9, attack=0.012, release=0.6)),
+        ("triangle", 0.08, (940, 1330), 0.26, dict(vol=0.77, attack=0.012, release=0.6)),
+        ("triangle", 0.1, (990, 1450), 0.34, dict(vol=0.65, attack=0.012, release=0.7)),
+        ("square", 0.08, (880, 1250), 0.18, dict(vol=0.12, duty=25, low=2500, attack=0.012, release=0.6)),
     ],
 }
 
 
-# Gain after the peak normalization, in dB, for a sound dense enough to sound louder than the other hits at the
-# same peak: the cat's meow holds its pitch longer than the other hits' notes.
-TRIM_DB = {"sfx-hit-porch-cat": -1.5}
-
-
 def render_sounds(out_dir):
     """Write every sound into out_dir as .ogg and .m4a, as sounds.render does; return the keys."""
-    os.makedirs(out_dir, exist_ok=True)
-    with tempfile.TemporaryDirectory() as tmp:
-        for key, notes in EFFECTS.items():
-            layers = []
-            for i, (wave, seconds, freq, start, opts) in enumerate(notes):
-                path = f"{tmp}/{key}-{i}.wav"
-                sounds.tone(path, sounds.n(seconds), wave, freq, start=sounds.n(start), **opts)
-                layers.append(path)
-            wav = f"{tmp}/{key}.wav"
-            sounds.mix([(path, 1 / len(layers)) for path in layers], wav)
-            if key in TRIM_DB:
-                sounds.sox(wav, f"{tmp}/{key}-trim.wav", "gain", str(TRIM_DB[key]))
-                wav = f"{tmp}/{key}-trim.wav"
-            sounds.encode(wav, out_dir, key)
-    return list(EFFECTS)
+    return sounds.render_effects(out_dir, EFFECTS)
 
 
 # ---------- card illustrations ----------
@@ -1056,6 +1040,8 @@ def build():
 if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == "preview":
         preview(sys.argv[2])
+    elif len(sys.argv) == 3 and sys.argv[1] == "sounds":
+        print("wrote", ", ".join(render_sounds(sys.argv[2])))
     elif len(sys.argv) == 2 and sys.argv[1] == "build":
         build()
     else:
