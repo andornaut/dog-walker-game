@@ -107,7 +107,7 @@ import minis  # noqa: E402
 import obstacles as ob  # noqa: E402
 import road  # noqa: E402
 from minis import STEPS  # noqa: E402
-from pixel import Grid, K, ZONE_ROADS, build as build_sprites, depth_settled, edged, preview  # noqa: E402
+from pixel import HEART, Grid, K, ZONE_ROADS, build as build_sprites, depth_settled, edged, preview  # noqa: E402
 from pixel import raster, scale_of, to_image  # noqa: E402
 from road import face_disc, face_front, lit  # noqa: E402
 
@@ -1177,13 +1177,24 @@ def shop_door(a):
     a.shade, a.leash_col = "dstone", "pink"
 
 
+def inked(a, pts, col):
+    """The card pixels pts in col inside a 1px ink line on their four sides, so a mark holds on the brick."""
+    mark = set(pts)
+    for x, y in mark:
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            if (x + dx, y + dy) not in mark:
+                a.fill(x + dx, y + dy, 1, 1, "ink")
+    for x, y in mark:
+        a.fill(x, y, 1, 1, col)
+
+
 # The shop door's layout: the wall's bottom row and the door's left column.
 WALL, DOOR = 28, 26
 
 
 def card_cheese_sniff():
     """Have a sniff: the cheese crate at the shop door and Archie and Buddy nose in at it from either side,
-    stink wisps rising round them all and a heart."""
+    stink wisps rising round them all and a red heart in an ink line."""
     import cards
     a = cards.Art()
     shop_door(a)
@@ -1194,7 +1205,8 @@ def card_cheese_sniff():
     a.stink(3, 16, 2, "lime", "moss")
     a.stink(63, 18, 2, "lime", "moss")
     a.stink(37, 33, 1, "lime", "moss")
-    a.hearts([(66, 6)])
+    inked(a, [(66 + i, 6 + j) for j, row in enumerate(HEART) for i, c in enumerate(row) if c == "1"], "red")
+    a.fill(67, 7, 1, 1, "pink")
     return a
 
 
@@ -1230,26 +1242,27 @@ def card_cheese_buy():
     import cards
     a = cards.Art()
     shop_door(a)
-    a.put(CHEESE, "idle", 22, 42)
+    # the crate set back and left and Archie low, so his head sits under the cut wheel and the wheel clears
+    # the bill
+    a.put(CHEESE, "idle", 16, 40)
     monger = to_image(road.drawn(PERSON, road.dressed, cheesemonger_top, legs="bark", shoes="ink").outlined())
     a.paste(monger, 38, -4)
     a.paste(cards.sn.image("icon-bill"), 38, 4)
-    c = a.dog("archie", "idle", 30, 58)
-    a.lead(30, c, 36)
+    c = a.dog("archie", "idle", 28, 64)
+    a.lead(28, c, 34)
     return a
 
 
 def card_cheese_hurry_on():
     """Hurry on: the cheese crate at the shop door on the right and Archie pulled away to the left, the leash
-    taut off the bottom, a red ! by the cheese."""
+    taut off the bottom, a red ! in an ink line by the cheese."""
     import cards
     a = cards.Art()
     shop_door(a)
     a.put(CHEESE, "idle", 54, 42)
     c = a.dog("archie", "pull", 22, 56, flip=True)
     a.lead(22, c, 6)
-    a.fill(72, 2, 2, 5, "red")
-    a.fill(72, 8, 2, 2, "red")
+    inked(a, [(x, y) for x in (72, 73) for y in (2, 3, 4, 5, 6, 8, 9)], "red")
     return a
 
 
