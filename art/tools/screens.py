@@ -58,8 +58,8 @@ reads on them.
   344x92) the margins show only sky, lawn and sidewalk.
 - screen-loading: a Toronto street at night, shown while the game loads, seen
   from the road. NIGHT_SKY's bands fill the sky down to SKY_FOOT (356), stars,
-  a crescent moon at the top left and the logo drawn in at 2x (256x60 at
-  52,80) in the navy band. Far back, downtown's towers in navy and dslate
+  a crescent moon at the top left and the logo drawn in at 2x (290x82 at
+  35,74) in the navy band. Far back, downtown's towers in navy and dslate
   silhouette with a few gold floors lit, and the CN Tower lit (its haze shaft,
   the pod's gold window ring, the SkyPod and a red beacon on the mast, tip at
   row 150) over the corner lot. The near row: three Cabbagetown
@@ -960,7 +960,7 @@ def end():
 SKY_FOOT = 356  # NIGHT_SKY's bands end here, behind the skyline's foot
 YARD_FOOT = 414  # the iron fences' and the Pet shop's bottom row: the sidewalk starts under it
 CURB = 470  # the sidewalk's last row is CURB - 1; the curb, then the street
-LOADING_LOGO_AT = ((W - 2 * LOGO_W) // 2, 80)  # the logo at 2x, 256x60
+LOADING_LOGO_AT = ((W - 2 * LOGO_W) // 2, 74)  # the logo at 2x, 290x82, inside the navy band
 SHOP_AT = (W - 4 - PET_SHOP_W, YARD_FOOT - PET_SHOP_H)  # ui-pet-shop's building on the corner lot
 # ui-pet-shop's display window and door pane in its frame, left lit on screen-loading
 SHOP_WINDOW = (9, 47, 67, 96)
