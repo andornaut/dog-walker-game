@@ -3,6 +3,7 @@ import type { GameObjects, Scene } from "phaser";
 import { animationKey } from "../../assets/asepriteAnimations";
 import { AMBIENT_VARIANTS, IDLE_TAG } from "../../assets/spriteKeys";
 import type { AmbientMover, ZoneId } from "../../data/types";
+import { getOrInsert } from "../../lib/maps";
 import type { Random } from "../../lib/random";
 import { DEPTH, LAYOUT, PROJECTION, showOnRoad } from "../../scenes/run/stage";
 import { firstTag, playTag, showAtDepth } from "../../scenes/sprites";
@@ -116,13 +117,9 @@ export class AmbientView {
 
   // The mover's own art and its variants that are loaded.
   private art(mover: AmbientMover): readonly string[] {
-    const cached = this.arts.get(mover.key);
-    if (cached !== undefined) {
-      return cached;
-    }
-    const has = (key: string) => this.scene.textures.exists(key);
-    const art = [mover.key, ...(AMBIENT_VARIANTS[mover.key] ?? [])].filter(has);
-    this.arts.set(mover.key, art);
-    return art;
+    return getOrInsert(this.arts, mover.key, () => {
+      const has = (key: string) => this.scene.textures.exists(key);
+      return [mover.key, ...(AMBIENT_VARIANTS[mover.key] ?? [])].filter(has);
+    });
   }
 }

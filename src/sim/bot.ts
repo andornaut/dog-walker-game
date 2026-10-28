@@ -365,12 +365,7 @@ function pathsAhead(path: MoverPath): readonly MoverPath[] {
   if ((path.motion !== "approach" && path.motion !== "shy") || path.pending.length === 0) {
     return [path];
   }
-  let outcomes = OUTCOMES.get(path);
-  if (outcomes === undefined) {
-    outcomes = moverOutcomes(path);
-    OUTCOMES.set(path, outcomes);
-  }
-  return outcomes;
+  return getOrInsert(OUTCOMES, path, () => moverOutcomes(path));
 }
 
 // The hazards a mover makes on any of paths, one per lane and stretch it touches the pack in, each

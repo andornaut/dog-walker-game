@@ -21,6 +21,7 @@ import {
   soundKeysOf,
   type Volumes,
 } from "../audio/sound";
+import { getOrInsert } from "../lib/maps";
 import { AUDIO_UNLOCK_EVENTS, PHONE_EVENTS } from "../pwa";
 
 // Every concrete sound class (Web Audio, HTML5 audio, no audio) has setVolume; BaseSound does not.
@@ -191,11 +192,5 @@ const soundboards = new WeakMap<Game, Soundboard>();
 
 // The game's soundboard, made on first use.
 export function soundboardOf(scene: Scene): Soundboard {
-  const existing = soundboards.get(scene.game);
-  if (existing !== undefined) {
-    return existing;
-  }
-  const soundboard = new Soundboard(scene.game);
-  soundboards.set(scene.game, soundboard);
-  return soundboard;
+  return getOrInsert(soundboards, scene.game, () => new Soundboard(scene.game));
 }
