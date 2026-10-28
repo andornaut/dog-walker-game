@@ -16,6 +16,8 @@ sfx-hit-squirrel   0.40s  chitter: seven quick falling square chirps near 3kHz, 
 sfx-hit-other-dog  0.40s  friendly woof: a soft low "boof", then a rising yip
 sfx-badge          1.00s  jingle: square D6 F#6 A6 up to a ringing D7, then a sparkle A7 F#7 D7 A7
 sfx-new-best       1.50s  fanfare: G4 C5 E5 G5, E5 G5 over a triangle bass, warm square
+music-cabbagetown  31.28s 12 bars at about 92 BPM in F, loops seamlessly: triangle music-box
+                          lead, fingerpicked pulse guitar, triangle walking bass, brushed tick
 music-walk         28.77s 12 bars at about 100 BPM in C, loops seamlessly: square lead,
                           triangle walking bass, thin square arpeggio, soft kick and tick
 

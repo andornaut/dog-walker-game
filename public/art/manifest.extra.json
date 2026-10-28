@@ -1,5 +1,8 @@
 {
   "sounds": {
+    "music-cabbagetown": {
+      "loop": true
+    },
     "music-walk": {
       "loop": true
     }

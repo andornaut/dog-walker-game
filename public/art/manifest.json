@@ -13332,6 +13332,12 @@
   ],
   "sounds": [
     {
+      "key": "music-cabbagetown",
+      "ogg": "sounds/music-cabbagetown.ogg",
+      "m4a": "sounds/music-cabbagetown.m4a",
+      "loop": true
+    },
+    {
       "key": "music-walk",
       "ogg": "sounds/music-walk.ogg",
       "m4a": "sounds/music-walk.m4a",
