@@ -2,7 +2,7 @@ import { DOG_SLOTS } from "../data/dogSlots";
 import type { Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
 import type { FontMetrics } from "../ui/fontMetrics";
-import { scrollbarRects } from "../ui/scrollbar";
+import { type ScrollbarRects, scrollbarRects } from "../ui/scrollbar";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
 import { HOME_LAYOUT } from "./homeLayout";
 import { SHOP_TABS } from "./shop";
@@ -105,7 +105,7 @@ export function shopListBottom(
 }
 
 // The shop list's scrollbar (scrollbarRects), or null for a list that fits.
-export function shopScrollbar(max: number, y: number): { thumb: Rect; track: Rect } | null {
+export function shopScrollbar(max: number, y: number): ScrollbarRects | null {
   return scrollbarRects(SHOP_LAYOUT.scrollbar, LIST, max, y);
 }
 

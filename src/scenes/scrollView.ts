@@ -16,6 +16,7 @@ import { containsPoint, type Rect } from "../lib/rect";
 import { read } from "../rules/units";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
+import type { ScrollbarRects } from "../ui/scrollbar";
 import { listenOnePress } from "./onePress";
 import { currentSettings } from "./profileStore";
 import { paintRectMask } from "./rectMask";
@@ -31,11 +32,6 @@ export const LIST_SCROLL_RULE: ScrollRule = {
 export type ScrollbarView =
   | { readonly kind: "art"; readonly thumb: GameObjects.NineSlice }
   | { readonly graphics: GameObjects.Graphics; readonly kind: "fallback" };
-
-interface ScrollbarRects {
-  readonly thumb: Rect;
-  readonly track: Rect;
-}
 
 // Beside a list longer than its view: ui-scroll-track with ui-scroll-thumb in it, or a navy
 // track and a yellow thumb while the art is missing. undefined for a list that fits (bar null).

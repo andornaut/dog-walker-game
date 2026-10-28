@@ -2,7 +2,7 @@ import { SCREEN_LAYOUT } from "../data/screen";
 import type { Rect } from "../lib/rect";
 import { pageCloseControl } from "../ui/closeControl";
 import { type FontMetrics, inkRowsOfLines } from "../ui/fontMetrics";
-import { scrollbarRects, type ScrollbarSpec } from "../ui/scrollbar";
+import { type ScrollbarRects, scrollbarRects, type ScrollbarSpec } from "../ui/scrollbar";
 import { BADGE_STRIP } from "./badgesView";
 
 export type StatsTab = "badges" | "dogs" | "runs";
@@ -209,6 +209,6 @@ export function wallRowHeight(lines: number): number {
 
 // The scrollbar's track and thumb for content max pixels taller than the view, scrolled y, or
 // null for content that fits.
-export function statsScrollbar(max: number, y: number): { thumb: Rect; track: Rect } | null {
+export function statsScrollbar(max: number, y: number): ScrollbarRects | null {
   return scrollbarRects(SCROLLBAR, VIEW, max, y);
 }

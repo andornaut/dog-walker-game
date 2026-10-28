@@ -11,6 +11,12 @@ export interface ScrollbarSpec {
   readonly x: number;
 }
 
+// A scrollbar's track and the thumb in it.
+export interface ScrollbarRects {
+  readonly thumb: Rect;
+  readonly track: Rect;
+}
+
 // The scrollbar's track and thumb for a list max pixels taller than view, scrolled y, or null
 // for a list that fits. The thumb is as tall a share of the track's inside as the view is of
 // the list.
@@ -19,7 +25,7 @@ export function scrollbarRects(
   view: { readonly height: number; readonly y: number },
   max: number,
   y: number,
-): { thumb: Rect; track: Rect } | null {
+): ScrollbarRects | null {
   if (max <= 0) {
     return null;
   }
