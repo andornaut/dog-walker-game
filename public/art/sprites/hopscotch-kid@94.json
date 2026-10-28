@@ -1,0 +1,88 @@
+{ "frames": {
+   "hopscotch-kid@94 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 45, "h": 68 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 68 },
+    "sourceSize": { "w": 45, "h": 68 },
+    "duration": 75
+   },
+   "hopscotch-kid@94 1.aseprite": {
+    "frame": { "x": 45, "y": 0, "w": 45, "h": 68 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 68 },
+    "sourceSize": { "w": 45, "h": 68 },
+    "duration": 75
+   },
+   "hopscotch-kid@94 2.aseprite": {
+    "frame": { "x": 90, "y": 0, "w": 45, "h": 68 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 68 },
+    "sourceSize": { "w": 45, "h": 68 },
+    "duration": 75
+   },
+   "hopscotch-kid@94 3.aseprite": {
+    "frame": { "x": 135, "y": 0, "w": 45, "h": 68 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 68 },
+    "sourceSize": { "w": 45, "h": 68 },
+    "duration": 75
+   },
+   "hopscotch-kid@94 4.aseprite": {
+    "frame": { "x": 180, "y": 0, "w": 45, "h": 68 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 68 },
+    "sourceSize": { "w": 45, "h": 68 },
+    "duration": 300
+   },
+   "hopscotch-kid@94 5.aseprite": {
+    "frame": { "x": 225, "y": 0, "w": 45, "h": 68 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 68 },
+    "sourceSize": { "w": 45, "h": 68 },
+    "duration": 300
+   },
+   "hopscotch-kid@94 6.aseprite": {
+    "frame": { "x": 270, "y": 0, "w": 45, "h": 68 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 68 },
+    "sourceSize": { "w": 45, "h": 68 },
+    "duration": 200
+   },
+   "hopscotch-kid@94 7.aseprite": {
+    "frame": { "x": 315, "y": 0, "w": 45, "h": 68 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 68 },
+    "sourceSize": { "w": 45, "h": 68 },
+    "duration": 200
+   },
+   "hopscotch-kid@94 8.aseprite": {
+    "frame": { "x": 360, "y": 0, "w": 45, "h": 68 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 68 },
+    "sourceSize": { "w": 45, "h": 68 },
+    "duration": 200
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "hopscotch-kid@94.png",
+  "format": "RGBA8888",
+  "size": { "w": 405, "h": 68 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "hop", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "idle", "from": 4, "to": 5, "direction": "forward" },
+   { "name": "cue", "from": 6, "to": 8, "direction": "forward" }
+  ]
+ }
+}

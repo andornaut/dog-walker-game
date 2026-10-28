@@ -101,6 +101,17 @@ sign-spinner        48x72   Yonge Street; a hopping stepper facing the player, a
                             degrees a frame anticlockwise, level, angled, upright and round; cue (4
                             frames, 60ms): the fast spin before each hop, 90 degrees a frame, the knees
                             bent 1px
+hopscotch-kid       48x72   Cabbagetown and Kensington Market; a hopping stepper facing the player, as
+                            sign-spinner is, a school-age kid drawn shorter than the adults (the hips, top
+                            and head 2 design rows lower) hopping on one foot, the other bent up behind with
+                            its sneaker beside the skirt, the arms out for balance: auburn hair with a fringe
+                            and a high ponytail tied with a yellow scrunchie, a pink top with white stripes,
+                            a flared azure skirt, white socks and sneakers; hop (4 frames, 75ms): a hop
+                            sideways on the one foot, crouched, pushing off with the arms flung up, at the
+                            top with the foot tucked and the ponytail floating, leaning the way (mirrored
+                            for left), landing crouched; idle (2 frames, 300ms): balancing, the arms
+                            see-sawing and the body wobbling 1px each way; cue (3 frames, 200ms, played
+                            once): the wind-up, the arms swinging down as the knee dips, then up
 tour-group          112x72  Distillery District, 2 lanes; a guided tour, a stepper facing the player as the
                             couple is: in front the guide in a green tee and cap with a yellow flag logo
                             and a red lanyard to a white badge, stone shorts, the left arm (screen right)
@@ -1263,6 +1274,107 @@ def spinner_top(turn=0):
 def sign_spinner(turn=0, bob=0, lf=0, rf=0):
     """The sign spinner facing the player, with the road outline and the lit rim."""
     return rim(edged(road.person(spinner_top(turn), bob=bob, lf=lf, rf=rf, **SPINNER)), SPINNER_RIM)
+
+
+# ---------- hopscotch-kid: a kid hopping on one foot, facing the player ----------
+
+# The hop sideways across a lane on the one foot: crouched on it, pushing off with the arms flung up, at the top
+# with the foot tucked up and the ponytail floating, landing crouched on the same foot. The game mirrors the
+# sprite for a hop to the left.
+KID_HOP = (dict(bob=2, arms=-1, kick=-1), dict(bob=-2, foot=-2, arms=2, kick=1, sway=1, tail=1),
+           dict(bob=-4, foot=-5, arms=3, kick=2, sway=1, tail=-1), dict(bob=1, arms=1, tail=1))
+KID_HOP_MS = 75
+# Balancing on the one foot between hops: the arms see-saw and the body wobbles 1px each way.
+KID_IDLE = (dict(tilt=1, sway=-1), dict(tilt=-1, sway=1))
+KID_IDLE_MS = 300
+# The wind-up before each hop, played once over 600ms: the arms swing down as the knee dips, then up as it
+# straightens to go.
+KID_CUE = (dict(bob=1, arms=-2), dict(bob=2, arms=-4, kick=-1), dict(bob=1, arms=1))
+KID_CUE_MS = 200
+KID_RIM = {**LIT, "cobalt": ("azure", None)}
+# How many rows lower than road.person's adults the kid's hips, top and head sit, its legs that much shorter.
+KID_DROP = 2
+
+
+def kid_stripes(g, light, shade, b):
+    """White stripes across the pink top, lgrey over its mauve shade: every third drawn row from the
+    collar, at least every other one, so they stay even at every size."""
+    px, s = raster(g), scale_of(g)
+    period = max(2, math.floor(3 * s + 0.5))
+    top = math.floor((23 + b) * s + 0.5)
+    for y in range(top, px.h):
+        if (y - top) % period != period - 1:
+            continue
+        for x in range(px.w):
+            c = px.px[y][x]
+            if c == K["pink"]:
+                px.px[y][x] = K[light]
+            elif c == K["mauve"]:
+                px.px[y][x] = K[shade]
+
+
+def hopscotch_kid(bob=0, foot=0, arms=0, tilt=0, kick=0, tail=0, sway=0):
+    """A kid hopping on one foot facing the player, drawn shorter than road.person's adults: the standing
+    leg (screen left) lifted foot rows by a hop, the other bent up behind, its sneaker kick rows higher; the
+    arms out for balance, the hands arms rows up, see-sawing tilt rows; the ponytail tail rows down; the body
+    leaning sway pixels at the head. The road outline and the lit rim."""
+    g = edged(Grid(32, 48))
+    # the body sits KID_DROP rows lower than an adult's, the legs shorter
+    b = bob + KID_DROP
+    # the bent leg behind: the shin folded up from the knee, the sneaker's sole to the player beside the skirt
+    knee = (19.5, 38.5 + b)
+    heel = (23.5, 35 + b - kick)
+    volley_bar(g, knee, heel, 2.6, "skin2")
+    g.cel(24, 34 + b - kick, 2.2, 2, "white", "lgrey")
+    g.rect(23, 35 + b - kick, 3, 1, "lgrey")
+    g.rect(17.5, 35 + b, 3, 3.5, "skin1")
+    g.rect(19.5, 35 + b, 1, 3.5, "skin2")
+    g.cel(19, 38.5 + b, 1.6, 1.2, "skin1", "skin2")
+    # the standing leg, white ankle socks and a white sneaker with a pink toe
+    g.rect(12.5, 35 + b, 3, 8 + foot - b, "skin1")
+    g.rect(14.5, 35 + b, 1, 8 + foot - b, "skin2")
+    g.rect(12.5, 41.5 + foot, 3, 1.5, "white")
+    g.rect(11.5, 43 + foot, 5, 2, "white")
+    g.rect(11.5, 44 + foot, 5, 1, "lgrey")
+    g.rect(11.5, 43 + foot, 1.5, 1, "pink")
+    # the skirt, azure and flared, a pleat shaded down each side of the middle
+    g.rect(10, 30 + b, 12, 2, "azure")
+    g.tri((10, 31.5 + b), (22, 31.5 + b), (7, 36.5 + b), "azure")
+    g.tri((10, 31.5 + b), (22, 31.5 + b), (25, 36.5 + b), "azure")
+    g.rect(8.5, 31.5 + b, 15, 5, "azure")
+    g.tri((19, 31.5 + b), (22, 31.5 + b), (25, 36.5 + b), "cobalt")
+    g.rect(13, 32 + b, 1, 4.5, "cobalt")
+    g.rect(17.5, 32 + b, 1, 4.5, "cobalt")
+    # the arms out for balance, short pink sleeves, the hands see-sawing
+    for sx, hx, t in ((10.5, 3.5, tilt), (21.5, 28.5, -tilt)):
+        hand = (hx, 23.5 + b - arms - t)
+        volley_bar(g, (sx, 24.5 + b), hand, 2.6, "skin2")
+        volley_bar(g, (sx, 24 + b), (hand[0], hand[1] - 0.5), 1.6, "skin1")
+        g.cel(hand[0], hand[1], 1.6, 1.6, "skin1", "skin2")
+    # the striped top: pink, its right side mauve, white stripes, a round white collar
+    g.rect(10, 23 + b, 12, 8, "pink")
+    g.rect(19, 23 + b, 3, 8, "mauve")
+    for x in (7.5, 21.5):
+        g.cel(x + 1.5, 24.5 + b, 2.5, 2, "pink", "mauve")
+    kid_stripes(g, "white", "lgrey", b)
+    g.rect(13.5, 23 + b, 5, 1, "white")
+    # the head: the face, auburn hair with a fringe, a high ponytail tied with a yellow scrunchie
+    g.rect(14.5, 21 + b, 3, 2.5, "skin2")
+    g.cel(7, 9.5 + b + tail, 3.5, 2.6, "rust", "dbrown", "ochre")
+    g.cel(5, 12.5 + b + tail, 2, 2.6, "rust", "dbrown")
+    face_disc(g, 16, 16 + b, 6.5, 6, "skin1", "skin2")
+    g.cel(16, 12.5 + b, 7.5, 4.5, "rust", "dbrown", "ochre")
+    g.rect(8.5, 12.5 + b, 15, 2, "rust")
+    g.rect(21, 12.5 + b, 2.5, 2, "dbrown")
+    g.rect(8.5, 13.5 + b, 1.5, 4, "rust")
+    g.rect(22, 13.5 + b, 1.5, 4, "dbrown")
+    g.cel(10.5, 9 + b, 2, 1.6, "yellow", "amber")
+    road.face_front(g, 16, 16 + b, spread=3, mouth=3)
+    g.p(11.5, 19 + b, "pink")
+    g.p(20.5, 19 + b, "pink")
+    if sway:
+        g = lean(g, sway)
+    return rim(g, KID_RIM)
 # ---------- tour-group: a guide with a flag and two tourists, facing the player, two lanes ----------
 
 # The tour group's design grid: 112 px wide at road.SCALE, 48 rows, as the couple's. The left edge of each
@@ -1839,6 +1951,9 @@ def steps(suffix, s):
     yield f"sign-spinner{suffix}", [("hop", [spinner(q) for q in SPINNER_HOP], SPINNER_HOP_MS),
                                     ("idle", [spinner(q) for q in SPINNER_IDLE], SPINNER_IDLE_MS),
                                     ("cue", [spinner(q) for q in SPINNER_CUE], SPINNER_CUE_MS)]
+    yield f"hopscotch-kid{suffix}", [("hop", [own(hopscotch_kid, q) for q in KID_HOP], KID_HOP_MS),
+                                     ("idle", [own(hopscotch_kid, q) for q in KID_IDLE], KID_IDLE_MS),
+                                     ("cue", [own(hopscotch_kid, q) for q in KID_CUE], KID_CUE_MS)]
     yield f"tour-group{suffix}", [("walk", [own(tour_group, q) for q in TOUR_WALK], TOUR_WALK_MS),
                                   ("idle", [own(tour_group, dict(gbob=b, lbob=b, rbob=b)) for b in road.BREATH],
                                    road.BREATH_MS),
