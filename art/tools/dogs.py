@@ -160,10 +160,11 @@ def kilo_face(mood):
     g.rect(15, 8, 2, 7, "lgrey")
     g.rect(10, 12, 3, 1, "white")
     g.rect(19, 12, 3, 1, "white")
-    # a Y-front harness: a strap down from each shoulder to a ring on the chest, one down from it
+    # a Y-front harness: a strap down from each shoulder to a ring on the chest, one down from it, each step
+    # overlapping the last so the straps stay unbroken at the face's zoom
     for i in range(4):
-        g.rect(9 + i * 1.5, 25 + i, 2, 1, "orange")
-        g.rect(21 - i * 1.5, 25 + i, 2, 1, "orange")
+        g.rect(9 + i * 1.5, 25 + i, 2.5, 1.5, "orange")
+        g.rect(20.5 - i * 1.5, 25 + i, 2.5, 1.5, "orange")
     g.rect(15, 29, 2, 3, "orange")
     g.rect(15, 28, 2, 2, "grey")
     eyes(g, 10, 19, 14, iris="sky", mood=mood)
@@ -240,7 +241,8 @@ def duchess_road(q):
     hx = 16 + ln
     g.cel(hx - 4.5, 18 + b - q["ears"] + q["flop"], 2.2, 4, "white", "lgrey")
     g.ell(hx + 4.5, 18 + b - q["ears"] + q["flop"] + q["twitch"], 2.2, 4, "lgrey")
-    g.cel(hx, 15.5 + b, 5.5, 4.5, "white", "lgrey")
+    # the head inlaid in lgrey over the ears and the back, so it holds apart from the white coat
+    inlay(g, "lgrey", lambda t: t.cel(hx, 15.5 + b, 5.5, 4.5, "white", "lgrey"))
     bow(g, hx, 10 + b, folds=False)
     underside(g)
     spray(g, q["spray"])
@@ -253,8 +255,8 @@ def duchess_face(mood):
     d = droop(mood)
     g.cel(7.5 - d / 2, 19 + d, 3.5, 7.5, "white", "lgrey")
     g.cel(24.5 + d / 2, 19 + d, 3.5, 7.5, "lgrey", "grey")
-    g.cel(16, 16, 8.5, 8, "white", "lgrey")
-    g.cel(16, 20.5, 4.5, 3.5, "white", "lgrey")
+    # the head inlaid over the ears in lgrey, so the white ears hang apart from the white head
+    inlay(g, "lgrey", lambda t: (t.cel(16, 16, 8.5, 8, "white", "lgrey"), t.cel(16, 20.5, 4.5, 3.5, "white", "lgrey")))
     bow(g, 16, 6, big=True)
     eyes(g, 11, 19, 15, mood=mood)
     g.rect(15, 18, 2, 2, "ink")
@@ -460,10 +462,10 @@ def archie_road(q):
     g.cel(tx, 27.5 + b, 2, 1.6, *COAT)
     # the fluffy white ruff round the neck, tufted out past the shoulders and down onto the back
     g.cel(bx, 18.5 + b, 6.5, 2.4, "white", "lgrey")
-    g.cel(bx - 5.5, 19.5 + b, 1.5, 1.5, "white")
-    g.cel(bx + 5.5, 19.5 + b, 1.5, 1.5, "white", "lgrey")
-    for x, c in ((bx - 2.5, "white"), (bx + 2.5, "lgrey")):
-        g.cel(x, 20.5 + b, 2, 1.5, c)
+    # its tufts flat white, so the ruff's one shade is its own crescent along the lower right
+    for x, y, rx, ry in ((bx - 5.5, 19.5, 1.5, 1.5), (bx + 5.5, 19.5, 1.5, 1.5), (bx - 2.5, 20.5, 2, 1.5),
+                         (bx + 2.5, 20.5, 2, 1.5)):
+        g.ell(x, y + b, rx, ry, "white")
     # the red bandana tied at the nape in one knot
     g.rect(bx - 5, 16.7 + b, 10, 1.4, "red")
     g.rect(bx - 1, 16.7 + b, 2, 2, "dred")
@@ -534,12 +536,11 @@ def snowball_road(q):
     bx = 16 + ln // 2
     g.cel(bx, 20.5 + o + b, 9, 6.5, "white", "lgrey")
     for dx, dy in ((-8, -1), (8, -1), (-7, 3), (7, 3), (-4, 6), (4, 6)):
-        g.cel(bx + dx, 20.5 + o + b + dy, 2.2, 2.2, "white", "lgrey")
+        g.ell(bx + dx, 20.5 + o + b + dy, 2.2, 2.2, "white")
     g.rect(bx - 7, 16 + o + b, 14, 1, "sky")
     # the plumed tail carried up over the back
     tx = 16 + q["tail"]
     g.cel(tx, 23.5 + o + b, 4.5, 3.5, "white", "lgrey")
-    g.ell(tx - 1, 23 + o + b, 2.5, 1.5, "lgrey")
     # a broad round head, its drop ears hanging at the sides, marked a soft badger cream
     hx = 16 + ln
     e, t = -q["ears"] + q["flop"], q["twitch"]
