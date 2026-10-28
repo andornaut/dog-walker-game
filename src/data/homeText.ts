@@ -72,7 +72,7 @@ export const HOME_TEXT = {
   },
   gateSign: "Toronto",
   gearBought: "Got the {gear}!",
-  newerSave: "Newer save: reload page.",
+  newerSave: "Newer save found. Reload the page.",
   noticePackFull: "The pack is full. Tap a picked dog to take it out.",
   noticeSoundOff: "Sound off.",
   noticeSoundOn: "Sound on.",
