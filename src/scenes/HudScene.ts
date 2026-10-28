@@ -29,6 +29,7 @@ import type { MessageLine } from "../hud/messageStrip";
 import { cardOwnerMood, FORGIVEN_EVENT, type ForgivenCue } from "../hud/moments";
 import {
   cashChipPlace,
+  freeCashSlot,
   mergeTips,
   MONEY_LABEL,
   moneyChipPlace,
@@ -152,12 +153,13 @@ interface ChangeChip {
   rect: Rect;
 }
 
-// The tip label showing by the cash before it goes in: its label, its chip, and the money it
-// keeps off the counter until it lands.
+// The tip label showing by the cash before it goes in: its label, its chip, its slot in the
+// cash's column, and the money it keeps off the counter until it lands.
 interface ShowingTip {
   chip: ChangeChip;
   held: number;
   label: ChangeLabel;
+  slot: number;
 }
 
 const NOT_EXPLAINED = { key: "", layer: undefined };
@@ -222,6 +224,8 @@ export class HudScene extends Scene {
   // The change labels, glints and owners' pop-ins on screen, which hold while the player has
   // paused.
   private labels = new TimedGroup();
+  // The slots of the cash's column that money labels showing by the cash hold.
+  private cashSlots = new Set<number>();
   private messages = new MessageStrip();
   private money: GameObjects.BitmapText | undefined;
   // The money changes still flying to the cash, which the counter leaves out until they land.
@@ -262,6 +266,7 @@ export class HudScene extends Scene {
     this.effectParts = [];
     this.spareTreatPip = undefined;
     this.tip = undefined;
+    this.cashSlots = new Set();
     this.explained = NOT_EXPLAINED;
     this.messages = new MessageStrip();
     this.moneyInFlight = 0;
@@ -858,10 +863,10 @@ export class HudScene extends Scene {
     return index < 0 ? undefined : index;
   }
 
-  // Each change shows where it happened: a money change pops where it changed hands, a tip's by
-  // the cash, and flies into the cash; a heart change pops over its dog and flies into its card
-  // (heartFeedback.ts), its label then fading in place on the card's bottom rows, while its owner
-  // pops in on the card for ownerMs.
+  // Each change shows where it happened: a money loss pops where it changed hands, a money gain
+  // by the cash, and either flies into the cash; a heart change pops over its dog and flies into
+  // its card (heartFeedback.ts), its label then fading in place on the card's bottom rows, while
+  // its owner pops in on the card for ownerMs.
   private floatLabels(ownerMs: number, labels: ChangeLabel[]): void {
     const run = this.walk();
     const body = pixelFontMetrics(this, "body");
@@ -877,7 +882,11 @@ export class HudScene extends Scene {
     });
     for (const label of labels) {
       if (label.target.kind === "cash") {
-        this.showTipLabel(label);
+        if (label.target.tip) {
+          this.showTipLabel(label);
+        } else {
+          this.showGainLabel(label);
+        }
       }
     }
     const pops = heartPops({ lanes: this.lanes().heartLabels, run }, labels, (slot) => {
@@ -925,49 +934,73 @@ export class HudScene extends Scene {
   }
 
   // A money change pops on its chip where place puts it and holds as a heart's pop does; then it
-  // goes into the cash (sendMoneyLabel). Reduced motion keeps the pop and fades it at once.
+  // goes into the cash (sendMoneyLabel), calling left once it has left its place. Reduced motion
+  // keeps the pop and fades it at once.
   private showMoneyLabel(
     label: ChangeLabel,
     place: (shown: { lines: number; scale: number; width: number }) => { chip: Rect; text: Point },
+    left: () => void = () => undefined,
   ): void {
     const chip = this.addChangeChip(label, MONEY_LABEL.room, place);
     const held = this.holdOffCounter(label.amount);
     if (this.walk().reducedMotion()) {
-      this.sendMoneyLabel(chip, held);
+      this.sendMoneyLabel(chip, held, left);
       return;
     }
-    this.labels.after(this, MONEY_LABEL.holdMs, () => this.sendMoneyLabel(chip, held));
+    this.labels.after(this, MONEY_LABEL.holdMs, () => this.sendMoneyLabel(chip, held, left));
   }
 
-  // A tip's label pops by the cash and holds as a heart's pop does, then goes into the cash
-  // (sendMoneyLabel); with reduced motion it fades after the hold. A tip grabbed while one shows
-  // adds up with it on one chip and restarts the hold (mergeTips); one that cannot, as a Stinky
-  // "+$0" beside a paying tip, sends the showing label in now and takes its place.
+  // A money gain's label that is not a tip's pops by the cash in the cash column's first free
+  // slot, which it holds until it leaves, and goes in as any money label does (showMoneyLabel).
+  // It never adds up with a tip's.
+  private showGainLabel(label: ChangeLabel): void {
+    const body = pixelFontMetrics(this, "body");
+    const slot = this.takeCashSlot();
+    this.showMoneyLabel(
+      label,
+      (shown) => cashChipPlace(body, slot, shown),
+      () => this.cashSlots.delete(slot),
+    );
+  }
+
+  // A tip's label pops by the cash, in the cash column's first free slot, and holds as a heart's
+  // pop does, then goes into the cash (sendMoneyLabel); with reduced motion it fades after the
+  // hold. A tip grabbed while one shows adds up with it on one chip in its slot and restarts the
+  // hold (mergeTips); one that cannot, as a Stinky "+$0" beside a paying tip, sends the showing
+  // label in now and takes the first free slot.
   private showTipLabel(label: ChangeLabel): void {
     const showing = this.tip;
     const merged = showing === undefined ? undefined : mergeTips(showing.label, label);
     if (showing !== undefined) {
       if (merged === undefined) {
-        this.sendMoneyLabel(showing.chip, showing.held);
+        this.sendMoneyLabel(showing.chip, showing.held, () => this.cashSlots.delete(showing.slot));
       } else {
         showing.chip.parts.forEach((part) => part.destroy());
       }
     }
     const tipLabel = merged ?? label;
+    const slot = merged === undefined || showing === undefined ? this.takeCashSlot() : showing.slot;
     const body = pixelFontMetrics(this, "body");
     const chip = this.addChangeChip(tipLabel, MONEY_LABEL.room, (shown) =>
-      cashChipPlace(body, shown),
+      cashChipPlace(body, slot, shown),
     );
     const before = merged === undefined ? 0 : (showing?.held ?? 0);
     const held = before + this.holdOffCounter(label.amount);
-    const tip = { chip, held, label: tipLabel };
+    const tip = { chip, held, label: tipLabel, slot };
     this.tip = tip;
     this.labels.after(this, MONEY_LABEL.holdMs, () => {
       if (this.tip === tip) {
         this.tip = undefined;
-        this.sendMoneyLabel(chip, held);
+        this.sendMoneyLabel(chip, held, () => this.cashSlots.delete(slot));
       }
     });
+  }
+
+  // The cash column's first free slot, now held.
+  private takeCashSlot(): number {
+    const slot = freeCashSlot(this.cashSlots);
+    this.cashSlots.add(slot);
+    return slot;
   }
 
   // The money a label keeps off the counter until it lands, of amount: all of it, or none with
@@ -978,14 +1011,16 @@ export class HudScene extends Scene {
     return held;
   }
 
-  // A money label's chip flies along a heart's arc into the cash, which counts held as it lands.
-  // Reduced motion fades it in place, as a heart lands without flying.
-  private sendMoneyLabel(chip: ChangeChip, held: number): void {
+  // A money label's chip flies along a heart's arc into the cash, which counts held as it lands,
+  // calling left as it sets off. Reduced motion fades it in place, as a heart lands without
+  // flying, and calls left once it has faded.
+  private sendMoneyLabel(chip: ChangeChip, held: number, left: () => void): void {
     if (this.walk().reducedMotion()) {
       this.moneyInFlight -= held;
-      this.labels.join(fadeAway(this, chip.parts, { ms: LABEL.ms, rise: 0 }));
+      this.labels.join(fadeAway(this, chip.parts, { ms: LABEL.ms, rise: 0 }, left));
       return;
     }
+    left();
     const land = () => {
       this.moneyInFlight -= held;
       chip.parts.forEach((part) => part.destroy());

@@ -2,19 +2,20 @@ import type { Point, Rect } from "../lib/rect";
 import { amountText } from "../rules/causes";
 import type { FontMetrics } from "../ui/fontMetrics";
 import { FEEDBACK } from "./feedback";
-import { changeChipAt, changeLabelRoom } from "./hudLanes";
+import { CHANGE_LABEL_STYLES, changeChipAt, changeLabelRoom } from "./hudLanes";
 import type { ChangeLabel } from "./hudView";
 import { messagePanel } from "./messageStrip";
 import { arcControl, TOP_BAR_POINTS } from "./moments";
 import { WALK_BAR } from "./walkHud";
 
-// A money change's label pops on its chip where the money changed hands, centred over that
-// point with its bottom lift pixels above it, kept gutter pixels inside the screen's sides;
-// each later label from the same point in one batch stacks gap pixels above the one before.
-// A tip's label pops by the cash total instead (cashChipPlace), and a tip grabbed while it
-// shows adds up with it (mergeTips), restarting its hold. Either holds for holdMs, as long as a
-// heart's pop plays, then flies into the cash total as a heart flies into its card
-// (FEEDBACK.heart). Its text fits the cash well's width.
+// A money gain's label, a tip's included, pops by the cash total (cashChipPlace), in the first
+// slot of the cash's column no label showing there holds; a tip grabbed while a tip's label
+// shows adds up with it (mergeTips), restarting its hold. A money loss's label pops on its chip
+// where the money changed hands, centred over that point with its bottom lift pixels above it,
+// kept gutter pixels inside the screen's sides; each later label from the same point in one
+// batch stacks gap pixels above the one before. Either holds for holdMs, as long as a heart's
+// pop plays, then flies into the cash total as a heart flies into its card (FEEDBACK.heart).
+// Its text fits the cash well's width.
 export const MONEY_LABEL = {
   gap: 2,
   gutter: 2,
@@ -48,12 +49,24 @@ export function moneyChipPlace(
   return changeChipAt(body, { x, y }, text);
 }
 
-// A tip's label chip by the cash, and where its ink's left edge and capitals' top go, for text
-// on lines lines at scale, its ink width wide: centred on the cash total, under the cash well's
-// ink columns and clear of the bar's other wells, its top gap rows under the cash's capitals,
-// or higher for a chip that would otherwise reach the message strip.
+// The first slot of the cash's column that no label showing there, of taken, holds.
+export function freeCashSlot(taken: ReadonlySet<number>): number {
+  let slot = 0;
+  while (taken.has(slot)) {
+    slot++;
+  }
+  return slot;
+}
+
+// A money gain's label chip by the cash in slot of the cash's column, and where its ink's left
+// edge and capitals' top go, for text on lines lines at scale, its ink width wide: centred on the
+// cash total, under the cash well's ink columns and clear of the bar's other wells. The first
+// slot's top is gap rows under the cash's capitals, or higher for a chip that would otherwise
+// reach the message strip; each later slot's is the tallest chip and gap rows under the slot
+// before it, so chips of any style in neighbouring slots never overlap.
 export function cashChipPlace(
   body: FontMetrics,
+  slot: number,
   text: { lines: number; scale: number; width: number },
 ): { chip: Rect; text: Point } {
   const { gap, gutter } = MONEY_LABEL;
@@ -61,17 +74,30 @@ export function cashChipPlace(
   const { height, width } = changeChipAt(body, { x: 0, y: 0 }, text).chip;
   const x = Math.max(gutter, Math.round(bank.x - width / 2));
   const stripTop = messagePanel(body, 1).y;
-  const y = Math.min(WALK_BAR.cash.capsBottom + 1 + gap, stripTop - height);
-  return changeChipAt(body, { x, y }, text);
+  const first = Math.min(WALK_BAR.cash.capsBottom + 1 + gap, stripTop - height);
+  return changeChipAt(body, { x, y: first + slot * (tallestChip(body) + gap) }, text);
+}
+
+// The height of the tallest change chip, of every style a label may take.
+function tallestChip(body: FontMetrics): number {
+  return Math.max(
+    ...CHANGE_LABEL_STYLES.map(
+      ({ lines, scale }) =>
+        changeChipAt(body, { x: 0, y: 0 }, { lines: lines ?? 1, scale, width: 0 }).chip.height,
+    ),
+  );
 }
 
 // The tip label showing adding up next, a tip grabbed before it flies: one label for both, their
-// total. Undefined when either is not a tip's label, or when a debuff zeroed one and not the
-// other, or zeroed them by different debuffs, so a zeroed "+$0" never adds up with a paying tip.
+// total. Undefined when either is not a tip's label, so another gain never adds up with a tip,
+// or when a debuff zeroed one and not the other, or zeroed them by different debuffs, so a
+// zeroed "+$0" never adds up with a paying tip.
 export function mergeTips(showing: ChangeLabel, next: ChangeLabel): ChangeLabel | undefined {
   if (
     showing.target.kind !== "cash" ||
+    !showing.target.tip ||
     next.target.kind !== "cash" ||
+    !next.target.tip ||
     showing.zeroedBy !== next.zeroedBy
   ) {
     return undefined;
@@ -80,7 +106,7 @@ export function mergeTips(showing: ChangeLabel, next: ChangeLabel): ChangeLabel 
   return {
     amount,
     gain: amount > 0,
-    target: { kind: "cash" },
+    target: { kind: "cash", tip: true },
     text: amountText("money", amount),
     ...(showing.zeroedBy === undefined ? {} : { zeroedBy: showing.zeroedBy }),
   };

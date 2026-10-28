@@ -5,13 +5,15 @@ import { amountText, type CauseData, causeLabel, type Change, changeAmount } fro
 import { zoneById } from "../rules/route";
 
 // A floating label for a change: over the dog's slot (dog), from where money changed hands to
-// the bank (bank), or, for a tip, from by the cash total into it (cash). amount is the change in
-// hearts or cents. zeroedBy: the debuff that cancelled a change to nothing, as Stinky zeroes a
-// tip, so its label never adds up with a paying tip's.
+// the bank (bank), or, for a money gain, from by the cash total into it (cash), tip marking a
+// tip's, which adds up with the tip showing. amount is the change in hearts or cents. zeroedBy:
+// the debuff that cancelled a change to nothing, as Stinky zeroes a tip, so its label never adds
+// up with a paying tip's.
 export interface ChangeLabel {
   amount: number;
   gain: boolean;
-  target: { dog: DogId; kind: "dog" } | { from: Point; kind: "bank" } | { kind: "cash" };
+  target:
+    { dog: DogId; kind: "dog" } | { from: Point; kind: "bank" } | { kind: "cash"; tip: boolean };
   text: string;
   zeroedBy?: DebuffId;
 }
@@ -26,16 +28,15 @@ function zeroingDebuff(change: Change): DebuffId | undefined {
   )[0];
 }
 
-// Where a change's label goes: a heart change to its dog's slot, a tip, a Stinky "+$0" one
-// included, by the cash total, so the many tips stay out of the road, and any other money
-// change from from, where it changed hands, to the bank.
+// Where a change's label goes: a heart change to its dog's slot; a money gain, and a tip, a
+// Stinky "+$0" one included, by the cash total, so no gain's label covers the road; and a money
+// loss, or another change that came to nothing, from from, where it changed hands, to the bank.
 function labelTarget(from: Point, change: Change): ChangeLabel["target"] {
   if (change.kind === "hearts") {
     return { dog: change.dog, kind: "dog" };
   }
-  return change.causes.some((cause) => cause.kind === "tip")
-    ? { kind: "cash" }
-    : { from, kind: "bank" };
+  const tip = change.causes.some((cause) => cause.kind === "tip");
+  return tip || change.amount > 0 ? { kind: "cash", tip } : { from, kind: "bank" };
 }
 
 // One label per change at its labelTarget: a heart change's naming its causes ("−1♥ bump"), a

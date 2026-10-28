@@ -10,12 +10,13 @@ import { formatDollars } from "../rules/effectText";
 import { bumpCash, tipValue } from "../rules/run";
 import { read } from "../rules/units";
 import { activeModifier, testState } from "../testing/runState";
-import { changeLabels, heartRows } from "./hudView";
+import { type ChangeLabel, changeLabels, heartRows } from "./hudView";
 
 const { causes } = gameData.runText;
 const { tuning } = gameData;
 // Where the money changed hands.
 const AT = { x: 120, y: 300 };
+const skunkIgnore = { encounter: "skunk", kind: "encounter", option: 2 } as const;
 
 const bigTipper = activeModifier(
   { kind: "upgrade", upgrade: "bigTipper" },
@@ -23,8 +24,6 @@ const bigTipper = activeModifier(
 );
 
 describe("changeLabels", () => {
-  const skunkIgnore = { encounter: "skunk", kind: "encounter", option: 2 } as const;
-
   it("labels each heart change at its dog with its causes, and a tip by the cash", () => {
     const labels = changeLabels(gameData, AT, [
       {
@@ -70,32 +69,10 @@ describe("changeLabels", () => {
       {
         amount: 200,
         gain: true,
-        target: { kind: "cash" },
+        target: { kind: "cash", tip: true },
         text: "+$2",
       },
     ]);
-  });
-
-  it.each([
-    ["a tip", [{ amount: 100, kind: "tip" }], { kind: "cash" }],
-    [
-      "a tip Stinky zeroed",
-      [
-        { amount: 100, kind: "tip" },
-        { amount: -100, kind: "modifier", source: { debuff: "stinky", kind: "debuff" } },
-      ],
-      { kind: "cash" },
-    ],
-    ["a bump", [{ amount: -1000, kind: "bump" }], { from: AT, kind: "bank" }],
-    [
-      "a card option",
-      [{ amount: 500, kind: "effect", source: skunkIgnore }],
-      { from: AT, kind: "bank" },
-    ],
-  ] as const)("sends %s's label to %j", (_name, changeCauses, target) => {
-    const amount = cents(changeCauses.reduce((sum, cause) => sum + cause.amount, 0));
-    const change = { amount, causes: changeCauses, dog: null, kind: "money" } as const;
-    expect(changeLabels(gameData, AT, [change])[0]?.target).toEqual(target);
   });
 
   it("labels no heart change that nets nothing, such as a loss forgiven whole", () => {
@@ -178,9 +155,13 @@ describe("a money change's label", () => {
     { kilo: 5 },
     { debuffs: [{ debuff: "stinky", secondsLeft: 20, untilZone: 0 }] },
   );
-  // A tip's and a Big tipper tip's label are the money counter's, below.
+  const cash = (tip: boolean): ChangeLabel["target"] => ({ kind: "cash", tip });
+  const bank: ChangeLabel["target"] = { from: AT, kind: "bank" };
+  // A tip's and a Big tipper tip's text are the money counter's, below. Every gain's label pops
+  // by the cash, and every loss's where the money changed hands.
   it.each([
-    ["a Stinky tip", () => [tipValue(gameData, stinky)], "+$0"],
+    ["a tip", () => [tipValue(gameData, kilo)], null, cash(true)],
+    ["a Stinky tip", () => [tipValue(gameData, stinky)], "+$0", cash(true)],
     [
       "a lucky find",
       () =>
@@ -189,25 +170,34 @@ describe("a money change's label", () => {
           { encounter: "lostWallet", kind: "instant" },
         ),
       money(read(tuning, "money", "lostWalletKeep"), "+"),
+      cash(false),
+    ],
+    [
+      "a card gain",
+      () => resolved({ amount: "encounterLow", change: "gain", kind: "money" }, skunkIgnore),
+      money(read(tuning, "money", "encounterLow"), "+"),
+      cash(false),
     ],
     [
       "a card cost",
-      () =>
-        resolved(
-          { amount: "encounterLow", change: "lose", kind: "money" },
-          { encounter: "skunk", kind: "encounter", option: 2 },
-        ),
+      () => resolved({ amount: "encounterLow", change: "lose", kind: "money" }, skunkIgnore),
       money(read(tuning, "money", "encounterLow"), "−"),
+      bank,
     ],
     [
       "a Spotlight bump",
       () => [bumpCash(gameData, spotlight)].flatMap((change) => (change === null ? [] : [change])),
       money(read(tuning, "money", "spotlightBump"), "−"),
+      bank,
     ],
-  ] satisfies readonly [string, () => readonly Change[], string][])(
-    "shows %s as its amount alone",
-    (_name, changes, text) => {
-      expect(changeLabels(gameData, AT, changes()).map((label) => label.text)).toEqual([text]);
+  ] satisfies readonly [string, () => readonly Change[], string | null, ChangeLabel["target"]][])(
+    "shows %s as its amount alone, at its target",
+    (_name, changes, text, target) => {
+      const labels = changeLabels(gameData, AT, changes());
+      expect(labels.map((label) => label.target)).toEqual([target]);
+      if (text !== null) {
+        expect(labels.map((label) => label.text)).toEqual([text]);
+      }
     },
   );
 });

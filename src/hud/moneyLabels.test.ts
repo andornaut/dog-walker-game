@@ -12,6 +12,7 @@ import { MESSAGE_STRIP } from "./messageStrip";
 import { curvePoint, TOP_BAR_POINTS } from "./moments";
 import {
   cashChipPlace,
+  freeCashSlot,
   mergeTips,
   MONEY_LABEL,
   moneyChipPlace,
@@ -86,23 +87,49 @@ describe("cashChipPlace", () => {
   it.each(chips)(
     "pops the widest $lines-line chip at $scale x under the cash, clear of the bar's wells and the strip",
     (text) => {
-      const { chip } = cashChipPlace(BODY, text);
+      const { chip } = cashChipPlace(BODY, 0, text);
       expect(Math.abs(chip.x + chip.width / 2 - bank.x)).toBeLessThanOrEqual(1);
       expect(chip.y).toBeGreaterThan(WALK_BAR.cash.capsBottom);
       expect(chip.y + chip.height).toBeLessThanOrEqual(stripTop);
       expect(otherParts.filter((part) => rectsOverlap(part, chip))).toEqual([]);
     },
   );
+
+  // Each pair of chip styles, one in a slot and the other in the slot after it.
+  const pairs = chips.flatMap((upper) => chips.map((lower) => ({ lower, upper })));
+  it.each(pairs)(
+    "stacks a $lower.lines-line $lower.scale x chip under a $upper.lines-line $upper.scale x one",
+    ({ lower, upper }) => {
+      for (const slot of [0, 1, 2]) {
+        const above = cashChipPlace(BODY, slot, upper).chip;
+        const below = cashChipPlace(BODY, slot + 1, lower).chip;
+        expect(below.y).toBeGreaterThanOrEqual(above.y + above.height + MONEY_LABEL.gap);
+        expect(Math.abs(below.x + below.width / 2 - bank.x)).toBeLessThanOrEqual(1);
+      }
+    },
+  );
+});
+
+describe("freeCashSlot", () => {
+  it.each([
+    ["no slot held", [], 0],
+    ["the first slot held", [0], 1],
+    ["a gap under held slots", [0, 2], 1],
+    ["only a later slot held", [1], 0],
+  ])("takes the first free slot with %s", (_name, taken, slot) => {
+    expect(freeCashSlot(new Set(taken))).toBe(slot);
+  });
 });
 
 describe("mergeTips", () => {
   const tip = (amount: number): ChangeLabel => ({
     amount,
     gain: amount > 0,
-    target: { kind: "cash" },
+    target: { kind: "cash", tip: true },
     text: amountText("money", amount),
   });
   const zeroed: ChangeLabel = { ...tip(0), zeroedBy: "stinky" };
+  const find: ChangeLabel = { ...tip(2000), target: { kind: "cash", tip: false } };
   const bump: ChangeLabel = {
     amount: -1000,
     gain: false,
@@ -115,7 +142,7 @@ describe("mergeTips", () => {
   ])("adds up %s on one label by its amount alone", (_name, showing, next, merged) => {
     expect(mergeTips(showing, next)).toEqual({
       gain: merged.amount > 0,
-      target: { kind: "cash" },
+      target: { kind: "cash", tip: true },
       ...merged,
     });
   });
@@ -124,6 +151,9 @@ describe("mergeTips", () => {
     ["a Stinky tip into a paying one", tip(100), zeroed],
     ["a paying tip into a Stinky one", zeroed, tip(100)],
     ["a bump into a tip", tip(100), bump],
+    ["a lucky find into a tip", tip(100), find],
+    ["a tip into a lucky find", find, tip(100)],
+    ["two lucky finds", find, find],
   ])("keeps %s apart", (_name, showing, next) => {
     expect(mergeTips(showing, next)).toBeUndefined();
   });
@@ -141,7 +171,7 @@ describe("moneyFlightPath", () => {
       "the road's right edge",
       moneyChipPlace(BODY, SCREEN_WIDTH, { x: road.x + road.width, y: ROAD_MIDDLE.y }, 0, ONE_LINE),
     ],
-    ["by the cash", cashChipPlace(BODY, ONE_LINE)],
+    ["by the cash", cashChipPlace(BODY, 0, ONE_LINE)],
   ])("flies a chip from %s into the cash, on screen", (_name, { chip }) => {
     const path = moneyFlightPath(chip);
     const at = (t: number) => curvePoint(path.from, path.control, path.to, t);

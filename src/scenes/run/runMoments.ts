@@ -204,9 +204,9 @@ export class RunMoments {
     return delayMs;
   }
 
-  // The changes' labels, money's from from, where it changed hands, and each loss the walker's
-  // perk forgave: its strip line, the forgiven label over its dog forgivenAtMs on and the
-  // forgiven heart flashing back on its card.
+  // The changes' labels, a money loss's from from, where it changed hands, and a money gain's by
+  // the cash (changeLabels), and each loss the walker's perk forgave: its strip line, the
+  // forgiven label over its dog forgivenAtMs on and the forgiven heart flashing back on its card.
   addChanges(from: Point, changes: readonly Change[], forgivenAtMs = 0): void {
     this.changes.push(...changes);
     const labels = changeLabels(gameData, from, changes);
@@ -354,7 +354,8 @@ export class RunMoments {
     }
     this.sayQuips(step.fired.map((dog): QuipCue => ({ dog, moment: "fired" })));
     this.fired(step.fired, step.walk.run);
-    // A lucky find's money changes hands at its pickup.
+    // A lucky find's money changes hands at its pickup; a gain's label pops by the cash
+    // (changeLabels), and its popup and strip line show the find.
     for (const { encounter, item, outcome } of step.instants) {
       const changes = outcomeChanges(outcome);
       this.addChanges(this.itemPoint(item, pack), changes);
