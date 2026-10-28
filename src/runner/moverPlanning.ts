@@ -97,8 +97,9 @@ function blockCells(
 // clear of its body: those it passes through on the road. stands are each place it stands as an
 // obstacle, by distance from its row. screen is from its cue appearing until it is out of sight.
 // body is the road its hit box covers at any moment while it is on the road, by distance from its
-// row; a dart has none, as a standing spawn may stand where a dart passes. Of the placements that
-// fit in a start lane and row, the planner takes one of the highest rank, 0 when unset.
+// row; a dart has none, as a standing spawn may stand where a dart passes, but a stop-and-go
+// across, a vehicle crossing side-on, has one. Of the placements that fit in a start lane and row,
+// the planner takes one of the highest rank, 0 when unset.
 interface MoverPlacement {
   readonly appears: number;
   readonly body?: MoverBody;
@@ -507,7 +508,11 @@ function crossTilts(
 // the road by the time it reaches the pack's rows is harmless: it blocks no lanes and stands
 // nowhere. It keeps clear every row it is level with as it crosses or stands. It appears as its
 // row comes on screen, or at the road's top where its start is farther up the road than its row,
-// and waits idle at its edge until its cue, warningSeconds before it sets off.
+// and waits idle at its edge until its cue, warningSeconds before it sets off. One with a pause, a
+// stop-and-go across, is a vehicle, not a dart: level with its row the whole time it is on screen,
+// stops included, it has a body across every lane of the road, from its row up the road for its
+// hit length, its drawn one or its footprint's planned one, whichever is longer, so no standing
+// spawn stands where it crosses.
 function crossPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -626,6 +631,16 @@ function crossPlacements(
   // Its contact as drawn, for its stand: its own hit length and the pack's hit boxes.
   const drawnWindow = drawnHitLength(geometry, spec) + geometry.packHitLength;
   const drawnContact = contactOver(drawnWindow);
+  const body =
+    "pause" in pause
+      ? {
+          body: {
+            from: 0,
+            lanes: { count: laneCount, first: 0 },
+            to: Math.max(drawnHitLength(geometry, spec), bodyLength(geometry, spec.footprint.rows)),
+          },
+        }
+      : {};
   return ([1, -1] as const).map((direction): MoverPlacement => {
     const path: MoverPath = {
       ...along,
@@ -638,6 +653,7 @@ function crossPlacements(
     const touched = sweptLanes(laneCount, path, sightLength, sightLength + drawnWindow, inset);
     return {
       appears,
+      ...body,
       cells: blockCells(firstRow, lastRow - firstRow + 1, 0, laneCount),
       lane: direction === 1 ? 0 : laneCount - span,
       lanes,
@@ -1148,9 +1164,12 @@ export function screenHasRoom(
 // stands for the spawns placed later. isFree is true when a mover of a motion may take a cell
 // (moverMayTake in spawning.ts). take holds a cell for a mover, a dart if dart is set, so nothing
 // placed later takes it, but a lane-blocking standing spawn where no mover's body comes: occupy
-// records a mover's body, at distances along the zone, for those.
+// records a mover's body, at distances along the zone, for those. clearOf is true when a mover's
+// body, at distances along the zone, shares no road with a lane-blocking standing spawn placed
+// so far, which a dart may set off over.
 interface MoverGrid {
   block(row: number, lanes: LaneSpan, rows: number, keep: boolean, dart?: boolean): boolean;
+  clearOf(body: MoverBody): boolean;
   clearRun(lanes: LaneSpan, row: number): number;
   isFree(motion: MoverPath["motion"], lane: number, row: number): boolean;
   leavesRoom(cells: readonly BlockCell[]): boolean;
@@ -1193,6 +1212,14 @@ function screenOf(spot: Spot): readonly [number, number] {
   return [spot.distance + start, spot.distance + end];
 }
 
+// A spot's body, if it has one, at distances along the zone.
+function bodyOf(spot: Spot): MoverBody | undefined {
+  const { body } = spot.placement;
+  return body === undefined
+    ? undefined
+    : { from: spot.distance + body.from, lanes: body.lanes, to: spot.distance + body.to };
+}
+
 function standsOf(spot: Spot): MoverStand[] {
   return spot.placement.stands.map((stand) => ({
     ...stand,
@@ -1202,7 +1229,8 @@ function standsOf(spot: Spot): MoverStand[] {
 
 // Places every mover on rows at the distances given, each quota spread one per equal stretch of the
 // zone, or of the share of it the quota's within holds it to, as the planner spreads other
-// spawns, each mover wholly on screen within the zone, within the caps on screen. A mover with no
+// spawns, each mover wholly on screen within the zone, within the caps on screen, its body, where
+// it has one, clear of the lane-blocking standing spawns placed before it. A mover with no
 // room in its stretch, such as one over a cap there, waits: it comes on at the next row with
 // room, within its share of the zone. A dart with no room at its drawn start retries the same rows
 // from higher up the road, its start lifted by each of DART_LIFTS in turn, lowest first, before it
@@ -1233,11 +1261,13 @@ export function placeMovers<Kind extends string>(
     const [start, end] = screenOf(spot);
     const { placement } = spot;
     const { cells } = placement;
+    const body = bodyOf(spot);
     return (
       start >= 0 &&
       end <= geometry.zoneLength &&
       screenHasRoom(caps, onScreen, onScreenOf(placement.path, [start, end])) &&
       cells.every(({ lane, row }) => grid.isFree(placement.path.motion, lane, spot.row + row)) &&
+      (body === undefined || grid.clearOf(body)) &&
       grid.leavesRoom(cells.map(({ lane, row }) => ({ lane, row: spot.row + row }))) &&
       grid.packFits(standsOf(spot)) &&
       grid.block(
@@ -1340,9 +1370,9 @@ export function placeMovers<Kind extends string>(
       const { placement } = spot;
       const dart = placement.path.motion === "cross";
       placement.cells.forEach(({ lane, row }) => grid.take(dart, lane, spot.row + row));
-      if (placement.body !== undefined) {
-        const { from, lanes, to } = placement.body;
-        grid.occupy({ from: spot.distance + from, lanes, to: spot.distance + to });
+      const body = bodyOf(spot);
+      if (body !== undefined) {
+        grid.occupy(body);
       }
       grid.block(spot.row, placement.lanes, placement.rows, true, dart);
       grid.stand(standsOf(spot));

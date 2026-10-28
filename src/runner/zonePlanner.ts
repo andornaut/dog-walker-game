@@ -221,13 +221,25 @@ interface Standing<Kind extends string> {
   quota: SpawnQuota<Kind>;
 }
 
+// Road along the zone, from and to as distances, in the lanes of a lane mask.
+interface MaskedRoad {
+  readonly from: number;
+  readonly lanes: number;
+  readonly to: number;
+}
+
+// Whether two stretches of road share any road in a lane both cover.
+function sharesRoad(a: MaskedRoad, b: MaskedRoad): boolean {
+  return (a.lanes & b.lanes) !== 0 && a.from < b.to && b.from < a.to;
+}
+
 // Places a zone's spawns by planSpawns' rules, on the zone's rows and around its drawn path.
 class ZonePlanner<Kind extends string> {
   private readonly cells: SpawnCells;
   private readonly events: SpawnEvent<Kind>[] = [];
   private readonly lanes: LaneBlocks;
   // The lane-blocking movers' bodies, as lane masks and distances along the zone.
-  private readonly moverBodies: { from: number; lanes: number; to: number }[] = [];
+  private readonly moverBodies: MaskedRoad[] = [];
   // The rows that come on screen with a lane-blocking mover in view (moverRowsInView).
   private readonly moverInView: Uint8Array;
   // What is on screen as the lane-blocking movers are placed.
@@ -277,14 +289,28 @@ class ZonePlanner<Kind extends string> {
     return this.events;
   }
 
-  // True when a lane-blocking standing spawn's hit box, from its row up the road for its hit
-  // length, shares no road with a mover's body in its lanes.
-  private clearOfMovers(cell: Cell, footprint: Footprint): boolean {
-    const covered = laneMask(cell.lane, footprint.lanes);
+  // A lane-blocking standing spawn's hit box, from its row up the road for its hit length, in
+  // its lanes.
+  private standingRoad(cell: Cell, footprint: Footprint): MaskedRoad {
     const from = itemAt(this.rows, cell.row);
-    const to = from + hitLength(this.plan, footprint.rows);
-    return this.moverBodies.every(
-      (body) => (body.lanes & covered) === 0 || body.to <= from || to <= body.from,
+    return {
+      from,
+      lanes: laneMask(cell.lane, footprint.lanes),
+      to: from + hitLength(this.plan, footprint.rows),
+    };
+  }
+
+  // True when a lane-blocking standing spawn's hit box shares no road with a mover's body.
+  private clearOfMovers(cell: Cell, footprint: Footprint): boolean {
+    const road = this.standingRoad(cell, footprint);
+    return this.moverBodies.every((body) => !sharesRoad(body, road));
+  }
+
+  // True when a mover's body shares no road with a lane-blocking standing spawn's hit box.
+  private clearOfStanding(body: MoverBody): boolean {
+    const road = { ...body, lanes: laneMask(body.lanes.first, body.lanes.count) };
+    return this.standing.every(
+      ({ cell, quota }) => !sharesRoad(road, this.standingRoad(cell, quotaFootprint(quota))),
     );
   }
 
@@ -354,6 +380,7 @@ class ZonePlanner<Kind extends string> {
           keep,
           dart,
         ),
+      clearOf: (body: MoverBody) => this.clearOfStanding(body),
       clearRun: (span: LaneSpan, row: number) => lanes.clearRun(span, row),
       isFree: (motion: MoverPath["motion"], lane: number, row: number) =>
         cells.isFree(motion, lane, row),
@@ -375,12 +402,13 @@ class ZonePlanner<Kind extends string> {
   }
 
   // The grid placeMovers places the moving prizes on. A moving prize keeps its cells clear of
-  // other spawns, and nothing else: it blocks no lane, stands nowhere for the pack-fit gap, and
-  // counts toward no cap on screen beside the lane-blocking movers.
+  // other spawns, and nothing else: it blocks no lane, has no body, stands nowhere for the
+  // pack-fit gap, and counts toward no cap on screen beside the lane-blocking movers.
   private prizeGrid() {
     return {
       ...this.moverGrid(),
       block: () => true,
+      clearOf: () => true,
       occupy: () => {},
       packFits: () => true,
       stand: () => {},
@@ -741,12 +769,14 @@ class ZonePlanner<Kind extends string> {
 // first are placed first, their movers then the rest; then the other lane-blocking movers; then the
 // other lane-blocking spawns; then the moving prizes; then the other spawns. Movers are placed by
 // placeMovers. A dart may set off over cells the spawns placed before it hold, crossing over or
-// past them, and a rider may pass over cells only darts hold (moverMayTake). Nothing else placed
-// after a mover takes its cells, another dart included, but a lane-blocking standing spawn: one
-// where a dart passes, which the dart then crosses over or past the same way, and one whose hit box
-// shares no road with any other mover's body, the road that mover's hit box covers at some moment
-// on screen, so the two never meet; a mover other than a dart holds every row its blocking and its
-// path touch, which is more road than its body. A kind marked moversPassOver also takes a mover's
+// past them, and a rider may pass over cells only darts hold (moverMayTake). A stop-and-go across,
+// a vehicle crossing side-on, is placed as a dart but has a body, which keeps clear of the
+// lane-blocking standing spawns placed before it. Nothing else placed after a mover takes its
+// cells, another dart included, but a lane-blocking standing spawn: one where a dart passes, which
+// the dart then crosses over or past the same way, and one whose hit box shares no road with any
+// other mover's body, the road that mover's hit box covers at some moment on screen, so the two
+// never meet; a mover other than a dart holds every row its blocking and its path touch, which is
+// more road than its body. A kind marked moversPassOver also takes a mover's
 // cells, but not one where a mover may end a move and stand unless it is also marked moversRestOn.
 // A mover with no room in its stretch, such as one over a cap on screen, waits for the next row
 // with room; only one marked first stands still in its footprint when no row has room for it to

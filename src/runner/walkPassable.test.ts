@@ -114,6 +114,8 @@ describe("the planned road", { timeout: 120_000 }, () => {
     ...ZONE_IDS.map((zone) => ({ zone, zoneIndex: WORLD.walkLength - 1 })),
     { zone: WORLD.firstZone as ZoneId, zoneIndex: 0 },
   ];
+  // How many seeds the overlap check plans each zone place on.
+  const OVERLAP_SEEDS = 8;
   type PassableCase = {
     road: RoadGeometry;
     seed?: number;
@@ -314,56 +316,70 @@ describe("the planned road", { timeout: 120_000 }, () => {
   }
 
   // A standing obstacle may stand where a dart passes, crossing over or past it, but never where
-  // another mover is while it is there: at no moment with both on the road do their drawn hit
-  // boxes overlap in a lane both cover, whichever way a stalker or shy hopper chooses its moves.
-  it("keeps every standing obstacle's hit box off every mover's but a dart's", () => {
-    for (const passable of PASSABLE) {
-      const { road, tuned, zone } = passable;
-      const walk = planOf(passable);
-      const blocking = walk.road.pending.filter((event) => blocksLane(tuned, event.kind));
-      const roadLength = road.roadBottom - road.roadTop;
-      const inset = road.cell.inset / road.cell.length;
-      const standing = blocking.filter(({ mover }) => mover === undefined);
-      for (const { distance, kind, mover } of blocking) {
-        if (mover === undefined || mover.motion === "cross") {
-          continue;
-        }
-        const height = itemHeight(tuned, road, kind, true);
-        const across = footprintOf(tuned, kind).lanes;
-        // By lane, the nearest and farthest distances along the zone its near edge reaches on
-        // the road.
-        const reached = new Map<number, { far: number; near: number }>();
-        for (const path of moverOutcomes(mover)) {
-          for (let since = 0; since < MOVER_SCROLL; since++) {
-            const place = moverPlace(LANE_COUNT, path, since);
-            if (!place.solid || place.travel <= 0) {
-              continue;
-            }
-            if (place.travel - height >= roadLength) {
-              break;
-            }
-            const at = distance + since - place.travel;
-            const first = Math.floor(place.lanePosition - 1 + inset) + 1;
-            const last = Math.ceil(place.lanePosition + across - inset) - 1;
-            for (let lane = first; lane <= last; lane++) {
-              const { far, near } = reached.get(lane) ?? { far: at, near: at };
-              reached.set(lane, { far: Math.max(far, at), near: Math.min(near, at) });
-            }
+  // another mover is while it is there, a stop-and-go crossing the road side-on included: at no
+  // moment with both on the road do their drawn hit boxes overlap in a lane both cover, whichever
+  // way a stalker or shy hopper chooses its moves. Each overlap, named.
+  const standingOverlaps = (passable: PassableCase): string[] => {
+    const { road, seed = 1, tuned, zone } = passable;
+    const walk = planOf(passable);
+    const blocking = walk.road.pending.filter((event) => blocksLane(tuned, event.kind));
+    const roadLength = road.roadBottom - road.roadTop;
+    const inset = road.cell.inset / road.cell.length;
+    const standing = blocking.filter(({ mover }) => mover === undefined);
+    return blocking.flatMap(({ distance, kind, mover }) => {
+      if (mover === undefined || (mover.motion === "cross" && mover.pause === undefined)) {
+        return [];
+      }
+      const height = itemHeight(tuned, road, kind, true);
+      const across = footprintOf(tuned, kind).lanes;
+      // By lane, the nearest and farthest distances along the zone its near edge reaches on the
+      // road.
+      const reached = new Map<number, { far: number; near: number }>();
+      for (const path of moverOutcomes(mover)) {
+        for (let since = 0; since < MOVER_SCROLL; since++) {
+          const place = moverPlace(LANE_COUNT, path, since);
+          if (!place.solid || place.travel <= 0) {
+            continue;
           }
-        }
-        for (const obstacle of standing) {
-          const { lanes } = footprintOf(tuned, obstacle.kind);
-          const length = itemHeight(tuned, road, obstacle.kind, false);
-          for (let lane = obstacle.lane; lane < obstacle.lane + lanes; lane++) {
-            const span = reached.get(lane);
-            const overlaps =
-              span !== undefined &&
-              obstacle.distance < span.far + height &&
-              span.near < obstacle.distance + length;
-            expect(overlaps, `${zone}: ${obstacle.kind} on ${kind}`).toBe(false);
+          if (place.travel - height >= roadLength) {
+            break;
+          }
+          const at = distance + since - place.travel;
+          const first = Math.floor(place.lanePosition - 1 + inset) + 1;
+          const last = Math.ceil(place.lanePosition + across - inset) - 1;
+          for (let lane = first; lane <= last; lane++) {
+            const { far, near } = reached.get(lane) ?? { far: at, near: at };
+            reached.set(lane, { far: Math.max(far, at), near: Math.min(near, at) });
           }
         }
       }
-    }
+      return standing.flatMap((obstacle) => {
+        const { lanes } = footprintOf(tuned, obstacle.kind);
+        const length = itemHeight(tuned, road, obstacle.kind, false);
+        const overlaps = Array.from({ length: lanes }, (_, i) => obstacle.lane + i).some((lane) => {
+          const span = reached.get(lane);
+          return (
+            span !== undefined &&
+            obstacle.distance < span.far + height &&
+            span.near < obstacle.distance + length
+          );
+        });
+        return overlaps ? [`${zone} seed ${seed}: ${obstacle.kind} on ${kind} at ${distance}`] : [];
+      });
+    });
+  };
+  it("keeps every standing obstacle's hit box off every mover's but a dart's", () => {
+    expect(PASSABLE.flatMap(standingOverlaps)).toEqual([]);
   });
+  // Over many seeds of every zone where a walk has it, as no one seed plans every stop-and-go
+  // crosser next to a standing obstacle.
+  it.each(zonePlaces)(
+    "keeps every standing obstacle's hit box off every mover's but a dart's in $zone at $zoneIndex",
+    (place) => {
+      const seeds = Array.from({ length: OVERLAP_SEEDS }, (_, i) => i + 1);
+      expect(
+        seeds.flatMap((seed) => standingOverlaps({ ...place, road: GAME_ROAD, seed, tuned: REAL })),
+      ).toEqual([]);
+    },
+  );
 });

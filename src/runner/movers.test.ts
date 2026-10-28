@@ -1478,6 +1478,7 @@ describe("placeMovers", () => {
           }
           return true;
         },
+        clearOf: () => true,
         // Every lane equally clear, so start lanes are drawn evenly.
         clearRun: () => 1,
         isFree: (motion: MoverPath["motion"], lane: number, row: number) =>
