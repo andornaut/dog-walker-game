@@ -1,6 +1,7 @@
-import type { GameData, Movement, World, Zone } from "../data/types";
+import type { GameData, Movement, World } from "../data/types";
 import { randomStream, seededRandom } from "../lib/random";
 import type { PlannerStreams } from "../runner/movers";
+import { mapZones } from "./world";
 
 export type HopMovement = Extract<Movement, { kind: "hop" }>;
 
@@ -11,9 +12,7 @@ export function plannerStreams(seed: number): PlannerStreams {
 
 // The world with every zone at this mover share.
 export function sharedWorld(world: World, share: number): World {
-  const [first, ...rest] = world.zones;
-  const shared = (zone: Zone): Zone => ({ ...zone, moverShare: share });
-  return { ...world, zones: [shared(first), ...rest.map(shared)] };
+  return mapZones((zone) => ({ ...zone, moverShare: share }), world);
 }
 
 // The obstacles, minor or not, with every stepping or hopping mover hopping as hop does.

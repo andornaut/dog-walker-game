@@ -37,6 +37,7 @@ import { walkGeometry, walkProjection } from "../runner/walkGeometry";
 import { newRun, type RunState } from "../state/runState";
 import { type BlockingSpan } from "./avoidable";
 import { data } from "./walk";
+import { mapZones } from "./world";
 
 // The real world, as the integrity tests read it.
 export const REAL = { ...data, tuning: TUNING, world: WORLD };
@@ -72,9 +73,7 @@ export const realRun = (tuned: Real, walker: WalkerId = DEFAULT_WALKER) =>
   newRun(tuned, 3, { dogs: ["duchess", "biscuit", "kilo"], gear: null, walker });
 // The world with every zone's weights changed by reweigh.
 export function reweighed(reweigh: (weights: Zone["weights"]) => Zone["weights"]): World {
-  const [first, ...rest] = WORLD.zones;
-  const zoned = (zone: Zone): Zone => ({ ...zone, weights: reweigh(zone.weights) });
-  return { ...WORLD, zones: [zoned(first), ...rest.map(zoned)] };
+  return mapZones((zone) => ({ ...zone, weights: reweigh(zone.weights) }), WORLD);
 }
 // The weights with each of ids weighed one higher.
 export function raised<Id extends string>(
