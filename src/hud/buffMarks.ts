@@ -183,7 +183,7 @@ function placeKey(at: PopAt): string {
 }
 
 // Each pop takes the next index at its place.
-export function stacked(pops: readonly UnplacedPop[]): BuffPop[] {
+function stacked(pops: readonly UnplacedPop[]): BuffPop[] {
   const counts = new Map<string, number>();
   return pops.map((pop) => {
     const key = placeKey(pop.at);
@@ -254,45 +254,6 @@ export function stepValues(
       null;
     return { bump: bump !== undefined, dog, item, value };
   });
-}
-
-// How many tips and treats the walk has collected while a buff scaled their spawns.
-export interface SpawnCounts {
-  readonly tips: number;
-  readonly treats: number;
-}
-
-export const NO_SPAWNS: SpawnCounts = { tips: 0, treats: 0 };
-
-// Keen eye's and Rush hour's pops: while a buff scales a pickup's spawns, every second one
-// collected pops each scaling buff's charm over it. Returns the pops and the counts after.
-export function spawnPops(
-  data: MarkData,
-  run: StandingRun,
-  collected: readonly WalkItem[],
-  counts: SpawnCounts,
-): { counts: SpawnCounts; pops: BuffPop[] } {
-  const pickups = collected.filter(({ kind }) => kind === "tip" || kind === "treat");
-  if (pickups.length === 0) {
-    return { counts, pops: [] };
-  }
-  const scaled = standingModified(data, run);
-  const next = { ...counts };
-  const pops = pickups.flatMap((item): UnplacedPop[] => {
-    const spawn = item.kind === "tip" ? "tips" : "treats";
-    const value = scaled.find(
-      ({ subject }) => subject.kind === "spawns" && subject.spawn === spawn,
-    );
-    if (value === undefined) {
-      return [];
-    }
-    next[spawn] += 1;
-    if (next[spawn] % 2 !== 0) {
-      return [];
-    }
-    return charmsOf(data, value).map((charm) => charmPop({ item: item.id, kind: "item" }, charm));
-  });
-  return { counts: next, pops: stacked(pops) };
 }
 
 // Good leash's pop over a dog that would have strained toward a squirrel: one per squirrel.

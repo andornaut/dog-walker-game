@@ -15,15 +15,7 @@ import { read } from "../rules/units";
 import type { WalkItem } from "../runner/walkItems";
 import { type ModifierSource, newRun } from "../state/runState";
 import { activeModifier, testState } from "../testing/runState";
-import {
-  type BuffPop,
-  extraHearts,
-  NO_SPAWNS,
-  optionMarks,
-  type PoppedValue,
-  popsOf,
-  spawnPops,
-} from "./buffMarks";
+import { type BuffPop, extraHearts, optionMarks, type PoppedValue, popsOf } from "./buffMarks";
 
 const { card, seconds } = gameData.runText;
 const SWEET_TALKER: ModifierSource = { kind: "upgrade", upgrade: "sweetTalker" };
@@ -235,39 +227,6 @@ describe("popsOf", () => {
     const raised = value({ kind: "money" }, 100, [[100, big]]);
     const tip = { bump: false, dog: null, item: item("tip"), value: raised };
     expect(popsOf(gameData, [tip, tip]).map(({ index }) => index)).toEqual([0, 1]);
-  });
-});
-
-describe("spawnPops", () => {
-  it("pops Keen eye's charm on every second treat collected", () => {
-    const run = testState(
-      { kilo: 3 },
-      {
-        modifiers: [
-          activeModifier(
-            { kind: "walker", walker: "mrB" },
-            { by: "keenEyeTreatSpawns", operation: "multiply", stat: "treatSpawns" },
-          ),
-        ],
-        walker: "mrB",
-      },
-    );
-    const treat = (id: number): WalkItem => ({
-      height: 12,
-      id,
-      kind: "treat",
-      lane: 0,
-      laneSpan: 1,
-      y: 0,
-    });
-    let counts = NO_SPAWNS;
-    const popped = [1, 2, 3, 4].map((id) => {
-      const step = spawnPops(gameData, run, [treat(id)], counts);
-      counts = step.counts;
-      return step.pops.map(({ item }) => item);
-    });
-    const finder = { kind: "perk", perk: "keenEye" };
-    expect(popped).toEqual([[], [finder], [], [finder]]);
   });
 });
 

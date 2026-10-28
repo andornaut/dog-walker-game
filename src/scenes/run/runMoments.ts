@@ -3,17 +3,7 @@ import type { Scene } from "phaser";
 import { hitCue } from "../../audio/sound";
 import { gameData } from "../../data";
 import type { DogId, HintId, HintTrigger, MinorObstacleId } from "../../data/types";
-import {
-  type BuffPop,
-  leashPops,
-  NO_SPAWNS,
-  popsOf,
-  type SpawnCounts,
-  spawnPops,
-  stacked,
-  stepValues,
-  walkStartMarks,
-} from "../../hud/buffMarks";
+import { type BuffPop, leashPops, popsOf, stepValues, walkStartMarks } from "../../hud/buffMarks";
 import type { EffectItem } from "../../hud/effectIcons";
 import { heartPopFrame } from "../../hud/feedback";
 import { changeLabels } from "../../hud/hudView";
@@ -182,8 +172,6 @@ export class RunMoments {
   // The pack's point on the last step walked, for pops away from a dog or an item.
   private pack: Point | undefined;
   private readonly scene: Scene;
-  // The tips and treats collected while a buff scaled their spawns.
-  private spawns: SpawnCounts = NO_SPAWNS;
   // Where the current zone's changes start in changes.
   private zoneStart = 0;
 
@@ -276,9 +264,7 @@ export class RunMoments {
   // at pack.
   walked(step: WalkStep, pack: Point): void {
     this.pack = pack;
-    const spawned = spawnPops(gameData, step.walk.run, step.collected, this.spawns);
-    this.spawns = spawned.counts;
-    this.popBuffs(stacked([...popsOf(gameData, stepValues(step)), ...spawned.pops]));
+    this.popBuffs(popsOf(gameData, stepValues(step)));
     this.deps.items.strike(step);
     const sound = soundboardOf(this.scene);
     if (step.tips.length > 0) {
