@@ -5,6 +5,7 @@ import type { AchievementCondition, DogId, TallyId, ZoneId } from "../data/types
 import { keysOf } from "../lib/records";
 import { cents, dollarsToCents } from "../lib/units";
 import { type SaveDocument } from "../save/schema";
+import type { RunState } from "../state/runState";
 import { runFactsFor, saveFor } from "../testing/achievements";
 import { defined } from "../testing/defined";
 import { testState } from "../testing/runState";
@@ -21,7 +22,6 @@ import {
   runCountersOf,
   type RunFacts,
 } from "./achievements";
-import { applyEffects } from "./effects";
 
 const facts = (changes: Partial<RunFacts> = {}): RunFacts => ({
   bumpsByKind: {},
@@ -459,32 +459,28 @@ describe("earnedByRun", () => {
 });
 
 describe("counters", () => {
-  it("counts bumps by zone, filling the zones before with none", () => {
-    const run = testState({ kilo: 5 }, { zoneIndex: 2 });
-    expect(countBump(countBump(run)).bumpsByZone).toEqual([0, 0, 2]);
-  });
-
-  it("counts landed bumps by obstacle kind, adding to a kind already counted", () => {
-    const run = testState({ kilo: 5 });
-    const twice = countLandedBump("pigeons", countLandedBump("pigeons", run));
-    expect(countLandedBump("raccoon", twice).bumpsByKind).toEqual({ pigeons: 2, raccoon: 1 });
-  });
-
-  it("counts each time a debuff is applied, again on a debuff already on", () => {
-    const stinky = { debuff: "stinky", kind: "debuff" } as const;
-    const context = {
-      affected: [],
-      source: { kind: "walker", walker: "casey" },
-    } as const;
-    const once = applyEffects(gameData, context, [stinky], testState({ kilo: 5 }));
-    expect(once.debuffsGot).toEqual({ stinky: 1 });
-    expect(applyEffects(gameData, context, [stinky], once).debuffsGot).toEqual({ stinky: 2 });
-  });
-
-  it("counts a tally, adding to one already counted", () => {
-    const run = testState({ kilo: 5 });
-    const twice = countTally("treats", countTally("treats", run));
-    expect(twice.tallies).toEqual({ treats: 2 });
+  // Each counter applied to a walk in its third zone, and what it has counted after. A debuff
+  // applied is counted where effects apply it.
+  it.each([
+    {
+      count: (run: RunState) => countBump(countBump(run)).bumpsByZone,
+      counted: [0, 0, 2],
+      name: "bumps by zone, filling the zones before with none",
+    },
+    {
+      count: (run: RunState) =>
+        countLandedBump("raccoon", countLandedBump("pigeons", countLandedBump("pigeons", run)))
+          .bumpsByKind,
+      counted: { pigeons: 2, raccoon: 1 },
+      name: "landed bumps by obstacle kind, adding to a kind already counted",
+    },
+    {
+      count: (run: RunState) => countTally("treats", countTally("treats", run)).tallies,
+      counted: { treats: 2 },
+      name: "a tally, adding to one already counted",
+    },
+  ])("counts $name", ({ count, counted }) => {
+    expect(count(testState({ kilo: 5 }, { zoneIndex: 2 }))).toEqual(counted);
   });
 
   it("counts option picks by encounter and option id, each apart", () => {
