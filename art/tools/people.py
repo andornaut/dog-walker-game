@@ -469,7 +469,7 @@ def gadget_top(wave):
 
 
 def jason_top(wave):
-    """Jason, lawn care pro, laid-back: short brown hair under an orange cap with a moss leaf on its front, an
+    """Jason, lawn care pro, laid-back: short brown hair under an orange baseball cap with a moss leaf on its front, an
     olive work polo with a moss collar and an orange logo, amber work gloves, khaki work shorts, brown work
     boots, and a turquoise leaf blower in his left hand, its nozzle down to the grass and two leaves blowing off it."""
     def top(g, b):
@@ -497,19 +497,18 @@ def jason_top(wave):
         g.rect(5, 31 + b, 4, 3, "amber")
         g.rect(5, 31 + b, 4, 1, "orange")
         head(g, b, "skin2", "brown")
-        g.rect(8, 8 + b, 2, 5, "dbrown")
-        g.rect(22, 8 + b, 2, 5, "plum")
-        # the cap: a low crown fitted to the head, a button on top and a moss leaf low on its front panel, over
-        # a bill that curves down toward the viewer, its shadow a rust band beneath
-        g.cel(16, 7 + b, 8.5, 5, "orange", "rust", "amber")
-        g.rect(15, 1 + b, 2, 1, "rust")
+        # short hair at the temples and over the ears, under the cap
+        g.rect(7, 9 + b, 3, 4, "dbrown")
+        g.rect(22, 9 + b, 3, 4, "plum")
+        g.rect(7, 9 + b, 1, 3, "brown")
+        # the cap: a low crown hugging the head, a button on top and a moss leaf on its front panel, over a flat
+        # bill, a darker band across the brow that juts out past the head to his right, as on his face
+        g.cel(16, 7.5 + b, 8.5, 4, "orange", "rust", "amber")
+        g.rect(15, 3 + b, 2, 1, "rust")
         g.rect(15, 5 + b, 2, 2, "moss")
         g.p(16, 5 + b, "olive")
-        g.rect(8, 8 + b, 16, 1, "orange")
-        g.rect(10, 9 + b, 12, 1, "orange")
-        g.p(9, 9 + b, "rust")
-        g.p(22, 9 + b, "rust")
-        g.rect(11, 10 + b, 10, 1, "rust")
+        g.rect(4, 8 + b, 20, 1, "ochre")
+        g.rect(2, 9 + b, 22, 1, "rust")
         face_front(g, 16, 13 + b)
         cheeks(g, b, "brown")
     return top

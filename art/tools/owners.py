@@ -392,8 +392,8 @@ def gadget(mood):
 
 
 def jason(mood):
-    """Lawn care pro, laid-back: short brown hair under an orange cap with a moss leaf on its front, an olive work
-    polo with a moss collar, its placket open at the neck, and an orange logo on the chest."""
+    """Lawn care pro, laid-back: short brown hair under an orange baseball cap with a moss leaf on its front, an
+    olive work polo with a moss collar, its placket open at the neck, and an orange logo on the chest."""
     g = face()
     base(g, "skin2", "brown", "olive", "dolive")
     # the polo's collar points either side of the placket, and the logo on the left of the chest
@@ -401,26 +401,24 @@ def jason(mood):
     g.tri((21, 26), (16, 27), (19, 29), "moss")
     g.rect(16, 28, 1, 3, "dolive")
     g.rect(20, 29, 3, 1, "orange")
-    # short hair at the temples, under the cap
-    g.rect(8, 11, 2, 5, "dbrown")
-    g.rect(22, 11, 2, 5, "plum")
-    # the cap: a low crown fitted to the head, a button on top, a seam either side and a moss leaf low on its
-    # front panel, over a bill that curves down toward the viewer, its shadow a rust band beneath
-    g.cel(16, 10, 8.5, 6, "orange", "rust", "amber")
-    g.rect(15, 3, 2, 1, "rust")
-    g.p(12, 6, "rust")
-    g.p(11, 7, "rust")
-    g.p(20, 6, "rust")
-    g.p(21, 7, "rust")
+    # short hair at the temples and over the ears, under the cap; at 20px one pixel each side, clear of the brows
+    if isinstance(g, minis.Mini):
+        g.rect(6, 12, 2, 5, "dbrown")
+        g.rect(24, 12, 2, 5, "plum")
+    else:
+        g.rect(7, 12, 3, 5, "dbrown")
+        g.rect(22, 12, 3, 5, "plum")
+        g.rect(7, 12, 1, 3, "brown")
+    # the cap: a low crown hugging the head, a button on top, a seam either side and a moss leaf on its front
+    # panel, over a flat bill, a darker band across the brow that juts out past the head to his right
+    g.cel(16, 10.5, 8.5, 4.5, "orange", "rust", "amber")
+    g.rect(15, 6, 2, 1, "rust")
+    g.p(11, 8, "rust")
+    g.p(21, 8, "rust")
     g.rect(15, 8, 2, 2, "moss")
     g.p(16, 8, "olive")
-    g.rect(8, 11, 16, 1, "orange")
-    g.rect(9, 12, 14, 1, "orange")
-    g.rect(11, 13, 10, 1, "rust")
-    g.rect(8, 12, 1, 1, "rust")
-    g.rect(23, 12, 1, 1, "rust")
-    g.rect(9, 13, 2, 1, "rust")
-    g.rect(21, 13, 2, 1, "rust")
+    g.rect(4, 11, 20, 1, "ochre")
+    g.rect(2, 12, 22, 1, "rust")
     expression(g, mood)
     return g
 
