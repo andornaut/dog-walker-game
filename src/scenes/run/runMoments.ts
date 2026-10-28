@@ -269,7 +269,7 @@ export class RunMoments {
 
   // Sounds, bursts, labels, hints and strip lines for what happened in a step, around the pack
   // at pack.
-  walked(step: WalkStep, pack: { x: number; y: number }): void {
+  walked(step: WalkStep, pack: Point): void {
     this.pack = pack;
     const spawned = spawnPops(gameData, step.walk.run, step.collected, this.spawns);
     this.spawns = spawned.counts;
@@ -590,7 +590,7 @@ export class RunMoments {
 
   // The hit moment over the stop, framed by the road and the backdrop band beside it, labelled
   // with the encounter's hit label.
-  private playHit(hit: EncounterCard, step: WalkStep, pack: { x: number; y: number }): void {
+  private playHit(hit: EncounterCard, step: WalkStep, pack: Point): void {
     playHitMoment(this.scene, {
       caught: this.deps.pack.sprites(hit.affected),
       centre: { x: pack.x, y: pack.y - 20 },
@@ -608,7 +608,7 @@ export class RunMoments {
 
   // A plain or moving hit's cues: its bump and debris over the struck dog, the dog reacting
   // and flashing white, the struck obstacle's motion, and the bump's flash.
-  private playBumpHit(bump: MinorBump, step: WalkStep, pack: { x: number; y: number }): void {
+  private playBumpHit(bump: MinorBump, step: WalkStep, pack: Point): void {
     const still = this.deps.still();
     const { item } = bump;
     const hit = {
@@ -643,11 +643,7 @@ export class RunMoments {
   }
 
   // A minor obstacle's hit label over the stop; none shows while it has none.
-  private playBumpLabel(
-    kind: MinorObstacleId,
-    step: WalkStep,
-    pack: { x: number; y: number },
-  ): void {
+  private playBumpLabel(kind: MinorObstacleId, step: WalkStep, pack: Point): void {
     const label = gameData.minorObstacles[kind].hitLabel;
     if (label === undefined) {
       return;
