@@ -1105,9 +1105,11 @@ PLACEMENT = {
     "distillery-district": sparse(("gas-lamp", 213, 0), ("love-lock", 216, 0)),
     "kensington-market": sparse(("shopfront-violet", 216, 0), ("fruit-stand", 216, 0), {
         1: (("cafe-patio", 213, 0),),
+        2: (("gas-lamp", 213, 0),),
         4: (("mural-wall", 216, 0),),
         6: (("shopfront-ochre", 216, 0),),
         7: (("cafe-patio", 213, 0),),
+        8: (("gas-lamp", 213, 0),),
         9: (("shopfront-violet", 216, 0),),
         10: (("mural-wall", 216, 0),),
     }),

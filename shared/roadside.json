@@ -243,7 +243,13 @@
             "dz": 0
           }
         ],
-        [],
+        [
+          {
+            "key": "roadside-gas-lamp",
+            "across": 231,
+            "dz": 0
+          }
+        ],
         [
           {
             "key": "roadside-fruit-stand",
@@ -273,7 +279,13 @@
             "dz": 0
           }
         ],
-        [],
+        [
+          {
+            "key": "roadside-gas-lamp",
+            "across": 231,
+            "dz": 0
+          }
+        ],
         [
           {
             "key": "roadside-shopfront-violet",
