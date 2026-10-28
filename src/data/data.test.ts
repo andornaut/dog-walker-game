@@ -280,12 +280,17 @@ describe("run, world and walkers", () => {
     expect(zoneKinds.some(({ zones }) => zones.length > 1)).toBe(true);
   });
 
-  it.each(zoneKinds)("draws $id only in its own zones, $zones", ({ id, table, zones }) => {
-    const weighted = world.zones.flatMap((each) =>
-      ((each.weights[table] as Readonly<Record<string, number>>)[id] ?? 0) > 0 ? [each.id] : [],
-    );
-    expect(weighted).toEqual(zoneIds.filter((zone) => zones.includes(zone)));
-    expect(zones.filter((zone) => !zoneIds.includes(zone))).toEqual([]);
+  it("draws each of those obstacles only in the world's zones it names", () => {
+    const offenders = zoneKinds.flatMap(({ id, table, zones }) => {
+      const weighted = world.zones.flatMap((each) =>
+        ((each.weights[table] as Readonly<Record<string, number>>)[id] ?? 0) > 0 ? [each.id] : [],
+      );
+      const named = zoneIds.filter((zone) => zones.includes(zone));
+      return weighted.join() === named.join() && named.length === zones.length
+        ? []
+        : [`${id}: names ${zones.join(", ")}, weighed in ${weighted.join(", ")}`];
+    });
+    expect(offenders).toEqual([]);
   });
 
   // So the neighbourhoods stay distinct, no mover or plain obstacle appears in more than 3.
