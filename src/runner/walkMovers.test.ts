@@ -298,19 +298,21 @@ describe("movers", { timeout: 120_000 }, () => {
       seeds.flatMap((seed) => spawnsOf(zone, zoneIndex, seed)),
     );
   // The spawns planned in zones that match, planned a seed at a time from seed 1 until found holds
-  // of them or the search has planned its most seeds.
+  // of them or the search has planned its most seeds, failing if none of what it seeks come up.
   const searchSpawns = (
     zones: readonly ZoneId[],
     matches: (spawn: Planned) => boolean,
     found: (spawns: readonly Planned[]) => boolean,
+    sought: string,
   ): Planned[] => {
     const spawns: Planned[] = [];
     for (let seed = 1; seed <= SEARCH_SEEDS_MOST && !found(spawns); seed++) {
       spawns.push(...zones.flatMap((zone) => planIn(zone, [seed])).filter(matches));
     }
+    const where = zones.length > 0 ? `zones ${zones.join(", ")}` : "no zone that weighs it above 0";
     expect(
       spawns.length,
-      `none planned in ${SEARCH_SEEDS_MOST} seeds of ${zones.join(", ") || "no zone"}`,
+      `no ${sought} planned on ${SEARCH_SEEDS_MOST} seeds in ${where}`,
     ).toBeGreaterThan(0);
     return spawns;
   };
@@ -338,14 +340,17 @@ describe("movers", { timeout: 120_000 }, () => {
   };
   // A kind's spawns planned in the zones that draw it, searched until found holds of them.
   const spawnsOfKind = (kind: WalkItem["kind"], found = enough) =>
-    searchSpawns(zonesOf(kind), (spawn) => spawn.kind === kind, found);
+    searchSpawns(zonesOf(kind), (spawn) => spawn.kind === kind, found, kind);
   // A kind's movers planned in the zones that draw it, searched until found holds of them.
   type PlannedMover = Planned & { mover: MoverPath };
   const isMover = (spawn: Planned): spawn is PlannedMover => spawn.mover !== undefined;
   const moversOf = (kind: WalkItem["kind"], found = enough): PlannedMover[] =>
-    searchSpawns(zonesOf(kind), (spawn) => spawn.kind === kind && isMover(spawn), found).filter(
-      isMover,
-    );
+    searchSpawns(
+      zonesOf(kind),
+      (spawn) => spawn.kind === kind && isMover(spawn),
+      found,
+      `moving ${kind}`,
+    ).filter(isMover);
   // The counts of steps a kind's stalkers among spawns plan.
   const stalkedRows = (spawns: readonly Planned[]) =>
     new Set(spawns.flatMap(({ mover }) => (mover?.motion === "approach" ? [mover.rows] : [])));
@@ -711,6 +716,7 @@ describe("movers", { timeout: 120_000 }, () => {
           ZONE_IDS,
           (spawn) => spawn.mover?.movement === movement,
           (found) => enough(found) && spread(found),
+          `${movement} mover`,
         ),
       );
       expect(Math.min(...factors)).toBeGreaterThanOrEqual(1 - jitter - 1e-9);
