@@ -1,5 +1,5 @@
 import type { LaneDirection } from "../layout/lanes";
-import { clampIndex } from "../lib/arrays";
+import { clampIndex, partitionPoint } from "../lib/arrays";
 
 // Times are seconds of walking from now, and lanes are lane masks: bit n set means lane n.
 // A hazard is hit by a pack that occupies one of its lanes during the open interval
@@ -98,19 +98,13 @@ function sortedTimes(
   return unique;
 }
 
-// The first index whose time is at or after time, or the last index.
+// The first index of sorted times whose time is at or after time, or the last index. times is
+// never empty: it holds at least the plan's end.
 function indexAtOrAfter(times: readonly number[], time: number): number {
-  let low = 0;
-  let high = times.length - 1;
-  while (low < high) {
-    const middle = (low + high) >> 1;
-    if ((times[middle] ?? 0) < time - SAME_TIME) {
-      low = middle + 1;
-    } else {
-      high = middle;
-    }
-  }
-  return low;
+  return clampIndex(
+    times.length,
+    partitionPoint((at) => at < time - SAME_TIME, times),
+  );
 }
 
 // When the plan may change lanes again after a pull: after the pull's lane change, if it
