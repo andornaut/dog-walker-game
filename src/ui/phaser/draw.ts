@@ -130,6 +130,9 @@ export function drawDashedRect(graphics: GameObjects.Graphics, colour: number, r
   }
 }
 
+// A cream box framed in plum: a panel, bubble or chip drawn in code.
+export const CREAM_PANEL_COLOURS = { border: PALETTE.plum, fill: PALETTE.cream };
+
 // A box with a 1px border drawn inside it, not straddling its edge as a Phaser stroke would.
 export function drawFramedRect(
   graphics: GameObjects.Graphics,

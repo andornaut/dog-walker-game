@@ -15,7 +15,7 @@ import type { ChangeLabel } from "../hud/hudView";
 import { arcControl, curvePoint } from "../hud/moments";
 import { insetRect, type Point, type Rect } from "../lib/rect";
 import { slotIndexOf } from "../state/pack";
-import { drawFramedRect, drawRing } from "../ui/phaser/draw";
+import { CREAM_PANEL_COLOURS, drawFramedRect, drawRing } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText } from "../ui/phaser/pixelText";
 import { FEEDBACK_ART } from "./feedbackArt";
@@ -214,7 +214,7 @@ export class HeartFeedback {
       x: at.x - CHIP_PAD,
       y: at.y - CHIP_PAD,
     };
-    drawFramedRect(box, { border: PALETTE.plum, fill: PALETTE.cream }, { ...rect, x: 0, y: 0 });
+    drawFramedRect(box, CREAM_PANEL_COLOURS, { ...rect, x: 0, y: 0 });
     const chip = this.scene.add.container(rect.x, rect.y, [box, text]).setDepth(DEPTH);
     return { chip, rect };
   }

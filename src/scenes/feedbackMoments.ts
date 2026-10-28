@@ -45,7 +45,7 @@ import { type Cents, cents } from "../rules/units";
 import { slotIndexOf } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { addDisplayText } from "../ui/phaser/displayText";
-import { addFilledRect, drawFramedRect, drawRing } from "../ui/phaser/draw";
+import { addFilledRect, CREAM_PANEL_COLOURS, drawFramedRect, drawRing } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
@@ -346,11 +346,12 @@ export class HudFeedback {
       container.add(sprite);
     } else {
       const frame = this.scene.add.graphics();
-      drawFramedRect(
-        frame,
-        { border: PALETTE.plum, fill: PALETTE.cream },
-        { height: size, width: size, x: -size / 2, y: -size / 2 },
-      );
+      drawFramedRect(frame, CREAM_PANEL_COLOURS, {
+        height: size,
+        width: size,
+        x: -size / 2,
+        y: -size / 2,
+      });
       const name = addPixelText(this.scene, 0, 0, gameData.dogs[dog].owner.name, {
         colour: PALETTE.plum,
         originX: 0.5,
@@ -611,11 +612,7 @@ export class HudFeedback {
     const body = pixelFontMetrics(this.scene, "body");
     const place = lowChipPlace(body, SCREEN_CONFIG.width, rect, shown);
     const box = this.scene.add.graphics();
-    drawFramedRect(
-      box,
-      { border: PALETTE.plum, fill: PALETTE.cream },
-      { ...place.box, x: 0, y: 0 },
-    );
+    drawFramedRect(box, CREAM_PANEL_COLOURS, { ...place.box, x: 0, y: 0 });
     const at = { capsTop: place.text.y - place.box.y, x: place.text.x - place.box.x };
     const text = addFaceRows(this.scene, at, { box: set.box, fit: set.style, style }, set.rows);
     const chip = this.scene.add.container(place.box.x, place.box.y, [box, ...text]).setDepth(DEPTH);

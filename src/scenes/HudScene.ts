@@ -82,6 +82,7 @@ import { heartsOf, slotIndexOf } from "../state/pack";
 import type { PackSlot, RunState } from "../state/runState";
 import {
   addFilledRect,
+  CREAM_PANEL_COLOURS,
   drawDashedRect,
   drawFramedRect,
   drawHeart,
@@ -1024,7 +1025,7 @@ export class HudScene extends Scene {
     const placed = place({ lines: lines.length, scale: style.scale, width: ink.right - ink.left });
     placePixelText(text, placed.text.x - ink.left, placed.text.y);
     const chip = this.add.graphics();
-    drawFramedRect(chip, { border: PALETTE.plum, fill: PALETTE.cream }, placed.chip);
+    drawFramedRect(chip, CREAM_PANEL_COLOURS, placed.chip);
     text.setDepth(1);
     const pills = addNamePills([text]);
     return { parts: [chip, ...pills, text], rect: placed.chip };

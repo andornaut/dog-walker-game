@@ -6,7 +6,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { chipLeft, FEEDBACK, heartPopFrame, type LabelAnchor } from "../hud/feedback";
 import { COMIC_WORDS } from "../layout/comicWords";
 import type { Point } from "../lib/rect";
-import { drawFramedRect } from "../ui/phaser/draw";
+import { CREAM_PANEL_COLOURS, drawFramedRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
 import { letterEffect } from "./comicWord";
@@ -100,11 +100,12 @@ function floatChip(
   const { above, parts, width } = content;
   const title = pixelFontMetrics(scene, "title");
   const box = scene.add.graphics();
-  drawFramedRect(
-    box,
-    { border: PALETTE.plum, fill: PALETTE.cream },
-    { height: title.capHeight * TITLE_SCALE + above + 2 * CHIP_PAD, width, x: 0, y: 0 },
-  );
+  drawFramedRect(box, CREAM_PANEL_COLOURS, {
+    height: title.capHeight * TITLE_SCALE + above + 2 * CHIP_PAD,
+    width,
+    x: 0,
+    y: 0,
+  });
   const capTop = anchor.lineBottom - (title.lineHeight - title.capTop) * TITLE_SCALE;
   const x = chipLeft(SCREEN_CONFIG.width, anchor.centreX, width);
   const y = capTop - CHIP_PAD - above;

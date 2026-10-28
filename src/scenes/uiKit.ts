@@ -15,7 +15,7 @@ import {
   tileState,
 } from "../ui/interaction";
 import { MARK_OFFSET } from "../ui/mark";
-import { drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
+import { CREAM_PANEL_COLOURS, drawFramedRect, drawRing, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
@@ -140,7 +140,7 @@ export function addPanel(
     return panel;
   }
   const g = scene.add.graphics();
-  drawFramedRect(g, { border: PALETTE.plum, fill: PALETTE.cream }, rect);
+  drawFramedRect(g, CREAM_PANEL_COLOURS, rect);
   return g;
 }
 
@@ -325,11 +325,7 @@ export function addIconButton(
     const g = scene.add.graphics();
     const top = tag === "pressed" ? ICON_BUTTON.pressPx : 0;
     const size = ICON_BUTTON.size;
-    drawFramedRect(
-      g,
-      { border: PALETTE.plum, fill: PALETTE.cream },
-      { height: size - top, width: size, x, y: y + top },
-    );
+    drawFramedRect(g, CREAM_PANEL_COLOURS, { height: size - top, width: size, x, y: y + top });
     return g;
   });
   parent.add(faces);
