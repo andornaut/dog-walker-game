@@ -45,7 +45,11 @@ vi.mock("./simulate", async (importOriginal) => {
     return {
       badges: [],
       cardsSeen: Math.floor(random() * 10),
-      choices: [],
+      // The debuffs policy falls back on 1 of 3 free cards; the others choose none.
+      choices:
+        config.policy === "debuffs"
+          ? [true, false, false].map((fellBack) => ({ cost: cents(0), fellBack }))
+          : [],
       // Each debuff lasted through 1 bump and took $2.
       debuffCosts: Object.fromEntries(
         Object.keys(data.debuffs).map((debuff) => [debuff, { bumpsWhile: 1, centsLost: 200 }]),
@@ -259,6 +263,17 @@ describe("simulateMatrix", () => {
     expect(new Set(paid)).toEqual(new Set(["-"]));
     expect(formatKindTable(gameData, rows).split("\n")).toHaveLength(rows.length + 1);
     expect(formatDebuffCostTable(gameData, rows).split("\n")).toHaveLength(rows.length + 1);
+  });
+
+  it("gives the share of cards a policy with a fallback fell back on, and null for the others", () => {
+    const rows = simulateMatrix(gameData, 3, 2, {
+      ...SMALL,
+      packs: [{ dogs: ["kilo"], name: "Kilo" }],
+      players: [{ kind: "skill", preset: "typical" }],
+      policies: ["debuffs", "heartsUnlessLow"],
+    });
+
+    expect(rows.map((row) => row.policyFallbackShare)).toEqual([1 / 3, null]);
   });
 
   it("gives each debuff's mean bumps while it lasted and cents it took, in dollars in the table", () => {

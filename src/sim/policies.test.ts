@@ -12,6 +12,7 @@ import {
   choosePath,
   LOW_HEARTS,
   MIXED_PAY_SHARE,
+  pickCardOption,
   type PolicyId,
 } from "./policies";
 
@@ -168,6 +169,30 @@ describe("the debuff policies", () => {
       const state = testState({ duchess: SAFE }, { money: cents(5000) });
 
       expect(thiefChoice(policy, state, () => draw)).toBe(expected);
+    },
+  );
+});
+
+// Whether a policy fell back from its own rule: the policy, the card, the owner's hearts and
+// cash, and the result (null for a policy with no fallback). Each draw takes the money option.
+describe("pickCardOption", () => {
+  it.each([
+    ["heartsUnlessLow", "triple", TRIPLE_SAFE, 5000, null],
+    ["mixed", "triple", TRIPLE_SAFE, 5000, null],
+    ["debuffs", "triple", TRIPLE_SAFE, 5000, false],
+    ["debuffs", "thief", SAFE, 5000, true],
+    ["noDebuffs", "triple", TRIPLE_SAFE, 5000, false],
+    ["noDebuffs", "triple", TRIPLE_SAFE - 1, 5000, false],
+    ["noDebuffs", "triple", TRIPLE_SAFE - 1, 0, true],
+  ] as const)(
+    "%s on the %s card at %i hearts with %i cents fell back: %s",
+    (policy, card, hearts, money, expected) => {
+      const state = testState({ duchess: hearts }, { money: cents(money) });
+      const encounter = card === "thief" ? "thief" : TRIPLE;
+      const source: CardSource = { affected: ["duchess"], encounter, kind: "encounter" };
+      const view = cardFor(gameData, state, source);
+
+      expect(pickCardOption(gameData, () => 0, policy, state, view).fellBack).toBe(expected);
     },
   );
 });

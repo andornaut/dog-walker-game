@@ -161,36 +161,65 @@ function mixed(random: Random, previews: readonly OptionPreview[]): OptionPrevie
   return chance(random, MIXED_PAY_SHARE) ? paid : free;
 }
 
+// What a policy took, and whether it fell back from its own rule to play as mixed: null for a
+// policy with no fallback.
+interface PolicyPick {
+  readonly fellBack: boolean | null;
+  readonly picked: OptionPreview | undefined;
+}
+
 // The safe debuff option that keeps the most money, then the most hearts, whenever one is on the
-// card; otherwise as mixed.
-function debuffs(random: Random, previews: readonly OptionPreview[]): OptionPreview | undefined {
-  return (
-    best(previews.filter(givesDebuff).filter(isSafe), [mostMoney, mostHearts]) ??
-    mixed(random, previews)
-  );
+// card; otherwise, falling back, as mixed.
+function debuffs(random: Random, previews: readonly OptionPreview[]): PolicyPick {
+  const debuff = best(previews.filter(givesDebuff).filter(isSafe), [mostMoney, mostHearts]);
+  return debuff === undefined
+    ? { fellBack: true, picked: mixed(random, previews) }
+    : { fellBack: false, picked: debuff };
 }
 
 // As mixed among the hearts and money options, those that give no debuff, while one of them is
-// safe; otherwise as mixed among every option.
-function noDebuffs(random: Random, previews: readonly OptionPreview[]): OptionPreview | undefined {
+// safe; otherwise, falling back, as mixed among every option.
+function noDebuffs(random: Random, previews: readonly OptionPreview[]): PolicyPick {
   const others = previews.filter(givesNoDebuff);
-  return mixed(random, others.some(isSafe) ? others : previews);
+  const fellBack = !others.some(isSafe);
+  return { fellBack, picked: mixed(random, fellBack ? previews : others) };
 }
 
-type Policy = (random: Random, previews: readonly OptionPreview[]) => OptionPreview | undefined;
+type Policy = (random: Random, previews: readonly OptionPreview[]) => PolicyPick;
+
+const noFallback = (picked: OptionPreview | undefined): PolicyPick => ({
+  fellBack: null,
+  picked,
+});
 
 const POLICIES: Readonly<Record<PolicyId, Policy>> = {
-  alwaysHearts: (_, previews) => freePick(previews),
-  alwaysPay: (_, previews) => alwaysPay(previews),
+  alwaysHearts: (_, previews) => noFallback(freePick(previews)),
+  alwaysPay: (_, previews) => noFallback(alwaysPay(previews)),
   debuffs,
-  heartsUnlessLow: (_, previews) => heartsUnlessLow(previews),
-  mixed,
+  heartsUnlessLow: (_, previews) => noFallback(heartsUnlessLow(previews)),
+  mixed: (random, previews) => noFallback(mixed(random, previews)),
   noDebuffs,
 };
 
-// An encounter card's choice. Every policy takes Hall pass's Skip, when offered, in place of a
-// pick that costs hearts or a debuff, and keeps it for such a card otherwise. Only the mixed
-// policy, and the debuffs and noDebuffs policies when they play as mixed, draw from random.
+// An encounter card's choice, and whether the policy fell back to take it (null for a policy
+// with no fallback). Every policy takes Hall pass's Skip, when offered, in place of a pick that
+// costs hearts or a debuff, and keeps it for such a card otherwise. Only the mixed policy, and
+// the debuffs and noDebuffs policies when they play as mixed, draw from random.
+export function pickCardOption(
+  data: ChoiceData,
+  random: Random,
+  policy: PolicyId,
+  state: RunState,
+  card: CardView,
+): { readonly choice: Choice; readonly fellBack: boolean | null } {
+  const { fellBack, picked } = POLICIES[policy](random, previewOptions(data, state, card));
+  if (picked === undefined) {
+    throw new Error(`${card.title} has no option the ${policy} policy can take`);
+  }
+  return { choice: card.skip && picked.harms ? "skip" : picked.choice, fellBack };
+}
+
+// An encounter card's choice by pickCardOption.
 export function chooseCardOption(
   data: ChoiceData,
   random: Random,
@@ -198,9 +227,5 @@ export function chooseCardOption(
   state: RunState,
   card: CardView,
 ): Choice {
-  const picked = POLICIES[policy](random, previewOptions(data, state, card));
-  if (picked === undefined) {
-    throw new Error(`${card.title} has no option the ${policy} policy can take`);
-  }
-  return card.skip && picked.harms ? "skip" : picked.choice;
+  return pickCardOption(data, random, policy, state, card).choice;
 }

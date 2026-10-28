@@ -111,6 +111,10 @@ export interface MatrixRow extends BadgeCounters {
   readonly pack: string;
   readonly player: string;
   readonly policy: PolicyId;
+  // Of the cards chosen, the share the policy fell back on, playing as mixed: for debuffs, those
+  // with no safe debuff option, and for noDebuffs, those with no safe option that gives no
+  // debuff. null for a policy with no fallback, or with no card chosen.
+  readonly policyFallbackShare: number | null;
   readonly route: RoutePolicyId;
   readonly runs: number;
   readonly walker: WalkerId;
@@ -322,6 +326,7 @@ function summarizeCell(
   }
   const earnings = results.map((result) => result.earnings as number).sort((a, b) => a - b);
   const choices = results.flatMap((result) => result.choices);
+  const judged = choices.filter(({ fellBack }) => fellBack !== null);
   // A mover's counts are kept under the kind it meets the pack as, for the shares by category.
   const counted = results.flatMap((result) => [
     ...Object.entries(result.items).map(([kind, count]) => ({
@@ -400,6 +405,10 @@ function summarizeCell(
     pack: cell.pack.name,
     player: playerName(cell.player),
     policy: cell.policy,
+    policyFallbackShare:
+      judged.length === 0
+        ? null
+        : judged.filter(({ fellBack }) => fellBack === true).length / judged.length,
     route: cell.route,
     runs: results.length,
     walker: cell.walker,
@@ -533,8 +542,9 @@ export function formatKindTable(
   );
 }
 
-// What each debuff cost per walk: for each debuff, the landed bumps while it lasted and the
-// dollars it took.
+// The share of cards the policy fell back on (a dash for a policy with no fallback), then what
+// each debuff cost per walk: for each debuff, the landed bumps while it lasted and the dollars
+// it took.
 export function formatDebuffCostTable(
   data: Pick<GameData, "debuffs">,
   rows: readonly MatrixRow[],
@@ -542,9 +552,14 @@ export function formatDebuffCostTable(
   const debuffs = Object.keys(data.debuffs) as DebuffId[];
   return textTable(
     CELL_HEADERS.length,
-    [...CELL_HEADERS, ...debuffs.flatMap((debuff) => [`${debuff} bumps`, `${debuff} lost`])],
+    [
+      ...CELL_HEADERS,
+      "Fallback",
+      ...debuffs.flatMap((debuff) => [`${debuff} bumps`, `${debuff} lost`]),
+    ],
     rows.map((row) => [
       ...cellNames(row),
+      row.policyFallbackShare === null ? "-" : percent(row.policyFallbackShare),
       ...debuffs.flatMap((debuff) => {
         const cost = row.debuffCosts[debuff];
         return [cost.meanBumpsWhile.toFixed(2), dollars(cost.meanCentsLost)];

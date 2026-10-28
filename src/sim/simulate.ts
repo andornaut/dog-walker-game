@@ -42,7 +42,7 @@ import { packDogs } from "../state/pack";
 import { newRun, type PackDogs, type RunState } from "../state/runState";
 import { actBot, type BotRoad, newBot, observePulls, observeRoad } from "./bot";
 import { type ZoneDelivery, zoneDelivery } from "./delivery";
-import { chooseCardOption, choosePath, type PolicyId, type RoutePolicyId } from "./policies";
+import { choosePath, pickCardOption, type PolicyId, type RoutePolicyId } from "./policies";
 import type { BotSight } from "./sight";
 import type { Skill } from "./skills";
 
@@ -70,9 +70,11 @@ export interface SimConfig {
   readonly walker: WalkerId;
 }
 
-// One encounter card: what the option the policy took cost.
+// One encounter card: what the option the policy took cost, and whether the policy fell back
+// from its own rule to take it (null for a policy with no fallback).
 interface ChoiceRecord {
   readonly cost: Cents;
+  readonly fellBack: boolean | null;
 }
 
 interface FiringRecord {
@@ -290,19 +292,22 @@ function notePulls(
 }
 
 // The policies' choice on the open card: the route policy's path at a fork, or the card
-// policy's option.
+// policy's option, with whether the card policy fell back (null at a fork).
 function policyChoice(
   data: SimData,
   config: SimConfig,
   tally: Tally,
   run: RunState,
   card: CardView,
-): Choice {
+): { readonly choice: Choice; readonly fellBack: boolean | null } {
   const { source } = card;
   if (source.kind === "fork") {
-    return choosePath(tally.policyRandom, config.route, source.paths.length);
+    return {
+      choice: choosePath(tally.policyRandom, config.route, source.paths.length),
+      fellBack: null,
+    };
   }
-  return chooseCardOption(data, tally.policyRandom, config.policy, run, card);
+  return pickCardOption(data, tally.policyRandom, config.policy, run, card);
 }
 
 // The counts of the zone just planned, read from the road the plan left.
@@ -314,6 +319,7 @@ function noteZonePlan(data: SimData, tally: Tally, walk: Walk): void {
 // A choice's record: an encounter card seen, and the firings it brought about.
 function noteChoice(
   tally: Tally,
+  fellBack: boolean | null,
   run: RunState,
   event: Extract<SessionEvent, { kind: "chosen" }>,
 ): void {
@@ -324,7 +330,7 @@ function noteChoice(
   }
   const option = view.options.find(({ index }) => index === choice);
   tally.cardsSeen += 1;
-  tally.choices.push({ cost: option?.cost ?? cents(0) });
+  tally.choices.push({ cost: option?.cost ?? cents(0), fellBack });
 }
 
 // What the bot reads of the road: its geometry for the pack and the zone's scroll speed.
@@ -360,6 +366,8 @@ function playBySkill(
     const { card, walk } = session;
     const clock = bot.clock;
     let acted = walk;
+    // Whether the card policy fell back on this step's card, for its choice's record.
+    let fellBack: boolean | null = null;
     let step: SessionStep;
     if (card === null) {
       if (walk.run.pack !== road.pack) {
@@ -375,8 +383,9 @@ function playBySkill(
         bot.replan = true;
       }
     } else {
-      const choice = policyChoice(data, config, tally, walk.run, card);
-      step = chooseCard(data, streams, screenRoadGeometry, choice, session);
+      const picked = policyChoice(data, config, tally, walk.run, card);
+      fellBack = picked.fellBack;
+      step = chooseCard(data, streams, screenRoadGeometry, picked.choice, session);
       bot.replan = true;
     }
     let pulledWalk = acted;
@@ -386,7 +395,7 @@ function playBySkill(
           bot.replan = true;
           break;
         case "chosen":
-          noteChoice(tally, walk.run, event);
+          noteChoice(tally, fellBack, walk.run, event);
           tally.inputs.push({ choice: event.choice, kind: "card", timeMs: event.timeMs });
           break;
         case "input":
