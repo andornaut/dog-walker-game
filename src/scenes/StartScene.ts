@@ -96,7 +96,7 @@ import type { PackPlacement } from "../layout/packFormation";
 import { screenLayout } from "../layout/screenLayout";
 import { clampIndex, itemAt } from "../lib/arrays";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
-import { addFigure, PackFigures, YARD_LEASH_COLOUR } from "../pack/phaser/packFigures";
+import { addFigure, PackFigures } from "../pack/phaser/packFigures";
 import { startWakeLock, stopWakeLock } from "../pwa";
 import type { Cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
@@ -1362,8 +1362,6 @@ export class StartScene extends Scene {
     const reduced = currentSettings(this).reducedMotion;
     this.drawPorch(root, g, save, reduced);
     const walkerKey = save.walker === null ? undefined : walkerSpriteKey(this, save.walker);
-    const groundColour = (atX: number) =>
-      atX >= PATH.x && atX < PATH.x + PATH.width ? PALETTE.brown : PALETTE.darkGreen;
     const dogs = this.loadout.dogs.map((dog, rank) => {
       const placement = itemAt(GATE_SPOTS, rank);
       return {
@@ -1380,10 +1378,7 @@ export class StartScene extends Scene {
       walkerKey,
       this.loadout.dogs,
     );
-    const shadow = (key: string, depth: number, atX: number, atFootY: number) =>
-      drawShadow(g, groundColour(atX), atX, atFootY, spriteMetrics(key).opaqueWidth * depth);
-    const look = { colour: YARD_LEASH_COLOUR, taut: null };
-    figures.stand(0, shadow, look, { dogs, walker: { footY, x } });
+    figures.standInYard(g, PATH, { dogs, walker: { footY, x } });
     root.add(figures.layers());
     const now = this.time.now;
     for (const { dog, feet } of dogs) {

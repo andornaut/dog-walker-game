@@ -31,12 +31,12 @@ import { isConfirmKey } from "../input/keyBindings";
 import { itemAt } from "../lib/arrays";
 import { fillLine } from "../lib/lines";
 import type { Rect } from "../lib/rect";
-import { PackFigures, YARD_LEASH_COLOUR } from "../pack/phaser/packFigures";
+import { PackFigures } from "../pack/phaser/packFigures";
 import { stopWakeLock } from "../pwa";
 import { walkLength } from "../rules/route";
 import type { LastWalk } from "../save/schema";
 import { addDisplayText } from "../ui/phaser/displayText";
-import { drawShadow, fillRect } from "../ui/phaser/draw";
+import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
@@ -59,7 +59,7 @@ import {
 } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
-import { firstTag, playTag, spriteMetrics } from "./sprites";
+import { firstTag, playTag } from "./sprites";
 import {
   addMenuButton,
   addPanel,
@@ -293,23 +293,13 @@ export class EndScene extends Scene {
     pack.add(shadows);
     const walkerKey = walkerSpriteKey(this, walkerInUse(profileSave(this)));
     const { walker: walkerAt } = scene;
-    const onPath = (x: number) => x >= scene.path.x && x < scene.path.x + scene.path.width;
     const figures = new PackFigures(this, { still: reduced, tag: "walk" }, walkerKey, dogs);
     const standing = dogs.map((dog, rank) => {
       const { x, y } = itemAt(scene.dogs, rank);
       const placement = { dx: x - walkerAt.x, footDy: y - walkerAt.y };
       return { dog, feet: { footY: y, x }, placement, rank };
     });
-    const shadow = (key: string, depth: number, x: number, footY: number) =>
-      drawShadow(
-        shadows,
-        onPath(x) ? PALETTE.brown : PALETTE.darkGreen,
-        x,
-        footY,
-        spriteMetrics(key).opaqueWidth * depth,
-      );
-    const look = { colour: YARD_LEASH_COLOUR, taut: null };
-    figures.stand(0, shadow, look, {
+    figures.standInYard(shadows, scene.path, {
       dogs: standing,
       walker: { footY: walkerAt.y, x: walkerAt.x },
     });

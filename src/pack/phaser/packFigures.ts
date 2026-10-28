@@ -6,8 +6,8 @@ import type { DogId } from "../../data/types";
 import type { DepthDraw } from "../../layout/depthScale";
 import { PACK_DEPTH, tautLeashLine } from "../../layout/packFormation";
 import type { Shadow } from "../../scenes/run/stage";
-import { addStandingSprite, playTag, showAtDepth } from "../../scenes/sprites";
-import { drawPixelLine } from "../../ui/phaser/draw";
+import { addStandingSprite, playTag, showAtDepth, spriteMetrics } from "../../scenes/sprites";
+import { drawPixelLine, drawShadow } from "../../ui/phaser/draw";
 import { PALETTE } from "../../ui/phaser/palette";
 import { type Feet, type LeashLine, leashLine, packLayers, type StandingDog } from "../packDraw";
 
@@ -79,6 +79,26 @@ export class PackFigures {
   // Stands the walker on its feet and each dog given on its own, at full size, each over its
   // shadow, layered over base by packLayers, with a leash from the walker's hand to each dog's
   // collar. Returns how each dog is drawn.
+  // Stands the pack still in the yard, as the start screen's gate and the end screen's walk home
+  // do: on depth base 0, with slack yard leashes and each figure's ground shadow on g, brown over
+  // the path and dark green over the lawn.
+  standInYard(
+    g: GameObjects.Graphics,
+    path: { readonly width: number; readonly x: number },
+    stand: { dogs: readonly StandingDog[]; walker: Feet },
+  ): void {
+    const onPath = (x: number) => x >= path.x && x < path.x + path.width;
+    const shadow = (key: string, depth: number, x: number, footY: number) =>
+      drawShadow(
+        g,
+        onPath(x) ? PALETTE.brown : PALETTE.darkGreen,
+        x,
+        footY,
+        spriteMetrics(key).opaqueWidth * depth,
+      );
+    this.stand(0, shadow, { colour: YARD_LEASH_COLOUR, taut: null }, stand);
+  }
+
   stand(
     base: number,
     shadow: Shadow,
