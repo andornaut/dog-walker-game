@@ -14,6 +14,7 @@ import { everyPack, PART_INSET } from "../layout/packFormation";
 import { project, SCALE_STEPS, screenYAt } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
 import { testState } from "../testing/runState";
+import { undrawn } from "../testing/undrawnArt";
 import { hitDog, type ScaledBox } from "./collision";
 import { stillInLane } from "./laneMotion";
 import { drawnObstacleBox } from "./obstacleBox";
@@ -133,7 +134,11 @@ describe("drawnObstacleBox", () => {
   // At each depth step, in a lane off the road's centre: each edge of a hit box lies the inset
   // inside the sprites' opaque pixels, give or take the inset again and 2 pixels for the
   // positions' rounding and the step art's own size, which the 1x silhouette scales to.
-  const CASES = LOOKS.flatMap(({ kind, moving }) =>
+  const has = (key: string) => FEET.has(key);
+  const drawnLooks = LOOKS.filter(({ kind, moving }) =>
+    obstacleParts(gameData, has, kind, moving).every(({ key }) => !undrawn(has, key)),
+  );
+  const CASES = drawnLooks.flatMap(({ kind, moving }) =>
     SCALE_STEPS.map((step) => ({ kind, moving, step })),
   );
   it("hits every obstacle, moving or not, as drawn at every depth step", () => {

@@ -297,7 +297,6 @@ export const ACHIEVEMENTS = [
         kinds: [
           "car",
           "cargoBike",
-          "carriage",
           "cyclist",
           "deliveryCyclist",
           "deliveryTruck",

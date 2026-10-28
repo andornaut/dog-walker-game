@@ -49,18 +49,6 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 2 },
     zones: ["shops"],
   },
-  carriage: {
-    movement: {
-      factor: 0.7,
-      goSeconds: 0.5,
-      kind: "stopAndGo",
-      stopSeconds: 0.6,
-      stops: { max: 3, min: 2 },
-    },
-    name: "Horse-drawn carriage",
-    shape: { lanes: 2, rows: 1 },
-    zones: ["street"],
-  },
   cat: {
     movement: { kind: "dart", stopShare: 0.5, tilt: { max: 1.6, min: 0.1 }, turnBackShare: 0.33 },
     name: "Cat",
@@ -192,6 +180,19 @@ export const MINOR_OBSTACLES = {
     name: "Jogger",
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
+  },
+  kegDollyWorker: {
+    movement: {
+      factor: 0.7,
+      goSeconds: 0.5,
+      kind: "stopAndGo",
+      stopSeconds: 0.6,
+      stops: { max: 3, min: 2 },
+    },
+    name: "Keg dolly worker",
+    onFoot: true,
+    shape: { lanes: 1, rows: 1 },
+    zones: ["street"],
   },
   kidOnBike: {
     movement: { factor: 1.35, kind: "inLane" },

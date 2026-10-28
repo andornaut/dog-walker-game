@@ -26,7 +26,6 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   busker: { above: 67, left: -23, right: 24 },
   capybara: { above: 33, left: -23, right: 23 },
   "cargo-bike": { above: 70, left: -22, right: 22 },
-  carriage: { above: 69, left: -56, right: 56 },
   "chase-cat": { above: 32, left: -10, right: 13 },
   "chase-ducklings": { above: 25, left: -19, right: 19 },
   "chase-pigeons": { above: 31, left: -19, right: 19 },

@@ -1748,28 +1748,6 @@
       "spriteKey": "cargo-bike"
     },
     {
-      "id": "carriage",
-      "movement": {
-        "factor": 0.7,
-        "goSeconds": 0.5,
-        "kind": "stopAndGo",
-        "stopSeconds": 0.6,
-        "stops": {
-          "max": 3,
-          "min": 2
-        }
-      },
-      "name": "Horse-drawn carriage",
-      "shape": {
-        "lanes": 2,
-        "rows": 1
-      },
-      "zones": [
-        "street"
-      ],
-      "spriteKey": "carriage"
-    },
-    {
       "id": "cat",
       "movement": {
         "kind": "dart",
@@ -2145,6 +2123,29 @@
         "rows": 1
       },
       "spriteKey": "jogger"
+    },
+    {
+      "id": "kegDollyWorker",
+      "movement": {
+        "factor": 0.7,
+        "goSeconds": 0.5,
+        "kind": "stopAndGo",
+        "stopSeconds": 0.6,
+        "stops": {
+          "max": 3,
+          "min": 2
+        }
+      },
+      "name": "Keg dolly worker",
+      "onFoot": true,
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "street"
+      ],
+      "spriteKey": "keg-dolly-worker"
     },
     {
       "id": "kidOnBike",
@@ -3076,7 +3077,6 @@
           "busker": 0,
           "car": 1.5,
           "cargoBike": 0,
-          "carriage": 0,
           "cat": 2.25,
           "clothingRack": 0,
           "cone": 0,
@@ -3100,6 +3100,7 @@
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
           "jogger": 3,
+          "kegDollyWorker": 0,
           "kidOnBike": 3,
           "leafPile": 3.75,
           "lifeguardChair": 0,
@@ -3189,7 +3190,6 @@
           "busker": 0,
           "car": 0,
           "cargoBike": 0,
-          "carriage": 0,
           "cat": 0,
           "clothingRack": 0,
           "cone": 0,
@@ -3213,6 +3213,7 @@
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
           "jogger": 5,
+          "kegDollyWorker": 0,
           "kidOnBike": 0,
           "leafPile": 0,
           "lifeguardChair": 0,
@@ -3302,7 +3303,6 @@
           "busker": 0,
           "car": 0,
           "cargoBike": 0,
-          "carriage": 4,
           "cat": 0,
           "clothingRack": 0,
           "cone": 6,
@@ -3326,6 +3326,7 @@
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
           "jogger": 0,
+          "kegDollyWorker": 4,
           "kidOnBike": 0,
           "leafPile": 0,
           "lifeguardChair": 0,
@@ -3415,7 +3416,6 @@
           "busker": 0,
           "car": 0,
           "cargoBike": 4.5,
-          "carriage": 0,
           "cat": 3,
           "clothingRack": 5.5,
           "cone": 3.75,
@@ -3439,6 +3439,7 @@
           "iceCreamBike": 0,
           "iceCreamTruck": 1,
           "jogger": 0,
+          "kegDollyWorker": 0,
           "kidOnBike": 3,
           "leafPile": 0,
           "lifeguardChair": 0,
@@ -3528,7 +3529,6 @@
           "busker": 0,
           "car": 0,
           "cargoBike": 0,
-          "carriage": 0,
           "cat": 0,
           "clothingRack": 0,
           "cone": 0,
@@ -3552,6 +3552,7 @@
           "iceCreamBike": 2,
           "iceCreamTruck": 0,
           "jogger": 5,
+          "kegDollyWorker": 0,
           "kidOnBike": 2,
           "leafPile": 0,
           "lifeguardChair": 4,
@@ -3641,7 +3642,6 @@
           "busker": 2,
           "car": 7,
           "cargoBike": 0,
-          "carriage": 0,
           "cat": 3.75,
           "clothingRack": 0,
           "cone": 6,
@@ -3665,6 +3665,7 @@
           "iceCreamBike": 0,
           "iceCreamTruck": 2,
           "jogger": 0,
+          "kegDollyWorker": 0,
           "kidOnBike": 0,
           "leafPile": 0,
           "lifeguardChair": 0,
