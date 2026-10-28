@@ -17,7 +17,7 @@ function neutral(zone: Zone): Zone {
   };
   return {
     ...zone,
-    density: { luckyFinds: 1, obstacles: 1, tips: 1 },
+    density: { cards: 1, luckyFinds: 1, minorObstacles: 1, tips: 1 },
     moverShare: 0,
     speed: 1,
     weights,

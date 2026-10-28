@@ -11,7 +11,7 @@ export const WORLD = {
   zones: [
     {
       art: "cabbagetown",
-      density: { luckyFinds: 1, obstacles: 0.8, tips: 1 },
+      density: { cards: 0.8, luckyFinds: 1, minorObstacles: 0.8, tips: 1 },
       difficulty: 1,
       difficultyName: "Easiest",
       id: "snoozeCrescent",
@@ -113,7 +113,7 @@ export const WORLD = {
     },
     {
       art: "high-park",
-      density: { luckyFinds: 1.25, obstacles: 1, tips: 1 },
+      density: { cards: 1, luckyFinds: 1.25, minorObstacles: 1, tips: 1 },
       difficulty: 2,
       difficultyName: "Easy",
       id: "park",
@@ -215,7 +215,7 @@ export const WORLD = {
     },
     {
       art: "distillery-district",
-      density: { luckyFinds: 1, obstacles: 1, tips: 1 },
+      density: { cards: 1, luckyFinds: 1, minorObstacles: 1, tips: 1 },
       difficulty: 3,
       difficultyName: "Normal",
       id: "street",
@@ -317,7 +317,7 @@ export const WORLD = {
     },
     {
       art: "kensington-market",
-      density: { luckyFinds: 1, obstacles: 1, tips: 1.2 },
+      density: { cards: 1, luckyFinds: 1, minorObstacles: 1, tips: 1.2 },
       difficulty: 4,
       difficultyName: "Hard",
       id: "shops",
@@ -419,7 +419,7 @@ export const WORLD = {
     },
     {
       art: "the-beaches",
-      density: { luckyFinds: 1.25, obstacles: 1, tips: 1 },
+      density: { cards: 1, luckyFinds: 1.25, minorObstacles: 1, tips: 1 },
       difficulty: 4,
       difficultyName: "Hard",
       id: "pawsPromenade",
@@ -521,7 +521,7 @@ export const WORLD = {
     },
     {
       art: "yonge-street",
-      density: { luckyFinds: 1, obstacles: 1, tips: 1 },
+      density: { cards: 1, luckyFinds: 1, minorObstacles: 1, tips: 1 },
       difficulty: 5,
       difficultyName: "Hardest",
       id: "homeStretch",

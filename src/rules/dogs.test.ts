@@ -88,7 +88,7 @@ describe("ownerMaxHearts", () => {
 });
 
 describe("zoneStats", () => {
-  const plain = { density: { luckyFinds: 1, obstacles: 1, tips: 1 }, speed: 1 };
+  const plain = { density: { cards: 1, luckyFinds: 1, minorObstacles: 1, tips: 1 }, speed: 1 };
 
   it("raises the speed per zone, so the same distance takes less time", () => {
     const first = zoneStats(TEST_TUNING, plain, 0);
@@ -111,10 +111,14 @@ describe("zoneStats", () => {
 
   it("multiplies the speed and the counts by the zone's own, rounding the counts", () => {
     const { counts } = TEST_TUNING;
-    const busy = { density: { luckyFinds: 2, obstacles: 0.5, tips: 1.5 }, speed: 1.25 };
+    const busy = {
+      density: { cards: 0.5, luckyFinds: 2, minorObstacles: 0.75, tips: 1.5 },
+      speed: 1.25,
+    };
     const stats = zoneStats(TEST_TUNING, busy, 0);
     expect(stats.scrollSpeed).toBe(80 * 1.25);
     expect(stats.duration).toBe(240 / 1.25);
+    expect(stats.minorObstacles).toBe(Math.round(counts.minorObstaclesFirstZone * 0.75));
     expect(stats.obstacles).toBe(Math.round(counts.obstaclesFirstZone * 0.5));
     expect(stats.tips).toBe(Math.round(counts.tipsFirstZone * 1.5));
     expect(stats.luckyFinds).toEqual(

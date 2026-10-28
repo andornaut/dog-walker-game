@@ -36,13 +36,13 @@ export function zoneStats(
       zoneIndex,
       read(tuning, "counts", "minorObstaclesFirstZone"),
       read(tuning, "counts", "minorObstaclesGainPerZone"),
-      density.obstacles,
+      density.minorObstacles,
     ),
     obstacles: zoneCount(
       zoneIndex,
       read(tuning, "counts", "obstaclesFirstZone"),
       read(tuning, "counts", "obstaclesGainPerZone"),
-      density.obstacles,
+      density.cards,
     ),
     scrollSpeed: zoneScrollSpeed(tuning, zone, zoneIndex),
     tips: zoneCount(

@@ -567,11 +567,13 @@ export interface ZoneWeights {
 export interface Zone {
   // The zone's name in its art keys, such as backdrop-<art>.
   readonly art: string;
-  // Multiply the zone's counts, on top of the per-zone gains in counts: obstacles (minor ones
-  // too), tips and each kind of lucky find's.
+  // Multiply the zone's counts, on top of the per-zone gains in counts: cards scales the
+  // obstacles that open a card, minorObstacles the ones that open none, then tips and each kind
+  // of lucky find's.
   readonly density: {
+    readonly cards: number;
     readonly luckyFinds: number;
-    readonly obstacles: number;
+    readonly minorObstacles: number;
     readonly tips: number;
   };
   readonly difficulty: Difficulty;
