@@ -24,7 +24,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import K, edged, main  # noqa: E402
+from pixel import K, edged, hairline, main  # noqa: E402
 from road import BREATH, BREATH_MS, LIT, face_disc, face_front, person, rim  # noqa: E402
 
 OWNER_WAVE = ("up", "out")
@@ -56,6 +56,16 @@ def arms(g, b, wave, sleeve, shade, hand, short=False):
         g.rect(25, 12 + b, 4, 5, hand if short else sleeve)
         g.rect(26, 9 + b, 4, 3, hand)
         g.p(25, 10 + b, hand)
+
+
+def gloves(g, b, wave, glove, cuff):
+    """Work gloves over the hands arms drew, the right one wherever wave puts it, each with a cuff at the wrist."""
+    hands = {None: (23, 31), "up": (23, 9), "out": (26, 9)}
+    for x, y in ((5, 31), hands[wave]):
+        g.rect(x, y + b, 4, 3, glove)
+        g.rect(x, (y + 3 if y == 9 else y) + b, 4, 1, cuff)
+    if wave:
+        g.p(22 if wave == "up" else 25, 10 + b, glove)
 
 
 def torso(g, b, shirt, shade, h=13):
@@ -238,6 +248,8 @@ def ralph_top(wave):
         g.rect(22, 8 + b, 2, 4, "grey")
         g.rect(13, 4 + b, 1, 3, "lgrey")
         g.rect(14, 3 + b, 2, 1, "lgrey")
+        # the hairline a shade darker, so the cream hair stands apart from the fair forehead, as on his face
+        hairline(g, "cream", "skin1", "tan")
         face_front(g, 16, 13 + b)
         # heavy brows, two rows deep and pulled low over the eyes, and a big nose
         g.rect(10, 10 + b, 4, 2, "brown")
@@ -457,26 +469,47 @@ def gadget_top(wave):
 
 
 def jason_top(wave):
-    """Jason, trail runner, laid-back: short brown hair, a sky-blue headband, an orange running top with a
-    race bib, navy shorts, and a water bottle in the left hand."""
+    """Jason, lawn care pro, laid-back: short brown hair under an orange cap with a moss leaf on its front, an
+    olive work polo with a moss collar and an orange logo, amber work gloves, khaki work shorts, brown work
+    boots, and a turquoise leaf blower in his left hand, its nozzle down to the grass and two leaves blowing off it."""
     def top(g, b):
-        g.rect(10, 33 + b, 12, 4, "navy")
-        g.rect(16, 35 + b, 1, 2, "ink")
-        torso(g, b, "orange", "rust")
-        g.rect(12, 24 + b, 7, 5, "white")
-        g.rect(15, 25 + b, 1, 3, "ink")
-        g.p(14, 26 + b, "ink")
-        arms(g, b, wave, "orange", "rust", "skin2", short=True)
-        # the water bottle, cap up, in the left fist
-        g.rect(5, 25 + b, 4, 8, "sky")
-        g.rect(5, 25 + b, 1, 8, "cyan")
-        g.rect(6, 23 + b, 2, 2, "white")
-        g.rect(5, 31 + b, 4, 2, "skin2")
+        # the work shorts, a seam down the middle
+        g.rect(10, 33 + b, 12, 4, "driftwood")
+        g.rect(19, 33 + b, 3, 4, "stone")
+        g.rect(16, 34 + b, 1, 3, "stone")
+        torso(g, b, "olive", "dolive")
+        # the polo's collar points either side of the placket, and the logo on the left of the chest
+        g.tri((12, 21 + b), (16, 21 + b), (14, 24 + b), "moss")
+        g.tri((16, 21 + b), (20, 21 + b), (18, 24 + b), "moss")
+        g.rect(16, 23 + b, 1, 3, "dolive")
+        g.rect(18, 26 + b, 3, 1, "orange")
+        arms(g, b, wave, "olive", "dolive", "skin2", short=True)
+        gloves(g, b, wave, "amber", "orange")
+        # the leaf blower: a turquoise engine hanging from the fist by its handle, a dark intake on its face,
+        # and a grey nozzle angled down to the grass, two leaves blowing off its end
+        g.cel(4.5, 36 + b, 3.5, 2.5, "turquoise", "dturq")
+        g.rect(4, 35 + b, 2, 2, "teal")
+        g.rect(6, 34 + b, 2, 1, "dturq")
+        g.rect(2, 38 + b, 2, 3, "grey")
+        g.rect(1, 41 + b, 2, 2, "grey")
+        g.p(0, 44, "ochre")
+        g.p(4, 44, "moss")
+        g.rect(5, 31 + b, 4, 3, "amber")
+        g.rect(5, 31 + b, 4, 1, "orange")
         head(g, b, "skin2", "brown")
-        g.cel(16, 7.5 + b, 9, 4.5, "dbrown", "plum", "brown")
-        g.rect(8, 9 + b, 16, 2, "sky")
-        g.rect(8, 10 + b, 16, 1, "blue")
-        g.p(23, 8 + b, "cyan")
+        g.rect(8, 8 + b, 2, 5, "dbrown")
+        g.rect(22, 8 + b, 2, 5, "plum")
+        # the cap: a low crown fitted to the head, a button on top and a moss leaf low on its front panel, over
+        # a bill that curves down toward the viewer, its shadow a rust band beneath
+        g.cel(16, 7 + b, 8.5, 5, "orange", "rust", "amber")
+        g.rect(15, 1 + b, 2, 1, "rust")
+        g.rect(15, 5 + b, 2, 2, "moss")
+        g.p(16, 5 + b, "olive")
+        g.rect(8, 8 + b, 16, 1, "orange")
+        g.rect(10, 9 + b, 12, 1, "orange")
+        g.p(9, 9 + b, "rust")
+        g.p(22, 9 + b, "rust")
+        g.rect(11, 10 + b, 10, 1, "rust")
         face_front(g, 16, 13 + b)
         cheeks(g, b, "brown")
     return top
@@ -486,7 +519,7 @@ def jason_top(wave):
 OWNERS = {
     "duchess": (eve_top, "skin1", "white", None),
     "reggie": (ryan_top, "slate", "dbrown", None),
-    "buddy": (jason_top, "skin2", "sky", None),
+    "buddy": (jason_top, "skin2", "dbrown", None),
     "pierre": (tara_top, "skin1", "ink", None),
     "biscuit": (clare_top, "brown", "mauve", None),
     "archie": (kiwi_top, "brown", "red", None),

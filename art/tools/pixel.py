@@ -213,6 +213,16 @@ def edged(g, edge=road_edge, close=False):
     return g
 
 
+def hairline(g, hair, skin, line):
+    """Recolour line every hair pixel with skin directly below it: the hair's lower edge, where a fill close to
+    the skin's tone would otherwise run into the face. On a minis.Mini it is 1px of the drawn grid."""
+    px = raster(g)
+    hair, skin = K[hair], K[skin]
+    edge = [(x, y) for y in range(px.h - 1) for x in range(px.w) if px.px[y][x] == hair and px.px[y + 1][x] == skin]
+    for x, y in edge:
+        px.p(x, y, line)
+
+
 # The 7x6 heart the UI, the badges, the fonts' drawn ♥ and scene.py's callout hearts share.
 HEART = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
 

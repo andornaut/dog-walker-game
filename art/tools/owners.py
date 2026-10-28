@@ -9,7 +9,7 @@ expressions go.
 
 face-owner-<dog>-20: 20x20, the same owner and tags for the walk's dog card. The hair, clothes and props
 are the 32x32 drawing rasterized at 20x20 by minis.Mini, with its own ink line; the expression is drawn
-natively at 20x20, one pixel per feature, and Tara's bun is redrawn by hand.
+natively at 20x20, one pixel per feature, and Tara's bun and Gadget's collar points are redrawn by hand.
 
 face-walker-<name>: 32x32 portraits for the walker picker. Tags: happy, neutral.
 
@@ -27,7 +27,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 import minis  # noqa: E402
-from pixel import Grid, edged, main  # noqa: E402
+from pixel import Grid, edged, hairline, main  # noqa: E402
 from road import face_disc  # noqa: E402
 
 MOODS = ["happy", "neutral", "upset", "fired", "worried"]
@@ -214,8 +214,10 @@ def ralph(mood):
     for x, y, r, c in ((8, 20.5, 1.8, "cream"), (6.8, 23, 1.7, "cream"), (5.6, 25.5, 1.4, "tan"),
                        (4.8, 27.5, 1, "tan")):
         g.ell(x, y, r, r + 0.3, c)
-    g.p(6, 23, "lgrey")
-    g.p(5, 25, "lgrey")
+    if not isinstance(g, minis.Mini):
+        # grey strands through the tail, left out at 20px, where they break it into specks
+        g.p(6, 23, "lgrey")
+        g.p(5, 25, "lgrey")
     g.rect(7, 20, 3, 1, "dbrown")
     base(g, "skin1", "skin2", "dbrown", "plum")
     # the strong jaw, squared off under the face, and the neck thick under it
@@ -245,7 +247,10 @@ def ralph(mood):
     g.rect(22, 11, 2, 4, "grey")
     g.rect(13, 7, 1, 3, "lgrey")
     g.rect(14, 6, 2, 1, "lgrey")
-    expression(g, mood, brow="brown")
+    # the hairline a shade darker, so the cream hair stands apart from the fair forehead
+    hairline(g, "cream", "skin1", "tan")
+    # the brows a step darker at 20px, where they are one pixel deep
+    expression(g, mood, brow="dbrown" if isinstance(g, minis.Mini) else "brown")
     if not isinstance(g, minis.Mini):
         # heavy brows: each brow pixel doubled upward
         brows = [(x, y) for y in range(12, 17) for x in range(9, 23) if g.px[y][x] == minis.K["brown"]]
@@ -387,14 +392,35 @@ def gadget(mood):
 
 
 def jason(mood):
-    """Trail runner, laid-back: short hair, sky-blue headband, orange running top."""
+    """Lawn care pro, laid-back: short brown hair under an orange cap with a moss leaf on its front, an olive work
+    polo with a moss collar, its placket open at the neck, and an orange logo on the chest."""
     g = face()
-    base(g, "skin2", "brown", "orange", "rust")
-    g.rect(14, 27, 4, 1, "rust")
-    g.cel(16, 9.5, 9, 5, "dbrown", "plum", "brown")
-    g.rect(8, 11, 16, 2, "sky")
-    g.rect(8, 12, 16, 1, "blue")
-    g.p(23, 10, "cyan")
+    base(g, "skin2", "brown", "olive", "dolive")
+    # the polo's collar points either side of the placket, and the logo on the left of the chest
+    g.tri((11, 26), (16, 27), (13, 29), "moss")
+    g.tri((21, 26), (16, 27), (19, 29), "moss")
+    g.rect(16, 28, 1, 3, "dolive")
+    g.rect(20, 29, 3, 1, "orange")
+    # short hair at the temples, under the cap
+    g.rect(8, 11, 2, 5, "dbrown")
+    g.rect(22, 11, 2, 5, "plum")
+    # the cap: a low crown fitted to the head, a button on top, a seam either side and a moss leaf low on its
+    # front panel, over a bill that curves down toward the viewer, its shadow a rust band beneath
+    g.cel(16, 10, 8.5, 6, "orange", "rust", "amber")
+    g.rect(15, 3, 2, 1, "rust")
+    g.p(12, 6, "rust")
+    g.p(11, 7, "rust")
+    g.p(20, 6, "rust")
+    g.p(21, 7, "rust")
+    g.rect(15, 8, 2, 2, "moss")
+    g.p(16, 8, "olive")
+    g.rect(8, 11, 16, 1, "orange")
+    g.rect(9, 12, 14, 1, "orange")
+    g.rect(11, 13, 10, 1, "rust")
+    g.rect(8, 12, 1, 1, "rust")
+    g.rect(23, 12, 1, 1, "rust")
+    g.rect(9, 13, 2, 1, "rust")
+    g.rect(21, 13, 2, 1, "rust")
     expression(g, mood)
     return g
 
@@ -506,8 +532,15 @@ def tara_small_bun(g):
                 g.g.p(x, y, colours[c])
 
 
+def gadget_small_collar(g):
+    """His collar's points filled in against the neck at 20px, where the scaled points stop a pixel short and
+    leave a gap ringed in ink beside the jaw."""
+    g.g.p(6, 15, "cream")
+    g.g.p(13, 15, "tan")
+
+
 # Fixes drawn after the scaled owner, for shapes that do not survive the scale.
-SMALL_FIXES = {"pierre": tara_small_bun}
+SMALL_FIXES = {"penny": gadget_small_collar, "pierre": tara_small_bun}
 
 
 def small(dog, mood):

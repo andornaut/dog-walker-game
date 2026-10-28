@@ -6188,7 +6188,7 @@
       "json": "sprites/owner-buddy.json",
       "anchor": {
         "feetY": 45,
-        "opaqueWidth": 24
+        "opaqueWidth": 28
       }
     },
     {
