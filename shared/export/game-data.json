@@ -49,7 +49,7 @@
         "id": "cheeseCrates",
         "kind": "encounter"
       },
-      "text": "Stinky: tips pay nothing for 30s",
+      "text": "Stinky: tips pay nothing for 60s",
       "title": "Cheese crates"
     },
     {
@@ -127,7 +127,7 @@
         "id": "fishCrates",
         "kind": "encounter"
       },
-      "text": "Stinky: tips pay nothing for 30s",
+      "text": "Stinky: tips pay nothing for 60s",
       "title": "Fish crate spill"
     },
     {
@@ -283,7 +283,7 @@
         "id": "skunk",
         "kind": "encounter"
       },
-      "text": "Stinky: tips pay nothing for 30s",
+      "text": "Stinky: tips pay nothing for 60s",
       "title": "Skunk"
     },
     {
@@ -2844,7 +2844,7 @@
       "pullTell": 1,
       "shyHopNearSeconds": 1.65,
       "spotlightSeconds": 30,
-      "stinkySeconds": 30,
+      "stinkySeconds": 60,
       "zoneAtBaseSpeed": 148,
       "zoomiesDriftSeconds": 1,
       "zoomiesSeconds": 30

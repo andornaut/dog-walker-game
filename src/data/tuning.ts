@@ -250,7 +250,7 @@ export const TUNING = {
     // How long the Spotlight debuff lasts, in walking time.
     spotlightSeconds: 30,
     // How long the Stinky debuff lasts, in walking time.
-    stinkySeconds: 30,
+    stinkySeconds: 60,
     // Every zone is the same distance: zone 1 takes this long, later zones less as speed rises.
     zoneAtBaseSpeed: 148,
     // While the pack has Zoomies, it drifts a lane every this many seconds of walking.
