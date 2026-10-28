@@ -47,19 +47,21 @@ export function musicLevel(state: MusicState): number {
   }
 }
 
-// Starting mid fade-out turns the fade around from the current level rather than jumping.
-export function startMusic(fadeMs: number, state: MusicState): MusicState {
-  if (state.kind === "playing" || (state.kind === "fading" && state.toward === "playing")) {
+// Fades toward playing or stopped. Fading one way mid fade the other turns the fade around from
+// the current level rather than jumping; already there, or fading there, changes nothing.
+function fadeToward(toward: "playing" | "stopped", fadeMs: number, state: MusicState): MusicState {
+  if (state.kind === toward || (state.kind === "fading" && state.toward === toward)) {
     return state;
   }
-  return { fadeMs, kind: "fading", level: musicLevel(state), toward: "playing" };
+  return { fadeMs, kind: "fading", level: musicLevel(state), toward };
+}
+
+export function startMusic(fadeMs: number, state: MusicState): MusicState {
+  return fadeToward("playing", fadeMs, state);
 }
 
 export function stopMusic(fadeMs: number, state: MusicState): MusicState {
-  if (state.kind === "stopped" || (state.kind === "fading" && state.toward === "stopped")) {
-    return state;
-  }
-  return { fadeMs, kind: "fading", level: musicLevel(state), toward: "stopped" };
+  return fadeToward("stopped", fadeMs, state);
 }
 
 // Moves a fade at a constant rate, so reversing halfway takes half a fade to undo.
