@@ -21,7 +21,7 @@ export const DOGS = {
     name: "Biscuit",
     owner: {
       name: "Clare",
-      role: "Psychology Student",
+      role: "Psychologist",
     },
     price: "biscuit",
     size: "medium",
