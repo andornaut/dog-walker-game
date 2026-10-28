@@ -56,6 +56,7 @@ roadside-street-lamp     0 1 2 3 2 1   2400 300 250 900 250 300   the lenses fad
 roadside-gas-lamp        0 1 2 1       2600 250 350 250           the flame dips and recovers (GAS_FLAME)
 roadside-leuty           0 1 2         1800 300 300               a fold runs out along the flag (LEUTY_FOLD)
 roadside-shopfront-*     0 1 2 1       2400 300 600 300           the sign's letters dim and relight (SHOP_LETTERS)
+curb-pay-station         0 1 2 1       2200 300 700 300           the screen's backlight dims and returns (PAY_SCREEN)
 
 The ground row is the last opaque row; the frame keeps a clear ring for the outline. Outlines are road_edge;
 there is no light rim (road.LIT), since the props stand on the verge, never on the road.
@@ -951,9 +952,14 @@ def mailbox():
     return w, h, draw
 
 
+# The pay station's screen at each idle frame, lit to dimmed.
+PAY_SCREEN = ("cyan", "sky", "blue")
+
+
 def pay_station():
     """A pay-and-display machine: an lgrey cabinet shaded stone, a lit screen, a keypad, a coin slot and a
-    ticket slot, under a white P on a forest disc on a post."""
+    ticket slot, under a white P on a forest disc on a post. Frame f draws the screen in PAY_SCREEN[f], its
+    backlight dimming from lit (0) to low (2)."""
     w, h = 14, 34
 
     def draw(g, f=0):
@@ -961,7 +967,7 @@ def pay_station():
         g.rect(3, 10, 8, base - 9, "lgrey")
         g.rect(9, 10, 2, base - 9, "stone")
         g.rect(4, 11, 4, 4, "coal")
-        g.rect(4, 12, 4, 2, "cyan")
+        g.rect(4, 12, 4, 2, PAY_SCREEN[f])
         for y in (17, 19):
             g.rect(4, y, 1, 1, "ash")
             g.rect(6, y, 1, 1, "ash")
@@ -1009,7 +1015,7 @@ PROPS = {
     "curb-hydrant": (hydrant(), (0,), STILL_MS, True),
     "curb-life-ring": (life_ring(), (0,), STILL_MS, True),
     "curb-mailbox": (mailbox(), (0,), STILL_MS, True),
-    "curb-pay-station": (pay_station(), (0,), STILL_MS, True),
+    "curb-pay-station": (pay_station(), (0, 1, 2, 1), (2200, 300, 700, 300), True),
     "curb-rope-posts": (rope_posts(), (0,), STILL_MS, True),
     "curb-urn": (urn(), (0,), STILL_MS, True),
     "curb-utility-box": (utility_box(), (0,), STILL_MS, True),

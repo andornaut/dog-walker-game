@@ -1,11 +1,35 @@
 { "frames": {
-   "curb-pay-station@88.aseprite": {
+   "curb-pay-station@88 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 18, "h": 45 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 45 },
     "sourceSize": { "w": 18, "h": 45 },
-    "duration": 1000
+    "duration": 2200
+   },
+   "curb-pay-station@88 1.aseprite": {
+    "frame": { "x": 18, "y": 0, "w": 18, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 45 },
+    "sourceSize": { "w": 18, "h": 45 },
+    "duration": 300
+   },
+   "curb-pay-station@88 2.aseprite": {
+    "frame": { "x": 36, "y": 0, "w": 18, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 45 },
+    "sourceSize": { "w": 18, "h": 45 },
+    "duration": 700
+   },
+   "curb-pay-station@88 3.aseprite": {
+    "frame": { "x": 54, "y": 0, "w": 18, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 45 },
+    "sourceSize": { "w": 18, "h": 45 },
+    "duration": 300
    }
  },
  "meta": {
@@ -13,10 +37,10 @@
   "version": "1.2.30-x64",
   "image": "curb-pay-station@88.png",
   "format": "RGBA8888",
-  "size": { "w": 18, "h": 45 },
+  "size": { "w": 72, "h": 45 },
   "scale": "1",
   "frameTags": [
-   { "name": "idle", "from": 0, "to": 0, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
   ]
  }
 }
