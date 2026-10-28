@@ -80,6 +80,7 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   streetcar: { above: 65, left: -28, right: 28 },
   stroller: { above: 60, left: -23, right: 24 },
   "strolling-busker": { above: 67, left: -23, right: 24 },
+  taxi: { above: 41, left: -27, right: 28 },
   thief: { above: 67, left: -17, right: 23 },
   "tour-group": { above: 68, left: -50, right: 48 },
   tourist: { above: 67, left: -24, right: 19 },
