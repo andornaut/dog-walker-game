@@ -18,11 +18,14 @@ const BURST_DROP = 6;
 // The big line's top over the small line's, so the big line's outline clears the small one's.
 const TITLE_OVER_SUBTITLE = 38;
 
-// The celebration moves with the road, its rows set from the road's top row: the dim from 72
-// rows over it, and each version's walker's feet line under it, with the new walker's bubble
-// 6 rows under its feet line and the parts in the bubble from the bubble's top.
+// The dim covers the walk view, the backdrop and road between the walk bar and the dog cards. The
+// celebration moves with the road, its rows set from the road's top row: each version's walker's
+// feet line under it, with the new walker's bubble 6 rows under its feet line and the parts in the
+// bubble from the bubble's top.
 const ROAD_TOP = SCREEN_LAYOUT.roadView.y;
-const DIM = { height: 316, width: SCREEN_WIDTH, x: 0, y: ROAD_TOP - 72 };
+const DIM = SCREEN_LAYOUT.walkView;
+// Confetti stops this many rows above the dim's bottom.
+const CONFETTI_FLOOR = 8;
 const NEW_WALKER_FEET = ROAD_TOP + 104;
 const BUBBLE_TOP = NEW_WALKER_FEET + 6;
 const ZONE_DONE_FEET = ROAD_TOP + 148;
@@ -62,7 +65,7 @@ export const CELEBRATION_LAYOUT = {
     sway: 4,
     swayMs: 320,
     toX: 348,
-    toY: DIM.y + 308,
+    toY: DIM.y + DIM.height - CONFETTI_FLOOR,
   },
   dim: DIM,
   // The burst's top-left; the walker, drawn at walkerScale, stands with its frame's bottom

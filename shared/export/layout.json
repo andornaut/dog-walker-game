@@ -1304,17 +1304,17 @@
         "bits": 60,
         "fallMs": 2000,
         "fromX": 6,
-        "fromY": 134,
+        "fromY": 48,
         "sway": 4,
         "swayMs": 320,
         "toX": 348,
-        "toY": 442
+        "toY": 474
       },
       "dim": {
-        "height": 316,
+        "height": 434,
         "width": 360,
         "x": 0,
-        "y": 134
+        "y": 48
       },
       "newWalker": {
         "burst": {
