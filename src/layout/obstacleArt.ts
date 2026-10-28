@@ -110,8 +110,8 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   "ttc-bus": { above: 64, left: -27, right: 27 },
   "ttc-bus-crossing": { above: 61, left: -87, right: 86 },
   "velvet-rope": { above: 34, left: -55, right: 55 },
-  "volleyball-net-2": { above: 35, left: -56, right: 56 },
-  "volleyball-net-3": { above: 35, left: -88, right: 88 },
+  "volleyball-net-2": { above: 41, left: -55, right: 55 },
+  "volleyball-net-3": { above: 41, left: -87, right: 87 },
   "volleyball-player": { above: 62, left: -24, right: 24 },
   "wedding-shoot": { above: 69, left: -53, right: 56 },
 };
