@@ -435,7 +435,36 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
     );
     return { geometry, placements: spread(placements), run, speed };
   };
-  it.each(cases)("moves ahead of the pack and is read as it hits: $name", (mover) => {
+  // A test for each way of moving runs every case of it, so a failure lists each case that
+  // failed, with its first failed check.
+  const byMovement = <Case extends { readonly kind: WalkItemKind; readonly movement: Movement }>(
+    list: readonly Case[],
+  ) => {
+    const groups = new Map<string, { kind: WalkItemKind; ways: Case[] }>();
+    for (const mover of list) {
+      const key = JSON.stringify(mover.movement);
+      const group = groups.get(key) ?? { kind: mover.kind, ways: [] };
+      group.ways.push(mover);
+      groups.set(key, group);
+    }
+    return [...groups.values()];
+  };
+  const failures = <Case extends { readonly name: string }>(
+    list: readonly Case[],
+    check: (mover: Case) => void,
+  ): string[] =>
+    list.flatMap((mover) => {
+      try {
+        check(mover);
+        return [];
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return [`${mover.name}: ${message.split("\n")[0] ?? ""}`];
+      }
+    });
+  // The slowest ways of moving check thousands of places, several seconds on a loaded machine.
+  const FOLDED_TIMEOUT = 180_000;
+  const movesAheadAndHits = (mover: (typeof cases)[number]) => {
     const { geometry, placements, run, speed } = placedCase(mover);
     const road: BotRoad = { data: gameData, geometry, speed };
     const { laneCount, roadBottom, roadTop, sightLength } = geometry;
@@ -532,54 +561,65 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
         expect(hit, `lanes ${hazard.lanes} from ${hazard.from.toFixed(4)}s`).toBe(true);
       }
     }
-  });
+  };
+  it.each(byMovement(cases))(
+    "moves ahead of the pack and is read as it hits, moving as $kind does",
+    ({ ways }) => {
+      expect(failures(ways, movesAheadAndHits)).toEqual([]);
+    },
+    FOLDED_TIMEOUT,
+  );
 
   // By sight, the bot reads a mover from what it shows, and that reading holds until it shows
   // something new: from each moment it does, the mover is where one of the paths read then has it,
   // whichever way a stalker or shy hopper chooses its moves.
-  it.each(cases)(
-    "is where its sight reading has it until it shows something new: $name",
-    (mover) => {
-      const { geometry, placements, speed } = placedCase(mover);
-      const road: BotRoad = { data: gameData, geometry, speed };
-      const { laneCount, roadBottom, roadTop } = geometry;
-      const height = itemHeight(gameData, geometry, mover.kind, true);
-      const same = (a: MoverPath, b: MoverPath, since: number) => {
-        const [p, q] = [moverPlace(laneCount, a, since), moverPlace(laneCount, b, since)];
-        return (
-          p.solid === q.solid &&
-          Math.abs(p.lanePosition - q.lanePosition) < 1e-6 &&
-          Math.abs(p.travel - q.travel) < 1e-6
-        );
+  const holdsSightReading = (mover: (typeof cases)[number]) => {
+    const { geometry, placements, speed } = placedCase(mover);
+    const road: BotRoad = { data: gameData, geometry, speed };
+    const { laneCount, roadBottom, roadTop } = geometry;
+    const height = itemHeight(gameData, geometry, mover.kind, true);
+    const same = (a: MoverPath, b: MoverPath, since: number) => {
+      const [p, q] = [moverPlace(laneCount, a, since), moverPlace(laneCount, b, since)];
+      return (
+        p.solid === q.solid &&
+        Math.abs(p.lanePosition - q.lanePosition) < 1e-6 &&
+        Math.abs(p.travel - q.travel) < 1e-6
+      );
+    };
+    for (const outcome of placements.flatMap(({ path }) => moverOutcomes(path))) {
+      const item: WalkItem = {
+        height,
+        id: 1,
+        kind: mover.kind,
+        lane: 0,
+        laneSpan: mover.shape.lanes,
+        mover: { path: outcome, since: 0 },
+        y: roadTop - height,
       };
-      for (const outcome of placements.flatMap(({ path }) => moverOutcomes(path))) {
-        const item: WalkItem = {
-          height,
-          id: 1,
-          kind: mover.kind,
-          lane: 0,
-          laneSpan: mover.shape.lanes,
-          mover: { path: outcome, since: 0 },
-          y: roadTop - height,
-        };
-        let shows = moverShows(outcome, 0);
-        let read = sightPaths(road, 0, item);
-        for (let since = 0; ; since += (speed * STEP_SECONDS) / 4) {
-          const place = moverPlace(laneCount, outcome, since);
-          if (hasLeftRoad(laneCount, place) || roadTop - height + place.travel >= roadBottom) {
-            break;
-          }
-          if (moverShows(outcome, since) !== shows) {
-            shows = moverShows(outcome, since);
-            read = sightPaths(road, since, item);
-          }
-          expect(
-            read.some((path) => same(path, outcome, since)),
-            `showing ${shows} at ${since.toFixed(1)}`,
-          ).toBe(true);
+      let shows = moverShows(outcome, 0);
+      let read = sightPaths(road, 0, item);
+      for (let since = 0; ; since += (speed * STEP_SECONDS) / 4) {
+        const place = moverPlace(laneCount, outcome, since);
+        if (hasLeftRoad(laneCount, place) || roadTop - height + place.travel >= roadBottom) {
+          break;
         }
+        if (moverShows(outcome, since) !== shows) {
+          shows = moverShows(outcome, since);
+          read = sightPaths(road, since, item);
+        }
+        expect(
+          read.some((path) => same(path, outcome, since)),
+          `showing ${shows} at ${since.toFixed(1)}`,
+        ).toBe(true);
       }
+    }
+  };
+  it.each(byMovement(cases))(
+    "is where its sight reading has it until it shows something new, moving as $kind does",
+    ({ ways }) => {
+      expect(failures(ways, holdsSightReading)).toEqual([]);
     },
+    FOLDED_TIMEOUT,
   );
 
   // Every way of moving has somewhere the planner can put it.
@@ -600,23 +640,22 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
   // lift only raises its start, so the lowest start meets the margin and the highest the cue. It
   // keeps its range's top tilt unless it sets off at that highest start, where the zone's pace
   // leaves no start for a steeper one.
-  it.each(
-    ZONE_ENDS.flatMap((zoneIndex) =>
-      [...movements.values()].flatMap((entry) =>
-        entry.movement.kind === "dart" && entry.movement.tilt.max > 0
-          ? [LOW, HIGH].flatMap((draws) =>
-              [0, defined(DART_LIFTS.at(-1))].map((lift) => ({
-                ...entry,
-                draws: { ...draws, tilt: 0.999999 },
-                lift,
-                name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, start ${endName(draws)}, lift ${lift}`,
-                zoneIndex,
-              })),
-            )
-          : [],
-      ),
+  const tiltCases = ZONE_ENDS.flatMap((zoneIndex) =>
+    [...movements.values()].flatMap((entry) =>
+      entry.movement.kind === "dart" && entry.movement.tilt.max > 0
+        ? [LOW, HIGH].flatMap((draws) =>
+            [0, defined(DART_LIFTS.at(-1))].map((lift) => ({
+              ...entry,
+              draws: { ...draws, tilt: 0.999999 },
+              lift,
+              name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, start ${endName(draws)}, lift ${lift}`,
+              zoneIndex,
+            })),
+          )
+        : [],
     ),
-  )("starts a dart at its top tilt within its cue and the pack's reaction: $name", (mover) => {
+  );
+  const startsWithinCueAndReaction = (mover: (typeof tiltCases)[number]) => {
     const { geometry, placements, speed } = placedCase(mover);
     const { cell, sightLength } = geometry;
     const reaction = read(gameData.tuning, "seconds", "pathReactionMargin");
@@ -635,30 +674,35 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
         Math.abs(path.tilt - mover.movement.tilt.max) < 1e-3 || Math.abs(ahead - cueOnRoad) < 1e-5,
       ).toBe(true);
     }
-  });
+  };
+  it.each(byMovement(tiltCases))(
+    "starts a dart at its top tilt within its cue and the pack's reaction, darting as $kind does",
+    ({ ways }) => {
+      expect(failures(ways, startsWithinCueAndReaction)).toEqual([]);
+    },
+  );
 
   // At the slowest pace and the fastest, a dart at either end of its speed draw crosses at its
   // kind's speed times 1 -/+ the dart speed jitter, and set off as low and steep as it may be,
   // still leaves the pack its reaction margin between its cue ending and its reaching the pack's
   // rows.
-  it.each(
-    ZONE_ENDS.flatMap((zoneIndex) =>
-      [...movements.values()].flatMap((entry) =>
-        entry.movement.kind === "dart"
-          ? [
-              { end: -1, speed: 0 },
-              { end: 1, speed: 0.999999 },
-            ].map(({ end, speed }) => ({
-              ...entry,
-              draws: { ...LOW, speed, tilt: 0.999999 },
-              end,
-              name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, speed ${end < 0 ? "low" : "high"}`,
-              zoneIndex,
-            }))
-          : [],
-      ),
+  const speedCases = ZONE_ENDS.flatMap((zoneIndex) =>
+    [...movements.values()].flatMap((entry) =>
+      entry.movement.kind === "dart"
+        ? [
+            { end: -1, speed: 0 },
+            { end: 1, speed: 0.999999 },
+          ].map(({ end, speed }) => ({
+            ...entry,
+            draws: { ...LOW, speed, tilt: 0.999999 },
+            end,
+            name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, speed ${end < 0 ? "low" : "high"}`,
+            zoneIndex,
+          }))
+        : [],
     ),
-  )("keeps the reaction margin for a dart at either end of its speed: $name", (mover) => {
+  );
+  const keepsReactionMargin = (mover: (typeof speedCases)[number]) => {
     const { geometry, placements, speed } = placedCase(mover);
     const reaction = read(gameData.tuning, "seconds", "pathReactionMargin");
     const factor = 1 + mover.end * read(gameData.tuning, "multipliers", "dartSpeedJitter");
@@ -672,7 +716,13 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
       const reaches = (geometry.sightLength - path.enterTravel) / (1 + path.tilt) / speed;
       expect(reaches).toBeGreaterThanOrEqual(reaction - 1e-9);
     }
-  });
+  };
+  it.each(byMovement(speedCases))(
+    "keeps the reaction margin for a dart at either end of its speed, darting as $kind does",
+    ({ ways }) => {
+      expect(failures(ways, keepsReactionMargin)).toEqual([]);
+    },
+  );
 
   // A rider slower than the road still comes down it, at its slowest draw, so it never comes
   // back up at a pack that has passed it.
