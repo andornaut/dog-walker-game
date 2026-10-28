@@ -24,15 +24,14 @@ import {
   LOW_CHIP_FIT,
   lowChipPlace,
   lowHeartDogs,
+  lastLandMs,
   lowHeartsText,
   MOMENTS,
   newlyLow,
+  type Payout,
   PAYOUT_EVENT,
-  PAYOUT_TAG,
-  type PayoutCue,
   type PayoutFlight,
   payoutFlights,
-  payoutTagTop,
   SPARE_TREAT_EVENT,
   type SpareTreatCue,
   TOP_BAR_POINTS,
@@ -47,7 +46,7 @@ import { type Cents, cents } from "../lib/units";
 import { slotIndexOf } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { addDisplayText } from "../ui/phaser/displayText";
-import { addFilledRect, CREAM_PANEL_COLOURS, drawFramedRect, drawRing } from "../ui/phaser/draw";
+import { CREAM_PANEL_COLOURS, drawFramedRect, drawRing } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
@@ -72,10 +71,6 @@ const POP = { key: "fx-fired-pop", scale: 2, tag: "play" };
 const PLATE = { corner: 8, dropIn: 8, key: "ui-fired-plate" };
 // A fired line's bubble's tail is 8px wide.
 const LINE_TAIL_WIDTH = 8;
-// The payout label: a three-slice with 8px caps, its amount's ink from x 9 and capitals from
-// row 3, and 5px after the ink.
-const PAYOUT_LABEL = { cap: 8, inkX: 9, inkY: 3, key: "ui-payout-label" };
-const PAYOUT_LABEL_END = 5;
 const COIN = { key: "fx-coin-fly", tag: "spin" };
 const TREAT_POP = { fallback: "fx-sparkle", key: "fx-treat-pop", tag: "play" };
 const SPARE_TREAT_ICON = "icon-treat";
@@ -96,12 +91,13 @@ function dogFaceCentre(rect: Rect): Point {
 
 // The callbacks the HUD gives the moments: effectWell is the walk bar's effect well at an index,
 // floatLabels shows change labels, popping a heart change's owner in for ownerMs, firingShown
-// runs once a firing moment is on screen, and popOwner pops a dog's owner in on its card, in a
-// mood, for ms.
+// runs once a firing moment is on screen, popOwner pops a dog's owner in on its card, in a mood,
+// for ms, and payTotal shows a zone's pay by the cash for holdMs, then fades it over fadeMs.
 interface HudFeedbackHooks {
   effectWell: (index: number) => Rect | undefined;
   firingShown: () => void;
   floatLabels: (ownerMs: number, labels: ChangeLabel[]) => void;
+  payTotal: (label: ChangeLabel, timing: { fadeMs: number; holdMs: number }) => void;
   popOwner: (dog: DogId, mood: string, ms: number) => void;
 }
 
@@ -116,9 +112,7 @@ interface SlotWarning {
 // the HUD keeps running under it. The firing moment stops whenever the walk does, so it plays
 // out over its hold however the hold is paused.
 export class HudFeedback {
-  private cardUp = false;
   private inFlight = 0;
-  private readonly payoutLabels = new Set<GameObjects.Container>();
   // The firing moments' faces and plates on screen.
   private readonly firingParts = new Set<Rect>();
   // Fired lines' bubbles on screen, and lines waiting for room beside them.
@@ -153,7 +147,7 @@ export class HudFeedback {
     this.run = run;
     this.scene = scene;
     onSceneEvent(scene, run.events, FIRING_EVENT, (cue: FiringCue) => this.playFiring(cue));
-    onSceneEvent(scene, run.events, PAYOUT_EVENT, (cues: PayoutCue[]) => this.playPayout(cues));
+    onSceneEvent(scene, run.events, PAYOUT_EVENT, (payout: Payout) => this.playPayout(payout));
     onSceneEvent(scene, run.events, TREAT_EVENT, (cue: TreatCue) => this.playTreat(cue));
     onSceneEvent(scene, run.events, SPARE_TREAT_EVENT, (cue: SpareTreatCue) =>
       this.playSpareTreat(cue),
@@ -163,10 +157,6 @@ export class HudFeedback {
   update(run: RunState, pause: RunPause): void {
     this.moments.hold(playerPaused(pause));
     this.firing.hold(walkPaused(pause));
-    this.cardUp = pause.card;
-    if (this.cardUp) {
-      this.clearPayoutLabels();
-    }
     this.showLowHearts(run);
   }
 
@@ -438,51 +428,37 @@ export class HudFeedback {
     return true;
   }
 
-  // Each paid dog's coin flies from its card's header to the bank while its amount rises from
-  // the card, and the counter counts each fee as it lands. Reduced motion flies nothing: the
-  // amounts show and fade over the cards and the counter shows the fees at once.
-  private playPayout(cues: PayoutCue[]): void {
+  // Each paid dog's coin flies from its card's header to the bank, and the counter counts each
+  // fee as it lands, while the pay's total shows by the cash until the last coin has landed, then
+  // fades. Reduced motion flies nothing: the counter shows the fees at once and the total fades.
+  private playPayout(payout: Payout): void {
     const pack = this.run.hudView()?.run.pack;
     if (pack === undefined) {
       return;
     }
-    for (const flight of payoutFlights(cues, pack, this.run.reducedMotion())) {
+    const flights = payoutFlights(payout.fees, pack, this.run.reducedMotion());
+    for (const flight of flights) {
       const rect = LAYOUT.dogSlots[flight.slot];
       if (rect !== undefined) {
         this.flyFee(flight, rect);
       }
     }
+    if (payout.total !== null) {
+      const timing = { fadeMs: MOMENTS.payout.chipMs, holdMs: lastLandMs(flights) };
+      this.hooks.payTotal(payout.total, timing);
+    }
   }
 
-  // A card covering the walk takes the fees' amounts away; their coins fly on.
-  private clearPayoutLabels(): void {
-    [...this.payoutLabels].forEach((label) => label.destroy());
-  }
-
+  // A fee's coin flies from the header of its card, at rect, to the bank, which counts the fee as
+  // it lands; one that lands as it starts, with reduced motion, flies nothing.
   private flyFee(flight: PayoutFlight, rect: Rect): void {
-    const { bow, chipMs, roof } = MOMENTS.payout;
-    const from = { x: rect.x + roof.x, y: rect.y + roof.y };
-    // The amount rises over the road from just above the roof, clear of the faces and hearts.
-    const label = () => {
-      const shown = this.addPayoutLabel(flight.text, from.x, payoutTagTop(rect));
-      this.payoutLabels.add(shown);
-      shown.once("destroy", () => this.payoutLabels.delete(shown));
-      return shown;
-    };
     if (flight.landMs === flight.startMs) {
-      if (!this.cardUp) {
-        this.fadeOut([label()], 0, chipMs);
-      }
       return;
     }
+    const { bow, roof } = MOMENTS.payout;
+    const from = { x: rect.x + roof.x, y: rect.y + roof.y };
     this.inFlight += flight.amount;
     this.after(flight.startMs, () => {
-      const ms = flight.landMs - flight.startMs + chipMs;
-      if (!this.cardUp) {
-        const shown = label();
-        this.tween({ duration: ms, targets: shown, y: shown.y - PAYOUT_TAG.rise });
-        this.fadeOut([shown], ms - chipMs, chipMs);
-      }
       const coin = this.addCoin(from);
       const bank = TOP_BAR_POINTS.bank;
       const path = { control: bowRightControl(from, bank, bow), from, to: bank };
@@ -491,26 +467,6 @@ export class HudFeedback {
         coin.destroy();
       });
     });
-  }
-
-  // The amount on a price tag centred on x, its top at top.
-  private addPayoutLabel(text: string, x: number, top: number): GameObjects.Container {
-    const { cap, inkX, inkY, key } = PAYOUT_LABEL;
-    const { height } = PAYOUT_TAG;
-    const amount = addPixelText(this.scene, inkX, inkY, text, {
-      colour: PALETTE.forest,
-      font: "title",
-      scale: 2,
-    });
-    const width = inkX + Math.ceil(amount.width) + PAYOUT_LABEL_END;
-    const tag: GameObjects.GameObject = this.scene.textures.exists(key)
-      ? this.scene.add
-          .nineslice(0, 0, key, tagFrame(this.scene, key, "normal"), width, height, cap, cap, 0, 0)
-          .setOrigin(0)
-      : addFilledRect(this.scene, PALETTE.cream, { height, width, x: 0, y: 0 });
-    return this.scene.add
-      .container(Math.round(x - width / 2), top, [tag, amount])
-      .setDepth(HUD_DEPTH.moment);
   }
 
   // fx-coin-fly spinning, else a drawn coin.

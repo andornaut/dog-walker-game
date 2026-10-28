@@ -35,11 +35,17 @@ export interface ForgivenCue {
   hearts: number;
 }
 
-// One dog's fee, with its change label's text.
+// One dog's fee, whose coin flies from its card.
 export interface PayoutCue {
   amount: Cents;
   dog: DogId;
-  text: string;
+}
+
+// A zone's pay: each dog's fee, and the label of all the zone's end pays, the Walk bonus
+// included, which shows by the cash while the coins fly (null when it pays nothing).
+export interface Payout {
+  fees: readonly PayoutCue[];
+  total: ChangeLabel | null;
 }
 
 export interface TreatCue {
@@ -61,8 +67,8 @@ export const MOMENTS = {
   lowCueMs: 1500,
   lowHearts: 1,
   // Each fee's coin leaves its card's header staggerMs after the slot before's, bowing bow
-  // pixels right of the straight line, and takes flightMs to reach the bank; the amount rises
-  // from the header and fades over chipMs.
+  // pixels right of the straight line, and takes flightMs to reach the bank; the pay's total by
+  // the cash fades over chipMs once the last coin has landed.
   payout: { bow: 48, chipMs: 900, flightMs: 650, roof: { x: 60, y: 10 }, staggerMs: 200 },
   // A spare treat given back flies from its gear's well to its dog's face on the card over
   // flyMs, peaking about peak pixels over the well.
@@ -344,20 +350,14 @@ export function payoutFlights(
     });
 }
 
-// A fee's amount on its 16px tag starts gap pixels above its card, and rises rise pixels over
-// the road.
-export const PAYOUT_TAG = { gap: 2, height: 16, rise: 14 } as const;
-
-// The tag's top as it starts, for the card at slot.
-export function payoutTagTop(slot: Pick<Rect, "y">): number {
-  return slot.y - PAYOUT_TAG.gap - PAYOUT_TAG.height;
+// From the payout's start until its last coin has landed; 0 with none.
+export function lastLandMs(flights: readonly PayoutFlight[]): number {
+  return Math.max(0, ...flights.map((flight) => flight.landMs));
 }
 
-// From the payout's start until the last amount has faded at the bank.
+// From the payout's start until its total by the cash has faded.
 export function payoutMs(flights: readonly PayoutFlight[]): number {
-  return flights.length === 0
-    ? 0
-    : Math.max(...flights.map((flight) => flight.landMs)) + MOMENTS.payout.chipMs;
+  return lastLandMs(flights) + MOMENTS.payout.chipMs;
 }
 
 // A run that ends on a firing or a payout waits for the longest of them before the end

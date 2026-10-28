@@ -6,7 +6,7 @@ import type { DogId, HintId, HintTrigger } from "../../data/types";
 import { type BuffPop, leashPops, popsOf, stepValues, walkStartMarks } from "../../hud/buffMarks";
 import { type EffectItem, effectItems, gearWell } from "../../hud/effectIcons";
 import { heartPopFrame } from "../../hud/feedback";
-import { changeLabels } from "../../hud/hudView";
+import { changeLabels, totalLabel } from "../../hud/hudView";
 import type { MessageLine } from "../../hud/messageStrip";
 import {
   endScreenDelayMs,
@@ -15,6 +15,7 @@ import {
   firingTimeline,
   FORGIVEN_EVENT,
   type ForgivenCue,
+  type Payout,
   PAYOUT_EVENT,
   type PayoutCue,
   payoutFlights,
@@ -52,7 +53,6 @@ import {
 import type { Random } from "../../lib/random";
 import type { Point, Rect } from "../../lib/rect";
 import {
-  amountText,
   type Change,
   changeAmount,
   type HeartChange,
@@ -583,19 +583,21 @@ export class RunMoments {
     });
   }
 
-  // At a zone's end, each dog's pay flies as a coin from its card to the bank while its
-  // amount rises over the card. Returns the zone's changes, for its celebration, and how
-  // long the coins take to land.
+  // At a zone's end, each dog's pay flies as a coin from its card to the bank while the total
+  // the zone's end pays shows by the cash. Returns the zone's changes, for its celebration, and
+  // how long the coins take to land and the total to fade.
   payOut(fees: readonly MoneyChange[], run: RunState): ZonePayout {
     this.changes.push(...fees);
-    const cues = fees.flatMap((fee): PayoutCue[] =>
-      fee.dog === null
-        ? []
-        : [{ amount: fee.amount, dog: fee.dog, text: amountText("money", fee.amount) }],
-    );
-    this.scene.events.emit(PAYOUT_EVENT, cues);
+    const payout: Payout = {
+      fees: fees.flatMap((fee): PayoutCue[] =>
+        fee.dog === null ? [] : [{ amount: fee.amount, dog: fee.dog }],
+      ),
+      total: totalLabel(fees),
+    };
+    this.scene.events.emit(PAYOUT_EVENT, payout);
     this.say(fullPackLine(gameData, fees));
-    const ms = payoutMs(payoutFlights(cues, run.pack, this.deps.still()));
+    const flights = payoutFlights(payout.fees, run.pack, this.deps.still());
+    const ms = payout.total === null ? 0 : payoutMs(flights);
     if (run.zoneIndex >= walkLength(gameData) - 1) {
       this.endMoments.payoutMs = ms;
     }

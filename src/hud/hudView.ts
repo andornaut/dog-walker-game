@@ -1,7 +1,7 @@
 import { zonePipTag } from "../assets/spriteKeys";
 import type { DebuffId, DogId, GameData, ZoneId } from "../data/types";
 import type { Point } from "../lib/rect";
-import { amountText, type Change, changeAmount } from "../rules/causes";
+import { amountText, type Change, changeAmount, type MoneyChange } from "../rules/causes";
 import { zoneById } from "../rules/route";
 
 // A floating label for a change: over the dog's slot (dog), from where money changed hands to
@@ -54,6 +54,20 @@ export function changeLabels(from: Point, changes: readonly Change[]): ChangeLab
       ...(zeroedBy === undefined ? {} : { zeroedBy }),
     };
   });
+}
+
+// One label for money paid together, such as a zone's fees and the Walk bonus: their total, by
+// the cash; null when they pay nothing.
+export function totalLabel(changes: readonly MoneyChange[]): ChangeLabel | null {
+  const amount = changes.reduce((sum, change) => sum + change.amount, 0);
+  return amount <= 0
+    ? null
+    : {
+        amount,
+        gain: true,
+        target: { kind: "cash", tip: false },
+        text: amountText("money", amount),
+      };
 }
 
 // A meter of max hearts, the first `hearts` of them full, in rows of at most perRow.

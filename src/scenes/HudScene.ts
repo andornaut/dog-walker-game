@@ -330,6 +330,7 @@ export class HudScene extends Scene {
       effectWell: (index) => BAR.effectWells[index],
       firingShown: () => this.hearts?.clearWay(),
       floatLabels: (ownerMs, labels) => this.floatLabels(ownerMs, labels),
+      payTotal: (label, timing) => this.showPayTotal(label, timing),
       popOwner: (dog, mood, ms) => this.popOwner(dog, mood, ms),
     });
     this.hearts = new HeartFeedback(this, {
@@ -993,6 +994,21 @@ export class HudScene extends Scene {
         this.tip = undefined;
         this.sendMoneyLabel(chip, held, () => this.cashSlots.delete(slot));
       }
+    });
+  }
+
+  // A zone's pay, its total, pops by the cash in the cash column's first free slot, which it holds
+  // until it has faded: it shows while the fees' coins fly, timing's holdMs, then fades in place
+  // over its fadeMs. The coins carry its money to the counter, so it never flies.
+  private showPayTotal(label: ChangeLabel, timing: { fadeMs: number; holdMs: number }): void {
+    const body = pixelFontMetrics(this, "body");
+    const slot = this.takeCashSlot();
+    const chip = this.addChangeChip(label, MONEY_LABEL.room, (shown) =>
+      cashChipPlace(body, slot, shown),
+    );
+    this.labels.after(this, timing.holdMs, () => {
+      const fade = { ms: timing.fadeMs, rise: 0 };
+      this.labels.join(fadeAway(this, chip.parts, fade, () => this.cashSlots.delete(slot)));
     });
   }
 

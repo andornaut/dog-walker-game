@@ -41,11 +41,9 @@ import {
   lowHeartsText,
   MOMENTS,
   newlyLow,
-  PAYOUT_TAG,
   type PayoutCue,
   payoutFlights,
   payoutMs,
-  payoutTagTop,
   trotOffX,
 } from "./moments";
 import { ownerTabRect } from "./walkHud";
@@ -57,11 +55,7 @@ const PACK: Pack = [
   { dog: "biscuit", status: "fired", zoneIndex: 0 },
   walking("kilo", 4),
 ];
-const fee = (dog: PayoutCue["dog"], amount: number): PayoutCue => ({
-  amount: cents(amount),
-  dog,
-  text: `+$${amount / 100} fee`,
-});
+const fee = (dog: PayoutCue["dog"], amount: number): PayoutCue => ({ amount: cents(amount), dog });
 
 describe("firingTimeline", () => {
   const { fadeMs, plateMs, popMs } = MOMENTS.firing;
@@ -293,18 +287,6 @@ describe("cardOwnerMood", () => {
   });
 });
 
-describe("payoutTagTop", () => {
-  const { dogSlots } = SCREEN_LAYOUT;
-
-  // A tag sits by its slot's top alone, so the first slot stands for every one.
-  it.each(dogSlots.slice(0, 1).map((slot, i) => [i, slot] as const))(
-    "starts slot %i's tag above its roof, clear of its faces and hearts",
-    (_, slot) => {
-      expect(payoutTagTop(slot) + PAYOUT_TAG.height + PAYOUT_TAG.gap).toBe(slot.y);
-    },
-  );
-});
-
 describe("payoutFlights", () => {
   const cues = [fee("kilo", 2000), fee("duchess", 2000), fee("biscuit", 3000)];
 
@@ -326,10 +308,10 @@ describe("payoutFlights", () => {
     expect(payoutMs(flights)).toBe(MOMENTS.payout.chipMs);
   });
 
-  it("lasts until the last amount has faded at the bank, or not at all with no fees", () => {
+  it("lasts until the last coin has landed and the total by the cash has faded", () => {
     const { chipMs, flightMs, staggerMs } = MOMENTS.payout;
     expect(payoutMs(payoutFlights(cues, PACK, false))).toBe(2 * staggerMs + flightMs + chipMs);
-    expect(payoutMs([])).toBe(0);
+    expect(payoutMs([])).toBe(chipMs);
   });
 });
 

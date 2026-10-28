@@ -10,7 +10,7 @@ import { formatDollars } from "../rules/effectText";
 import { bumpCash, tipValue } from "../rules/run";
 import { read } from "../rules/units";
 import { activeModifier, testState } from "../testing/runState";
-import { type ChangeLabel, changeLabels, heartRows } from "./hudView";
+import { type ChangeLabel, changeLabels, heartRows, totalLabel } from "./hudView";
 
 const { tuning } = gameData;
 // Where the money changed hands.
@@ -138,6 +138,27 @@ describe("changeLabels", () => {
         text: "−$10",
       },
     ]);
+  });
+});
+
+describe("totalLabel", () => {
+  const paid = (amount: number, kind: "bonus" | "pay") =>
+    ({ amount: cents(amount), causes: [{ amount, kind }], dog: null, kind: "money" }) as const;
+
+  it.each([
+    ["the fees and the Walk bonus", [paid(2000, "pay"), paid(2000, "pay"), paid(5000, "bonus")], "+$90"],
+    ["one fee", [paid(2000, "pay")], "+$20"],
+  ] as const)("labels %s by the cash as one total", (_name, changes, text) => {
+    expect(totalLabel(changes)).toEqual({
+      amount: changes.reduce((sum, { amount }) => sum + amount, 0),
+      gain: true,
+      target: { kind: "cash", tip: false },
+      text,
+    });
+  });
+
+  it("labels nothing paid as nothing", () => {
+    expect(totalLabel([])).toBeNull();
   });
 });
 
