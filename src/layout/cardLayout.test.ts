@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
 
+import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
+import { charmEffects } from "../hud/buffMarks";
+import { type EffectItem, effectName } from "../hud/effectIcons";
 import { itemAt } from "../lib/arrays";
+import { keysOf } from "../lib/records";
 import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
 import { MAX_CARD_OPTIONS } from "../rules/choices";
+import { inkWidth } from "../testing/fontInk";
 import { inside } from "../testing/rects";
 import { CARD_HEADER } from "../ui/cardRow";
-import { cardCharmsAt, CHARM, charmRingSize, charmRowHeight } from "./buffLayout";
+import { plainMarks } from "../ui/pixelFont";
+import { CARD_CHARMS_HEIGHT, cardCharmPlates, cardCharmWidth, CHARM } from "./buffLayout";
 import {
   CARD_LAYOUT,
   CARD_ROW_BLOCK_HEIGHT,
@@ -79,25 +85,51 @@ describe("the card row's block", () => {
     },
   );
 
-  it("puts Head home under the charm row, inside the walk view", () => {
+  it("puts Head home under the charms' rows, inside the walk view", () => {
     const cards = itemAt(itemAt(ROWS, 0), 0);
-    expect(HEAD_HOME.y).toBe(bottom(cards) + charmRowHeight(1) + CARD_LAYOUT.forkHome.gap);
+    expect(HEAD_HOME.y).toBe(bottom(cards) + CARD_CHARMS_HEIGHT + CARD_LAYOUT.forkHome.gap);
     expect(inside(HEAD_HOME, WALK)).toBe(true);
   });
 
-  it("centres the enlarged card and its charm row in the walk view", () => {
+  it("centres the enlarged card and its charms' rows in the walk view", () => {
     for (const height of [CARD_LAYOUT.large.height, largeCardHeight(0)]) {
       const card = largeCardRect(WALK, height);
       const above = card.y - WALK.y;
-      const below = bottom(WALK) - (bottom(card) + charmRowHeight(2));
+      const below = bottom(WALK) - (bottom(card) + CARD_CHARMS_HEIGHT);
       expect(below - above).toBeGreaterThanOrEqual(0);
       expect(below - above).toBeLessThanOrEqual(1);
     }
   });
 });
 
+// Every charm a card can show: each item with a charm effect, gear found or not, with its name
+// over each of its effects' lines.
+const ITEMS: EffectItem[] = [
+  ...keysOf(gameData.shopGear).flatMap((gear): EffectItem[] => [
+    { gear, kind: "gear" },
+    { found: true, gear, kind: "gear" },
+  ]),
+  ...keysOf(gameData.walkerPerks).map((perk): EffectItem => ({ kind: "perk", perk })),
+  ...keysOf(gameData.upgrades).map((upgrade): EffectItem => ({ kind: "upgrade", upgrade })),
+];
+const ONE_X = { letterSpacing: 0, scale: 1 };
+const CHARM_WIDTHS = ITEMS.flatMap((item) =>
+  charmEffects(gameData, item).map((effect) => {
+    const name = inkWidth("font-body", ONE_X, effectName(gameData, item));
+    const line = plainMarks(gameData.runText.card.charmEffect[effect]).toUpperCase();
+    return cardCharmWidth(Math.max(name, inkWidth("font-title", ONE_X, line)));
+  }),
+);
+const WIDEST = Math.max(...CHARM_WIDTHS);
+
 describe("a card's charms", () => {
-  const cases = [1, 2].flatMap((count) => [
+  it("cover every charm effect", () => {
+    expect(new Set(ITEMS.flatMap((item) => charmEffects(gameData, item)))).toEqual(
+      new Set(keysOf(gameData.runText.card.charmEffect)),
+    );
+  });
+
+  const cases = Array.from({ length: CHARM.card.most }, (_, i) => i + 1).flatMap((count) => [
     // The row's cards, Skip among them, and Head home stay in view beside a small card's charms;
     // the enlarged card hides them.
     ...SMALL_CARDS.map(({ card, row }) => ({
@@ -105,7 +137,6 @@ describe("a card's charms", () => {
       controls: [HEAD_HOME],
       count,
       row,
-      scale: 1,
       size: "small",
     })),
     ...[CARD_LAYOUT.large.height, largeCardHeight(0)].map((height) => ({
@@ -113,34 +144,27 @@ describe("a card's charms", () => {
       controls: [],
       count,
       row: [],
-      scale: 2,
       size: "enlarged",
     })),
   ]);
 
   it.each(cases)(
-    "sit $count across, fully below the $size card and centred under it",
-    ({ card, controls, count, row, scale }) => {
-      const rings = cardCharmsAt(card, scale, count).map((well) =>
-        insetRect(-CHARM.ring * scale, {
-          height: CHARM.size * scale,
-          width: CHARM.size * scale,
-          ...well,
-        }),
-      );
-      const first = itemAt(rings, 0);
-      const last = itemAt(rings, count - 1);
-      expect(first.width).toBe(charmRingSize(scale));
+    "stack $count at the widest under the $size card, centred on it, in their reserved rows",
+    ({ card, controls, count, row }) => {
+      const widths = Array.from({ length: count }, () => WIDEST);
+      const rings = cardCharmPlates(card, widths).map((plate) => insetRect(-CHARM.ring, plate));
+      const reserved = bottom(card) + CARD_CHARMS_HEIGHT;
+      expect(itemAt(rings, 0).y).toBe(bottom(card) + CHARM.under);
       rings.slice(1).forEach((ring, i) => {
-        expect(ring.x - right(itemAt(rings, i))).toBe(CHARM.gap * scale);
+        expect(ring.y - bottom(itemAt(rings, i))).toBe(CHARM.gap);
       });
-      // Centred under the card, the odd pixel to the right.
-      const margin = right(card) - right(last) - (first.x - card.x);
-      expect(margin).toBeGreaterThanOrEqual(0);
-      expect(margin).toBeLessThanOrEqual(1);
       for (const ring of rings) {
-        expect(ring.y).toBe(bottom(card) + CHARM.under);
-        expect(bottom(ring)).toBe(bottom(card) + charmRowHeight(scale));
+        // Centred across the card, the odd pixel to the right, and no wider than it.
+        const margin = right(card) - right(ring) - (ring.x - card.x);
+        expect(margin).toBeGreaterThanOrEqual(0);
+        expect(margin).toBeLessThanOrEqual(1);
+        expect(ring.x).toBeGreaterThanOrEqual(card.x);
+        expect(bottom(ring)).toBeLessThanOrEqual(reserved);
         expect(inside(ring, WALK)).toBe(true);
         for (const other of [...row, ...controls]) {
           expect(rectsOverlap(ring, other)).toBe(false);
@@ -148,4 +172,11 @@ describe("a card's charms", () => {
       }
     },
   );
+
+  it("fill their reserved rows when an option has the most", () => {
+    const card = itemAt(itemAt(ROWS, 0), 0);
+    const widths = Array.from({ length: CHARM.card.most }, () => WIDEST);
+    const last = itemAt(cardCharmPlates(card, widths), CHARM.card.most - 1);
+    expect(bottom(insetRect(-CHARM.ring, last))).toBe(bottom(card) + CARD_CHARMS_HEIGHT);
+  });
 });

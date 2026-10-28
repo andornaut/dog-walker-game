@@ -85,6 +85,8 @@ const SLICES = {
   // The detail card a held dog or gear tile opens, and the title band across it.
   "ui-detail-band": { bottom: 2, left: 8, right: 8, top: 2 },
   "ui-detail-card": { bottom: 8, left: 8, right: 8, top: 8 },
+  // A buff's well, widened into a card charm's plate: 1px cut corners and edges.
+  "ui-effect-well": { bottom: 1, left: 1, right: 1, top: 1 },
   // The Pet shop's message plate across the list's top.
   "ui-hint": { bottom: 8, left: 8, right: 8, top: 8 },
   // The plate over a hit.

@@ -1,11 +1,11 @@
-import type { DogId, GameData } from "../data/types";
+import type { CharmEffect, DogId, Effect, GameData } from "../data/types";
 import { fillLine, fillNames } from "../lib/lines";
 import { cents } from "../lib/units";
 import { amountText } from "../rules/causes";
 import type { CardView, OptionView } from "../rules/choices";
 import { isLarge, packSizeRaise, placeInPack } from "../rules/dogs";
 import { formatDollars, largeSpeedText } from "../rules/effectText";
-import type { ModifiedValue } from "../rules/modified";
+import type { ModifiedSubject, ModifiedValue } from "../rules/modified";
 import { standingModified, type StandingRun } from "../rules/standing";
 import type { WalkStep } from "../runner/walk";
 import type { WalkItem } from "../runner/walkItems";
@@ -69,13 +69,89 @@ function chipText(data: Pick<GameData, "runText">, value: ModifiedValue): string
   }
 }
 
+// A card option's charm: the item, its name, and what it did to the option (null for an effect
+// no charmEffect line names).
+export interface CardCharm {
+  readonly effect: string | null;
+  readonly item: EffectItem;
+  readonly name: string;
+}
+
+// The value each charm effect changes on a card option.
+const CHARM_EFFECT_SUBJECTS: { readonly [E in CharmEffect]: ModifiedSubject["kind"] } = {
+  cardCost: "money",
+  debuffSeconds: "debuffSeconds",
+  forgivenHearts: "hearts",
+  freeCards: "money",
+  skipOption: "skip",
+};
+
+function itemEffects(
+  data: Pick<GameData, "shopGear" | "upgrades" | "walkerPerks">,
+  item: EffectItem,
+): readonly Effect[] {
+  switch (item.kind) {
+    case "gear":
+      return data.shopGear[item.gear].effects;
+    case "perk":
+      return data.walkerPerks[item.perk].effects;
+    case "upgrade":
+      return data.upgrades[item.upgrade].effects;
+    default:
+      return item satisfies never;
+  }
+}
+
+function isCharmEffect(key: string): key is CharmEffect {
+  return Object.hasOwn(CHARM_EFFECT_SUBJECTS, key);
+}
+
+// The charm effects among item's effects, in its order: a modifier by its stat, any other effect
+// by its kind.
+export function charmEffects(
+  data: Pick<GameData, "shopGear" | "upgrades" | "walkerPerks">,
+  item: EffectItem,
+): CharmEffect[] {
+  return itemEffects(data, item)
+    .map((effect) => (effect.kind === "modifier" ? effect.stat : effect.kind))
+    .filter(isCharmEffect);
+}
+
+// What item did to a value of subject, as its charm says it: the line of its first charm effect
+// that changes such a value.
+function charmEffectText(
+  data: Pick<GameData, "runText" | "shopGear" | "upgrades" | "walkerPerks">,
+  item: EffectItem,
+  subject: ModifiedSubject["kind"],
+): string | null {
+  const key = charmEffects(data, item).find((effect) => CHARM_EFFECT_SUBJECTS[effect] === subject);
+  return key === undefined ? null : data.runText.card.charmEffect[key];
+}
+
+// The charms of values' modifiers, one per item that has one, the first value's effect for an
+// item on several, in the order applied.
+function cardCharms(
+  data: Pick<GameData, "runText" | "shopGear" | "upgrades" | "walkerPerks" | "walkers">,
+  values: readonly ModifiedValue[],
+): CardCharm[] {
+  const charms = values.flatMap((value) =>
+    charmsOf(data, value).map((item): CardCharm => ({
+      effect: charmEffectText(data, item, value.subject.kind),
+      item,
+      name: effectName(data, item),
+    })),
+  );
+  const keys = charms.map(({ item }) => effectIconKey(item));
+  return charms.filter(({ item }, i) => keys.indexOf(effectIconKey(item)) === i);
+}
+
 // What a card shows of the buffs on an option, or on the Skip a buff offers (option
-// undefined): the lit charms on its art window; the plaque, the price a buff waived or cut
+// undefined): the lit charms under the card; the plaque, the price a buff waived or cut
 // (FREE, or the lowered price), or FREE on the Skip (null leaves the plaque as the option has
 // it); and a loss the walker's perk forgives, the hearts it leaves each dog, with the perk's
 // name under them, in place of the effect text where that text says only the forgiving.
 export interface OptionMarks {
-  readonly charms: readonly EffectItem[];
+  readonly charms: readonly CardCharm[];
   readonly forgiven: { readonly name: string; readonly rows: readonly string[] } | null;
   readonly plaque: string | null;
 }
@@ -89,11 +165,13 @@ export function optionMarks(
 ): OptionMarks {
   const free = data.runText.card.free;
   if (option === undefined) {
-    const skips = card.modified.filter(({ subject }) => subject.kind === "skip");
-    const charms = uniqueItems(skips.flatMap((value) => charmsOf(data, value)));
+    const charms = cardCharms(
+      data,
+      card.modified.filter(({ subject }) => subject.kind === "skip"),
+    );
     return charms.length === 0 ? NO_MARKS : { ...NO_MARKS, charms, plaque: free };
   }
-  const charms = uniqueItems(option.modified.flatMap((value) => charmsOf(data, value)));
+  const charms = cardCharms(data, option.modified);
   const waived = option.modified.find(
     ({ after, before, subject }) => subject.kind === "money" && before < 0 && after > before,
   );

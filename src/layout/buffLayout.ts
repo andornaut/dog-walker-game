@@ -1,12 +1,19 @@
 import type { Point, Rect } from "../lib/rect";
 
 // The buff charm: the walk bar's ui-effect-well, size square, holding the buff's 20x20 icon at
-// icon,icon, the same on a card, the road and the bar. Lit, it wears a ring-wide amber ring
-// around the well. fx-sparkle plays centred at sparkle from its top-left. Under a card option,
-// small or enlarged, the lit charms sit in a row centred on the card, their rings under rows
-// below it and gap apart, drawn at the card's scale (2 on the enlarged card); a second charm
-// stacks gap left of the first over the road.
+// icon,icon, the same on the road and the bar. Lit, it wears a ring-wide amber ring around the
+// well. fx-sparkle plays centred at sparkle from its top-left. A second charm stacks gap left of
+// the first over the road.
+//
+// Under a card option, small or enlarged, the charm's well widens into a plate: the icon at its
+// left, and right of the well, card.textX columns on, the item's name in the body font with its
+// capitals card.nameY rows under the plate's top and, under it, what the item did in the title
+// font with its capitals card.effectY rows under the top, the plate ending card.padRight
+// columns past the wider line's ink. An option's charms, card.most at most (the walker's perk
+// and one money item), stack gap apart, each centred on the card, the first ring under rows
+// below it, at 1x under the enlarged card too, so every charm fits the card it is under.
 export const CHARM = {
+  card: { effectY: 13, most: 2, nameY: 3, padRight: 4, textX: 3 },
   gap: 2,
   icon: 1,
   ring: 1,
@@ -39,20 +46,28 @@ export function charmRingSize(scale: number): number {
   return (CHARM.size + 2 * CHARM.ring) * scale;
 }
 
-// The rows a card's charm row takes under the card at scale: the gap, then a lit charm.
-export function charmRowHeight(scale: number): number {
-  return CHARM.under + charmRingSize(scale);
+// A card charm's plate width, in plate pixels, for text whose wider line inks inkWidth columns.
+export function cardCharmWidth(inkWidth: number): number {
+  const { padRight, textX } = CHARM.card;
+  return CHARM.size + textX + inkWidth + padRight;
 }
 
-// The wells' top-lefts for count charms under card, drawn at scale: their rings under rows
-// below the card, gap apart, centred on the card as a row, the odd pixel to the right.
-export function cardCharmsAt(card: Rect, scale: number, count: number): Point[] {
-  const ring = charmRingSize(scale);
-  const step = ring + CHARM.gap * scale;
-  const total = count * ring + (count - 1) * CHARM.gap * scale;
-  const left = card.x + Math.floor((card.width - total) / 2) + CHARM.ring * scale;
-  const top = card.y + card.height + CHARM.under + CHARM.ring * scale;
-  return Array.from({ length: count }, (_, i) => ({ x: left + i * step, y: top }));
+// The rows under a card its charms take, reserved whether or not it has any: the gap, then
+// card.most lit charms stacked gap apart.
+export const CARD_CHARMS_HEIGHT =
+  CHARM.under + CHARM.card.most * charmRingSize(1) + (CHARM.card.most - 1) * CHARM.gap;
+
+// The plates of a card's charms, widths wide: stacked gap apart, the first ring under rows below
+// the card, each centred on the card, the odd pixel to the right.
+export function cardCharmPlates(card: Rect, widths: readonly number[]): Rect[] {
+  const { gap, ring, size, under } = CHARM;
+  const top = card.y + card.height + under + ring;
+  return widths.map((width, i) => ({
+    height: size,
+    width,
+    x: card.x + Math.floor((card.width - (width + 2 * ring)) / 2) + ring,
+    y: top + i * (charmRingSize(1) + gap),
+  }));
 }
 
 // The charm's rect over the road: centred on centreX with its bottom gap rows over top.

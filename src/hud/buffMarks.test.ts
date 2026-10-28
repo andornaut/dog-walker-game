@@ -16,6 +16,7 @@ import type { WalkItem } from "../runner/walkItems";
 import { type ModifierSource, newRun } from "../state/runState";
 import { activeModifier, testState } from "../testing/runState";
 import { type BuffPop, extraHearts, optionMarks, type PoppedValue, popsOf } from "./buffMarks";
+import { type EffectItem, effectName } from "./effectIcons";
 
 const { card, seconds } = gameData.runText;
 const SWEET_TALKER: ModifierSource = { kind: "upgrade", upgrade: "sweetTalker" };
@@ -51,7 +52,17 @@ describe("optionMarks", () => {
   const forgiven = value({ dog: "kilo", kind: "hearts" }, -1, [[1, CASEY]]);
   const waived = value({ kind: "money" }, -1000, [[1000, SWEET_TALKER]]);
   const cut = value({ kind: "money" }, -1000, [[500, FANNY_PACK]]);
-  const skip = value({ kind: "skip" }, 0, [[1, { gear: "hallPass", kind: "gear" }]]);
+  const ADA: ModifierSource = { kind: "walker", walker: "ada" };
+  const adaPerk = { kind: "perk", perk: gameData.walkers.ada.perk } as const;
+  const shortened = value({ debuff: "muddy", kind: "debuffSeconds" }, 30, [[-15, ADA]]);
+  const hallPass = { gear: "hallPass", kind: "gear" } as const;
+  const skip = value({ kind: "skip" }, 0, [[1, hallPass]]);
+  const sweetTalker = { kind: "upgrade", upgrade: "sweetTalker" } as const;
+  const charm = (item: EffectItem, effect: keyof typeof card.charmEffect) => ({
+    effect: card.charmEffect[effect],
+    item,
+    name: effectName(gameData, item),
+  });
   it.each([
     {
       expected: { charms: [], forgiven: null, plaque: null },
@@ -59,26 +70,18 @@ describe("optionMarks", () => {
       view: option([]),
     },
     {
-      expected: {
-        charms: [{ kind: "upgrade", upgrade: "sweetTalker" }],
-        forgiven: null,
-        plaque: card.free,
-      },
+      expected: { charms: [charm(sweetTalker, "freeCards")], forgiven: null, plaque: card.free },
       name: "a cost Sweet talker waived, as FREE alone",
       view: option([waived]),
     },
     {
-      expected: {
-        charms: [FANNY_PACK],
-        forgiven: null,
-        plaque: "$5",
-      },
+      expected: { charms: [charm(FANNY_PACK, "cardCost")], forgiven: null, plaque: "$5" },
       name: "a cost a buff cut, as the lowered price alone",
       view: option([cut]),
     },
     {
       expected: {
-        charms: [caseyPerk],
+        charms: [charm(caseyPerk, "forgivenHearts")],
         forgiven: {
           name: gameData.walkerPerks[caseyPerk.perk].name,
           rows: [`0♥ ${kilo}`],
@@ -89,16 +92,21 @@ describe("optionMarks", () => {
       view: option([forgiven], fillNames(card.heartForgiven, { dog: kilo, hearts: "1" })),
     },
     {
-      expected: { charms: [caseyPerk], forgiven: null, plaque: null },
+      expected: { charms: [charm(caseyPerk, "forgivenHearts")], forgiven: null, plaque: null },
       name: "a forgiven loss among other effects, which keep their text",
       view: option([forgiven], `−$5, ${fillNames(card.heartForgiven, { dog: kilo, hearts: "1" })}`),
     },
     {
       expected: {
-        charms: [{ gear: "hallPass", kind: "gear" }],
+        charms: [charm(adaPerk, "debuffSeconds"), charm(FANNY_PACK, "cardCost")],
         forgiven: null,
-        plaque: card.free,
+        plaque: "$5",
       },
+      name: "a debuff the walker's perk shortened and a cut cost, a charm each in order",
+      view: option([shortened, cut]),
+    },
+    {
+      expected: { charms: [charm(hallPass, "skipOption")], forgiven: null, plaque: card.free },
       name: "the Skip Hall pass offers",
       view: undefined,
     },

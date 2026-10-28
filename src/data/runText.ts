@@ -4,6 +4,13 @@ import type { RunText } from "./types";
 // each line may use.
 export const RUN_TEXT = {
   card: {
+    charmEffect: {
+      cardCost: "Half price",
+      debuffSeconds: "Half time",
+      forgivenHearts: "Safe",
+      freeCards: "Free",
+      skipOption: "Free skip",
+    },
     fires: "Fires {owners}",
     forkSubtitle: "Each path brings an upgrade",
     forkTitle: "Which way?",

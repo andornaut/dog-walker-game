@@ -15,7 +15,7 @@ import { largeBodyText, type PlaqueSize, plaqueTexts, smallCardText } from "../h
 import { type HoldPress, holdRule, startHold, tickHold } from "../input/hold";
 import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
-import { cardCharmsAt } from "../layout/buffLayout";
+import { cardCharmPlates } from "../layout/buffLayout";
 import {
   boxStyles,
   CARD_LAYOUT,
@@ -58,7 +58,7 @@ import {
 } from "../ui/phaser/pixelText";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { GREYED } from "../ui/selection";
-import { addCharm } from "./buffCharm";
+import { addCardCharm } from "./buffCharm";
 import { addNamePills } from "./effectNameColours";
 import { onSceneEvent } from "./overlay";
 import { currentSettings } from "./profileStore";
@@ -405,7 +405,7 @@ export class CardScene extends Scene {
         .setCrop(0, 0, ART.width, ART.height);
     }
     const marks = optionMarks(gameData, view, option);
-    this.addCharms(marks, { height, width: LARGE.width, x, y }, 2);
+    this.addCharms(marks, { height, width: LARGE.width, x, y });
     this.addLargeBody(option, x + LARGE.body.x, y + LARGE.body.y);
     const badge = { ...LARGE.badge, x: x + LARGE.badge.x, y: y + LARGE.badge.y + shift };
     // A free option's foot stays plain.
@@ -519,11 +519,16 @@ export class CardScene extends Scene {
     return snapCentre(label, centre);
   }
 
-  // The lit charm of each buff on the option, in a row centred under its card, at scale.
-  private addCharms(marks: OptionMarks, card: Rect, scale: number): void {
-    const wells = cardCharmsAt(card, scale, marks.charms.length);
-    marks.charms.forEach((item, i) => {
-      addCharm(this, item, itemAt(wells, i), { lit: true, scale });
+  // The lit charm of each buff on the option, stacked under its card, each centred on it.
+  private addCharms(marks: OptionMarks, card: Rect): void {
+    const charms = marks.charms.map((charm) => addCardCharm(this, charm));
+    const plates = cardCharmPlates(
+      card,
+      charms.map(({ width }) => width),
+    );
+    charms.forEach(({ container }, i) => {
+      const plate = itemAt(plates, i);
+      container.setPosition(plate.x, plate.y);
     });
   }
 
@@ -629,7 +634,7 @@ export class CardScene extends Scene {
     }
 
     const marks = optionMarks(gameData, view, entry.option);
-    this.addCharms(marks, rect, 1);
+    this.addCharms(marks, rect);
 
     // A path card shows its zone's difficulty as paws, then in words.
     const path = entry.option?.path;

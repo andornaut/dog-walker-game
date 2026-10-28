@@ -2,7 +2,7 @@ import type { Rect } from "../lib/rect";
 import { CARD_HEADER, cardRowRects, type CardRowSpec } from "../ui/cardRow";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import type { TextFitStyle } from "../ui/textFit";
-import { charmRowHeight } from "./buffLayout";
+import { CARD_CHARMS_HEIGHT } from "./buffLayout";
 
 // The choice cards: the card-frame sprite's parts in card pixels, the row of cards centred
 // on the road, and the enlarged card a hold opens, card-frame-large, centred in the dimmed band
@@ -18,7 +18,7 @@ export const CARD_LAYOUT = {
   band: { height: 11, room: 106, y: 2 },
   effect: { height: 55, width: 100, x: 6, y: 76 },
   fires: { size: 16, x: 18, y: 132 },
-  // A fork card's Head home button, centred under the paths, gap rows below their charm row.
+  // A fork card's Head home button, centred under the paths, gap rows below their charms.
   forkHome: { gap: 6, height: 44, width: 160 },
   height: 153,
   // The enlarged card's body: a firing warning in the title font at 1x, warningGap over the
@@ -111,21 +111,22 @@ export function largeCardHeight(contentHeight: number): number {
   return height - Math.max(0, body.height - Math.ceil(contentHeight));
 }
 
-// The enlarged card's rect, height tall, centred in area on whole pixels with its charm row
-// under it, reserved whether or not the option has a charm.
+// The enlarged card's rect, height tall, centred in area on whole pixels with its charms'
+// rows under it, reserved whether or not the option has a charm.
 export function largeCardRect(area: Rect, height: number = CARD_LAYOUT.large.height): Rect {
   const { width } = CARD_LAYOUT.large;
   return {
     height,
     width,
     x: area.x + Math.floor((area.width - width) / 2),
-    y: area.y + Math.floor((area.height - (height + charmRowHeight(2))) / 2),
+    y: area.y + Math.floor((area.height - (height + CARD_CHARMS_HEIGHT)) / 2),
   };
 }
 
 // The card row's block: its header's title titleRise over the cards, the cards, then their
-// charm row, reserved whether or not a card has a charm, so the row keeps its place.
-export const CARD_ROW_BLOCK_HEIGHT = CARD_HEADER.titleRise + CARD_LAYOUT.height + charmRowHeight(1);
+// charms' rows, reserved whether or not a card has a charm, so the row keeps its place.
+export const CARD_ROW_BLOCK_HEIGHT =
+  CARD_HEADER.titleRise + CARD_LAYOUT.height + CARD_CHARMS_HEIGHT;
 
 // The cards' top in walkView: the block sits with the rows over it and under it 1:2.
 export function cardRowTop(walkView: Rect): number {
@@ -145,13 +146,13 @@ export function cardRows(maxCount: number, walkView: Rect): Rect[][] {
   return Array.from({ length: maxCount }, (_, i) => cardRowIn(walkView, maxCount, i + 1));
 }
 
-// A fork card's Head home button, centred on centreX, gap rows under its paths' charm row.
+// A fork card's Head home button, centred on centreX, gap rows under its paths' charms' rows.
 export function forkHomeRect(cards: Rect, centreX: number): Rect {
   const { gap, height, width } = CARD_LAYOUT.forkHome;
   return {
     height,
     width,
     x: Math.round(centreX - width / 2),
-    y: cards.y + cards.height + charmRowHeight(1) + gap,
+    y: cards.y + cards.height + CARD_CHARMS_HEIGHT + gap,
   };
 }

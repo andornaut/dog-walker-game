@@ -781,6 +781,12 @@ export interface HomeText {
   readonly walkerLocked: string;
 }
 
+// What a perk, gear item or upgrade did to a card option, by the effect that did it, as its
+// charm under the card says it: a cardCost cut, a debuffSeconds cut, a forgivenHearts loss, a
+// freeCards cost and a skipOption Skip.
+export type CharmEffect =
+  "cardCost" | "debuffSeconds" | "forgivenHearts" | "freeCards" | "skipOption";
+
 // The walk's own text. card is the choice cards': the titles and subtitles a card's data does not
 // name, the Skip card, and the cost plaque's words. fired is the firing plate's word, homeQuestion
 // is what the pause menu's and a fork card's Head home ask, with its two answers, and lowHearts is
@@ -789,6 +795,8 @@ export interface HomeText {
 // owner who fires you, and card.fires flags an option that would fire owners.
 export interface RunText {
   readonly card: {
+    // Under the item's name on a card option's charm, in the title font.
+    readonly charmEffect: { readonly [E in CharmEffect]: string };
     readonly fires: string;
     readonly forkSubtitle: string;
     readonly forkTitle: string;
