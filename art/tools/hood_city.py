@@ -14,8 +14,8 @@ beach-umbrella      48x72   minor, 1 lane: someone's spot set up in the road, a 
                             lifts on frame 2
 sandcastle          48x48   minor, 1 lane: a sandcastle of three bucket towers over a crenellated wall
                             and an arched door on a mound of sand, a red pennant on the middle tower,
-                            shells pressed into the wall. idle (4 frames, 400ms): the pennant flutters
-                            on frame 2
+                            the bucket rings on its towers down to obstacles.TEXTURE_MIN. idle (4
+                            frames, 400ms): the pennant flutters on frame 2
 lifeguard-chair     48x72   minor, 1 lane: a tall wooden lifeguard chair, its legs splayed and laddered,
                             a red seat back with a white cross, a yellow and white umbrella over it and
                             an orange life ring hung on its leg; no box, roof or flag, unlike the Leuty
@@ -63,8 +63,8 @@ newspaper-box       48x48   minor, 1 lane: a row of three street newspaper boxes
                             single red box under a dome. idle (4 frames, 400ms): the lid paper's corner
                             lifts 1px on frame 2
 pedicab             48x72   minor rider, 1 lane, coming down its lane at the pack, facing the player: a
-                            bike taxi, its cobalt canopy edged in a white scalloped valance with yellow
-                            string lights shading a padded red bench on two wheels, a passenger in a
+                            bike taxi, its cobalt canopy edged in a white scalloped valance shading a
+                            padded red bench on two wheels, a passenger in a
                             green top and a gold bob sitting on its left, and in front the rider, who
                             wears a purple tee and a white headband. ride (4 frames, 120ms): the pedals
                             going round, the front tire's tread falling 1px a frame
@@ -390,8 +390,8 @@ PEDICAB_RIDE_MS = 120
 
 def pedicab(lf=39, rf=44, roll=0):
     """A bike taxi coming down the road at the pack, facing the player. Further up the road, so standing
-    higher: a cobalt canopy lit azure, edged by a white scalloped valance strung with yellow lights on grey
-    posts, shading a padded red bench, button tufted, its seat roll lit pink, and on the bench's left a
+    higher: a cobalt canopy lit azure, edged by a white scalloped valance on grey posts, shading a padded red
+    bench, its seat roll lit pink, and on the bench's left a
     passenger, gold hair and a green top, their head and shoulders under the valance. In front, lower and
     centred, the rider in a purple tee and a white headband, the hands on the handlebar, the legs either side
     of the front tire, edge-on under its mudguard, the tread falling down it 1px a frame; the cab's two
@@ -408,10 +408,8 @@ def pedicab(lf=39, rf=44, roll=0):
     g.rect(3, 10, 26, 9, "navy")
     for x in (2, 29):
         g.rect(x, 9, 1, 25, "grey")
-    # the bench: its back, button tufted, and the seat roll along its front
+    # the bench: its back and the seat roll along its front
     g.cel(16, 22.5, 13, 5.5, "red", "dred", "pink", power=4)
-    for x, y in ((24, 19), (27, 22), (24, 25)):
-        g.p(x, y, "dred")
     g.cel(16, 29, 14.5, 2.5, "red", "dred", "pink", power=4)
     # the passenger on the bench's left: shoulders in a green top, the neck, the face, a gold bob
     g.cel(8, 22, 5, 3.5, "green", "dgreen", "lime", power=3)
@@ -421,13 +419,11 @@ def pedicab(lf=39, rf=44, roll=0):
     g.rect(3.5, 12, 1.5, 4.5, "gold")
     g.rect(10, 12, 1.5, 4, "amber")
     road.face_front(g, 7.5, 14, lips="dbrown", spread=2, mouth=3)
-    # the valance along the canopy's edge, scalloped, with lights
+    # the valance along the canopy's edge, scalloped
     g.rect(1, 8, 30, 2, "cobalt")
     g.rect(27, 8, 4, 2, "blue")
     for k in range(6):
         g.cel(3.5 + k * 5, 10.5, 2.5, 1.5, "white", "lgrey")
-    for k in range(6):
-        g.p(3 + k * 5, 9, "yellow")
     # the rider's legs either side of the front wheel, bare shins, shoes on the pedals
     g.blob(16, 41, 2, 5.5, "ink")
     treads(g, 15.5, 38, 1, 8, roll, u, back=True)
@@ -541,14 +537,15 @@ SANDCASTLE_IDLE = (0, 1, 2, 1), 400
 def sandcastle(flutter=0):
     """A sandcastle, front on, laid out on obstacles.SIZE: a mound of sand, a crenellated wall with an
     arched door between two bucket towers ribbed where the bucket left its rings, a taller middle tower
-    behind with a red pennant on a stick. Tan, lit cream on the left, shaded brown on the right, with pink
-    and white shells pressed in. flutter lifts the pennant's tip that many pixels, its hoist held still."""
+    behind with a red pennant on a stick. Tan, lit cream on the left, shaded brown on the right.
+    The rings on the towers are drawn down to obstacles.TEXTURE_MIN. flutter lifts the pennant's tip that many
+    pixels, its hoist held still."""
     g = edged(Grid(obstacles.SIZE, obstacles.SIZE))
     uy = unit(g)[1]
+    fine = scale_of(g) >= obstacles.TEXTURE_MIN
     # the pennant on its stick
     g.rect(20, 2, 1, 8, "brown")
     g.tri((21, 2), (21, 6), (26, 4 - flutter * uy), "red")
-    g.p(21, 2, "pink")
     # the middle tower, behind
     g.rect(15, 9, 11, 14, "tan")
     g.rect(23, 9, 3, 14, "brown")
@@ -556,7 +553,8 @@ def sandcastle(flutter=0):
     for x in (15, 19, 23):
         g.rect(x, 7, 3, 2, "tan")
     g.rect(23, 7, 3, 2, "brown")
-    g.rect(15, 13, 11, 1, "clay")
+    if fine:
+        g.rect(15, 13, 11, 1, "clay")
     # the wall with its battlements and the arched door
     g.rect(9, 20, 22, 11, "tan")
     g.rect(27, 20, 4, 11, "brown")
@@ -574,16 +572,12 @@ def sandcastle(flutter=0):
         else:
             g.rect(x0 + 2, 15, 4.5, 16, "brown")
         g.rect(x0 + 1, 14, 6, 1, "skin1")
-        for y in (19, 24):
+        for y in (19, 24) if fine else ():
             g.rect(x0 + 1, y, 6, 1, "clay")
     # the mound of sand under it all
     g.cel(20, 33, 18, 3.5, "tan", "brown", "skin1")
     g.rect(2, 33, 36, 1.5, "tan")
     g.rect(32, 33, 6, 1.5, "brown")
-    # shells
-    g.p(12, 23, "pink")
-    g.p(25, 16, "white")
-    g.p(33, 22, "white")
     return lit(g)
 
 
@@ -809,9 +803,8 @@ def newspaper_box(lift=0):
     """A row of three street newspaper boxes chained together on a concrete pad, front on, laid out on
     obstacles.SIZE: a sky blue box, a taller red one in the middle and a yellow one, each with a white
     masthead band, a window onto a folded paper, a coin panel and a coal plinth, a chain sagging in two
-    loops along their feet to an amber padlock, its links alternating lgrey and slate (all lgrey below
-    obstacles.TEXTURE_MIN), and a paper left lying on the yellow box's lid. lift raises the paper's loose
-    corner that many drawn pixels."""
+    loops along their feet to an amber padlock, a plain lgrey line, and a paper left lying on the yellow box's
+    lid. lift raises the paper's loose corner that many drawn pixels."""
     g = edged(Grid(obstacles.SIZE, obstacles.SIZE))
     # the pad, a sliver of its top over its front
     g.rect(1, 34, 38, 3, "grey")
@@ -819,11 +812,10 @@ def newspaper_box(lift=0):
     g.rect(35, 35, 4, 2, "slate")
     for spec in NEWS_BOXES:
         news_box_front(g, *spec)
-    fine = scale_of(g) >= obstacles.TEXTURE_MIN
     # the chain, sagging in two loops along the boxes' feet to a padlock on the red box
     for x in range(4, 37):
         t = (x + 0.5 - (12 if x < 20 else 28)) / 8
-        g.rect(x, 30.5 + 1.5 * (1 - t * t), 1, 1, "lgrey" if x % 2 or not fine else "slate")
+        g.rect(x, 30.5 + 1.5 * (1 - t * t), 1, 1, "lgrey")
     g.rect(19.5, 29.5, 2, 1.5, "grey")
     g.rect(18.5, 31, 4, 3, "amber")
     g.rect(18.5, 31, 4, 1, "yellow")
