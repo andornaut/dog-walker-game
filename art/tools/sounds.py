@@ -24,6 +24,7 @@ cannot play Ogg.
 
 Usage:
   sounds.py preview OUT_DIR   write the .ogg and .m4a files into OUT_DIR only
+  sounds.py one KEY OUT_DIR   write one sound's .ogg and .m4a into OUT_DIR
   sounds.py build             write public/art/sounds/*.ogg and *.m4a, and flag
                               the music as looping in public/art/manifest.extra.json
 
@@ -32,6 +33,7 @@ sox runs in repeatable mode (fixed noise seed, no dither) and ffmpeg in
 bitexact mode, so a rebuild only changes files when this script changes.
 """
 
+import importlib
 import json
 import os
 import subprocess
@@ -256,14 +258,16 @@ def drum_score():
     return [(v, 4) for _ in range(12) for v in ("kick", "tick", "kick", "tick")]
 
 
-def voice(tmp, name, score, play):
+def voice(tmp, name, score, play, step=STEP):
+    """Render a score of (note, sixteenths) through play(path, samples, note), step samples to the sixteenth,
+    and join the notes into one file."""
     paths = []
     for i, (note, steps) in enumerate(score):
         path = f"{tmp}/{name}-{i:03}.wav"
         if note == "-":
-            rest(path, steps * STEP)
+            rest(path, steps * step)
         else:
-            play(path, steps * STEP, note)
+            play(path, steps * step, note)
         paths.append(path)
     out = f"{tmp}/{name}.wav"
     concat(paths, out)
@@ -289,6 +293,19 @@ def music(tmp, out):
     mix([(lead, 1), (bass, 0.8), (arp, 1), (drums, 0.5)], out)
 
 
+# Each neighbourhood's walk music, by art id. Its loop is music-<art id>, rendered by music(tmp, out) in
+# art/tools/music_<art id with underscores>.py.
+ZONE_MUSIC = ("cabbagetown", "distillery-district", "high-park", "kensington-market", "the-beaches", "yonge-street")
+MUSIC = ("music-walk", *(f"music-{zone}" for zone in ZONE_MUSIC))
+
+
+def track(key):
+    """The function that renders a music key into a wav: music(tmp, out)."""
+    if key == "music-walk":
+        return music
+    return importlib.import_module("music_" + key.removeprefix("music-").replace("-", "_")).music
+
+
 def effect(tmp, key, out):
     layers = []
     for i, (wave, seconds, freq, start, opts) in enumerate(EFFECTS[key]):
@@ -309,19 +326,18 @@ def encode(wav, out_dir, key):
                    check=True)
 
 
-def render(out_dir):
-    """Write every sound into out_dir as .ogg and .m4a; return the keys."""
+def render(out_dir, keys=(*EFFECTS, *MUSIC)):
+    """Write each sound in keys into out_dir as .ogg and .m4a; return the keys."""
     os.makedirs(out_dir, exist_ok=True)
-    keys = [*EFFECTS, "music-walk"]
     with tempfile.TemporaryDirectory() as tmp:
         for key in keys:
             wav = f"{tmp}/{key}.wav"
-            if key == "music-walk":
-                music(tmp, wav)
+            if key in MUSIC:
+                track(key)(tmp, wav)
             else:
                 effect(tmp, key, wav)
             encode(wav, out_dir, key)
-    return keys
+    return list(keys)
 
 
 def mark_loops(keys, path="public/art/manifest.extra.json"):
@@ -349,6 +365,8 @@ def build():
 if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == "preview":
         print("wrote", ", ".join(render(sys.argv[2])))
+    elif len(sys.argv) == 4 and sys.argv[1] == "one":
+        print("wrote", ", ".join(render(sys.argv[3], (sys.argv[2],))))
     elif len(sys.argv) == 2 and sys.argv[1] == "build":
         build()
     else:
