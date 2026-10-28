@@ -1319,12 +1319,13 @@ def market_house(cv, cx, w, wall, roof, awn, sign, board, letters, base=BASE, tr
 
 
 def mural(cv, x0, top, base, flip):
-    """A laneway wall 16 wide, rows top to base, painted with a mural: diagonal bands of bright paint
-    under a walnut coping, a dog's face looking out of them, the paint stopping short of the ground."""
+    """A laneway wall 16 wide, rows top to base, painted with a mural: diagonal bands of MURAL's paint a ramp
+    step darker, so the walls at the band's edges sit behind the shopfronts, under a walnut coping, a dog's
+    face looking out of them, the paint stopping short of the ground."""
     for py in range(top, base):
         for px in range(x0, x0 + 16):
             u = (px - x0) if not flip else (x0 + 15 - px)
-            c = MURAL[((u + py) // 5) % len(MURAL)] if py < base - 4 else "coal"
+            c = dk(MURAL[((u + py) // 5) % len(MURAL)]) if py < base - 4 else "coal"
             cv.fill(px, py, 1, 1, c)
     cv.fill(x0, top, 16, 2, "walnut")
     fy = top + 34
