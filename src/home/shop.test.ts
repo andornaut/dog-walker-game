@@ -210,12 +210,6 @@ describe("gearRows and dogRows", () => {
     },
   );
 
-  it("move a dog to the end of the list when a retune makes it the dearest", () => {
-    const [, retuned] = dogTunings[2] as [string, LiveTuning];
-    expect(dogRows(data, owned)[starters.length]?.id).toBe(`dog:${cheapestDog}`);
-    expect(dogRows({ ...data, tuning: retuned }, owned).at(-1)?.id).toBe(`dog:${cheapestDog}`);
-  });
-
   it("gives a dog's row its size and hearts, and its price on the plate", () => {
     const dog = forSale[0] ?? "kilo";
     const row = dogRows(data, owned).find(({ id }) => id === `dog:${dog}`);

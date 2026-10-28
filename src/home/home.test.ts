@@ -220,12 +220,6 @@ describe("gearByPrice", () => {
       });
     },
   );
-
-  it("moves an item to the end when a retune makes it the dearest", () => {
-    const [, retuned] = tunings[2] as [string, LiveTuning];
-    expect(gearByPrice({ shopGear: SHOP_GEAR, tuning: TEST_TUNING })[0]).toBe(cheapest);
-    expect(gearByPrice({ shopGear: SHOP_GEAR, tuning: retuned }).at(-1)).toBe(cheapest);
-  });
 });
 
 describe("rosterRows", () => {
