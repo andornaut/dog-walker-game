@@ -52,10 +52,12 @@ const cheapestRow = (rows: readonly ShopRow[]): ShopRow | undefined => {
   )?.row;
 };
 
-// With every slot owned there is nothing to afford, so the bank is checked once.
-const cases = tunings.flatMap(([prices, tuning]) =>
+// The pricing picks the cheapest slot and the bank only whether it is affordable, so a bank a
+// cent short is checked at the first pricing alone. With every slot owned there is nothing to
+// afford, so the bank is checked once.
+const cases = tunings.flatMap(([prices, tuning], pricing) =>
   slotSets.flatMap((dogSlots) =>
-    (forSale.every((slot) => dogSlots.includes(slot)) ? [true] : [true, false]).map(
+    (pricing > 0 || forSale.every((slot) => dogSlots.includes(slot)) ? [true] : [true, false]).map(
       (affordable) => ({
         affordable,
         dogSlots,
