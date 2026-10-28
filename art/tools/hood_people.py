@@ -651,10 +651,9 @@ def stilt_walker(lf=0, rf=0, bob=0, sway=0, arms="out"):
     g.rect(15.5 + o, 28 + b, 1, 4, "cobalt")
     for y in (29, 31):
         g.p(14 + o, y + b, "gold")
-    # the patches: red on the left breast, lime on the left shoulder, gold low on the right, each stitched
+    # the patches: red on the left breast, lime on the left shoulder, gold low on the right
     for x, y, c in ((7.5, 25, "red"), (8, 21, "lime"), (19.5, 28, "gold")):
         g.rect(x + o, y + b, 3, 3, c)
-        g.p(x + 1 + o, y + 1 + b, "white")
     # the neck and the red bow tie
     g.rect(13 + o, 18 + b, 6, 2, "skin1")
     g.tri((11.5 + o, 18.5 + b), (11.5 + o, 22.5 + b), (16 + o, 20.5 + b), "red")
@@ -665,7 +664,6 @@ def stilt_walker(lf=0, rf=0, bob=0, sway=0, arms="out"):
         limb(g, sx + o, sy + b, hx + o, hy + b, 4, ((1, "cobalt"),))
         limb(g, sx - 0.5 + o, sy + b, hx - 0.5 + o, hy + b, 3, ((1, "azure"),))
         g.cel(hx + o, hy + b, 2.2, 2.2, "white", "lgrey")
-        g.p(hx - 2 + o, hy - 1 + b, "white")
     # the big friendly face: curly orange hair out at the sides, rosy cheeks and a wide smile
     for cx in (8.5, 23.5):
         g.cel(cx + o, 13 + b, 2.5, 3.5, "orange", "rust", "amber")
