@@ -4,6 +4,7 @@ import { gameData } from "../data";
 import type { DebuffId } from "../data/types";
 import { itemAt } from "../lib/arrays";
 import { keysOf } from "../lib/records";
+import { currentZoneId } from "../rules/route";
 import { bumpCash, tipValue } from "../rules/run";
 import { cents } from "../rules/units";
 import type { WalkStep } from "../runner/walk";
@@ -16,7 +17,9 @@ import { IDEAL_SKILL, simConfig } from "../testing/sim";
 import { badgeCounters } from "./report";
 import {
   type DebuffCosts,
+  type DebuffsByZone,
   noteDebuffCosts,
+  noteZoneDebuffs,
   type RunResult,
   type SimConfig,
   simulateRun,
@@ -295,4 +298,38 @@ describe("noteDebuffCosts", () => {
 
     expect(costs[debuff].bumpsWhile).toBe(counted);
   });
+});
+
+describe("noteZoneDebuffs", () => {
+  const debuff = itemAt(keysOf(gameData.debuffs), 0);
+  const plain = testState({ duchess: 3 });
+  const zone = currentZoneId(gameData, plain);
+  const at = (holds: boolean, got: number) => ({
+    ...plain,
+    debuffs: holds ? [{ debuff, secondsLeft: 20, untilZone: 0 }] : [],
+    debuffsGot: got === 0 ? {} : { [debuff]: got },
+  });
+
+  // Whether the run held the debuff before and after a step of 2 bumps and 0.5 s, and what the
+  // zone counts: the step toward the debuff when it held it throughout, toward clear when it held
+  // none, and a period when the pack got it.
+  it.each([
+    { after: true, before: true, clear: 0, got: 0, held: 1 },
+    { after: true, before: false, clear: 0, got: 1, held: 0 },
+    { after: false, before: true, clear: 0, got: 0, held: 0 },
+    { after: false, before: false, clear: 1, got: 0, held: 0 },
+  ])(
+    "held before $before and after $after counts $held toward it and $clear toward clear",
+    ({ after, before, clear, got, held }) => {
+      const zones: DebuffsByZone = {};
+      noteZoneDebuffs(gameData, zones, { bumps: 2, seconds: 0.5 }, at(before, 0), at(after, got));
+
+      expect(zones[zone]?.clear).toEqual({ bumps: 2 * clear, seconds: 0.5 * clear });
+      expect(zones[zone]?.debuffs[debuff] ?? { bumpsWhile: 0, periods: 0, seconds: 0 }).toEqual({
+        bumpsWhile: 2 * held,
+        periods: got,
+        seconds: 0.5 * held,
+      });
+    },
+  );
 });

@@ -10,6 +10,7 @@ import type {
 } from "../data/types";
 import type { InputEvent } from "../dev/inputLog";
 import { type Random, randomStream } from "../lib/random";
+import { keysOf } from "../lib/records";
 import { earnedByRun, runCountersOf, type RunFacts } from "../rules/achievements";
 import { type CardView, type Choice, type ChoiceData } from "../rules/choices";
 import { currentZoneId } from "../rules/route";
@@ -130,6 +131,20 @@ export interface DebuffCost {
 
 export type DebuffCosts = Record<DebuffId, DebuffCost>;
 
+// A run's walking in one zone, by the debuffs on the pack: clear holds the landed bumps and
+// walking seconds with no debuff on it, and debuffs, for each debuff, the landed bumps while it
+// lasted, the times the pack got it in the zone and the walking seconds it lasted, so a debuff's
+// bumps per period compare against the zone's bump rate without one. A step counts toward a
+// debuff when the run held it before and after the step, and toward clear when it held none.
+export interface ZoneDebuffs {
+  readonly clear: { bumps: number; seconds: number };
+  readonly debuffs: Partial<
+    Record<DebuffId, { bumpsWhile: number; periods: number; seconds: number }>
+  >;
+}
+
+export type DebuffsByZone = Partial<Record<ZoneId, ZoneDebuffs>>;
+
 export interface RunResult {
   // The achievements the run earns on its own facts, whatever the profile holds.
   readonly badges: readonly AchievementId[];
@@ -139,6 +154,7 @@ export interface RunResult {
   // Each zone planned, in order: what its plan asked for and what it placed.
   readonly deliveries: readonly ZoneDelivery[];
   readonly debuffCosts: Readonly<Record<DebuffId, Readonly<DebuffCost>>>;
+  readonly debuffsByZone: DebuffsByZone;
   // The money banked at the end of the run.
   readonly earnings: Cents;
   // What the achievements judge the run on: its session counters and how it ended.
@@ -170,6 +186,7 @@ interface Tally {
   cardsSeen: number;
   readonly choices: ChoiceRecord[];
   readonly debuffCosts: DebuffCosts;
+  readonly debuffsByZone: DebuffsByZone;
   readonly deliveries: ZoneDelivery[];
   readonly firings: FiringRecord[];
   readonly hits: HitCounts;
@@ -275,6 +292,43 @@ export function noteDebuffCosts(
   const cashing = after.find((debuff) => data.debuffs[debuff].bumpMoney !== undefined);
   if (cashing !== undefined) {
     costs[cashing].centsLost -= landed.reduce((sum, { cash }) => sum + (cash?.amount ?? 0), 0);
+  }
+}
+
+// Counts a session step toward its zone's debuffs (ZoneDebuffs): the walking seconds it lasted
+// and its landed bumps, toward each debuff the run held before and after it, or toward clear when
+// it held none, and the debuffs the pack got in it.
+export function noteZoneDebuffs(
+  data: Pick<GameData, "world">,
+  zones: DebuffsByZone,
+  step: { readonly bumps: number; readonly seconds: number },
+  before: Pick<RunState, "debuffs" | "debuffsGot" | "route" | "zoneIndex">,
+  after: Pick<RunState, "debuffs" | "debuffsGot">,
+): void {
+  const id = currentZoneId(data, before);
+  const zone = zones[id] ?? { clear: { bumps: 0, seconds: 0 }, debuffs: {} };
+  zones[id] = zone;
+  const cost = (debuff: DebuffId) => {
+    const held = zone.debuffs[debuff] ?? { bumpsWhile: 0, periods: 0, seconds: 0 };
+    zone.debuffs[debuff] = held;
+    return held;
+  };
+  if (before.debuffs.length === 0 && after.debuffs.length === 0) {
+    zone.clear.bumps += step.bumps;
+    zone.clear.seconds += step.seconds;
+  }
+  for (const { debuff } of after.debuffs) {
+    if (before.debuffs.some((active) => active.debuff === debuff)) {
+      const held = cost(debuff);
+      held.bumpsWhile += step.bumps;
+      held.seconds += step.seconds;
+    }
+  }
+  for (const debuff of keysOf(after.debuffsGot)) {
+    const got = (after.debuffsGot[debuff] ?? 0) - (before.debuffsGot[debuff] ?? 0);
+    if (got > 0) {
+      cost(debuff).periods += got;
+    }
   }
 }
 
@@ -390,6 +444,7 @@ function playBySkill(data: SimData, seed: number, config: SimConfig, tally: Tall
       bot.replan = true;
     }
     let pulledWalk = acted;
+    let landed = 0;
     for (const event of step.events) {
       switch (event.kind) {
         case "cardOpened":
@@ -438,6 +493,7 @@ function playBySkill(data: SimData, seed: number, config: SimConfig, tally: Tall
             afterPull !== null && bot.clock <= afterPull.until ? afterPull.fromLane : null;
           countLeaving(data, tally, road.geometry, pulledFrom, pulledWalk, event.step.walk);
           noteDebuffCosts(data, tally.debuffCosts, pulledWalk.run, event.step);
+          landed = event.step.bumps.filter(({ dodged }) => !dodged).length;
           for (const { outcome } of [...event.step.contacts, ...event.step.instants]) {
             recordFirings(tally, pulledWalk.run, outcome.fired);
           }
@@ -464,6 +520,14 @@ function playBySkill(data: SimData, seed: number, config: SimConfig, tally: Tall
           break;
       }
     }
+    const walking = card === null && walk.road.hitStop === null;
+    noteZoneDebuffs(
+      data,
+      tally.debuffsByZone,
+      { bumps: landed, seconds: walking ? STEP_SECONDS : 0 },
+      walk.run,
+      step.session.walk.run,
+    );
     session = step.session;
   }
   tally.run = session.walk.run;
@@ -482,6 +546,7 @@ export function simulateRun(data: SimData, seed: number, config: SimConfig): Run
     debuffCosts: Object.fromEntries(
       Object.keys(data.debuffs).map((debuff) => [debuff, { bumpsWhile: 0, centsLost: 0 }]),
     ) as DebuffCosts,
+    debuffsByZone: {},
     deliveries: [],
     firings: [],
     hits: { afterPull: 0, all: 0 },
@@ -511,6 +576,7 @@ export function simulateRun(data: SimData, seed: number, config: SimConfig): Run
     cardsSeen: tally.cardsSeen,
     choices: tally.choices,
     debuffCosts: tally.debuffCosts,
+    debuffsByZone: tally.debuffsByZone,
     deliveries: tally.deliveries,
     earnings: tally.run.money,
     facts,

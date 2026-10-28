@@ -8,6 +8,7 @@ import type {
   MinorObstacleId,
   TallyId,
   WalkerId,
+  ZoneId,
 } from "../data/types";
 import { DEFAULT_WALKER } from "../data/walkers";
 import { itemAt } from "../lib/arrays";
@@ -83,6 +84,31 @@ export interface MatrixRow extends BadgeCounters {
   // tips and bumps (DebuffCost in simulate.ts).
   readonly debuffCosts: Readonly<
     Record<DebuffId, { readonly meanBumpsWhile: number; readonly meanCentsLost: number }>
+  >;
+  // Each zone's walking by the debuffs on the pack, per walk (ZoneDebuffs in simulate.ts): with
+  // none, the landed bumps and walking seconds; for each debuff, the landed bumps while it
+  // lasted, the times the pack got it and the walking seconds it lasted.
+  readonly debuffsByZone: Readonly<
+    Partial<
+      Record<
+        ZoneId,
+        {
+          readonly clear: { readonly meanBumps: number; readonly meanSeconds: number };
+          readonly debuffs: Readonly<
+            Partial<
+              Record<
+                DebuffId,
+                {
+                  readonly meanBumpsWhile: number;
+                  readonly meanPeriods: number;
+                  readonly meanSeconds: number;
+                }
+              >
+            >
+          >;
+        }
+      >
+    >
   >;
   readonly delivery: readonly ZoneDelivery[];
   readonly finishedShare: number;
@@ -223,6 +249,40 @@ function percentile(sorted: readonly number[], fraction: number): number {
 
 const mean = (values: readonly number[]) =>
   values.reduce((sum, value) => sum + value, 0) / values.length;
+
+// The runs' debuffsByZone as means per walk, over every zone and debuff any run met: a run that
+// did not counts 0.
+function meanDebuffsByZone(results: readonly RunResult[]): MatrixRow["debuffsByZone"] {
+  const zones = [...new Set(results.flatMap((result) => keysOf(result.debuffsByZone)))];
+  return Object.fromEntries(
+    zones.map((zone) => {
+      const runs = results.map((result) => result.debuffsByZone[zone]);
+      const debuffs = [...new Set(runs.flatMap((run) => keysOf(run?.debuffs ?? {})))];
+      return [
+        zone,
+        {
+          clear: {
+            meanBumps: mean(runs.map((run) => run?.clear.bumps ?? 0)),
+            meanSeconds: mean(runs.map((run) => run?.clear.seconds ?? 0)),
+          },
+          debuffs: Object.fromEntries(
+            debuffs.map((debuff) => {
+              const held = runs.map((run) => run?.debuffs[debuff]);
+              return [
+                debuff,
+                {
+                  meanBumpsWhile: mean(held.map((cost) => cost?.bumpsWhile ?? 0)),
+                  meanPeriods: mean(held.map((cost) => cost?.periods ?? 0)),
+                  meanSeconds: mean(held.map((cost) => cost?.seconds ?? 0)),
+                },
+              ];
+            }),
+          ),
+        },
+      ];
+    }),
+  );
+}
 
 // The badge counters of a cell's walks, from each walk's facts. packSize is the cell's dogs.
 export function badgeCounters(
@@ -365,6 +425,7 @@ function summarizeCell(
         },
       ]),
     ) as MatrixRow["debuffCosts"],
+    debuffsByZone: meanDebuffsByZone(results),
     delivery: sumDeliveries(results.flatMap((result) => result.deliveries)),
     finishedShare: mean(results.map((result) => (result.finished ? 1 : 0))),
     firedShare: mean(results.map((result) => (result.firings.length > 0 ? 1 : 0))),

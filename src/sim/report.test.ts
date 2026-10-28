@@ -54,6 +54,19 @@ vi.mock("./simulate", async (importOriginal) => {
       debuffCosts: Object.fromEntries(
         Object.keys(data.debuffs).map((debuff) => [debuff, { bumpsWhile: 1, centsLost: 200 }]),
       ) as ReturnType<typeof actual.simulateRun>["debuffCosts"],
+      // Each debuff lasted 10 s of the first zone through 1 bump, the pack got it once, and the
+      // zone's 20 s with none held 1 bump.
+      debuffsByZone: {
+        [data.world.zones[0]?.id as ZoneId]: {
+          clear: { bumps: 1, seconds: 20 },
+          debuffs: Object.fromEntries(
+            Object.keys(data.debuffs).map((debuff) => [
+              debuff,
+              { bumpsWhile: 1, periods: 1, seconds: 10 },
+            ]),
+          ),
+        },
+      },
       // Each run plans its first zone: 2 tips asked for and 1 placed.
       deliveries: [
         zoneDelivery(data, 1, data.world.zones[0]?.id as ZoneId, {
@@ -283,6 +296,14 @@ describe("simulateMatrix", () => {
     expect(Object.values(row?.debuffCosts ?? {})).toEqual(
       debuffs.map(() => ({ meanBumpsWhile: 1, meanCentsLost: 200 })),
     );
+    expect(row?.debuffsByZone).toEqual({
+      [gameData.world.zones[0]?.id as ZoneId]: {
+        clear: { meanBumps: 1, meanSeconds: 20 },
+        debuffs: Object.fromEntries(
+          debuffs.map((debuff) => [debuff, { meanBumpsWhile: 1, meanPeriods: 1, meanSeconds: 10 }]),
+        ),
+      },
+    });
     const [header, line] = formatDebuffCostTable(gameData, row === undefined ? [] : [row]).split(
       "\n",
     );
