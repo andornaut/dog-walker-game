@@ -111,7 +111,7 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
 export const POSE_SILHOUETTES: Readonly<Record<string, Readonly<Record<string, Silhouette>>>> = {
   "volleyball-player": {
     dive: { above: 52, left: -24, right: 24 },
-    idle: { above: 31, left: -24, right: 24 },
+    idle: { above: 31, left: -23, right: 24 },
     run: { above: 62, left: -16, right: 21 },
   },
 };
