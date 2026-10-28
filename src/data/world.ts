@@ -293,7 +293,7 @@ export const WORLD = {
       speed: 1,
       weights: {
         minorObstacles: {
-          ball: 1.5,
+          ball: 0,
           barrier2: 3.75,
           barrier3: 3.75,
           bench: 7.5,
@@ -302,7 +302,7 @@ export const WORLD = {
           car: 0,
           cargoBike: 2,
           carriage: 0,
-          cat: 1.5,
+          cat: 3,
           clothingRack: 2,
           cone: 3.75,
           couple: 0,
