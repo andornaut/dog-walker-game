@@ -1,11 +1,35 @@
 { "frames": {
-   "roadside-gas-lamp.aseprite": {
+   "roadside-gas-lamp 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 36, "h": 150 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 150 },
     "sourceSize": { "w": 36, "h": 150 },
-    "duration": 1000
+    "duration": 2600
+   },
+   "roadside-gas-lamp 1.aseprite": {
+    "frame": { "x": 36, "y": 0, "w": 36, "h": 150 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 150 },
+    "sourceSize": { "w": 36, "h": 150 },
+    "duration": 250
+   },
+   "roadside-gas-lamp 2.aseprite": {
+    "frame": { "x": 72, "y": 0, "w": 36, "h": 150 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 150 },
+    "sourceSize": { "w": 36, "h": 150 },
+    "duration": 350
+   },
+   "roadside-gas-lamp 3.aseprite": {
+    "frame": { "x": 108, "y": 0, "w": 36, "h": 150 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 150 },
+    "sourceSize": { "w": 36, "h": 150 },
+    "duration": 250
    }
  },
  "meta": {
@@ -13,10 +37,10 @@
   "version": "1.2.30-x64",
   "image": "roadside-gas-lamp.png",
   "format": "RGBA8888",
-  "size": { "w": 36, "h": 150 },
+  "size": { "w": 144, "h": 150 },
   "scale": "1",
   "frameTags": [
-   { "name": "idle", "from": 0, "to": 0, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
   ]
  }
 }

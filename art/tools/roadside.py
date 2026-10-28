@@ -53,6 +53,7 @@ a light or a flag loop a slow ease instead, the rest pose holding most of the lo
 the game starts each placed prop at its own point in the loop. The drawings each frame shows, and its ms:
 
 roadside-street-lamp     0 1 2 3 2 1   2400 300 250 900 250 300   the lenses fade off and on (LAMP_LENS)
+roadside-gas-lamp        0 1 2 1       2600 250 350 250           the flame dips and recovers (GAS_FLAME)
 
 The ground row is the last opaque row; the frame keeps a clear ring for the outline. Outlines are road_edge;
 there is no light rim (road.LIT), since the props stand on the verge, never on the road.
@@ -103,20 +104,26 @@ def bar(g, a, b, c, wide=2):
     g.tri((x0, y0), (x1, y1), (x1 + wide, y1), c)
 
 
+# The gas lamp's lantern at each idle frame, full flame to low: (glass, highlight) colours.
+GAS_FLAME = (("gold", "cream"), ("gold", "gold"), ("amber", "gold"))
+
+
 def gas_lamp():
-    """A heritage street lamp: a coal post on a fluted base, a four-sided lantern lit gold."""
+    """A heritage street lamp: a coal post on a fluted base, a four-sided lantern lit gold. Frame f draws the
+    lantern at GAS_FLAME[f], its flame dipping from full (0) to low (2)."""
     w, h = 24, 100
 
     def draw(g, f=0):
         base = h - 2
+        glass, glint = GAS_FLAME[f]
         g.rect(10, 26, 4, base - 25, "coal")
         g.rect(10, 26, 1, base - 25, "ash")
         g.rect(7, base - 9, 10, 10, "coal")
         g.rect(7, base - 9, 1, 10, "ash")
         g.rect(8, 22, 8, 4, "coal")
         g.rect(5, 8, 14, 14, "coal")
-        g.rect(7, 10, 10, 10, "gold")
-        g.rect(7, 10, 3, 3, "cream")
+        g.rect(7, 10, 10, 10, glass)
+        g.rect(7, 10, 3, 3, glint)
         g.rect(11, 10, 1, 10, "coal")
         g.tri((4, 8), (20, 8), (12, 2), "coal")
         # the roof's eave reaches a pixel past the lantern on each side, where the triangle's widest row
@@ -960,7 +967,7 @@ def pay_station():
 # key: (design w, h, draw), idle frame arguments, the ms of every frame (or of each frame in turn), whether it
 # stands free and casts the game's ground shadow.
 PROPS = {
-    "roadside-gas-lamp": (gas_lamp(), (0,), STILL_MS, True),
+    "roadside-gas-lamp": (gas_lamp(), (0, 1, 2, 1), (2600, 250, 350, 250), True),
     "roadside-street-lamp": (street_lamp(), (0, 1, 2, 3, 2, 1), (2400, 300, 250, 900, 250, 300), True),
     "roadside-tree-maple": (lobed_tree("canopy", "pine", "moss"), (0,), STILL_MS, True),
     "roadside-tree-oak": (lobed_tree("pine", "fir", "canopy", "bark", big=True), (0,), STILL_MS, True),
