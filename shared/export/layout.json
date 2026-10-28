@@ -227,6 +227,121 @@
   },
   "join": [
     {
+      "bandRow": 134,
+      "distance": 856.1770623742455,
+      "laneCentres": [
+        121,
+        150,
+        180,
+        209,
+        238
+      ],
+      "laneDividers": [
+        136,
+        165,
+        194,
+        223
+      ],
+      "road": {
+        "first": 107,
+        "last": 252
+      },
+      "row": 182,
+      "scale": 0.4568014705882353
+    },
+    {
+      "bandRow": 135,
+      "distance": 849.8597194388778,
+      "laneCentres": [
+        121,
+        150,
+        180,
+        209,
+        238
+      ],
+      "laneDividers": [
+        135,
+        165,
+        194,
+        224
+      ],
+      "road": {
+        "first": 107,
+        "last": 252
+      },
+      "row": 183,
+      "scale": 0.4586397058823529
+    },
+    {
+      "bandRow": 136,
+      "distance": 843.5928143712576,
+      "laneCentres": [
+        121,
+        150,
+        180,
+        209,
+        238
+      ],
+      "laneDividers": [
+        135,
+        165,
+        194,
+        224
+      ],
+      "road": {
+        "first": 106,
+        "last": 253
+      },
+      "row": 184,
+      "scale": 0.46047794117647056
+    },
+    {
+      "bandRow": 137,
+      "distance": 837.375745526839,
+      "laneCentres": [
+        120,
+        150,
+        180,
+        209,
+        239
+      ],
+      "laneDividers": [
+        135,
+        165,
+        194,
+        224
+      ],
+      "road": {
+        "first": 106,
+        "last": 253
+      },
+      "row": 185,
+      "scale": 0.46231617647058826
+    },
+    {
+      "bandRow": 138,
+      "distance": 831.2079207920792,
+      "laneCentres": [
+        120,
+        150,
+        180,
+        209,
+        239
+      ],
+      "laneDividers": [
+        135,
+        165,
+        194,
+        224
+      ],
+      "road": {
+        "first": 106,
+        "last": 253
+      },
+      "row": 186,
+      "scale": 0.4641544117647059
+    },
+    {
       "bandRow": 139,
       "distance": 825.0887573964496,
       "laneCentres": [
@@ -976,11 +1091,17 @@
         "y": 486
       }
     ],
-    "rasterView": {
-      "height": 295,
+    "junction": {
+      "height": 5,
       "width": 360,
       "x": 0,
-      "y": 187
+      "y": 182
+    },
+    "rasterView": {
+      "height": 300,
+      "width": 360,
+      "x": 0,
+      "y": 182
     },
     "road": {
       "height": 276,

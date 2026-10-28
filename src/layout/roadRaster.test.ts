@@ -39,7 +39,7 @@ import {
 } from "./roadRaster";
 import { screenLayout, walkerFootY } from "./screenLayout";
 
-const { approach, rasterView: view, road } = screenLayout(SCREEN_CONFIG);
+const { approach, junction, rasterView: view, road } = screenLayout(SCREEN_CONFIG);
 // The road's far row, nearest row and middle row, and the backdrop's bottom row above the far
 // row.
 const FAR_Y = road.y;
@@ -49,7 +49,7 @@ const MID_Y = Math.round((FAR_Y + NEAR_Y) / 2);
 // Verge distances, across, count out from the road's edge.
 const ROAD_HALF = SCREEN_CONFIG.roadWidth / 2;
 const projection = roadProjection(ROAD_CAMERA, walkerFootY(road), road);
-const raster = roadRaster(projection, view);
+const raster = roadRaster(projection, approach.y, view);
 
 const look = (zone: ZoneId, rgb: number): RoadLook => ({
   strip: stripLevels(solidStrip(rgb)),
@@ -72,7 +72,10 @@ const pixelAt = (out: Uint32Array, x: number, y: number) =>
 
 describe("the verge beside the road", () => {
   // The backdrop's bottom row, which the verge continues.
-  const bandRow = itemAt(roadRaster(projection, { ...view, height: 1, y: BAND_BOTTOM_Y }).rows, 0);
+  const bandRow = itemAt(
+    roadRaster(projection, approach.y, { ...view, height: 1, y: BAND_BOTTOM_Y }).rows,
+    0,
+  );
   const ZONES = Object.keys(VERGES) as ZoneId[];
   const zoneWhere = (test: (verge: Verge) => boolean): ZoneId => {
     const zone = ZONES.find((id) => test(VERGES[id]));
@@ -360,24 +363,28 @@ describe("drawRoad", () => {
     expect(itemAt(raster.rows, raster.rows.length - 1).level).toBe(0);
   });
 
-  // The backdrop paints the road's approach to its cross street in the band's bottom rows.
-  // Left to the backdrop, the top of the road would stand still while the rest scrolled.
-  it("draws the moving road surface up the band's approach, leaving the verge beside it", () => {
-    expect(raster.approachRows).toBe(approach.height);
+  // The backdrop paints the road's junction and approach to its cross street in the band's
+  // bottom rows. Left to the backdrop, the top of the road would stand still while the rest
+  // scrolled, short of the cross street.
+  it("draws the moving road surface up to the cross street, leaving the verge beside it", () => {
+    expect(raster.junctionRows).toBe(junction.height);
+    expect(raster.approachRows).toBe(junction.height + approach.height);
     const strips = { strip: stripLevels(labelled), zone: "street" as const };
     const stripRow = (out: Uint32Array, y: number) =>
       Math.floor(((pixelAt(out, 180, y) ?? 1) - 1) / STRIP.width);
     const [before, after] = [0, 24].map((scroll) => draw(frameOf({ current: strips, scroll })));
-    for (const y of [approach.y, approach.y + approach.height - 1, road.y]) {
+    for (const y of [junction.y, approach.y, approach.y + approach.height - 1, road.y]) {
       expect(stripRow(before ?? new Uint32Array(), y)).not.toBe(
         stripRow(after ?? new Uint32Array(), y),
       );
     }
     const out = draw(frameOf({}));
     for (const x of [0, 100, 260, 359]) {
+      expect(pixelAt(out, x, junction.y)).toBe(0);
       expect(pixelAt(out, x, approach.y)).toBe(0);
       expect(pixelAt(out, x, road.y)).not.toBe(0);
     }
+    expect(pixelAt(out, 180, junction.y)).toBe(pixelWord(0x3a4466));
     expect(pixelAt(out, 180, approach.y)).toBe(pixelWord(0x3a4466));
   });
 
@@ -476,13 +483,19 @@ describe("drawRoad", () => {
     },
   );
 
-  // The backdrop's own verge on the approach rows, as the raster draws its base.
-  const backdropOf = (zone: ZoneId, recolour?: number) => {
+  // The backdrop's own pixels beside the road on rows first to last (excluded): by default its
+  // verge on the approach rows, as the raster draws its base, and 0 elsewhere.
+  const backdropOf = (
+    zone: ZoneId,
+    colourAt = (across: number, scale: number) => vergeBase(VERGES[zone], across, scale),
+    first = raster.junctionRows,
+    last = raster.approachRows,
+  ) => {
     const band = new Uint32Array(view.width * raster.approachRows);
-    raster.rows.slice(0, raster.approachRows).forEach((row, y) => {
+    raster.rows.slice(first, last).forEach((row, k) => {
       row.across.forEach((across, i) => {
-        const rgb = recolour ?? vergeBase(VERGES[zone], across, row.scale);
-        band[y * view.width + i] = across < 0 ? 0 : pixelWord(rgb);
+        band[(first + k) * view.width + i] =
+          across < 0 ? 0 : pixelWord(colourAt(across, row.scale));
       });
     });
     return band;
@@ -507,10 +520,80 @@ describe("drawRoad", () => {
   );
 
   it("leaves the backdrop's own pixels on the approach where it does not show the verge", () => {
-    const band = backdropOf("street", 0x010203);
+    const band = backdropOf("street", () => 0x010203);
     const out = draw(frameOf({ approach: band, current: look("street", 0x3a4466), scroll: 7 }));
     expect(approachVerge(out, band).every((word) => word === 0)).toBe(true);
   });
+
+  it("leaves the near corners beside the junction to the backdrop, verge or not", () => {
+    const band = backdropOf("shops", undefined, 0, raster.junctionRows);
+    const out = draw(frameOf({ approach: band, current: look("shops", 0x3a4466), scroll: 7 }));
+    expect(approachVerge(out, band).every((word) => word === 0)).toBe(true);
+  });
+
+  // The backdrops paint seams, dots and marks on their approach verges, standing still. The
+  // raster draws its own there, moving with the road, so the backdrop's never show beside them.
+  const zoneWith = (test: (verge: Verge) => boolean): ZoneId => {
+    const zone = (Object.keys(VERGES) as ZoneId[]).find((id) => test(VERGES[id]));
+    if (zone === undefined) {
+      throw new Error("No zone's verge fits");
+    }
+    return zone;
+  };
+  const SEAMED = zoneWith((verge) => verge.walkTo - walkFrom(verge) >= 8);
+  const DOTTED_ZONE = zoneWith((verge) => dottedBands(verge).length > 0);
+  const DOT_BAND = itemAt(dottedBands(VERGES[DOTTED_ZONE]), 0);
+  const MOWN_ZONE = zoneWith((verge) => verge.lawn === "mown");
+  const ROUGH_ZONE = zoneWith((verge) => verge.lawn === "rough");
+  const lawnColour = (zone: ZoneId, i: number) => itemAt(VERGES[zone].lawnColours ?? [], i);
+  it.each([
+    {
+      colour: VERGES[SEAMED].seamColour,
+      from: walkFrom(VERGES[SEAMED]),
+      name: "a seam",
+      zone: SEAMED,
+    },
+    {
+      colour: itemAt(itemAt(DOT_BAND.dots, 0).colours, 0),
+      from: DOT_BAND.from,
+      name: "a dot",
+      zone: DOTTED_ZONE,
+    },
+    {
+      colour: lawnColour(MOWN_ZONE, 2),
+      from: VERGES[MOWN_ZONE].walkTo,
+      name: "a tuft",
+      zone: MOWN_ZONE,
+    },
+    {
+      colour: lawnColour(ROUGH_ZONE, 1),
+      from: VERGES[ROUGH_ZONE].walkTo,
+      name: "a rough lawn's patch",
+      zone: ROUGH_ZONE,
+    },
+  ])(
+    "covers $name the backdrop paints on the approach with the verge",
+    ({ colour, from, zone }) => {
+      const picks = (across: number) => across >= from && across < from + 8;
+      const kept = (detail: number) => {
+        const band = backdropOf(zone, (across, scale) =>
+          picks(across) ? detail : vergeBase(VERGES[zone], across, scale),
+        );
+        const out = draw(frameOf({ approach: band, current: look(zone, 0x3a4466), scroll: 7 }));
+        return raster.rows
+          .slice(raster.junctionRows, raster.approachRows)
+          .flatMap((row, k) =>
+            Array.from(row.across, (across, i) =>
+              picks(across) ? out[(raster.junctionRows + k) * view.width + i] !== 0 : null,
+            ).filter((shown) => shown !== null),
+          );
+      };
+      const own = kept(colour);
+      expect(own.length).toBeGreaterThan(0);
+      expect(own.every(Boolean)).toBe(true);
+      expect(kept(0x010203).some(Boolean)).toBe(false);
+    },
+  );
 });
 
 describe("shrinkRows", () => {

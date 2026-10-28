@@ -137,8 +137,8 @@ function hexColour(hex: string): number {
 }
 
 // The zone's road as the run screen draws it, in the two layers road sprites go between:
-// under them the road, and over them the backdrop band, the road's approach rows over the
-// band, and the card row.
+// under them the road, and over them the backdrop band, the road's junction and approach rows
+// over the band, and the card row.
 async function zoneLayers(zone: Zone): Promise<{ over: RgbaImage; under: RgbaImage }> {
   const under = blankImage(SCREEN_CONFIG.width, viewHeight);
   fill(DOG_ROW, { height: viewHeight, width: SCREEN_CONFIG.width, x: 0, y: 0 }, under);
@@ -149,7 +149,7 @@ async function zoneLayers(zone: Zone): Promise<{ over: RgbaImage; under: RgbaIma
       ? pixelImage(tileImage)
       : solidStrip(hexColour(zone.roadColour));
   const look = roadLook(zone.id as RoadLook["zone"], strip);
-  const raster = roadRaster(projection, rasterView);
+  const raster = roadRaster(projection, layout.approach.y, rasterView);
   const pixels = new Uint32Array(rasterView.width * rasterView.height);
   const frame = { current: look, scroll: 0, transition: null, zoneStart: 0 };
   drawRoad(raster, frame, pixels);

@@ -4,7 +4,10 @@ import { TUNING } from "./tuning";
 
 // Internal render resolution: portrait, scaled to the window without smoothing.
 // The backdrop band ends backdropHeight rows under the walk bar, and its bottom rows,
-// roadIntoBand, are the approach the backdrop paints; the camera derives from the band. The
+// roadIntoBand, are the approach the backdrop paints; the camera derives from the band. Over the
+// approach, the junctionRows rows up to the cross street are the near corners' curb and sidewalk,
+// which the road crosses to meet the cross street (the cross street's near lane ends on the row
+// above them, CROSS_STREET.nearLane in src/layout/crossStreet.ts). The
 // neighbourhood's progress line takes the screen's last zoneProgressHeight rows: its borders
 // and a row per fill colour (ZONE_PROGRESS in src/hud/walkHud.ts).
 export const SCREEN_CONFIG: ScreenConfig = {
@@ -13,6 +16,7 @@ export const SCREEN_CONFIG: ScreenConfig = {
   dogRowHeight: 74,
   dogSlotCount: 3,
   height: 560,
+  junctionRows: 5,
   roadIntoBand: 19,
   roadWidth: 320,
   topBarHeight: 48,

@@ -99,10 +99,10 @@ export function layoutExport(
   data: Pick<GameData, "dogs" | "help" | "menuText" | "shopGear" | "walkers" | "tuning">,
 ) {
   const regions = screenLayout(SCREEN_CONFIG);
-  const { approach, backdrop, road, walkView } = regions;
+  const { backdrop, rasterView, road, walkView } = regions;
   const projection = walkProjection(ROAD_CAMERA, road);
   const scrollSpeed = read(data.tuning, "pixels", "roadScrollSpeed");
-  const bandRows = Array.from({ length: approach.height }, (_, i) => approach.y + i);
+  const bandRows = Array.from({ length: road.y - rasterView.y }, (_, i) => rasterView.y + i);
   const body = fontMetrics(readBitmapFont("font-body"));
   return {
     camera: {
@@ -131,8 +131,8 @@ export function layoutExport(
     // The walk HUD's transient layers, each kept to its lane: money changes under the message
     // strip, the owners' tabs over the cards' tops, and heart changes by slot.
     hudLanes: hudLanes(body, regions),
-    // The road on each of the band's approach rows, where the moving road draws over the
-    // backdrop, down to the band's bottom row; bandRow counts from the band's top.
+    // The road on each of the band's junction and approach rows, where the moving road draws
+    // over the backdrop, down to the band's bottom row; bandRow counts from the band's top.
     join: bandRows.map((row) => ({
       bandRow: row - backdrop.y,
       ...roadRow(projection, road, row),

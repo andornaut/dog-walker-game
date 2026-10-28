@@ -9,6 +9,7 @@ export interface ScreenConfig {
   dogRowHeight: number;
   dogSlotCount: number;
   height: number;
+  junctionRows: number;
   roadIntoBand: number;
   roadWidth: number;
   topBarHeight: number;
@@ -22,8 +23,10 @@ export interface ScreenConfig {
 // dogCardHeight tall on the row's bottom rows. roadView is the road as drawn, verges included;
 // road is its lanes, centred in it, which the walk, the lanes and the projection use. approach
 // is the band's bottom rows, where the backdrop paints the road's approach to its cross street:
-// the moving road surface is drawn over them, beside the backdrop's own verges. rasterView is
-// the approach and roadView together, which the road raster draws. walkView is the backdrop
+// the moving road surface is drawn over them, beside the backdrop's own verges. junction is the
+// rows over the approach up to the cross street, where the road passes between the near corners:
+// the moving road surface is drawn over them, and the corners stay the backdrop's. rasterView is
+// the junction, the approach and roadView together, which the road raster draws. walkView is the backdrop
 // band and roadView together, everything between the walk bar and the dog cards, which a card
 // or the pause menu dims.
 export interface ScreenLayout {
@@ -31,6 +34,7 @@ export interface ScreenLayout {
   backdrop: Rect;
   dogRow: Rect;
   dogSlots: Rect[];
+  junction: Rect;
   rasterView: Rect;
   road: Rect;
   roadView: Rect;
@@ -51,6 +55,11 @@ export function screenLayout(config: ScreenConfig): ScreenLayout {
   const slotWidth = width / dogSlotCount;
   const backdrop = { height: backdropHeight, width, x: 0, y: config.topBarHeight };
   const approach = { height: config.roadIntoBand, width, x: 0, y: roadY - config.roadIntoBand };
+  const junction = {
+    ...approach,
+    height: config.junctionRows,
+    y: approach.y - config.junctionRows,
+  };
   return {
     approach,
     backdrop,
@@ -61,7 +70,8 @@ export function screenLayout(config: ScreenConfig): ScreenLayout {
       x: i * slotWidth,
       y: zoneProgressY - config.dogCardHeight,
     })),
-    rasterView: { ...roadView, height: roadView.height + approach.height, y: approach.y },
+    junction,
+    rasterView: { ...roadView, height: roadY + roadView.height - junction.y, y: junction.y },
     road: { ...roadView, width: roadWidth, x: (width - roadWidth) / 2 },
     roadView,
     screen: { height, width, x: 0, y: 0 },

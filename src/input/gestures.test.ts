@@ -23,6 +23,7 @@ const screen: ScreenConfig = {
   dogRowHeight: 90,
   dogSlotCount: 3,
   height: 560,
+  junctionRows: 0,
   roadIntoBand: 0,
   roadWidth: 280,
   topBarHeight: 40,

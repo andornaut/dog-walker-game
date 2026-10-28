@@ -41,8 +41,8 @@ export const DEPTH = {
   struck: 9,
 };
 
-// The row where the road's approach meets the band's cross street.
-export const JUNCTURE_Y = LAYOUT.approach.y;
+// The row where the road's junction meets the band's cross street.
+export const JUNCTURE_Y = LAYOUT.junction.y;
 
 // Hides the part of a road sprite, placed and sized, that lies above the juncture.
 export function clipToRoad(sprite: GameObjects.Sprite): void {

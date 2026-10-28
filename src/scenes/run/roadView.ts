@@ -44,8 +44,8 @@ export class RoadArt {
     return look;
   }
 
-  // The backdrop's bottom rows, where the road's approach is drawn over it, across the road's
-  // view.
+  // The backdrop's bottom rows, where the road's junction and approach are drawn over it,
+  // across the road's view.
   approach(zone: Zone): Uint32Array | null {
     const key = backdropKey(zone);
     let rows = this.approaches.get(key);
@@ -58,13 +58,14 @@ export class RoadArt {
 
   private approachRows(key: string): Uint32Array | null {
     const image = this.imagePixels(key);
-    const { approach, rasterView } = LAYOUT;
-    if (image === null || image.height < approach.height) {
+    const { rasterView, road } = LAYOUT;
+    const height = road.y - rasterView.y;
+    if (image === null || image.height < height) {
       return null;
     }
-    const rows = new Uint32Array(rasterView.width * approach.height);
-    for (let y = 0; y < approach.height; y++) {
-      const start = (image.height - approach.height + y) * image.width + rasterView.x;
+    const rows = new Uint32Array(rasterView.width * height);
+    for (let y = 0; y < height; y++) {
+      const start = (image.height - height + y) * image.width + rasterView.x;
       rows.set(image.pixels.subarray(start, start + rasterView.width), y * rasterView.width);
     }
     return rows;
@@ -111,12 +112,12 @@ export class RoadView {
 
   // One texture the size of the road, kept across runs, that the road is drawn into. Under
   // WebGL its pixel buffer uploads straight to the GPU; the Canvas renderer, which cannot draw
-  // a buffer, gets a canvas texture instead. Its approach rows are a second image of it, over
-  // the backdrop. Another view of the road names its own texture.
+  // a buffer, gets a canvas texture instead. Its junction and approach rows are a second image
+  // of it, over the backdrop. Another view of the road names its own texture.
   constructor(scene: Scene, art: RoadArt, road: Rect, textureKey: string = ROAD_TEXTURE) {
     this.scene = scene;
     this.art = art;
-    const raster = roadRaster(PROJECTION, road);
+    const raster = roadRaster(PROJECTION, LAYOUT.approach.y, road);
     this.road = roadPixels(scene, { key: textureKey, raster }, road);
     const near = road.height - raster.approachRows;
     const image = () => scene.add.image(road.x, road.y, textureKey).setOrigin(0);
