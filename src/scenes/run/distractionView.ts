@@ -3,7 +3,6 @@ import type { GameObjects, Scene } from "phaser";
 import { animationKey } from "../../assets/asepriteAnimations";
 import { IDLE_TAG } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
-import { LANE_COUNT } from "../../data/screen";
 import { project } from "../../layout/projection";
 import { itemAt } from "../../lib/arrays";
 import { getOrInsert } from "../../lib/maps";
@@ -21,7 +20,7 @@ import {
   startDistractions,
   stepDistractions,
 } from "./distractions";
-import { DEPTH, LANE_XS, LAYOUT, PROJECTION, ROW_DEPTH, showOnRoad } from "./stage";
+import { DEPTH, LANE_XS, laneX, PROJECTION, ROW_DEPTH, showOnRoad } from "./stage";
 
 // The tags a distraction moves in, the first its art has: it walks, or hops.
 const MOVING_TAGS = ["walk", "hop", "run"] as const;
@@ -90,8 +89,7 @@ export class DistractionView {
     const { key } = distraction;
     const sprite = getOrInsert(this.sprites, distraction, () => scene.add.sprite(0, 0, key));
     const { place } = this;
-    const { road } = LAYOUT;
-    const x = itemAt(LANE_XS, 0) + (place.lanePosition * road.width) / LANE_COUNT;
+    const x = laneX(place.lanePosition);
     const placed = project(PROJECTION, { distance: PROJECTION.footY - place.y, x });
     const drawn = showAtDepth(sprite, key, placed.scale);
     // Half a row's depth step more than a roadside prop stands it in front of a prop on its row.

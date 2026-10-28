@@ -16,7 +16,6 @@ import { LANE_COUNT } from "../../data/screen";
 import type { EncounterId, MinorObstacleId } from "../../data/types";
 import { moverBodyArt } from "../../layout/obstacleArt";
 import { project } from "../../layout/projection";
-import { itemAt } from "../../lib/arrays";
 import { read } from "../../rules/units";
 import {
   drawnLanes,
@@ -32,7 +31,7 @@ import {
 import { itemCategory, type WalkItem } from "../../runner/walk";
 import { firstTag, playTag, showAtDepth } from "../sprites";
 import type { ItemPart, ItemView } from "./itemViews";
-import { DEPTH, JUNCTURE_Y, LANE_XS, LAYOUT, PROJECTION, showOnRoad } from "./stage";
+import { DEPTH, JUNCTURE_Y, laneX, LAYOUT, PROJECTION, showOnRoad } from "./stage";
 import { type StandFrame, standPart } from "./standPart";
 
 // A mover's cue, in road pixels before projection: its sign inset from the road's edge, or
@@ -102,8 +101,7 @@ export function drawMover(
   const [body, cue, arrow, wander] = view.parts;
   const place = moverPlace(LANE_COUNT, path, since);
   const span = drawnLanes(item.laneSpan, path);
-  const laneX =
-    itemAt(LANE_XS, 0) + ((place.lanePosition + (span - 1) / 2) * road.width) / LANE_COUNT;
+  const centreX = laneX(place.lanePosition + (span - 1) / 2);
   const leftward = facesLeft(path, since);
   const lucky = itemCategory(gameData, item.kind) === "lucky";
   const tell = lucky ? null : moverTell(path, since);
@@ -116,12 +114,12 @@ export function drawMover(
     for (const part of view.parts.slice(MOVER_CUE_PARTS + 1)) {
       part.sprite.setVisible(shown);
       if (shown) {
-        standPart(item, part, laneX, frame);
+        standPart(item, part, centreX, frame);
       }
     }
     if (shown) {
       const distance = PROJECTION.footY - body.footY(item);
-      const placed = project(PROJECTION, { distance, x: laneX });
+      const placed = project(PROJECTION, { distance, x: centreX });
       const drawn = showAtDepth(body.sprite, body.key, placed.scale, body.feet);
       const has = (candidate: string) => scene.anims.exists(animationKey(drawn.key, candidate));
       const pose = isSliding(path, since)
@@ -185,7 +183,7 @@ export function drawMover(
     PROJECTION,
     across
       ? { distance: PROJECTION.footY - footY, x: edgeX }
-      : { distance: PROJECTION.footY - (roadTop + CUE.top), x: laneX },
+      : { distance: PROJECTION.footY - (roadTop + CUE.top), x: centreX },
   );
   const x = Math.round(cueAt.x);
   let y = Math.round(cueAt.y);

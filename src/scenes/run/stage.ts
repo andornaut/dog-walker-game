@@ -4,6 +4,7 @@ import { gameData } from "../../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../../data/screen";
 import { laneCentreXs } from "../../layout/lanes";
 import { screenLayout, walkerFootY } from "../../layout/screenLayout";
+import { itemAt } from "../../lib/arrays";
 import { fadeIn, rowsHidden } from "../../road/roadClip";
 import { read } from "../../rules/units";
 import { laneMotionX } from "../../runner/laneMotion";
@@ -16,6 +17,11 @@ export const LAYOUT = screenLayout(SCREEN_CONFIG);
 // Every road sprite, the road and its verge are drawn through this one projection.
 export const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
 export const LANE_XS = laneCentreXs(LANE_COUNT, LAYOUT.road);
+
+// The road x of a lane position: the first lane's centre and a lane's width for each lane past it.
+export function laneX(lanePosition: number): number {
+  return itemAt(LANE_XS, 0) + (lanePosition * LAYOUT.road.width) / LANE_COUNT;
+}
 
 // The backdrop band, the road's approach drawn over it and the band's movers lie under the
 // road and its sprites: an item standing on the road draws whole over them, and showOnRoad cuts
