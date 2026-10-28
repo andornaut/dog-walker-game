@@ -123,7 +123,7 @@ export function startSession(
     pulls: NO_PULLS,
     queue: [],
     timeMs: 0,
-    walk: planned(data, streams, geometry, walk),
+    walk: planCurrentZone(data, streams, geometry, walk),
     zoneEndPending: false,
     zoomiesSeconds: 0,
   };
@@ -233,7 +233,7 @@ export function headHomeSession(session: Session): SessionStep {
   };
 }
 
-function planned(
+function planCurrentZone(
   data: SessionData,
   streams: RunStreams,
   geometry: SessionGeometry,
@@ -290,7 +290,7 @@ function continueWalk(
     return endZone(data, streams, geometry, events, { ...session, zoneEndPending: false });
   }
   if (session.needsZonePlan) {
-    const next = planned(data, streams, geometry, walk);
+    const next = planCurrentZone(data, streams, geometry, walk);
     events.push({ kind: "zonePlanned" });
     return { events, session: { ...session, needsZonePlan: false, walk: next } };
   }
