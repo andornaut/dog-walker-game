@@ -29,8 +29,10 @@ motion), run (4 frames, 80ms: down the road at the player).
 Snatch, the thief's tags: walk (4 frames, 100ms, road.PERSON_WALK: a foot lifted,
 passing 1px higher, the other foot), flee (4 frames, 90ms: from behind, see FLEE
 and SEAGULL_FLEE), idle (2 frames, 400ms: breathing). Each carries a tan loot
-sack.
-  snatch-raccoon     38x57, standing about as tall as a medium dog, the sack at its chest: a
+sack, but for the standing raccoon's chest bundle.
+  snatch-raccoon     38x57, standing about as tall as a medium dog, clutching at its chest (walk,
+                     idle) a lumpy grey-brown cloth bundle knotted at the top (bundle), never round
+                     or tan, so it never reads as a tip coin: a
                      grey-brown coat (RACCOON_LIT) with dark legs and paws, the black bandit mask
                      between white brows and a white muzzle, rounded white-rimmed ears and a bushy
                      tail in bold light and coal rings; flee runs, the tail swinging against the
@@ -418,6 +420,27 @@ def sack(g, x, y):
     g.rect(x - 1, y + 1, 2, 1, "dbrown")
 
 
+# The lumps of the raccoon's chest bundle about its centre: (dx, dy, rx, ry), the two at the bottom side by side
+# and the one over them smaller, so it reads as a soft knotted bundle and not a round coin.
+BUNDLE = ((-2, 1, 2.8, 2.6), (2.2, 1.2, 2.6, 2.4), (0, -1.4, 2.8, 2.4))
+
+
+def bundle(g, x, y):
+    """The raccoon's loot clutched at its chest, centred on (x, y): a lumpy grey-brown cloth bundle, dstone lit
+    stone, in a coal line, gathered at the top under a knot whose two ends flare up either side. Darker than the
+    coat and grey, never tan, and lumpy, never round, so it never reads as a tip coin."""
+    knot = ((x - 1, y - 5, 2, 2), (x - 3, y - 6, 2, 2), (x + 1, y - 6, 2, 2))
+    for dx, dy, rx, ry in BUNDLE:
+        g.cel(x + dx, y + dy, rx + 0.9, ry + 0.9, "coal")
+    for kx, ky, kw, kh in knot:
+        g.rect(kx - 0.9, ky - 0.9, kw + 1.8, kh + 1.8, "coal")
+    for dx, dy, rx, ry in BUNDLE:
+        g.cel(x + dx, y + dy, rx, ry, "dstone", None, "stone")
+    for kx, ky, kw, kh in knot:
+        g.rect(kx, ky, kw, kh, "dstone")
+    g.rect(x - 1.5, y - 3.2, 3, 1, "coal")
+
+
 # The raccoon's colours: a grey-brown coat in the stone ramp, so it holds on the dark roads as well as the
 # light ones; dstone legs and coal paws; the black mask between white brows and a white muzzle; rounded ears
 # rimmed white; and the bushy tail's bold rings, lgrey and coal, ending in an ink tip. RACCOON_LIT is its rim
@@ -466,7 +489,7 @@ def raccoon_face(g, cx, y, w=8, narrow=False):
 def raccoon(lf=0, rf=0, bob=0):
     """A raccoon standing up facing the player, its feet on row 44: a grey-brown coat, a pale belly, dark legs
     and paws, the black mask between white brows and a white pointed snout, rounded white-rimmed ears, the
-    bushy ringed tail curling up its right side past its shoulder, and the loot sack clutched at its chest. lf
+    bushy ringed tail curling up its right side past its shoulder, and the loot bundle clutched at its chest. lf
     and rf lift a foot; bob raises everything above the legs."""
     g = edged(Grid(32, 48))
     b = bob
@@ -479,7 +502,7 @@ def raccoon(lf=0, rf=0, bob=0):
         g.rect(x - 1, 43 + f, 5, 2, "coal")
     g.cel(16, 32 + b, 8, 7.5, "stone", "dstone", "driftwood")
     g.cel(16, 33.5 + b, 4.5, 5, "driftwood", "stone")
-    sack(g, 16, 31 + b)
+    bundle(g, 16, 31.5 + b)
     for x in (10, 19):
         g.rect(x, 30 + b, 3, 2, "coal")
     raccoon_ears(g, ((10, 13 + b), (22, 13 + b)))
