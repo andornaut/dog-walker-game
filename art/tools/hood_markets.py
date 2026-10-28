@@ -1294,7 +1294,7 @@ SOUNDS = {
         ("triangle", 0.14, (150, 65), 0, dict(vol=0.8, attack=0.003, release=0.85)),
         ("pinknoise", 0.05, None, 0, dict(vol=0.3, low=700, attack=0.002, release=0.9)),
         ("pinknoise", 0.12, None, 0.14, dict(vol=0.6, low=1100, high=180, attack=0.02, release=0.7)),
-        ("sine", 0.08, (180, 520), 0.16, dict(vol=0.8, attack=0.004, release=0.6)),
+        ("triangle", 0.08, (180, 520), 0.16, dict(vol=0.4, attack=0.004, release=0.6)),
         ("triangle", 0.12, (300, 120), 0.27, dict(vol=0.5, attack=0.01, release=0.8)),
     ],
     # the flash whining up, the shutter's two clicks, then two bells
