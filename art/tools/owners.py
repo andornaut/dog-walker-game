@@ -267,17 +267,22 @@ def ralph(mood):
 
 
 def tara(mood):
-    """Dog-show judge, fussy: tall dark updo, pearls, red lips, purple blazer."""
+    """Dog-show judge, fussy: tall blonde updo, pearls, red lips, purple blazer."""
     g = face()
     base(g, "skin1", "skin2", "purple", "plum")
     g.tri((13, 27), (19, 27), (16, 31), "white")
     for x in range(11, 22, 2):
         g.p(x, 27, "white")
-    g.cel(16, 10, 9, 5, "navy", "ink", "dslate")
+    # blonde: yellow shaded amber, with an orange line where the bun tucks in and along the hairline
+    g.cel(16, 10, 9, 5, "yellow", "amber")
     # the bun, round and narrower than the crown, from row 1, so the outline closes over it
-    g.cel(16, 4, 4.5, 3, "navy", "ink", "dslate")
-    g.rect(8, 10, 2, 8, "navy")
-    g.rect(22, 10, 2, 8, "navy")
+    g.cel(16, 4, 4.5, 3, "yellow", "amber")
+    g.rect(14, 6, 4, 1, "orange")
+    g.rect(8, 10, 2, 8, "yellow")
+    g.rect(22, 10, 2, 8, "amber")
+    hairline(g, "yellow", "skin1", "orange")
+    hairline(g, "amber", "skin1", "orange")
+    hairline(g, "amber", "skin2", "orange")
     # amber drop earrings, two pixels long so they show, as on her figure
     g.rect(7, 19, 1, 2, "amber")
     g.rect(24, 19, 1, 2, "amber")
@@ -505,19 +510,19 @@ def small_expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=Fa
 
 TARA_SMALL_HAIR = (
     "....................",
-    "........dnni........",
-    ".......dnnnni.......",
-    "........nnni........",
-    ".....ddnnnnnnni.....",
-    "....dnnnnnnnnnni....",
-    "....nnnnnnnnnnni....",
+    "........yyya........",
+    ".......yyyyya.......",
+    "........oooo........",
+    ".....yyyyyyyyya.....",
+    "....yyyyyyyyyyya....",
+    "....yyyyyyyyyyya....",
 )
 
 
 def tara_small_bun(g):
-    """Her updo's top rows drawn again at 20px: a round bun pinched in above a domed crown, lit dslate on the
-    left and shaded ink on the right, where the scaled bun and crown square off into a top hat."""
-    colours = {"d": "dslate", "n": "navy", "i": "ink"}
+    """Her updo's top rows drawn again at 20px: a round bun over an orange tuck line above a domed crown, yellow
+    shaded amber on the right, where the scaled bun and crown square off into a top hat."""
+    colours = {"a": "amber", "o": "orange", "y": "yellow"}
     for y, row in enumerate(TARA_SMALL_HAIR):
         for x, c in enumerate(row):
             g.g.px[y][x] = None

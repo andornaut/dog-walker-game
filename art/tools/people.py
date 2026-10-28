@@ -251,7 +251,7 @@ def ralph_top(wave):
 
 
 def tara_top(wave):
-    """Ms. Tara, dog-show judge, fussy: tall dark updo, amber earrings, red lips, a purple blazer over
+    """Ms. Tara, dog-show judge, fussy: tall blonde updo, amber earrings, red lips, a purple blazer over
     a white blouse and pearls, a pencil skirt, and a blue first-prize rosette in her left hand."""
     def top(g, b):
         g.rect(10, 33 + b, 12, 6, "purple")
@@ -271,13 +271,16 @@ def tara_top(wave):
         g.rect(8, 31 + b, 2, 4, "sky")
         g.rect(5, 31 + b, 4, 3, "skin1")
         head(g, b, "skin1", "skin2")
-        g.cel(16, 7.5 + b, 9, 4.5, "navy", "ink", "dslate")
+        # blonde: yellow shaded amber, as on her face
+        g.cel(16, 7.5 + b, 9, 4.5, "yellow", "amber")
         # the bun, round and narrower than the crown, from row 2, so the outline closes over it on the
-        # breath's raised frame, tucked in with an ink line where it meets the crown
-        g.cel(16, 3.5 + b, 4, 1.6, "navy", "ink", "dslate")
-        g.rect(14, 5 + b, 4, 1, "ink")
-        g.rect(8, 9 + b, 2, 8, "navy")
-        g.rect(22, 9 + b, 2, 8, "navy")
+        # breath's raised frame, tucked in with an orange line where it meets the crown
+        g.cel(16, 3.5 + b, 4, 1.6, "yellow", "amber")
+        g.rect(14, 5 + b, 4, 1, "orange")
+        g.rect(8, 9 + b, 2, 8, "yellow")
+        g.rect(22, 9 + b, 2, 8, "amber")
+        # the hairline in orange, so the amber shade stands apart from the fair forehead, as on her face
+        hairline(g, "amber", "skin1", "orange")
         g.p(7, 17 + b, "amber")
         face_front(g, 16, 13 + b, lips="red")
         g.p(10, 12 + b, "ink")
