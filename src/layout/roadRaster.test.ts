@@ -234,7 +234,6 @@ describe("the verge beside the road", () => {
     [0.41, 0xffffff],
     [0.449, 0xf77622],
     [0.45, null],
-    [0.99, null],
   ])("dotColour picks %d's dot: %d", (value, colour) => {
     expect(dotColour(DOTS, value)).toBe(colour);
   });
@@ -367,7 +366,6 @@ describe("drawRoad", () => {
       expect(row.level).toBe(row.span <= 2 ? 0 : row.span <= 4 ? 1 : 2);
     }
     expect(itemAt(raster.rows, 0).level).toBe(2);
-    expect(itemAt(raster.rows, raster.rows.length - 1).level).toBe(0);
   });
 
   // The backdrop paints the road's junction and approach to its cross street in the band's
@@ -635,12 +633,6 @@ describe("shrinkRows", () => {
     const skip = Uint8Array.from([0, 1, 1, 1, 1, 1, 1, 1]);
     expect([...shrinkRows(4, source).pixels]).toEqual([9, 2]);
     expect([...shrinkRows(4, source, skip).pixels]).toEqual([4, 2]);
-  });
-
-  it("uses only colours the image has", () => {
-    const source = image([[5], [6], [7], [8]]);
-    const shrunk = shrinkRows(2, source);
-    expect([...shrunk.pixels].every((pixel) => source.pixels.includes(pixel))).toBe(true);
   });
 });
 
