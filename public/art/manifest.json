@@ -4148,7 +4148,7 @@
       "png": "sprites/drop-fanny-pack.png",
       "json": "sprites/drop-fanny-pack.json",
       "anchor": {
-        "feetY": 22,
+        "feetY": 20,
         "opaqueWidth": 24
       }
     },
@@ -4157,7 +4157,7 @@
       "png": "sprites/drop-fanny-pack@50.png",
       "json": "sprites/drop-fanny-pack@50.json",
       "anchor": {
-        "feetY": 11,
+        "feetY": 10,
         "opaqueWidth": 12
       }
     },
@@ -4166,7 +4166,7 @@
       "png": "sprites/drop-fanny-pack@56.png",
       "json": "sprites/drop-fanny-pack@56.json",
       "anchor": {
-        "feetY": 13,
+        "feetY": 12,
         "opaqueWidth": 14
       }
     },
@@ -4175,7 +4175,7 @@
       "png": "sprites/drop-fanny-pack@62.png",
       "json": "sprites/drop-fanny-pack@62.json",
       "anchor": {
-        "feetY": 14,
+        "feetY": 13,
         "opaqueWidth": 15
       }
     },
@@ -4184,7 +4184,7 @@
       "png": "sprites/drop-fanny-pack@69.png",
       "json": "sprites/drop-fanny-pack@69.json",
       "anchor": {
-        "feetY": 16,
+        "feetY": 15,
         "opaqueWidth": 17
       }
     },
@@ -4193,7 +4193,7 @@
       "png": "sprites/drop-fanny-pack@75.png",
       "json": "sprites/drop-fanny-pack@75.json",
       "anchor": {
-        "feetY": 17,
+        "feetY": 15,
         "opaqueWidth": 18
       }
     },
@@ -4202,7 +4202,7 @@
       "png": "sprites/drop-fanny-pack@81.png",
       "json": "sprites/drop-fanny-pack@81.json",
       "anchor": {
-        "feetY": 19,
+        "feetY": 17,
         "opaqueWidth": 20
       }
     },
@@ -4211,7 +4211,7 @@
       "png": "sprites/drop-fanny-pack@88.png",
       "json": "sprites/drop-fanny-pack@88.json",
       "anchor": {
-        "feetY": 20,
+        "feetY": 18,
         "opaqueWidth": 21
       }
     },
@@ -4220,7 +4220,7 @@
       "png": "sprites/drop-fanny-pack@94.png",
       "json": "sprites/drop-fanny-pack@94.json",
       "anchor": {
-        "feetY": 22,
+        "feetY": 20,
         "opaqueWidth": 23
       }
     },

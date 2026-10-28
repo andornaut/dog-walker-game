@@ -85,15 +85,27 @@ def paw(g, cx, cy, c="dred"):
 # ---------- the gear ----------
 
 def fanny_pack(g):
-    """An amber pouch zipped in orange, squarer than the coin, hung on a brown strap that runs past it each
-    side to an lgrey buckle on the right."""
-    g.rect(0.7, 5.5, 14.6, 2, "brown")
-    g.rect(0.7, 7, 14.6, 0.5, "dbrown")
-    g.rect(11.3, 4.5, 2.7, 4, "lgrey")
-    g.rect(12.3, 5.5, 0.7, 2, "grey")
-    g.blob(7, 10.5, 6, 4, "amber", "orange", "yellow", power=3)
-    g.rect(2.7, 9.6, 8.6, 0.7, "orange")
-    g.p(11.3, 9.6, "lgrey")
+    """A forest-green waist pack: a pouch flat along the top and round below, its black webbing belt out of
+    each side, dipping at the ends as it would round a waist, a black side-release buckle on the left strap,
+    a black zip across the top with its pull hanging at the right end, and a white logo patch low on the
+    left. icons.py's item-fanny-pack and glyphs.py's icon-gear-fanny-pack draw this same design."""
+    g.rect(0.6, 5.8, 14.8, 1.8, "dslate")
+    g.rect(0.6, 5.8, 14.8, 0.6, "slate")
+    g.rect(0, 6.6, 1.2, 1.8, "dslate")
+    g.rect(14.8, 6.6, 1.2, 1.8, "dslate")
+    # the buckle: a black clip with a slate catch
+    g.rect(0.4, 5, 2.2, 3.6, "ink")
+    g.rect(1, 5.8, 1, 2, "slate")
+    # the pouch, lit along its top
+    g.blob(8, 8.8, 5.4, 4.4, "dgreen", "forest", "green", power=3)
+    g.rect(2.8, 4.6, 10.4, 3, "dgreen")
+    g.rect(3.4, 4.6, 9.2, 0.8, "green")
+    # the zip and its pull
+    g.rect(3.6, 6.4, 8.8, 0.8, "ink")
+    g.rect(11.4, 6.4, 0.8, 2.6, "ink")
+    # the logo patch
+    g.rect(4.4, 9.4, 3, 1.6, "white")
+    g.rect(5, 10, 1.8, 0.6, "navy")
 
 
 def hall_pass(g):
@@ -162,7 +174,7 @@ def whistle(g):
 
 # Each drop: its drawing and its sparkle's centre in design units, in the top corner its gear leaves clear.
 DROPS = {
-    "fanny-pack": (fanny_pack, (3, 2.6)),
+    "fanny-pack": (fanny_pack, (13.2, 2.6)),
     "hall-pass": (hall_pass, (13.2, 2.6)),
     "lucky-collar": (lucky_collar, (13.2, 2.6)),
     "running-shoes": (running_shoes, (3, 3.4)),

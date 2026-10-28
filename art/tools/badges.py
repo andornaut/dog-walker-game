@@ -263,9 +263,13 @@ def _(g):
 @icon("kitted-out")
 def _(g):
     """Three of the gear items: the fanny pack, the lucky collar and a running shoe."""
-    g.rect(6, 9, 12, 1, "dbrown")
-    g.rect(14, 8, 2, 3, "lgrey")
-    g.ell(11, 12.5, 4.5, 3, "amber", "orange", "yellow")
+    g.rect(5, 10, 13, 1, "dslate")
+    g.rect(5, 9, 2, 3, "ink")
+    g.rect(8, 9, 8, 4, "dgreen")
+    g.ell(12, 13, 4, 2.5, "dgreen", "forest")
+    g.rect(8, 9, 8, 1, "green")
+    g.rect(9, 11, 6, 1, "ink")
+    g.rect(9, 13, 2, 1, "white")
     g.ell(21, 10, 5, 4, "red", "dred")
     g.ell(21, 9.5, 3, 2, None)
     g.ell(21, 15, 1.8, 1.8, "green", "dgreen")

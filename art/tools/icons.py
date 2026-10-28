@@ -20,17 +20,18 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
+import drops  # noqa: E402
+from minis import Mini  # noqa: E402
 from pixel import Grid, bitmap, to_image  # noqa: E402
 
 
 # ---------- gear ----------
 
 def fanny_pack(g):
-    g.rect(2, 12, 28, 2, "brown")
-    g.rect(25, 11, 4, 4, "lgrey")
-    g.ell(15, 19, 9.5, 6.5, "amber", "orange", "yellow")
-    g.rect(8, 17, 15, 1, "orange")
-    g.p(22, 17, "lgrey")
+    """drops.py's forest-green waist pack, drawn at 2x."""
+    m = Mini(2, 16, 16)
+    drops.fanny_pack(m)
+    g.px = m.px
 
 
 def hall_pass(g):

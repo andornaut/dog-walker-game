@@ -55,6 +55,8 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
+import drops  # noqa: E402
+from minis import Mini  # noqa: E402
 from pixel import K, Grid, bitmap, build as build_sprites, icon_edge, to_image  # noqa: E402
 from fx import burst, star4  # noqa: E402
 from road import SQUIRREL_FUR  # noqa: E402
@@ -504,13 +506,8 @@ def gear_whistle():
 
 
 def gear_fanny_pack():
-    g = Grid(16, 16)
-    g.rect(0, 5, 16, 2, "brown")
-    g.rect(12, 4, 3, 4, "lgrey")
-    g.ell(7.5, 10, 6.5, 4.5, "amber", "orange", "yellow")
-    g.rect(3, 9, 9, 1, "orange")
-    g.p(11, 9, "lgrey")
-    return g
+    """drops.py's forest-green waist pack at 16x16."""
+    return fanny_pack_at(1)
 
 
 def gear_hall_pass():
@@ -775,16 +772,16 @@ def gear_whistle20():
 
 
 def gear_fanny_pack20():
-    """The fanny pack: an amber pouch zipped in orange on a brown strap with an lgrey buckle."""
-    g = Grid(20, 20)
-    g.rect(1, 6, 18, 2, "brown")
-    g.rect(15, 5, 3, 4, "lgrey")
-    g.p(16, 6, "grey")
-    g.p(16, 7, "grey")
-    g.ell(9, 12.5, 7.5, 5.5, "amber", "orange", "yellow")
-    g.rect(4, 11, 10, 1, "orange")
-    g.p(14, 11, "lgrey")
-    g.p(14, 12, "lgrey")
+    """drops.py's forest-green waist pack at 20x20."""
+    return fanny_pack_at(1.25)
+
+
+def fanny_pack_at(s):
+    """drops.fanny_pack's 16-unit design drawn at scale s on a Grid."""
+    m = Mini(s, 16, 16)
+    drops.fanny_pack(m)
+    g = Grid(len(m.px[0]), len(m.px))
+    g.px = m.px
     return g
 
 
