@@ -1081,25 +1081,37 @@ def gap(*props):
 # 7 and 10. Yonge Street: the transit stop in 3 and 9.
 #
 # The lots hold a neighbourhood's lamps, at a fixed rhythm: each side has a lamp every `every` lots
-# (every * 2 slots), every odd, and the right side's lamps stand halfway between the left's, so over
-# both sides one stands every `every` slots, alternating sides. A side's lamps stand midway between its
-# gap 0 and gap 3 props, across the road from the other side's. Gas lamps stand every 3 lots (840 px a
-# side, one every 420 px), street lamps every lot (280 px a side, one every 140 px). A zone with no lamps
-# has one empty lot.
+# (every * 2 slots), and the right side's lamps stand lamp_lag slots after the left's, every slots (halfway)
+# for an odd every, every - 1 for an even one. Gas lamps stand every 2 lots: 560 px a side, the right
+# side's 140 px after the left's, so over both sides they stand 140 and 420 px apart in turn. Street lamps
+# stand every lot: 280 px a side, one every 140 px, alternating sides. A zone with no lamps has one empty
+# lot.
 SIDES = dict(
     left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=1),
     right=dict(offset=1, lotStart=0, lotStride=1, gapStart=2, gapStride=1),
 )
 
 
+def lamp_lag(every):
+    """How many slots the right side's lamps stand after the left's for a lamp every `every` lots: an odd
+    count, since lots stand on even slots on the left and odd slots on the right; halfway (every) for an
+    odd every, else every - 1."""
+    return every if every % 2 else every - 1
+
+
 def lamps(key, inner, every):
-    """The lots and sides for a lamp every `every` lots on each side, the right side's halfway between the
-    left's: the left side's lamps at slots n = every + 1 (mod 2 * every), the right's every slots on."""
-    if every < 1 or every % 2 == 0:
-        sys.exit(f"{key}: a lamp every {every} lots does not alternate sides evenly")
+    """The lots and sides for a lamp every `every` lots (every * 2 slots) on each side, the right side's
+    lamp_lag slots after the left's. With an odd every the left side's lamps stand at slots
+    n = every + 1 (mod 2 * every), midway between its gap 0 and gap 3 props; with an even every at
+    n = 0 (mod 2 * every)."""
+    if every < 1:
+        sys.exit(f"{key}: a lamp every {every} lots")
     lots = (gap((key, inner, 0)),) + ((),) * (every - 1)
-    left = dict(SIDES["left"], lotStart=-((every + 1) // 2) % every)
-    return lots, dict(left=left, right=SIDES["right"])
+    first = every + 1 if every % 2 else 0
+    right = first + lamp_lag(every)
+    left = dict(SIDES["left"], lotStart=-(first // 2) % every)
+    right = dict(SIDES["right"], lotStart=-((right - 1) // 2) % every)
+    return lots, dict(left=left, right=right)
 
 
 def sparse(first, own, between=None, lamp=None):
@@ -1118,7 +1130,7 @@ def sparse(first, own, between=None, lamp=None):
     return dict(slot=140, lots=lots, gaps=tuple(gaps), sides=sides)
 
 
-GAS_LAMP = ("gas-lamp", 213, 3)
+GAS_LAMP = ("gas-lamp", 213, 2)
 PLACEMENT = {
     "cabbagetown": sparse(("tree-maple", 220, 0), ("tree-maple", 220, 0), lamp=GAS_LAMP),
     "high-park": sparse(("tree-oak", 220, 0), ("hot-dog-stand", 216, 0)),
@@ -1201,16 +1213,16 @@ def lot_slots(p, side):
 
 
 def check_lamps(zone, p):
-    """Each side's lot props stand a fixed number of slots apart, and the right side's halfway between the
-    left's, so they alternate sides evenly."""
+    """Each side's lot props stand a fixed number of slots apart, and the right side's lamp_lag slots after
+    the left's."""
     (left, period), (right, _) = lot_slots(p, "left"), lot_slots(p, "right")
     if not left and not right:
         return
     step = period // len(left) if left else 0
     if len(left) != len(right) or any((b - a) % period != step for a, b in zip(left, left[1:] + left[:1])):
         sys.exit(f"{zone}: the lots' props do not stand at a fixed step on each side")
-    if sorted((n + step // 2) % period for n in left) != right or step % 2:
-        sys.exit(f"{zone}: the right side's lot props do not stand halfway between the left's")
+    if step % 2 or sorted((n + lamp_lag(step // 2)) % period for n in left) != right:
+        sys.exit(f"{zone}: the right side's lot props do not stand lamp_lag slots after the left's")
 
 
 def check_placement():
