@@ -1,3 +1,4 @@
+import { laneMask } from "../layout/lanes";
 import { itemAt, partitionPoint } from "../lib/arrays";
 import { randomPick, weightedPick } from "../lib/random";
 import { approachOutcomes } from "./approach";
@@ -281,8 +282,8 @@ export interface PathChange {
 function pathMovesBetween(change: PathChange, near: BlockingPlace, far: BlockingPlace): number {
   const side = Math.sign(change.to - change.from);
   const steps = Math.abs(change.to - change.from);
-  const nearMask = laneRun(near.lane, near.lanes);
-  const farMask = laneRun(far.lane, far.lanes);
+  const nearMask = laneMask(near.lane, near.lanes);
+  const farMask = laneMask(far.lane, far.lanes);
   let nearest = Infinity;
   let farthest = -Infinity;
   for (let step = 0; step <= steps; step++) {
@@ -327,11 +328,6 @@ export function packFitsOnPath(
 // Adds the lanes of mask to masks' entry at row.
 function addLanes(masks: Int32Array, row: number, mask: number): void {
   masks[row] = (masks[row] ?? 0) | mask;
-}
-
-// The mask of count lanes from first on.
-function laneRun(first: number, count: number): number {
-  return ((1 << count) - 1) << first;
 }
 
 function laneTotal(mask: number): number {
@@ -535,7 +531,7 @@ export function planSpawns<Kind extends string>(
   // row before a change, every lane the change crosses.
   const pathHeld = Int32Array.from(path, (lane, row) => {
     const next = path[row + 1] ?? lane;
-    return laneRun(Math.min(lane, next), Math.abs(next - lane) + 1);
+    return laneMask(Math.min(lane, next), Math.abs(next - lane) + 1);
   });
   const changes: PathChange[] = path.flatMap((from, row) => {
     const to = path[row + 1] ?? from;
@@ -557,7 +553,7 @@ export function planSpawns<Kind extends string>(
   // True when a lane-blocking standing spawn's hit box, from its row up the road for its hit
   // length, shares no road with a mover's body in its lanes.
   const clearOfMovers = (cell: Cell, footprint: Footprint): boolean => {
-    const covered = laneRun(cell.lane, footprint.lanes);
+    const covered = laneMask(cell.lane, footprint.lanes);
     const from = itemAt(rows, cell.row);
     const to = from + hitLength(plan, footprint.rows);
     return moverBodies.every(
@@ -580,7 +576,7 @@ export function planSpawns<Kind extends string>(
   const blockedBefore = new Int32Array(rows.length);
   const gapBefore = new Int32Array(rows.length);
   const events: SpawnEvent<Kind>[] = [];
-  const roadLanes = laneRun(0, laneCount);
+  const roadLanes = laneMask(0, laneCount);
   // The lane-blocking spawns placed so far, and every place each mover stands, by distance. Two
   // places with more road between them than the widest pack gap always fit the pack, so a place
   // is checked only against those within longestPlaced, the longest length placed, and that gap.
@@ -674,7 +670,7 @@ export function planSpawns<Kind extends string>(
     if (lastRow >= rows.length || lastGap >= rows.length - 1) {
       return false;
     }
-    const covered = laneRun(cell.lane, footprint.lanes);
+    const covered = laneMask(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= Math.max(lastRow, lastGap); row++) {
       if (((pathHeld[row] ?? 0) & covered) !== 0) {
         return false;
@@ -753,7 +749,7 @@ export function planSpawns<Kind extends string>(
     if (last >= rows.length) {
       return false;
     }
-    const covered = laneRun(cell.lane, footprint.lanes);
+    const covered = laneMask(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= last; row++) {
       const held = heldFor(row, quota);
       if ((held & covered) !== 0) {
@@ -817,7 +813,7 @@ export function planSpawns<Kind extends string>(
       tryBlock({ lane: span.first, row }, { lanes: span.count, rows: rowsBlocked }, keep, dart),
     clearRun,
     isFree: (motion: MoverPath["motion"], lane: number, row: number) => {
-      const cell = laneRun(lane, 1);
+      const cell = laneMask(lane, 1);
       return moverMayTake(
         motion,
         ((dartHeld[row] ?? 0) & cell) !== 0,
@@ -829,11 +825,11 @@ export function planSpawns<Kind extends string>(
       leavesRoom(
         cells.filter(
           ({ lane, row }) =>
-            row >= 0 && row < rows.length && ((taken[row] ?? 0) & laneRun(lane, 1)) === 0,
+            row >= 0 && row < rows.length && ((taken[row] ?? 0) & laneMask(lane, 1)) === 0,
         ).length,
       ),
     occupy: ({ from, lanes: span, to }: MoverBody) => {
-      moverBodies.push({ from, lanes: laneRun(span.first, span.count), to });
+      moverBodies.push({ from, lanes: laneMask(span.first, span.count), to });
     },
     packFits: (stands: readonly MoverStand[]) =>
       stands.every(
@@ -846,7 +842,7 @@ export function planSpawns<Kind extends string>(
     },
     take: (dart: boolean, lane: number, row: number) => {
       if (row >= 0 && row < rows.length) {
-        const cell = laneRun(lane, 1);
+        const cell = laneMask(lane, 1);
         takeCells(row, cell);
         addLanes(moverHeld, row, cell);
         addLanes(dart ? dartHeld : otherMoverHeld, row, cell);
@@ -900,7 +896,7 @@ export function planSpawns<Kind extends string>(
     take: (dart: boolean, lane: number, row: number) => {
       moverGrid.take(dart, lane, row);
       if (row >= 0 && row < rows.length) {
-        addLanes(prizeHeld, row, laneRun(lane, 1));
+        addLanes(prizeHeld, row, laneMask(lane, 1));
       }
     },
   };
@@ -933,7 +929,7 @@ export function planSpawns<Kind extends string>(
         plan.quotas.find((quota) => quota.kind === kind)?.mover?.footprint ?? SINGLE_CELL;
       const length = hitLength(plan, footprint.rows);
       for (const rest of moverRests(laneCount, distance, mover)) {
-        const covered = laneRun(rest.lane, footprint.lanes) & roadLanes;
+        const covered = laneMask(rest.lane, footprint.lanes) & roadLanes;
         rows.forEach((rowDistance, row) => {
           if (rowDistance > rest.distance - oneRowHit && rowDistance < rest.distance + length) {
             addLanes(restHeld, row, covered);
@@ -1052,7 +1048,7 @@ export function planSpawns<Kind extends string>(
   const placeAt = (quota: SpawnQuota<Kind>, cell: Cell) => {
     const footprint = quotaFootprint(quota);
     const lastRow = lastRowTaken(cell, footprint, quota.blocksLane);
-    const covered = laneRun(cell.lane, footprint.lanes);
+    const covered = laneMask(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= lastRow; row++) {
       takeCells(row, covered);
       addLanes(heldByStanding, row, covered);
@@ -1190,7 +1186,7 @@ export function planSpawns<Kind extends string>(
   const lift = (lifted: Standing) => {
     const { block, cell, event, place, quota } = lifted;
     const footprint = quotaFootprint(quota);
-    const covered = laneRun(cell.lane, footprint.lanes);
+    const covered = laneMask(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= block.lastRow; row++) {
       heldByStanding[row] = (heldByStanding[row] ?? 0) & ~covered;
       const freed = covered & (taken[row] ?? 0) & ~(moverHeld[row] ?? 0);

@@ -15,6 +15,11 @@ export function laneDividerXs(laneCount: number, road: Rect): number[] {
   return Array.from({ length: laneCount - 1 }, (_, i) => road.x + laneWidth * (i + 1));
 }
 
+// The lane mask of count lanes from first on: bit i set for lane i.
+export function laneMask(first: number, count: number): number {
+  return ((1 << count) - 1) << first;
+}
+
 // Held at the edge lanes rather than leaving the road.
 export function moveLane(laneCount: number, direction: LaneDirection, lane: number): number {
   return clampIndex(laneCount, lane + direction);

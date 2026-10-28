@@ -1,5 +1,5 @@
 import type { DogId } from "../data/types";
-import type { LaneDirection } from "../layout/lanes";
+import { type LaneDirection, laneMask } from "../layout/lanes";
 import { type RoadProjection, screenXAt } from "../layout/projection";
 import { getOrInsert } from "../lib/maps";
 import { chance, type Random } from "../lib/random";
@@ -425,7 +425,7 @@ export function moverPrizes(
 
 // The lanes an item covers, as a lane mask.
 function itemLanes(item: Pick<WalkItem, "lane" | "laneSpan">): number {
-  return ((1 << item.laneSpan) - 1) << item.lane;
+  return laneMask(item.lane, item.laneSpan);
 }
 
 // The lane mask within reach lanes of the mask's lanes, on a road laneCount lanes wide.
@@ -434,7 +434,7 @@ function widenMask(laneCount: number, reach: number, mask: number): number {
   for (let step = 0; step < reach; step++) {
     widened |= (widened << 1) | (widened >> 1);
   }
-  return widened & ((1 << laneCount) - 1);
+  return widened & laneMask(0, laneCount);
 }
 
 // When an item comes into view: at the far edge of the road, or, with visionSeconds, once it

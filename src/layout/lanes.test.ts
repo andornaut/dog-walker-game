@@ -1,6 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import { type LaneDirection, moveLane } from "./lanes";
+import { type LaneDirection, laneMask, moveLane } from "./lanes";
+
+describe("laneMask", () => {
+  it.each([
+    { count: 0, first: 2, mask: 0b0 },
+    { count: 1, first: 0, mask: 0b1 },
+    { count: 1, first: 3, mask: 0b1000 },
+    { count: 3, first: 1, mask: 0b1110 },
+    { count: 5, first: 0, mask: 0b11111 },
+  ])("sets $count lanes from $first on", ({ count, first, mask }) => {
+    expect(laneMask(first, count)).toBe(mask);
+  });
+});
 
 describe("moveLane", () => {
   // One lane left or right, staying in the edge lane when moving off the road.
