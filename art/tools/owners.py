@@ -434,7 +434,7 @@ SMALL = 20
 
 
 def small_expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, brow=None, whites=False,
-                     glasses=None, lips=None):
+                     lips=None):
     """expression drawn at 20x20 on a Mini's own pixels, one feature per pixel: eyes at x 7 and 12 on rows 10
     and 11, brows on row 9 (raised to 8), the mouth on rows 13 and 14. Lashes are left out at this size."""
     p = g.g.p
@@ -469,14 +469,6 @@ def small_expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=Fa
     }[mood]
     for x, y in brows:
         p(x, y, brow)
-    if glasses:
-        # the frames a step lighter than on the large face, so the 1px eyes show inside them
-        glasses = {"walnut": "dbrown"}.get(glasses, glasses)
-        for x in (7, 12):
-            for dx, dy in ((-1, 10), (-1, 11), (1, 10), (1, 11), (0, 12)):
-                p(x + dx, dy, glasses)
-        p(9, 10, glasses)
-        p(10, 10, glasses)
     if mood == "happy":
         p(5, 12, blush)
         p(14, 12, blush)

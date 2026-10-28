@@ -2,9 +2,9 @@
 """Draw the owners standing, full body, and build their Aseprite sources and exports.
 
 owner-<dog>: 32x48, chibi, front view, in Endesga 32 with the road outline and
-the lit rim, like the forced-stop people in road.py. Each owner's hair, skin,
-glasses and clothes match their face-owner-<dog> portrait in owners.py, and
-their job shows in a prop held in the left hand. They stand at the gate on the
+the lit rim, like the forced-stop people in road.py. Each owner's hair, skin
+and clothes match their face-owner-<dog> portrait in owners.py, and their job
+shows in a prop held in the left hand. They stand at the gate on the
 start screen before the first walk and wave the pack home on the end screen.
 Tags: idle (2 frames at 400ms: they breathe, the body 1px higher on the second
 with the feet planted) and wave (2 frames at 300ms: the right arm raised, the
@@ -80,16 +80,6 @@ def head(g, b, skin, shade):
 def cheeks(g, b, c="pink"):
     g.p(10, 16 + b, c)
     g.p(22, 16 + b, c)
-
-
-def specs(g, b, c):
-    """Round glasses: a ring round each eye and a bridge between them."""
-    for x in (10, 18):
-        g.rect(x + 1, 11 + b, 2, 1, c)
-        g.rect(x + 1, 16 + b, 2, 1, c)
-        g.rect(x, 12 + b, 1, 4, c)
-        g.rect(x + 3, 12 + b, 1, 4, c)
-    g.rect(14, 13 + b, 4, 1, c)
 
 
 def eve_top(wave):
