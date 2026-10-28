@@ -1,12 +1,15 @@
-import { type GameObjects, Scene } from "phaser";
+import { type GameObjects, Scene, Scenes } from "phaser";
 
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
+import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { MenuText } from "../data/types";
 import { FEEDBACK } from "../home/feedback";
 import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import {
+  INSTALL_STEPS_FIT,
+  type InstallStepsLayout,
+  installStepsLayout,
   knobX,
   SETTINGS_ROW,
   type SettingsLayout,
@@ -21,31 +24,42 @@ import {
   volumeSteps,
 } from "../home/settings";
 import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
+import { screenArea } from "../input/outsideTap";
 import { itemAt } from "../lib/arrays";
 import { fillLine } from "../lib/lines";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
+import { installApp, installState, offersInstall, onInstallStateChange } from "../pwa";
 import type { Settings } from "../save/schema";
 import { closeFace } from "../ui/closeControl";
 import { PLAIN_ITEM, tileState } from "../ui/interaction";
-import { drawFocusRing, fillRect } from "../ui/phaser/draw";
+import { addDim, drawFocusRing, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import { addPixelText, fitPixelTextsAlike, type LabelToFit } from "../ui/phaser/pixelText";
+import {
+  addPixelText,
+  fitPixelText,
+  fitPixelTextsAlike,
+  type LabelToFit,
+  setPixelText,
+  withProbe,
+} from "../ui/phaser/pixelText";
 import { GREYED } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
 import { addDetailCard } from "./homePanels";
 import { listenOnePress } from "./onePress";
-import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
+import { closeOverlay, listenOutsideTap, onBackPressed, type OverlayData } from "./overlay";
 import { currentSettings, setSettings } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
-import { listenTargetPress } from "./targetPress";
+import { listenTargetPress, sameByValue } from "./targetPress";
 import {
+  addBodyText,
   addCloseButton,
   addNineSlice,
   addScreenBackdrop,
   addSelectTile,
   addTagImage,
   addTapBurst,
+  BODY_TEXT,
   clearScene,
 } from "./uiKit";
 
@@ -58,17 +72,18 @@ type SettingsWord = Exclude<keyof MenuText["settings"], "volume">;
 // Each row carries a 16x16 -panel icon with on and off tags, and the menuText.settings keys
 // of its label and note.
 type Row =
+  | { icon: string; key: "install"; kind: "button"; label: SettingsWord }
   | { icon: string; key: SwitchKey; kind: "switch"; label: SettingsWord; note: SettingsWord }
   | { icon: string; key: VolumeKey; kind: "slider"; label: SettingsWord };
 
-type Target = { kind: "close" } | { key: SwitchKey; kind: "switch" };
-
-function sameTarget(a: Target, b: Target): boolean {
-  return a.kind === "close" ? b.kind === "close" : b.kind === "switch" && a.key === b.key;
-}
+type Target =
+  | { kind: "close" }
+  | { kind: "install" }
+  | { kind: "stepsClose" }
+  | { key: SwitchKey; kind: "switch" };
 
 // Four rows, each its own tap target, and the close control.
-const ROWS: readonly Row[] = [
+const SETTING_ROWS: readonly Row[] = [
   {
     icon: "icon-sound-panel",
     key: "muted",
@@ -86,19 +101,33 @@ const ROWS: readonly Row[] = [
     note: "motionNote",
   },
 ];
-const ROW_KINDS = ROWS.map((row) => row.kind);
+// Under them while the game can be installed (offersInstall).
+const INSTALL_ROW: Row = {
+  icon: "icon-install-panel",
+  key: "install",
+  kind: "button",
+  label: "install",
+};
+// iOS's Share glyph, before the install steps.
+const SHARE_ICON = "icon-share";
 const ICON_DX = 6;
 const { labelDx: LABEL_DX } = SETTINGS_ROW;
 const SWITCH_ROW = SETTINGS_ROW.switch;
 const SWITCH = SWITCH_ROW.switch;
 const KNOB_HEIGHT = 16;
-// The keyboard moves through the rows, then the close control, one per focus row.
-const FOCUS_ROW_LENGTHS: readonly number[] = [...ROWS.map(() => 1), 1];
 // The ring stays inside the panel's 8px margin.
 const FOCUS_OUTSET = 3;
 
-function rowIndex(key: SwitchKey | VolumeKey): number {
-  return ROWS.findIndex((row) => row.key === key);
+function settingsRows(installable: boolean): readonly Row[] {
+  return installable ? [...SETTING_ROWS, INSTALL_ROW] : SETTING_ROWS;
+}
+
+// How many lines the iOS steps wrap onto in their card.
+function stepsLines(scene: Scene, steps: string): number {
+  return withProbe(scene, BODY_TEXT, (probe) => {
+    setPixelText(probe, steps);
+    return fitPixelText(probe, INSTALL_STEPS_FIT, 0, 0);
+  }).lines.length;
 }
 
 // A switch is on when its setting is: sound is on while not muted.
@@ -106,17 +135,22 @@ function switchOn(key: SwitchKey, settings: Settings): boolean {
   return key === "muted" ? !settings.muted : settings.reducedMotion;
 }
 
-// Sound on or off, music and effects volume, and reduced motion, reachable from the home
-// screen and the pause menu. Every change is saved and applied at once. A switch row is
-// normal and shows its setting in its switch; a tap dips the row, then flips it. Up and Down
-// move the keyboard's focus through the rows and the close control; Enter or Space presses
+// Sound on or off, music and effects volume, reduced motion and, until the game is installed
+// where it can be, Install app, reachable from the home screen and the pause menu. Every change
+// is saved and applied at once. A switch row is normal and shows its setting in its switch; a
+// tap dips the row, then flips it. Install app dips, then opens the browser's install prompt
+// or, on iOS, a card with the Share, then Add to Home Screen steps over the settings. Up and
+// Down move the keyboard's focus through the rows and the close control; Enter or Space presses
 // the focused row, and on a slider the left and right keys, Home and End set the volume.
 export class SettingsScene extends Scene {
   private dragging: VolumeKey | undefined;
   private focus: Focus | null = null;
-  private layout: SettingsLayout = settingsLayout(SCREEN_CONFIG, ROW_KINDS);
+  private layout: SettingsLayout = settingsLayout(SCREEN_CONFIG, []);
   private pressed: Target | undefined;
   private resumeKey: SceneKey | undefined;
+  private rows: readonly Row[] = SETTING_ROWS;
+  // The iOS install steps' card, while it is open.
+  private steps: InstallStepsLayout | undefined;
 
   constructor() {
     super(SCENE_KEYS.settings);
@@ -124,34 +158,39 @@ export class SettingsScene extends Scene {
 
   create(data?: OverlayData): void {
     this.resumeKey = data?.resume;
-    this.layout = settingsLayout(SCREEN_CONFIG, ROW_KINDS);
+    this.rows = settingsRows(offersInstall(installState()));
+    this.layout = settingsLayout(
+      SCREEN_CONFIG,
+      this.rows.map((row) => row.kind),
+    );
     this.dragging = undefined;
     this.focus = null;
     this.pressed = undefined;
+    this.steps = undefined;
     this.render();
 
-    // The close control and the switch rows; a switch dips, then flips.
+    // The install row comes and goes as the game becomes installable or installed.
+    const stopWatching = onInstallStateChange(() => this.scene.restart(data));
+    this.events.once(Scenes.Events.SHUTDOWN, stopWatching);
+
+    // The close control, the switch rows and the install row, which dip before they act, and
+    // the steps' card's close control.
     listenTargetPress<Target>(this, {
-      dipMs: (target) => (target.kind === "switch" ? FEEDBACK.pressDipMs : 0),
+      dipMs: (target) =>
+        target.kind === "switch" || target.kind === "install" ? FEEDBACK.pressDipMs : 0,
       onPressed: (target) => {
         this.pressed = target;
         this.render();
       },
-      onTap: (target) => {
-        if (target.kind === "close") {
-          this.close();
-        } else {
-          this.flip(target.key);
-        }
-      },
-      same: sameTarget,
+      onTap: (target) => this.tap(target),
+      same: sameByValue,
       targetAt: (x, y) => this.targetAt(x, y),
     });
     // The sliders, dragged from a press on their row; every press bursts where it lands.
     listenOnePress(this, {
       down: (pointer) => {
-        const row = ROWS.find((_, i) => containsPoint(this.rowRect(i), pointer.x, pointer.y));
-        if (row?.kind === "slider" && !currentSettings(this).muted) {
+        const row = this.rows.find((_, i) => containsPoint(this.rowRect(i), pointer.x, pointer.y));
+        if (this.steps === undefined && row?.kind === "slider" && !currentSettings(this).muted) {
           this.dragging = row.key;
           this.slideTo(pointer.x);
           // The knob shows pressed while held.
@@ -176,8 +215,15 @@ export class SettingsScene extends Scene {
         this.render();
       },
     });
-    // The screen around the card closes, as the close control in its band does.
-    listenDismiss(this, [this.layout.panel], () => this.close());
+    // The back button and the screen around the card close it, as the close control in its
+    // band does; while the steps' card is open, they close that card, and the settings card
+    // counts as around it. As listenDismiss, with the area read as each press lands.
+    onBackPressed(this, () => this.back());
+    listenOutsideTap(
+      this,
+      () => screenArea([this.steps?.card ?? this.layout.panel]),
+      () => this.back(),
+    );
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (menuKeyActs(event.repeat, event.key)) {
         this.onKey(event.key);
@@ -186,7 +232,13 @@ export class SettingsScene extends Scene {
   }
 
   private onKey(key: string): void {
-    const focusedRow = this.focus === null ? undefined : ROWS[this.focus.row];
+    if (this.steps !== undefined) {
+      if (isPauseKey(key) || isConfirmKey(key)) {
+        this.closeSteps();
+      }
+      return;
+    }
+    const focusedRow = this.focus === null ? undefined : this.rows[this.focus.row];
     if (focusedRow?.kind === "slider") {
       const settings = currentSettings(this);
       const current = volumeSteps(settings[focusedRow.key]);
@@ -204,7 +256,8 @@ export class SettingsScene extends Scene {
     }
     const direction = focusDirectionForKey(key);
     if (direction !== undefined) {
-      this.focus = moveFocus(FOCUS_ROW_LENGTHS, direction, this.focus);
+      // The rows, then the close control, one per focus row.
+      this.focus = moveFocus([...this.rows.map(() => 1), 1], direction, this.focus);
       this.render();
     } else if (isPauseKey(key)) {
       this.close();
@@ -215,14 +268,71 @@ export class SettingsScene extends Scene {
     }
   }
 
-  // Enter or Space flips a focused switch, and closes from the close control or with nothing
-  // focused.
+  // Enter or Space flips a focused switch, presses Install app, and closes from the close
+  // control or with nothing focused.
   private confirm(focusedRow: Row | undefined): void {
     if (focusedRow?.kind === "switch") {
       this.flipAfterDip(focusedRow.key);
+    } else if (focusedRow?.kind === "button") {
+      this.pressed = { kind: "install" };
+      this.render();
+      this.time.delayedCall(FEEDBACK.pressDipMs, () => this.install());
     } else if (focusedRow === undefined) {
       this.close();
     }
+  }
+
+  private tap(target: Target): void {
+    switch (target.kind) {
+      case "close":
+        this.close();
+        return;
+      case "install":
+        this.install();
+        return;
+      case "stepsClose":
+        this.closeSteps();
+        return;
+      case "switch":
+        this.flip(target.key);
+    }
+  }
+
+  // The browser's install prompt, asked for while the tap still counts as the player's
+  // gesture, or the iOS steps.
+  private install(): void {
+    this.pressed = undefined;
+    this.render();
+    void installApp().then((outcome) => {
+      if (outcome === "iosSteps" && this.scene.isActive()) {
+        this.openSteps();
+      }
+    });
+  }
+
+  private openSteps(): void {
+    const lines = stepsLines(this, gameData.menuText.settings.installSteps);
+    this.steps = installStepsLayout(SCREEN_CONFIG, lines);
+    this.render();
+  }
+
+  private closeSteps(): void {
+    this.steps = undefined;
+    this.pressed = undefined;
+    this.render();
+  }
+
+  // The back button and a tap outside the open card close the steps' card first.
+  private back(): void {
+    if (this.steps === undefined) {
+      this.close();
+    } else {
+      this.closeSteps();
+    }
+  }
+
+  private rowIndex(key: Row["key"]): number {
+    return this.rows.findIndex((row) => row.key === key);
   }
 
   private rowRect(index: number): Rect {
@@ -230,11 +340,17 @@ export class SettingsScene extends Scene {
   }
 
   private targetAt(x: number, y: number): Target | undefined {
+    if (this.steps !== undefined) {
+      return containsPoint(this.steps.close.hit, x, y) ? { kind: "stepsClose" } : undefined;
+    }
     if (containsPoint(this.layout.close.hit, x, y)) {
       return { kind: "close" };
     }
-    const row = ROWS.find((_, i) => containsPoint(this.rowRect(i), x, y));
-    return row?.kind === "switch" ? { key: row.key, kind: "switch" } : undefined;
+    const row = this.rows.find((_, i) => containsPoint(this.rowRect(i), x, y));
+    if (row?.kind === "switch") {
+      return { key: row.key, kind: "switch" };
+    }
+    return row?.kind === "button" ? { kind: "install" } : undefined;
   }
 
   // A key presses the switch row: it dips, then flips.
@@ -287,9 +403,11 @@ export class SettingsScene extends Scene {
     });
     const rows = this.add.container(0, 0);
     const notes: LabelToFit[] = [];
-    for (const row of ROWS) {
+    for (const row of this.rows) {
       if (row.kind === "switch") {
         notes.push(this.drawSwitchRow(rows, row, settings));
+      } else if (row.kind === "button") {
+        this.drawButtonRow(rows, row, settings);
       } else {
         this.drawSlider(row, settings);
       }
@@ -300,11 +418,67 @@ export class SettingsScene extends Scene {
     const separators = this.add.graphics();
     this.layout.separators.forEach((rect) => fillRect(separators, PALETTE.tan, rect));
     addCloseButton(this, this.add.container(0, 0), close, this.pressed?.kind === "close");
-    if (this.focus !== null) {
+    if (this.focus !== null && this.steps === undefined) {
       const focused =
-        this.focus.row < ROWS.length ? this.rowRect(this.focus.row) : closeFace(close);
+        this.focus.row < this.rows.length ? this.rowRect(this.focus.row) : closeFace(close);
       drawFocusRing(this.add.graphics(), FOCUS_OUTSET, focused);
     }
+    if (this.steps !== undefined) {
+      this.drawSteps(this.steps);
+    }
+  }
+
+  // The iOS install steps' card over the dimmed settings: its title in the band, its close
+  // control, and the Share glyph and steps under the band, the glyph left out while missing.
+  private drawSteps(steps: InstallStepsLayout): void {
+    const words = gameData.menuText.settings;
+    addDim(this, SCREEN_LAYOUT.screen);
+    addDetailCard(this, this.add.container(0, 0), steps.card, steps.band);
+    addPixelText(this, steps.title.x, steps.title.y, words.installStepsTitle, {
+      colour: PALETTE.white,
+      font: "title",
+      originX: 0.5,
+      scale: TEXT_SCALE,
+    });
+    if (this.textures.exists(SHARE_ICON)) {
+      this.add.image(steps.icon.x, steps.icon.y, SHARE_ICON).setOrigin(0);
+    }
+    const text = addBodyText(this, undefined, steps.steps, words.installSteps);
+    fitPixelText(text, INSTALL_STEPS_FIT, steps.steps.x, steps.steps.y);
+    addCloseButton(
+      this,
+      this.add.container(0, 0),
+      steps.close,
+      this.pressed?.kind === "stepsClose",
+    );
+  }
+
+  // Install app: a normal row that dips while pressed, its icon and label centred down it.
+  private drawButtonRow(
+    parent: GameObjects.Container,
+    row: Extract<Row, { kind: "button" }>,
+    settings: Settings,
+  ): void {
+    const rect = this.rowRect(this.rowIndex(row.key));
+    const tile = addSelectTile(this, parent, rect, {
+      edge: false,
+      reducedMotion: settings.reducedMotion,
+      state: "normal",
+      tile: false,
+    });
+    if (this.pressed?.kind === "install") {
+      tile.container.y += FEEDBACK.pressDipPx;
+    }
+    const { iconDy, labelDy } = SETTINGS_ROW.button;
+    const icon = addTagImage(this, row.icon, "on", rect.x + ICON_DX, rect.y + iconDy);
+    const label = addPixelText(
+      this,
+      rect.x + LABEL_DX,
+      rect.y + labelDy,
+      gameData.menuText.settings[row.label],
+      { colour: PALETTE[tile.look.text], font: "title", scale: TEXT_SCALE },
+    );
+    tile.content.add(icon === undefined ? [label] : [icon, label]);
   }
 
   // A switch row, its note left for render to fit with the others'. Returns the note.
@@ -313,7 +487,7 @@ export class SettingsScene extends Scene {
     row: Extract<Row, { kind: "switch" }>,
     settings: Settings,
   ): LabelToFit {
-    const rect = this.rowRect(rowIndex(row.key));
+    const rect = this.rowRect(this.rowIndex(row.key));
     const on = switchOn(row.key, settings);
     // The row is normal; whether it is on shows in its switch.
     const tile = addSelectTile(this, parent, rect, {
@@ -361,7 +535,7 @@ export class SettingsScene extends Scene {
   // A volume slider: drag along the row to set it. Muted, it is disabled and reads "Muted".
   private drawSlider(row: Extract<Row, { kind: "slider" }>, settings: Settings): void {
     const { key } = row;
-    const { x, y } = this.rowRect(rowIndex(key));
+    const { x, y } = this.rowRect(this.rowIndex(key));
     const { track: slider } = this.layout;
     const active = tileState({ ...PLAIN_ITEM, available: !settings.muted }) !== "disabled";
     const steps = volumeSteps(settings[key]);

@@ -654,6 +654,9 @@ export interface HomeText {
     readonly firstVisit: string;
     // Said in place of afterWalk after each of the player's first few walks.
     readonly howTo: string;
+    // Said once in place of howTo or afterWalk after the first finished walk, while the game
+    // can be installed and is not.
+    readonly install: string;
     readonly newAffordable: string;
     // After a walk that unlocked a walker.
     readonly newWalker: string;
@@ -988,6 +991,11 @@ export interface MenuText {
   };
   readonly settings: {
     readonly effects: string;
+    // The row that installs the game, shown until it is installed.
+    readonly install: string;
+    // The panel the row opens on iOS, where the browser has no install prompt.
+    readonly installSteps: string;
+    readonly installStepsTitle: string;
     readonly motion: string;
     readonly motionNote: string;
     readonly music: string;

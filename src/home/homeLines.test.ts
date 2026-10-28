@@ -41,25 +41,49 @@ describe("walkerLineKey", () => {
   const affordable = { affordable: true, walker: false };
   const none = { affordable: false, walker: false };
 
-  it("puts a first visit, a new walker, a firing, something new to buy and the how-to in that order", () => {
+  it("orders a first visit, a new walker, a firing, something new, installing and the how-to", () => {
     const cases: readonly [
       string,
       Pick<LastWalk, "firings"> | null,
       VisitNews,
+      boolean,
       number,
       WalkerLine,
     ][] = [
-      ["greets a player who has never walked, whatever else holds", null, both, 0, "firstVisit"],
-      ["puts a new walker ahead of a firing", fired, both, 1, "newWalker"],
-      ["puts a firing ahead of something new to buy", fired, affordable, 1, "afterFiring"],
-      ["puts a firing ahead of the how-to", fired, none, 1, "afterFiring"],
-      ["puts something new to buy ahead of the how-to", kept, affordable, 1, "newAffordable"],
-      ["says how to use the screen after the first walk", kept, none, 1, "howTo"],
-      ["says how to use the screen up to the last how-to walk", kept, none, HOW_TO_WALKS, "howTo"],
-      ["welcomes back after the how-to walks", kept, none, later, "afterWalk"],
+      [
+        "greets a player who has never walked, whatever else holds",
+        null,
+        both,
+        true,
+        0,
+        "firstVisit",
+      ],
+      ["puts a new walker ahead of a firing", fired, both, true, 1, "newWalker"],
+      ["puts a firing ahead of something new to buy", fired, affordable, true, 1, "afterFiring"],
+      ["puts a firing ahead of the how-to", fired, none, false, 1, "afterFiring"],
+      [
+        "puts something new to buy ahead of the install suggestion",
+        kept,
+        affordable,
+        true,
+        1,
+        "newAffordable",
+      ],
+      ["suggests installing in place of the how-to", kept, none, true, 1, "install"],
+      ["suggests installing in place of the welcome back", kept, none, true, later, "install"],
+      ["says how to use the screen after the first walk", kept, none, false, 1, "howTo"],
+      [
+        "says how to use the screen up to the last how-to walk",
+        kept,
+        none,
+        false,
+        HOW_TO_WALKS,
+        "howTo",
+      ],
+      ["welcomes back after the how-to walks", kept, none, false, later, "afterWalk"],
     ];
-    for (const [, lastWalk, news, walks, expected] of cases) {
-      expect(walkerLineKey(lastWalk, news, walks)).toBe(expected);
+    for (const [, lastWalk, news, suggestInstall, walks, expected] of cases) {
+      expect(walkerLineKey(lastWalk, news, suggestInstall, walks)).toBe(expected);
     }
   });
 });

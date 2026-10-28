@@ -190,6 +190,12 @@
   white-space: nowrap;
 }
 
+/* The storage line under the save cheats. */
+.dev-note {
+  margin: 12px 0 0;
+  opacity: 0.7;
+}
+
 .dev-actions .dev-primary {
   flex: 1;
 }

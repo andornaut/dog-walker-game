@@ -105,9 +105,9 @@ import { clampIndex, itemAt } from "../lib/arrays";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import type { Cents } from "../lib/units";
 import { addFigure, PackFigures } from "../pack/phaser/packFigures";
-import { startWakeLock, stopWakeLock } from "../pwa";
+import { installNudgeDue, noteInstallNudged, startWakeLock, stopWakeLock } from "../pwa";
 import type { SaveDocument } from "../save/schema";
-import { walksPlayed } from "../save/stats";
+import { walksFinished, walksPlayed } from "../save/stats";
 import { packDogsOf } from "../state/pack";
 import { closeControl } from "../ui/closeControl";
 import { gridRects, rectIndexAt } from "../ui/grid";
@@ -462,7 +462,12 @@ export class StartScene extends Scene {
       affordable: newlyAffordable(gameData, owned, before, bankCents),
       walker: walkerUnlockedSince(walkersBefore, owned.walkers),
     };
-    this.walkerLine = walkerLineKey(stats.lastWalk, news, walksPlayed(stats));
+    // Once per device, after the first finished walk, in place of the how-to or welcome back.
+    const suggestInstall = walksFinished(stats) > 0 && installNudgeDue();
+    this.walkerLine = walkerLineKey(stats.lastWalk, news, suggestInstall, walksPlayed(stats));
+    if (this.walkerLine === "install") {
+      noteInstallNudged();
+    }
     stopWakeLock();
     clearRunOverrides();
 

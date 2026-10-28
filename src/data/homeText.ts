@@ -9,6 +9,7 @@ export const HOME_TEXT = {
     afterWalk: "Nice walk! Who's next?",
     firstVisit: "Morning! Who's walking today? Tap to pick, press and hold to learn more.",
     howTo: "Tap to pick. Press and hold anything to learn more.",
+    install: "Install the app: full screen, offline.",
     newAffordable: "Something new at the Pet shop!",
     newWalker: "New walker!",
     noWalker: "Who's walking? Tap a face.",

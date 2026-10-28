@@ -62,7 +62,7 @@ export function soundVolumes(settings: Settings): { music: number; sfx: number }
   return { music: settings.musicVolume, sfx: settings.sfxVolume };
 }
 
-type SettingsRowKind = "slider" | "switch";
+export type SettingsRowKind = "button" | "slider" | "switch";
 
 export interface SettingsLayout {
   // The title band across the card's top, the title's capitals centred on it.
@@ -77,12 +77,14 @@ export interface SettingsLayout {
   track: SliderTrack & { dy: number; height: number };
 }
 
-// Offsets from a row's top-left corner. Every text is at 2x. A slider row has its 16x16 icon,
-// its 2x title-font label and its percentage over the track. A switch row has its icon and
-// label over its note, wrapped to noteWidth in up to two body-font lines a linePitch apart,
-// with the switch centred down the row's right side.
+// Offsets from a row's top-left corner. Every text is at 2x. A button row has its 16x16 icon
+// and its title-font label centred down it. A slider row has its 16x16 icon, its title-font
+// label and its percentage over the track. A switch row has its icon and label over its note,
+// wrapped to noteWidth in up to two body-font lines a linePitch apart, with the switch centred
+// down the row's right side.
 export const SETTINGS_ROW = {
-  height: { slider: 44, switch: 62 },
+  button: { iconDy: 14, labelDy: 17 },
+  height: { button: 44, slider: 44, switch: 62 },
   labelDx: 26,
   slider: { iconDy: 5, labelDy: 8 },
   switch: {
@@ -142,5 +144,60 @@ export function settingsLayout(
     })),
     title: { x: x + PANEL.width / 2, y: band.y + HOME_LAYOUT.card.band.titleY },
     track: { dy: 26, height: 10, knobWidth: 10, width: 216, x: x + 16 },
+  };
+}
+
+// The iOS install steps: a detail card, wide enough for its title clear of the close control,
+// centred on the screen, with its title band and close control, and under the band the 16x16
+// icon-share, centred on the first line's capitals (icon.dy from their top), then the steps in
+// body text, wrapped to up to lines lines a linePitch apart.
+export const INSTALL_STEPS = {
+  icon: { dy: -2, gap: 6, size: 16 },
+  linePitch: SETTINGS_ROW.switch.linePitch,
+  lines: 3,
+  pad: HOME_LAYOUT.card.pad,
+  stepsDy: 4,
+  width: HOME_LAYOUT.card.width,
+} as const;
+
+export const INSTALL_STEPS_FIT = {
+  room:
+    INSTALL_STEPS.width - 2 * INSTALL_STEPS.pad - INSTALL_STEPS.icon.size - INSTALL_STEPS.icon.gap,
+  styles: textFitStylesOnLines(INSTALL_STEPS.lines),
+};
+
+export interface InstallStepsLayout {
+  band: Rect;
+  card: Rect;
+  close: CloseControl;
+  // icon-share's top-left corner.
+  icon: { x: number; y: number };
+  // The steps' first line's left edge and capitals' top.
+  steps: { x: number; y: number };
+  title: { x: number; y: number };
+}
+
+// The card for steps wrapped onto lines lines.
+export function installStepsLayout(
+  screen: { height: number; width: number },
+  lines: number,
+): InstallStepsLayout {
+  const height = ROWS_TOP + lines * INSTALL_STEPS.linePitch + PANEL_FOOT;
+  const card = {
+    height,
+    width: INSTALL_STEPS.width,
+    x: Math.round((screen.width - INSTALL_STEPS.width) / 2),
+    y: Math.round((screen.height - height) / 2),
+  };
+  const band = cardBand(card);
+  const { icon, pad, stepsDy } = INSTALL_STEPS;
+  const stepsY = card.y + ROWS_TOP + stepsDy;
+  return {
+    band,
+    card,
+    close: closeControl(card),
+    icon: { x: card.x + pad, y: stepsY + icon.dy },
+    steps: { x: card.x + pad + icon.size + icon.gap, y: stepsY },
+    title: { x: card.x + INSTALL_STEPS.width / 2, y: band.y + HOME_LAYOUT.card.band.titleY },
   };
 }

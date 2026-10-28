@@ -12,7 +12,7 @@ import { pageRunSetup } from "./dev/pageRunSetup";
 import { noteKeyPress } from "./input/keyNumbers";
 import { lostTouches } from "./input/touches";
 import { integerZoom } from "./layout/integerZoom";
-import { noteWalkStarted, setOnHomeScreen, setupPhoneApp } from "./pwa";
+import { noteWalkStarted, setOnHomeScreen, setupPhoneApp, storagePersistence } from "./pwa";
 import { BootScene } from "./scenes/BootScene";
 import { CardScene } from "./scenes/CardScene";
 import { CelebrationScene } from "./scenes/CelebrationScene";
@@ -34,6 +34,7 @@ import { ZoneCelebrationScene } from "./scenes/ZoneCelebrationScene";
 // The dev panel's view of the game: the cheats are a registry entry RunScene reads each frame.
 function devPanelHost(game: Game): DevPanelHost {
   return {
+    persistence: storagePersistence(),
     setCheats: (cheats) => {
       game.registry.set(DEV_CHEATS_KEY, cheats);
     },

@@ -6,6 +6,7 @@ import "./devPanel.css";
 
 import { gameData } from "../data";
 import { sessionRead, sessionRemove, sessionWrite } from "../lib/sessionStore";
+import type { StoragePersistence } from "../pwa/storagePersistence";
 import { saveContextFrom } from "../save/load";
 import { loadedSave, newPlayerOnDevice } from "../save/profile";
 import { createDefaultSave } from "../save/schema";
@@ -41,9 +42,19 @@ import { stripDevParams } from "./devStart";
 import { randomSeed } from "./runSetup";
 
 export interface DevPanelHost {
+  // What the browser answered when asked to keep the game's storage.
+  readonly persistence: Promise<StoragePersistence>;
   // Hands the game the cheats it plays by.
   setCheats(cheats: Cheats): void;
 }
+
+const PERSISTENCE_LABELS: Readonly<Record<StoragePersistence | "asking", string>> = {
+  asking: "Storage: asking the browser to keep it",
+  bestEffort: "Storage: the browser may clear it",
+  browserTab: "Storage: the browser may clear it; asked only when installed",
+  persisted: "Storage: kept by the browser",
+  unsupported: "Storage: no persist API, the browser may clear it",
+};
 
 type Props<K extends keyof HTMLElementTagNameMap> = Partial<
   Omit<HTMLElementTagNameMap[K], "style">
@@ -248,6 +259,11 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     }
   });
 
+  const persistence = el("p", { className: "dev-note", textContent: PERSISTENCE_LABELS.asking });
+  void host.persistence.then((answer) => {
+    persistence.textContent = PERSISTENCE_LABELS[answer];
+  });
+
   sheet.append(
     el("h2", { textContent: "Changes your walks" }),
     controls,
@@ -255,6 +271,7 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     el("hr", { className: "dev-divider" }),
     el("h2", { textContent: "Changes your save" }),
     el("div", { className: "dev-save" }, ...saveCheats, reset),
+    persistence,
   );
   container.append(bar, sheet);
   setOpen(sessionRead(DEV_PANEL_OPEN_KEY) === "1");

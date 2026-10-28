@@ -49,6 +49,9 @@ export const MENU_TEXT = {
   },
   settings: {
     effects: "Effects",
+    install: "Install app",
+    installSteps: "Tap Share, then Add to Home Screen.",
+    installStepsTitle: "Add to Home Screen",
     motion: "Reduced motion",
     motionNote: "Skips shakes, bobs, confetti, scenery",
     music: "Music",

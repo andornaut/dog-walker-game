@@ -1,18 +1,26 @@
 // The game as an installed phone app: the service worker and its update notice, the screen wake
-// lock, the back gesture, visibility and orientation events, the turn-upright notice and audio
-// unlock. setupPhoneApp runs once from main.ts; the scenes listen for PHONE_EVENTS on window and
-// call the functions below.
+// lock, the back gesture, visibility and orientation events, the turn-upright notice, audio
+// unlock, the install offer and persistent storage. setupPhoneApp runs once from main.ts; the
+// scenes listen for PHONE_EVENTS on window and call the functions below.
 import { chooseSoundFormat, type SoundFormat } from "../audio/soundFormat";
+import { browserStorage, lazyStorage } from "../save/storage";
 import { guardBackNavigation } from "./backNavigation";
 import { PHONE_EVENTS } from "./events";
+import { type InstallFlow, type InstallOutcome, watchInstall } from "./installFlow";
+import { createInstallNudge, type InstallNudge } from "./installNudge";
+import type { InstallState } from "./installState";
 import { type OrientationRelay, relayOrientationEvents, type Viewport } from "./orientation";
 import { serviceWorkerUrl } from "./serviceWorkerUrl";
+import { requestPersistentStorage, type StoragePersistence } from "./storagePersistence";
 import { createUpdateFlow, noticePlacement, type UpdateFlow } from "./updateReady";
 import { relayVisibilityEvents } from "./visibility";
 import { createScreenWakeLock, type ScreenWakeLock } from "./wakeLock";
 
 export { AUDIO_UNLOCK_EVENTS, unlockAudioOnFirstGesture } from "./audioUnlock";
 export { PHONE_EVENTS } from "./events";
+export type { InstallOutcome } from "./installFlow";
+export { type InstallState, offersInstall } from "./installState";
+export type { StoragePersistence } from "./storagePersistence";
 
 const SERVICE_WORKER_URL = "/sw.js";
 // Elements in pages/play/index.html.
@@ -46,7 +54,10 @@ export function browserSoundFormat(): SoundFormat | undefined {
   return chooseSoundFormat((mimeType) => audio.canPlayType(mimeType));
 }
 
+let installFlow: InstallFlow | undefined;
+let installNudge: InstallNudge | undefined;
 let orientation: OrientationRelay | undefined;
+let persistence: Promise<StoragePersistence> = Promise.resolve("unsupported");
 let screenWakeLock: ScreenWakeLock | undefined;
 let updateFlow: UpdateFlow | undefined;
 
@@ -119,6 +130,14 @@ function showTurnUprightNotice(): void {
 // version (it never resolves for a page that reloads into one first).
 export function setupPhoneApp(): Promise<void> {
   const bootable = registerServiceWorker();
+  installFlow = watchInstall(window);
+  // Asked once per launch of the installed app, never in a browser tab. Not waited for: the game
+  // boots whatever the browser answers, or if it never does.
+  persistence = requestPersistentStorage(
+    installFlow.state() === "installed",
+    "storage" in navigator ? navigator.storage : undefined,
+  );
+  installNudge = createInstallNudge(browserStorage(lazyStorage(() => globalThis.localStorage)));
   relayVisibilityEvents(window, document);
   showTurnUprightNotice();
   orientation = relayOrientationEvents(readViewport, window);
@@ -154,4 +173,34 @@ export function setOnHomeScreen(onHome: boolean): void {
 // A walk started, which counts as the player interacting even with no input (a dev walk URL).
 export function noteWalkStarted(): void {
   updateFlow?.noteInteraction();
+}
+
+// What the browser answered when asked to keep the game's storage, for the dev panel.
+export function storagePersistence(): Promise<StoragePersistence> {
+  return persistence;
+}
+
+export function installState(): InstallState {
+  return installFlow?.state() ?? "unsupported";
+}
+
+// Calls listener on each change of the install state until the returned function is called.
+export function onInstallStateChange(listener: (state: InstallState) => void): () => void {
+  return installFlow?.onChange(listener) ?? (() => undefined);
+}
+
+// Shows the browser's install prompt, or tells the caller to show the iOS steps. Call it from
+// the player's tap: the browser shows its prompt only during a gesture.
+export function installApp(): Promise<InstallOutcome> {
+  return installFlow?.install() ?? Promise.resolve("unavailable");
+}
+
+// Whether the start screen should suggest installing now: once per device, while the state
+// offers a way to install.
+export function installNudgeDue(): boolean {
+  return installNudge?.due(installState()) ?? false;
+}
+
+export function noteInstallNudged(): void {
+  installNudge?.markShown();
 }

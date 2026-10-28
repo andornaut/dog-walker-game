@@ -21,11 +21,12 @@ export interface VisitNews {
 
 // The walker's own line, in priority order: a player who has never walked; a walker unlocked
 // since the last visit; the last walk had a firing; something became affordable since the
-// last visit; back from one of the first few walks, how to use the screen; back from a later
-// walk.
+// last visit; the one-time suggestion to install the game, when suggestInstall; back from one
+// of the first few walks, how to use the screen; back from a later walk.
 export function walkerLineKey(
   lastWalk: Pick<LastWalk, "firings"> | null,
   news: VisitNews,
+  suggestInstall: boolean,
   walks: number,
 ): WalkerLine {
   if (lastWalk === null) {
@@ -39,6 +40,9 @@ export function walkerLineKey(
   }
   if (news.affordable) {
     return "newAffordable";
+  }
+  if (suggestInstall) {
+    return "install";
   }
   return walks <= HOW_TO_WALKS ? "howTo" : "afterWalk";
 }
