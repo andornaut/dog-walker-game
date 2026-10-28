@@ -1730,35 +1730,53 @@ def beaches():
 
 
 def cn_tower(cv, cx, base, top):
-    """The tower far off at night, from its antenna's tip on row top to row base, in the far landmarks'
-    haze shaded lgrey, in its real proportions: the antenna the top sixth, a red beacon at its tip and
-    another halfway down; the SkyPod with its gold windows; a 5-column shaft on to the main pod, 23 wide
-    with a gold window band, two thirds of the way up; then the long shaft tapering out to 13 columns at the foot."""
+    """The CN Tower at night, the tallest thing on the skyline, from its antenna's tip on row top down to row
+    base, centred on column cx, in an ink outline, lgrey lit white on its left and grey in shade on its right,
+    in its real proportions: the antenna the top sixth, 2 columns wide, with a red light at its tip and another
+    halfway down; the SkyPod with a ring of lit windows; a 5-column shaft on to the main pod, about two thirds
+    of the way up, a saucer 31 wide under a white cap with two rings of lit 2x2 windows, gold over amber and
+    cream, its underside in shade; then the shaft tapering out to 17 columns at the foot."""
     h = base - top
-
-    def row(y, half):
-        cv.fill(cx - half, y, 2 * half + 1, 1, "haze")
-        cv.fill(cx + max(1, half - 2), y, min(3, half), 1, "lgrey")
-
-    mast, sky_pod, pod = top + round(h * 0.09), top + round(h * 0.16), top + round(h * 0.33)
-    cv.fill(cx, top, 1, mast - top, "lgrey")
-    for y in range(mast, sky_pod):
-        row(y, 1)
-    for k, half in enumerate((2, 4, 4, 4, 3)):
-        row(sky_pod + k, half)
-    cv.fill(cx - 3, sky_pod + 2, 7, 1, "gold")
-    for y in range(sky_pod + 5, pod):
-        row(y, 2)
-    for k, half in enumerate((6, 9, 10, 11, 11, 11, 10, 9, 7, 5)):
-        row(pod + k, half)
-    cv.fill(cx - 11, pod + 4, 23, 1, "gold")
-    for x in range(cx - 10, cx + 11, 3):
-        cv.fill(x, pod + 4, 1, 1, "amber")
-    for y in range(pod + 10, base):
-        row(y, 2 + (y - pod - 10) * 5 // (base - pod - 10))
-        cv.fill(cx, y, 1, 1, "lgrey")
-    cv.fill(cx, top, 1, 1, "red")
-    cv.fill(cx, mast - (mast - top) // 2, 1, 1, "red")
+    sky_pod, pod = top + round(h * 0.16), top + round(h * 0.33)
+    rows = {}
+    for y in range(top, sky_pod):
+        rows[y] = (0, 1)
+    for k, half in enumerate((2, 4, 5, 5, 4, 3)):
+        rows[sky_pod + k] = (half, half)
+    for y in range(sky_pod + 6, pod):
+        rows[y] = (2, 2)
+    saucer = (5, 9, 12, 14, 15, 15, 15, 15, 14, 12, 9, 7, 5, 4)
+    for k, half in enumerate(saucer):
+        rows[pod + k] = (half, half)
+    low = pod + len(saucer)
+    for y in range(low, base):
+        half = 3 + (y - low) * 5 // max(1, base - low)
+        rows[y] = (half, half)
+    inside = {(x, y) for y, (left, right) in rows.items() for x in range(cx - left, cx + right + 1)}
+    for x, y in inside:
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            if (x + dx, y + dy) not in inside:
+                cv.fill(x + dx, y + dy, 1, 1, "ink")
+    for y, (left, right) in rows.items():
+        cv.fill(cx - left, y, left + right + 1, 1, "lgrey")
+        cv.fill(cx - left, y, 1, 1, "white")
+        shade = min(3, right) if right > 1 else 1
+        cv.fill(cx + right - shade + 1, y, shade, 1, "grey")
+    # the antenna's lights, the SkyPod's window ring
+    cv.fill(cx, top, 2, 2, "red")
+    cv.fill(cx, top + (sky_pod - top) // 2, 2, 2, "red")
+    for k, x in enumerate(range(cx - 4, cx + 5, 3)):
+        cv.fill(x, sky_pod + 2, 2, 2, ("cream", "gold")[k % 2])
+    # the main pod: a white cap, a ring of gold and amber windows at its widest, a ring of cream below it,
+    # the underside in shade
+    cv.fill(cx - 11, pod + 2, 23, 1, "white")
+    for k, x in enumerate(range(cx - 14, cx + 14, 3)):
+        cv.fill(x, pod + 4, 2, 2, ("gold", "amber")[k % 2])
+    cv.fill(cx - 15, pod + 6, 31, 1, "grey")
+    for x in range(cx - 13, cx + 13, 3):
+        cv.fill(x, pod + 7, 2, 2, "cream")
+    for k, half in enumerate(saucer[9:]):
+        cv.fill(cx - half, pod + 9 + k, 2 * half + 1, 1, "grey")
 
 
 def mast(cv, cx, top, h):
@@ -1932,7 +1950,7 @@ def word_art(text, col):
 
 
 def dundas_screens(cv, x, w, top):
-    """The Yonge-Dundas tower: shale with runs of lit windows over its wall of screens, the giant WOOF!
+    """The Yonge-Dundas tower: shale with runs of lit windows over its wall of screens, the giant LIVE!
     screen at 2x on cobalt over blue and, under it, three ads (EAT on red, a paw print on turquoise,
     NEW on hot pink) starting clear of the EATON CENTRE sign at column 161."""
     cv.fill(x, top, w, BASE - top, "shale")
@@ -1941,7 +1959,7 @@ def dundas_screens(cv, x, w, top):
     sx, sw, sy, sh = x + 3, w - 6, top + 9, 18
     screen(cv, sx, sy, sw, sh, "cobalt")
     cv.fill(sx, sy + sh - 6, sw, 6, "blue")
-    word(cv, "WOOF!", x + w / 2, sy, "gold", 2)
+    word(cv, "LIVE!", x + w / 2, sy, "gold", 2)
     ay, ax = sy + sh + 3, max(sx, 161)
     aw = (sx + sw - ax - 4) // 3
     for k, (back, art) in enumerate((("ttc", word_art("EAT", "white")), ("turquoise", paw_art),
@@ -2202,17 +2220,19 @@ def yonge():
     # downtown is a wall of towers filling most of the sky, the only sky left in the gaps and over the
     # top: unlike the other backdrops it rises above row 45, under the debuff bars' and the message
     # strip's opaque plates. Far back, dark towers in navy and dslate with a third of their windows lit
-    skyline(cv, ((-2, 16, 30, "navy"), (44, 20, 22, "dslate"), (66, 18, 36, "navy"), (114, 22, 26, "navy"),
-                 (150, 18, 16, "dslate"), (170, 20, 34, "navy"), (196, 16, 24, "dslate"), (214, 14, 12, "navy"),
+    # Every tower tops out below the CN Tower's SkyPod, and the towers either side of its pod stay low, so
+    # it stands clear against the sky
+    skyline(cv, ((-2, 16, 30, "navy"), (44, 20, 54, "dslate"), (66, 18, 58, "navy"), (114, 22, 30, "navy"),
+                 (150, 18, 28, "dslate"), (170, 20, 34, "navy"), (196, 16, 28, "dslate"), (214, 14, 26, "navy"),
                  (228, 18, 30, "navy"),
-                 (268, 16, 40, "dslate"), (300, 18, 30, "navy"), (322, 16, 24, "dslate"), (342, 20, 38, "navy")))
-    for cx, top, h in ((52, 22, 9), (122, 26, 7), (156, 16, 8), (178, 34, 6), (220, 12, 6), (348, 38, 8)):
+                 (268, 16, 40, "dslate"), (300, 18, 30, "navy"), (322, 16, 28, "dslate"), (342, 20, 38, "navy")))
+    for cx, top, h in ((122, 30, 6), (156, 28, 5), (178, 34, 6), (220, 26, 4), (348, 38, 8)):
         mast(cv, cx, top - h, h)
-    # behind the SkyDome, lit towers and, far off in a lighter haze, the CN Tower, the tallest thing on
-    # the skyline, its slender shaft rising from behind the dome's left flank; a low dark block between
-    # the shaft and the dome keeps the two light shapes apart; then the SkyDome, large, in front
+    # behind the SkyDome, lit towers and the CN Tower, the tallest thing on the skyline, from the band's
+    # top row down behind the dome's left flank; a low dark block between the shaft and the dome keeps the
+    # two light shapes apart; then the SkyDome, large, in front
     glass_tower(cv, 14, 30, 40, 7)
-    scotia(cv, 76, 24, 28)
+    scotia(cv, 80, 24, 34)
     dominion(cv, 102, 22, 44, 5)
     glass_tower(cv, 126, 22, 34, 8, "dslate")
     cn_tower(cv, 61, BASE, 0)
@@ -2233,7 +2253,7 @@ def yonge():
     dundas_screens(cv, CX - 32, 64, 40)
     royal_bank(cv, 210, 20, 36)
     royal_bank(cv, 230, 14, 58)
-    first_canadian(cv, 246, 22, 14)
+    first_canadian(cv, 246, 22, 26)
     dominion(cv, 270, 34, 30, 1)
     glass_tower(cv, 332, 32, 34, 3)
     crown(cv, 332, 32, 34, "turquoise", "turquoise", steps=3)
@@ -2248,7 +2268,7 @@ def yonge():
             fronts.append((x + 1, x + w - 1))
     eaton_centre(cv, 82, 72, BASE - 36)
     blade(cv, 3, 58, "HOTEL", "pink")
-    screen(cv, 16, 46, 26, 20, "turquoise", word_art("LIVE", "white"))
+    screen(cv, 14, 46, 30, 20, "turquoise", word_art("WOOF!", "white"))
     screen(cv, 274, 46, 26, 20, "azure", paw_art)
     screen(cv, 334, 52, 26, 22, "hot", word_art("SALE", "white"))
     elgin(cv, 236, BASE - 73, BASE - 25)
