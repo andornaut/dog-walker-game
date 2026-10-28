@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Draw the neighbourhood road people: the movers and the busker that only some
 neighbourhoods have, drawn like road.py's road people (laid out on a 32x48
-design grid, the couple and the tour group on 112/1.5 x 48, and drawn
-road.SCALE (1.5) times bigger on a minis.Mini), with the road outline
-(pixel.road_edge) and road.LIT's lit rim, cel shaded.
+design grid, the couple, the tour group and the carriage on 112/1.5 x 48 and
+the stilt walker on 32x64, and drawn road.SCALE (1.5) times bigger on a
+minis.Mini), with the road outline (pixel.road_edge) and road.LIT's lit rim,
+cel shaded.
 
 tourist             48x72   Distillery District and Yonge Street; a stepper facing the player, as the
                             mail carrier is: a straw sun hat with a red band, a turquoise holiday shirt
@@ -387,16 +388,22 @@ NOTE = ("..##", "..#.", "..#.", "###.", "##..")
 
 
 def note(g, x, y, c):
-    """NOTE with its top-left at design (x, y), one drawn pixel per character; a single pixel below 1x."""
-    s, px = scale_of(g), raster(g)
-    x0, y0 = scaled(x, s), scaled(y, getattr(g, "sy", s))
+    """NOTE with its top-left at design (x, y), one drawn pixel per character; a 1x2 dash below 1x."""
+    s = scale_of(g)
     if s < 1:
-        px.rect(x0, y0, 1, 2, c)
+        raster(g).rect(scaled(x, s), scaled(y, getattr(g, "sy", s)), 1, 2, c)
         return
-    for j, row in enumerate(NOTE):
+    bitmap_at(g, NOTE, x, y, c)
+
+
+def bitmap_at(g, rows, x, y, c):
+    """A character map with its top-left at design (x, y), one drawn pixel per character."""
+    s, sy = scale_of(g), getattr(g, "sy", scale_of(g))
+    px = raster(g)
+    for j, row in enumerate(rows):
         for i, ch in enumerate(row):
             if ch == "#":
-                px.p(x0 + i, y0 + j, c)
+                px.p(scaled(x, s) + i, scaled(y, sy) + j, c)
 
 
 def busker_top(strum=0, nod=0):
@@ -1014,6 +1021,8 @@ def gardener(lf=0, rf=0, bob=0, roll="0", tilt="0"):
     g.p(10, 17 + b, "pink")
     g.p(22, 17 + b, "pink")
     return rim(g, GARDENER_RIM)
+
+
 # ---------- ranger-cart: a park ranger's utility cart, facing the player, stop and go ----------
 
 # Driving: the front tires' tread falls 1px a frame and the body dips 1px onto them on frames 1 and 2; 4 frames
@@ -1143,6 +1152,8 @@ def ranger_cart(roll=None, light=0, look=0, point=0):
     body = px.px
     px.px = [[(body[y - dip][x] if y >= dip else None) or wheels[y][x] for x in range(px.w)] for y in range(px.h)]
     return rim(g, RANGER_RIM)
+
+
 # ---------- ice-cream-bike: facing the player, pedalling a freezer box down a lane ----------
 
 # Pedalling: each foot's row under the box (the pedals go round), the wheels' tread roll and the rider's
@@ -1175,16 +1186,6 @@ def recolour(g, x0, x1, y1, inside, swap):
         for x in range(max(0, scaled(x0, s)), min(px.w, scaled(x1, s))):
             if px.px[y][x] in swap and inside((x + 0.5) / s, (y + 0.5) / sy):
                 px.px[y][x] = swap[px.px[y][x]]
-
-
-def bitmap_at(g, rows, x, y, c):
-    """A character map with its top-left at design (x, y), one drawn pixel per character."""
-    s, sy = scale_of(g), getattr(g, "sy", scale_of(g))
-    px = raster(g)
-    for j, row in enumerate(rows):
-        for i, ch in enumerate(row):
-            if ch == "#":
-                px.p(scaled(x, s) + i, scaled(y, sy) + j, c)
 
 
 def ice_cream_bike(lf=42.5, rf=42.5, roll=None, sway=0, offer=False, lift=0, bob=0, ring=0):
@@ -1278,8 +1279,10 @@ def ice_cream_bike(lf=42.5, rf=42.5, roll=None, sway=0, offer=False, lift=0, bob
     g.rect(14, 30, 1, 3, "white")
     if ring:
         # the ring marks: three short strokes out from the bell, up, up-left and left, further out on ring 2
-        bitmap_at(g, RING[ring - 1], 0, 19.5, K["amber"])
+        bitmap_at(g, RING[ring - 1], 0, 19.5, "amber")
     return rim(g, ICE_RIM)
+
+
 # ---------- food-cart-vendor: pushing a churro cart down a lane at the player ----------
 
 # Pushing the cart: road.PERSON_WALK's stride under the cart and the 1px bob, the stroller's pace, while the
@@ -1411,6 +1414,8 @@ def food_cart_vendor(lf=0, rf=0, bob=0, wipe=None, bell=None, tread=0):
         g.rect(x0, 1, 4, 1, ("foam" if i % 2 == 0 else "white") if light else col)
         g.cel(x0 + 2, 7, 2, 1.6, col)
     return rim(g, CART_RIM)
+
+
 # ---------- sign-spinner: facing the player, twirling an arrow sign between hops ----------
 
 # The arrow sign, pointing right, about its pivot (the hands, at the centre of the board): (along, across)
@@ -1613,6 +1618,8 @@ def hopscotch_kid(bob=0, foot=0, arms=0, tilt=0, kick=0, tail=0, sway=0):
     if sway:
         g = lean(g, sway)
     return rim(g, KID_RIM)
+
+
 # ---------- tour-group: a guide with a flag and two tourists, facing the player, two lanes ----------
 
 # The tour group's design grid: 112 px wide at road.SCALE, 48 rows, as the couple's. The left edge of each
@@ -1772,6 +1779,8 @@ def tour_group(glf=0, grf=0, gbob=0, garms=0, llf=0, lrf=0, lbob=0, larms=0, rlf
     tour_right(g, TOUR_RIGHT, rbob, rlf, rrf, rarms)
     tour_guide(g, GUIDE, gbob, glf, grf, garms, dip)
     return rim(g, TOUR_RIM)
+
+
 # ---------- volleyball-player: side on, darting across the road after a ball ----------
 
 # Running across: the near leg reaching forward to plant as the far foot kicks up behind, the far knee coming
@@ -1936,6 +1945,8 @@ def volleyball_player(pose="run-reach", bob=0, tail=0):
     for x, y, r in q.get("sand", ()):
         g.cel(x, y, r, r, "tan", "brown", "cream")
     return rim(g, VOLLEY_RIM)
+
+
 # ---------- carriage: a horse-drawn tour carriage coming at the player, two lanes ----------
 
 # The carriage's design grid: 112 px wide at road.SCALE, as the couple's, 48 rows; C is its centre column.
@@ -2347,6 +2358,7 @@ def steps(suffix, s):
     yield f"volleyball-player{suffix}", [("run", [own(volleyball_player, q) for q in VOLLEY_RUN], VOLLEY_RUN_MS),
                                          ("dive", [own(volleyball_player, q) for q in VOLLEY_DIVE], VOLLEY_DIVE_MS),
                                          ("idle", [own(volleyball_player, q) for q in VOLLEY_IDLE], VOLLEY_IDLE_MS)]
+
     def wheeled(q):
         """The carriage in pose q, its wheels' roll a frame index, not an offset to snap."""
         pose = {k: v for k, v in q.items() if k != "roll"}
