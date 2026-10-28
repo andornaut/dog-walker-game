@@ -345,11 +345,11 @@ export const WORLD = {
       difficulty: 4,
       difficultyName: "Hard",
       id: "shops",
-      leashColour: "#f6757a",
+      leashColour: "#3e2731",
       moverShare: 1,
       name: "Kensington Market",
-      roadColour: "#5e2620",
-      roadShadowColour: "#2e2019",
+      roadColour: "#8a857c",
+      roadShadowColour: "#625e58",
       speed: 1,
       weights: {
         minorObstacles: {
