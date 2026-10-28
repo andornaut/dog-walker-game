@@ -1,7 +1,7 @@
 {
   "id": "/play/",
-  "name": "Dog Walker",
-  "short_name": "Dog Walker",
+  "name": "Archie's Dog Walks",
+  "short_name": "Archie's Walks",
   "description": "A cozy pixel-art lane runner about walking dogs.",
   "start_url": "/play/",
   "scope": "/",
