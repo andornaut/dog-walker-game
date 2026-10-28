@@ -19,7 +19,6 @@ import type {
 } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import { keysOf } from "../lib/records";
-import { roundDollars } from "../lib/units";
 import { type EffectSource, type ModifierSource, newRun, type RunState } from "../state/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
@@ -125,7 +124,6 @@ function optionModified(encounter: EncounterId, index: number, state: RunState):
 
 const sources = {
   bigTipper: { kind: "upgrade", upgrade: "bigTipper" },
-  fannyPack: { gear: "fannyPack", kind: "gear" },
   goodLeash: { kind: "upgrade", upgrade: "goodLeash" },
   hallPass: { gear: "hallPass", kind: "gear" },
   longReach: { kind: "walker", walker: walkerWith("longReach") },
@@ -145,34 +143,8 @@ describe("a card option's modified values", () => {
   const letGo = read(tuning, "money", thiefPays.effect.amount);
   const seconds = read(tuning, "seconds", DEBUFFS[skunkDebuff.effect.debuff].seconds);
   const calmed = seconds * read(tuning, "multipliers", "quickRecoveryDebuffFactor");
-  const cut = roundDollars(letGo * read(tuning, "multipliers", "fannyPackCardCostFactor"));
 
   it.each([
-    [
-      "Fanny pack cuts the cost",
-      () =>
-        optionModified("thief", thiefPays.index, { ...runWith(PLAIN, "fannyPack"), money: letGo }),
-      [
-        {
-          after: -cut,
-          before: -letGo,
-          by: by(letGo - cut, sources.fannyPack),
-          subject: { kind: "money" },
-        },
-      ],
-    ],
-    [
-      "Sweet talker waives a cost Fanny pack would cut",
-      () => optionModified("thief", thiefPays.index, runWith(PLAIN, "fannyPack", ["sweetTalker"])),
-      [
-        {
-          after: 0,
-          before: -letGo,
-          by: by(letGo, sources.sweetTalker),
-          subject: { kind: "money" },
-        },
-      ],
-    ],
     [
       "Sweet talker waives the cost",
       () => optionModified("thief", thiefPays.index, runWith(PLAIN, null, ["sweetTalker"])),

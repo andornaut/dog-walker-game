@@ -8,6 +8,7 @@ import { ownerMaxHearts } from "./dogs";
 import { resolveEffects } from "./effects";
 import type { ModifiedValue } from "./modified";
 import { price } from "./shop";
+import { holdSpareTreats } from "./spareTreats";
 import { readTable } from "./units";
 
 // Gear drops: a gear item found on the road, which a neighbourhood places at random. Grabbing
@@ -71,18 +72,19 @@ export function foundGearSource(gear: GearId): Extract<EffectSource, { kind: "ge
 const isFound = (source: ModifierSource): boolean =>
   source.kind === "gear" && source.found === true;
 
-// The found item's effects ended: its modifiers, dodges, immunities and skip gone, and each
-// owner's hearts held to their max as it stands without them, as when a found Lucky collar's
-// extra max goes. A Skip already used this neighbourhood stays used.
+// The found item's effects ended: its modifiers, dodges, immunities and skip gone, the spare
+// treats held cut to the room left without them, as when a found Fanny pack goes back with its
+// spare treat, and each owner's hearts held to their max as it stands without them, as when a
+// found Lucky collar's extra max goes. A Skip already used this neighbourhood stays used.
 function dropFoundEffects(data: Pick<GameData, "dogs" | "tuning">, run: RunState): RunState {
-  const ended: RunState = {
+  const ended: RunState = holdSpareTreats(data, {
     ...run,
     dodges: run.dodges.filter(({ source }) => !isFound(source)),
     foundGear: null,
     immunities: run.immunities.filter(({ source }) => !isFound(source)),
     modifiers: run.modifiers.filter(({ source }) => !isFound(source)),
     skipPass: run.skipPass !== null && isFound(run.skipPass) ? null : run.skipPass,
-  };
+  });
   return {
     ...ended,
     pack: mapPack(
@@ -100,9 +102,9 @@ function dropFoundEffects(data: Pick<GameData, "dogs" | "tuning">, run: RunState
 // hold, and ends, as any gear's would, read where it acts: a maxHearts modifier, such as Lucky
 // collar's, raises each owner's max but not their hearts, and on going back lowers it, holding
 // hearts above it to it; a skip, such as Hall pass's, is offered from this neighbourhood on; a
-// cardCost modifier, such as Fanny pack's, cuts the cards that open after it; a dodge, such as
-// the Whistle's, and an agility modifier, such as Running shoes', act at once. replaced is the
-// item that went back, or null.
+// spareTreats modifier, such as the Fanny pack's, holds the treats grabbed after it; a dodge,
+// such as the Whistle's, and an agility modifier, such as Running shoes', act at once. replaced
+// is the item that went back, or null.
 export function grabGear(
   data: Pick<GameData, "debuffs" | "dogs" | "encounters" | "shopGear" | "tuning">,
   gear: GearId,

@@ -91,6 +91,8 @@ export const RUN_TEXT = {
     plainHit: "{dog} bumped the {obstacle}! {owner} −{hearts}♥",
     pull: "{dog} spotted a squirrel!",
     secondChance: "Second chance! {owner} lets it go.",
+    spareTreatSaved: "Spare treat saved!",
+    spareTreatUsed: "Spare treat! {owner} keeps the ♥",
     treat: "{dog} got a treat! {owner} +{hearts}♥",
   },
   zoneBanner: "{world}, neighbourhood {n}",

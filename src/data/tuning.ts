@@ -15,6 +15,8 @@ export const TUNING = {
     // About this many distraction movers step on and off each zone's edge lanes as scenery,
     // spread through it.
     distractionsPerZone: 17,
+    // The Fanny pack holds this many spare treats.
+    fannyPackTreats: 1,
     // The gear drops a neighbourhood places on average, by its position in the walk from 1: the
     // whole part always, and one more at the fractional part's chance.
     gearDropsPerZone: { 1: 0.5, 2: 0.8, 3: 1.2, 4: 1.5 },
@@ -151,8 +153,6 @@ export const TUNING = {
     // A visit distraction, once it has stepped into its edge lane, stands there for this share of
     // its time on screen before it steps back off.
     distractionVisitLingerShare: 0.35,
-    // Fanny pack scales each card option's cash cost by this; the cost rounds to the dollar.
-    fannyPackCardCostFactor: 0.5,
     goodLeashSquirrelPull: 0,
     // How many tips appear while Mr. B's Keen eye walks.
     keenEyeTipSpawns: 1.5,

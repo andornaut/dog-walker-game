@@ -1,20 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { EncounterId } from "../data/types";
 import { fillNames } from "../lib/lines";
-import { keysOf } from "../lib/records";
-import { cents, roundDollars } from "../lib/units";
-import { amountText, gearSourceName } from "../rules/causes";
-import { cardFor, chooseOption, openCard, type OptionView } from "../rules/choices";
-import { baseMoneyCost } from "../rules/effects";
-import { formatDollars } from "../rules/effectText";
+import { cents } from "../lib/units";
+import { gearSourceName } from "../rules/causes";
+import type { OptionView } from "../rules/choices";
 import { grabGear } from "../rules/gearDrops";
 import { type ModifiedValue, modifierCause } from "../rules/modified";
 import { read } from "../rules/units";
 import type { WalkItem } from "../runner/walkItems";
 import { type ModifierSource, newRun } from "../state/runState";
-import { activeModifier, testState } from "../testing/runState";
 import { type BuffPop, extraHearts, optionMarks, type PoppedValue, popsOf } from "./buffMarks";
 import { type EffectItem, effectName } from "./effectIcons";
 
@@ -235,53 +230,6 @@ describe("popsOf", () => {
     const raised = value({ kind: "money" }, 100, [[100, big]]);
     const tip = { bump: false, dog: null, item: item("tip"), value: raised };
     expect(popsOf(gameData, [tip, tip]).map(({ index }) => index)).toEqual([0, 1]);
-  });
-});
-
-describe("a card cost Fanny pack cuts", () => {
-  const fannyPack = activeModifier(FANNY_PACK, {
-    by: "fannyPackCardCostFactor",
-    operation: "multiply",
-    stat: "cardCost",
-  });
-  const factor = read(gameData.tuning, "multipliers", "fannyPackCardCostFactor");
-  const optionEffects = (id: EncounterId, index: number) => {
-    const { resolution } = gameData.encounters[id];
-    return resolution.kind === "card" ? (resolution.options[index]?.effects ?? []) : [];
-  };
-  // The first option of each base cost: the cut reads only the cost, which sets the rounding.
-  const paid = keysOf(gameData.encounters)
-    .flatMap((id) => {
-      const { resolution } = gameData.encounters[id];
-      return resolution.kind === "card"
-        ? resolution.options.flatMap((option, index) => {
-            const base = baseMoneyCost(gameData, option.effects);
-            return base > 0 ? [[id, option.name, index, base] as const] : [];
-          })
-        : [];
-    })
-    .filter(([, , , base], i, all) => all.findIndex((other) => other[3] === base) === i);
-
-  it.each(paid)("shows %s's %s at the cut price everywhere, and charges it", (id, _, index) => {
-    const state = testState(
-      { duchess: 5, kilo: 5 },
-      { modifiers: [fannyPack], money: cents(5000) },
-    );
-    const source = { affected: ["duchess", "kilo"], encounter: id, kind: "encounter" } as const;
-    const opened = openCard(source, state);
-    const card = cardFor(gameData, opened, source);
-    const view = card.options.find((each) => each.index === index);
-    const base = baseMoneyCost(gameData, optionEffects(id, index));
-    const cost = roundDollars(base * factor);
-    const charged = -chooseOption(gameData, opened, card, index).moneyDelta;
-    expect([view?.cost, charged]).toEqual([cost, cost]);
-    expect(optionMarks(gameData, card, view).plaque).toBe(formatDollars(cost));
-    expect(view?.text).toContain(`−${formatDollars(cost)}`);
-    expect(view?.breakdown).toContainEqual({
-      dog: null,
-      name: gameData.shopGear.fannyPack.name,
-      text: amountText("money", base - cost),
-    });
   });
 });
 

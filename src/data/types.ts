@@ -201,9 +201,9 @@ export type Target =
 export type Duration = "nextZone" | "run";
 
 // Stats a modifier changes. An "add" names a key in the stat's own unit group.
-// How many lanes beside the pack's tips and treats are grabbed from, and how many encounter
-// cards each zone cost no money.
-type CountStat = "freeCards" | "tipReach" | "treatReach";
+// How many lanes beside the pack's tips and treats are grabbed from, how many encounter
+// cards each zone cost no money, and how many spare treats the pack holds.
+type CountStat = "freeCards" | "spareTreats" | "tipReach" | "treatReach";
 // forgivenHearts: how many of the first hearts lost in each zone are forgiven.
 type HeartsStat = "forgivenHearts" | "maxHearts";
 type MoneyStat = "tipValue";
@@ -215,8 +215,6 @@ export type Stat =
   | "bumpHearts"
   // How much cash a minor bump costs while a debuff, such as Spotlight, makes bumps cost cash.
   | "bumpMoney"
-  // What a card option's cash costs.
-  | "cardCost"
   // How long a debuff lasts.
   | "debuffSeconds"
   // The walker's agility: how many times faster than the base the pack changes lanes. An add
@@ -919,6 +917,8 @@ export interface RunText {
     readonly plainHit: string;
     readonly pull: string;
     readonly secondChance: string;
+    readonly spareTreatSaved: string;
+    readonly spareTreatUsed: string;
     readonly treat: string;
   };
   // The walk bar's place in the walk beside the neighbourhood's name: the zone's number, n, of

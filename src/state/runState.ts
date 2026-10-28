@@ -75,6 +75,14 @@ type ActiveImmunity = Lasting & {
   readonly source: EffectSource;
 };
 
+export interface SpareTreats {
+  readonly held: number;
+  readonly spent: number;
+  readonly stored: number;
+}
+
+export const NO_SPARE_TREATS: SpareTreats = { held: 0, spent: 0, stored: 0 };
+
 export type EndReason = "finished" | "noDogs" | "wentHome";
 
 type Phase =
@@ -118,6 +126,9 @@ export interface RunState {
   readonly route: readonly ZoneId[];
   // Encounter cards resolved this zone, for the free cards of freeCards modifiers.
   readonly cardsThisZone: number;
+  // The spare treats spareTreats modifiers, such as the Fanny pack's, let the pack hold: held
+  // now, and this walk's stored and spent.
+  readonly spareTreats: SpareTreats;
   // Hall pass's free Skip: skipPass, what gave it, offers it on every obstacle card until
   // skipUsed, which each zone's start clears. Null without one.
   readonly skipPass: EffectSource | null;
@@ -165,6 +176,7 @@ export function blankRun(start: Pick<RunState, "gear" | "pack" | "route" | "walk
     route,
     skipPass: null,
     skipUsed: false,
+    spareTreats: NO_SPARE_TREATS,
     startMoney: cents(0),
     tallies: {},
     upgradesPicked: [],

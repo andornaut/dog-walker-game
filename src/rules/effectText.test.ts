@@ -131,16 +131,9 @@ describe("effectText", () => {
         ),
       ],
       [
-        "a cut card cost as a signed percent",
-        [
-          {
-            by: "fannyPackCardCostFactor",
-            kind: "modifier",
-            operation: "multiply",
-            stat: "cardCost",
-          },
-        ],
-        capitalize(`−${-percent("fannyPackCardCostFactor")}% ${words.stats.cardCost}`),
+        "spare treats as a signed count",
+        [{ by: "fannyPackTreats", kind: "modifier", operation: "add", stat: "spareTreats" }],
+        capitalize(`+${read(TEST_TUNING, "counts", "fannyPackTreats")} ${words.stats.spareTreats}`),
       ],
       [
         "a raised agility as a percent of the base lane-change speed",

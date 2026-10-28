@@ -3,12 +3,13 @@ import { fillLine, fillNames } from "../lib/lines";
 import { cents } from "../lib/units";
 import { type Change, type HeartChange, heartsForgiven, type MoneyChange } from "../rules/causes";
 import { debuffFields, formatDollars } from "../rules/effectText";
+import { spareTreatSource } from "../rules/spareTreats";
 import type { FaceMood } from "../rules/treats";
 import { read } from "../rules/units";
-import type { ActiveDebuff, RunState } from "../state/runState";
+import type { ActiveDebuff, EffectSource, RunState } from "../state/runState";
 import { debuffNameMarks } from "./effectNames";
 import { faceSentenceList, type FaceText, fillFaceLine, ownerFaceText } from "./faceText";
-import type { MessageLine } from "./messageStrip";
+import type { MessageIcon, MessageLine } from "./messageStrip";
 import { MOMENTS } from "./moments";
 import { STRIP_LINE_FIELDS } from "./runText";
 
@@ -35,6 +36,7 @@ export const STRIP_OWNER_MOODS = {
   luckyNeighbourGain: "happy",
   plainHit: "upset",
   secondChance: "neutral",
+  spareTreatUsed: "happy",
   treat: "happy",
 } as const satisfies Partial<Record<StripKey, FaceMood>>;
 
@@ -132,6 +134,31 @@ export function treatLine(data: StripData, change: HeartChange | null): MessageL
       dog: data.dogs[dog].name,
       hearts: String(change.after - change.before),
     }),
+  };
+}
+
+// What leads a spare treat's line: the icon of the gear that holds it, such as the Fanny pack.
+function spareTreatIcon(source: EffectSource | undefined): MessageIcon {
+  return source?.kind === "gear" ? source : "treat";
+}
+
+// A treat grabbed at every owner's max, held as a spare treat by run's gear.
+export function spareTreatSavedLine(
+  data: Pick<GameData, "runText">,
+  run: Pick<RunState, "modifiers">,
+): MessageLine {
+  return {
+    icon: spareTreatIcon(spareTreatSource(run)),
+    text: stripLine(data, "spareTreatSaved", {}),
+  };
+}
+
+// A spare treat given back to the owner who just lost a heart, who keeps it.
+export function spareTreatUsedLine(data: StripData, change: HeartChange): MessageLine {
+  const [base] = change.causes;
+  return {
+    icon: spareTreatIcon(base?.kind === "effect" ? base.source : undefined),
+    ...ownerLine(data, "spareTreatUsed", change.dog, {}),
   };
 }
 

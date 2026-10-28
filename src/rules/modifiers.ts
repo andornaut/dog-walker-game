@@ -14,6 +14,7 @@ export function modifierValue(tuning: LiveTuning, modifier: Modifier): number {
     case "maxHearts":
       return read(tuning, "hearts", modifier.by);
     case "freeCards":
+    case "spareTreats":
     case "tipReach":
     case "treatReach":
       return read(tuning, "counts", modifier.by);

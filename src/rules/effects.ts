@@ -20,7 +20,6 @@ import {
   type HeartChange,
   type ModifierCause,
   type MoneyChange,
-  negatedCauses,
 } from "./causes";
 import { ownerMaxHearts } from "./dogs";
 import { debuffLasting, lastingFor, longerLasting } from "./durations";
@@ -70,8 +69,8 @@ export function targetDogs(
 }
 
 // A money effect's amount, and how it came about: base is the amount before modifiers, and
-// adjustments the cardCost modifiers that cut a cost, or the freeCards modifier that waived it.
-// base and adjustments are signed as changes to the money.
+// adjustments the freeCards modifier that waived a cost. base and adjustments are signed as
+// changes to the money.
 interface MoneyParts {
   readonly adjustments: readonly ModifierCause[];
   readonly amount: Cents;
@@ -91,8 +90,7 @@ function freeCardModifier(
 }
 
 // Each amount is rounded to the dollar, and charged once whatever the pack. Every money loss is
-// a card option's cost. A cost on a free card is waived, naming the modifier that waived it;
-// otherwise cardCost modifiers, such as Fanny pack's, scale it, each naming its share of the cut.
+// a card option's cost. A cost on a free card is waived, naming the modifier that waived it.
 function moneyParts(data: RulesData, state: RunState, effect: MoneyEffect): MoneyParts {
   const amount = read(data.tuning, "money", effect.amount);
   if (effect.change === "gain") {
@@ -106,23 +104,11 @@ function moneyParts(data: RulesData, state: RunState, effect: MoneyEffect): Mone
       base: -amount,
     };
   }
-  const cost = statModified(
-    data.tuning,
-    state.modifiers,
-    "cardCost",
-    { kind: "money" },
-    amount,
-    roundDollars,
-  );
-  return {
-    adjustments: negatedCauses(cost?.by ?? []),
-    amount: cents(cost?.after ?? roundDollars(amount)),
-    base: -amount,
-  };
+  return { adjustments: [], amount: roundDollars(amount), base: -amount };
 }
 
 // What an option's effects would take from the player before modifiers, such as Sweet talker's
-// free card or Fanny pack's cut.
+// free card.
 export function baseMoneyCost(data: Pick<GameData, "tuning">, effects: readonly Effect[]): Cents {
   return cents(
     effects.reduce(

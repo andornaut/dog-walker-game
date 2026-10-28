@@ -1543,15 +1543,15 @@
       "id": "fannyPack",
       "effects": [
         {
-          "by": "fannyPackCardCostFactor",
+          "by": "fannyPackTreats",
           "kind": "modifier",
-          "operation": "multiply",
-          "stat": "cardCost"
+          "operation": "add",
+          "stat": "spareTreats"
         }
       ],
       "name": "Fanny pack",
       "price": "fannyPack",
-      "short": "Card cash options cost half",
+      "short": "Saves a spare treat for later",
       "iconKey": "item-fanny-pack"
     },
     {
@@ -2868,6 +2868,7 @@
       "dartStopLanesMax": 4,
       "dartStopLanesMin": 2,
       "distractionsPerZone": 17,
+      "fannyPackTreats": 1,
       "gearDropsPerZone": {
         "1": 0.5,
         "2": 0.8,
@@ -2963,7 +2964,6 @@
       "distractionEndRoadShare": 0.5,
       "distractionLeaveLingerShare": 0.3,
       "distractionVisitLingerShare": 0.35,
-      "fannyPackCardCostFactor": 0.5,
       "goodLeashSquirrelPull": 0,
       "keenEyeTipSpawns": 1.5,
       "keenEyeTreatSpawns": 1.5,

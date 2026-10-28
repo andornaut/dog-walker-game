@@ -43,6 +43,7 @@ import { cardEffectText, type CardTextContext, sentenceList } from "./effectText
 import { type ModifiedValue, modifierCause } from "./modified";
 import { forkPaths, type PathSide, pathSide, zoneById } from "./route";
 import { fireOwnersAtZero } from "./run";
+import { spendSpareTreat } from "./spareTreats";
 
 export type ChoiceData = CauseData & Pick<GameData, "dogs" | "homeText" | "tuning" | "world">;
 
@@ -146,6 +147,10 @@ export interface ChoiceOutcome {
   // Every value modifiers changed, in order, such as a loss forgiven or a cost waived.
   readonly modified: readonly ModifiedValue[];
   readonly quips: readonly QuipCue[];
+  // The spare treat given back to an owner the effects cost hearts, from a spareTreats modifier
+  // such as the Fanny pack's, or null with none spent. It comes after heartChanges and before any
+  // firing, and shows as its own moment, so outcomeChanges leaves it out.
+  readonly spareTreat: HeartChange | null;
   readonly state: RunState;
 }
 
@@ -190,7 +195,8 @@ function walkingHearts(state: RunState): Map<DogId, Hearts> {
   );
 }
 
-// Applies effects, then owners at 0 hearts fire you; with no dogs left the run ends.
+// Applies effects, then gives a held spare treat back to an owner they cost hearts, then owners
+// at 0 hearts fire you; with no dogs left the run ends.
 function outcomeOf(
   data: ChoiceData,
   context: EffectContext,
@@ -198,7 +204,8 @@ function outcomeOf(
   state: RunState,
 ): ChoiceOutcome {
   const applied = resolveEffects(data, context, effects, state);
-  const firing = fireOwnersAtZero(applied.state);
+  const spare = spendSpareTreat(data, applied.changes, applied.state);
+  const firing = fireOwnersAtZero(spare.state);
   const next: RunState = {
     ...firing.state,
     phase:
@@ -211,7 +218,7 @@ function outcomeOf(
 
   const before = walkingHearts(state);
   const quips = [
-    ...[...walkingHearts(applied.state)].flatMap(([dog, after]): QuipCue[] => {
+    ...[...walkingHearts(spare.state)].flatMap(([dog, after]): QuipCue[] => {
       const previous = before.get(dog);
       return previous === undefined || previous === after || firing.fired.includes(dog)
         ? []
@@ -226,6 +233,7 @@ function outcomeOf(
     moneyChanges: applied.changes.filter(isMoney),
     moneyDelta: cents(next.money - state.money),
     quips,
+    spareTreat: spare.change,
     state: next,
   };
 }
@@ -249,14 +257,15 @@ function causeLines(data: ChoiceData, changes: readonly Change[]): BreakdownLine
   );
 }
 
-// The changes an option would make, cause by cause: the hearts, a line for each owner who
-// would fire you, then the money.
+// The changes an option would make, cause by cause: the hearts, a spare treat given back, a line
+// for each owner who would fire you, then the money.
 function breakdownOf(
   data: ChoiceData,
-  outcome: Pick<ChoiceOutcome, "fired" | "heartChanges" | "moneyChanges">,
+  outcome: Pick<ChoiceOutcome, "fired" | "heartChanges" | "moneyChanges" | "spareTreat">,
 ): BreakdownLine[] {
   return [
     ...causeLines(data, outcome.heartChanges),
+    ...causeLines(data, outcome.spareTreat === null ? [] : [outcome.spareTreat]),
     ...outcome.fired.map((dog) => ({ dog, name: firedByText(data, dog), text: "" })),
     ...causeLines(data, outcome.moneyChanges),
   ];
@@ -513,6 +522,7 @@ export function chooseOption(
       moneyChanges: [],
       moneyDelta: cents(0),
       quips: [],
+      spareTreat: null,
       state: skipped,
     };
   }

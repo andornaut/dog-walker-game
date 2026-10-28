@@ -40,6 +40,7 @@ import {
   payZone,
   tipValue,
 } from "../rules/run";
+import { spendSpareTreat, storeSpareTreat } from "../rules/spareTreats";
 import { reachModified } from "../rules/standing";
 import { treatRecipient } from "../rules/treats";
 import { read } from "../rules/units";
@@ -205,11 +206,13 @@ export interface MinorBump {
 }
 
 // A treat the pack grabbed: the dog whose owner it went to, by treatRecipient, and the hearts
-// that owner gained, or null at their max.
+// that owner gained, or null at their max. stored is set when, with every owner at their max, the
+// pack held it as a spare treat (storeSpareTreat) instead.
 interface TreatGrab {
   change: HeartChange | null;
   dog: DogId;
   item: WalkItem;
+  stored: boolean;
 }
 
 export type EncounterCard = Extract<CardSource, { kind: "encounter" }>;
@@ -233,7 +236,9 @@ interface RoadModified {
 
 // bumps, cards, contacts, found, instants, tips and treats are in the order the pack met them;
 // modified every value modifiers changed, in the order the pack met their items; fired the
-// owners a bump left at 0 hearts; zoneEnded is set on the step that reaches the end of the zone.
+// owners a bump left at 0 hearts; spareTreat the spare treat given back to an owner the step's
+// bumps cost hearts, before any firing (spendSpareTreat), or null; zoneEnded is set on the step
+// that reaches the end of the zone.
 // encounterHits are the card obstacles met this step, which play a hit moment. A hit stop holds
 // the step's cards and zone end back to the step it ends on.
 export interface WalkStep {
@@ -246,6 +251,7 @@ export interface WalkStep {
   found: GearFind[];
   instants: InstantFind[];
   modified: RoadModified[];
+  spareTreat: HeartChange | null;
   tips: TipGrab[];
   treats: TreatGrab[];
   walk: Walk;
@@ -850,10 +856,13 @@ export function stepWalk(
       collected.push(item);
       modifiedAt(item, [changeModified(pickup.tip)]);
     } else if (kind === "treat") {
-      const recipient = treatRecipient(data, nextRun, dog);
-      const grab = grabTreat(data, recipient, countTally("treats", nextRun));
+      const counted = countTally("treats", nextRun);
+      const recipient = treatRecipient(data, counted, dog);
+      const stored = storeSpareTreat(data, counted);
+      const grab =
+        stored === null ? grabTreat(data, recipient, counted) : { change: null, state: stored };
       nextRun = grab.state;
-      treats.push({ change: grab.change, dog: recipient, item });
+      treats.push({ change: grab.change, dog: recipient, item, stored: stored !== null });
       collected.push(item);
       modifiedAt(item, [grab.change === null ? null : changeModified(grab.change)]);
     } else if (isMinorObstacle(data, kind)) {
@@ -921,10 +930,16 @@ export function stepWalk(
       meet(each);
     }
   };
-  // The hits land first. An owner they left at 0 hearts fires you before the pickups, so a
-  // treat cannot save them; with no dogs left the walk ends.
+  // The hits land first, then a held spare treat gives back a heart they cost. An owner they left
+  // at 0 hearts fires you before the pickups, so a treat grabbed this step cannot save them; with
+  // no dogs left the walk ends.
   meetAll(hits);
-  const firing = fireOwnersAtZero(nextRun);
+  const spare = spendSpareTreat(
+    data,
+    bumps.flatMap(({ change }) => (change === null ? [] : [change])),
+    nextRun,
+  );
+  const firing = fireOwnersAtZero(spare.state);
   nextRun =
     firing.fired.length > 0 && packDogs(firing.state).length === 0
       ? { ...firing.state, phase: { kind: "ended", reason: "noDogs" } }
@@ -963,6 +978,7 @@ export function stepWalk(
     found,
     instants,
     modified,
+    spareTreat: spare.change,
     tips,
     treats,
     walk: {
@@ -1072,6 +1088,7 @@ function stillStep(held: HeldStep, walk: Walk): WalkStep {
     found: [],
     instants: [],
     modified: [],
+    spareTreat: null,
     tips: [],
     treats: [],
     walk,

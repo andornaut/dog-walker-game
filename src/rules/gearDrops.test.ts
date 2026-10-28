@@ -12,7 +12,7 @@ import { UPGRADES } from "../data/upgrades";
 import { fillNames } from "../lib/lines";
 import { seededRandom } from "../lib/random";
 import { keysOf } from "../lib/records";
-import { cents, clampHearts, roundDollars } from "../lib/units";
+import { cents, clampHearts } from "../lib/units";
 import { mapPack } from "../state/pack";
 import { newRun, type RunState } from "../state/runState";
 import { defined } from "../testing/defined";
@@ -32,6 +32,7 @@ import {
   grabGear,
 } from "./gearDrops";
 import { price } from "./shop";
+import { spareTreatRoom } from "./spareTreats";
 import { read } from "./units";
 import { packAgility } from "./walkers";
 
@@ -243,7 +244,6 @@ describe("grabbing a gear drop", () => {
   // A card mid-walk, in a zone after the first, with cash for every option.
   const skunk: CardSource = { affected: ["buddy"], encounter: "skunk", kind: "encounter" };
   const midWalk = walkWith(null, { cardsThisZone: 1, money: cents(100000), zoneIndex: 2 });
-  const factor = read(TEST_TUNING, "multipliers", "fannyPackCardCostFactor");
   const whistle = SHOP_GEAR.whistle.effects[0];
   // What each item changes, read where it acts, and what it reads once the item is found, from
   // what it read before.
@@ -253,8 +253,8 @@ describe("grabbing a gear drop", () => {
     readonly gear: GearId;
   }[] = [
     {
-      act: (run) => cardFor(data, run, skunk).options.map(({ cost }) => cost),
-      found: (before) => (before as number[]).map((cost) => roundDollars(cost * factor)),
+      act: (run) => spareTreatRoom(data, run),
+      found: (before) => (before as number) + read(TEST_TUNING, "counts", "fannyPackTreats"),
       gear: "fannyPack",
     },
     { act: (run) => cardFor(data, run, skunk).skip, found: () => true, gear: "hallPass" },

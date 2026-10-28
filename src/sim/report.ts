@@ -126,6 +126,10 @@ export interface MatrixRow extends BadgeCounters {
   readonly meanEarnings: number;
   readonly meanFirings: number;
   readonly meanGrabs: number;
+  // Spare treats per walk, such as the Fanny pack's (RunState.spareTreats): held when grabbed
+  // with every owner at their max, and given back on a heart lost.
+  readonly meanSpareTreatsSpent: number;
+  readonly meanSpareTreatsStored: number;
   readonly meanTipCents: number;
   readonly meanTips: number;
   readonly meanZones: number;
@@ -446,6 +450,8 @@ function summarizeCell(
     meanEarnings: mean(earnings),
     meanFirings: mean(results.map((result) => result.firings.length)),
     meanGrabs: drops.reduce((sum, count) => sum + count.touched, 0) / results.length,
+    meanSpareTreatsSpent: mean(results.map((result) => result.run.spareTreats.spent)),
+    meanSpareTreatsStored: mean(results.map((result) => result.run.spareTreats.stored)),
     meanTipCents: mean(results.map((result) => result.tips as number)),
     meanTips: mean(results.map((result) => result.items.tip?.touched ?? 0)),
     meanZones: mean(results.map((result) => result.zones.length)),

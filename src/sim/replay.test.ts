@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { LANE_COUNT } from "../data/screen";
+import type { GearId } from "../data/types";
 import {
   decodeInputLog,
   encodeInputLog,
@@ -65,21 +66,45 @@ function replay(log: InputLog): RunState {
 // A simulated run's seed and inputs, written as the game's input log and read back as the dev
 // panel reads a replay, play the same run in the game's replay.
 describe("a simulated run", { timeout: 60_000 }, () => {
-  it.each<{ pack: string; policy: PolicyId; seed: number; skill: SkillPresetId }>([
-    { pack: "kilo,biscuit", policy: "mixed", seed: 1, skill: "typical" },
-    { pack: "buddy,archie,snowball", policy: "alwaysPay", seed: 3, skill: "novice" },
-  ])("replays in the game: $skill, $pack, seed $seed", ({ pack, policy, seed, skill }) => {
+  // spares is how many spare treats the walk stores and spends at least, which the replay matches.
+  it.each<{
+    gear: GearId | null;
+    pack: string;
+    policy: PolicyId;
+    seed: number;
+    skill: SkillPresetId;
+    spares: number;
+  }>([
+    { gear: null, pack: "kilo,biscuit", policy: "mixed", seed: 1, skill: "typical", spares: 0 },
+    {
+      gear: null,
+      pack: "buddy,archie,snowball",
+      policy: "alwaysPay",
+      seed: 3,
+      skill: "novice",
+      spares: 0,
+    },
+    {
+      gear: "fannyPack",
+      pack: "kilo,biscuit",
+      policy: "mixed",
+      seed: 1,
+      skill: "novice",
+      spares: 1,
+    },
+  ])("replays in the game: $skill, $pack, $gear, seed $seed", (row) => {
+    const { gear, pack, policy, seed, skill, spares } = row;
     const dogs = pack.split(",") as [never];
     const result = simulateRun(
       gameData,
       seed,
-      simConfig(SKILL_PRESETS[skill], dogs, { policy, walker: gameData.defaultWalker }),
+      simConfig(SKILL_PRESETS[skill], dogs, { gear, policy, walker: gameData.defaultWalker }),
     );
     const log: InputLog = {
       events: result.inputs,
       setup: {
         dev: false,
-        gear: null,
+        gear,
         pack: dogs,
         seed,
         speed: 1,
@@ -94,5 +119,7 @@ describe("a simulated run", { timeout: 60_000 }, () => {
 
     expect(result.inputs.length).toBeGreaterThan(0);
     expect(replay(decoded.log)).toEqual(result.run);
+    const { spent, stored } = result.run.spareTreats;
+    expect(Math.min(stored, spent)).toBeGreaterThanOrEqual(spares);
   });
 });

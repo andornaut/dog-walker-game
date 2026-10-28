@@ -30,6 +30,7 @@ import {
   forgivenLines,
   lowHeartsLines,
   luckyLine,
+  spareTreatUsedLine,
   treatLine,
 } from "./stripLines";
 
@@ -83,6 +84,7 @@ const PLACES: readonly (readonly [string, FaceText | null | undefined, keyof typ
     bumpLines(gameData, { cash: null, change: hearts(4, 2), dodged: false, dog: DOG }, "Cone")[0],
     "loss",
   ],
+  ["strip.spareTreatUsed", spareTreatUsedLine(gameData, hearts(0, 1)), "gain"],
   ["strip.treat", treatLine(gameData, hearts(2, 3)), "gain"],
 ];
 

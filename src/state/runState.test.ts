@@ -86,7 +86,7 @@ describe("newRun", () => {
     );
     expect(state.modifiers.map(({ by, source, stat }) => [stat, by, source])).toEqual([
       ...perkModifiers,
-      ["cardCost", "fannyPackCardCostFactor", { gear: "fannyPack", kind: "gear" }],
+      ["spareTreats", "fannyPackTreats", { gear: "fannyPack", kind: "gear" }],
     ]);
     expect(state.modifiers.every(({ untilZone }) => untilZone === undefined)).toBe(true);
   });

@@ -5,12 +5,10 @@ import type { Gear } from "./types";
 // Locked dogs are sold too: those with unlock "shop" in dogs.ts, at their price.
 export const SHOP_GEAR = {
   fannyPack: {
-    effects: [
-      { by: "fannyPackCardCostFactor", kind: "modifier", operation: "multiply", stat: "cardCost" },
-    ],
+    effects: [{ by: "fannyPackTreats", kind: "modifier", operation: "add", stat: "spareTreats" }],
     name: "Fanny pack",
     price: "fannyPack",
-    short: "Card cash options cost half",
+    short: "Saves a spare treat for later",
   },
   hallPass: {
     effects: [{ kind: "skipOption" }],
