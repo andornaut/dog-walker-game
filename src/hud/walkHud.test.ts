@@ -590,9 +590,9 @@ describe("the dog cards", () => {
   });
 
   const { room } = DOG_CARD.name;
+  // The cards' names share one scale: the widest exactly fitting 2x keeps it, and one a pixel
+  // too wide sets them all at 1x.
   it.each<[string, number[], 1 | 2]>([
-    ["a name that fits at 2x", [room / 2], 2],
-    ["a name one pixel too wide for 2x", [room / 2 + 1], 1],
     ["every name at 2x when all fit", [room / 2, room / 4], 2],
     ["every name at 1x when one is too wide for 2x", [room / 4, room / 2 + 1], 1],
   ])("sets %s", (_name, widths, scale) => {
