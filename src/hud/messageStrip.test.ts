@@ -343,6 +343,18 @@ const LEAD_PLACES: readonly (readonly [string, LeadSlot, Rect])[] = [
 ];
 // The moments a walk's owners quip on the strip; a firing's quip shows in its own moment.
 const WALK_QUIP_MOMENTS = ["happier", "upset"] as const satisfies readonly QuipMoment[];
+// A lead's layout reads only its name's ink: the narrowest and the widest, and a name of the
+// other parity when those two share one, as an odd ink centres differently under the face.
+const BY_INK = [...OWNER_NAMES].sort((a, b) => a[2] - b[2]);
+const NARROWEST = defined(BY_INK[0]);
+const WIDEST = defined(BY_INK.at(-1));
+const LEAD_NAMES = [
+  NARROWEST,
+  WIDEST,
+  ...(NARROWEST[2] % 2 === WIDEST[2] % 2
+    ? BY_INK.filter(([, , ink]) => ink % 2 !== NARROWEST[2] % 2).slice(0, 1)
+    : []),
+];
 
 describe("an owner's lead", () => {
   const right = (rect: Rect) => rect.x + rect.width;
@@ -350,7 +362,7 @@ describe("an owner's lead", () => {
 
   it.each(
     LEAD_PLACES.flatMap(([place, slot, panel]) =>
-      OWNER_NAMES.map(([, name, ink]) => [place, name, slot, panel, ink] as const),
+      LEAD_NAMES.map(([, name, ink]) => [place, name, slot, panel, ink] as const),
     ),
   )(
     "keeps the face and name of %s's owner %s inside the panel, the text clear of them",
