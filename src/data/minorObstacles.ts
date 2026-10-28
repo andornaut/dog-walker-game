@@ -350,7 +350,7 @@ export const MINOR_OBSTACLES = {
     zones: ["homeStretch", "shops", "street"],
   },
   touristTrain: {
-    movement: { kind: "stopAndGoAcross", speed: 0.55, stopSeconds: 1 },
+    movement: { kind: "stopAndGoAcross", speed: 0.55, stopSeconds: 1.6 },
     name: "Tourist train",
     shape: { lanes: 3, rows: 1 },
     zones: ["park"],
