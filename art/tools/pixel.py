@@ -534,7 +534,7 @@ def shortened(tags, rows):
     return _regrouped(tags, _without_rows(frames, max(0, bottom - top + 1 - rows), first=True))
 
 
-def depth_settled(sprites, originals=None):
+def depth_settled(sprites, originals=None, apart=()):
     """sprites with each depth variant (<key>@<step>) cut to its step's depth_envelope (see squatted) and, for a
     ground sprite, held to its ideal, the full size at its scale, and seated on a feet row from it. The game draws
     a ground sprite smoothly, from the smallest step at least its true size scaled down
@@ -545,8 +545,26 @@ def depth_settled(sprites, originals=None):
     side / full side, rounded up, or the frame's bottom row when that is past it, so the feet move less than
     1px when it switches. The others (status overlays) are drawn at their own step. The full-size sprite is the
     one in sprites, else in originals ({key: tags}), else the one already exported; so is each step, settled
-    larger steps first. A sprite's steps are the ones in sprites and the ones already exported."""
+    larger steps first. A sprite's steps are the ones in sprites and the ones already exported.
+
+    The tags named in apart are settled on their own, against their own full-size frame 0, as a second pose
+    set: a pose that differs from the rest pose (a crouch beside a standing walk) then takes out the rows
+    and columns that change it least, and adding it leaves the other tags' settling as it was. Each step's
+    apart frames then move sideways to keep their full-size offset from the rest (see _abreast)."""
     sprites = list(sprites)
+    if apart:
+        rest = dict(depth_settled([(k, [t for t in tags if t[0] not in apart]) for k, tags in sprites], originals))
+        own = dict(depth_settled([(k, ts) for k, tags in sprites if (ts := [t for t in tags if t[0] in apart])]))
+        scales = depth_scales()
+        out = []
+        for key, tags in sprites:
+            base, at, suffix = key.partition("@")
+            if at and key in own and rest[key] and base in rest and base in own:
+                own[key] = _abreast(own[key], rest[key], scales.get(f"@{suffix}", 1),
+                                    _middle(own[base]) - _middle(rest[base]))
+            settled_tags = {t[0]: t for t in rest[key] + own.get(key, [])}
+            out.append((key, [settled_tags[t[0]] for t in tags]))
+        return out
     full = {**(originals or {}), **dict(sprites)}
     scales = depth_scales()
     unanchored = _unanchored()
@@ -595,10 +613,30 @@ def depth_settled(sprites, originals=None):
     return [(key, full[key] if key in settled else tags) for key, tags in sprites]
 
 
-def build(sprites, src_dir, originals=None):
+def _middle(tags):
+    """The middle of frame 0's opaque columns, or None when it is blank."""
+    cols = opaque_cols([tags[0][1][0]])
+    return cols and (cols[0] + cols[1]) / 2
+
+
+def _abreast(tags, rest, scale, gap):
+    """A depth step's apart tags (see depth_settled) moved sideways so frame 0 sits gap x scale columns from
+    the rest's frame 0, as at full size, rounded, without clipping an opaque pixel."""
+    frames = [f for _, fs, _ in tags for f in fs]
+    left, right = opaque_cols(frames) or (0, len(frames[0][0]) - 1)
+    dx = round(_middle(rest) + gap * scale - _middle(tags))
+    dx = max(-left, min(len(frames[0][0]) - 1 - right, dx))
+
+    def move(f):
+        return [[None] * dx + row[:len(row) - dx] if dx >= 0 else row[-dx:] + [None] * -dx for row in f]
+
+    return [(tag, [move(f) for f in fs], ms) for tag, fs, ms in tags]
+
+
+def build(sprites, src_dir, originals=None, apart=()):
     """Write src_dir/<key>.aseprite for every sprite and export it to public/art/sprites/, each depth
     variant settled by depth_settled."""
-    sprites = depth_settled(sprites, originals)
+    sprites = depth_settled(sprites, originals, apart)
     os.makedirs(src_dir, exist_ok=True)
     os.makedirs("public/art/sprites", exist_ok=True)
     built = []
@@ -615,13 +653,13 @@ def build(sprites, src_dir, originals=None):
     print("built", ", ".join(built))
 
 
-def main(argv, sprites, src_dir, doc, grounds=ZONE_ROADS, originals=None):
+def main(argv, sprites, src_dir, doc, grounds=ZONE_ROADS, originals=None, apart=()):
     """originals, if given, returns {key: tags} of the full-size sprites whose depth variants sprites draws
-    but not their full size (see depth_settled)."""
+    but not their full size; apart names the tags settled on their own (see depth_settled)."""
     if len(argv) == 3 and argv[1] == "preview":
-        preview(depth_settled(sprites(), originals and originals()), argv[2], grounds)
+        preview(depth_settled(sprites(), originals and originals(), apart), argv[2], grounds)
     elif len(argv) == 2 and argv[1] == "build":
-        build(list(sprites()), src_dir, originals and originals())
+        build(list(sprites()), src_dir, originals and originals(), apart)
     else:
         sys.exit(doc)
 

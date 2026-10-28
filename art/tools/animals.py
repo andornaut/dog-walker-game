@@ -31,7 +31,11 @@ passing 1px higher, the other foot), flee (4 frames, 90ms: from behind, see FLEE
 and SEAGULL_FLEE), idle (2 frames, 400ms: breathing). Each carries a tan loot
 sack, as the thief does.
   snatch-raccoon     38x57, standing about as tall as a medium dog, the sack at its chest; flee
-                     runs, the ringed tail swinging against the stride
+                     runs, the ringed tail swinging against the stride; and, on all fours face on
+                     with the sack slung across its back, stalk (4 frames, 120ms: the creep, as
+                     the coyote's walk, a diagonal pair of paws lifting as the body sinks 1px under
+                     a level head) and step (4 frames, 80ms: a low lunge for each step, as the
+                     coyote's), settled at each depth step apart from the standing tags
   snatch-seagull     32x48, a head shorter, the sack in its beak; flee flies, the wings beating
                      up, level, down, level
 
@@ -492,6 +496,69 @@ def raccoon_fleeing(stride, bob=-1):
     return lit(g)
 
 
+# The raccoon's creep at the pack, as the coyote's (hazards.COYOTE_WALK): one diagonal pair lifts (lf, rf the
+# front paws, lh, rh the hind ones, negative up) while the body sinks 1px under the level head, then the other.
+RACCOON_STALK = [dict(lf=-2, rh=-1, sink=1), dict(), dict(rf=-2, lh=-1, sink=1), dict()]
+RACCOON_STALK_MS = 120
+# A quick low lunge for each lane step, as the coyote's (hazards.COYOTE_STEP): a sink onto the haunches, the
+# push with both front paws up and the ears pinned back, the reach with the head thrust lower still, and the
+# landing on the hind paws.
+RACCOON_STEP = [dict(sink=1, head=1), dict(lf=-2, rf=-2, head=1, ear=1),
+                dict(lf=-1, rf=-2, sink=1, head=2, ear=1), dict(lh=-1, rh=-1, sink=1)]
+RACCOON_STEP_MS = 80
+
+
+def raccoon_stalking(lf=0, rf=0, lh=0, rh=0, sink=0, head=0, ear=0):
+    """The raccoon creeping at the player on all fours, face on, its paws on row 44: the shoulders hunched up
+    either side of a low head, the mask and eyes fixed forward, the back rising behind with the loot sack
+    slung across it, the ringed tail held low out past its right hip, and the hind paws peeking out under its
+    chest. lf, rf, lh and rh lift a paw (negative up); sink lowers the body, and head the head, which otherwise
+    holds level; ear pins the ears back."""
+    g = edged(Grid(32, 48))
+    s, h = sink, head
+    # the ringed tail, low behind the right hip
+    for i, (x, y) in enumerate(((24, 34), (26, 36.5), (27.3, 39))):
+        g.cel(x, y + s, 2.3, 2.1, "dslate" if i % 2 else "lgrey", "ink" if i % 2 else "grey")
+    g.cel(27.5, 41.3 + s, 1.5, 1.4, "ink")
+    # the back low between the shoulder blades, which hunch up past the head, the one over a lifted paw rolling
+    # up as the body sinks, and the sack slung across the middle of it
+    g.cel(16, 29.5 + s, 7, 3.5, "dslate", "ink", "slate")
+    for x, side, lift in ((10, -1, lf), (22, 1, rf)):
+        r = 0 if lift else s
+        g.tri((x - side * 4.5, 30 + r), (x - side * 0.5, 25 + r), (x + side * 3.5, 30 + r), "dslate")
+        g.p(x - side * 0.5 - (1 if side > 0 else 0), 26 + r, "slate")
+    sack(g, 16, 27.5 + s)
+    # the pale chest, the hind paws under it a shade darker
+    g.cel(16, 39 + s, 4, 3.5, "lgrey", "grey")
+    for x, lift in ((12.5, lh), (16.5, rh)):
+        g.rect(x, 41 + lift, 3, 1, "dslate")
+        g.rect(x, 42 + lift, 3, 1, "ink")
+    # the forelegs, the elbows splayed out and the paws set in under them, dark
+    for x, side, lift in ((10, -1, lf), (22, 1, rf)):
+        out, inn, foot = x + side * 3.5, x - side * 0.5, x + side * 0.5
+        g.tri((out, 29 + s), (inn, 29 + s), (foot - side * 2, 43 + lift), "slate")
+        g.tri((out, 29 + s), (foot + side * 1.5, 43 + lift), (foot - side * 2, 43 + lift), "slate")
+        g.tri((out, 29 + s), (out - side * 1, 29 + s), (foot + side * 1.5, 43 + lift), "dslate")
+        g.rect(foot - 2.5, 43 + lift, 5, 2, "ink")
+    # head: wide and low between the shoulders, the ears pricked forward, pale-tipped
+    for x, tip, inner in ((10, 9.5 + ear, 14), (22, 22.5 - ear, 18)):
+        g.tri((x, 32 + h), (tip, 25.5 + h + ear), (inner, 30 + h), "slate")
+        g.tri((x + (1 if x < 16 else -1), 31 + h), (tip, 27 + h + ear), (inner + (-1.5 if x < 16 else 1.5), 30 + h),
+              "lgrey")
+    g.cel(16, 34.5 + h, 7, 5, "slate", "dslate", "grey")
+    g.rect(10.5, 31.5 + h, 4, 1, "white")
+    g.rect(17.5, 31.5 + h, 4, 1, "white")
+    g.rect(9.5, 33 + h, 13, 2.5, "ink")
+    g.rect(15, 31.5 + h, 2, 3.5, "grey")
+    # narrowed eyes fixed ahead
+    g.rect(11.5, 34 + h, 2, 1, "white")
+    g.rect(18.5, 34 + h, 2, 1, "white")
+    g.cel(16, 37 + h, 3, 2, "white", "lgrey")
+    g.rect(15, 35.5 + h, 2, 1, "ink")
+    g.rect(15, 38 + h, 3, 1, "dbrown")
+    return lit(g)
+
+
 def seagull(lf=0, rf=0, bob=0):
     """A seagull standing facing the player, its feet on row 44: white head and chest, grey wings folded at its
     sides with black tips, pink legs, a yellow bill with the red spot, and the loot sack hanging from it. lf
@@ -675,10 +742,18 @@ SNATCH = {
     "snatch-raccoon": (raccoon, raccoon_fleeing, FLEE),
     "snatch-seagull": (seagull, seagull_fleeing, SEAGULL_FLEE),
 }
+# A Snatch animal's tags after idle: [(tag, draw, poses, ms)]. They are settled at each depth step apart
+# from the standing tags (pixel.depth_settled), so the crouch takes out its own rows and leaves the standing
+# frames as they were.
+SNATCH_EXTRA = {
+    "snatch-raccoon": [("stalk", raccoon_stalking, RACCOON_STALK, RACCOON_STALK_MS),
+                       ("step", raccoon_stalking, RACCOON_STEP, RACCOON_STEP_MS)],
+}
 # road.PERSON_WALK's feet and bob: a snatcher holds its sack, so it has no free arm to swing.
 SNATCH_WALK = [{k: v for k, v in q.items() if k in ("lf", "rf", "bob")} for q in road.PERSON_WALK]
+APART = {tag for extra in SNATCH_EXTRA.values() for tag, *_ in extra}
 # The pose arguments that move a part by pixels, snapped to whole pixels at each scale.
-POSE = ("lf", "rf", "bob", "fl", "fr", "bl", "br", "tail", "twitch")
+POSE = ("lf", "rf", "lh", "rh", "bob", "sink", "head", "ear", "fl", "fr", "bl", "br", "tail", "twitch")
 
 
 def drawn(s, draw, *args, **q):
@@ -706,7 +781,8 @@ def animals(step):
         t = SNATCH_SIDE[key] / 32 * step
         yield key, [("walk", [drawn(t, draw, **q) for q in SNATCH_WALK], road.PERSON_WALK_MS),
                     ("flee", [drawn(t, flee, **q) for q in flees], FLEE_MS),
-                    ("idle", [drawn(t, draw, bob=bb) for bb in BREATH], BREATH_MS)]
+                    ("idle", [drawn(t, draw, bob=bb) for bb in BREATH], BREATH_MS),
+                    *((tag, [drawn(t, d, **q) for q in qs], ms) for tag, d, qs, ms in SNATCH_EXTRA.get(key, ()))]
     d = SOCIAL_SIDE / 32 * step
     run = [dict(bob=q["bob"], front=q["front"], hind=q["hind"]) for q in hazards.CORGI_RUN]
     for key, draw in DOGS.items():
@@ -721,4 +797,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/animals", __doc__)
+    main(sys.argv, sprites, "art/animals", __doc__, apart=APART)

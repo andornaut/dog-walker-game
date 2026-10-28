@@ -78,6 +78,70 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 31, "h": 46 },
     "sourceSize": { "w": 31, "h": 46 },
     "duration": 400
+   },
+   "snatch-raccoon@81 10.aseprite": {
+    "frame": { "x": 310, "y": 0, "w": 31, "h": 46 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 31, "h": 46 },
+    "sourceSize": { "w": 31, "h": 46 },
+    "duration": 120
+   },
+   "snatch-raccoon@81 11.aseprite": {
+    "frame": { "x": 341, "y": 0, "w": 31, "h": 46 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 31, "h": 46 },
+    "sourceSize": { "w": 31, "h": 46 },
+    "duration": 120
+   },
+   "snatch-raccoon@81 12.aseprite": {
+    "frame": { "x": 372, "y": 0, "w": 31, "h": 46 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 31, "h": 46 },
+    "sourceSize": { "w": 31, "h": 46 },
+    "duration": 120
+   },
+   "snatch-raccoon@81 13.aseprite": {
+    "frame": { "x": 403, "y": 0, "w": 31, "h": 46 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 31, "h": 46 },
+    "sourceSize": { "w": 31, "h": 46 },
+    "duration": 120
+   },
+   "snatch-raccoon@81 14.aseprite": {
+    "frame": { "x": 434, "y": 0, "w": 31, "h": 46 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 31, "h": 46 },
+    "sourceSize": { "w": 31, "h": 46 },
+    "duration": 80
+   },
+   "snatch-raccoon@81 15.aseprite": {
+    "frame": { "x": 465, "y": 0, "w": 31, "h": 46 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 31, "h": 46 },
+    "sourceSize": { "w": 31, "h": 46 },
+    "duration": 80
+   },
+   "snatch-raccoon@81 16.aseprite": {
+    "frame": { "x": 496, "y": 0, "w": 31, "h": 46 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 31, "h": 46 },
+    "sourceSize": { "w": 31, "h": 46 },
+    "duration": 80
+   },
+   "snatch-raccoon@81 17.aseprite": {
+    "frame": { "x": 527, "y": 0, "w": 31, "h": 46 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 31, "h": 46 },
+    "sourceSize": { "w": 31, "h": 46 },
+    "duration": 80
    }
  },
  "meta": {
@@ -85,12 +149,14 @@
   "version": "1.2.30-x64",
   "image": "snatch-raccoon@81.png",
   "format": "RGBA8888",
-  "size": { "w": 310, "h": 46 },
+  "size": { "w": 558, "h": 46 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
    { "name": "flee", "from": 4, "to": 7, "direction": "forward" },
-   { "name": "idle", "from": 8, "to": 9, "direction": "forward" }
+   { "name": "idle", "from": 8, "to": 9, "direction": "forward" },
+   { "name": "stalk", "from": 10, "to": 13, "direction": "forward" },
+   { "name": "step", "from": 14, "to": 17, "direction": "forward" }
   ]
  }
 }
