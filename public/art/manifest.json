@@ -2200,6 +2200,87 @@
       }
     },
     {
+      "key": "cheese-crates",
+      "png": "sprites/cheese-crates.png",
+      "json": "sprites/cheese-crates.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 41
+      }
+    },
+    {
+      "key": "cheese-crates@50",
+      "png": "sprites/cheese-crates@50.png",
+      "json": "sprites/cheese-crates@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "cheese-crates@56",
+      "png": "sprites/cheese-crates@56.png",
+      "json": "sprites/cheese-crates@56.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "cheese-crates@62",
+      "png": "sprites/cheese-crates@62.png",
+      "json": "sprites/cheese-crates@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "cheese-crates@69",
+      "png": "sprites/cheese-crates@69.png",
+      "json": "sprites/cheese-crates@69.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "cheese-crates@75",
+      "png": "sprites/cheese-crates@75.png",
+      "json": "sprites/cheese-crates@75.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "cheese-crates@81",
+      "png": "sprites/cheese-crates@81.png",
+      "json": "sprites/cheese-crates@81.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "cheese-crates@88",
+      "png": "sprites/cheese-crates@88.png",
+      "json": "sprites/cheese-crates@88.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "cheese-crates@94",
+      "png": "sprites/cheese-crates@94.png",
+      "json": "sprites/cheese-crates@94.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 38
+      }
+    },
+    {
       "key": "clothing-rack",
       "png": "sprites/clothing-rack.png",
       "json": "sprites/clothing-rack.json",
@@ -5096,6 +5177,11 @@
       "key": "fx-hit-capybara",
       "png": "sprites/fx-hit-capybara.png",
       "json": "sprites/fx-hit-capybara.json"
+    },
+    {
+      "key": "fx-hit-cheese-crates",
+      "png": "sprites/fx-hit-cheese-crates.png",
+      "json": "sprites/fx-hit-cheese-crates.json"
     },
     {
       "key": "fx-hit-dropped-cone",
@@ -11717,6 +11803,18 @@
       "png": "images/card-capybara-help.png"
     },
     {
+      "key": "card-cheese-crates-buy",
+      "png": "images/card-cheese-crates-buy.png"
+    },
+    {
+      "key": "card-cheese-crates-hurry-on",
+      "png": "images/card-cheese-crates-hurry-on.png"
+    },
+    {
+      "key": "card-cheese-crates-sniff",
+      "png": "images/card-cheese-crates-sniff.png"
+    },
+    {
       "key": "card-cost",
       "png": "images/card-cost.png"
     },
@@ -12377,6 +12475,11 @@
       "key": "sfx-hit-capybara",
       "ogg": "sounds/sfx-hit-capybara.ogg",
       "m4a": "sounds/sfx-hit-capybara.m4a"
+    },
+    {
+      "key": "sfx-hit-cheese-crates",
+      "ogg": "sounds/sfx-hit-cheese-crates.ogg",
+      "m4a": "sounds/sfx-hit-cheese-crates.m4a"
     },
     {
       "key": "sfx-hit-dropped-cone",

@@ -4,6 +4,11 @@ the hit bursts, hit sounds and card illustrations that go with them, and their m
 
 Distillery District:
 
+cheese-crates       48x48   card obstacle, 1 lane, in Kensington Market too: a cheesemonger's slatted
+                            crate set out at the shop door, two golden wheels stacked at the back left,
+                            a cut wheel stood on its edge at the right showing its pale paste, a blue
+                            cheese wedge in front and a chalk price tag hung on the crate. idle (4
+                            frames, 350ms): three stink wisps rise a quarter wave a frame
 wedding-shoot       112x72  card obstacle, 2 lanes: a bride posing in a white gown and veil with a
                             bouquet in the left lane; in the right lane a photographer in black
                             kneels facing her, a camera with a flash on top raised to his eye, a
@@ -41,21 +46,26 @@ cargo-bike          48x72   minor mover, 1 lane by 2 rows: a cargo bike riding d
                             jacket; the box hides the legs. ride (4 frames, 100ms): the rider sways
                             1px over the bars, the flowers jiggle and a tread line rolls down the tire
 
+fx-hit-cheese-crates 77x77  play (8 frames, 70ms): a gold impact star, then a puff of lime stink
+                            swelling up and shrinking away as the cut wheel bounces up out of it and
+                            rolls off right, a quarter turn a frame, crumbs flying and wisps rising
 fx-hit-wedding-shoot 77x77  play (8 frames, 70ms): a lilac impact star, then a camera flash flaring
                             and fading while the bouquet flies up out of it, tumbling, and petals
                             scatter and drift down
 fx-hit-fish-crates  77x77   play (8 frames, 70ms): a shallow impact star, then a fish leaping up out
                             of a splash, flipping as it arcs over and falls, ice chips and drops
                             thrown out either side
+sfx-hit-cheese-crates 0.39s a soft wooden thunk, a squish, then a rising plop that sags as it settles
 sfx-hit-wedding-shoot 0.58s a flash charging up, the shutter's double click, then a triangle
                             "ding dong" of wedding bells
 sfx-hit-fish-crates 0.46s   a wooden thunk, ice chips clattering, then two wet flops
 
 Cards (75x56), one per option, composed from the sprites above and the pack's exports:
-card-wedding-shoot-pose, -walk-around and -reshoot on the Distillery District's road;
-card-fish-crates-sniff, -pay and -hurry-past on Kensington Market's. The two paid options show a bill
-(icon-bill) changing hands: the photographer reaching out to take it, the fishmonger in a white apron
-holding it up.
+card-cheese-crates-sniff, -buy and -hurry-on at a brick shopfront's wooden door, which fits both the
+neighbourhoods it stands in; card-wedding-shoot-pose, -walk-around and -reshoot on the Distillery
+District's road; card-fish-crates-sniff, -pay and -hurry-past on Kensington Market's. The paid options
+show a bill (icon-bill) changing hands: the photographer reaching out to take it, the fishmonger in a
+white apron and the cheesemonger in an ochre shirt and white apron holding it up.
 
 The road sprites take the road outline rule (pixel.road_edge) and road.LIT's rim on their dark
 colours, so their silhouettes hold 3:1 on every road. People, movers and the card obstacles are laid
@@ -101,6 +111,8 @@ SRC = "art/hood-markets"
 # their layout pixels.
 PERSON = road.SCALE
 OBSTACLE = ob.SCALE
+# The cheese crate's key, which its hit burst's and option pictures' keys extend.
+CHEESE = "cheese-crates"
 # The wedding shoot's design width: two lanes, 112px at PERSON.
 SHOOT_W = 224 / 3
 
@@ -453,6 +465,95 @@ def fish_crates(flop=0):
 FISH_IDLE = (0, 0, 1, 2), 350
 
 
+# ---------- the cheese crate ----------
+
+def cheese_wheel(g, cx, cy, r, turn=0.0, cut=True):
+    """A cheese wheel stood on its edge, seen face on round design point cx, cy, r design units across the
+    middle: a gold rind ring shaded amber on its lower right and lit yellow on its upper left round pale cream
+    paste with three tan holes, and with cut a wedge cut out of it to the centre, turned turn degrees
+    clockwise from straight up. Drawn pixel for pixel at the grid's scale, so it keeps its shape at any
+    angle."""
+    px, s = raster(g), scale_of(g)
+    ox, oy, rr = cx * s, cy * s, r * s
+    a0 = math.radians(turn - 90)
+    rind = max(1, round(1.3 * s))
+    holes = [(ox + math.cos(a0 + math.radians(d)) * rr * k, oy + math.sin(a0 + math.radians(d)) * rr * k)
+             for d, k in ((130, 0.5), (215, 0.45), (290, 0.55))]
+    for y in range(px.h):
+        for x in range(px.w):
+            dx, dy = x + 0.5 - ox, y + 0.5 - oy
+            d = math.hypot(dx, dy)
+            if d > rr:
+                continue
+            ang = (math.degrees(math.atan2(dy, dx)) - turn + 90) % 360
+            if cut and d > 0.5 and ang < 50:
+                continue
+            light = (dx + dy) / max(d, 1e-9)
+            if d > rr - rind:
+                c = "yellow" if light < -0.7 else "amber" if light > 0.5 else "gold"
+            else:
+                c = "cream"
+                for hx, hy in holes:
+                    if math.hypot(x + 0.5 - hx, y + 0.5 - hy) < max(0.8, 0.12 * rr):
+                        c = "tan"
+            px.p(x, y, c)
+
+
+def blue_wedge(g, x, y, w, h):
+    """A wedge of blue cheese lying on its side, x, y to x + w, y + h in design units: its white paste shaded
+    lgrey along the bottom, blue veins speckled through it, its rind a cream strip down the tall back end on
+    the left, the point at the right."""
+    g.tri((x, y), (x, y + h), (x + w, y + h), "white")
+    g.rect(x, y + h - 1, w, 1, "lgrey")
+    g.rect(x, y, 1.5, h, "cream")
+    for vx, vy in ((0.2, 0.35), (0.35, 0.7), (0.15, 0.75), (0.55, 0.8), (0.28, 0.5), (0.75, 0.88)):
+        g.p(x + w * vx, y + h * vy, "blue")
+    for vx, vy in ((0.4, 0.62), (0.2, 0.58), (0.62, 0.72)):
+        g.p(x + w * vx, y + h * vy, "sky")
+
+
+def stink_wisps(g, phase, xs=(9, 17, 25), top=1, bottom=9):
+    """Wavy stink lines in drawn pixels, 1px wide, lime with every third pixel moss, rising from design row
+    bottom to row top at each design column in xs; phase (0 to 3) moves the wave up a quarter period, so the
+    frames in turn make the lines rise."""
+    px, s = raster(g), scale_of(g)
+    period = max(4, round(4 * s))
+    for i, cx in enumerate(xs):
+        y0, y1 = math.floor((top + (i % 2)) * s), math.floor(bottom * s)
+        for y in range(y0, y1):
+            k = (y + phase * period // 4 + i * period // 2) % period
+            dx = (0, 1, 1, 0, 0, -1, -1, 0)[k * 8 // period]
+            px.p(math.floor(cx * s) + dx, y, "moss" if (y - y0) % 3 == 2 else "lime")
+
+
+def cheese_crates(phase=0):
+    """A cheesemonger's slatted wooden crate set out at the shop door, on the 32-unit grid: a stack of two
+    whole golden wheels (gold tops lit yellow, amber rinds) at the back left, a cut wheel stood on its edge at
+    the right showing its pale paste, and a wedge of blue cheese lying in front; a small chalk price tag hung on
+    the crate's front, and stink wisps rising off the cheese. phase (0 to 3) moves the wisps up."""
+    g = edged(Grid(32, 32))
+    stink_wisps(g, phase)
+    # the whole wheels, stacked flat: each a side band of rind, a dark seam under it, under a lit top
+    for top in (10, 14.5):
+        g.rect(3.5, top, 11, 4, "amber")
+        g.rect(3.5, top + 3.5, 11, 1, "orange")
+        g.rect(12.5, top, 2, 4, "orange")
+        g.cel(9, top, 5.5, 2, "gold", None, "yellow")
+    cheese_wheel(g, 22, 12, 6.5, turn=35)
+    blue_wedge(g, 8.5, 12.5, 13, 7)
+    crate(g, 3, 19, 26, 12)
+    # the chalk price tag on its string, hung from the crate's rim, two lines of chalk writing on it
+    g.rect(20.5, 19, 1, 2, "cream")
+    g.rect(17, 21, 8, 5, "coal")
+    g.rect(18.5, 22.3, 5, 0.7, "white")
+    g.rect(18.5, 24, 3, 0.7, "lgrey")
+    return lit(g, dict(coal=("grey", None)))
+
+
+# The wisps rise a quarter wave a frame.
+CHEESE_IDLE = (0, 1, 2, 3), 350
+
+
 # ---------- the produce crates ----------
 
 def crate(g, x, y, w, h):
@@ -643,6 +744,8 @@ def road_sprites(s=1):
                              ("run", frames(p, rolling_barrel, [dict(turn=a, dust=d) for a, d in run]), run_ms)]
     args, ms = FISH_IDLE
     yield "fish-crates", [("idle", frames(p, fish_crates, [dict(flop=a) for a in args]), ms)]
+    args, ms = CHEESE_IDLE
+    yield CHEESE, [("idle", frames(p, cheese_crates, [dict(phase=a) for a in args]), ms)]
     args, ms = PRODUCE_IDLE
     yield "produce-crates", [("idle", frames(o, produce_crates, [dict(leaf=a) for a in args]), ms)]
     args, ms = RACK_IDLE
@@ -760,7 +863,39 @@ def hit_fish_crates(step):
     return g
 
 
-HIT_BURSTS = {"fx-hit-wedding-shoot": (hit_wedding_shoot, 8), "fx-hit-fish-crates": (hit_fish_crates, 8)}
+def hit_cheese_crates(step):
+    """A gold impact star, then a puff of lime stink swelling up and shrinking away as the cut cheese wheel
+    bounces up out of it and rolls away to the right, turning a quarter turn a frame, crumbs thrown out
+    either side and stink wisps rising off the puff."""
+    g = hits.Grid(64, 64)
+    cx, cy = 32, 42
+    if step == 0:
+        hits.impact(g, "gold", cx, cy - 4)
+        return hits.rim(g)
+    r = (0, 7, 11, 14, 15, 13, 10, 6)[step]
+
+    def puff(p):
+        for dx, dy, k in ((-9, 1, 0.7), (9, 1, 0.7), (0, -3, 1), (-5, -8, 0.6), (5, -9, 0.55)):
+            p.cel(cx + dx * r / 14, cy + dy * r / 14, r * k * 0.6 + 1, r * k * 0.45 + 1, "lime", None, "yellow")
+        p.rect(cx - r * 0.9, cy + r * 0.3, r * 1.8, 1, "moss")
+
+    hits.piece(g, puff)
+    if step >= 3:
+        hits.piece(g, lambda p: stink_wisps(p, step % 4, xs=(cx - 9, cx, cx + 9), top=cy - 24 + step,
+                                            bottom=cy - 6 - r * 0.5))
+    t = step - 0.5
+    for i, (vx, vy) in enumerate(((-9, -8), (9, -7), (-12, -3), (12, -4), (-5, -10), (6, -10))):
+        x, y = cx + vx * t * 0.8, cy - 4 + vy * t * 0.8 + 1.3 * t * t
+        if 3 <= x < 60 and 3 <= y < 60:
+            hits.piece(g, lambda p: p.rect(x, y, 2, 2, "cream" if i % 2 else "gold"))
+    wx = (0, 30, 33, 37, 41, 45, 48, 51)[step]
+    wy = (0, 32, 22, 17, 18, 24, 32, 28)[step]
+    hits.piece(g, lambda p: cheese_wheel(p, wx, wy, 8, turn=step * 90))
+    return g
+
+
+HIT_BURSTS = {"fx-hit-wedding-shoot": (hit_wedding_shoot, 8), "fx-hit-fish-crates": (hit_fish_crates, 8),
+              f"fx-hit-{CHEESE}": (hit_cheese_crates, 8)}
 
 
 def burst_sprites():
@@ -922,6 +1057,109 @@ def card_fish_hurry_past():
     return a
 
 
+def shop_door(a):
+    """The cheese crate's setting, the same in both neighbourhoods it stands in: a red brick shopfront in a
+    running bond of dbrick mortar across the top, a bark wooden door in a dbrown frame with a gold knob over a
+    stone step, and stone paving below in dstone courses; shadows dstone, the leash pink."""
+    from cards import AH, AW
+    a.fill(0, 0, AW, WALL, "brick")
+    for y in range(3, WALL, 4):
+        a.fill(0, y, AW, 1, "dbrick")
+        for x in range(-4 + 4 * (y // 4 % 2), AW, 8):
+            a.fill(x, y - 3, 1, 3, "dbrick")
+    a.fill(0, WALL - 2, AW, 2, "dbrick")
+    a.fill(DOOR - 3, 0, 30, WALL - 1, "dbrown")
+    a.fill(DOOR, 0, 24, WALL - 1, "bark")
+    for x in range(DOOR + 5, DOOR + 24, 6):
+        a.fill(x, 0, 1, WALL - 1, "walnut")
+    a.fill(DOOR + 2, 3, 20, 8, "dbrown")
+    a.fill(DOOR + 3, 4, 18, 6, "haze")
+    a.fill(DOOR + 3, 4, 18, 1, "white")
+    a.fill(DOOR + 20, 16, 2, 2, "gold")
+    a.fill(DOOR - 5, WALL - 2, 34, 3, "stone")
+    a.fill(DOOR - 5, WALL - 2, 34, 1, "driftwood")
+    a.fill(0, WALL + 1, AW, AH - WALL - 1, "stone")
+    for y in range(WALL + 7, AH, 8):
+        a.fill(0, y, AW, 1, "dstone")
+    a.shade, a.leash_col = "dstone", "pink"
+
+
+# The shop door's layout: the wall's bottom row and the door's left column.
+WALL, DOOR = 28, 26
+
+
+def card_cheese_sniff():
+    """Have a sniff: the cheese crate at the shop door and Archie and Buddy nose in at it from either side,
+    stink wisps rising round them all and a heart."""
+    import cards
+    a = cards.Art()
+    shop_door(a)
+    a.put(CHEESE, "idle", 38, 40)
+    for dog, x, foot, i in (("buddy", 54, 58, 1), ("archie", 22, 60, 2)):
+        c = a.dog(dog, "walk", x, foot, i)
+        a.lead(x, c, x + 6)
+    a.stink(3, 16, 2, "lime", "moss")
+    a.stink(63, 18, 2, "lime", "moss")
+    a.stink(37, 33, 1, "lime", "moss")
+    a.hearts([(66, 6)])
+    return a
+
+
+def cheesemonger_top(g, b):
+    """The cheesemonger facing the player: an ochre shirt under a long white apron, dbrown hair and a short
+    moustache, the near hand (screen left) raised beside the face to hold up the fee, the other hand low at the
+    side holding a wedge of gold cheese across the apron."""
+    g.rect(9, 21 + b, 14, 13, "ochre")
+    g.rect(20, 21 + b, 3, 13, "rust")
+    g.rect(11, 23 + b, 10, 12, "white")
+    g.rect(19, 23 + b, 2, 12, "lgrey")
+    g.rect(11, 21 + b, 1, 2, "white")
+    g.rect(20, 21 + b, 1, 2, "lgrey")
+    g.rect(5, 22 + b, 4, 4, "ochre")
+    g.rect(4, 15 + b, 4, 8, "ochre")
+    g.rect(4, 13 + b, 4, 3, "skin1")
+    road.back_arm(g, 23, 4, 22 + b, ((8, "ochre", "rust"), (3, "skin1", None)))
+    g.tri((24, 29 + b), (24, 34 + b), (17, 34 + b), "gold")
+    g.rect(17, 33 + b, 7, 1, "amber")
+    g.rect(23, 29 + b, 1, 5, "yellow")
+    g.rect(22, 32 + b, 3, 2, "skin1")
+    face_disc(g, 16, 13.5 + b, 7.5, 7.5, "skin1", "skin2")
+    face_front(g, 16, 14 + b)
+    g.rect(13.5, 16.5 + b, 5, 1, "dbrown")
+    g.cel(16, 8 + b, 7.5, 3, "dbrown", "plum", "brown")
+    g.rect(8.5, 8 + b, 2, 5, "dbrown")
+    g.rect(21.5, 8 + b, 2, 5, "dbrown")
+
+
+def card_cheese_buy():
+    """Buy the cheese: the cheese crate at the shop door with Archie sitting by it, and the cheesemonger in
+    the doorway holding up the bill he has been paid and holding out a wedge of cheese."""
+    import cards
+    a = cards.Art()
+    shop_door(a)
+    a.put(CHEESE, "idle", 22, 42)
+    monger = to_image(road.drawn(PERSON, road.dressed, cheesemonger_top, legs="bark", shoes="ink").outlined())
+    a.paste(monger, 38, -4)
+    a.paste(cards.sn.image("icon-bill"), 38, 4)
+    c = a.dog("archie", "idle", 30, 58)
+    a.lead(30, c, 36)
+    return a
+
+
+def card_cheese_hurry_on():
+    """Hurry on: the cheese crate at the shop door on the right and Archie pulled away to the left, the leash
+    taut off the bottom, a red ! by the cheese."""
+    import cards
+    a = cards.Art()
+    shop_door(a)
+    a.put(CHEESE, "idle", 54, 42)
+    c = a.dog("archie", "pull", 22, 56, flip=True)
+    a.lead(22, c, 6)
+    a.fill(72, 2, 2, 5, "red")
+    a.fill(72, 8, 2, 2, "red")
+    return a
+
+
 CARDS = {
     "card-wedding-shoot-pose": card_wedding_pose,
     "card-wedding-shoot-walk-around": card_wedding_walk_around,
@@ -929,6 +1167,9 @@ CARDS = {
     "card-fish-crates-sniff": card_fish_sniff,
     "card-fish-crates-pay": card_fish_pay,
     "card-fish-crates-hurry-past": card_fish_hurry_past,
+    f"card-{CHEESE}-sniff": card_cheese_sniff,
+    f"card-{CHEESE}-buy": card_cheese_buy,
+    f"card-{CHEESE}-hurry-on": card_cheese_hurry_on,
 }
 
 
@@ -958,6 +1199,14 @@ def build_cards():
 
 # Each is a list of sounds.tone() calls, (wave, seconds, freq, start seconds, options), as sounds.EFFECTS.
 SOUNDS = {
+    # a soft wooden thunk, a squish, then the cheese's rising plop and a sag as it settles
+    f"sfx-hit-{CHEESE}": [
+        ("triangle", 0.14, (150, 65), 0, dict(vol=0.8, attack=0.003, release=0.85)),
+        ("pinknoise", 0.05, None, 0, dict(vol=0.3, low=700, attack=0.002, release=0.9)),
+        ("pinknoise", 0.12, None, 0.14, dict(vol=0.6, low=1100, high=180, attack=0.02, release=0.7)),
+        ("sine", 0.08, (180, 520), 0.16, dict(vol=0.8, attack=0.004, release=0.6)),
+        ("triangle", 0.12, (300, 120), 0.27, dict(vol=0.5, attack=0.01, release=0.8)),
+    ],
     # the flash whining up, the shutter's two clicks, then two bells
     "sfx-hit-wedding-shoot": [
         ("square", 0.12, (1800, 4200), 0, dict(vol=0.15, duty=25, low=5000, attack=0.02, release=0.3)),
