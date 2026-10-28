@@ -21,7 +21,7 @@ import type {
 } from "../data/types";
 import { HOME_TEXT_FIELDS, homeLine } from "../home/homeText";
 import { assertNever } from "../lib/assertNever";
-import { fillLine, fillNames, MINUS, signedText } from "../lib/lines";
+import { fillLine, fillNames, signedText } from "../lib/lines";
 import type { ModifiedValue } from "./modified";
 import { modifiersOf, modifierValue } from "./modifiers";
 import { type Cents, cents, read } from "./units";
@@ -52,7 +52,7 @@ export function formatDollars(amount: Cents): string {
 
 // A money effect's amount, signed by its change: "+$5", "−$1.50".
 function moneyChangeText(change: MoneyEffect["change"], amount: Cents): string {
-  return `${change === "gain" ? "+" : MINUS}${formatDollars(amount)}`;
+  return signedText(change === "gain" ? 1 : -1, formatDollars(amount));
 }
 
 // A change in hearts, signed: "+3♥", "−1♥".
