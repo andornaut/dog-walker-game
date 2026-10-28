@@ -249,14 +249,18 @@ describe("a card cost Fanny pack cuts", () => {
     const { resolution } = gameData.encounters[id];
     return resolution.kind === "card" ? (resolution.options[index]?.effects ?? []) : [];
   };
-  const paid = keysOf(gameData.encounters).flatMap((id) => {
-    const { resolution } = gameData.encounters[id];
-    return resolution.kind === "card"
-      ? resolution.options.flatMap((option, index) =>
-          baseMoneyCost(gameData, option.effects) > 0 ? [[id, option.name, index] as const] : [],
-        )
-      : [];
-  });
+  // The first option of each base cost: the cut reads only the cost, which sets the rounding.
+  const paid = keysOf(gameData.encounters)
+    .flatMap((id) => {
+      const { resolution } = gameData.encounters[id];
+      return resolution.kind === "card"
+        ? resolution.options.flatMap((option, index) => {
+            const base = baseMoneyCost(gameData, option.effects);
+            return base > 0 ? [[id, option.name, index, base] as const] : [];
+          })
+        : [];
+    })
+    .filter(([, , , base], i, all) => all.findIndex((other) => other[3] === base) === i);
 
   it.each(paid)("shows %s's %s at the cut price everywhere, and charges it", (id, _, index) => {
     const state = testState(
