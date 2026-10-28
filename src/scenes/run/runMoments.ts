@@ -97,7 +97,7 @@ import { flashWhite, moveObstacle, playHitEffects, shakeRoad } from "./hitFx";
 import type { ItemViews } from "./itemViews";
 import type { PackView } from "./packView";
 import { showGearPopup, showInstantPopup } from "./roadBanners";
-import { DEPTH, firingSeconds, LAYOUT, overPack } from "./stage";
+import { DEPTH, firingSeconds, LAYOUT, overPack, PROJECTION } from "./stage";
 
 // How long the step's hit stop holds the road, or a plain obstacle's stop while it has none.
 function stopMs(step: WalkStep): number {
@@ -593,7 +593,6 @@ export class RunMoments {
   // The hit moment over the stop, framed by the road and the backdrop band beside it, labelled
   // with the encounter's hit label.
   private playHit(hit: EncounterCard, step: WalkStep, pack: { x: number; y: number }): void {
-    const { road } = LAYOUT;
     playHitMoment(this.scene, {
       caught: this.deps.pack.sprites(hit.affected),
       centre: { x: pack.x, y: pack.y - 20 },
@@ -602,7 +601,7 @@ export class RunMoments {
       field: hitField(),
       kind: gameData.encounters[hit.encounter].kind,
       label: hitLabelOf(gameData.encounters[hit.encounter]),
-      labelX: road.x + road.width / 2,
+      labelX: PROJECTION.centreX,
       seconds: step.walk.road.hitStop?.seconds ?? 0,
       still: this.deps.still(),
       word: hitWord(gameData.encounters[hit.encounter]),
@@ -655,12 +654,11 @@ export class RunMoments {
     if (label === undefined) {
       return;
     }
-    const { road } = LAYOUT;
     playMinorHitLabel(this.scene, {
       centre: { x: pack.x, y: pack.y - 20 },
       depth: DEPTH.popup,
       label,
-      labelX: road.x + road.width / 2,
+      labelX: PROJECTION.centreX,
       seconds: step.walk.road.hitStop?.seconds ?? 0,
       still: this.deps.still(),
     });

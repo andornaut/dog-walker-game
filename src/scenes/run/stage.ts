@@ -70,10 +70,9 @@ export type Shadow = (key: string, depth: number, x: number, footY: number) => v
 
 // The pack's centre at the leading dog's feet, in screen pixels.
 export function packPoint(walk: Walk | undefined): { x: number; y: number } {
-  const road = LAYOUT.road;
   const x =
-    walk === undefined ? road.x + road.width / 2 : laneMotionX(LANE_XS, walk.road.control.motion);
-  return { x, y: walkerFootY(road) - 20 };
+    walk === undefined ? PROJECTION.centreX : laneMotionX(LANE_XS, walk.road.control.motion);
+  return { x, y: walkerFootY(LAYOUT.road) - 20 };
 }
 
 // Over the pack at pack: where pops over the pack, its sparkles and its money labels show.

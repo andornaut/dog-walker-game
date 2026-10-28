@@ -11,7 +11,7 @@ import { fillRect } from "../../ui/phaser/draw";
 import { PALETTE } from "../../ui/phaser/palette";
 import { addPixelText } from "../../ui/phaser/pixelText";
 import { fadeAway } from "../uiKit";
-import { DEPTH, LAYOUT } from "./stage";
+import { DEPTH, LAYOUT, PROJECTION } from "./stage";
 
 // An instant lucky find's art pops up over the road, then floats up and fades.
 const POPUP = { artY: 120, fadeMs: 1800, rise: 16 };
@@ -32,7 +32,7 @@ export function showInstantPopup(scene: Scene, encounter: EncounterId, still: bo
   }
   const { road } = LAYOUT;
   const art = scene.add
-    .image(road.x + road.width / 2, road.y + POPUP.artY, resolution.art)
+    .image(PROJECTION.centreX, road.y + POPUP.artY, resolution.art)
     .setOrigin(0.5, 0)
     .setDepth(DEPTH.popup);
   fadeAway(scene, [art], { ms: POPUP.fadeMs, rise: still ? 0 : POPUP.rise });
@@ -47,7 +47,7 @@ export function showGearPopup(scene: Scene, gear: GearId, still: boolean): void 
   }
   const { road } = LAYOUT;
   const art = scene.add
-    .image(road.x + road.width / 2, road.y + POPUP.artY, key)
+    .image(PROJECTION.centreX, road.y + POPUP.artY, key)
     .setOrigin(0.5, 0)
     .setScale(GEAR_POPUP_SCALE)
     .setDepth(DEPTH.popup);
