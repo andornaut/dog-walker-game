@@ -1905,14 +1905,29 @@ describe("stop-and-go across", () => {
     },
   );
 
-  // It tries the stop its stop draw picks first, each as likely, then the others nearest that one
-  // in its list first; a crosser with no stops tries once, with none.
+  // It tries the stop its stop draw picks first, each as likely, then the others in the order
+  // what is left of the draw picks, scaled to the stops left; a crosser with no stops tries once,
+  // with none.
   it.each([
-    { draw: 0, want: [EVERY_STOP[0], EVERY_STOP[1], EVERY_STOP[2]] },
-    { draw: 0.34, want: [EVERY_STOP[1], EVERY_STOP[0], EVERY_STOP[2]] },
-    { draw: 0.99, want: [EVERY_STOP[2], EVERY_STOP[1], EVERY_STOP[0]] },
+    { draw: 0, want: [0, 1, 2] },
+    { draw: 0.2, want: [0, 2, 1] },
+    { draw: 0.4, want: [1, 0, 2] },
+    { draw: 0.5, want: [1, 2, 0] },
+    { draw: 0.7, want: [2, 0, 1] },
+    { draw: 0.99, want: [2, 1, 0] },
   ])("tries its stops in the order $want at a stop draw of $draw", ({ draw, want }) => {
-    expect(stopsToTry(stopAndGo(EVERY_STOP), draw)).toEqual(want);
+    expect(stopsToTry(stopAndGo(EVERY_STOP), draw)).toEqual(want.map((i) => EVERY_STOP[i]));
+  });
+  // Over even steps of the draw from 0 up to 1, every order of its stops comes up as often.
+  it("tries every order of its stops equally often across the draw", () => {
+    const steps = 600;
+    const orders = new Map<string, number>();
+    for (let i = 0; i < steps; i++) {
+      const order = JSON.stringify(stopsToTry(stopAndGo(EVERY_STOP), (i + 0.5) / steps));
+      orders.set(order, (orders.get(order) ?? 0) + 1);
+    }
+    const ways = EVERY_STOP.reduce((count, _, i) => count * (i + 1), 1);
+    expect([...orders.values()]).toEqual(Array.from({ length: ways }, () => steps / ways));
   });
   it("tries a crosser with no stops once, with none", () => {
     expect(stopsToTry(spec(cross(2, 0)), 0.5)).toEqual([null]);
@@ -1934,14 +1949,11 @@ describe("stop-and-go across", () => {
     );
   });
 
-  // Placed on a grid whose path holds lane 4 on every row, each of a seed's movers stands in the
-  // stop its draw picks where that leaves lane 4 open, and otherwise in the nearest that does.
-  it.each([1, 2, 3, 4, 5, 6])("stands clear of the path's lane, seed %i", (seed) => {
-    const held = laneMask(4, 1);
-    const streams = plannerStreams(seed);
-    const own = drawMover(plannerStreams(seed));
-    const { spawns } = placeMovers(
-      streams,
+  // One mover placed on a seed on a grid whose path holds the lanes held on every row: the stop it
+  // stands in, or null where it is dropped.
+  const standsOnHeld = (held: number, seed: number): StopLanes | null => {
+    const { dropped, spawns } = placeMovers(
+      plannerStreams(seed),
       { ...geometry, zoneLength: 6150 },
       CAPS,
       {
@@ -1961,9 +1973,37 @@ describe("stop-and-go across", () => {
       [{ count: 1, kind: "train", spec: stopAndGo(EVERY_STOP) }],
     );
     const [spawn] = spawns;
-    const stands = spawn === undefined ? null : standsIn(spawn.mover);
-    const tried = stopsToTry(stopAndGo(EVERY_STOP), own.turnAt);
-    expect(stands).toEqual(tried.find((stop) => stop !== null && stop[1] < 4));
+    expect(dropped.length + spawns.length).toBe(1);
+    return spawn === undefined ? null : standsIn(spawn.mover);
+  };
+
+  // Placed on a grid whose path holds lane 4 on every row, each of a seed's movers stands in the
+  // stop its draw picks where that leaves lane 4 open, and otherwise in the first of its others to
+  // try that does.
+  it.each([1, 2, 3, 4, 5, 6])("stands clear of the path's lane, seed %i", (seed) => {
+    const tried = stopsToTry(stopAndGo(EVERY_STOP), drawMover(plannerStreams(seed)).turnAt);
+    expect(standsOnHeld(laneMask(4, 1), seed)).toEqual(
+      tried.find((stop) => stop !== null && stop[1] < 4),
+    );
+  });
+
+  // Across seeds on such a grid, each stop that leaves the path open comes up about as often, one
+  // drawn that does not falling back to them evenly: each share within four standard errors of an
+  // even one over the seeds. With none open, none stands anywhere: every mover is dropped.
+  const FALLBACK_SEEDS = 600;
+  it.each([
+    { held: [4], open: [EVERY_STOP[0], EVERY_STOP[1]] },
+    { held: [0, 1], open: [EVERY_STOP[2]] },
+    { held: [2], open: [] },
+  ])("stands evenly in the stops that leave the path in $held open", ({ held, open }) => {
+    const mask = held.reduce((lanes, lane) => lanes | laneMask(lane, 1), 0);
+    const stands = Array.from({ length: FALLBACK_SEEDS }, (_, i) => standsOnHeld(mask, i + 1));
+    for (const stop of EVERY_STOP) {
+      const share = stands.filter((stood) => stood?.[0] === stop[0]).length / FALLBACK_SEEDS;
+      const want = open.includes(stop) ? 1 / open.length : 0;
+      const tolerance = 4 * Math.sqrt((want * (1 - want)) / FALLBACK_SEEDS) + 1e-9;
+      expect(Math.abs(share - want), stop.join("-")).toBeLessThanOrEqual(tolerance);
+    }
   });
 
   // A red herring, at its share of 1, is never placed and takes no room: it blocks no lane, takes

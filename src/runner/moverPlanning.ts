@@ -1455,20 +1455,26 @@ function bodyOf(spot: Spot): MoverBody | undefined {
     : { from: spot.distance + body.from, lanes: body.lanes, to: spot.distance + body.to };
 }
 
-// The stops a stop-and-go across tries in turn: the one its stop draw picks among its stops, each
-// as likely, then the others, nearest that one in its list first, the earlier first between two as
-// near. A mover with no stops tries once, with none (null).
+// The stops a stop-and-go across tries in turn, in an order its stop draw picks, each order as
+// likely and with no draw of its own: the draw, scaled to the stops left, picks the next among
+// them, and what it leaves past that one's share, scaled again, picks the one after. So the first
+// is the one the draw picks among all its stops, each as likely, and the rest come in a random
+// order. A mover with no stops tries once, with none (null).
 export function stopsToTry(spec: MoverSpec, stopDraw: number): (StopLanes | null)[] {
   const { motion } = spec;
   if (motion.kind !== "cross" || motion.pause === undefined) {
     return [null];
   }
-  const { stops } = motion.pause;
-  const drawn = Math.min(stops.length - 1, Math.floor(stopDraw * stops.length));
-  return stops
-    .map((stop, index) => ({ index, stop }))
-    .sort((a, b) => Math.abs(a.index - drawn) - Math.abs(b.index - drawn) || a.index - b.index)
-    .map(({ stop }) => stop);
+  const left = [...motion.pause.stops];
+  const order: StopLanes[] = [];
+  let draw = stopDraw;
+  while (left.length > 0) {
+    const scaled = draw * left.length;
+    const index = Math.min(left.length - 1, Math.floor(scaled));
+    order.push(...left.splice(index, 1));
+    draw = scaled - index;
+  }
+  return order;
 }
 
 // Whether a placement stands in stop, or has no stop where stop is null.
@@ -1517,8 +1523,9 @@ function standsOf(spot: Spot): MoverStand[] {
 // a place in that lane of the highest rank in its row, so each row gives the lane the widest reach
 // that fits there. A stop-and-go across tries the stop its stop draw picks first, each as likely,
 // on the rows where it leaves the path's lanes open (leavesPathOpen), with every retry, and only
-// then its other stops in turn (stopsToTry). A red herring crosser (isHerring) is not placed: it
-// comes as scenery in its stretch (herringSpawn), one of its quota's count, taking no room.
+// then its other stops in turn, in a random order its stop draw picks (stopsToTry); it is dropped
+// only where no stop fits. A red herring crosser (isHerring) is not placed: it comes as scenery in
+// its stretch (herringSpawn), one of its quota's count, taking no room.
 // onScreen holds the movers already on screen, from an earlier call, and gains each mover placed.
 export function placeMovers<Kind extends string>(
   streams: PlannerStreams,
