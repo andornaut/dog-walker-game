@@ -140,7 +140,8 @@ export class CardScene extends Scene {
   private chosen = false;
   private entries: Entry[] = [];
   private onChoose: (choice: Choice) => void = () => undefined;
-  private badges: (GameObjects.BitmapText | undefined)[] = [];
+  // Each option's plaque text, which a refused pick flashes; none for a plaque value.
+  private plaqueLabels: (GameObjects.BitmapText | undefined)[] = [];
   private enlarged: GameObjects.GameObject[] = [];
   // The title, subtitle and their band, hidden with the row while a card is enlarged.
   private headerParts: GameObjects.GameObject[] = [];
@@ -167,7 +168,7 @@ export class CardScene extends Scene {
     this.chosen = false;
     this.pressed = undefined;
     this.view = view;
-    this.badges = [];
+    this.plaqueLabels = [];
     this.enlarged = [];
     this.hold = undefined;
     this.parts = [];
@@ -332,12 +333,12 @@ export class CardScene extends Scene {
         yoyo: true,
       });
     }
-    const badge = this.badges[index];
+    const label = this.plaqueLabels[index];
     let flashes = 0;
     this.time.addEvent({
       callback: () => {
         flashes += 1;
-        badge?.setTint(flashes % 2 === 1 ? PALETTE.red : PALETTE[GREYED.plateText]);
+        label?.setTint(flashes % 2 === 1 ? PALETTE.red : PALETTE[GREYED.plateText]);
         if (flashes >= REFUSE.flashes) {
           this.refusing = false;
         }
@@ -461,6 +462,11 @@ export class CardScene extends Scene {
     });
   }
 
+  // A texture key as a card shows it: its greyed copy on a greyed card.
+  private shownKey(grey: boolean, key: string): string {
+    return grey ? greyTextureKey(this, key) : key;
+  }
+
   // ui-fires over the plaque's left rivet, pulsing unless motion is reduced. Returns its
   // right edge, or undefined while the art is missing, when the text flag stands alone.
   private addFiresMarker(x: number, y: number, scale: number, grey: boolean): number | undefined {
@@ -469,7 +475,7 @@ export class CardScene extends Scene {
     }
     const still = grey || currentSettings(this).reducedMotion;
     const frame = tagFrame(this, FIRES_KEY, "static");
-    const key = grey ? greyTextureKey(this, FIRES_KEY) : FIRES_KEY;
+    const key = this.shownKey(grey, FIRES_KEY);
     const marker = this.add.sprite(x, y, key, frame).setOrigin(0).setScale(scale);
     if (!still) {
       playTag(marker, FIRES_KEY, "pulse");
@@ -563,7 +569,7 @@ export class CardScene extends Scene {
     const g = this.add.graphics();
     if (this.textures.exists(CARD_FRAME_KEY)) {
       const frameName = tagFrame(this, CARD_FRAME_KEY, tag);
-      const key = grey ? greyTextureKey(this, CARD_FRAME_KEY) : CARD_FRAME_KEY;
+      const key = this.shownKey(grey, CARD_FRAME_KEY);
       this.add.sprite(x, y, key, frameName).setOrigin(0);
     } else {
       fillRect(g, PALETTE.plum, rect);
@@ -581,12 +587,12 @@ export class CardScene extends Scene {
     const art = { ...ART, x: x + ART.x, y: y + ART.y };
     const illustration = illustrationKey(entry.option);
     if (this.textures.exists(illustration)) {
-      const key = grey ? greyTextureKey(this, illustration) : illustration;
+      const key = this.shownKey(grey, illustration);
       this.add.image(art.x, art.y, key).setOrigin(0).setCrop(0, 0, art.width, art.height);
     } else {
       const spriteKey = entry.option === undefined ? undefined : sourceSpriteKey(view.source);
       if (spriteKey !== undefined && this.textures.exists(spriteKey)) {
-        const key = grey ? greyTextureKey(this, spriteKey) : spriteKey;
+        const key = this.shownKey(grey, spriteKey);
         const sprite = addStandingSprite(
           this,
           spriteKey,
@@ -656,7 +662,7 @@ export class CardScene extends Scene {
     if (!plaque) {
       // A free option's foot stays plain.
     } else if (this.textures.exists(COST_KEY)) {
-      const key = grey ? greyTextureKey(this, COST_KEY) : COST_KEY;
+      const key = this.shownKey(grey, COST_KEY);
       this.add.image(badge.x, badge.y, key).setOrigin(0);
     } else {
       fillRect(g, grey ? PALETTE[GREYED.plateFace] : PALETTE.cream, badge);
@@ -667,10 +673,10 @@ export class CardScene extends Scene {
         : undefined;
     if (marks.plaque !== null) {
       this.addPlaqueValue(badge, marker, 4, marks.plaque);
-      this.badges.push(undefined);
+      this.plaqueLabels.push(undefined);
       return;
     }
-    this.badges.push(
+    this.plaqueLabels.push(
       hasPlaque(option)
         ? this.addPlaqueText(
             "small",
