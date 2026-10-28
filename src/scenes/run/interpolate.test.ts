@@ -13,7 +13,8 @@ import {
   startSession,
   stepSession,
 } from "../../runner/session";
-import { laneMoveSeconds, startRoad, type Walk, type WalkItem } from "../../runner/walk";
+import { laneMoveSeconds, startRoad, type Walk } from "../../runner/walk";
+import { type WalkItem } from "../../runner/walkItems";
 import { newRun } from "../../state/runState";
 import { blendWalk, leadWalk, stepAlpha } from "./interpolate";
 

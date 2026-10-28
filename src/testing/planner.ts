@@ -14,18 +14,16 @@ import { slowestDebuffedAgility, slowestPackAgility } from "../rules/walkers";
 import { approachOutcomes } from "../runner/approach";
 import { type MoverPath, moverPlace } from "../runner/movers";
 import {
-  blocksLane,
-  footprintOf,
   itemHeight,
   laneMoveSeconds,
-  plannedCellInset,
   type RoadGeometry,
   type Walk,
-  type WalkItem,
   walkScrollSpeed,
   zoneLength,
 } from "../runner/walk";
 import { walkGeometry, walkProjection } from "../runner/walkGeometry";
+import { blocksLane, footprintOf, type WalkItem } from "../runner/walkItems";
+import { plannedCellInset } from "../runner/zonePlan";
 import { newRun, type RunState } from "../state/runState";
 import { type BlockingSpan } from "./avoidable";
 import { data } from "./walk";

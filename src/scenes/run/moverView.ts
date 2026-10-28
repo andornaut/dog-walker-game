@@ -28,7 +28,7 @@ import {
   moverPlace,
   moverTell,
 } from "../../runner/movers";
-import { itemCategory, type WalkItem } from "../../runner/walk";
+import { itemCategory, type WalkItem } from "../../runner/walkItems";
 import { firstTag, playTag, showAtDepth } from "../sprites";
 import type { ItemPart, ItemView } from "./itemViews";
 import { DEPTH, JUNCTURE_Y, laneX, LAYOUT, PROJECTION, showOnRoad } from "./stage";

@@ -72,7 +72,8 @@ import { hintFor } from "../../rules/hints";
 import { walkLength } from "../../rules/route";
 import { read } from "../../rules/units";
 import type { PullStep } from "../../runner/pulls";
-import type { EncounterCard, MinorBump, WalkItem, WalkStep } from "../../runner/walk";
+import type { EncounterCard, MinorBump, WalkStep } from "../../runner/walk";
+import type { WalkItem } from "../../runner/walkItems";
 import {
   type AchievementPreview,
   NOTHING_PREVIEWED,

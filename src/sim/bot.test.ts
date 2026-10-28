@@ -20,25 +20,23 @@ import {
   moverPlace,
   moverPlacements,
 } from "../runner/movers";
+import { moverSpec } from "../runner/moverSpecs";
 import { moverOutcomes } from "../runner/outcomes";
 import { NO_PULLS } from "../runner/pulls";
 import { screenRoadGeometry } from "../runner/screenGeometry";
 import { blockingLength } from "../runner/spawning";
 import {
-  blocksLane,
   itemHeight,
-  moverSpec,
   obstacleHitBox,
   packBoxes,
-  plannedCellInset,
   startRoad,
   steerWalk,
   sweptPackBoxes,
   type Walk,
-  type WalkItem,
-  type WalkItemKind,
   walkScrollSpeed,
 } from "../runner/walk";
+import { blocksLane, type WalkItem, type WalkItemKind } from "../runner/walkItems";
+import { plannedCellInset } from "../runner/zonePlan";
 import type { PackDogs } from "../state/runState";
 import { hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
 import { testState } from "../testing/runState";

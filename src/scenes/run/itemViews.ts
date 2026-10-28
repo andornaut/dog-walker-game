@@ -21,14 +21,9 @@ import { keysOf } from "../../lib/records";
 import { struckBy, type StruckItem, struckNow } from "../../road/struckScenery";
 import { moverTell } from "../../runner/movers";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
-import {
-  itemCategory,
-  type RoadGeometry,
-  type Walk,
-  type WalkItem,
-  type WalkStep,
-} from "../../runner/walk";
+import { type RoadGeometry, type Walk, type WalkStep } from "../../runner/walk";
 import { walkGeometry } from "../../runner/walkGeometry";
+import { itemCategory, type WalkItem } from "../../runner/walkItems";
 import { PALETTE } from "../../ui/phaser/palette";
 import { addStandingSprite, ensurePlaceholder } from "../sprites";
 import { applyItemCue } from "./itemCueViews";

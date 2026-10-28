@@ -9,9 +9,6 @@ import { hasLeftRoad, laneAt, type MoverPath, moverPlace, moverY } from "../runn
 import { moverOutcomes } from "../runner/outcomes";
 import { contactWindow, type PullEvent, type Pulls } from "../runner/pulls";
 import {
-  isObstacleCategory,
-  isPullObstacle,
-  itemCategory,
   laneMoveSeconds,
   obstacleHitBox,
   pickupReach,
@@ -19,8 +16,13 @@ import {
   steerWalk,
   type Walk,
   type WalkData,
-  type WalkItem,
 } from "../runner/walk";
+import {
+  isObstacleCategory,
+  isPullObstacle,
+  itemCategory,
+  type WalkItem,
+} from "../runner/walkItems";
 import {
   type LaneHazard,
   type LanePrize,

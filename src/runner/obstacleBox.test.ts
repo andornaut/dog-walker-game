@@ -19,8 +19,10 @@ import { hitDog, type ScaledBox } from "./collision";
 import { stillInLane } from "./laneMotion";
 import { drawnObstacleBox } from "./obstacleBox";
 import { screenRoadGeometry } from "./screenGeometry";
-import { footprintOf, itemHeight, obstacleOnRoad, packBoxes, plannedCellInset } from "./walk";
+import { itemHeight, obstacleOnRoad, packBoxes } from "./walk";
 import { walkProjection } from "./walkGeometry";
+import { footprintOf } from "./walkItems";
+import { plannedCellInset } from "./zonePlan";
 
 type Kind = EncounterId | MinorObstacleId;
 

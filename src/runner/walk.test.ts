@@ -94,32 +94,36 @@ import { hasLeftRoad, laneAt, type MoverPath, moverPlace } from "./movers";
 import { shyOutcomes } from "./shy";
 import { WIDE_LANES, zoneRows } from "./spawning";
 import {
-  blocksLane,
   collectTip,
   finishZone,
-  firstContactSeconds,
-  footprintOf,
   headHome,
-  isMinorObstacle,
-  itemCategory,
   itemHeight,
   laneMoveSeconds,
-  minorObstacleWeights,
-  movementOf,
-  obstacleWeights,
-  opensACard,
-  plannedCellInset,
-  planZone,
   type RoadGeometry,
-  spawnQuotas,
   startRoad,
   steerWalk,
   stepWalk,
   type Walk,
-  type WalkItem,
   walkScrollSpeed,
   zoneLength,
 } from "./walk";
+import {
+  blocksLane,
+  footprintOf,
+  isMinorObstacle,
+  itemCategory,
+  movementOf,
+  opensACard,
+  type WalkItem,
+} from "./walkItems";
+import {
+  firstContactSeconds,
+  minorObstacleWeights,
+  obstacleWeights,
+  plannedCellInset,
+  planZone,
+  spawnQuotas,
+} from "./zonePlan";
 
 // The scroll since its cue at which a mover's body first shows on the road: at or below the
 // road's top, and not yet off its side. A cue, or a dart waiting at the road's edge, blocks

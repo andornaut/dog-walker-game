@@ -33,7 +33,9 @@ import {
   pullWalk,
   stepPulls,
 } from "./pulls";
-import { planZone, startRoad, steerWalk, stepWalk, type Walk, type WalkItem } from "./walk";
+import { startRoad, steerWalk, stepWalk, type Walk } from "./walk";
+import { type WalkItem } from "./walkItems";
+import { planZone } from "./zonePlan";
 
 const data = {
   debuffs: DEBUFFS,

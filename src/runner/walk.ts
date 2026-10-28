@@ -1,15 +1,11 @@
 import { IDLE_TAG, MOVING_TAGS } from "../assets/spriteKeys";
 import type {
   DogId,
-  Encounter,
   EncounterId,
   GameData,
   GearId,
   MinorObstacleId,
-  MoveCount,
-  Movement,
   MovementKind,
-  ObstacleEncounterId,
 } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { hasObstacleArt, obstacleParts, obstacleSilhouette } from "../layout/obstacleArt";
@@ -17,22 +13,14 @@ import { formationOrder, PART_INSET } from "../layout/packFormation";
 import { itemAt } from "../lib/arrays";
 import { assertNever } from "../lib/assertNever";
 import { getOrInsertComputed } from "../lib/maps";
-import {
-  chance,
-  chanceRound,
-  type Random,
-  randomPick,
-  shuffled,
-  weightedPick,
-} from "../lib/random";
-import { keysOf } from "../lib/records";
+import { chance, type Random } from "../lib/random";
 import { countBump, countLandedBump, countTally } from "../rules/achievements";
 import { type HeartChange, modifierCauses, type MoneyChange, negatedCauses } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
 import { expireAtZoneEnd, tickDebuffs } from "../rules/durations";
 import { changeHearts } from "../rules/effects";
 import { affectedDogs, hitLabel, opensCard } from "../rules/encounters";
-import { drawGearDrops, grabGear } from "../rules/gearDrops";
+import { grabGear } from "../rules/gearDrops";
 import {
   changeModified,
   type ModifiedValue,
@@ -53,8 +41,8 @@ import {
 import { reachModified } from "../rules/standing";
 import { treatRecipient } from "../rules/treats";
 import { addCents, type Pixels, pixels, read } from "../rules/units";
-import { packAgility, slowestDebuffedAgility, slowestPackAgility } from "../rules/walkers";
-import { zoneScrollSpeed, zoneStats } from "../rules/zones";
+import { packAgility } from "../rules/walkers";
+import { zoneScrollSpeed } from "../rules/zones";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
 import {
@@ -80,7 +68,6 @@ import {
   type ScaledBox,
   tickInvulnerability,
 } from "./collision";
-import { STEP_SECONDS } from "./fixedStep";
 import { type HeldStep, type HitStop, hitStopLength, startHitStop, tickHitStop } from "./hitStop";
 import { advanceLaneControl, type LaneControl, laneControlIn, steerLane } from "./laneControl";
 import { type LaneMotion, type LaneMotionConfig, laneMotionX, stillInLane } from "./laneMotion";
@@ -88,35 +75,32 @@ import {
   drawnLanes,
   hasLeftRoad,
   hasStopped,
-  hopSequences,
-  hopShapes,
   isSliding,
   isWarning,
   laneAt,
   moveMovers,
-  type MoverFootprint,
   type MoverItem,
-  type MoverMotion,
   type MoverPath,
   moverPlace,
-  type MoverSpec,
   moverY,
-  type PlannerStreams,
-  SIDESTEPS,
-  type StepShape,
 } from "./movers";
 import { drawnObstacleBox, exitLength, type PlacedPart, type RoadLens } from "./obstacleBox";
 import { awayHop, nextShyChoiceAt, shyChoices, type ShyPath, takeHop } from "./shy";
+import { type PathRow, type SpawnEvent, takeDueSpawns } from "./spawning";
 import {
-  type Footprint,
-  type PathRow,
-  SINGLE_CELL,
-  type SpawnEvent,
-  type SpawnQuota,
-  takeDueSpawns,
-} from "./spawning";
-import { spacedStretch } from "./stretches";
-import { planSpawns } from "./zonePlanner";
+  footprintOf,
+  isGearDrop,
+  isMinorObstacle,
+  isObstacle,
+  isPickup,
+  isPullObstacle,
+  type ItemCategory,
+  itemCategory,
+  type ObstacleKind,
+  type PickupKind,
+  type WalkItem,
+  type WalkItemKind,
+} from "./walkItems";
 
 export type WalkData = Pick<
   GameData,
@@ -133,14 +117,6 @@ export type WalkData = Pick<
   | "walkers"
   | "world"
 >;
-
-type PickupKind = "tip" | "treat";
-// A road item's kind: an encounter, a minor obstacle, a pickup, or a gear drop by its gear.
-export type WalkItemKind = EncounterId | GearId | MinorObstacleId | PickupKind;
-export type WalkItem = MoverItem<WalkItemKind>;
-// What a road item is to the rules: an obstacle hit by accident, a minor obstacle that opens
-// no card, a lucky encounter, a gear drop, or a pickup.
-type ItemCategory = "gear" | "lucky" | "minor" | "obstacle" | PickupKind;
 
 // Everything on the road that the run state does not hold. pending is this zone's spawns
 // not yet in view, at zone distances. path is this zone's guaranteed path, at zone distances,
@@ -281,92 +257,6 @@ interface ZoneEnd {
   run: RunState;
 }
 
-export function isMinorObstacle(
-  data: Pick<GameData, "minorObstacles">,
-  kind: WalkItemKind,
-): kind is MinorObstacleId {
-  return Object.hasOwn(data.minorObstacles, kind);
-}
-
-// A gear drop: a kind that is no pickup, minor obstacle or encounter, so one of the gear.
-export function isGearDrop(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
-  kind: WalkItemKind,
-): kind is GearId {
-  return !isPickup(kind) && !isMinorObstacle(data, kind) && !Object.hasOwn(data.encounters, kind);
-}
-
-export function itemCategory(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
-  kind: WalkItemKind,
-): ItemCategory {
-  if (isPickup(kind)) {
-    return kind;
-  }
-  if (isGearDrop(data, kind)) {
-    return "gear";
-  }
-  return isMinorObstacle(data, kind) ? "minor" : data.encounters[kind as EncounterId].kind;
-}
-
-// The lanes and rows an item covers: an obstacle's shape, or one cell.
-export function footprintOf(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
-  kind: WalkItemKind,
-): Footprint {
-  if (isPickup(kind) || isGearDrop(data, kind)) {
-    return SINGLE_CELL;
-  }
-  if (isMinorObstacle(data, kind)) {
-    return data.minorObstacles[kind].shape;
-  }
-  const encounter = data.encounters[kind as EncounterId];
-  return encounter.kind === "obstacle" ? encounter.shape : SINGLE_CELL;
-}
-
-type ObstacleKind = EncounterId | MinorObstacleId;
-
-// Whether a category is an obstacle's, minor or not.
-export function isObstacleCategory(category: ItemCategory): category is "minor" | "obstacle" {
-  return category === "minor" || category === "obstacle";
-}
-
-// Obstacles, minor or not, which hit as they are drawn.
-export function isObstacle(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
-  kind: WalkItemKind,
-): kind is ObstacleKind {
-  return isObstacleCategory(itemCategory(data, kind));
-}
-
-// How an obstacle that is an encounter resolves, or null for anything else.
-function obstacleResolution(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
-  kind: WalkItemKind,
-): Encounter["resolution"]["kind"] | null {
-  return itemCategory(data, kind) === "obstacle"
-    ? data.encounters[kind as EncounterId].resolution.kind
-    : null;
-}
-
-// An obstacle touching does nothing to, such as a squirrel: dogs pull toward it instead.
-export function isPullObstacle(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
-  kind: WalkItemKind,
-): boolean {
-  return obstacleResolution(data, kind) === "pull";
-}
-
-// What the pack steers around, and the spawn planner keeps a path past: every obstacle but a
-// pull obstacle, which passes through the pack. A pull obstacle that moves is planned as a moving
-// prize.
-export function blocksLane(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
-  kind: WalkItemKind,
-): boolean {
-  return isObstacle(data, kind) && !isPullObstacle(data, kind);
-}
-
 // The last lane move time, scroll speed and zone length worked out, with the data groups and run
 // fields they were worked out from. A walk asks for the same ones every step until its pack, zone,
 // modifiers or debuffs or the data change; data and run states are never changed in place.
@@ -452,13 +342,6 @@ export function walkScrollSpeed(
   return speed;
 }
 
-// The entries of a zone's weights above 0, in the data's order.
-function positiveWeights<Id extends string>(weights: Readonly<Record<Id, number>>): [Id, number][] {
-  return keysOf(weights)
-    .map((id): [Id, number] => [id, weights[id]])
-    .filter(([, weight]) => weight > 0);
-}
-
 // The road's scroll speed in pixels per second: the zone's (walkScrollSpeed) at the road's
 // speedFactor.
 export function roadScrollSpeed(
@@ -469,23 +352,6 @@ export function roadScrollSpeed(
   },
 ): number {
   return walkScrollSpeed(data, walk.run) * walk.road.speedFactor;
-}
-
-// The minor obstacles that may appear in the run's current zone, with their weights.
-export function minorObstacleWeights(
-  data: Pick<GameData, "world">,
-  run: Pick<RunState, "route" | "zoneIndex">,
-): [MinorObstacleId, number][] {
-  return positiveWeights(currentZone(data, run).weights.minorObstacles);
-}
-
-// The walk's first zone starts with spawns on the road in view, the first meeting the pack no
-// sooner than this long in; later zones start with their own spawns still to come into view.
-export function firstContactSeconds(
-  data: Pick<GameData, "tuning">,
-  run: Pick<RunState, "zoneIndex">,
-): number | undefined {
-  return run.zoneIndex === 0 ? read(data.tuning, "seconds", "firstZoneContact") : undefined;
 }
 
 // Every zone is the distance the base speed covers in zoneAtBaseSpeed.
@@ -508,493 +374,6 @@ export function startRoad(laneCount: number, speedFactor = 1): Road {
     planned: [],
     speedFactor,
   };
-}
-
-// The chance weights of the obstacles in the run's current zone.
-export function obstacleWeights(
-  data: Pick<GameData, "world">,
-  run: Pick<RunState, "route" | "zoneIndex">,
-): [ObstacleEncounterId, number][] {
-  return positiveWeights(currentZone(data, run).weights.obstacles);
-}
-
-// The movement a drawn spawn moves with: an obstacle, minor or not, or a lucky encounter with a
-// movement comes as a mover at a chance of share. Other spawns never move and draw nothing, as
-// does any spawn at a share of 0.
-export function moverMovement(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
-  random: Random,
-  share: number,
-  kind: WalkItemKind,
-): Movement | null {
-  const movement = movementOf(data, kind);
-  if (movement === null || share <= 0) {
-    return null;
-  }
-  return chance(random, share) ? movement : null;
-}
-
-// The movement an obstacle, minor or not, or a lucky encounter can come with, or null for anything
-// that never moves.
-export function movementOf(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
-  kind: WalkItemKind,
-): Movement | null {
-  if (isPickup(kind) || isGearDrop(data, kind)) {
-    return null;
-  }
-  const entry = isMinorObstacle(data, kind) ? data.minorObstacles[kind] : data.encounters[kind];
-  const movement = "movement" in entry ? entry.movement : undefined;
-  return movement ?? null;
-}
-
-// A step: a lane to either side, or a row toward the pack or away.
-export const STEP_SHAPES: readonly StepShape[] = [
-  ...SIDESTEPS,
-  { lanes: 0, travel: 1 },
-  { lanes: 0, travel: -1 },
-];
-
-// Every count in a range, fewest first.
-function countsOf(range: MoveCount): number[] {
-  return Array.from({ length: range.max - range.min + 1 }, (_, i) => range.min + i);
-}
-
-// Steps steps a lane to one side and back in turn, starting toward direction.
-function swayed(direction: -1 | 1, steps: number): StepShape[] {
-  return Array.from({ length: steps }, (_, i) => ({
-    lanes: i % 2 === 0 ? direction : -direction,
-    travel: 0,
-  }));
-}
-
-// Every sequence of steps sideways steps, a lane to either side each: 2 to the power of steps.
-function sidestepSequences(steps: number): StepShape[][] {
-  return Array.from({ length: 2 ** steps }, (_, index) =>
-    Array.from({ length: steps }, (__, i) => itemAt(SIDESTEPS, (index >> (steps - 1 - i)) & 1)),
-  );
-}
-
-// The sequences of a pattern mover, which draws nothing: a bounce's and a sway's back and forth,
-// either way first, a follower's every way to step sideways, and a stop-and-go's pushes in its
-// lane. Each sequence's length is its count of steps.
-function patternMotion(
-  data: Pick<GameData, "tuning">,
-  movement: Extract<Movement, { kind: "bounce" | "follow" | "stopAndGo" | "sway" }>,
-): MoverMotion {
-  const { tuning } = data;
-  const stepSeconds = read(tuning, "seconds", "moverStepSeconds");
-  switch (movement.kind) {
-    case "bounce":
-      return {
-        count: movement.hops,
-        cueEach: true,
-        kind: "steps",
-        pauseSeconds: movement.pauseSeconds,
-        sequences: countsOf(movement.hops).flatMap((hops) => [swayed(-1, hops), swayed(1, hops)]),
-        stepSeconds: read(tuning, "seconds", "moverHopSeconds"),
-      };
-    case "follow":
-      return {
-        count: movement.steps,
-        cueEach: true,
-        kind: "steps",
-        pauseSeconds: movement.pauseSeconds,
-        sequences: countsOf(movement.steps).flatMap(sidestepSequences),
-        stepSeconds,
-      };
-    case "stopAndGo": {
-      const pushes = { max: movement.stops.max + 1, min: movement.stops.min + 1 };
-      return {
-        count: pushes,
-        cueEach: true,
-        drift: movement.factor - 1,
-        kind: "steps",
-        pauseSeconds: movement.stopSeconds,
-        sequences: countsOf(pushes).map((count) =>
-          Array.from({ length: count }, () => ({ lanes: 0, travel: 0 })),
-        ),
-        stepSeconds: movement.goSeconds,
-      };
-    }
-    default:
-      return {
-        count: { max: 2 * movement.times.max, min: 2 * movement.times.min },
-        kind: "steps",
-        pauseSeconds: movement.pauseSeconds,
-        sequences: countsOf(movement.times).flatMap((times) => [
-          swayed(-1, 2 * times),
-          swayed(1, 2 * times),
-        ]),
-        stepSeconds,
-      };
-  }
-}
-
-// Where every crosser may set off: the reaction margin the pack keeps, and the share of the road
-// ahead of the pack it starts from.
-function crossStart(
-  tuning: GameData["tuning"],
-): Pick<Extract<MoverMotion, { kind: "cross" }>, "reactionSeconds" | "startRoadShare"> {
-  return {
-    reactionSeconds: read(tuning, "seconds", "pathReactionMargin"),
-    startRoadShare: [
-      read(tuning, "multipliers", "dartStartRoadShareMin"),
-      read(tuning, "multipliers", "dartStartRoadShareMax"),
-    ],
-  };
-}
-
-// How a mover of movement moves (moverSpec). A stepper's and a hopper's draws are made here.
-function moverMotion(
-  data: Pick<GameData, "tuning">,
-  streams: PlannerStreams,
-  movement: Movement,
-): MoverMotion {
-  const { tuning } = data;
-  switch (movement.kind) {
-    case "stopAndGoAcross":
-      return {
-        kind: "cross",
-        lanesPerSecond: read(tuning, "counts", "dartLanesPerSecond") * movement.speed,
-        pauseSeconds: movement.stopSeconds,
-        ...crossStart(tuning),
-        stopLanes: { max: 1, min: 1 },
-        stopShare: 0,
-        tilt: [0, 0],
-        turnAtShare: [0, 0],
-        turnBackShare: 0,
-        vergeShare: 0,
-      };
-    case "dart":
-    case "dive": {
-      const dive = movement.kind === "dive";
-      return {
-        kind: "cross",
-        lanesPerSecond: read(tuning, "counts", "dartLanesPerSecond") * (dive ? movement.speed : 1),
-        ...crossStart(tuning),
-        stopLanes: {
-          max: read(tuning, "counts", "dartStopLanesMax"),
-          min: read(tuning, "counts", "dartStopLanesMin"),
-        },
-        ...(dive ? { slide: movement.slide } : {}),
-        stopShare: dive ? 1 : movement.stopShare,
-        tilt: [movement.tilt.min, movement.tilt.max],
-        turnAtShare: [
-          read(tuning, "multipliers", "dartTurnAtShareMin"),
-          read(tuning, "multipliers", "dartTurnAtShareMax"),
-        ],
-        turnBackShare: dive ? 0 : movement.turnBackShare,
-        vergeShare: dive ? 0 : read(tuning, "probability", "dartVergeStopShare"),
-      };
-    }
-    case "bounce":
-    case "follow":
-    case "stopAndGo":
-    case "sway":
-      return patternMotion(data, movement);
-    case "inLane":
-      return { kind: "ride", speedMultiplier: movement.factor };
-    case "merge":
-      return {
-        kind: "ride",
-        merge: { at: movement.mergeAt, seconds: movement.mergeSeconds },
-        speedMultiplier: movement.factor,
-      };
-    case "approach":
-      return {
-        firstDelaySeconds: [
-          read(tuning, "seconds", "approachFirstDelayMin"),
-          read(tuning, "seconds", "approachFirstDelayMax"),
-        ],
-        kind: "approach",
-        secondRoadShare: [
-          read(tuning, "multipliers", "approachSecondRoadShareMin"),
-          read(tuning, "multipliers", "approachSecondRoadShareMax"),
-        ],
-        stepSeconds: read(tuning, "seconds", "moverStepSeconds"),
-        steps: movement.steps,
-      };
-    case "hop": {
-      const sideways = movement.sideways === true;
-      return {
-        count: movement.times,
-        kind: "steps",
-        sequences: countsOf(movement.times).flatMap((times) =>
-          hopSequences(streams.movers, movement.most, sideways, times),
-        ),
-        ...(movement.shy === true
-          ? {
-              shy: {
-                nearSeconds: read(tuning, "seconds", "shyHopNearSeconds"),
-                rise: sideways ? 0 : movement.most,
-                shapes: hopShapes(movement.most, sideways),
-                share: read(tuning, "probability", "shyHopperShare"),
-              },
-            }
-          : {}),
-        stepSeconds: read(tuning, "seconds", "moverHopSeconds"),
-      };
-    }
-    case "step": {
-      const { max, min } = movement.steps;
-      const steps = Array.from({ length: max }, (_, i) =>
-        randomPick(i < min ? streams.spawns : streams.movers, STEP_SHAPES),
-      );
-      const mirrored = steps.map(({ lanes, travel }) => ({ lanes: -lanes as -1 | 0 | 1, travel }));
-      return {
-        count: movement.steps,
-        kind: "steps",
-        sequences: countsOf(movement.steps).flatMap((count) => [
-          steps.slice(0, count),
-          mirrored.slice(0, count),
-        ]),
-        stepSeconds: read(tuning, "seconds", "moverStepSeconds"),
-      };
-    }
-    default:
-      return assertNever(movement);
-  }
-}
-
-// How a mover moves, by its movement and the tuning. A stepper's steps are drawn here, as many as
-// its most, the first min from the spawns stream and any more from the movers stream; it may take
-// the first steps of them, or of their mirror image, as many as its drawn count. A bounce, a
-// follower, a stop-and-go and a sway draw nothing here (patternMotion). A dive is a dart that
-// always stops in a lane, never on the verge, sliding its last lane. A merge is a rider that
-// changes lane once. A stop-and-go across is a dart as wide as its footprint that never stops for
-// good or turns back, pausing once in the middle of the road. A hopper may make
-// any hops it can, as many as its drawn count, of up to HOP_SEQUENCES_MOST ways for each count,
-// drawn here from the movers stream where there are more. The planner takes whichever way keeps
-// the road passable, drawing among those from the zone's seed.
-export function moverSpec(
-  data: Pick<GameData, "tuning">,
-  streams: PlannerStreams,
-  footprint: MoverFootprint,
-  movement: Movement,
-): MoverSpec {
-  const { tuning } = data;
-  const motion = moverMotion(data, streams, movement);
-  return {
-    footprint,
-    motion,
-    movement: movement.kind,
-    variation: {
-      delaySeconds: read(tuning, "seconds", "moverTimingJitter"),
-      lengthShare: read(tuning, "seconds", "moverMoveSecondsJitter"),
-      speedShare: read(
-        tuning,
-        "multipliers",
-        movement.kind === "dart" || movement.kind === "dive"
-          ? "dartSpeedJitter"
-          : "moverSpeedJitter",
-      ),
-    },
-    warningSeconds: read(tuning, "seconds", "moverWarningSeconds"),
-  };
-}
-
-// Whether a kind is an obstacle that opens a card, which the planner places before every other
-// spawn, so it is the last skipped.
-export function opensACard(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
-  kind: WalkItemKind,
-): boolean {
-  return obstacleResolution(data, kind) === "card";
-}
-
-// Each obstacle and minor obstacle is drawn first by the zone's weights, so its shape is known
-// when it is placed. Rush hour and the like scale both obstacle counts, the tips and the treats.
-// Then each obstacle whose look moves comes as a mover at the zone's mover share: one quota per
-// kind, and one per stepper, whose steps are its own. A pull obstacle blocks no lane, moving or
-// not (blocksLane). Then the zone's lucky finds: of each kind, zoneStats' luckyFinds rounded by
-// chanceRound, in the kinds' order, then shuffled, each a quota of its own held to its spaced
-// stretch of the zone (spacedStretch) and, where its look moves, a mover at the mover share; a
-// lucky find blocks no lane. Last, the zone's gear drops (drawGearDrops), each a quota of its own
-// that blocks no lane, held to its spaced stretch.
-export function spawnQuotas(
-  data: WalkData,
-  streams: PlannerStreams,
-  run: RunState,
-): SpawnQuota<WalkItemKind>[] {
-  const random = streams.spawns;
-  const zone = currentZone(data, run);
-  const stats = zoneStats(data.tuning, zone, run.zoneIndex);
-  const scaled = (stat: "obstacleSpawns" | "tipSpawns" | "treatSpawns", base: number) =>
-    Math.round(modifiedStat(data.tuning, run.modifiers, stat, base));
-  const drawn = <Kind extends WalkItemKind>(
-    count: number,
-    weights: readonly (readonly [Kind, number])[],
-  ) => {
-    const ids = weights.map(([id]) => id);
-    const odds = weights.map(([, weight]) => weight);
-    return weights.length === 0
-      ? []
-      : Array.from({ length: count }, () => weightedPick(random, ids, odds));
-  };
-  const kinds: WalkItemKind[] = [
-    ...drawn(scaled("obstacleSpawns", stats.obstacles), obstacleWeights(data, run)),
-    ...drawn(scaled("obstacleSpawns", stats.minorObstacles), minorObstacleWeights(data, run)),
-  ];
-  const quotas = new Map<WalkItemKind, number>();
-  const movers = new Map<WalkItemKind, { readonly count: number; readonly movement: Movement }>();
-  const steppers: SpawnQuota<WalkItemKind>[] = [];
-  const count = <Key>(map: Map<Key, number>, key: Key) => map.set(key, (map.get(key) ?? 0) + 1);
-  const moverQuota = (kind: WalkItemKind, movement: Movement, moverCount: number) => ({
-    blocksLane: blocksLane(data, kind),
-    count: moverCount,
-    first: opensACard(data, kind),
-    kind,
-    mover: moverSpec(data, streams, footprintOf(data, kind), movement),
-  });
-  for (const kind of kinds) {
-    const movement = moverMovement(data, random, zone.moverShare, kind);
-    if (movement === null) {
-      count(quotas, kind);
-    } else if (movement.kind === "step") {
-      steppers.push(moverQuota(kind, movement, 1));
-    } else {
-      movers.set(kind, { count: (movers.get(kind)?.count ?? 0) + 1, movement });
-    }
-  }
-  const finds = shuffled(
-    random,
-    (Object.entries(stats.luckyFinds) as [EncounterId, number][]).flatMap(([kind, expected]) =>
-      Array.from({ length: chanceRound(random, expected) }, () => kind),
-    ),
-  );
-  const lucky = finds.map((kind, i): SpawnQuota<WalkItemKind> => {
-    const within = spacedStretch(finds.length, i);
-    const movement = moverMovement(data, random, zone.moverShare, kind);
-    return movement === null
-      ? { blocksLane: false, count: 1, footprint: footprintOf(data, kind), kind, within }
-      : { ...moverQuota(kind, movement, 1), within };
-  });
-  const drops = drawGearDrops(data, random, run);
-  return [
-    ...[...movers].map(([kind, { count: moverCount, movement }]) =>
-      moverQuota(kind, movement, moverCount),
-    ),
-    ...steppers,
-    ...[...quotas].map(([kind, kindCount]) => ({
-      blocksLane: blocksLane(data, kind),
-      count: kindCount,
-      first: opensACard(data, kind),
-      footprint: footprintOf(data, kind),
-      kind,
-    })),
-    ...lucky,
-    ...drops.map((gear, i): SpawnQuota<WalkItemKind> => ({
-      blocksLane: false,
-      count: 1,
-      kind: gear,
-      within: spacedStretch(drops.length, i),
-    })),
-    {
-      blocksLane: false,
-      count: scaled("tipSpawns", stats.tips),
-      kind: "tip",
-      moversPassOver: true,
-      moversRestOn: true,
-    },
-    {
-      blocksLane: false,
-      count: scaled("treatSpawns", stats.treats),
-      kind: "treat",
-      moversPassOver: true,
-    },
-  ];
-}
-
-// Plans the run's current zone: its spawns, each obstacle and lucky encounter drawn by the
-// zone's weights.
-export function planZone(
-  data: WalkData,
-  geometry: Pick<
-    RoadGeometry,
-    | "cell"
-    | "itemHeights"
-    | "laneCount"
-    | "lens"
-    | "packBand"
-    | "roadBottom"
-    | "roadTop"
-    | "sightLength"
-    | "tallestPackBand"
-  >,
-  streams: PlannerStreams,
-  walk: Walk,
-): Walk {
-  const { road, run } = walk;
-  const length = zoneLength(data);
-  // Each lane-blocking kind's drawn hit length, standing and moving, for the pack-fit gap.
-  const withHitLengths = (quotas: SpawnQuota<WalkItemKind>[]) =>
-    quotas.map((quota) =>
-      !quota.blocksLane
-        ? quota
-        : {
-            ...quota,
-            hitLength: itemHeight(data, geometry, quota.kind, false),
-            ...(quota.mover === undefined
-              ? {}
-              : {
-                  mover: {
-                    ...quota.mover,
-                    hitLength: itemHeight(data, geometry, quota.kind, true),
-                  },
-                }),
-          },
-    );
-  const firstContact = firstContactSeconds(data, run);
-  // The zone's minor obstacles that never move, which one with no room is swapped among.
-  const fixedKinds = minorObstacleWeights(data, run)
-    .filter(([kind]) => movementOf(data, kind) === null)
-    .map(([kind, weight]) => ({
-      footprint: footprintOf(data, kind),
-      hitLength: itemHeight(data, geometry, kind, false),
-      kind,
-      weight,
-    }));
-  const plan = {
-    cellInset: plannedCellInset(data, geometry),
-    cellLength: geometry.cell.length,
-    ...(firstContact === undefined ? {} : { firstContactSeconds: firstContact }),
-    fixedKinds,
-    laneCount: geometry.laneCount,
-    laneInset: geometry.cell.inset,
-    // The slowest pack's lane move sets the row spacing, so every pack fits every gap.
-    laneMoveSeconds: read(data.tuning, "seconds", "laneMove") / slowestPackAgility(data),
-    maxEmptyRows: read(data.tuning, "counts", "maxEmptyRows"),
-    minOpenLanes: read(data.tuning, "counts", "openLanesPerRowMin"),
-    minSpacing: read(data.tuning, "pixels", "spawnRowSpacing"),
-    moverCaps: {
-      darts: read(data.tuning, "counts", "maxDartMovers"),
-      slowVehicles: read(data.tuning, "counts", "maxSlowVehicles"),
-      total: read(data.tuning, "counts", "maxMovers"),
-    },
-    // The tallest pack's hit boxes, inside its outline by PART_INSET at each end.
-    packHitLength: geometry.tallestPackBand - 2 * PART_INSET,
-    packLength: geometry.tallestPackBand,
-    // A Muddy pack's lane move, the slowest, spaces the path's lane changes: a puddle may be on
-    // any neighbourhood's road, and Muddy may last past a neighbourhood's end.
-    pathLaneMoveSeconds: read(data.tuning, "seconds", "laneMove") / slowestDebuffedAgility(data),
-    // The path goes on from where the last zone's ends, or starts in the pack's lane.
-    pathStart: road.path[road.path.length - 1]?.lane ?? road.control.target,
-    quotas: withHitLengths(spawnQuotas(data, streams, run)),
-    reactionSeconds: read(data.tuning, "seconds", "pathReactionMargin"),
-    roadLength: geometry.roadBottom - geometry.roadTop,
-    scrollSpeed: walkScrollSpeed(data, run),
-    sightLength: geometry.sightLength,
-    stepSeconds: STEP_SECONDS,
-    zoneLength: length,
-  };
-  const planned = plan.quotas.map(({ count, kind, mover }) => ({
-    count,
-    kind,
-    movement: mover?.movement ?? null,
-  }));
-  const { events, path } = planSpawns(streams, plan);
-  return { road: { ...road, path, pending: events, planned }, run };
 }
 
 // Steering during a hit stop is dropped, not queued.
@@ -1064,34 +443,6 @@ export function itemHeight(
     () => exitLength(geometry.lens, PART_INSET, parts, bottom),
     lengths,
   );
-}
-
-// The planner's inset at each end of a footprint row: whatever lane-blocking obstacle stands in
-// a footprint, standing or moving, its hit length is no more than the footprint's rows less this
-// at each end, so every blocking span it plans covers the obstacle's. Negative where an obstacle
-// is drawn longer than its rows.
-export function plannedCellInset(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
-  geometry: Pick<RoadGeometry, "cell" | "itemHeights" | "lens" | "packBand">,
-): number {
-  const kinds = [
-    ...Object.keys(data.minorObstacles),
-    ...Object.keys(data.encounters).filter((kind) => blocksLane(data, kind as EncounterId)),
-  ] as ObstacleKind[];
-  const { length } = geometry.cell;
-  const over = Math.max(
-    ...kinds.flatMap((kind) =>
-      (movementOf(data, kind) === null ? [false] : [false, true]).map(
-        (moving) =>
-          itemHeight(data, geometry, kind, moving) - (footprintOf(data, kind).rows - 1) * length,
-      ),
-    ),
-  );
-  return (length - over) / 2;
-}
-
-function isPickup(kind: WalkItemKind): kind is PickupKind {
-  return kind === "tip" || kind === "treat";
 }
 
 // How many lanes beside the pack's a pickup is collected from: tipReach and treatReach

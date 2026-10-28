@@ -10,8 +10,9 @@ import { testState } from "../testing/runState";
 import { hitDog, itemBox, pickupDog } from "./collision";
 import { stillInLane } from "./laneMotion";
 import { screenRoadGeometry } from "./screenGeometry";
-import { isObstacle, itemHeight, obstacleHitBox, packBoxes, type WalkItemKind } from "./walk";
+import { itemHeight, obstacleHitBox, packBoxes } from "./walk";
 import { walkProjection } from "./walkGeometry";
+import { isObstacle, type WalkItemKind } from "./walkItems";
 
 const DATA = { encounters: ENCOUNTERS, minorObstacles: MINOR_OBSTACLES };
 const LAYOUT = SCREEN_LAYOUT;

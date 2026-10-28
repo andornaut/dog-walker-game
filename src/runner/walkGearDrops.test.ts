@@ -10,7 +10,9 @@ import { plannerStreams } from "../testing/movers";
 import { GAME_ROAD, inZone, REAL, realRun } from "../testing/planner";
 import { atPack, inLane, step, walkWith } from "../testing/walk";
 import { spacedStretch } from "./stretches";
-import { isGearDrop, planZone, spawnQuotas, startRoad, type Walk, zoneLength } from "./walk";
+import { startRoad, type Walk, zoneLength } from "./walk";
+import { isGearDrop } from "./walkItems";
+import { planZone, spawnQuotas } from "./zonePlan";
 
 const GEAR = keysOf(SHOP_GEAR);
 const POSITIONS = Array.from({ length: WORLD.walkLength }, (_, position) => position);

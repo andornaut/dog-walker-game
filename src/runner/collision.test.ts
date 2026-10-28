@@ -21,7 +21,8 @@ import { stillInLane } from "./laneMotion";
 import type { MoverPath } from "./movers";
 import type { RoadItem } from "./roadItems";
 import { screenRoadGeometry } from "./screenGeometry";
-import { footprintOf, itemHeight, obstacleHitBox, packBoxes, type WalkItem } from "./walk";
+import { itemHeight, obstacleHitBox, packBoxes } from "./walk";
+import { footprintOf, type WalkItem } from "./walkItems";
 
 type Kind = "obstacle" | "tip";
 

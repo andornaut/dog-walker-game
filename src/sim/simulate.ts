@@ -28,16 +28,15 @@ import {
   stepSession,
 } from "../runner/session";
 import {
-  blocksLane,
   laneMoveSeconds,
   type RoadGeometry,
   roadScrollSpeed,
   startRoad,
   type Walk,
   type WalkData,
-  type WalkItemKind,
   type WalkStep,
 } from "../runner/walk";
+import { blocksLane, type WalkItemKind } from "../runner/walkItems";
 import { packDogs } from "../state/pack";
 import { newRun, type PackDogs, type RunState } from "../state/runState";
 import { actBot, type BotRoad, newBot, observePulls, observeRoad } from "./bot";

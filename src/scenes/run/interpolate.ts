@@ -3,7 +3,8 @@ import { clamp01 } from "../../lib/numbers";
 import { pixels } from "../../rules/units";
 import { advanceLaneControl } from "../../runner/laneControl";
 import type { SessionInput } from "../../runner/session";
-import { laneMotionConfig, steerWalk, type Walk, type WalkItem } from "../../runner/walk";
+import { laneMotionConfig, steerWalk, type Walk } from "../../runner/walk";
+import { type WalkItem } from "../../runner/walkItems";
 
 // The walk as drawn between two fixed steps. The session steps at 60 Hz while the screen may
 // refresh at any rate, so each frame draws the last two steps' walks blended by how far the

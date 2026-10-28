@@ -12,15 +12,14 @@ import { destinationLane } from "./laneMotion";
 import { isWaiting, laneAt, moverPlace, moverY } from "./movers";
 import { moverOutcomes } from "./outcomes";
 import {
-  blocksLane,
   laneMotionConfig,
   laneMoveSeconds,
   packBoxes,
   type RoadGeometry,
   roadScrollSpeed,
   type Walk,
-  type WalkItem,
 } from "./walk";
+import { blocksLane, type WalkItem } from "./walkItems";
 
 // Every dog pulls toward squirrels, and only toward squirrels. One dog strains at a time, the
 // one nearest the squirrel: pullTell seconds with its bubble, an arrow and a line to the

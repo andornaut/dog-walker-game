@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { WalkItem } from "../runner/walk";
+import type { WalkItem } from "../runner/walkItems";
 import { defined } from "../testing/defined";
 import { struckBy, type StruckItem, struckNow } from "./struckScenery";
 

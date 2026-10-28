@@ -27,7 +27,8 @@ import {
   startSession,
   stepSession,
 } from "./session";
-import { itemHeight, startRoad, type WalkItem, zoneLength } from "./walk";
+import { itemHeight, startRoad, zoneLength } from "./walk";
+import { type WalkItem } from "./walkItems";
 
 const SKUNK: CardSource = { affected: ["kilo"], encounter: "skunk", kind: "encounter" };
 const STOP: CardSource = { affected: ["kilo"], encounter: "thief", kind: "encounter" };

@@ -30,17 +30,9 @@ import {
 import { STEP_SECONDS } from "./fixedStep";
 import { hasLeftRoad, type MoverPath, moverPlace, onScreenOf } from "./movers";
 import { moverOutcomes } from "./outcomes";
-import {
-  blocksLane,
-  footprintOf,
-  itemHeight,
-  movementOf,
-  planZone,
-  type RoadGeometry,
-  startRoad,
-  type Walk,
-  walkScrollSpeed,
-} from "./walk";
+import { itemHeight, type RoadGeometry, startRoad, type Walk, walkScrollSpeed } from "./walk";
+import { blocksLane, footprintOf, movementOf } from "./walkItems";
+import { planZone } from "./zonePlan";
 
 // While set, the lane-balance bias is off: the planner's only weighted draws are its lane balance
 // (laneBalanceWeight), so even weights draw every place that fits alike.

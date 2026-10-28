@@ -15,15 +15,9 @@ import { stillInLane } from "../runner/laneMotion";
 import type { MoverOnRoad } from "../runner/movers";
 import { NO_PULLS, type Pulls } from "../runner/pulls";
 import { screenRoadGeometry } from "../runner/screenGeometry";
-import {
-  itemHeight,
-  startRoad,
-  type Walk,
-  type WalkItem,
-  type WalkItemKind,
-  zoneLength,
-} from "../runner/walk";
+import { itemHeight, startRoad, type Walk, zoneLength } from "../runner/walk";
 import { walkProjection } from "../runner/walkGeometry";
+import { type WalkItem, type WalkItemKind } from "../runner/walkItems";
 import { heartsOf, mapPack } from "../state/pack";
 import {
   type CardSource,

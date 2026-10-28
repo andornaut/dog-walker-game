@@ -15,14 +15,8 @@ import {
   stopsOnVerge,
 } from "../../runner/movers";
 import type { SpawnEvent } from "../../runner/spawning";
-import {
-  footprintOf,
-  itemHeight,
-  type RoadGeometry,
-  type WalkItem,
-  type WalkItemKind,
-  zoneLength,
-} from "../../runner/walk";
+import { itemHeight, type RoadGeometry, zoneLength } from "../../runner/walk";
+import { footprintOf, type WalkItem, type WalkItemKind } from "../../runner/walkItems";
 
 // The distraction movers: red herrings. They wear the zone's own hazards (distractionKinds), step
 // on and off the road's edges in the top part of the road, and are gone before their row nears the

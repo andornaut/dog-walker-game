@@ -8,7 +8,9 @@ import { zoneStats } from "../rules/zones";
 import { plannerStreams } from "../testing/movers";
 import { GAME_ROAD, inZone, LUCKY_IDS, REAL, type Real, realRun } from "../testing/planner";
 import { mapZones } from "../testing/world";
-import { itemCategory, planZone, spawnQuotas, startRoad, zoneLength } from "./walk";
+import { startRoad, zoneLength } from "./walk";
+import { itemCategory } from "./walkItems";
+import { planZone, spawnQuotas } from "./zonePlan";
 
 // The seeds the quota draws sample, and the fewer the planner's placements do, each zone's plan
 // taking a few hundred milliseconds.

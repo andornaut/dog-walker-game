@@ -44,19 +44,10 @@ import {
   type MoverStep,
   moverTell,
 } from "./movers";
-import {
-  blocksLane,
-  footprintOf,
-  isPullObstacle,
-  itemHeight,
-  moverMovement,
-  planZone,
-  startRoad,
-  stepWalk,
-  type Walk,
-  type WalkItem,
-  walkScrollSpeed,
-} from "./walk";
+import { moverMovement } from "./moverSpecs";
+import { itemHeight, startRoad, stepWalk, type Walk, walkScrollSpeed } from "./walk";
+import { blocksLane, footprintOf, isPullObstacle, type WalkItem } from "./walkItems";
+import { planZone } from "./zonePlan";
 
 // A crosser 2.5 lanes in from the left edge 32px of scroll after its cue's 50px, its hit
 // box then just inside the pack's band.

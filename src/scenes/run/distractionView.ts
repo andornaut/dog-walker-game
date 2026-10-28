@@ -10,7 +10,8 @@ import type { Random } from "../../lib/random";
 import { ROADSIDE } from "../../road/roadsideProps";
 import { currentZone, previousZone } from "../../rules/route";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
-import type { Walk, WalkItem } from "../../runner/walk";
+import type { Walk } from "../../runner/walk";
+import type { WalkItem } from "../../runner/walkItems";
 import { firstTag, playTag, showAtDepth, spriteMetrics } from "../sprites";
 import {
   type Distraction,

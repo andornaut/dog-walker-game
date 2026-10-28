@@ -13,14 +13,10 @@ import {
   type StepShape,
   turnedBack,
 } from "../runner/movers";
+import { STEP_SHAPES } from "../runner/moverSpecs";
 import { shyOutcomes } from "../runner/shy";
-import {
-  movementOf,
-  type RoadGeometry,
-  STEP_SHAPES,
-  type WalkData,
-  type WalkItem,
-} from "../runner/walk";
+import { type RoadGeometry, type WalkData } from "../runner/walk";
+import { movementOf, type WalkItem } from "../runner/walkItems";
 
 // How a bot reads a mover: by sight, only what a player sees of it, or by foresight, its whole
 // planned path, every way it may yet choose its moves included.

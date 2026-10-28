@@ -27,8 +27,9 @@ import {
   startSession,
   stepSession,
 } from "../../runner/session";
-import { startRoad, type WalkItem, zoneLength } from "../../runner/walk";
+import { startRoad, zoneLength } from "../../runner/walk";
 import { walkProjection } from "../../runner/walkGeometry";
+import { type WalkItem } from "../../runner/walkItems";
 import { newRun } from "../../state/runState";
 import { defined } from "../../testing/defined";
 import {

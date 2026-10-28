@@ -1,4 +1,4 @@
-import type { WalkItem } from "../runner/walk";
+import type { WalkItem } from "../runner/walkItems";
 
 // An obstacle a hit took out of play, kept on the road as scenery: the item as the hit left
 // it, and the zone and how far into it the walk was then. Scenery is drawn only: the walk never

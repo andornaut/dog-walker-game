@@ -1,5 +1,5 @@
 import { project } from "../../layout/projection";
-import type { WalkItem } from "../../runner/walk";
+import type { WalkItem } from "../../runner/walkItems";
 import { playFirstTag, showAtDepth } from "../sprites";
 import type { ItemPart } from "./itemViews";
 import { DEPTH, PROJECTION, type Shadow, showOnRoad } from "./stage";

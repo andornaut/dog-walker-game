@@ -2,7 +2,7 @@ import type { GameObjects } from "phaser";
 
 import { gameData } from "../../data";
 import { bobOffset, itemBobs } from "../../rules/itemCues";
-import type { WalkItem } from "../../runner/walk";
+import type { WalkItem } from "../../runner/walkItems";
 
 // The walk screen's reading aid for road items: the grab-worthy ones bob, from the item's
 // data. View-only. Call after the item's sprites are placed, with the scene's time.

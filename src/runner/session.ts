@@ -19,7 +19,6 @@ import { NO_PULLS, type PullData, type Pulls, type PullStep, stepPulls } from ".
 import {
   finishZone,
   headHome,
-  planZone,
   type RoadGeometry,
   steerWalk,
   stepWalk,
@@ -28,6 +27,7 @@ import {
   type WalkStep,
   zoneLength,
 } from "./walk";
+import { planZone } from "./zonePlan";
 import { stepZoomies } from "./zoomies";
 
 // One walk's step order, shared by the run scene and the simulator: the inputs, the pulls, the

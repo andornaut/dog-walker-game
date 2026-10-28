@@ -12,8 +12,10 @@ import { STEP_SECONDS } from "./fixedStep";
 import { laneControlIn } from "./laneControl";
 import { destinationLane, stillInLane } from "./laneMotion";
 import { pullHorizon } from "./pulls";
-import { planZone, startRoad, steerWalk, stepWalk, type Walk, type WalkItem } from "./walk";
+import { startRoad, steerWalk, stepWalk, type Walk } from "./walk";
 import { walkGeometry, walkProjection } from "./walkGeometry";
+import { type WalkItem } from "./walkItems";
+import { planZone } from "./zonePlan";
 import { hasZoomies, stepZoomies } from "./zoomies";
 
 // The game's road for the pack of three the drift test walks; walkIn's lone Kilo leads it.

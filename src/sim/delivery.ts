@@ -1,5 +1,5 @@
 import type { GameData, MovementKind, ZoneId } from "../data/types";
-import { itemCategory, opensACard, type WalkItemKind } from "../runner/walk";
+import { itemCategory, opensACard, type WalkItemKind } from "../runner/walkItems";
 
 // What a zone's plan asked for against what it placed on the road. The tuning counts are aims:
 // the planner skips a spawn it has no room for, so placed can fall short of planned.

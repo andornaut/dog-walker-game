@@ -11,7 +11,7 @@ import { formatDollars } from "../rules/effectText";
 import { grabGear } from "../rules/gearDrops";
 import { type ModifiedValue, modifierCause } from "../rules/modified";
 import { cents, read, roundDollars } from "../rules/units";
-import type { WalkItem } from "../runner/walk";
+import type { WalkItem } from "../runner/walkItems";
 import { type ModifierSource, newRun } from "../state/runState";
 import { activeModifier, testState } from "../testing/runState";
 import {

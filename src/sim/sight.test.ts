@@ -5,7 +5,8 @@ import type { MinorObstacleId, Movement } from "../data/types";
 import { keysOf } from "../lib/records";
 import type { MoverPath } from "../runner/movers";
 import { screenRoadGeometry } from "../runner/screenGeometry";
-import { type WalkItem, type WalkItemKind, walkScrollSpeed } from "../runner/walk";
+import { walkScrollSpeed } from "../runner/walk";
+import { type WalkItem, type WalkItemKind } from "../runner/walkItems";
 import { testState } from "../testing/runState";
 import { sightPaths } from "./sight";
 

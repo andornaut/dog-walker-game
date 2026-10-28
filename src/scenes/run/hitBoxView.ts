@@ -4,7 +4,8 @@ import { gameData } from "../../data";
 import { project, screenXAt, screenYAt } from "../../layout/projection";
 import type { Box, ScaledBox } from "../../runner/collision";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
-import { isObstacle, obstacleHitBox, packBoxes, type Walk, walkItemBox } from "../../runner/walk";
+import { obstacleHitBox, packBoxes, type Walk, walkItemBox } from "../../runner/walk";
+import { isObstacle } from "../../runner/walkItems";
 import { PALETTE } from "../../ui/phaser/palette";
 import { DEPTH, LAYOUT, PROJECTION } from "./stage";
 

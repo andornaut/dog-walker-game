@@ -18,7 +18,7 @@ import {
   picksOf,
   type RunFacts,
 } from "../rules/achievements";
-import { blocksLane, isPullObstacle, itemCategory, type WalkItemKind } from "../runner/walk";
+import { blocksLane, isPullObstacle, itemCategory, type WalkItemKind } from "../runner/walkItems";
 import { MAX_RUN_DOGS, TALLY_IDS } from "../save/schema";
 import type { PackDogs } from "../state/runState";
 import { type Delivered, DELIVERY_GROUPS, sumDeliveries, type ZoneDelivery } from "./delivery";

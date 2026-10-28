@@ -1,5 +1,6 @@
 import { moverPlace, moverY, stopsOnVerge } from "../../runner/movers";
-import type { RoadGeometry, WalkItem } from "../../runner/walk";
+import type { RoadGeometry } from "../../runner/walk";
+import type { WalkItem } from "../../runner/walkItems";
 
 // A dart that stops on the verge leaves the walk as it leaves the road, so it collides with
 // nothing from then on, and is kept as scenery: the item as the walk last had it, and the zone
