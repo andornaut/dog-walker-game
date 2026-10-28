@@ -30,12 +30,15 @@ Snatch, the thief's tags: walk (4 frames, 100ms, road.PERSON_WALK: a foot lifted
 passing 1px higher, the other foot), flee (4 frames, 90ms: from behind, see FLEE
 and SEAGULL_FLEE), idle (2 frames, 400ms: breathing). Each carries a tan loot
 sack, as the thief does.
-  snatch-raccoon     38x57, standing about as tall as a medium dog, the sack at its chest; flee
-                     runs, the ringed tail swinging against the stride; and, on all fours face on
-                     with the sack slung across its back, stalk (4 frames, 120ms: the creep, as
-                     the coyote's walk, a diagonal pair of paws lifting as the body sinks 1px under
-                     a level head) and step (4 frames, 80ms: a low lunge for each step, as the
-                     coyote's), settled at each depth step apart from the standing tags
+  snatch-raccoon     38x57, standing about as tall as a medium dog, the sack at its chest: a
+                     grey-brown coat (RACCOON_LIT) with dark legs and paws, the black bandit mask
+                     between white brows and a white muzzle, rounded white-rimmed ears and a bushy
+                     tail in bold light and coal rings; flee runs, the tail swinging against the
+                     stride; and, on all fours face on under a hunched back with the sack slung
+                     over its right shoulder, stalk (4 frames, 120ms: the creep, as the coyote's
+                     walk, a diagonal pair of paws lifting as the body sinks 1px under a level
+                     head) and step (4 frames, 80ms: a low lunge for each step, as the coyote's),
+                     settled at each depth step apart from the standing tags
   snatch-seagull     32x48, a head shorter, the sack in its beak; flee flies, the wings beating
                      up, level, down, level
 
@@ -422,40 +425,74 @@ def sack(g, x, y):
     g.rect(x - 1, y + 1, 2, 1, "dbrown")
 
 
+# The raccoon's colours: a grey-brown coat in the stone ramp, so it holds on the dark roads as well as the
+# light ones; dstone legs and coal paws; the black mask between white brows and a white muzzle; rounded ears
+# rimmed white; and the bushy tail's bold rings, lgrey and coal, ending in an ink tip. RACCOON_LIT is its rim
+# for road.lit: the coat lit driftwood, the legs stone, the paws and mask ash.
+RACCOON_LIT = dict(stone=("driftwood", None), dstone=("stone", None), coal=("ash", None), ink=("ash", None))
+
+
+def raccoon_tail(g, rings, tip):
+    """The bushy ringed tail: rings is [(x, y, rx, ry)] from the root out, light and coal in turn, and tip the
+    black tip's (x, y, rx, ry)."""
+    for i, (x, y, rx, ry) in enumerate(rings):
+        if i % 2:
+            g.cel(x, y, rx, ry, "coal", "ink")
+        else:
+            g.cel(x, y, rx, ry, "lgrey", "driftwood", "white")
+    g.cel(*tip, "ink")
+
+
+def raccoon_ears(g, ears, r=3):
+    """Rounded ears at ears [(x, y)], set behind the head so it hides their lower half: dstone, rimmed white
+    along the top."""
+    for x, y in ears:
+        g.cel(x, y, r, r, "white")
+        g.cel(x, y + 0.8, r - 0.4, r - 0.6, "dstone")
+
+
+def raccoon_face(g, cx, y, w=8, narrow=False):
+    """A raccoon's face on a head whose brows sit on row y, its mask w either side of cx: white brows over the
+    black bandit mask across the eyes, its outer ends sweeping down the cheeks, a dstone stripe down the
+    forehead into it, eyes glinting in the mask (narrowed when narrow), and under it white cheeks and a white
+    muzzle tapering to the snout, the black nose at its top."""
+    k = w / 8
+    g.rect(cx - 1, y - 2, 2, 3, "dstone")
+    g.cel(cx, y + 6.5, 5.5 * k, 2.6, "white", "lgrey")
+    g.tri((cx - 3 * k, y + 7), (cx + 3 * k, y + 7), (cx, y + 9.5), "white")
+    for side in (-1, 1):
+        g.rect(cx + side * 3.5 * k - 2, y, 4, 1, "white")
+    g.rect(cx - w, y + 1.5, 2 * w, 3, "ink")
+    for side in (-1, 1):
+        g.tri((cx + side * (w - 3), y + 4.5), (cx + side * w, y + 4.5), (cx + side * (w - 0.5), y + 6), "ink")
+        g.rect(cx + side * 4 * k - 1, y + 2.5, 2, 1, "lgrey" if narrow else "white")
+    g.rect(cx - 1, y + 4.5, 2, 1.5, "ink")
+    g.rect(cx - 1, y + 8, 2, 1, "dstone")
+
+
 def raccoon(lf=0, rf=0, bob=0):
-    """A raccoon standing up facing the player, its feet on row 44: grey coat, pale belly, the black mask
-    under white brows, a ringed tail curling up its right side and the loot sack clutched at its chest. lf and
-    rf lift a foot; bob raises everything above the legs."""
+    """A raccoon standing up facing the player, its feet on row 44: a grey-brown coat, a pale belly, dark legs
+    and paws, the black mask between white brows and a white pointed snout, rounded white-rimmed ears, the
+    bushy ringed tail curling up its right side past its shoulder, and the loot sack clutched at its chest. lf
+    and rf lift a foot; bob raises everything above the legs."""
     g = edged(Grid(32, 48))
     b = bob
-    # the ringed tail, from behind the right hip up its side
-    for i, (x, y) in enumerate(((24, 39), (26, 35), (27, 31), (26.5, 27))):
-        g.cel(x, y + b, 2.6, 2.4, "dslate" if i % 2 else "lgrey", "ink" if i % 2 else "grey")
-    g.cel(26, 24 + b, 2, 1.8, "ink")
+    # the ringed tail, from behind the right hip up its side, ending above the shoulder
+    raccoon_tail(g, [(x, y + b, 2.9, 2) for x, y in ((23, 40.5), (24.9, 37.6), (26.2, 34.4), (26.7, 31),
+                                                     (26.5, 27.7))],
+                 (25.8, 24.6 + b, 2.4, 2))
     for x, f in ((11, lf), (17, rf)):
-        g.rect(x, 37 + b, 4, 6 + f - b, "dslate")
-        g.rect(x - 1, 43 + f, 5, 2, "ink")
-    g.cel(16, 32 + b, 8, 7.5, "slate", "dslate", "grey")
-    g.cel(16, 33.5 + b, 4.5, 5, "lgrey", "grey")
+        g.rect(x, 37 + b, 4, 6 + f - b, "dstone")
+        g.rect(x - 1, 43 + f, 5, 2, "coal")
+    g.cel(16, 32 + b, 8, 7.5, "stone", "dstone", "driftwood")
+    g.cel(16, 33.5 + b, 4.5, 5, "driftwood", "stone")
     sack(g, 16, 31 + b)
     for x in (10, 19):
-        g.rect(x, 30 + b, 3, 2, "ink")
-    # head: wide, the ears pale-tipped
-    for x, tip in ((9, 10), (23, 22)):
-        g.tri((x, 17 + b), (tip, 9.5 + b), (16 + (-3 if x < 16 else 3), 13 + b), "slate")
-        g.p(tip, 11 + b, "lgrey")
-    g.cel(16, 18.5 + b, 8.5, 6.5, "slate", "dslate", "grey")
-    g.rect(9, 15 + b, 5, 1, "white")
-    g.rect(18, 15 + b, 5, 1, "white")
-    g.rect(8, 17 + b, 16, 3, "ink")
-    g.rect(15, 15 + b, 2, 4, "grey")
-    g.rect(11, 18 + b, 2, 1, "white")
-    g.rect(19, 18 + b, 2, 1, "white")
-    g.cel(16, 21.5 + b, 3.5, 2.5, "white", "lgrey")
-    g.rect(15, 20 + b, 2, 1, "ink")
-    g.rect(15, 23 + b, 3, 1, "dbrown")
-    g.p(18, 22 + b, "dbrown")
-    return lit(g)
+        g.rect(x, 30 + b, 3, 2, "coal")
+    raccoon_ears(g, ((10, 13 + b), (22, 13 + b)))
+    g.cel(16, 18.5 + b, 8.5, 6.5, "stone", "dstone", "driftwood")
+    raccoon_face(g, 16, 15 + b)
+    return lit(g, RACCOON_LIT)
 
 
 # A run up the road, seen from behind, 4 frames: the stride (-1 the left knee up, 1 the right, 0 passing with
@@ -466,34 +503,33 @@ FLEE_MS = 90
 
 def raccoon_fleeing(stride, bob=-1):
     """The raccoon running off up the road, seen from behind: the lifted leg short, the other planted, the
-    ringed tail swinging down its back against the stride and the loot sack bouncing over its right
-    shoulder. stride 0 is the passing frame, both feet down and the arms at its sides; bob lifts it."""
+    bushy ringed tail swinging down its back against the stride and the loot sack bouncing over its right
+    shoulder, the white-rimmed ears and the mask's tips showing past its cheeks. stride 0 is the passing
+    frame, both feet down and the arms at its sides; bob lifts it."""
     g = edged(Grid(32, 48))
     s, b = stride, bob
     for x, lift in ((11, s < 0), (17, s > 0)):
         if lift:
-            g.rect(x, 36 + b, 4, 4, "dslate")
-            g.rect(x - 1, 40 + b, 5, 2, "ink")
+            g.rect(x, 36 + b, 4, 4, "dstone")
+            g.rect(x - 1, 40 + b, 5, 2, "coal")
         else:
-            g.rect(x, 36 + b, 4, 7 - b, "dslate")
-            g.rect(x - 1, 43, 5, 2, "ink")
+            g.rect(x, 36 + b, 4, 7 - b, "dstone")
+            g.rect(x - 1, 43, 5, 2, "coal")
     for x, back in ((7, s < 0), (25, s > 0)):
         y = 28 if s == 0 else 31 if back else 25
-        g.rect(x - 1, y + b, 3, 4, "dslate")
-        g.rect(x - 1, y + 4 + b, 3, 2, "ink")
-    g.cel(16, 31 + b, 8, 7.5, "slate", "dslate", "grey")
+        g.rect(x - 1, y + b, 3, 4, "dstone")
+        g.rect(x - 1, y + 4 + b, 3, 2, "coal")
+    g.cel(16, 31 + b, 8, 7.5, "stone", "dstone", "driftwood")
     k = b + (1 if s > 0 else 0)
     sack(g, 22, 27 + k)
     # the tail down the back, swinging against the stride
-    for i, y in enumerate((30, 34, 38)):
-        g.cel(16 - s * (1 + i), y + b, 2.6, 2.4, "dslate" if i % 2 else "lgrey", "ink" if i % 2 else "grey")
-    g.cel(16 - s * 4, 41.5 + b, 2, 1.8, "ink")
-    for x, tip in ((9, 10), (23, 22)):
-        g.tri((x, 17 + b), (tip, 9.5 + b), (16 + (-3 if x < 16 else 3), 13 + b), "slate")
-    g.cel(16, 18.5 + b, 8.5, 6.5, "slate", "dslate", "grey")
-    g.rect(8, 18 + b, 2, 2, "ink")
-    g.rect(22, 18 + b, 2, 2, "ink")
-    return lit(g)
+    raccoon_tail(g, [(16 - s * (1 + i), y + b, 3, 2.3) for i, y in enumerate((29.5, 33.5, 37.5))],
+                 (16 - s * 4, 41.5 + b, 2.2, 1.9))
+    raccoon_ears(g, ((10, 13 + b), (22, 13 + b)))
+    g.cel(16, 18.5 + b, 8.5, 6.5, "stone", "dstone", "driftwood")
+    for x in (7.5, 22.5):
+        g.rect(x, 18 + b, 2, 2, "ink")
+    return lit(g, RACCOON_LIT)
 
 
 # The raccoon's creep at the pack, as the coyote's (hazards.COYOTE_WALK): one diagonal pair lifts (lf, rf the
@@ -509,54 +545,39 @@ RACCOON_STEP_MS = 80
 
 
 def raccoon_stalking(lf=0, rf=0, lh=0, rh=0, sink=0, head=0, ear=0):
-    """The raccoon creeping at the player on all fours, face on, its paws on row 44: the shoulders hunched up
-    either side of a low head, the mask and eyes fixed forward, the back rising behind with the loot sack
-    slung across it, the ringed tail held low out past its right hip, and the hind paws peeking out under its
-    chest. lf, rf, lh and rh lift a paw (negative up); sink lowers the body, and head the head, which otherwise
-    holds level; ear pins the ears back."""
+    """The raccoon creeping at the player on all fours, face on, its paws on row 44: a low head under rounded
+    white-rimmed ears that stand clear of its hunched, rounded back, the mask and pointed white snout fixed
+    forward, the loot sack slung over its right shoulder, the bushy ringed tail swept out past its right hip,
+    dark forelegs splayed either side of a pale chest and the hind paws peeking out under it. lf, rf, lh and
+    rh lift a paw (negative up); sink lowers the body, and head the head, which otherwise holds level; ear
+    pins the ears back and out."""
     g = edged(Grid(32, 48))
     s, h = sink, head
-    # the ringed tail, low behind the right hip
-    for i, (x, y) in enumerate(((24, 34), (26, 36.5), (27.3, 39))):
-        g.cel(x, y + s, 2.3, 2.1, "dslate" if i % 2 else "lgrey", "ink" if i % 2 else "grey")
-    g.cel(27.5, 41.3 + s, 1.5, 1.4, "ink")
-    # the back low between the shoulder blades, which hunch up past the head, the one over a lifted paw rolling
-    # up as the body sinks, and the sack slung across the middle of it
-    g.cel(16, 29.5 + s, 7, 3.5, "dslate", "ink", "slate")
-    for x, side, lift in ((10, -1, lf), (22, 1, rf)):
-        r = 0 if lift else s
-        g.tri((x - side * 4.5, 30 + r), (x - side * 0.5, 25 + r), (x + side * 3.5, 30 + r), "dslate")
-        g.p(x - side * 0.5 - (1 if side > 0 else 0), 26 + r, "slate")
-    sack(g, 16, 27.5 + s)
+    # the hunched back, rounded, rising behind the head over the ears
+    g.cel(16, 30 + s, 7.5, 5, "dstone", "coal", "stone")
+    # the sack slung over the right shoulder
+    sack(g, 24, 29 + s)
+    # the tail swept out low past the right hip
+    raccoon_tail(g, [(x, y + s, 2.6, 2.2) for x, y in ((22.6, 37.2), (24.6, 39), (26.4, 40.8))],
+                 (27.7, 42.4 + s, 1.7, 1.5))
     # the pale chest, the hind paws under it a shade darker
-    g.cel(16, 39 + s, 4, 3.5, "lgrey", "grey")
+    g.cel(16, 39 + s, 4, 3.5, "driftwood", "stone")
     for x, lift in ((12.5, lh), (16.5, rh)):
-        g.rect(x, 41 + lift, 3, 1, "dslate")
-        g.rect(x, 42 + lift, 3, 1, "ink")
+        g.rect(x, 41 + lift, 3, 1, "dstone")
+        g.rect(x, 42 + lift, 3, 1, "coal")
     # the forelegs, the elbows splayed out and the paws set in under them, dark
     for x, side, lift in ((10, -1, lf), (22, 1, rf)):
         out, inn, foot = x + side * 3.5, x - side * 0.5, x + side * 0.5
-        g.tri((out, 29 + s), (inn, 29 + s), (foot - side * 2, 43 + lift), "slate")
-        g.tri((out, 29 + s), (foot + side * 1.5, 43 + lift), (foot - side * 2, 43 + lift), "slate")
-        g.tri((out, 29 + s), (out - side * 1, 29 + s), (foot + side * 1.5, 43 + lift), "dslate")
-        g.rect(foot - 2.5, 43 + lift, 5, 2, "ink")
-    # head: wide and low between the shoulders, the ears pricked forward, pale-tipped
-    for x, tip, inner in ((10, 9.5 + ear, 14), (22, 22.5 - ear, 18)):
-        g.tri((x, 32 + h), (tip, 25.5 + h + ear), (inner, 30 + h), "slate")
-        g.tri((x + (1 if x < 16 else -1), 31 + h), (tip, 27 + h + ear), (inner + (-1.5 if x < 16 else 1.5), 30 + h),
-              "lgrey")
-    g.cel(16, 34.5 + h, 7, 5, "slate", "dslate", "grey")
-    g.rect(10.5, 31.5 + h, 4, 1, "white")
-    g.rect(17.5, 31.5 + h, 4, 1, "white")
-    g.rect(9.5, 33 + h, 13, 2.5, "ink")
-    g.rect(15, 31.5 + h, 2, 3.5, "grey")
-    # narrowed eyes fixed ahead
-    g.rect(11.5, 34 + h, 2, 1, "white")
-    g.rect(18.5, 34 + h, 2, 1, "white")
-    g.cel(16, 37 + h, 3, 2, "white", "lgrey")
-    g.rect(15, 35.5 + h, 2, 1, "ink")
-    g.rect(15, 38 + h, 3, 1, "dbrown")
-    return lit(g)
+        top = 31 + (0 if lift else s)
+        g.tri((out, top), (inn, top), (foot - side * 2, 43 + lift), "dstone")
+        g.tri((out, top), (foot + side * 1.5, 43 + lift), (foot - side * 2, 43 + lift), "dstone")
+        g.cel(x + side * 1.5, top, 3, 2, "stone", "dstone", "driftwood")
+        g.rect(foot - 2.5, 43 + lift, 5, 2, "coal")
+    # head: wide and low, the ears up out of the back's outline
+    raccoon_ears(g, ((11 - ear, 30.5 + h + ear), (21 + ear, 30.5 + h + ear)), 2.5)
+    g.cel(16, 35 + h, 6.3, 4.8, "stone", "dstone", "driftwood")
+    raccoon_face(g, 16, 32 + h, w=6.5, narrow=True)
+    return lit(g, RACCOON_LIT)
 
 
 def seagull(lf=0, rf=0, bob=0):

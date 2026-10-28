@@ -10468,7 +10468,7 @@
       "json": "sprites/snatch-raccoon.json",
       "anchor": {
         "feetY": 53,
-        "opaqueWidth": 28
+        "opaqueWidth": 29
       }
     },
     {
@@ -10477,7 +10477,7 @@
       "json": "sprites/snatch-raccoon@50.json",
       "anchor": {
         "feetY": 27,
-        "opaqueWidth": 14
+        "opaqueWidth": 15
       }
     },
     {
@@ -10504,7 +10504,7 @@
       "json": "sprites/snatch-raccoon@69.json",
       "anchor": {
         "feetY": 37,
-        "opaqueWidth": 19
+        "opaqueWidth": 20
       }
     },
     {
@@ -10513,7 +10513,7 @@
       "json": "sprites/snatch-raccoon@75.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 21
+        "opaqueWidth": 22
       }
     },
     {
@@ -10522,7 +10522,7 @@
       "json": "sprites/snatch-raccoon@81.json",
       "anchor": {
         "feetY": 43,
-        "opaqueWidth": 23
+        "opaqueWidth": 24
       }
     },
     {
@@ -10540,7 +10540,7 @@
       "json": "sprites/snatch-raccoon@94.json",
       "anchor": {
         "feetY": 50,
-        "opaqueWidth": 26
+        "opaqueWidth": 27
       }
     },
     {
