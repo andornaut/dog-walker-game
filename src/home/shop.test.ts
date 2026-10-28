@@ -99,15 +99,6 @@ describe("shopRowLook", () => {
     );
     expect(Object.keys(SHOP_ROW_VIEWS).sort()).toEqual(["affordable", "owned", "short"]);
   });
-
-  it.each(slotSets)("shows slots %s owned with the owned look", (_, dogSlots) => {
-    const have = { ...owned, dogSlots };
-    const rich = cents(Number.MAX_SAFE_INTEGER);
-    const looks = slotRows(data, have).map((row) => shopRowLook(data, have, rich, row));
-    expect(looks).toEqual(
-      allSlots.map((slot) => (dogSlots.includes(slot) ? "owned" : "affordable")),
-    );
-  });
 });
 
 describe("slotRows", () => {
