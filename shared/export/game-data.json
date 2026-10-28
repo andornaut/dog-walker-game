@@ -1228,7 +1228,6 @@
     },
     {
       "id": "pothole",
-      "hitWord": "SPLUNK!",
       "kind": "obstacle",
       "name": "Pothole",
       "resolution": {
@@ -1310,7 +1309,6 @@
     },
     {
       "id": "puddle",
-      "hitWord": "SPLOSH!",
       "kind": "obstacle",
       "name": "Puddle",
       "resolution": {
@@ -1397,7 +1395,6 @@
     },
     {
       "id": "squirrel",
-      "hitWord": "CHIRP!",
       "kind": "obstacle",
       "movement": {
         "kind": "dart",
@@ -3110,6 +3107,7 @@
       "shyHopNearSeconds": 1.65,
       "spotlightSeconds": 30,
       "stinkySeconds": 60,
+      "stripLineWaitSeconds": 3,
       "zoneAtBaseSpeed": 148,
       "zoomiesDriftSeconds": 1,
       "zoomiesSeconds": 40

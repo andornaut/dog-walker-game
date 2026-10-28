@@ -1934,7 +1934,6 @@
       },
       "speech": {
         "clearance": 2,
-        "lines": 4,
         "margin": 4,
         "owner": {
           "foot": 18,
