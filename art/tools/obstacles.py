@@ -193,20 +193,20 @@ def hedge(w=span(3), rustle=()):
     g.rect(4, 11, w - 8, 18, "forest")
     g.rect(1, 14, w - 2, 10, "forest")
     g.rect(4, 25, w - 8, 4, "teal")
-    # the rounded top: a clump every 10px, alternately higher, lit green on the upper left
-    for i, x in enumerate(range(9, int(w) - 7, 10)):
+    # the rounded top: clumps about 10px apart, alternately higher, lit green on the upper left, spaced evenly
+    # from 9px in at each end so both ends round off the same
+    n = round((w - 18) / 10) + 1
+    for i in range(n):
+        x = 9 + i * (w - 18) / (n - 1)
         r = u if i in rustle else 0
         y = 10 - (i % 2) - r
         g.ell(x + r, y + 1, 6, 5.5, "dgreen", "forest", "green")
-        if i % 3 == 0:
-            g.p(x - 2 + r, y - 1, "yellow")
     # the rounded ends
     for x in (6, w - 6):
         g.ell(x, 18, 5, 9, "forest")
-    # leaf texture lower down, dgreen clumps and teal hollows, spaced irregularly
+    # leaf texture lower down: dgreen clumps, spaced irregularly
     for i, x in enumerate(range(7, int(w) - 7, 9) if scale_of(g) >= TEXTURE_MIN else ()):
         g.ell(x + 2, 16 + (i * 3) % 4, 2.5, 2, "dgreen")
-        g.p(x, 21 + (i * 2) % 3, "teal")
     return lit(g)
 
 
