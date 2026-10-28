@@ -187,8 +187,9 @@ def scooter(blink=False, u=1, roll=None):
     if roll is not None:
         treads(g, 15, 40, 3, 7, roll, u)
     else:
+        # the stand's two legs, down from under the cowls so they join the body
         for x in (10, 21):
-            g.rect(x, 43, 1, 4, "dslate")
+            g.rect(x, 39, 1, 8, "dslate")
     wheel = [row[:] for row in px.px]
     px.px = [[None] * px.w for _ in range(px.h)]
     # mirrors on stalks, the handlebar and its grips, the leg shield behind the seat
