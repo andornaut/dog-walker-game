@@ -129,7 +129,6 @@ Road sprites have depth variants `<key>@94`, `@88`, `@81`, `@75`, `@69`, `@62`, 
 | `fx-hit-<encounter>`    | sprite | 77×77            | `play`            | capybara, cheese-crates, dropped-cone, green-bin, other-dog, porch-cat, promo-team, skunk, thief, wedding-shoot; the comic word is set over it |
 | `fx-sparkle`            | sprite | 16×16            | `play`            | Pickup collected                                                                                                                               |
 | `fx-splash`             | sprite | 64×48            | `play`            | Puddle                                                                                                                                         |
-| `fx-splunk`             | sprite | 64×48            | `play`            | Pothole; water and asphalt chips thrown up, the comic word set over it                                                                         |
 | `ui-hit-flash-<colour>` | sprite | 16×64            | `play`            | amber, mauve, orange, pink, sky; left edge strip, mirrored for right                                                                           |
 | `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`, `lucky` | Stretched to 176×32                                                                                                                            |
 

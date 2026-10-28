@@ -2,7 +2,7 @@
 """Draw the road effects for collisions and pickups, and the new-best burst on
 the end screen. The bumps, debris and fx-sparkle are light, warm or small, and
 would fade into the three light roads, so each carries a 1px plum rim (4.4:1 or
-more on those); fx-splash and fx-splunk carry a navy one. fx-new-best carries the plum rim
+more on those); fx-splash carries a navy one. fx-new-best carries the plum rim
 too, for the cream panel and the sunset sky of screen-end. The pack is always
 drawn at full size, so the hit effects have no depth variants.
 
@@ -20,13 +20,6 @@ fx-splash        64x48  play (8 frames, 60ms)  a puddle: a crown of five water j
                                                from the feet, three drops thrown off it and
                                                one ripple; its ground point, row 40, goes on
                                                the dog's feet
-fx-splunk        64x48  play (8 frames, 60ms)  a pothole: a thick column of water jumping up
-                                               from the feet between two low side sheets, a
-                                               drop falling off its top, four asphalt chips
-                                               tumbling out and one ripple; its ground point
-                                               is fx-splash's, row 40; the comic word's ring
-                                               sits at 10,1 (SPLUNK!, 43 wide), above the
-                                               column's top
 fx-sparkle       16x16  play (4 frames, 60ms)  twinkle where a treat or tip is collected
 fx-new-best      96x48  play (8 frames, 70ms)  rays, sparkles and stars in yellow, amber and
                                                white bursting from behind the ui-new-best
@@ -251,61 +244,6 @@ def splash(step):
     return g
 
 
-# The splunk's column of water and its two side sheets (base dx, tip dx, tip height, foot and tip radius) at full
-# height, and its height by frame: it jumps up over 3 frames and slumps back over 3.
-SPLUNK_JETS = ((0, 0, -22, 5, 3.5), (-6, -17, -9, 3.5, 1.5), (6, 17, -9, 3.5, 1.5))
-SPLUNK_HEIGHT = (0.5, 0.9, 1.0, 0.75, 0.45, 0.2, 0, 0)
-# The asphalt chips thrown out of the pothole from frame 1: each (dx, dy) a frame from beside the column's foot,
-# falling SPLUNK_FALL faster each frame, so they peak on frame 3 and land on frame 6 or 7.
-SPLUNK_CHIPS = ((-4.4, -8.0), (-2.6, -9.4), (2.8, -9.0), (4.6, -7.6))
-SPLUNK_FALL = 3
-
-
-def chip(g, x, y, turn):
-    """A 4x3 chip of asphalt, lgrey lit from the top left and grey along its lower right; turn flips it as it
-    tumbles."""
-    if turn:
-        g.rect(x + 1, y, 3, 1, "lgrey")
-        g.rect(x, y + 1, 3, 1, "lgrey")
-        g.rect(x + 3, y + 1, 1, 1, "grey")
-        g.rect(x, y + 2, 3, 1, "grey")
-    else:
-        g.rect(x, y, 3, 1, "lgrey")
-        g.rect(x, y + 1, 4, 1, "lgrey")
-        g.rect(x + 1, y + 2, 3, 1, "grey")
-
-
-def splunk(step):
-    """64x48, its ground point where fx-splash's is: a pothole's splunk. A thick column of sky water jumps up from
-    a pool at the feet between two low side sheets, each with a cyan core lit from the top left, then slumps back,
-    a drop with a white glint falling off the column's top; four asphalt chips tumble out and down either side
-    from frame 1; one ripple spreads from frame 3. A navy outline, no specks."""
-    g = Grid(64, 48)
-    cx, gy = SPLASH_GROUND
-    if step >= 3:
-        k = (step - 2) / 5
-        ripple(g, cx, gy, 14 + 15 * k, 3.5 + 2.5 * k, "sky")
-    h = SPLUNK_HEIGHT[step]
-    if h:
-        g.ell(cx, gy, 10 + 4 * h, 3, "sky")
-        for bx, tx, ty, r0, r1 in SPLUNK_JETS:
-            jet(g, cx + bx, gy, cx + bx + (tx - bx) * h, gy + ty * h, r0, r1, "sky")
-        for bx, tx, ty, r0, r1 in SPLUNK_JETS:
-            jet(g, cx + bx - 1, gy - 1, cx + bx - 1 + (tx - bx) * h, gy + ty * h, r0 - 2, max(0.8, r1 - 1.5), "cyan")
-    if 3 <= step <= 6:
-        t = step - 3
-        y = gy - 22 - 5 + 3 * t * t
-        if y < gy - 4:
-            g.ell(cx + t, y, 2.5, 2.5, "sky")
-            g.p(round(cx + t - 1), round(y - 1), "white")
-    t = step
-    for i, (vx, vy) in enumerate(SPLUNK_CHIPS):
-        x, y = round(cx - 2 + (3 if vx > 0 else -3) + vx * t), round(gy - 6 + vy * t + SPLUNK_FALL * t * t / 2)
-        if t and y <= gy - 3:
-            chip(g, x, y, (i + step) % 2)
-    return g
-
-
 def leaf(g, x, y, flip, col="dgreen", lit="green"):
     """A 4x3 leaf (3x4 when flip) with clipped corners and a lit tip."""
     w, h = (3, 4) if flip else (4, 3)
@@ -456,7 +394,6 @@ def sprites():
     yield "fx-debris-leaves", [("play", [rim(debris_leaves(i)).outlined(False) for i in range(6)], 70)]
     yield "fx-debris-litter", [("play", [rim(debris_litter(i)).outlined(False) for i in range(6)], 70)]
     yield "fx-splash", [("play", [rim(splash(i), "navy").outlined(False) for i in range(8)], 60)]
-    yield "fx-splunk", [("play", [rim(splunk(i), "navy").outlined(False) for i in range(8)], 60)]
     yield "fx-sparkle", [("play", [rim(sparkle(i)).outlined(False) for i in range(4)], 60)]
     yield "fx-new-best", [("play", [new_best(i).outlined(False) for i in range(8)], 70)]
 

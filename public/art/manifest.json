@@ -5487,11 +5487,6 @@
       "json": "sprites/fx-splash.json"
     },
     {
-      "key": "fx-splunk",
-      "png": "sprites/fx-splunk.png",
-      "json": "sprites/fx-splunk.json"
-    },
-    {
       "key": "fx-tap",
       "png": "sprites/fx-tap.png",
       "json": "sprites/fx-tap.json"
