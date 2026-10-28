@@ -13,11 +13,13 @@ import { heartsOf, mapPack, packDogs, packOrder } from "../state/pack";
 import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
 import {
   type Cause,
+  causesTotal,
   type Change,
   dollarCauses,
   type HeartChange,
   type ModifierCause,
   type MoneyChange,
+  negatedCauses,
 } from "./causes";
 import { ownerMaxHearts } from "./dogs";
 import { debuffLasting, lastingFor, longerLasting } from "./durations";
@@ -115,7 +117,7 @@ function moneyParts(data: RulesData, state: RunState, effect: MoneyEffect): Mone
     roundDollars,
   );
   return {
-    adjustments: (cost?.by ?? []).map((cause) => ({ ...cause, amount: -cause.amount })),
+    adjustments: negatedCauses(cost?.by ?? []),
     amount: cents(cost?.after ?? roundDollars(amount)),
     base: -amount,
   };
@@ -174,12 +176,12 @@ export function changeHearts(
   if (before === undefined) {
     return { change: null, state };
   }
-  if (state.invincible === true && given.reduce((sum, cause) => sum + cause.amount, 0) < 0) {
+  if (state.invincible === true && causesTotal(given) < 0) {
     return { change: null, state };
   }
   const forgiven = forgivenCause(data, given, state);
   const causes: Cause[] = forgiven === null ? [...given] : [...given, forgiven];
-  const total = causes.reduce((sum, cause) => sum + cause.amount, 0);
+  const total = causesTotal(causes);
   const unclamped = before + total;
   const after = clampHearts(ownerMaxHearts(data, state, dogId), unclamped);
   if (after === before && forgiven === null) {
@@ -210,7 +212,7 @@ function forgivenCause(
   given: readonly Cause[],
   state: Pick<RunState, "heartsForgiven" | "modifiers">,
 ): Cause | null {
-  const loss = -given.reduce((sum, cause) => sum + cause.amount, 0);
+  const loss = -causesTotal(given);
   const forgiver = state.modifiers.find((modifier) => modifier.stat === "forgivenHearts");
   if (loss <= 0 || forgiver === undefined) {
     return null;

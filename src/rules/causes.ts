@@ -61,6 +61,16 @@ export function firedByText(data: Pick<GameData, "dogs" | "runText">, dog: DogId
   return fillNames(data.runText.firedBy, { owner: data.dogs[dog].owner.name });
 }
 
+// The sum of causes' amounts, added from 0 in order.
+export function causesTotal(causes: readonly { readonly amount: number }[]): number {
+  return causes.reduce((sum, cause) => sum + cause.amount, 0);
+}
+
+// Causes with each amount negated: a cost's causes as shares of the loss it is.
+export function negatedCauses<C extends { readonly amount: number }>(causes: readonly C[]): C[] {
+  return causes.map((cause) => ({ ...cause, amount: -cause.amount }));
+}
+
 export function modifierCauses(
   contributions: readonly Contribution<ActiveModifier>[],
 ): ModifierCause[] {

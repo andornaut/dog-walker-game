@@ -25,7 +25,7 @@ import {
   weightedPick,
 } from "../lib/random";
 import { countBump, countLandedBump, countTally } from "../rules/achievements";
-import { type HeartChange, modifierCauses, type MoneyChange } from "../rules/causes";
+import { type HeartChange, modifierCauses, type MoneyChange, negatedCauses } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
 import { expireAtZoneEnd, tickDebuffs } from "../rules/durations";
 import { changeHearts } from "../rules/effects";
@@ -1127,10 +1127,7 @@ function bumpDog(
   if (bumped.change === null) {
     return { cash, change: null, modified: [paid], state };
   }
-  const raised = modifierCauses(parts.contributions).map((cause) => ({
-    ...cause,
-    amount: -cause.amount,
-  }));
+  const raised = negatedCauses(modifierCauses(parts.contributions));
   const by = [...raised, ...modifierCausesOf(bumped.change)];
   const base = -read(data.tuning, "hearts", "bump");
   const hearts = modifiedValue({ dog, kind: "hearts" }, base, by);

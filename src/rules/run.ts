@@ -1,7 +1,14 @@
 import type { DogId, GameData, LiveTuning } from "../data/types";
 import { mapPack, packDogs } from "../state/pack";
 import type { ActiveModifier, RunState } from "../state/runState";
-import { type Cause, dollarCauses, modifierCauses, type MoneyChange } from "./causes";
+import {
+  type Cause,
+  causesTotal,
+  dollarCauses,
+  modifierCauses,
+  type MoneyChange,
+  negatedCauses,
+} from "./causes";
 import { type StatParts, statParts } from "./modifiers";
 import { addCents, type Cents, cents, read, roundDollars } from "./units";
 
@@ -60,9 +67,9 @@ export function bumpCash(
   const parts = statParts(data.tuning, packModifiers(data, state), "bumpMoney", base);
   const causes = dollarCauses([
     { amount: -base, kind: "bump" },
-    ...modifierCauses(parts.contributions).map((cause) => ({ ...cause, amount: -cause.amount })),
+    ...negatedCauses(modifierCauses(parts.contributions)),
   ]);
-  const cost = -causes.reduce((sum, cause) => sum + cause.amount, 0);
+  const cost = -causesTotal(causes);
   const taken = Math.min(cost, state.money);
   const limit: Cause[] =
     taken < cost ? [{ amount: cost - taken, bound: "min", kind: "limit" }] : [];
