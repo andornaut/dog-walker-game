@@ -4,6 +4,7 @@ import { clamp01 } from "../../lib/numbers";
 import { type Random, weightedPick } from "../../lib/random";
 import { eachRoadsideProp, type RoadsideTable, START_STRIP_LENGTH } from "../../road/roadsideProps";
 import { read } from "../../rules/units";
+import { type Box, overlaps } from "../../runner/collision";
 import {
   DART_VERGE_LANES,
   drawnLanes,
@@ -264,18 +265,6 @@ function settle(deps: DistractionDeps, frame: DistractionFrame, distraction: Dis
   }
 }
 
-// A box on the road: lane positions from left to right, and flat road rows from top to bottom.
-interface Box {
-  bottom: number;
-  left: number;
-  right: number;
-  top: number;
-}
-
-function overlaps(a: Box, b: Box): boolean {
-  return a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
-}
-
 // The flat x spans of the roadside props whose footprints take in a zone distance's row, as
 // placeRoadside draws them: the zone's own past its start strip, and the zone before it's short of
 // the strip.
@@ -385,9 +374,10 @@ function arrivalOf(
   };
 }
 
-// The road an item covers scroll after it stands as given, or null once a crosser has left the
-// road (one that stops on the verge never does). A stalker's or shy hopper's moves still to
-// choose may take it anywhere in its lanes and rows, so it covers all of them.
+// The road an item covers scroll after it stands as given, across in lane positions and along in
+// flat road rows, or null once a crosser has left the road (one that stops on the verge never
+// does). A stalker's or shy hopper's moves still to choose may take it anywhere in its lanes and
+// rows, so it covers all of them.
 function itemBoxAfter(geometry: RoadGeometry, scroll: number, item: WalkItem): Box | null {
   if (item.mover === undefined) {
     const y = item.y + scroll;
