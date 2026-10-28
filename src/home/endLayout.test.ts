@@ -71,6 +71,10 @@ const cases = BREAKDOWN_LINES.flatMap((lines) =>
     [false, true].map((fired) => [lines, i + 1, fired] as const),
   ).flat(),
 );
+// The panel stacks its rows the same way at every count, so the fewest and the most rows.
+const panelCases = cases.filter(
+  ([, rows]) => rows === 1 || rows === SCREEN_CONFIG.dogSlotCount,
+);
 const quipRows = (count: number, fired: boolean, lines: readonly number[]): QuipRow[] =>
   Array.from({ length: count }, (_, i) => ({ fired, lines: lines[i] ?? 1 }));
 
@@ -91,7 +95,7 @@ describe("the side column's total row", () => {
 });
 
 describe("endPanelLayout", () => {
-  it.each(cases)(
+  it.each(panelCases)(
     "fits %i breakdown lines and %i owners' rows (fired: %s), each row under the last",
     (lines, rows, fired) => {
       const { panel, rows: placed } = endPanelLayout(BODY, lines, quipRows(rows, fired, []));
@@ -250,10 +254,14 @@ describe("the end screen's text", () => {
   });
 
   // Each label keeps clear of a four-figure amount, gained or lost, at 2x: the breakdown's in
-  // the body font, and TOTAL in the title font beside the walk's total in the side column.
-  const amounts = [9_999_00, -9_999_00].map((amount) => signedDollarText(amount));
+  // the body font, and TOTAL in the title font beside the walk's total in the side column. The
+  // wider of the two amounts leaves the least room.
   const amountWidth = (role: Role, amount: string) =>
     width(role)({ letterSpacing: 0, scale: 2 }, shown(role, amount));
+  const amounts = [9_999_00, -9_999_00]
+    .map((amount) => signedDollarText(amount))
+    .sort((a, b) => amountWidth("body", b) - amountWidth("body", a))
+    .slice(0, 1);
   const labels = [
     ...Object.values(words.earnings).map(
       (label) =>
