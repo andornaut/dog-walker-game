@@ -13,6 +13,7 @@ import { ownerMaxHearts } from "../rules/dogs";
 import { capitalize, debuffFields } from "../rules/effectText";
 import type { Cents } from "../rules/units";
 import type { Owned, SaveStats } from "../save/schema";
+import { heartsOf } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { extraHearts } from "./buffMarks";
 import { effectIconKey, effectItems, effectName } from "./effectIcons";
@@ -151,7 +152,7 @@ export function explainDetail(
       }
       const home = dogDetail(data, save.owned, save.bankCents, target.dog);
       const hearts = fillLine(RUN_TEXT_FIELDS.explain, text, "dogHearts", {
-        hearts: String(slot.status === "walking" ? slot.hearts : 0),
+        hearts: String(heartsOf(run, target.dog) ?? 0),
         max: String(ownerMaxHearts(data, run, target.dog)),
       });
       return {

@@ -72,6 +72,7 @@ import { hintFor, hintJumpsQueue } from "../rules/hints";
 import { currentZone } from "../rules/route";
 import { faceMood } from "../rules/treats";
 import { type Cents, cents, read } from "../rules/units";
+import { heartsOf } from "../state/pack";
 import type { PackSlot, RunState } from "../state/runState";
 import {
   addFilledRect,
@@ -995,8 +996,7 @@ export class HudScene extends Scene {
       return;
     }
     for (const { dog, text } of quips) {
-      const slot = run.pack.find((candidate) => candidate.dog === dog);
-      const hearts = slot?.status === "walking" ? slot.hearts : 0;
+      const hearts = heartsOf(run, dog) ?? 0;
       const max = ownerMaxHearts(gameData, run, dog);
       const icon = { dog, kind: "owner", mood: faceMood(gameData, max, hearts) } as const;
       this.messages.say({ icon, text });
