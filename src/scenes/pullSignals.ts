@@ -3,6 +3,7 @@ import type { GameObjects, Scene } from "phaser";
 import { animationKey } from "../assets/asepriteAnimations";
 import { PULL_ART } from "../assets/spriteKeys";
 import type { DogId } from "../data/types";
+import { arrowheadPixels } from "../ui/arrowhead";
 import { PALETTE } from "../ui/phaser/palette";
 import { playEffect, playTag, playTagOnce, spriteTopY } from "./sprites";
 
@@ -27,9 +28,10 @@ export interface DogSignal {
 // at (8,6) and the blocked mark at (21,1).
 const BUBBLE = { blocked: { x: 21, y: 1 }, height: 28, icon: { x: 8, y: 6 }, width: 32 };
 const ICON_SIZE = 16;
-// The pull line: 2x2 dots in a 1px rim, every 7px, ending in a 7x7 arrowhead in a rim whose
-// tip stops gap px short of the target's middle, clear of the animal it points at.
-const LINE = { arrow: 7, dot: 2, gap: 18, spacing: 7 };
+// The pull line: 2x2 dots in a 1px rim, every 7px, ending in an arrowhead arrowRows deep
+// (arrow px long or less) in a 1px rim, whose tip stops gap px short of the target's middle,
+// clear of the animal it points at.
+const LINE = { arrow: 7, arrowRows: 4, dot: 2, gap: 22, spacing: 7 };
 // The show tag's frames during which the bubble is too small to hold the icon.
 const SHOW_FRAMES_WITHOUT_ICON = 2;
 
@@ -197,21 +199,17 @@ export class PullSignals {
       g.fillStyle(PALETTE.plum).fillRect(x - 1, y - 1, LINE.dot + 2, LINE.dot + 2);
       g.fillStyle(PALETTE.yellow).fillRect(x, y, LINE.dot, LINE.dot);
     }
-    const head = (size: number, colour: number, inset: number) => {
-      const tip = { x: to.x - ux * inset, y: to.y - uy * inset };
-      const base = { x: tip.x - ux * size, y: tip.y - uy * size };
-      const half = size / 2;
-      g.fillStyle(colour).fillTriangle(
-        Math.round(tip.x),
-        Math.round(tip.y),
-        Math.round(base.x - uy * half),
-        Math.round(base.y + ux * half),
-        Math.round(base.x + uy * half),
-        Math.round(base.y - ux * half),
-      );
-    };
-    head(LINE.arrow + 2, PALETTE.plum, 0);
-    head(LINE.arrow, PALETTE.yellow, 1);
+    // Pixel by pixel, so it stays symmetric about its axis.
+    const tip = { x: Math.round(to.x), y: Math.round(to.y) };
+    const head = arrowheadPixels(LINE.arrowRows, ux, uy);
+    g.fillStyle(PALETTE.plum);
+    for (const { x, y } of head) {
+      g.fillRect(tip.x + x - 1, tip.y + y - 1, 3, 3);
+    }
+    g.fillStyle(PALETTE.yellow);
+    for (const { x, y } of head) {
+      g.fillRect(tip.x + x, tip.y + y, 1, 1);
+    }
   }
 }
 
