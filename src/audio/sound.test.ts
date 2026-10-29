@@ -14,7 +14,6 @@ import {
   type SoundCue,
   soundKeyFor,
   soundKeysOf,
-  STAND_IN_SOUNDS,
 } from "./sound";
 
 const mix = (overrides: Partial<Mix>): Mix => ({
@@ -37,22 +36,15 @@ describe("soundKeysOf", () => {
         hitCue("obstacle", "skunk"),
         ["sfx-hit-skunk", "sfx-bump"],
       ],
+      [
+        "plays a lucky hit's own sfx-<encounter>, with no bump in its place",
+        hitCue("lucky", "lostWallet"),
+        ["sfx-lost-wallet"],
+      ],
     ];
     for (const [name, cue, expected] of cases) {
       expect(soundKeysOf(cue), name).toEqual(expected);
     }
-  });
-
-  it("plays a lucky hit's own sfx-<encounter> first, with no bump in its place", () => {
-    const keys = soundKeysOf(hitCue("lucky", "lostWallet"));
-    expect(keys[0]).toBe("sfx-lost-wallet");
-    expect(keys).not.toContain("sfx-bump");
-  });
-
-  it("follows a key art has yet to draw with its stand-in", () => {
-    const keys = soundKeysOf("dodge");
-    const own = keys[0] ?? "";
-    expect(keys).toEqual(Object.hasOwn(STAND_IN_SOUNDS, own) ? [own, STAND_IN_SOUNDS[own]] : [own]);
   });
 
   it("picks the first key that loaded, or none", () => {

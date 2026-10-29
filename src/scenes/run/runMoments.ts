@@ -273,8 +273,8 @@ export class RunMoments {
     }
   }
 
-  // Sounds (stepCues), bursts, labels, hints and strip lines for what happened in a step, around the pack
-  // at pack.
+  // Sounds (stepCues), bursts, labels, hints and strip lines for what happened in a step,
+  // around the pack at pack.
   walked(step: WalkStep, pack: Point): void {
     this.pack = pack;
     this.popBuffs(popsOf(gameData, stepValues(step)));
