@@ -77,7 +77,7 @@ describe("endPanelLayout", () => {
       expect(rule).toBeGreaterThan(above);
       expect(rule - above).toBeLessThanOrEqual(8);
       expect(panel.y + panel.height).toBe((last?.top ?? 0) + (last?.height ?? 0) + 8);
-      expect(endPanelFits(panel)).toBe(true);
+      expect(endPanelFits(true, panel)).toBe(true);
       const two = endPanelLayout(BODY, lines, quipRows(rows, fired, [2, 2, 2])).rows;
       two.slice(1).forEach((row, i) => {
         const above = two[i];
@@ -92,24 +92,38 @@ describe("endPanelLayout", () => {
 });
 
 describe("grantedQuipLines", () => {
-  it.each(cases)(
-    "grants second lines from the top while the panel fits: %i lines, %i rows, fired %s",
-    (lines, rows, fired) => {
+  it.each(cases.flatMap((each) => [true, false].map((shown) => [...each, shown] as const)))(
+    "grants second lines from the top while the panel fits: %i lines, %i rows, fired %s, badges %s",
+    (lines, rows, fired, shown) => {
       const wanted = quipRows(rows, fired, [2, 2, 2]);
-      const granted = grantedQuipLines(BODY, lines, wanted);
+      const granted = grantedQuipLines(BODY, shown, lines, wanted);
       const layout = (given: readonly number[]) =>
         endPanelLayout(BODY, lines, quipRows(rows, fired, given));
-      expect(endPanelFits(layout(granted).panel)).toBe(true);
+      expect(endPanelFits(shown, layout(granted).panel)).toBe(true);
       // Every row granted one line could not have had two.
       granted.forEach((given, i) => {
         if (given === 1) {
           const more = granted.map((each, j) => (j === i ? 2 : each));
-          expect(endPanelFits(layout(more).panel)).toBe(false);
+          expect(endPanelFits(shown, layout(more).panel)).toBe(false);
         }
       });
       expect([...granted].sort((a, b) => b - a)).toEqual(granted);
     },
   );
+
+  // With no badge to show, the panel grows into the badge strip's area, so every row gets two.
+  it.each(cases)(
+    "grants every row two lines with no badges: %i lines, %i rows, fired %s",
+    (lines, rows, fired) => {
+      expect(grantedQuipLines(BODY, false, lines, quipRows(rows, fired, [2, 2, 2]))).toEqual(
+        Array<number>(rows).fill(2),
+      );
+    },
+  );
+
+  it("keeps the badge strip's area above the button", () => {
+    expect(badges.y + badges.height).toBeLessThanOrEqual(END_LAYOUT.button.y);
+  });
 });
 
 // An owner's row, mirrored: the bubble at the left, the face's well right of the bubble's

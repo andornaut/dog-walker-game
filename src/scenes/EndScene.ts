@@ -181,7 +181,8 @@ export class EndScene extends Scene {
     const title = (x: number, y: number, value: string, colour: number, originX = 0) =>
       addBodyText(this, undefined, { x, y }, value, { colour, font: "title", originX });
     const body = pixelFontMetrics(this, "body");
-    // A closing line wraps onto a second line at 2x while the panel has room for it.
+    // A closing line wraps onto a second line at 2x while the panel has room for it, the panel
+    // growing into the badge strip's area when no badge shows.
     const quipFit = (lines: number) => ({ room: QUIP_TEXT_ROOM, style: textOnLines(lines) });
     const wanted = closing.map((line) => {
       const { lines: shown } = withProbe(this, BODY_TEXT, (probe) => {
@@ -190,7 +191,7 @@ export class EndScene extends Scene {
       });
       return { fired: line.fired, lines: Math.min(QUIP_LINES, shown.length) };
     });
-    const quipLines = grantedQuipLines(body, lines.length, wanted);
+    const quipLines = grantedQuipLines(body, earned.length > 0, lines.length, wanted);
     const quipRows = closing.map(({ fired }, i) => ({ fired, lines: itemAt(quipLines, i) }));
     const { panel, rows } = endPanelLayout(body, lines.length, quipRows);
     addPanel(this, panel);
