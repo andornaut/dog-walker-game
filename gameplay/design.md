@@ -110,7 +110,7 @@ Each neighbourhood also has its own card obstacle (see Encounters and debuffs) a
 - The walk ends after neighbourhood 4, on Head home, or when no dogs are left. Your cash is banked, except when no dogs are left (see Cash)
 - **Interrupted walk:** the game saves the walk at the end of each neighbourhood and whenever it's hidden; a walk the browser closes before it ends is banked on the next launch as one that headed home
 - **Walk bonus:** when every dog you set out with gets home at the end of neighbourhood 4, the walk pays a Walk bonus of $50 into the bank, whatever the pack size, shown on the end screen. Heading home early or a firing loses it
-- **End screen:** the walk's total with a breakdown (pay, tips, lucky finds, Walk bonus, card costs, and in red the cash lost when every owner fired you) and the neighbourhoods walked, with no bank; a new-best ribbon when it beats the best walk with the same number of dogs; the badges the walk earned, each opening its badge card on a tap or a hold; one closing line from each owner (a happier line from owners still walking, the fired line from owners who fired you)
+- **End screen:** the walk's total with a breakdown (pay, tips, lucky finds, Walk bonus, card costs, and in red the cash lost when every owner fired you), every row shown and a zero reading "$0" with no sign and the neighbourhoods walked, with no bank; a new-best ribbon when it beats the best walk with the same number of dogs; the badges the walk earned, each opening its badge card on a tap or a hold; one closing line from each owner (a happier line from owners still walking, the fired line from owners who fired you)
 
 ### Choice cards
 
