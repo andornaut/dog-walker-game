@@ -7,12 +7,14 @@ holds 8.1:1 on turquoise and 4.3:1 on dturq, so he separates from the rays in co
 The app icons scale the master, Archie's 64x64 portrait (public/art/images/portrait-dog-archie.png)
 on the rays, by a whole number with nearest-neighbour, centred on the middle of his inked area
 (33,37 in the portrait) and the rays carried to the icon's edges, so every icon pixel is one master
-pixel. The rays radiate from that same point. The scales are the largest that keep every inked
-pixel inside the central 80% safe circle, so the 512 also serves as the maskable icon.
+pixel. The rays radiate from that same point. Archie fills most of each icon: under the maskable
+icon's central 80% safe circle, his head from below the ear tips (portrait rows 23 to 41) and his
+whole bandana stay inside it, and the ear tips, paws and tail may be cropped. The iOS rounded
+square crops less than that circle, so the 180 shows him whole.
 
-  apple-touch-icon.png    180x180  master x2
-  icon-192.png            192x192  master x2
-  icon-512.png            512x512  master x6
+  apple-touch-icon.png    180x180  master x3
+  icon-192.png            192x192  master x3
+  icon-512.png            512x512  master x8
   icon-maskable-512.png   512x512  the same image as icon-512
 
 The favicons are drawn at their own size, a tile with its corners cut:
@@ -28,7 +30,7 @@ Usage:
                                 circle with the safe zone marked, and the favicons at 1x and 8x
   appicons.py build             write public/icons/<icon>.png, public/art/favicon.png and
                                 favicon-16.png, and the sources art/appicon.aseprite (the master,
-                                96x96: what the 192 shows), art/favicon-32.aseprite and
+                                64x64: what the 192 and 512 show), art/favicon-32.aseprite and
                                 art/favicon-16.aseprite
 
 Run from the repository root after portraits.py and dogs.py: the icons read Archie's exported art. The
@@ -52,13 +54,15 @@ FACE = "public/art/sprites/face-dog-archie.png"  # frame 0, the happy face, is i
 RAY_LIGHT, RAY_DARK = "turquoise", "dturq"
 RAYS = 12  # light rays, each with a dark one beside it
 SAFE = 0.4  # the maskable safe zone: a circle of radius 40% of the icon size
-MASTER = 96
+MASTER = 64
+KEEP_ROWS = range(23, 42)  # the portrait's head below the ear tips, down to the chin
+BANDANA = ("red", "dred")
 
 ICONS = {
-    "apple-touch-icon": (180, 2),
-    "icon-192": (192, 2),
-    "icon-512": (512, 6),
-    "icon-maskable-512": (512, 6),
+    "apple-touch-icon": (180, 3),
+    "icon-192": (192, 3),
+    "icon-512": (512, 8),
+    "icon-maskable-512": (512, 8),
 }
 
 # The happy face at half size: the ears' dbrown folds, the blaze into the muzzle, the sky and amber
@@ -134,10 +138,14 @@ def render(subject, size, scale):
 
 
 def in_safe_zone(subject, size, scale):
-    """Whether every corner of every inked pixel lies inside the safe circle."""
+    """Whether every corner of every pixel of his head below the ear tips (KEEP_ROWS) and of his
+    bandana lies inside the safe circle."""
     cx, cy = centre(subject)
     r = SAFE * size
-    for x, y in subject:
+    bandana = {rgb(K[c]) for c in BANDANA}
+    for (x, y), c in subject.items():
+        if y not in KEEP_ROWS and c not in bandana:
+            continue
         for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
             if math.hypot((x + dx - cx) * scale, (y + dy - cy) * scale) > r + 1e-9:
                 return False
@@ -181,7 +189,7 @@ def icons():
     out = {}
     for name, (size, scale) in ICONS.items():
         if "maskable" in name:
-            assert in_safe_zone(subject, size, scale), f"{name}: Archie leaves the safe zone at x{scale}"
+            assert in_safe_zone(subject, size, scale), f"{name}: Archie's face leaves the safe zone at x{scale}"
         out[f"public/icons/{name}.png"] = render(subject, size, scale)
     out["public/art/favicon.png"] = favicon_32()
     out["public/art/favicon-16.png"] = favicon_16()
