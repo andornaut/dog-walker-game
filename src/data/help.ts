@@ -12,7 +12,7 @@ export const HELP_PAGES = [
     body:
       "Drag anywhere: a short drag moves the pack a lane, and each lane-width more moves one more. " +
       "A tap moves one lane toward the side you tap. Keys: arrows, A/D or H/L. " +
-      "Some obstacles move: an arrow shows where each will go.",
+      "Some obstacles move: an arrow shows each one's first move.",
     title: "Switch lanes",
   },
   {
