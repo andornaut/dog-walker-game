@@ -4,4 +4,5 @@ export { securityHeadersPlugin } from "../headers/securityHeadersPlugin";
 export { precachePlugin } from "../pwa/precachePlugin";
 export { atlasPlugin } from "./atlas/atlasPlugin";
 export { generatedFilesPlugin } from "./generatedFilesPlugin";
+export { PHASER_ENTRY_ID, phaserBuildPlugin } from "./phaserBuild";
 export { gitHead, shortCommit } from "@andornaut/game-kit/build/buildVersion";

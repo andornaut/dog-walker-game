@@ -19,9 +19,11 @@ const KIT_ALIAS = { "@andornaut/game-kit": repoPath("vendor/game-kit/src") };
 // the kit by its alias, loads through a module runner given the alias.
 const {
   module: {
+    PHASER_ENTRY_ID,
     atlasPlugin,
     generatedFilesPlugin,
     gitHead,
+    phaserBuildPlugin,
     precachePlugin,
     securityHeadersPlugin,
     shortCommit,
@@ -48,17 +50,24 @@ export default defineConfig({
         play: repoPath("pages/play/index.html"),
         data: repoPath("pages/data/index.html"),
       },
-      // Phaser goes in its own chunk, so a game code change keeps its hashed file name and a new
-      // service worker's precache gets it from the browser's HTTP cache.
+      // Phaser and phaserBuildPlugin's entry go in their own chunk, so a game code change keeps
+      // its hashed file name and a new service worker's precache gets it from the browser's HTTP
+      // cache.
       output: {
         codeSplitting: {
-          groups: [{ name: "phaser", test: /[\\/]node_modules[\\/]phaser[\\/]/ }],
+          groups: [
+            {
+              name: "phaser",
+              test: (id: string) =>
+                id === PHASER_ENTRY_ID || /[\\/]node_modules[\\/]phaser[\\/]/.test(id),
+            },
+          ],
         },
       },
     },
-    // The Phaser chunk alone is about 1.4 MB minified, so the 500 kB default always warns.
+    // The Phaser chunk alone is about 1.06 MB minified, so the 500 kB default always warns.
     // Set just above it so that growth in Phaser or game code still warns.
-    chunkSizeWarningLimit: 1600,
+    chunkSizeWarningLimit: 1100,
   },
   // The version and commit the dev bar shows, typed in vendor/game-kit/src/build/buildInfo.d.ts.
   // Fixed per commit, so two builds of one commit match.
@@ -71,11 +80,14 @@ export default defineConfig({
   // content hash in its name, mapped from its path under /art/ in the game's code.
   // generatedFilesPlugin, on the dev server only, rewrites public/art/manifest.json and
   // shared/export/ as the art and src/ change. npm run build writes shared/export/ first.
+  // phaserBuildPlugin, in a build only, bundles Phaser from its source without the namespaces the
+  // game does not use and without the Canvas renderer.
   // precachePlugin writes /sw.js, the service worker that precaches the game for offline play.
   // securityHeadersPlugin writes /_headers, the response headers with each page's CSP.
   plugins: [
     atlas,
     generatedFilesPlugin({ repoRoot: repoPath(".") }),
+    phaserBuildPlugin(),
     precachePlugin({
       getArtFiles: atlas.api.artFiles,
       pageHtmlFile: "play/index.html",

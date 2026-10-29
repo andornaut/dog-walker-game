@@ -3,7 +3,7 @@ import "./crash/install";
 import "./main.css";
 
 import { fitWholePixels } from "@andornaut/game-kit/view/phaser/fitWholePixels";
-import { AUTO, Core, Game, Scale } from "phaser";
+import { Core, Game, Scale, WEBGL } from "phaser";
 
 import { CRASH_SCREEN } from "./crash/crashScreen";
 import { SCREEN_CONFIG } from "./data/screen";
@@ -94,7 +94,8 @@ function bootGame(): Game {
       TapBurstScene,
       DevOverlayScene,
     ],
-    type: AUTO,
+    // WebGL only: the build's Phaser has no Canvas renderer (src/tools/phaserBuild.ts).
+    type: WEBGL,
     width: SCREEN_CONFIG.width,
   });
 
