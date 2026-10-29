@@ -54,15 +54,29 @@ export const idleTrack: PointerTrack<never> = {
   press: undefined,
 };
 
-// The walk's gestures, the hold that explains, and what a press at a point would explain.
+// The walk's gestures, the hold that explains, what a press at a point would explain, and
+// whether a tap opens that explanation too.
 export interface TrackContext<Target> extends GestureContext {
   explainAt: (point: Point) => Target | undefined;
   hold: HoldRule;
+  opensOnTap: (target: Target) => boolean;
 }
 
+// tapped: where a tap landed on something that opens its explanation on a tap. The caller opens
+// it (explainAt there) once the tap's burst has played out, as a button opens what it opens.
 interface PointerResult<Target> {
   actions: GestureAction[];
+  tapped?: Point;
   track: PointerTrack<Target>;
+}
+
+// Whether a press that went down at start and lifts at point, short of the hold's time, taps
+// something that opens on a tap: it stayed within the hold's slop.
+function tapOpens<Target>(context: TrackContext<Target>, hold: HoldPress, point: Point): boolean {
+  const target = context.explainAt(hold.start);
+  return (
+    target !== undefined && context.opensOnTap(target) && moveHold(point, hold).state === "holding"
+  );
 }
 
 const samePress = (a: Press | undefined, b: Press): boolean =>
@@ -107,7 +121,7 @@ function whileOpen<Target>(
 // they act, and the drag goes on. A press on an element that explains itself opens its
 // explanation once it has stayed within the hold's slop for its time (tickTrack), or lifts after
 // that time before a frame ticks; one that moves past the slop, or takes a lane step, steers as
-// any drag does.
+// any drag does. A tap on one that opens on a tap reports where it landed (tapped).
 export function trackPointer<Target>(
   context: TrackContext<Target>,
   presses: PressMode,
@@ -123,7 +137,7 @@ export function trackPointer<Target>(
   }
   const current = endedUnseen(press, track);
   if (presses === "explain") {
-    return { actions: [], track: holdOnly(context, sample, current) };
+    return holdOnly(context, sample, current);
   }
   if (phase === "down") {
     if (sample.onButton) {
@@ -154,36 +168,45 @@ export function trackPointer<Target>(
   if (hold !== undefined && releaseHold(sample.timeMs, hold) === "hold") {
     return { actions: [], track: opened(context, hold) };
   }
-  return { actions: pointerUp(context, point, current.gesture).actions, track: idleTrack };
+  const { actions } = pointerUp(context, point, current.gesture);
+  if (hold !== undefined && tapOpens(context, hold, point)) {
+    return { actions, tapped: hold.start, track: idleTrack };
+  }
+  return { actions, track: idleTrack };
 }
 
-// A press while only a hold acts: one that goes down on an element that explains itself opens
-// its explanation as a hold does. Any other press, a tap, or a press that moves past the slop
-// does nothing, so its release never steers once the walk goes on.
+// A press while only what explains itself acts: one that goes down on such an element opens its
+// explanation as a hold does, or as a tap does on what opens on a tap. Any other press, or a
+// press that moves past the slop, does nothing, so its release never steers once the walk goes
+// on.
 function holdOnly<Target>(
   context: TrackContext<Target>,
   sample: PointerSample,
   track: PointerTrack<Target>,
-): PointerTrack<Target> {
+): PointerResult<Target> {
   const { phase, point, press } = sample;
   if (phase === "down") {
     if (sample.onButton || context.explainAt(point) === undefined) {
-      return idleTrack;
+      return { actions: [], track: idleTrack };
     }
-    return { ...idleTrack, hold: startHold(context.hold, point, sample.timeMs), press };
+    const hold = startHold(context.hold, point, sample.timeMs);
+    return { actions: [], track: { ...idleTrack, hold, press } };
   }
   const { hold } = track;
   if (hold === undefined || !samePress(track.press, press)) {
-    return track;
+    return { actions: [], track };
   }
   if (phase === "move") {
     const moved = moveHold(point, hold);
-    return moved.state === "moved" ? idleTrack : { ...track, hold: moved };
+    return { actions: [], track: moved.state === "moved" ? idleTrack : { ...track, hold: moved } };
   }
   if (phase === "up" && releaseHold(sample.timeMs, hold) === "hold") {
-    return opened(context, hold);
+    return { actions: [], track: opened(context, hold) };
   }
-  return idleTrack;
+  if (phase === "up" && tapOpens(context, hold, point)) {
+    return { actions: [], tapped: hold.start, track: idleTrack };
+  }
+  return { actions: [], track: idleTrack };
 }
 
 // A hold candidate that moved past its slop, or whose drag took a lane step, steers instead.

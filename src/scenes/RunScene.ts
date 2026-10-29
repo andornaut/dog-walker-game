@@ -104,7 +104,7 @@ const STEP_MS = STEP_SECONDS * 1000;
 const STEPPING: FixedStepLimits = { maxFrameMs: 1000, stepMs: STEP_MS };
 
 // Before the walk starts, the HUD shows nothing to explain.
-const NOTHING_SHOWN: ExplainShown = { debuffs: [], dogs: [], effects: 0 };
+const NOTHING_SHOWN: ExplainShown = { debuffs: [], dogs: [], effects: [] };
 
 // The celebrations due, one after another, once a zone's fee coins have landed, delayMs from its
 // end.
@@ -328,7 +328,7 @@ export class RunScene extends Scene implements HudRun {
     };
   }
 
-  // What the HUD shows that a held press can explain: the walk's effects, its debuffs in the
+  // What the HUD shows that a press can explain: the kinds of the walk's effects, its debuffs in the
   // order they began, and each card's dog.
   private explainShown(): ExplainShown {
     const run = this.session?.walk.run;
@@ -338,7 +338,7 @@ export class RunScene extends Scene implements HudRun {
     return {
       debuffs: run.debuffs.map(({ debuff }) => debuff),
       dogs: LAYOUT.dogSlots.map((_, i) => run.pack[i]?.dog),
-      effects: effectItems(gameData, run).length,
+      effects: effectItems(gameData, run).map((item) => item.kind),
     };
   }
 

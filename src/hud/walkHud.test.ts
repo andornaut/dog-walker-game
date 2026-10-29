@@ -608,7 +608,11 @@ describe("the walk bar's neighbourhood name and count", () => {
 describe("explainTargetAt", () => {
   const dogs: (DogId | undefined)[] = ["kilo", "lady", undefined];
   const debuffs: DebuffId[] = ["muddy", "stinky"];
-  const shown = (effects: number): ExplainShown => ({ debuffs, dogs, effects });
+  const shown = (count: number): ExplainShown => ({
+    debuffs,
+    dogs,
+    effects: Array.from({ length: count }, () => "perk" as const),
+  });
   const holdAt = (i: number) => centre(BAR.effectHolds[i] ?? topBar);
   const bars = debuffBarRects(topBar, debuffs.length);
   const button = centre(BAR.buttons[WALK_BAR_BUTTONS[0]].hit);

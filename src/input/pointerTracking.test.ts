@@ -48,6 +48,7 @@ const context: TrackContext<string> = {
   explainAt: () => undefined,
   hold: { holdMs: 300, slopPx: 20 },
   layout: screenLayout(screen),
+  opensOnTap: () => false,
   stepMoves: () => true,
 };
 const laneConfig = { laneCount: LANES, moveDuration: 0.2 };
@@ -480,13 +481,20 @@ describe("trackPointer fuzz", () => {
 });
 
 // A press on the walk bar (y < 40) or a debuff bar (y 40 to 55) or a card (y 470 on) is on
-// something that explains itself; a tap on a debuff bar does nothing, as on the walk bar. A
+// something that explains itself; a tap on a debuff bar does nothing, as on the walk bar. On the
+// walk bar, x 300 on is a gear icon, which a tap opens too. A
 // press at x 100 is on the left half: the road taps left as it lands, a card on release. A hold
 // opens the explanation's detail card, which pauses the walk until a later press lifts.
 describe("hold to explain", () => {
   const explainContext: TrackContext<string> = {
     ...context,
-    explainAt: ({ y }) => (y < 40 ? "icon" : y < 56 ? "bar" : y >= 470 ? "card" : undefined),
+    explainAt: ({ x, y }) => {
+      if (y < 40) {
+        return x >= 300 ? "gear" : "icon";
+      }
+      return y < 56 ? "bar" : y >= 470 ? "card" : undefined;
+    },
+    opensOnTap: (target) => target === "gear",
     quietTaps: [{ height: 16, width: 360, x: 0, y: 40 }],
   };
   const { holdMs } = explainContext.hold;
@@ -503,7 +511,8 @@ describe("hold to explain", () => {
   type Step = PointerStep | { at: number; kind: "tick"; presses?: PressMode };
 
   // Every action, and each change of the open explanation as "<target>@<step>" or
-  // "closed@<step>". The walk is paused exactly while one is open.
+  // "closed@<step>", and each tap that opens one once its burst has played out as
+  // "tapped <target>@<step>". The walk is paused exactly while one is open.
   function play(steps: readonly Step[]): { actions: GestureAction[]; changes: string[] } {
     const actions: GestureAction[] = [];
     const changes: string[] = [];
@@ -519,6 +528,11 @@ describe("hold to explain", () => {
         const result = trackPointer(explainContext, presses, sample, track);
         track = result.track;
         actions.push(...result.actions);
+        if (result.tapped !== undefined) {
+          changes.push(
+            `tapped ${explainContext.explainAt(result.tapped) ?? "nothing"}@${step.kind}`,
+          );
+        }
       }
       if (track.open !== before) {
         changes.push(`${track.open ?? "closed"}@${step.kind}`);
@@ -539,6 +553,7 @@ describe("hold to explain", () => {
   const tick = (ms: number): Step => ({ at: ms, kind: "tick" });
   const card = 500;
   const icon = 20;
+  const gearX = 320;
   const bar = 48;
   const road = 300;
   // A card held open, its finger lifted.
@@ -717,6 +732,52 @@ describe("hold to explain", () => {
       ],
       [],
       [],
+    ],
+    [
+      "taps a gear icon open",
+      [at("down", 0, gearX, icon), at("up", 50, gearX, icon)],
+      [],
+      ["tapped gear@up"],
+    ],
+    [
+      "opens a gear icon held still once, its release tapping nothing",
+      [at("down", 0, gearX, icon), tick(holdMs), at("up", 400, gearX, icon)],
+      [],
+      ["gear@tick"],
+    ],
+    [
+      "opens a gear icon released past the hold time before a frame ticks once",
+      [at("down", 0, gearX, icon), at("up", holdMs, gearX, icon)],
+      [],
+      ["gear@up"],
+    ],
+    [
+      "taps no gear icon open past the slop",
+      [
+        at("down", 0, gearX, icon),
+        at("move", 20, gearX + 30, icon),
+        at("up", 50, gearX + 30, icon),
+      ],
+      [],
+      [],
+    ],
+    [
+      "taps no gear icon open from a press that lands elsewhere on the bar",
+      [at("down", 0, 100, icon), at("up", 50, gearX, icon)],
+      [],
+      [],
+    ],
+    [
+      "under the menu, taps a gear icon open",
+      underMenu([at("down", 0, gearX, icon), at("up", 50, gearX, icon)]),
+      [],
+      ["tapped gear@up"],
+    ],
+    [
+      "closes an open explanation on a tap on a gear icon, which opens nothing",
+      [...heldCard, at("down", 500, gearX, icon), at("up", 550, gearX, icon)],
+      [],
+      ["card@tick", "closed@up"],
     ],
     [
       "drops a hold under way when help takes the presses before its time comes",

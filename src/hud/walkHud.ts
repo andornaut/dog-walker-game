@@ -9,7 +9,7 @@ import { walkLength } from "../rules/route";
 import { zoneLength } from "../runner/walk";
 import type { RunState } from "../state/runState";
 import { topBarWellRows } from "../ui/topBarTrim";
-import { maxEffects } from "./effectIcons";
+import { type EffectItem, maxEffects } from "./effectIcons";
 import { heartRows } from "./hudView";
 
 // The walk screen's HUD: the walk bar (ui-walk-bar) across the top, a full-width bar per active
@@ -359,12 +359,18 @@ export type ExplainTarget =
   | { dog: DogId; kind: "dog" }
   | { effect: number; kind: "effect" };
 
-// What the HUD shows, for finding what a press explains: the walk's effects, its debuffs in
-// the order they began, and each card's dog, if any.
+// What the HUD shows, for finding what a press explains: the kind of each of the walk's effects,
+// well by well, its debuffs in the order they began, and each card's dog, if any.
 export interface ExplainShown {
   debuffs: readonly DebuffId[];
   dogs: readonly (DogId | undefined)[];
-  effects: number;
+  effects: readonly EffectItem["kind"][];
+}
+
+// A gear icon opens its explanation on a tap, as a button does, and on a hold; everything else
+// that explains itself opens on a hold.
+export function opensOnTap(shown: ExplainShown, target: ExplainTarget): boolean {
+  return target.kind === "effect" && shown.effects[target.effect] === "gear";
 }
 
 // The element under point that explains itself, if any. dimmed: an overlay's dim covers
@@ -381,7 +387,7 @@ export function explainTargetAt(
   }
   const bar = walkBarLayout(layout.topBar);
   const well = bar.effectHolds.findIndex((rect) => containsPoint(rect, x, y));
-  if (well >= 0 && well < shown.effects) {
+  if (well >= 0 && well < shown.effects.length) {
     return { effect: well, kind: "effect" };
   }
   const bars = debuffBarRects(layout.topBar, shown.debuffs.length);

@@ -5,7 +5,7 @@ import { homeBarAction, homeBarButtonAt } from "../home/homeBar";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import type { Point, Rect } from "../lib/rect";
 import { NOTHING_PAUSED, type RunPause, topBarAction, topBarButtonAt, walkPresses } from "./topBar";
-import { type ExplainShown, explainTargetAt, WALK_BAR, walkBarLayout } from "./walkHud";
+import { type ExplainShown, explainTargetAt, opensOnTap, WALK_BAR, walkBarLayout } from "./walkHud";
 
 // Every target on a top bar acts as it does with nothing open, under every card and overlay
 // that leaves the bar lit: a button does what its action says, and a well that explains itself
@@ -17,16 +17,21 @@ const { dogSlots, topBar } = SCREEN_LAYOUT;
 const BAR = walkBarLayout(topBar);
 const at = (rect: Rect): Rect => ({ ...rect, x: topBar.x + rect.x, y: topBar.y + rect.y });
 
-// The walk shows one effect and a dog in the first card.
-const SHOWN: ExplainShown = { debuffs: [], dogs: ["kilo", undefined, undefined], effects: 1 };
+// The walk shows the walker's perk and a gear item, and a dog in the first card.
+const SHOWN: ExplainShown = {
+  debuffs: [],
+  dogs: ["kilo", undefined, undefined],
+  effects: ["perk", "gear"],
+};
 
 const WALK_TARGETS = {
   cashWell: centre(at(WALK_BAR.cash.well)),
   dogCard: centre(dogSlots[0] ?? topBar),
-  effectWell: centre(BAR.effectWells[0] ?? topBar),
+  gearIcon: centre(BAR.effectWells[1] ?? topBar),
   help: centre(BAR.buttons.help.hit),
   neighbourhood: centre(BAR.zoneWell),
   pause: centre(BAR.buttons.pause.hit),
+  perkIcon: centre(BAR.effectWells[0] ?? topBar),
   settings: centre(BAR.buttons.settings.hit),
   sound: centre(BAR.buttons.sound.hit),
 } as const;
@@ -34,7 +39,8 @@ const WALK_TARGETS = {
 type WalkTarget = keyof typeof WALK_TARGETS;
 
 // What a press on the walk bar or a dog card does under pause: a button's tap action, else
-// "explain" when a hold there opens an explanation, else nothing.
+// "explainOnTap" when a tap or a hold there opens an explanation, "explainOnHold" when only a
+// hold does, else nothing.
 function walkTargetAction(pause: RunPause, point: Point): string | undefined {
   const button = topBarButtonAt(point.x, point.y);
   if (button !== undefined) {
@@ -45,7 +51,10 @@ function walkTargetAction(pause: RunPause, point: Point): string | undefined {
     return undefined;
   }
   const target = explainTargetAt(SCREEN_LAYOUT, SHOWN, presses === "explain", point);
-  return target === undefined ? undefined : "explain";
+  if (target === undefined) {
+    return undefined;
+  }
+  return opensOnTap(SHOWN, target) ? "explainOnTap" : "explainOnHold";
 }
 
 const WALK_MODALS: readonly (readonly [string, RunPause])[] = [
@@ -62,11 +71,12 @@ const WALK_MODALS: readonly (readonly [string, RunPause])[] = [
 // Each target's action with nothing open; the rows below list only what differs.
 const WALK_BASE: Readonly<Record<WalkTarget, string | undefined>> = {
   cashWell: undefined,
-  dogCard: "explain",
-  effectWell: "explain",
+  dogCard: "explainOnHold",
+  gearIcon: "explainOnTap",
   help: "openHelp",
   neighbourhood: undefined,
   pause: "openMenu",
+  perkIcon: "explainOnHold",
   settings: "openSettings",
   sound: "mute",
 };
@@ -75,9 +85,10 @@ const WALK_CHANGES: Readonly<Record<string, Partial<Record<WalkTarget, string | 
   "a card or the zone celebration": {},
   help: {
     dogCard: undefined,
-    effectWell: undefined,
+    gearIcon: undefined,
     help: undefined,
     pause: undefined,
+    perkIcon: undefined,
     settings: undefined,
     sound: undefined,
   },

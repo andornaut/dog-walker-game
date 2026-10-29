@@ -8,6 +8,7 @@ import {
   type ExplainShown,
   type ExplainTarget,
   explainTargetAt,
+  opensOnTap,
 } from "../../hud/walkHud";
 import type { GestureAction } from "../../input/gestures";
 import { holdRule } from "../../input/hold";
@@ -22,9 +23,11 @@ import {
   trackPointer,
 } from "../../input/pointerTracking";
 import type { LaneDirection } from "../../layout/lanes";
+import type { Point } from "../../lib/rect";
 import { read } from "../../rules/units";
 import type { SessionInput } from "../../runner/session";
 import { steerWalk, type Walk } from "../../runner/walk";
+import { addTapBurst, afterTapFx } from "../uiKit";
 import { leadWalk } from "./interpolate";
 import { LAYOUT } from "./stage";
 
@@ -109,19 +112,46 @@ export class RunInput {
 
   // Phaser reports a cancelled touch as a release with wasCanceled set. The run scene keeps
   // running while a card, the zone celebration or the pause menu covers the walk, and the press
-  // is theirs then, but for a hold on what they leave in view.
+  // is theirs then, but for what explains itself in what they leave in view. A press on what
+  // opens on a tap bursts as it lands, as a button's does, and its tap opens the explanation once
+  // the burst has played out.
   private onPointer(phase: "down" | "move" | "up", pointer: Input.Pointer): void {
     const presses = this.presses();
+    const context = this.context(presses);
+    const point = { x: pointer.x, y: pointer.y };
+    if (phase === "down" && presses !== "none" && this.pointers.open === undefined) {
+      const target = context.explainAt(point);
+      if (target !== undefined && context.opensOnTap(target)) {
+        addTapBurst(this.scene, point.x, point.y);
+      }
+    }
     const sample: PointerSample = {
       onButton: phase === "down" && topBarButtonAt(pointer.x, pointer.y) !== undefined,
       phase: phase === "up" && pointer.wasCanceled ? "cancel" : phase,
-      point: { x: pointer.x, y: pointer.y },
+      point,
       press: { downTime: pointer.downTime, id: pointer.id },
       timeMs: this.scene.game.loop.time,
     };
-    const result = trackPointer(this.context(presses), presses, sample, this.pointers);
+    const result = trackPointer(context, presses, sample, this.pointers);
     this.pointers = result.track;
     result.actions.forEach((action) => this.act(action));
+    const { tapped } = result;
+    if (tapped !== undefined) {
+      afterTapFx(this.scene, () => this.openTapped(tapped));
+    }
+  }
+
+  // Opens the explanation of what a tap at point landed on, if presses still reach it and it
+  // still explains itself, dropping every press as a hold's opening does.
+  private openTapped(point: Point): void {
+    const presses = this.presses();
+    if (presses === "none" || this.pointers.open !== undefined) {
+      return;
+    }
+    const open = this.context(presses).explainAt(point);
+    if (open !== undefined) {
+      this.pointers = { ...idleTrack, open };
+    }
   }
 
   private context(presses: PressMode): TrackContext<ExplainTarget> {
@@ -162,7 +192,8 @@ export class RunInput {
 
 // A tap on a debuff bar does nothing, and a press on anything that explains itself opens its
 // explanation once still for holdSeconds within swipeStartDistance, the drag's first
-// step. dimmed: an overlay's dim takes the presses on the walk view.
+// step, or on a tap within it for what opens on a tap (opensOnTap). dimmed: an overlay's dim
+// takes the presses on the walk view.
 function trackContext(
   dimmed: boolean,
   shown: ExplainShown,
@@ -174,6 +205,7 @@ function trackContext(
     explainAt: (point) => explainTargetAt(LAYOUT, shown, dimmed, point),
     hold: holdRule(gameData.tuning, swipeStartDistance),
     layout: LAYOUT,
+    opensOnTap: (target) => opensOnTap(shown, target),
     quietTaps: debuffBarRects(LAYOUT.topBar, shown.debuffs.length),
     stepMoves,
   };
