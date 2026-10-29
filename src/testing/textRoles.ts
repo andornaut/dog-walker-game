@@ -42,7 +42,7 @@ import {
 import { fillLine, fillNames } from "../lib/lines";
 import { keysOf } from "../lib/records";
 import { cents } from "../lib/units";
-import { amountText, firedByText } from "../rules/causes";
+import { amountText } from "../rules/causes";
 import { firesText } from "../rules/choices";
 import { startingDogSlots } from "../rules/shop";
 import type { Owned } from "../save/schema";
@@ -140,19 +140,8 @@ function ownerQuipRoles(): TextRoleCase[] {
   });
 }
 
-// A heart change names its source, or the owner who fires you; a money change says its amount.
+// A change label says its amount alone: a heart change's, and a money change's.
 function changeLabelRoles(): TextRoleCase[] {
-  const sources = [
-    ...Object.values(gameData.debuffs).map(({ name }) => name),
-    ...Object.values(gameData.shopGear).map(({ name }) => name),
-    ...Object.values(gameData.upgrades).map(({ name }) => name),
-    ...Object.values(gameData.walkerPerks).map(({ name }) => name),
-    ...Object.values(gameData.encounters).flatMap(({ name, resolution }) => [
-      name,
-      ...(resolution.kind === "card" ? resolution.options.map((option) => option.name) : []),
-    ]),
-    ...keysOf(gameData.dogs).map((dog) => firedByText(gameData, dog)),
-  ];
   const lane = defined(hudLanes(SCREEN_LAYOUT).heartLabels[0]);
   const hearts = { room: changeLabelRoom(lane.width), style: CHANGE_LABEL_STYLE };
   const money = { room: MONEY_LABEL.room, style: TEXT_STYLE };
@@ -161,7 +150,7 @@ function changeLabelRoles(): TextRoleCase[] {
       "heart change",
       "font-body",
       hearts,
-      sources.map((source) => `${amountText("hearts", -10)} ${source}`),
+      [-10, -1, 1, 10].map((amount) => amountText("hearts", amount)),
     ),
     ...plainRole(
       "money change",

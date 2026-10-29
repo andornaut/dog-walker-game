@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { type Rect, rectsOverlap } from "../lib/rect";
-import { defined } from "../testing/defined";
 import { fontFileMetrics } from "../testing/fontInk";
 import { inkRowsOfLines } from "../ui/fontMetrics";
 import {
@@ -55,30 +54,22 @@ describe("hudLanes", () => {
   });
 });
 
-// A heart change's label, on as many lines as its style holds and as wide as its room, sits on
-// a chip in its lane, or grown up the card from the lane's bottom, clear of the card's header;
-// the text's ink padded inside the chip (every label fits its room: ui/textRoles.test.ts).
+// A heart change's label, its amount on one line as wide as its room, sits on a chip inside its
+// lane, the text's ink padded inside the chip (every amount fits its room:
+// ui/textRoles.test.ts).
 describe("a heart change's label", () => {
-  const lines = Array.from({ length: CHANGE_LABEL_STYLE.lines ?? 1 }, (_, i) => i + 1);
-  it.each(
-    lines.flatMap((count) => lanes.heartLabels.map((lane, slot) => [count, slot, lane] as const)),
-  )("sets %i lines on a chip over card %i", (count, slot, lane) => {
-    const { scale } = CHANGE_LABEL_STYLE;
-    const shown = { lines: count, scale, width: changeLabelRoom(lane.width) };
-    const { chip, text: caps } = changeChipPlace(BODY, lane, shown);
-    const inkBottom = caps.y + inkRowsOfLines(BODY, count) * scale;
-    const card = defined(layout.dogSlots[slot]);
-    expect(chip.y).toBeGreaterThanOrEqual(card.y + DOG_CARD.dogFace.y);
-    expect(chip.y + chip.height).toBeLessThanOrEqual(lane.y + lane.height);
-    expect(chip.x + chip.width).toBeLessThanOrEqual(lane.x + lane.width);
-    expect(caps.y - chip.y).toBeGreaterThanOrEqual(CHANGE_CHIP.padY);
-    expect(chip.y + chip.height - inkBottom).toBeGreaterThanOrEqual(CHANGE_CHIP.padY);
-  });
-
-  it("keeps a one-line chip in its lane", () => {
-    const lane = defined(lanes.heartLabels[0]);
-    const shown = { lines: 1, scale: CHANGE_LABEL_STYLE.scale, width: 0 };
-    const { chip } = changeChipPlace(BODY, lane, shown);
-    expect(chip.y).toBeGreaterThanOrEqual(lane.y);
-  });
+  it.each(lanes.heartLabels.map((lane, slot) => [slot, lane] as const))(
+    "sets its amount on a chip inside card %i's lane",
+    (_slot, lane) => {
+      const { scale } = CHANGE_LABEL_STYLE;
+      const shown = { lines: 1, scale, width: changeLabelRoom(lane.width) };
+      const { chip, text: caps } = changeChipPlace(BODY, lane, shown);
+      const inkBottom = caps.y + inkRowsOfLines(BODY, 1) * scale;
+      expect(chip.y).toBeGreaterThanOrEqual(lane.y);
+      expect(chip.y + chip.height).toBeLessThanOrEqual(lane.y + lane.height);
+      expect(chip.x + chip.width).toBeLessThanOrEqual(lane.x + lane.width);
+      expect(caps.y - chip.y).toBeGreaterThanOrEqual(CHANGE_CHIP.padY);
+      expect(chip.y + chip.height - inkBottom).toBeGreaterThanOrEqual(CHANGE_CHIP.padY);
+    },
+  );
 });
