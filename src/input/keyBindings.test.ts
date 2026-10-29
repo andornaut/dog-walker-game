@@ -4,6 +4,7 @@ import type { GestureAction } from "./gestures";
 import {
   cardNumberForKey,
   isConfirmKey,
+  isExitKey,
   isMuteKey,
   isPauseKey,
   laneDirectionForKey,
@@ -46,6 +47,11 @@ describe("key bindings", () => {
         },
         name: "cardNumberForKey picks the card numbered by a digit, up to the 3 on offer",
         read: (key) => cardNumberForKey(3, key),
+      },
+      {
+        expected: { Escape: false, Q: true, m: false, q: true },
+        name: "isExitKey is Q in either case",
+        read: isExitKey,
       },
       {
         expected: { M: true, m: true, n: false },

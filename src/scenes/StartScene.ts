@@ -108,7 +108,7 @@ import {
   tickHold,
   TILE_SLOP_PX,
 } from "../input/hold";
-import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
+import { isConfirmKey, isExitKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import type { PackPlacement } from "../layout/packFormation";
 import { addFigure, PackFigures } from "../pack/phaser/packFigures";
 import {
@@ -417,8 +417,9 @@ const LAST_VISIT_WALKERS_KEY = "homeLastVisitWalkers";
 // shop: tapping the building opens it, and tapping a locked dog, gear item or the dog slot sign
 // opens it on that item. Holding a dog or gear tile opens its detail card.
 // The arrow keys move a focus ring, Enter or Space picks, Escape, P or back closes a card, ?
-// opens help, S settings, L the logbook and M mutes. Start walk and help wait for boot to load
-// the rest of the art, which it does behind this screen.
+// opens help, S settings, L the logbook, M mutes and Q leaves the game as Exit does, where the
+// top bar shows Exit. Start walk and help wait for boot to load the rest of the art, which it
+// does behind this screen.
 export class StartScene extends Scene {
   // The last action, for the message line and the bubble.
   private action: HomeAction = { kind: "none" };
@@ -691,6 +692,8 @@ export class StartScene extends Scene {
       this.act({ kind: "logbook" });
     } else if (isMuteKey(key)) {
       this.act({ kind: "mute" });
+    } else if (isExitKey(key) && this.exit) {
+      this.act({ kind: "exit" });
     }
   }
 

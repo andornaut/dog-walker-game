@@ -43,6 +43,11 @@ export function isMuteKey(key: string): boolean {
   return key.toLowerCase() === "m";
 }
 
+// Q, in either case, presses the home top bar's Exit.
+export function isExitKey(key: string): boolean {
+  return key.toLowerCase() === "q";
+}
+
 // Enter or Space presses the screen's main button.
 export function isConfirmKey(key: string): boolean {
   return key === "Enter" || key === " ";

@@ -94,6 +94,7 @@ const KEY_FUNCTIONS: Readonly<Record<string, () => readonly string[]>> = {
   focusDirectionForKey: none,
   gearIconKey: () => gear.map((id) => spriteKeys.gearIconKey(id)),
   isConfirmKey: none,
+  isExitKey: none,
   isMuteKey: none,
   isPauseKey: none,
   laneDirectionForKey: none,
