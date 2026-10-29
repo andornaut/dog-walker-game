@@ -245,62 +245,6 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
     "sourceSize": { "w": 104, "h": 40 },
-    "duration": 70
-   },
-   "ui-touch-drag 31.aseprite": {
-    "frame": { "x": 3224, "y": 0, "w": 104, "h": 40 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
-    "sourceSize": { "w": 104, "h": 40 },
-    "duration": 70
-   },
-   "ui-touch-drag 32.aseprite": {
-    "frame": { "x": 3328, "y": 0, "w": 104, "h": 40 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
-    "sourceSize": { "w": 104, "h": 40 },
-    "duration": 70
-   },
-   "ui-touch-drag 33.aseprite": {
-    "frame": { "x": 3432, "y": 0, "w": 104, "h": 40 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
-    "sourceSize": { "w": 104, "h": 40 },
-    "duration": 70
-   },
-   "ui-touch-drag 34.aseprite": {
-    "frame": { "x": 3536, "y": 0, "w": 104, "h": 40 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
-    "sourceSize": { "w": 104, "h": 40 },
-    "duration": 70
-   },
-   "ui-touch-drag 35.aseprite": {
-    "frame": { "x": 3640, "y": 0, "w": 104, "h": 40 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
-    "sourceSize": { "w": 104, "h": 40 },
-    "duration": 70
-   },
-   "ui-touch-drag 36.aseprite": {
-    "frame": { "x": 3744, "y": 0, "w": 104, "h": 40 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
-    "sourceSize": { "w": 104, "h": 40 },
-    "duration": 70
-   },
-   "ui-touch-drag 37.aseprite": {
-    "frame": { "x": 3848, "y": 0, "w": 104, "h": 40 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
-    "sourceSize": { "w": 104, "h": 40 },
     "duration": 1000
    }
  },
@@ -309,13 +253,12 @@
   "version": "1.2.30-x64",
   "image": "ui-touch-drag.png",
   "format": "RGBA8888",
-  "size": { "w": 3952, "h": 40 },
+  "size": { "w": 3224, "h": 40 },
   "scale": "1",
   "frameTags": [
    { "name": "right", "from": 0, "to": 14, "direction": "forward" },
    { "name": "left", "from": 15, "to": 29, "direction": "forward" },
-   { "name": "drag", "from": 30, "to": 36, "direction": "forward" },
-   { "name": "still", "from": 37, "to": 37, "direction": "forward" }
+   { "name": "still", "from": 30, "to": 30, "direction": "forward" }
   ]
  }
 }

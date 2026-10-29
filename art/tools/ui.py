@@ -41,8 +41,8 @@ icon-sound-panel, icon-music-panel, icon-effects-panel, icon-motion-panel and ic
 ui-zone-pips (18x8; tags todo, and <zone> and <zone>-done for each zone in ZONE_COLOURS), ui-tile
 (24x24 nine-slice, 4px on every side; tags normal, selected, disabled), ui-touch-drag (104x40, the
 help screen's swipe, a white glove dragging one lane-width; tags right and left, each a whole swipe of
-15 frames timed per frame (TOUCH_MS) and ending on an empty frame, drag (the swipe right's 7 drag
-frames, 70ms) and still (one frame for reduced motion)).
+15 frames timed per frame (TOUCH_MS) and ending on an empty frame, and still (one frame for reduced
+motion)).
 
 Panels, bubbles, plates, tiles and card frames share one chrome (chrome_shape); hits.py, moments.py,
 scene.py and cards.py draw their plates, callouts and frames with it.
@@ -1507,7 +1507,7 @@ TOUCH_OFFSETS = (4, 12, 24, 38, 51, 60, 64)
 TOUCH_HOVER = (2, 3)
 # Per-frame ms of one swipe: hover, press (2), drag (7), hold (2), lift (2) and the empty pause.
 TOUCH_MS = [300, 80, 100] + [70] * 7 + [80, 80, 90, 90, 350]
-# The still for reduced motion: the swipe right's fifth drag frame.
+# The still for reduced motion: the swipe right's fifth drag frame, its whole trail kept.
 TOUCH_STILL = 4
 
 
@@ -1533,19 +1533,20 @@ def touch_glove(x, dx=0, dy=0):
     return touch_layer(lambda g: bitmap(g, x - TOUCH_TIP + dx, TOUCH_Y + dy, TOUCH_GLOVE, cols))
 
 
-def touch_trail(head, start, fade=0):
-    """The dots the fingertip leaves from start to head, as the help picture's pack-move dots: 2x2 every
-    4px in an ink rim, white within 20px of the finger, then lgrey, then grey, none past 48px. fade draws
-    the tail in 12px per frame once the finger stops."""
+def touch_trail(head, start, fade=0, whole=False):
+    """The dots the fingertip leaves from start to head: 2x2 every 4px in an ink rim, white within 20px of
+    the finger, then lgrey, then grey, none past 48px. fade draws the tail in 12px per frame once the finger
+    stops. whole keeps every dot back to the start, white then lgrey, for a still that shows the whole
+    path (grey dots vanish on Cabbagetown's grey road)."""
     way = 1 if head >= start else -1
 
     def draw(g):
         x = start
         while (head - x) * way > 5:
             back = (head - x) * way + 12 * fade
-            if back <= 48:
+            if whole or back <= 48:
                 g.rect(x if way > 0 else x - 1, TOUCH_Y - 1, 2, 2,
-                       "white" if back < 20 else "lgrey" if back < 36 else "grey")
+                       "white" if back < 20 else "lgrey" if whole or back < 36 else "grey")
             x += 4 * way
     return touch_layer(draw)
 
@@ -1579,10 +1580,15 @@ def touch_swipe(start, way):
     return frames
 
 
+def touch_still():
+    """The reduced-motion still: the swipe right's drag frame TOUCH_STILL, its whole trail kept."""
+    x = TOUCH_FROM + TOUCH_OFFSETS[TOUCH_STILL]
+    return touch_frame(touch_trail(x, TOUCH_FROM, whole=True), touch_ring(x, 3.5, "yellow"), touch_glove(x))
+
+
 def touch_tags():
     right, left = touch_swipe(TOUCH_FROM, 1), touch_swipe(TOUCH_TO, -1)
-    return [("right", right, TOUCH_MS), ("left", left, TOUCH_MS),
-            ("drag", right[3:10], 70), ("still", [right[3 + TOUCH_STILL]], 1000)]
+    return [("right", right, TOUCH_MS), ("left", left, TOUCH_MS), ("still", [touch_still()], 1000)]
 
 
 IMAGES = {
