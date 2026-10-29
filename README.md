@@ -36,7 +36,7 @@ Requires Node 24 (`.nvmrc`). Run `npm install`, then:
 | `npm run simulate -- --help`                | Simulate runs ([src/README.md](src/README.md), Simulator)                  |
 | `npm test`                                  | Run the unit tests                                                         |
 
-The site's pages are in `pages/`, each at its URL's path (`pages/play/index.html` is `/play/`), and Vite bundles the TypeScript they load. `public/` is copied into the build unchanged: the art, the nav bar, the icons, and the art gallery, `public/art/index.html`. `shared/` holds the files art's tools and the game both read.
+The site's pages are in `pages/`, each at its URL's path (`pages/play/index.html` is `/play/`), and Vite bundles the TypeScript they load. `public/` is copied into the build unchanged: the art, the nav bar, the icons, and the art gallery, `public/art/index.html`. `shared/` holds the files art's tools and the game both read. [`packages/game-kit/`](packages/game-kit/README.md) holds the game-agnostic helpers, which the game imports as `@andornaut/game-kit/<path>`.
 
 CI runs check, lint, test and build, and the AI attributions scan.
 
