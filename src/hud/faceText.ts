@@ -185,9 +185,10 @@ function rowOf(
   return { faces, texts, width: start + (run === "" ? 0 : width(run)) };
 }
 
-// The line broken at spaces outside its names into rows no wider than room, as width measures
-// a run of text, each face box.framed wide and box.gap from its name, or each name alone with
-// no box. A word wider than room gets a row of its own.
+// The line broken greedily at spaces outside its names into rows no wider than room, each row
+// taking every word that fits, as width measures a run of text, each face box.framed wide and
+// box.gap from its name, or each name alone with no box. A word wider than room gets a row of
+// its own.
 export function faceRows(
   width: (text: string) => number,
   box: FaceBox | undefined,
@@ -208,32 +209,7 @@ export function faceRows(
   if (row.length > 0) {
     rows.push(row);
   }
-  return withoutOrphan(width, box, room, rows).map((words) => rowOf(width, box, words));
-}
-
-// The rows with a last row of one lone word given the word before it too, where the two fit
-// room and the row before keeps a word, so no word sits alone on the last row. A name with the
-// heart change after it is two words already.
-function withoutOrphan(
-  width: (text: string) => number,
-  box: FaceBox | undefined,
-  room: number,
-  rows: readonly Word[][],
-): Word[][] {
-  const last = rows.at(-1);
-  const before = rows.at(-2);
-  const moved = before?.at(-1);
-  const lone = last?.length === 1 && !(last[0] ?? []).some(({ text }) => text.includes(" "));
-  if (!lone || last === undefined || before === undefined || moved === undefined) {
-    return [...rows];
-  }
-  if (before.length < 2) {
-    return [...rows];
-  }
-  const together = [moved, ...last];
-  return rowOf(width, box, together).width <= room
-    ? [...rows.slice(0, -2), before.slice(0, -1), together]
-    : [...rows];
+  return rows.map((words) => rowOf(width, box, words));
 }
 
 // The line's rows in style, each face in box: broken within room as faceRows breaks them, or,

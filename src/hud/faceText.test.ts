@@ -154,6 +154,7 @@ describe("the walk's lines that name an owner", () => {
 });
 
 describe("faceRows", () => {
+  const home = gameData.hints.homeButton.text;
   const spaced = keysOf(gameData.dogs).filter((dog) => gameData.dogs[dog].owner.name.includes(" "));
 
   it.each(spaced)("keeps %s's owner's name whole on its row, however narrow", (dog) => {
@@ -164,19 +165,20 @@ describe("faceRows", () => {
     expect(rows.map((row) => row.faces.length)).toEqual([0, 1, 0]);
   });
 
-  it.each<[string, string, string[]]>([
+  it.each<[string, string, number, string[]]>([
     [
-      "takes the word before a lone last word with it",
+      "leaves a lone last word alone",
       "Good dog sits here",
-      ["Good dog", "sits here"],
+      width2x("Good dog sits"),
+      ["Good dog sits", "here"],
     ],
     [
-      "keeps a lone last word alone where the two would not fit",
-      "Good dog sits xxxxxxxxxxxxx",
-      ["Good dog sits", "xxxxxxxxxxxxx"],
+      "fills the strip's first row, leaving the last word alone",
+      home,
+      messageStripLayout(BODY).room,
+      [home.slice(0, home.lastIndexOf(" ")), home.slice(home.lastIndexOf(" ") + 1)],
     ],
-  ])("%s", (_name, text, rows) => {
-    const room = width2x("Good dog sits");
+  ])("wraps greedily: %s", (_name, text, room, rows) => {
     const set = faceRows(width2x, BOX_2X, room, { text });
     expect(set.map((row) => row.texts.map((run) => run.text).join(""))).toEqual(rows);
   });
