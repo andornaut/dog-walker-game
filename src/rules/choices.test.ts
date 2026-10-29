@@ -334,7 +334,7 @@ describe("chooseOption", () => {
   });
 
   it.each(leadOptions)("$id's $name reaches only the lead dog", ({ amount, id, index }) => {
-    // Formation leads with the largest dog: Pierre is the medium dog beside small Duchess.
+    // Formation leads with the largest dog: Pierre is the medium dog beside small Ginger.
     const state = testState({ duchess: 5, pierre: 5 });
     const outcome = choose(state, encounter(id, ["duchess", "pierre"]), index);
     expect(heartsByDog(outcome.state)).toEqual({ duchess: 5, pierre: 5 + amount });

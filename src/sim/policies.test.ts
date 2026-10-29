@@ -41,7 +41,7 @@ const PAY = THIEF_OPTIONS.findIndex(({ effects }) => effects.some(({ kind }) => 
 const HEARTS = THIEF_OPTIONS.findIndex(({ effects }) =>
   effects.some(({ kind }) => kind === "hearts"),
 );
-// What the hearts option costs Duchess's owner. At SAFE hearts it leaves the owner above
+// What the hearts option costs Ginger's owner. At SAFE hearts it leaves the owner above
 // LOW_HEARTS; at LOW it does not.
 const HEARTS_LOST = (() => {
   const effect = THIEF_OPTIONS[HEARTS]?.effects.find(({ kind }) => kind === "hearts");
