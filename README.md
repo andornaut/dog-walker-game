@@ -42,7 +42,9 @@ CI runs check, lint, test and build, and the AI attributions scan.
 
 ## Deploying
 
-Pushes to `main` deploy through [Cloudflare Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/), which runs `npm run build:deploy` (the build alone) and then `npx wrangler deploy` on Node `24.21.0` (the `NODE_VERSION` build variable). The type check, lint and tests run before each push and in GitHub CI, not in the deploy build. The build watch paths exclude `**/*.md`, `art/**` and `gameplay/**`, which are not build inputs, so a push that changes only those doesn't deploy. Build settings are on the `dog-walker-game` Worker, under Settings → Build in the Cloudflare dashboard.
+- [Cloudflare dashboard](https://dash.cloudflare.com/?to=/:account/workers/services/view/dog-walker-game)
+
+Pushes to `main` deploy through [Cloudflare Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/), which runs `npm run build:deploy` (the build alone) and then `npx wrangler deploy` on Node `24.21.0` (the `NODE_VERSION` build variable). The type check, lint and tests run before each push and in GitHub CI, not in the deploy build. The build watch paths exclude `**/*.md`, `art/**` and `gameplay/**`, which are not build inputs, so a push that changes only those doesn't deploy. Build settings are on the `dog-walker-game` Worker, under Settings → Build in the [Cloudflare dashboard](https://dash.cloudflare.com/?to=/:account/workers/services/view/dog-walker-game).
 
 To deploy by hand, to the account and custom domain set in `wrangler.jsonc`:
 
