@@ -4,11 +4,12 @@
 Images (16x16 icons unless noted): icon-pause, icon-play, icon-home, icon-help, icon-close,
 icon-logbook, icon-settings, icon-share (Safari's Share button, on the iOS install steps card),
 icon-browser-menu (the browser menu button's three dots, on the Firefox for Android install steps
-card), icon-lock, icon-bill (a green dollar bill with a white $, on an item for sale the bank covers),
-icon-treat (the treat pickup, its bone and heart as road.treat lays them out at 16x16, for the
-message strip), icon-stinky; icon-dog-slot (32x32, a pack slot for sale in the
-shop: a doghouse with a green plus badge, as the shop's item-<gear> art, outlined with icon_edge);
-ui-panel (24x24 nine-slice, 4px corners), ui-hint (24x24 nine-slice, 8px corners), ui-hint-tail
+card), icon-update (a green down arrow into a tray, on the home screen's update notice), icon-lock,
+icon-bill (a green dollar bill with a white $, on an item for sale the bank covers), icon-treat
+(the treat pickup, its bone and heart as road.treat lays them out at 16x16, for the message
+strip), icon-stinky; icon-dog-slot (32x32, a pack slot for sale in the shop: a doghouse with a
+green plus badge, as the shop's item-<gear> art, outlined with icon_edge); ui-panel (24x24
+nine-slice, 4px corners), ui-hint (24x24 nine-slice, 8px corners), ui-hint-tail
 (8x6), ui-new-best (72x20 ribbon, text baked in with font-title); the start screen's ui-detail-card
 (24x24 nine-slice, 8px corners), ui-detail-band (24x22 nine-slice, 8px caps and 2px top and bottom,
 drawn 24 tall) and ui-detail-well (68x68); the shop list's ui-scroll-track (8x24) and
@@ -374,6 +375,27 @@ def browser_menu_icon():
             for x, ch in enumerate(row):
                 if ch != ".":
                     g.p(6 + x, top + y, face if ch == "f" else shade)
+    return g
+
+
+# icon-update, 16x16 fills: lime lights the top-left edges, dgreen shades the lower-right.
+UPDATE_ROWS = ["................", "................", "......LLLL......", "......LGGD......",
+               "......LGGD......", "..LLLLLGGDLLLD..", "...LGGGGGGGGD...", "....LGGGGGGD....",
+               ".....LGGGGD.....", "......LGGD......", ".LL....GD....LL.", ".LG..........GD.",
+               ".LG..........GD.", ".LGGGGGGGGGGGGD.", ".DDDDDDDDDDDDDD.", "................"]
+
+
+def update_icon():
+    """The home screen's update notice: a green down arrow, its head 12 wide over a 4-wide shaft,
+    pointing into a tray of 2px walls and floor, with 2px or more clear between the head and the
+    walls. One forest line round every fill, which holds 3:1 on cream and tan as icon_edge's
+    outline on green does."""
+    g = edged(Grid(16, 16), "forest")
+    inks = {"L": "lime", "G": "green", "D": "dgreen"}
+    for y, row in enumerate(UPDATE_ROWS):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                g.p(x, y, inks[ch])
     return g
 
 
@@ -1529,6 +1551,7 @@ IMAGES = {
     "icon-settings": lambda: to_image(settings_icon().outlined(False)),
     "icon-share": lambda: to_image(share_icon().outlined(False)),
     "icon-browser-menu": lambda: to_image(browser_menu_icon().outlined(False)),
+    "icon-update": lambda: to_image(update_icon().outlined()),
     "icon-lock": lambda: to_image(lock().outlined()),
     "icon-bill": lambda: to_image(bill().outlined()),
     "icon-treat": lambda: to_image(treat_icon().outlined()),

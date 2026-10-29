@@ -14076,6 +14076,10 @@
       "png": "images/icon-treat.png"
     },
     {
+      "key": "icon-update",
+      "png": "images/icon-update.png"
+    },
+    {
       "key": "icon-upgrade-belly-rubs",
       "png": "images/icon-upgrade-belly-rubs.png"
     },
