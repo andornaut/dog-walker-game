@@ -52,6 +52,7 @@ import {
   setPixelText,
   withProbe,
 } from "../ui/phaser/pixelText";
+import { addRampDim } from "../ui/phaser/rampDim";
 import { GREYED } from "../ui/selection";
 import { fittingText, TEXT_SCALE } from "../ui/textFit";
 import { addCardTitle, addDetailCard } from "./homePanels";
@@ -66,7 +67,6 @@ import {
   addCloseButton,
   addMenuButton,
   addNineSlice,
-  addScreenBackdrop,
   addSelectTile,
   addTagImage,
   addTapBurst,
@@ -185,8 +185,15 @@ function switchOn(key: SwitchKey, settings: Settings): boolean {
   return key === "muted" ? !settings.muted : settings.reducedMotion;
 }
 
+// What the settings are launched with: the scene under them, which they resume on close, and
+// the part of the screen they dim: the whole start screen, or the walk view the pause menu dims.
+export interface SettingsData extends OverlayData {
+  readonly dim: Rect;
+}
+
 // Sound on or off, music and effects volume, reduced motion and, until the game is installed
-// where it can be, Install, reachable from the home screen and the pause menu. Every change
+// where it can be, Install, reachable from the home screen and the pause menu. The card draws
+// over the screen it opens from, its dim part ramp-dimmed as under the pause menu. Every change
 // is saved and applied at once. A switch row is normal and shows its setting in its switch; a
 // tap dips the row, then flips it. A tap anywhere on the Install row, its Get button included,
 // dips it, then opens the browser's install prompt or, in a browser that installs only from its
@@ -194,6 +201,9 @@ function switchOn(key: SwitchKey, settings: Settings): boolean {
 // Down move the keyboard's focus through the rows and the close control; Enter or Space presses
 // the focused row, and on a slider the left and right keys, Home and End set the volume.
 export class SettingsScene extends Scene {
+  private dim: Rect = SCREEN_LAYOUT.screen;
+  // The ramp dim's objects, kept as the card redraws over them.
+  private dimmed: readonly GameObjects.GameObject[] = [];
   private dragging: VolumeKey | undefined;
   private focus: Focus | null = null;
   // No rows until create measures their notes, so no font is read.
@@ -208,8 +218,10 @@ export class SettingsScene extends Scene {
     super(SCENE_KEYS.settings);
   }
 
-  create(data?: OverlayData): void {
-    this.resumeKey = data?.resume;
+  create(data: SettingsData): void {
+    this.resumeKey = data.resume;
+    this.dim = data.dim;
+    this.dimmed = addRampDim(this, data.dim);
     this.rows = settingsRows(offersInstall(installState()));
     this.layout = settingsLayout(settingsFonts(this), SCREEN_CONFIG, rowShapes(this, this.rows));
     this.dragging = undefined;
@@ -264,13 +276,17 @@ export class SettingsScene extends Scene {
         this.render();
       },
     });
-    // The back button and the screen around the card close it, as the close control in its
-    // band does; while the steps' card is open, they close that card, and the settings card
-    // counts as around it. As listenDismiss, with the area read as each press lands.
+    // The back button and the dimmed screen around the card close it, as the close control in
+    // its band does; over the walk, the lit top bar and dog cards are not around it. While the
+    // steps' card is open, the back button and the screen around that card close it, the
+    // settings card included. As listenDismiss, with the area read as each press lands.
     onBackPressed(this, () => this.back());
     listenOutsideTap(
       this,
-      () => screenArea([this.steps?.card ?? this.layout.panel]),
+      () =>
+        this.steps === undefined
+          ? { covered: [this.layout.panel], dim: this.dim }
+          : screenArea([this.steps.card]),
       () => this.back(),
     );
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
@@ -439,10 +455,9 @@ export class SettingsScene extends Scene {
   }
 
   private render(): void {
-    clearScene(this);
+    clearScene(this, this.dimmed);
     const settings = currentSettings(this);
     const { band, close, panel } = this.layout;
-    addScreenBackdrop(this);
     // The card and its title band.
     addDetailCard(this, this.add.container(0, 0), panel, band);
     addCardTitle(this, panel, gameData.menuText.settings.title);

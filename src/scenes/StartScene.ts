@@ -180,7 +180,7 @@ import {
 import { nextRunStart } from "./run/runRecorder";
 import { type RunPick, runSceneData } from "./run/runStart";
 import { SCENE_KEYS } from "./sceneKeys";
-import { SETTINGS_CLOSED_EVENT } from "./SettingsScene";
+import { SETTINGS_CLOSED_EVENT, type SettingsData } from "./SettingsScene";
 import {
   SHOP_CHANGED_EVENT,
   SHOP_CLOSED_EVENT,
@@ -889,9 +889,12 @@ export class StartScene extends Scene {
         // The logbook is the Stats page, on its first tab.
         openOverlay(this, SCENE_KEYS.stats, { resume: SCENE_KEYS.start });
         return;
-      case "settings":
-        openOverlay(this, SCENE_KEYS.settings, { resume: SCENE_KEYS.start });
+      case "settings": {
+        // Over the whole start screen, dimmed.
+        const data: SettingsData = { dim: SCREEN, resume: SCENE_KEYS.start };
+        openOverlay(this, SCENE_KEYS.settings, data);
         return;
+      }
       case "start":
         this.startWalk();
         return;

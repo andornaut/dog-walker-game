@@ -1,4 +1,4 @@
-import { Core, Scene } from "phaser";
+import { Core, Scene, Scenes } from "phaser";
 
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
@@ -28,7 +28,7 @@ import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { listenOutsideTap, onceSceneEvent, openOverlay } from "./overlay";
 import { SCENE_KEYS } from "./sceneKeys";
-import { SETTINGS_CLOSED_EVENT } from "./SettingsScene";
+import { SETTINGS_CLOSED_EVENT, type SettingsData } from "./SettingsScene";
 import { soundboardOf } from "./soundboard";
 import { listenTargetPress } from "./targetPress";
 import { addMenuButton, addRimmedPanel, addTapBurst, type MenuButton } from "./uiKit";
@@ -184,7 +184,12 @@ export class PauseScene extends Scene {
     this.buttons.forEach((button, i) => button.setPressed(i === this.pressed));
   }
 
+  // The settings over the walk, dimmed as the menu dims it. The menu hides under them, dim and
+  // all, so they dim the walk alone, and shows again as they resume it.
   private openSettings(): void {
-    openOverlay(this, SCENE_KEYS.settings, { resume: SCENE_KEYS.pause });
+    this.scene.setVisible(false);
+    onceSceneEvent(this, this.events, Scenes.Events.RESUME, () => this.scene.setVisible(true));
+    const data: SettingsData = { dim: SCREEN_LAYOUT.walkView, resume: SCENE_KEYS.pause };
+    openOverlay(this, SCENE_KEYS.settings, data);
   }
 }

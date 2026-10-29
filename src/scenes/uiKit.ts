@@ -726,10 +726,11 @@ export function addScreenBackdrop(scene: Scene, key?: string): void {
   }
 }
 
-// Destroys everything the scene drew except tap bursts still playing.
-export function clearScene(scene: Scene): void {
+// Destroys everything the scene drew except tap bursts still playing and keep, such as an
+// overlay's ramp dim.
+export function clearScene(scene: Scene, keep: readonly GameObjects.GameObject[] = []): void {
   for (const child of [...scene.children.list]) {
-    if (child.name !== KEEP_ON_REDRAW) {
+    if (child.name !== KEEP_ON_REDRAW && !keep.includes(child)) {
       child.destroy();
     }
   }

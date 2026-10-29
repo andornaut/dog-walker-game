@@ -1,4 +1,4 @@
-import { Core, type Scene, Scenes } from "phaser";
+import { Core, type GameObjects, type Scene, Scenes } from "phaser";
 
 import { remapDarker } from "../../assets/darkRamp";
 import type { Rect } from "../../lib/rect";
@@ -30,8 +30,13 @@ function shownPart(scene: Scene, rect: Rect): { canvas: Rect; world: Rect } | un
 // never the overlay's own objects, which may later hide or move. Only the part the scene's
 // camera shows is read back. Where the renderer gives no snapshot to remap, the ink layer stands
 // in. Each scene keeps its own texture, so two overlays can dim at once. onDrawn, if given, is
-// called as the overlay's first drawn frame begins, unless the scene shuts down first.
-export function addRampDim(scene: Scene, rect: Rect, onDrawn?: () => void): void {
+// called as the overlay's first drawn frame begins, unless the scene shuts down first. Returns
+// the objects it adds, for a scene that redraws to keep (clearScene).
+export function addRampDim(
+  scene: Scene,
+  rect: Rect,
+  onDrawn?: () => void,
+): readonly GameObjects.GameObject[] {
   const drawn = () => {
     if (onDrawn !== undefined) {
       onceBeforeRender(scene, onDrawn);
@@ -40,7 +45,7 @@ export function addRampDim(scene: Scene, rect: Rect, onDrawn?: () => void): void
   const shown = shownPart(scene, rect);
   if (shown === undefined) {
     drawn();
-    return;
+    return [];
   }
   const { canvas, world } = shown;
   const shade = addDim(scene, world).setVisible(false);
@@ -79,6 +84,7 @@ export function addRampDim(scene: Scene, rect: Rect, onDrawn?: () => void): void
     texture.refresh();
     dim.setTexture(key).setVisible(true);
   });
+  return [shade, dim];
 }
 
 // Calls then once, before the game's next frame is rendered, unless scene shuts down first.
