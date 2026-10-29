@@ -52,7 +52,7 @@ export const MENU_TEXT = {
   settings: {
     effects: "Effects",
     install: "Install",
-    installButton: "Get",
+    installButton: "Install",
     installNote: "Full screen, offline",
     installSteps: {
       firefoxAndroid: {
