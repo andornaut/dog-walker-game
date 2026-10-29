@@ -129,14 +129,17 @@ export class MenuFlow {
     this.blurred = blurred;
   }
 
+  // Help or the settings count while an explanation's detail card covers them, paused.
   private menuState(): RunPause["menu"] {
     if (!this.pauseOpen) {
       return "closed";
     }
-    if (this.scene.scene.isActive(SCENE_KEYS.help)) {
+    const { scene } = this.scene;
+    const shown = (key: SceneKey) => scene.isActive(key) || scene.isPaused(key);
+    if (shown(SCENE_KEYS.help)) {
       return "help";
     }
-    if (this.scene.scene.isActive(SCENE_KEYS.settings)) {
+    if (shown(SCENE_KEYS.settings)) {
       return "settings";
     }
     return this.pauseMode === "homeQuestion" ? "confirmHome" : "open";
