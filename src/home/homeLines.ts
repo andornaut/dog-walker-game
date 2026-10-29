@@ -3,6 +3,7 @@ import { fillLine } from "@andornaut/game-kit/lines";
 import type { DogId, GameData, HomeText, WalkerId } from "../data/types";
 import { packPlace, packSizeRaise } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
+import { walkerOrder } from "../rules/walkers";
 import type { StorageState } from "../save/profile";
 import { type LastWalk, MAX_RUN_DOGS, type Owned } from "../save/schema";
 import { packOrder } from "../state/pack";
@@ -49,16 +50,41 @@ export function walkerLineKey(
   return walks <= HOW_TO_WALKS ? "howTo" : "afterWalk";
 }
 
-// A walker owned now that was not at the last visit, or null for none. With no last visit to
-// compare with (a session's first), there is none.
-export function walkerUnlockedSince(
+// The walkers owned now that were not at the last visit, in unlock order (walkerOrder). With no
+// last visit to compare with (a session's first), there are none.
+export function walkersUnlockedSince(
+  data: Pick<GameData, "walkers">,
   remembered: readonly WalkerId[] | undefined,
   owned: readonly WalkerId[],
-): WalkerId | null {
-  return remembered === undefined ? null : (owned.find((id) => !remembered.includes(id)) ?? null);
+): WalkerId[] {
+  if (remembered === undefined) {
+    return [];
+  }
+  return walkerOrder(data).filter((id) => owned.includes(id) && !remembered.includes(id));
 }
 
-// The walker's own line in words: the new walker's names them, joined is the walker unlocked
+// The bubble's turns on a visit with walkers unlocked since the last: each new walker's
+// newWalker line in unlock order, then the walker's usual line (walkerLineKey without the news),
+// then round again. turn counts taps on the bubble or the walker at the gate (tappedBubbleTurn).
+export function bubbleTurnLine(
+  joined: readonly WalkerId[],
+  usual: WalkerLine,
+  turn: number,
+): { joined: WalkerId | null; line: WalkerLine } {
+  const walker = joined[turn % (joined.length + 1)];
+  return walker === undefined
+    ? { joined: null, line: usual }
+    : { joined: walker, line: "newWalker" };
+}
+
+// The turn a tap on the bubble or the walker at the gate leaves: the next while the bubble says
+// the walker's own line; the same while it says something else (a message or an owner's line),
+// which the tap clears, so the walker's line comes back where it was.
+export function tappedBubbleTurn(turn: number, walkerLineShowing: boolean): number {
+  return walkerLineShowing ? turn + 1 : turn;
+}
+
+// The walker's own line in words: the new walker's names them, joined is a walker unlocked
 // since the last visit.
 export function walkerSays(
   data: Pick<GameData, "homeText" | "walkers">,

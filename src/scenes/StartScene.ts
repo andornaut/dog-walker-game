@@ -65,15 +65,17 @@ import {
 } from "../home/homeLayout";
 import {
   bubbleSpeech,
+  bubbleTurnLine,
   gateTop,
   type HomeAction,
   packBonusLine,
   type PlateMode,
   storageNotice,
+  tappedBubbleTurn,
   type WalkerLine,
   walkerLineKey,
   walkerSays,
-  walkerUnlockedSince,
+  walkersUnlockedSince,
 } from "../home/homeLines";
 import { porchOwners } from "../home/porch";
 import {
@@ -283,6 +285,7 @@ type DetailTarget =
 type Target =
   | { dog: DogId; kind: "dog" }
   | { gear: GearId; kind: "gear" }
+  | { kind: "bubble" }
   | { kind: "help" }
   | { kind: "logbook" }
   | { kind: "mute" }
@@ -453,8 +456,14 @@ export class StartScene extends Scene {
     | undefined;
   private views = new Map<string, TileView>();
   private walkerLine: WalkerLine = "firstVisit";
-  // The walker unlocked since the last visit, whom the walker's newWalker line names.
-  private joined: WalkerId | null = null;
+  // The walkers unlocked since the last visit, in unlock order, whom the walker's newWalker line
+  // names one at a time; bubbleTurn counts the taps on the bubble or the walker at the gate
+  // that move it on (bubbleTurnLine), and usualLine is the walker's line without the news.
+  private joined: WalkerId[] = [];
+  private bubbleTurn = 0;
+  private usualLine: WalkerLine = "afterWalk";
+  // Where a tap moves the bubble on: the bubble and the walker at the gate, as last drawn.
+  private bubbleHits: Rect[] = [];
 
   constructor() {
     super(SCENE_KEYS.start);
@@ -479,14 +488,18 @@ export class StartScene extends Scene {
     const remembered = this.registry.get(LAST_VISIT_BANK_KEY) as Cents | undefined;
     const before = bankAtLastVisit(remembered, bankCents, stats.lastWalk);
     const walkersBefore = this.registry.get(LAST_VISIT_WALKERS_KEY) as WalkerId[] | undefined;
-    this.joined = walkerUnlockedSince(walkersBefore, owned.walkers);
+    this.joined = walkersUnlockedSince(gameData, walkersBefore, owned.walkers);
+    this.bubbleTurn = 0;
     const news = {
       affordable: newlyAffordable(gameData, owned, before, bankCents),
-      walker: this.joined !== null,
+      walker: this.joined.length > 0,
     };
     // Once per device, after the first finished walk, in place of the how-to or welcome back.
     const suggestInstall = walksFinished(stats) > 0 && installNudgeDue();
     this.walkerLine = walkerLineKey(stats.lastWalk, news, suggestInstall, walksPlayed(stats));
+    // The install suggestion waits for a visit it leads.
+    const quiet = { ...news, walker: false };
+    this.usualLine = walkerLineKey(stats.lastWalk, quiet, false, walksPlayed(stats));
     if (this.walkerLine === "install") {
       noteInstallNudged();
     }
@@ -788,7 +801,15 @@ export class StartScene extends Scene {
     if (this.signShown() && containsPoint(SLOT_SIGN.hit, x, y)) {
       return { kind: "slotSign" };
     }
-    return fixed.find(([rect]) => containsPoint(rect, x, y))?.[1];
+    const control = fixed.find(([rect]) => containsPoint(rect, x, y))?.[1];
+    if (control !== undefined) {
+      return control;
+    }
+    // Under the controls, the bubble and the walker at the gate take taps only on a visit with
+    // walkers to name, with a walker picked to name them.
+    const naming = this.joined.length > 0 && this.save().walker !== null;
+    const onBubble = this.bubbleHits.some((hit) => containsPoint(hit, x, y));
+    return naming && onBubble ? { kind: "bubble" } : undefined;
   }
 
   // The shop over everything below the top bar, framing the item tapped.
@@ -875,6 +896,7 @@ export class StartScene extends Scene {
       case "settings":
       case "slotSign":
         return true;
+      case "bubble":
       case "mute":
       case "start":
       case "update":
@@ -890,6 +912,9 @@ export class StartScene extends Scene {
     const id = targetId(target);
     const now = this.time.now;
     switch (target.kind) {
+      case "bubble":
+        this.tapBubble();
+        return;
       case "dog":
       case "gear": {
         const { owned } = this.save();
@@ -1505,6 +1530,8 @@ export class StartScene extends Scene {
     );
     figures.standInYard(g, PATH, { dogs, walker: { footY, x } });
     root.add(figures.layers());
+    const walkerSprite = figures.walker?.sprite;
+    this.bubbleHits = bubble && walkerSprite !== undefined ? [walkerSprite.getBounds()] : [];
     const now = this.time.now;
     for (const { dog, feet } of dogs) {
       const sprite = figures.dogs.get(dog);
@@ -1543,16 +1570,42 @@ export class StartScene extends Scene {
     }
   }
 
+  // The walker's own line (walkerSays): with walkers unlocked since the last visit, the one
+  // bubbleTurn has reached.
+  private walkerSaid(save: SaveDocument): string {
+    if (save.walker === null) {
+      return walkerSays(gameData, "noWalker", null);
+    }
+    if (this.joined.length === 0) {
+      return walkerSays(gameData, this.walkerLine, null);
+    }
+    const { joined, line } = bubbleTurnLine(this.joined, this.usualLine, this.bubbleTurn);
+    return walkerSays(gameData, line, joined);
+  }
+
+  // What the walker's bubble says (bubbleSpeech).
+  private speech(save: SaveDocument): ReturnType<typeof bubbleSpeech> {
+    const state = { action: this.action, loadout: this.loadout };
+    return bubbleSpeech(gameData.homeText, this.walkerSaid(save), state, this.quips);
+  }
+
+  // A tap on the bubble or the walker at the gate: while the walker's own line shows, the next
+  // turn (tappedBubbleTurn); else the message or owner's line clears and the walker's line
+  // comes back.
+  private tapBubble(): void {
+    const save = this.save();
+    const speech = this.speech(save);
+    const own = speech.owner === null && speech.paragraphs.join("") === this.walkerSaid(save);
+    this.bubbleTurn = tappedBubbleTurn(this.bubbleTurn, own);
+    this.action = { kind: "none" };
+    this.quips.clear();
+    this.render();
+  }
+
   // The walker's speech bubble over the gate, its tail's tip over the walker.
   private drawBubble(root: GameObjects.Container, save: SaveDocument, reduced: boolean): void {
     const { x } = WALKER_AT_GATE;
-    const state = { action: this.action, loadout: this.loadout };
-    const speech = bubbleSpeech(
-      gameData.homeText,
-      walkerSays(gameData, save.walker === null ? "noWalker" : this.walkerLine, this.joined),
-      state,
-      this.quips,
-    );
+    const speech = this.speech(save);
     const notice = storageNotice(gameData.homeText, storageState(this));
     // The speaking owner's name, at 1x, sets their column's width.
     const ownerName = speech.owner === null ? undefined : gameData.dogs[speech.owner].owner.name;
@@ -1592,6 +1645,7 @@ export class StartScene extends Scene {
     });
     addNamePills(labels);
     bubble.add(addPanel(this, rect, "ui-quip"));
+    this.bubbleHits.push(rect);
     if (!faced || speech.owner === null || column === null) {
       nameLabel?.destroy();
     } else {

@@ -10,17 +10,19 @@ import { cents } from "../units";
 import type { HomeLoadout } from "./home";
 import {
   bubbleSpeech,
+  bubbleTurnLine,
   gateTop,
   type HomeAction,
   HOW_TO_WALKS,
   messageLine,
   packBonusLine,
   storageNotice,
+  tappedBubbleTurn,
   type VisitNews,
   type WalkerLine,
   walkerLineKey,
   walkerSays,
-  walkerUnlockedSince,
+  walkersUnlockedSince,
 } from "./homeLines";
 
 const data = { ...gameData, tuning: TEST_TUNING };
@@ -90,17 +92,51 @@ describe("walkerLineKey", () => {
   });
 });
 
-describe("walkerUnlockedSince", () => {
-  it("finds a walker owned now and not at the last visit, and none with no last visit", () => {
-    const cases: readonly [string, WalkerId[] | undefined, WalkerId[], WalkerId | null][] = [
-      ["finds a walker owned now and not at the last visit", ["casey"], ["casey", "mrB"], "mrB"],
-      ["finds none when the walkers are unchanged", ["casey", "mrB"], ["casey", "mrB"], null],
-      ["finds none with no last visit to compare with", undefined, ["casey", "mrB"], null],
-    ];
-    for (const [, remembered, owned, expected] of cases) {
-      expect(walkerUnlockedSince(remembered, owned)).toBe(expected);
-    }
+describe("walkersUnlockedSince", () => {
+  it.each<[string, WalkerId[] | undefined, WalkerId[], WalkerId[]]>([
+    ["1 new walker", ["casey", "mrB", "ada"], ["casey", "mrB", "ada", "trista"], ["trista"]],
+    ["2 new walkers", ["casey", "mrB"], ["casey", "mrB", "trista", "ada"], ["ada", "trista"]],
+    ["3 new walkers", ["casey"], ["casey", "trista", "ada", "mrB"], ["mrB", "ada", "trista"]],
+    ["none when the walkers are unchanged", ["casey", "mrB"], ["casey", "mrB"], []],
+    ["none with no last visit to compare with", undefined, ["casey", "mrB"], []],
+  ])("finds %s, in unlock order", (_name, remembered, owned, expected) => {
+    expect(walkersUnlockedSince(gameData, remembered, owned)).toEqual(expected);
   });
+});
+
+describe("bubbleTurnLine", () => {
+  const says = ({ joined, line }: ReturnType<typeof bubbleTurnLine>) =>
+    walkerSays(gameData, line, joined);
+  const named = (walker: WalkerId) => walkerSays(gameData, "newWalker", walker);
+  const usual = gameData.homeText.bubble.afterWalk;
+  // The bubble's line before any tap, then after each of five taps: a tap while an owner's
+  // line shows, which only brings the walker's line back, then four on the walker's line.
+  it.each<[number, WalkerId[], string[]]>([
+    [1, ["mrB"], [named("mrB"), named("mrB"), usual, named("mrB"), usual, named("mrB")]],
+    [
+      2,
+      ["mrB", "ada"],
+      [named("mrB"), named("mrB"), named("ada"), usual, named("mrB"), named("ada")],
+    ],
+    [
+      3,
+      ["mrB", "ada", "trista"],
+      [named("mrB"), named("mrB"), named("ada"), named("trista"), usual, named("mrB")],
+    ],
+  ])(
+    "names each of %i new walkers in turn on a tap, in unlock order, then the usual line",
+    (_count, joined, lines) => {
+      const showing = [false, true, true, true, true];
+      const turns = showing.reduce<number[]>(
+        (taken, walkerLineShowing) => [
+          ...taken,
+          tappedBubbleTurn(taken.at(-1) ?? 0, walkerLineShowing),
+        ],
+        [0],
+      );
+      expect(turns.map((turn) => says(bubbleTurnLine(joined, "afterWalk", turn)))).toEqual(lines);
+    },
+  );
 });
 
 describe("walkerSays", () => {
