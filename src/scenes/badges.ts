@@ -210,7 +210,7 @@ export function addBadgeDetail(
         goal: PALETTE[locked.goal],
         line: PALETTE[locked.goal],
         name: PALETTE[locked.name],
-        status: PALETTE[locked.goal],
+        status: PALETTE[locked.status],
       };
   const text = (y: number, value: string, style: Partial<PixelTextStyle>) =>
     addBodyText(scene, parent, { x: centre, y: DETAIL.y + y }, value, { originX: 0.5, ...style });

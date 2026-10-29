@@ -93,6 +93,7 @@ describe("interaction-state colours", () => {
       ["an earned badge's name on its band", PALETTE[BADGE_TEXT_COLOURS.earned.name], BAND, TEXT],
       ["an earned badge's goal on its band", PALETTE[BADGE_TEXT_COLOURS.earned.goal], BAND, TEXT],
       ["a locked badge's name", PALETTE[BADGE_TEXT_COLOURS.locked.name], PALETTE.cream, TEXT],
+      ["a locked badge's status", PALETTE[BADGE_TEXT_COLOURS.locked.status], PALETTE.cream, TEXT],
       [
         "a locked badge's goal and progress",
         PALETTE[BADGE_TEXT_COLOURS.locked.goal],
