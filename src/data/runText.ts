@@ -40,7 +40,7 @@ export const RUN_TEXT = {
     upgradeStatus: "Picked at a fork",
   },
   fired: "FIRED!",
-  firedBy: "{owner} fired you!",
+  firedBy: "Fires {owner}",
   forgiven: "Forgiven!",
   foundGear: "{gear} (found)",
   homeQuestion: {

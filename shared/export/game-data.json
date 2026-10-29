@@ -10,7 +10,7 @@
         "id": "capybara",
         "kind": "encounter"
       },
-      "text": "Muddy: 67% slower moves for 30s",
+      "text": "Muddy: slower for 30s",
       "title": "Escaped capybara"
     },
     {
@@ -88,7 +88,7 @@
         "id": "droppedCone",
         "kind": "encounter"
       },
-      "text": "Muddy: 67% slower moves for 30s",
+      "text": "Muddy: slower for 30s",
       "title": "Dropped ice cream"
     },
     {
@@ -127,7 +127,7 @@
         "id": "greenBin",
         "kind": "encounter"
       },
-      "text": "Muddy: 67% slower moves for 30s",
+      "text": "Muddy: slower for 30s",
       "title": "Green bin spill"
     },
     {
@@ -179,7 +179,7 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "Zoomies: the pack drifts for 40s",
+      "text": "Zoomies: drifts for 40s",
       "title": "Other dog"
     },
     {
@@ -218,7 +218,7 @@
         "id": "porchCat",
         "kind": "encounter"
       },
-      "text": "Zoomies: the pack drifts for 40s",
+      "text": "Zoomies: drifts for 40s",
       "title": "Porch cat"
     },
     {
@@ -335,7 +335,7 @@
         "id": "thief",
         "kind": "encounter"
       },
-      "text": "Zoomies: the pack drifts for 40s",
+      "text": "Zoomies: drifts for 40s",
       "title": "Thief"
     },
     {
@@ -559,7 +559,7 @@
       ],
       "name": "Muddy",
       "seconds": "muddySeconds",
-      "stake": "{slower} slower moves for {seconds}s"
+      "stake": "slower for {seconds}s"
     },
     {
       "id": "spotlight",
@@ -587,7 +587,7 @@
       "modifiers": [],
       "name": "Zoomies",
       "seconds": "zoomiesSeconds",
-      "stake": "the pack drifts for {seconds}s"
+      "stake": "drifts for {seconds}s"
     }
   ],
   "dogs": [

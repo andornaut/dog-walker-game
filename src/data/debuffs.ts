@@ -9,7 +9,7 @@ export const DEBUFFS = {
     modifiers: [{ by: "muddyLaneSlow", operation: "multiply", stat: "agility" }],
     name: "Muddy",
     seconds: "muddySeconds",
-    stake: "{slower} slower moves for {seconds}s",
+    stake: "slower for {seconds}s",
   },
   spotlight: {
     bumpMoney: "spotlightBump",
@@ -28,6 +28,6 @@ export const DEBUFFS = {
     modifiers: [],
     name: "Zoomies",
     seconds: "zoomiesSeconds",
-    stake: "the pack drifts for {seconds}s",
+    stake: "drifts for {seconds}s",
   },
 } as const satisfies Record<string, Debuff>;
