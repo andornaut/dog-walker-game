@@ -29,7 +29,7 @@ export const CARD_LAYOUT = {
   band: { height: 11, room: 106, y: 2 },
   effect: { plaqueGap: 1, width: 100, x: 6 },
   fires: { inkTop: 1, size: 16, x: 18, y: 134 },
-  // A fork card's Head home button, centred under the paths, gap rows below their charms.
+  // A fork card's Return home button, centred under the paths, gap rows below their charms.
   forkHome: { gap: 6, height: 44, width: 160 },
   height: 153,
   // The enlarged card's body, the frame's rows that grow with it: a firing warning in the title
@@ -186,7 +186,7 @@ export function cardRows(maxCount: number, walkView: Rect): Rect[][] {
   return Array.from({ length: maxCount }, (_, i) => cardRowIn(walkView, maxCount, i + 1));
 }
 
-// A fork card's Head home button, centred on centreX, gap rows under its paths' charms' rows.
+// A fork card's Return home button, centred on centreX, gap rows under its paths' charms' rows.
 export function forkHomeRect(cards: Rect, centreX: number): Rect {
   const { gap, height, width } = CARD_LAYOUT.forkHome;
   return {

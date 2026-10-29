@@ -72,7 +72,7 @@ import { addMenuButton, addNineSlice, listenButtonTap, tagFrame } from "./uiKit"
 export interface CardSceneData {
   // Called with the option's data index, or "skip"; the run decides what happens next.
   onChoose: (choice: Choice) => void;
-  // A fork card's Head home button, under the paths; null leaves the button out.
+  // A fork card's Return home button, under the paths; null leaves the button out.
   onHeadHome: (() => void) | null;
   // Set to draw the card as a still picture, such as the help's, which takes no input.
   picture?: ScenePicture;
@@ -145,7 +145,7 @@ export class CardScene extends Scene {
   // The title, subtitle and their band, hidden with the row while a card is enlarged.
   private headerParts: GameObjects.GameObject[] = [];
   private hold: HoldPress | undefined;
-  // A fork card's Head home button, hidden with the row while a card is enlarged.
+  // A fork card's Return home button, hidden with the row while a card is enlarged.
   private homeParts: GameObjects.GameObject[] = [];
   private outline: GameObjects.Graphics | undefined;
   private parts: GameObjects.GameObject[][] = [];
@@ -368,7 +368,7 @@ export class CardScene extends Scene {
     }
     this.pressed = undefined;
     this.drawOutline();
-    // The row's edges, its title, subtitle and band, and Head home would show beside the enlarged
+    // The row's edges, its title, subtitle and band, and Return home would show beside the enlarged
     // card and its charms, so they hide until the release.
     this.showRow(false);
     const option = entry.option;

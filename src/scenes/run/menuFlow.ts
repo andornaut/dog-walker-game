@@ -103,7 +103,7 @@ export class MenuFlow {
     this.cardView = view;
   }
 
-  // A fork card's Head home button asks the Home question over it.
+  // A fork card's Return home button asks the Home question over it.
   showCard(view: CardView, onChoose: (choice: Choice) => void): void {
     soundboardOf(this.scene).play("cardOpen");
     const data: CardSceneData = {

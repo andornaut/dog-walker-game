@@ -832,7 +832,7 @@ export type CharmEffect = "debuffSeconds" | "forgivenHearts" | "freeCards" | "sk
 
 // The walk's own text. card is the choice cards': the titles and subtitles a card's data does not
 // name, the Skip card, and the cost plaque's words. fired is the firing plate's word, homeQuestion
-// is what the pause menu's Return home and a fork card's Head home ask, with its two answers, and
+// is what the pause menu's and a fork card's Return home ask, with its two answers, and
 // lowHearts is the chip over a dog card down to its last heart, naming its owner. A {name} in a
 // line is filled by code, and each line may use only the names src/hud/runText.ts lists for it.
 // firedBy names an owner who fires you, and card.fires flags an option that would fire owners.

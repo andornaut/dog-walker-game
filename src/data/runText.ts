@@ -44,10 +44,10 @@ export const RUN_TEXT = {
   forgiven: "Forgiven!",
   foundGear: "{gear} (found)",
   homeQuestion: {
-    headHome: "Head home",
+    headHome: "Return home",
     keepWalking: "Keep walking",
     lose: "You give up {lost} from {zone}.",
-    title: "Head home?",
+    title: "Return home?",
     zonesLeft: "Neighbourhoods left: {count}",
   },
   lead: "Lead",
