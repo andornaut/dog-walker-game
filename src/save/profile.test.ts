@@ -8,7 +8,8 @@ import { quietCounters, testAwards, testContext, veteranSave } from "../testing/
 import { cents } from "../units";
 import { earnedSince } from "./achievements";
 import { ProfileSession } from "./profile";
-import { DEFAULT_SETTINGS, SAVE_VERSION, type SaveDocument } from "./schema";
+import type { LaunchWalk, ResumeWalk } from "./resume";
+import { type Checkpoint, DEFAULT_SETTINGS, SAVE_VERSION, type SaveDocument } from "./schema";
 import { gameSaveStore, SAVE_KEYS } from "./storage";
 
 const awards = testAwards;
@@ -246,6 +247,98 @@ describe("runs", () => {
     expect(session.lastRunEnd?.newBestWalk).toBe(true);
     void session.finishRun({ ...result, earnedCents: cents(100) }, []);
     expect(session.lastRunEnd?.newBestWalk).toBe(false);
+  });
+});
+
+// A walk left in its first zone after zone 1's fork, with where it resumes; ProfileSession keeps
+// the resume point as the text it is.
+const leftAt: Checkpoint = {
+  counters: quietCounters(),
+  dogs: result.dogs,
+  earnedCents: cents(500),
+  resume: "the resume point",
+  route: ["distilleryDistrict", "highPark"],
+  zonesFinished: 1,
+};
+const bankedPart: Checkpoint = {
+  counters: leftAt.counters,
+  dogs: leftAt.dogs,
+  earnedCents: leftAt.earnedCents,
+  route: leftAt.route,
+  zonesFinished: leftAt.zonesFinished,
+};
+const WALK = { draws: { cards: 0, forks: 0 }, seed: 1 } as unknown as ResumeWalk;
+
+describe("a walk left unfinished", () => {
+  async function openedWith(decision: LaunchWalk) {
+    const entries = new Map([
+      [SAVE_KEYS.save, JSON.stringify({ ...veteranSave(), checkpoint: leftAt })],
+    ]);
+    const launch = vi.fn(() => decision);
+    const { session } = await ProfileSession.open(
+      awards,
+      gameSaveStore(testContext, memoryStorage(entries)),
+      undefined,
+      launch,
+    );
+    expect(launch).toHaveBeenCalledWith(leftAt);
+    return { entries, session };
+  }
+
+  it.each<{ bank: number; checkpoint: Checkpoint | null; decision: LaunchWalk; wentHome: number }>([
+    {
+      bank: 12_345,
+      checkpoint: leftAt,
+      decision: { kind: "resume", walk: WALK },
+      wentHome: 2,
+    },
+    {
+      bank: 12_345 + 500,
+      checkpoint: null,
+      decision: { kind: "bank", reason: "the checkpoint has no resume point" },
+      wentHome: 3,
+    },
+  ])(
+    "on a launch that decides $decision.kind, keeps the checkpoint or banks it",
+    async ({ bank, checkpoint, decision, wentHome }) => {
+      vi.spyOn(console, "info").mockImplementation(() => undefined);
+      const { entries, session } = await openedWith(decision);
+      expect(session.resumesWalk).toBe(decision.kind === "resume");
+      expect(session.save.checkpoint).toEqual(checkpoint);
+      expect(session.save.bankCents).toBe(bank);
+      expect(session.save.stats.runs.wentHome).toBe(wentHome);
+      expect(stored(entries).checkpoint).toEqual(checkpoint);
+    },
+  );
+
+  it("hands the resumed walk over once and drops its resume point from the stored checkpoint", async () => {
+    const { entries, session } = await openedWith({ kind: "resume", walk: WALK });
+    expect(session.takeResumedWalk()).toBe(WALK);
+    expect(session.takeResumedWalk()).toBeNull();
+    expect(session.resumesWalk).toBe(false);
+    await settle();
+    expect(stored(entries).checkpoint).toEqual(bankedPart);
+  });
+
+  // The launch banks nothing for a walk it resumes; the walk's own end banks it, once.
+  it("counts a resumed walk once, as a walk never left unfinished", async () => {
+    const resumed = await openedWith({ kind: "resume", walk: WALK });
+    resumed.session.takeResumedWalk();
+    await resumed.session.checkpointRun({ ...leftAt, zonesFinished: 2 });
+    await resumed.session.finishRun(result, []);
+    const never = await opened(veteranSave());
+    await never.session.finishRun(result, []);
+    expect(resumed.session.save).toEqual(never.session.save);
+    expect(stored(resumed.entries)).toEqual(stored(never.entries));
+  });
+
+  it("keeps the resume point in later checkpoints until the game crashes", async () => {
+    const { entries, session } = await opened(veteranSave());
+    await session.checkpointRun(leftAt);
+    expect(stored(entries).checkpoint).toEqual(leftAt);
+    session.stopResuming();
+    await session.checkpointRun(leftAt);
+    expect(stored(entries).checkpoint).toEqual(bankedPart);
   });
 });
 

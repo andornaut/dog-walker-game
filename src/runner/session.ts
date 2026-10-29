@@ -39,12 +39,22 @@ export type SessionData = CardData & PullData & WalkData;
 
 // The run's random streams, each named from the seed, so a seed replays the same walk however
 // the walk is driven. Each zone is planned from streams of its own, spawns-<zone index> and
-// movers-<zone index>.
+// movers-<zone index>. draws counts what each stream has drawn, so a resumed walk can take its
+// streams up where they were (runStreams).
 export interface RunStreams {
   readonly cards: Random;
+  draws(): StreamDraws;
   readonly forks: Random;
   readonly seed: number;
 }
+
+// How many numbers each of a run's streams has drawn.
+export interface StreamDraws {
+  readonly cards: number;
+  readonly forks: number;
+}
+
+export const NO_DRAWS: StreamDraws = { cards: 0, forks: 0 };
 
 // The road's geometry for the run's pack, which changes when an owner fires you.
 type SessionGeometry = (run: RunState) => RoadGeometry;
@@ -75,7 +85,8 @@ export interface Session {
 
 // What a step or a choice did, in order. input and chosen are stamped with the run time they
 // applied at, which is where a replay applies them. walked has the road walked this run, zones
-// before included. zoneEnded has the run before and after the zone's fees.
+// before included. zoneEnded has the run before and after the zone's fees, and zonePlanned the
+// walk as it stood before the plan.
 export type SessionEvent =
   | { readonly kind: "cardOpened"; readonly view: CardView }
   | { readonly direction: LaneDirection; readonly kind: "drifted" }
@@ -95,17 +106,38 @@ export type SessionEvent =
       readonly fees: readonly MoneyChange[];
       readonly kind: "zoneEnded";
     }
-  | { readonly kind: "zonePlanned" };
+  | { readonly kind: "zonePlanned"; readonly unplanned: Walk };
 
 export interface SessionStep {
   readonly events: readonly SessionEvent[];
   readonly session: Session;
 }
 
-export function runStreams(seed: number): RunStreams {
+// A stream that counts its draws, having drawn skip numbers already.
+function countedStream(seed: number, name: string, skip: number) {
+  const random = randomStream(seed, name);
+  for (let drawn = 0; drawn < skip; drawn++) {
+    random();
+  }
+  let drawn = skip;
   return {
-    cards: randomStream(seed, "cards"),
-    forks: randomStream(seed, "forks"),
+    drawn: () => drawn,
+    random: () => {
+      drawn += 1;
+      return random();
+    },
+  };
+}
+
+// The run's streams, each having drawn as many numbers as drawn says: none for a new walk, and
+// a resumed walk's count from when it was saved.
+export function runStreams(seed: number, drawn: StreamDraws = NO_DRAWS): RunStreams {
+  const cards = countedStream(seed, "cards", drawn.cards);
+  const forks = countedStream(seed, "forks", drawn.forks);
+  return {
+    cards: cards.random,
+    draws: () => ({ cards: cards.drawn(), forks: forks.drawn() }),
+    forks: forks.random,
     seed,
   };
 }
@@ -118,16 +150,62 @@ export function startSession(
   walk: Walk,
 ): Session {
   return {
+    ...unplannedStart(walk),
+    needsZonePlan: false,
+    walk: planCurrentZone(data, streams, geometry, walk),
+  };
+}
+
+// A walk about to start, its first zone not yet planned: the point a walk resumes from until
+// its first zone ends (resumeSession).
+export function unplannedStart(walk: Walk): Session {
+  return {
     card: null,
     distanceBeforeZone: 0,
-    needsZonePlan: false,
+    needsZonePlan: true,
     pulls: NO_PULLS,
     queue: [],
     timeMs: 0,
-    walk: planCurrentZone(data, streams, geometry, walk),
+    walk,
     zoneEndPending: false,
     zoomiesSeconds: 0,
   };
+}
+
+// A walk saved between zones, or at its start, goes on: the fork it waited at opens, or the zone
+// it was about to walk is planned, as they did when it was saved. Throws for a session saved
+// anywhere else.
+export function resumeSession(
+  data: SessionData,
+  streams: RunStreams,
+  geometry: SessionGeometry,
+  session: Session,
+): SessionStep {
+  if (!session.needsZonePlan || session.card !== null || session.zoneEndPending) {
+    throw new Error("A walk resumes only between zones or at its start");
+  }
+  return continueWalk(data, streams, geometry, [], session);
+}
+
+// The session at a fork as a walk resumes from it: the fork card closed and queued first again,
+// so resumeSession opens it as the zone's end did. A session with no card open is as it was.
+export function forkPoint(session: Session): Session {
+  const { card, walk } = session;
+  if (card === null) {
+    return session;
+  }
+  return {
+    ...session,
+    card: null,
+    queue: [card.source, ...session.queue],
+    walk: { ...walk, run: { ...walk.run, phase: { kind: "walking" } } },
+  };
+}
+
+// The session that just planned a zone as a walk resumes from it: as it stood before the plan,
+// with the walk the zonePlanned event names, so resumeSession plans the zone again.
+export function zoneStartPoint(session: Session, unplanned: Walk): Session {
+  return { ...session, needsZonePlan: true, walk: unplanned };
 }
 
 // One step of seconds: the inputs, the pulls, the Zoomies' drift, the walk, then the step's cards
@@ -292,7 +370,7 @@ function continueWalk(
   }
   if (session.needsZonePlan) {
     const next = planCurrentZone(data, streams, geometry, walk);
-    events.push({ kind: "zonePlanned" });
+    events.push({ kind: "zonePlanned", unplanned: walk });
     return { events, session: { ...session, needsZonePlan: false, walk: next } };
   }
   return { events, session };

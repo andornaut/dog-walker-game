@@ -1,7 +1,9 @@
 // The page's crash screen (the kit's crash/crashScreen), in the game's words and palette, with
 // the message, stack and build label under dev=1. It writes nothing to the save, whose
-// in-memory state may be corrupt; the zone checkpoint is already saved, and the next launch
-// banks it. src/crash/install.ts imports this module before any other game module.
+// in-memory state may be corrupt; the walk's last checkpoint is already saved, and the next
+// launch resumes or banks it. A checkpoint the walk writes after the crash, as the page hides,
+// keeps no resume point (stopResuming in src/main.ts), so that launch banks it.
+// src/crash/install.ts imports this module before any other game module.
 import "@andornaut/game-kit/crash/crash.css";
 
 import { BUILD_LABEL } from "@andornaut/game-kit/build/buildLabel";

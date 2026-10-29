@@ -40,7 +40,9 @@ import { currentZone, currentZoneId, previousZone, previousZoneId } from "../rul
 import { screenRoadGeometry } from "../runner/screenGeometry";
 import {
   chooseShownCard,
+  forkPoint,
   headHomeSession,
+  resumeSession,
   type RunStreams,
   runStreams,
   type Session,
@@ -48,9 +50,12 @@ import {
   type SessionStep,
   startSession,
   stepSession,
+  unplannedStart,
+  zoneStartPoint,
 } from "../runner/session";
 import { startRoad, type Walk } from "../runner/walk";
 import { dogsFinishedWith } from "../save/checkpoint";
+import type { ResumeWalk } from "../save/resume";
 import { checkpointOf, runResultOf } from "../save/runSlices";
 import { type Loadout, newRun, type RunState } from "../state/runState";
 import { colourFromHex, PALETTE } from "../ui/palette";
@@ -90,11 +95,13 @@ import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 
 // How the walk starts, from runSceneData: its setup, the loadout and dog slots it walks with, and
-// the inputs that drive it when it replays a log.
+// the inputs that drive it when it replays a log. A walk the launch resumes (resumedRunSceneData)
+// goes on from resume, where it was saved, under the pause menu.
 export interface RunSceneData {
   dogSlots: number;
   loadout: Loadout;
   replay: readonly InputEvent[] | undefined;
+  resume?: ResumeWalk;
   setup: RunSetup;
 }
 
@@ -143,6 +150,9 @@ export class RunScene extends Scene implements HudRun {
   // The ambient movers' clock: the walk's simulated time less its firings' holds, in which
   // they stand still.
   private ambientMs = 0;
+  // Where the next launch resumes the walk, saved with each checkpoint: the walk's start, its
+  // last fork, or the start of the zone it is in, whichever came last.
+  private resumePoint: ResumeWalk | null = null;
   private readonly roadArt = new RoadArt(this);
   private session: Session | undefined;
   private settings: Settings | undefined;
@@ -164,21 +174,28 @@ export class RunScene extends Scene implements HudRun {
     // canvas's plum clear colour would show.
     this.cameras.main.setBackgroundColor(PALETTE.ink);
 
-    const { setup } = data;
+    const { resume, setup } = data;
     const recorder = new RunRecorder(data.replay);
-    const run = withSetupStart(gameData, setup, newRun(gameData, data.dogSlots, data.loadout));
-    // The log names the pack, gear and walker walked and a later start's route, so its replay
-    // does not read the saved loadout. Each fork's path is a card choice in its events.
-    recorder.start({
-      ...setup,
-      gear: data.loadout.gear,
-      pack: data.loadout.dogs,
-      walker: run.walker,
-      ...(setup.zone === 1 ? {} : { route: run.route }),
-    });
-    const streams = runStreams(setup.seed);
-    const road = startRoad(LANE_COUNT, setup.speed);
-    this.session = startSession(gameData, streams, screenRoadGeometry, { road, run });
+    const streams = runStreams(setup.seed, resume?.draws);
+    if (resume === undefined) {
+      const run = withSetupStart(gameData, setup, newRun(gameData, data.dogSlots, data.loadout));
+      // The log names the pack, gear and walker walked and a later start's route, so its replay
+      // does not read the saved loadout. Each fork's path is a card choice in its events.
+      recorder.start({
+        ...setup,
+        gear: data.loadout.gear,
+        pack: data.loadout.dogs,
+        walker: run.walker,
+        ...(setup.zone === 1 ? {} : { route: run.route }),
+      });
+      const walk = { road: startRoad(LANE_COUNT, setup.speed), run };
+      this.session = startSession(gameData, streams, screenRoadGeometry, walk);
+      this.resumePoint = this.pointAt(streams, unplannedStart(walk));
+    } else {
+      // A resumed walk records no input log: a log replays a walk from its setup.
+      this.session = resume.session;
+      this.resumePoint = resume;
+    }
 
     this.settings = currentSettings(this);
     const sound = soundboardOf(this);
@@ -199,13 +216,27 @@ export class RunScene extends Scene implements HudRun {
     this.scene.launch(SCENE_KEYS.hud, hud);
     sound.setPaused(false);
     startWakeLock();
-    this.startZone(this.session.walk.run);
-    // The HUD this launches hears the walk's start a frame later.
-    const { moments } = this.world;
-    const started = this.session.walk.run;
-    this.time.delayedCall(0, () => moments.walkStarted(started));
-    // The first hints wait for the zone banner to leave: how to steer, the lead dog's
-    // pack-size bonus, then heading home.
+    if (resume === undefined) {
+      this.startWalk(this.session.walk.run);
+    } else {
+      this.resume(resume);
+    }
+    this.draw();
+    // A phone already on its side, as when a walk starts from the page's URL, gets no
+    // turned-sideways event, so the walk opens paused under the turn-upright notice. A resumed
+    // walk opens paused, for the player to resume when ready.
+    if (resume !== undefined || isPhoneSideways()) {
+      this.openPause();
+    }
+  }
+
+  // A new walk's first zone starts, and the HUD hears the walk's start a frame later. The first
+  // hints wait for the zone banner to leave: how to steer, the lead dog's pack-size bonus, then
+  // heading home.
+  private startWalk(run: RunState): void {
+    this.startZone(run);
+    const moments = this.world?.moments;
+    this.time.delayedCall(0, () => moments?.walkStarted(run));
     this.time.delayedCall(zoneBannerMs(this.reducedMotion()), () => {
       if (this.sys.game.device.input.touch) {
         showHint(this, { kind: "drag" });
@@ -213,16 +244,42 @@ export class RunScene extends Scene implements HudRun {
       startHintTriggers(gameData.tuning, run).forEach((trigger) => showHint(this, trigger));
       showHint(this, { kind: "homeButton" });
     });
-    this.draw();
-    // A phone already on its side, as when a walk starts from the page's URL, gets no
-    // turned-sideways event, so the walk opens paused under the turn-upright notice.
-    if (isPhoneSideways()) {
-      this.openPause();
+  }
+
+  // A resumed walk goes on from where it was saved: the zone it was about to walk is planned and
+  // starts, or the fork it waited at opens, its last zone's music playing as at the zone's end.
+  // Its resume point is already saved, so nothing is written.
+  private resume(resume: ResumeWalk): void {
+    const world = this.world;
+    if (world === undefined) {
+      return;
+    }
+    const step = resumeSession(gameData, world.streams, screenRoadGeometry, resume.session);
+    this.session = step.session;
+    const { card, walk } = step.session;
+    if (card === null) {
+      this.startZone(walk.run);
+      return;
+    }
+    soundboardOf(this).playMusic(musicKey(currentZone(gameData, walk.run)));
+    this.showCard(card);
+  }
+
+  // The resume point for session, with the run's streams as they have drawn so far.
+  private pointAt(streams: RunStreams, session: Session): ResumeWalk {
+    return { draws: streams.draws(), seed: streams.seed, session };
+  }
+
+  // Saves the walk so far with where the next launch resumes it, unless replayed.
+  private saveCheckpoint(run: RunState): void {
+    if (this.world?.recorder.replaying() === false) {
+      void checkpointRun(this, checkpointOf(gameData, run), this.resumePoint);
     }
   }
 
   private resetState(): void {
     this.ambientMs = 0;
+    this.resumePoint = null;
     this.session = undefined;
     this.stepBefore = undefined;
     this.stepClock = startStepClock;
@@ -310,12 +367,8 @@ export class RunScene extends Scene implements HudRun {
       this.world?.menus.setPageHidden(true);
       this.openPause();
       const walk = this.session?.walk;
-      if (
-        walk !== undefined &&
-        walk.run.phase.kind !== "ended" &&
-        this.world?.recorder.replaying() === false
-      ) {
-        void checkpointRun(this, checkpointOf(gameData, walk.run));
+      if (walk !== undefined && walk.run.phase.kind !== "ended") {
+        this.saveCheckpoint(walk.run);
       }
     };
     const onVisible = () => this.world?.menus.setPageHidden(false);
@@ -503,9 +556,10 @@ export class RunScene extends Scene implements HudRun {
     }
   }
 
-  // Pays out the zone's fees. Unless replayed, saves the walk between zones and returns the
-  // celebrations that play once the coins land: Neighbourhood done between zones, and after the
-  // last zone a New walker for each walker the walk unlocks (newWalkerCelebrations).
+  // Pays out the zone's fees. Unless replayed, saves the walk at the fork, where the next launch
+  // resumes it, and returns the celebrations that play once the coins land: Neighbourhood done
+  // between zones, and after the last zone a New walker for each walker the walk unlocks
+  // (newWalkerCelebrations).
   private endZone(event: Extract<SessionEvent, { kind: "zoneEnded" }>): Celebration | undefined {
     const world = this.world;
     if (world === undefined) {
@@ -522,7 +576,10 @@ export class RunScene extends Scene implements HudRun {
       const celebrations = newWalkerCelebrations(gameData, owned, finishedWith);
       return celebrations.length === 0 ? undefined : { celebrations, delayMs: payout.ms };
     }
-    void checkpointRun(this, checkpointOf(gameData, after));
+    if (this.session !== undefined) {
+      this.resumePoint = this.pointAt(world.streams, forkPoint(this.session));
+    }
+    this.saveCheckpoint(after);
     const celebration = zoneCelebration({
       changes: payout.changes,
       walker: before.walker,
@@ -578,6 +635,12 @@ export class RunScene extends Scene implements HudRun {
       case "zonePlanned":
         if (this.session !== undefined) {
           this.startZone(this.session.walk.run);
+          // The zone's start, the fork taken, is where the next launch resumes the walk.
+          this.resumePoint = this.pointAt(
+            world.streams,
+            zoneStartPoint(this.session, event.unplanned),
+          );
+          this.saveCheckpoint(this.session.walk.run);
         }
     }
   }

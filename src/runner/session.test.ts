@@ -20,6 +20,7 @@ import {
   chooseCard,
   chooseShownCard,
   headHomeSession,
+  resumeSession,
   runStreams,
   type Session,
   type SessionData,
@@ -70,6 +71,42 @@ describe("runStreams", () => {
     take(50, drawn.cards);
     expect(take(5, drawn.forks)).toEqual(forks);
     expect(forks).not.toEqual(cards);
+  });
+
+  // A resumed walk's streams go on from where the saved walk's had drawn to.
+  it("counts each stream's draws, and a count given takes the streams up from there", () => {
+    const drawn = runStreams(3);
+    take(5, drawn.cards);
+    take(2, drawn.forks);
+    expect(drawn.draws()).toEqual({ cards: 5, forks: 2 });
+    const resumed = runStreams(3, drawn.draws());
+    expect([take(4, resumed.cards), take(4, resumed.forks)]).toEqual([
+      take(4, drawn.cards),
+      take(4, drawn.forks),
+    ]);
+    expect(resumed.draws()).toEqual({ cards: 9, forks: 6 });
+  });
+});
+
+describe("resumeSession", () => {
+  it.each<{ name: string; session: Session }>([
+    { name: "mid-zone", session: STARTED },
+    {
+      name: "with a card open",
+      session: {
+        ...STARTED,
+        card: cardFor(gameData, STARTED.walk.run, SKUNK),
+        needsZonePlan: true,
+      },
+    },
+    {
+      name: "with the zone's end pending",
+      session: { ...STARTED, needsZonePlan: true, zoneEndPending: true },
+    },
+  ])("refuses a walk saved $name", ({ session }) => {
+    expect(() => resumeSession(gameData, runStreams(1), geometry, session)).toThrow(
+      "A walk resumes only between zones or at its start",
+    );
   });
 });
 

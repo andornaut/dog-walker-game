@@ -7,6 +7,7 @@ import type { Cents } from "../units";
 import { earnedIfBanked } from "./achievementPreview";
 import { awardAchievements, type AwardContext, earnedSince } from "./achievements";
 import { bankCheckpoint, recordCheckpoint, recordRunEnd, type RunResult } from "./checkpoint";
+import type { LaunchWalk, ResumeWalk } from "./resume";
 import type { Checkpoint, SaveDocument, Settings } from "./schema";
 
 // "unavailable" once storage could not be read, or while the last write failed: play goes on with
@@ -55,6 +56,17 @@ interface OpenedProfile {
   session: ProfileSession;
 }
 
+// What a launch does with a checkpoint: launchWalk in src/save/resume.ts. Without it, every
+// checkpoint banks.
+type LaunchDecision = (checkpoint: Checkpoint) => LaunchWalk;
+
+const bankEvery: LaunchDecision = () => ({ kind: "bank", reason: "resuming is off" });
+
+function withoutResume(checkpoint: Checkpoint): Checkpoint {
+  const { resume, ...banked } = checkpoint;
+  return resume === undefined ? checkpoint : banked;
+}
+
 // The player's save for this page's life. Every change applies to the save in memory at
 // once, so a scene can read it straight after, and is then written in the order made.
 export class ProfileSession {
@@ -65,6 +77,10 @@ export class ProfileSession {
   private readonly settingsListeners = new Set<SettingsListener>();
   private state: StorageState;
   private writes: Promise<void> = Promise.resolve();
+  // The walk the launch resumes, until the walk takes it (takeResumedWalk).
+  private resumable: ResumeWalk | null = null;
+  // Set once the game has crashed: no later checkpoint keeps a resume point (stopResuming).
+  private resumeStopped = false;
 
   private constructor(
     private readonly awards: AwardContext,
@@ -77,13 +93,15 @@ export class ProfileSession {
   }
 
   // Loads the save. A new player's save goes through newPlayer first (for settings read from
-  // the device). A run left unfinished at its last checkpoint is banked as if the player had
-  // headed home, and the banked save is written back. Achievements the save already meets
+  // the device). A run left unfinished at its last checkpoint resumes when launch says so, the
+  // checkpoint kept until the run ends (takeResumedWalk); otherwise it is banked as if the player
+  // had headed home, and the banked save is written back. Achievements the save already meets
   // (such as one from before they existed) are awarded and wait to be celebrated.
   static async open(
     awards: AwardContext,
     store: SaveStore<SaveDocument>,
     newPlayer: (save: SaveDocument) => SaveDocument = (save) => save,
+    launch: LaunchDecision = bankEvery,
   ): Promise<OpenedProfile> {
     const load = await store.load();
     const state =
@@ -91,7 +109,15 @@ export class ProfileSession {
     const loaded = loadedSave(load, newPlayer);
     const session = new ProfileSession(awards, store, loaded, state);
     if (loaded.checkpoint !== null) {
-      await session.update((save) => bankCheckpoint(session.awards, save));
+      const decided = launch(loaded.checkpoint);
+      if (decided.kind === "resume") {
+        session.resumable = decided.walk;
+      } else {
+        if (decided.kind === "bank") {
+          console.info(`The unfinished walk banks as heading home: ${decided.reason}`);
+        }
+        await session.update((save) => bankCheckpoint(session.awards, save));
+      }
     }
     const banked = session.save;
     if (newlyEarned(awards.data, banked, banked, null).length > 0) {
@@ -163,8 +189,36 @@ export class ProfileSession {
     return earnedIfBanked(this.awards, this.document, result);
   }
 
+  // The walk the launch resumes, once: its resume point leaves the stored checkpoint, so a
+  // resumed walk that crashes before it saves again banks on the next launch rather than
+  // resuming into the crash. null when the launch resumes none.
+  takeResumedWalk(): ResumeWalk | null {
+    const walk = this.resumable;
+    this.resumable = null;
+    if (walk !== null) {
+      void this.update((save) =>
+        save.checkpoint === null ? save : recordCheckpoint(save, withoutResume(save.checkpoint)),
+      );
+    }
+    return walk;
+  }
+
+  // Whether the launch resumes a walk, which takes it with takeResumedWalk.
+  get resumesWalk(): boolean {
+    return this.resumable !== null;
+  }
+
+  // Saves the run so far, with the point the next launch resumes it from unless the game has
+  // crashed (stopResuming).
   checkpointRun(slice: Checkpoint): Promise<void> {
-    return this.update((save) => recordCheckpoint(save, slice));
+    const kept = this.resumeStopped ? withoutResume(slice) : slice;
+    return this.update((save) => recordCheckpoint(save, kept));
+  }
+
+  // After a crash the walk in memory may be what broke, so the checkpoints it still writes (as
+  // the page hides) bank on the next launch rather than resume.
+  stopResuming(): void {
+    this.resumeStopped = true;
   }
 
   finishRun(result: RunResult, changes: readonly Change[]): Promise<void> {

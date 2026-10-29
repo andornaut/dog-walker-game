@@ -46,9 +46,16 @@ import { addFilledRect } from "../ui/phaser/draw";
 import { addPillGlyphs, registerFallbackPixelFont } from "../ui/phaser/pixelText";
 import { markArtReady } from "./artReady";
 import { onLoadProgress } from "./loadProgress";
-import { currentSettings, openProfile, profileSave, walkerInUse } from "./profileStore";
+import {
+  currentSettings,
+  openProfile,
+  profileSave,
+  resumesWalk,
+  takeResumedWalk,
+  walkerInUse,
+} from "./profileStore";
 import { nextRunStart } from "./run/runRecorder";
-import { runSceneData } from "./run/runStart";
+import { resumedRunSceneData, runSceneData } from "./run/runStart";
 import { SCENE_KEYS } from "./sceneKeys";
 import { ensurePlaceholder, measureSprite, playTag } from "./sprites";
 
@@ -106,7 +113,8 @@ function placeholderSizes(): Map<string, Size> {
 // apart, so the bar and the walker keep moving. A missing or broken asset is logged and
 // replaced by a placeholder box, never fatal. Then shows the home screen, and keeps running
 // behind it to load and register the rest the same way, then marks the art ready and stops. A
-// dev link that names a run loads everything before it starts the walk.
+// dev link that names a run loads everything before it starts the walk, and a walk the save
+// resumes (ProfileSession.open) loads the rest behind the loading screen before it goes on.
 export class BootScene extends Scene {
   private bar: GameObjects.Rectangle | undefined;
   private manifest: AssetManifest = { fonts: [], images: [], sounds: [], sprites: [] };
@@ -132,10 +140,14 @@ export class BootScene extends Scene {
     } catch (error) {
       console.error("The art manifest is invalid; drawing placeholders instead.", error);
     }
+    // A dev link that names a run starts its walk, and banks a walk left unfinished rather than
+    // resuming it.
+    const walkNow = namesRunSetup(pageSearch());
     // Opened once the save may be written (launchReady), so a version about to be replaced never
-    // banks it; the loading walker then follows the saved reduced motion setting.
+    // banks or resumes a walk left unfinished; the loading walker then follows the saved reduced
+    // motion setting.
     const profileOpened = launchReady().then(async () => {
-      const load = await openProfile(this);
+      const load = await openProfile(this, !walkNow);
       if (load.status === "corrupt" || load.status === "newer" || load.status === "unavailable") {
         console.warn(`The save is ${load.status}, so play starts fresh: ${load.reason}`);
       }
@@ -144,7 +156,6 @@ export class BootScene extends Scene {
     addAtlasTextures(this);
     this.showLoadingScreen();
 
-    const walkNow = namesRunSetup(pageSearch());
     const first = walkNow ? always : loadsFirst;
     queueManifestArt(this, this.manifest, first);
     queueFonts(this, this.manifest);
@@ -159,7 +170,15 @@ export class BootScene extends Scene {
       this.processAssets(first, FRAME_BUDGET_MS, () => {
         registerFallbackPixelFont(this);
         addPillGlyphs(this);
-        void profileOpened.then(() => (walkNow ? this.startWalk() : this.showHome()));
+        void profileOpened.then(() => {
+          if (walkNow) {
+            this.startWalk();
+          } else if (resumesWalk(this)) {
+            this.resumeWalk();
+          } else {
+            this.showHome();
+          }
+        });
       }),
     );
     this.load.start();
@@ -281,16 +300,36 @@ export class BootScene extends Scene {
       child.destroy();
     }
     [this.bar, this.walker] = [undefined, undefined];
+    this.loadRest(BEHIND_FRAME_BUDGET_MS, () => this.scene.stop());
+  }
+
+  // Loads and registers what the home screen did not need, then marks the art ready and calls
+  // done.
+  private loadRest(budgetMs: number, done: () => void): void {
     const rest = (key: string) => !loadsFirst(key);
     queueManifestArt(this, this.manifest, rest);
     this.queueSounds((key) => !loadsSoundFirst(key));
     this.load.once("complete", () =>
-      this.processAssets(rest, BEHIND_FRAME_BUDGET_MS, () => {
+      this.processAssets(rest, budgetMs, () => {
         markArtReady(this);
-        this.scene.stop();
+        done();
       }),
     );
     this.load.start();
+  }
+
+  // Resumes the walk left unfinished, under the pause menu, once the rest has loaded behind the
+  // loading screen.
+  private resumeWalk(): void {
+    this.loadRest(FRAME_BUDGET_MS, () => {
+      const walk = takeResumedWalk(this);
+      if (walk === null) {
+        this.scene.start(SCENE_KEYS.start);
+        return;
+      }
+      startWakeLock();
+      this.scene.start(SCENE_KEYS.run, resumedRunSceneData(pageRunSetup().setup.dev, walk));
+    });
   }
 
   // Starts the walk a dev link names, with everything loaded.

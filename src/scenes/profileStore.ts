@@ -1,5 +1,6 @@
 import type { StoreLoadResult } from "@andornaut/game-kit/save/saveStore";
-import { type Scene, Scenes } from "phaser";
+import { localSaveStorage } from "@andornaut/game-kit/save/storage";
+import { type Game, type Scene, Scenes } from "phaser";
 
 import { gameData } from "../data";
 import type { AchievementId, HintId, WalkerId } from "../data/types";
@@ -14,13 +15,14 @@ import {
   type RunEnd,
   type StorageState,
 } from "../save/profile";
+import { encodeResume, launchWalk, type ResumeWalk } from "../save/resume";
 import {
   type Checkpoint,
   DEFAULT_SETTINGS,
   type SaveDocument,
   type Settings,
 } from "../save/schema";
-import { pageSaveStore } from "../save/storage";
+import { pageSaveStore, RESUME_BACKUP_KEY } from "../save/storage";
 import { soundboardOf } from "./soundboard";
 
 export type { Settings } from "../save/schema";
@@ -49,17 +51,47 @@ export function applySound(scene: Scene, settings: Settings): void {
   soundboard.setMuted(settings.muted);
 }
 
-// Loads the save from localStorage, banks a run left at a checkpoint, and applies the saved
-// volumes. A new player's reduced motion follows the device's setting.
-export async function openProfile(scene: Scene): Promise<StoreLoadResult<SaveDocument>> {
+// Loads the save from localStorage and applies the saved volumes. A new player's reduced motion
+// follows the device's setting. A run left at a checkpoint resumes when resume allows it and its
+// resume point is good (launchWalk), and is banked as heading home otherwise; a resume point
+// that could not be read is kept under RESUME_BACKUP_KEY.
+export async function openProfile(
+  scene: Scene,
+  resume: boolean,
+): Promise<StoreLoadResult<SaveDocument>> {
+  const launch = (checkpoint: Checkpoint) => {
+    const decided = launchWalk(gameData, resume, checkpoint);
+    if (decided.kind === "bank" && decided.backup !== undefined) {
+      localSaveStorage()
+        .write(RESUME_BACKUP_KEY, decided.backup)
+        .catch((error: unknown) => console.warn("The resume point was not backed up.", error));
+    }
+    return decided;
+  };
   const { load, session: opened } = await ProfileSession.open(
     { data: gameData },
     pageSaveStore(saveContextFrom(gameData)),
     newPlayerOnDevice,
+    launch,
   );
   scene.registry.set(SESSION_KEY, opened);
   applySound(scene, opened.save.settings);
   return load;
+}
+
+// Whether the launch resumes a walk left unfinished.
+export function resumesWalk(scene: Scene): boolean {
+  return session(scene).resumesWalk;
+}
+
+// The walk the launch resumes, once, for the run scene that resumes it; null when there is none.
+export function takeResumedWalk(scene: Scene): ResumeWalk | null {
+  return session(scene).takeResumedWalk();
+}
+
+// Called as the crash screen stops the game: the walk's later checkpoints keep no resume point.
+export function stopResuming(game: Game): void {
+  (game.registry.get(SESSION_KEY) as ProfileSession | undefined)?.stopResuming();
 }
 
 export function profileSave(scene: Scene): SaveDocument {
@@ -136,9 +168,16 @@ export function shownHints(scene: Scene): ReadonlySet<HintId> {
   return session(scene).shownHints();
 }
 
-// At each zone end. src/save/runSlices.ts builds the slice from the run.
-export function checkpointRun(scene: Scene, slice: Checkpoint): Promise<void> {
-  return session(scene).checkpointRun(slice);
+// At each fork, as each zone after the first starts, and as the tab hides. src/save/runSlices.ts
+// builds the slice from the run; resume is where the next launch resumes the walk, or null for a
+// walk that does not resume.
+export function checkpointRun(
+  scene: Scene,
+  slice: Checkpoint,
+  resume: ResumeWalk | null,
+): Promise<void> {
+  const text = resume === null ? undefined : encodeResume(gameData, resume);
+  return session(scene).checkpointRun(text === undefined ? slice : { ...slice, resume: text });
 }
 
 // What banking result now would newly earn, for a mid-run badge line: nothing is written, and

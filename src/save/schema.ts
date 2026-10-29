@@ -77,12 +77,16 @@ const runCountersSchema = v.object({
   tallies: v.record(contentId, count),
 });
 
-// A run in progress, saved after each zone or as the tab hides. zonesFinished counts the zones
-// finished, 0 in the first.
+// A run in progress, saved at each fork, as each zone after the first starts, and as the tab hides.
+// zonesFinished counts the zones finished, 0 in the first.
 const checkpointSchema = v.object({
   counters: runCountersSchema,
   dogs: v.pipe(v.array(dogRunSchema), v.maxLength(MAX_RUN_DOGS)),
   earnedCents: cents,
+  // Where the next launch resumes the walk, as text in its own versioned format
+  // (src/save/resume.ts), so one the game cannot read banks the run and leaves the rest of the
+  // save as it is. Absent when the walk cannot resume, and the run banks as heading home.
+  resume: v.exactOptional(v.string()),
   // The zones walked, in order, by id.
   route: ids,
   zonesFinished: count,

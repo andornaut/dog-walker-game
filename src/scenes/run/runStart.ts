@@ -3,7 +3,8 @@ import { type Random, randomStream } from "@andornaut/game-kit/random";
 import type { DogId } from "../../data/types";
 import type { RunSetup } from "../../dev/runSetup";
 import { loadoutFor } from "../../dev/setupRun";
-import type { Loadout } from "../../state/runState";
+import type { ResumeWalk } from "../../save/resume";
+import type { Loadout, PackDogs } from "../../state/runState";
 import type { RunSceneData } from "../RunScene";
 import type { RunStart } from "./runRecorder";
 
@@ -39,5 +40,19 @@ export function runSceneData(start: RunStart, pick: RunPick): RunSceneData {
     loadout: loadoutFor(pick.loadout, setup as Parameters<typeof loadoutFor>[1]),
     replay,
     setup,
+  };
+}
+
+// The walk a launch resumes: its own pack, gear, walker, seed and road speed, its setup at the
+// zone it resumes in, and no replay. dev keeps the page's dev overlay.
+export function resumedRunSceneData(dev: boolean, resume: ResumeWalk): RunSceneData {
+  const { road, run } = resume.session.walk;
+  const dogs = run.pack.map(({ dog }) => dog) as readonly DogId[] as PackDogs;
+  return {
+    dogSlots: dogs.length,
+    loadout: { dogs, gear: run.gear, walker: run.walker },
+    replay: undefined,
+    resume,
+    setup: { dev, seed: resume.seed, speed: road.speedFactor, zone: run.zoneIndex + 1 },
   };
 }

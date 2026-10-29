@@ -25,6 +25,7 @@ import { HelpScene } from "./scenes/HelpScene";
 import { watchHomeScreen } from "./scenes/homeScreen";
 import { HudScene } from "./scenes/HudScene";
 import { PauseScene } from "./scenes/PauseScene";
+import { stopResuming } from "./scenes/profileStore";
 import { QuitScene } from "./scenes/QuitScene";
 import { RunScene } from "./scenes/RunScene";
 import { SCENE_KEYS } from "./scenes/sceneKeys";
@@ -109,9 +110,11 @@ function bootGame(): Game {
     width: SCREEN_CONFIG.width,
   });
 
+  // The walk's checkpoints after a crash bank on the next launch rather than resume it.
   CRASH_SCREEN.stopGameOnCrash(() => {
     game.pause();
     game.sound.pauseAll();
+    stopResuming(game);
   });
   // Menus draw at most about 60 frames a second; a walk (RunScene) draws every frame.
   capFrameRate(MENU_FPS, () => game.scene.isActive(SCENE_KEYS.run), game);

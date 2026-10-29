@@ -9,6 +9,9 @@ export const SAVE_KEYS: SaveKeys = {
   save: "dog-walker-game:save",
 };
 
+// Where a checkpoint's resume point that could not be read is copied as the launch banks it.
+export const RESUME_BACKUP_KEY = "dog-walker-game:resume-backup";
+
 // The game's save in storage, in its format for context.
 export function gameSaveStore(context: SaveContext, storage: SaveStorage): SaveStore<SaveDocument> {
   return saveStore(storage, SAVE_KEYS, saveFormat(context));
