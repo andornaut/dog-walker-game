@@ -18,7 +18,7 @@ import { startZoneClocks, tickZoneClocks, type ZoneClocks } from "../dev/zoneClo
 import { effectItems } from "../hud/effectIcons";
 import { cardHintTriggers, startHintTriggers } from "../hud/hintTriggers";
 import { homeQuestionNote, pauseNote } from "../hud/homeQuestion";
-import { NOTHING_PAUSED, type RunPause, walkPaused } from "../hud/topBar";
+import { NOTHING_PAUSED, type RunPause, walkBackAction, walkPaused } from "../hud/topBar";
 import { type ExplainShown } from "../hud/walkHud";
 import {
   newWalkerCelebrations,
@@ -284,7 +284,27 @@ export class RunScene extends Scene implements HudRun {
   // A hidden tab or a window out of focus pauses the walk under the pause menu, which stays
   // when the page comes back, so the walk resumes only on Resume.
   private listen(): void {
-    const onBack = () => this.openPause();
+    // The run scene hears back before any overlay launched over it, so it reads the overlays as
+    // they were when back was pressed; help and the settings close themselves.
+    const onBack = () => {
+      const over = this.session === undefined || this.session.walk.run.phase.kind === "ended";
+      const action = walkBackAction(over, this.runPause());
+      switch (action) {
+        case "closeExplanation":
+          this.world?.input.dropPress();
+          return;
+        case "menu":
+          this.openPause();
+          return;
+        case "none":
+          return;
+        case "resume":
+          this.closePause();
+          return;
+        default:
+          action satisfies never;
+      }
+    };
     const onHidden = () => {
       this.world?.menus.setPageHidden(true);
       this.openPause();

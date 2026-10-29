@@ -86,6 +86,11 @@ export const HOME_TEXT = {
     note: "One per walk",
     title: "Pick your gear",
   },
+  quit: {
+    keepPlaying: "Keep playing",
+    quit: "Quit",
+    title: "Quit?",
+  },
   sectionDogs: "Pick your dogs",
   sectionWalker: "Pick a walker",
   sectionWalkerPrompt: "Tap a face",

@@ -763,6 +763,13 @@ export interface HomeText {
     readonly note: string;
     readonly title: string;
   };
+  // What back asks on the home screen with nothing open, with its two answers: keepPlaying
+  // closes the question, and quit leaves the game.
+  readonly quit: {
+    readonly keepPlaying: string;
+    readonly quit: string;
+    readonly title: string;
+  };
   // The Walker and Dogs section headings, and what the Walker band asks for with nothing
   // picked.
   readonly sectionDogs: string;

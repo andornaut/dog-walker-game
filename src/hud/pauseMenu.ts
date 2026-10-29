@@ -8,10 +8,17 @@ export type PauseMenuItem = (typeof PAUSE_MENU_ITEMS)[number];
 // The Home question's answers, top to bottom: the safe one first, as the primary and key 1.
 export const HOME_QUESTION_ANSWERS = ["keepWalking", "headHome"] as const;
 
+// The Quit question's answers, top to bottom, as the Home question's: the safe one first.
+export const QUIT_QUESTION_ANSWERS = ["keepPlaying", "quit"] as const;
+
 const PANEL_WIDTH = 232;
 // Offsets from the panel's top-left corner, and the room under the last part.
 const TITLE_Y = 16;
 const BUTTON = { gap: 8, height: 40, width: 200, x: 16, y: 40 };
+
+// The width a panel's title has, as wide as the buttons, and a button's label, its key number
+// included, 4px in from each side.
+export const PANEL_TEXT_ROOM = { label: BUTTON.width - 8, title: BUTTON.width } as const;
 // The note plate is as wide as the buttons, gap under the last one. The note is body text at
 // scale, wrapped to the plate's width less padX each side, its first line's capitals padTop
 // under the plate's top, a line of the body font apart, and the last line's lowest ink
@@ -40,7 +47,7 @@ interface PauseMenuLayout {
 
 // The panel centred in area, the dimmed band and road, sized to its parts: the title, then the
 // buttons stacked down it with the note plate under them, or the note plate first when it is
-// the question.
+// the question. With no note lines there is no plate, and the buttons follow the title.
 function panelLayout(
   body: FontMetrics,
   area: Rect,
@@ -48,13 +55,14 @@ function panelLayout(
   noteFirst: boolean,
 ): PauseMenuLayout {
   const { buttonCount } = parts;
-  const noteHeight = notePlateHeight(body, parts.noteLines);
+  const noted = parts.noteLines > 0;
+  const noteHeight = noted ? notePlateHeight(body, parts.noteLines) : 0;
   const buttonsHeight = buttonCount * (BUTTON.height + BUTTON.gap) - BUTTON.gap;
   // Offsets down the panel: a note first sits where the buttons would start, less its gap.
   const noteFirstY = BUTTON.y - NOTE_PLATE.gap;
-  const buttonsY = noteFirst ? noteFirstY + noteHeight + BUTTON.gap : BUTTON.y;
+  const buttonsY = noteFirst && noted ? noteFirstY + noteHeight + BUTTON.gap : BUTTON.y;
   const noteY = noteFirst ? noteFirstY : BUTTON.y + buttonsHeight + NOTE_PLATE.gap;
-  const height = Math.max(buttonsY + buttonsHeight, noteY + noteHeight) + BOTTOM;
+  const height = Math.max(buttonsY + buttonsHeight, noted ? noteY + noteHeight : 0) + BOTTOM;
   const panel: Rect = {
     height,
     width: PANEL_WIDTH,

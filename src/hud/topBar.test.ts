@@ -14,6 +14,8 @@ import {
   topBarAction,
   topBarButtonAt,
   topBarButtonForKey,
+  type WalkBackAction,
+  walkBackAction,
   walkPaused,
   walkPresses,
 } from "./topBar";
@@ -134,6 +136,28 @@ describe("the walk bar in each pause state", () => {
       ).toEqual(expected);
     }
   });
+});
+
+describe("walkBackAction", () => {
+  it.each([
+    ["walking", false, NOTHING_PAUSED, "menu"],
+    ["under a card or the zone celebration", false, CARD, "menu"],
+    ["through the hit stop", false, HIT_STOP, "menu"],
+    ["with the tab hidden", false, { ...NOTHING_PAUSED, page: "hidden" }, "menu"],
+    ["under an explanation's detail card", false, HOLD, "closeExplanation"],
+    ["under a detail card over the menu", false, { ...HOLD, menu: "open" }, "closeExplanation"],
+    ["in the menu", false, { ...NOTHING_PAUSED, menu: "open" }, "resume"],
+    ["in the menu over a card", false, { ...CARD, menu: "open" }, "resume"],
+    ["on the Home question", false, { ...CARD, menu: "confirmHome" }, "menu"],
+    ["under help, which closes itself", false, { ...NOTHING_PAUSED, menu: "help" }, "none"],
+    ["under the settings, which close themselves", false, { ...CARD, menu: "settings" }, "none"],
+    ["after the walk's end, before the end screen", true, NOTHING_PAUSED, "none"],
+  ] satisfies [string, boolean, RunPause, WalkBackAction][])(
+    "%s, back does what its row says",
+    (_name, over, pause, action) => {
+      expect(walkBackAction(over, pause)).toBe(action);
+    },
+  );
 });
 
 describe("topBarButtonForKey", () => {

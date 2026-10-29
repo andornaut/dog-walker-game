@@ -4,6 +4,7 @@ import { SCREEN_LAYOUT } from "../data/screen";
 import { isOutside } from "../input/outsideTap";
 import { containsPoint, type Rect } from "../lib/rect";
 import {
+  homeBackAction,
   type HomeBarAction,
   homeBarAction,
   type HomeBarButton,
@@ -85,4 +86,13 @@ describe("homeBarAction", () => {
       expect(homeBarAction(open, button)).toBe(action);
     },
   );
+});
+
+describe("homeBackAction", () => {
+  it.each([
+    [true, "closeDetail"],
+    [false, "askQuit"],
+  ] as const)("with a detail card open %s, back does %s", (detailOpen, action) => {
+    expect(homeBackAction(detailOpen)).toBe(action);
+  });
 });

@@ -10,6 +10,7 @@ export const SCENE_KEYS = {
   helpPicture: "helpPicture",
   hud: "hud",
   pause: "pause",
+  quit: "quit",
   run: "run",
   settings: "settings",
   shop: "shop",

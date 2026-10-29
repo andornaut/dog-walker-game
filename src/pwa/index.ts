@@ -4,9 +4,9 @@
 // scenes listen for PHONE_EVENTS on window and call the functions below.
 import { chooseSoundFormat, type SoundFormat } from "../audio/soundFormat";
 import { browserStorage, lazyStorage } from "../save/storage";
-import { guardBackNavigation } from "./backNavigation";
+import { type BackGuard, guardBackNavigation } from "./backNavigation";
 import { dispatchPhoneEvent, PHONE_EVENTS } from "./events";
-import { type InstallFlow, type InstallOutcome, pageRunsAsApp, watchInstall } from "./installFlow";
+import { type InstallFlow, type InstallOutcome, watchInstall } from "./installFlow";
 import { createInstallNudge, type InstallNudge } from "./installNudge";
 import type { InstallState, MenuInstallBrowser } from "./installState";
 import { type OrientationRelay, relayOrientationEvents, type Viewport } from "./orientation";
@@ -32,6 +32,7 @@ export function browserSoundFormat(): SoundFormat | undefined {
   return chooseSoundFormat((mimeType) => audio.canPlayType(mimeType));
 }
 
+let backGuard: BackGuard | undefined;
 let installFlow: InstallFlow | undefined;
 let installNudge: InstallNudge | undefined;
 let orientation: OrientationRelay | undefined;
@@ -121,13 +122,18 @@ export function setupPhoneApp(): Promise<void> {
   relayVisibilityEvents(window, document);
   showTurnUprightNotice();
   orientation = relayOrientationEvents(readViewport, window);
-  guardBackNavigation(pageRunsAsApp(window), window, history);
+  backGuard = guardBackNavigation(window, window, history);
   const wakeLock = "wakeLock" in navigator ? navigator.wakeLock : undefined;
   screenWakeLock = createScreenWakeLock(wakeLock, document);
   // Held whenever the game is visible until the scenes take over with stopWakeLock and
   // startWakeLock (for example, letting the screen sleep on a menu).
   screenWakeLock.start();
   return bootable;
+}
+
+// Leaves the game for the previous page, or closes the installed app (BackGuard.leave).
+export function leaveGame(): void {
+  backGuard?.leave();
 }
 
 // Whether the phone is on its side now, with the turn-upright notice over the game.

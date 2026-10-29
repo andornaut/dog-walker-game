@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
 import { dollarText } from "../home/home";
+import { overlayRegion } from "../home/homeBar";
 import { itemAt } from "../lib/arrays";
 import { fillNames, sentences, wrapWords } from "../lib/lines";
 import { cents } from "../lib/units";
@@ -18,6 +19,7 @@ import {
   PAUSE_NOTE_LINES,
   PAUSE_NOTE_WIDTH,
   pauseMenuLayout,
+  QUIT_QUESTION_ANSWERS,
 } from "./pauseMenu";
 import { TOP_BAR_BUTTONS } from "./topBar";
 
@@ -78,6 +80,20 @@ describe("the Home question's panel", () => {
     });
     expect(panel.y).toBeGreaterThanOrEqual(walkView.y);
     expect(panel.y + panel.height).toBeLessThanOrEqual(walkView.y + walkView.height);
+  });
+});
+
+describe("the Quit question's panel", () => {
+  // No note: the buttons follow the title, as the pause menu's do, in the home screen under its
+  // top bar.
+  it("puts its buttons where the pause menu's start, inside the home screen", () => {
+    const home = overlayRegion("home");
+    const parts = { buttonCount: QUIT_QUESTION_ANSWERS.length, noteLines: 0 };
+    const quit = homeQuestionLayout(BODY, home, parts);
+    const menu = pauseMenuLayout(BODY, home, parts);
+    expect({ ...quit, notePlate: undefined }).toEqual({ ...menu, notePlate: undefined });
+    expect(quit.panel.y).toBeGreaterThanOrEqual(home.y);
+    expect(quit.panel.y + quit.panel.height).toBeLessThanOrEqual(home.y + home.height);
   });
 });
 

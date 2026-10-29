@@ -50,7 +50,7 @@ import {
   tapDog,
   tapGear,
 } from "../home/home";
-import { homeBarButtonAt, overlayRegion, regionOutside } from "../home/homeBar";
+import { homeBackAction, homeBarButtonAt, overlayRegion, regionOutside } from "../home/homeBar";
 import {
   bankAmountText,
   bankWell,
@@ -168,6 +168,7 @@ import {
   onSceneEvent,
   onWindowEvent,
   openOverlay,
+  type OverlayData,
 } from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
 import {
@@ -573,10 +574,14 @@ export class StartScene extends Scene {
       },
       () => this.closeOverlay(),
     );
-    // Back closes an open panel, as Escape does.
+    // Back closes an open detail card, as Escape does, and with none asks Quit?.
     onBackPressed(this, () => {
-      if (this.overlay !== undefined) {
+      const action = homeBackAction(this.overlay !== undefined);
+      if (action === "closeDetail") {
         this.closeOverlay();
+      } else {
+        const data: OverlayData = { resume: SCENE_KEYS.start };
+        openOverlay(this, SCENE_KEYS.quit, data);
       }
     });
     // A held key acts once, so an Enter held from the end screen cannot start a walk.

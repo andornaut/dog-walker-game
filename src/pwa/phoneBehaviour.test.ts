@@ -6,6 +6,7 @@ import {
   BACK_GUARD_STATE,
   guardBackNavigation,
   type HistoryLike,
+  type LeaveHost,
 } from "./backNavigation";
 import { PHONE_EVENTS } from "./events";
 import { relayVisibilityEvents, type VisibilitySource } from "./visibility";
@@ -122,71 +123,139 @@ describe("createScreenWakeLock", () => {
   });
 });
 
+// The page's session history: the previous page's entry, if the game was opened from one, then
+// the game's own entries. Going back past the game's first entry leaves the page, which hides it;
+// going further than the history reaches does nothing.
 class FakeHistory extends EventTarget implements HistoryLike {
-  private readonly entries: unknown[] = [null];
-  private index = 0;
+  private readonly entries: { page: "game" | "previous"; state: unknown }[];
+  private index: number;
 
-  get length(): number {
-    return this.entries.length;
+  constructor(previous: boolean) {
+    super();
+    const game = { page: "game", state: null } as const;
+    this.entries = previous ? [{ page: "previous", state: null }, game] : [game];
+    this.index = this.entries.length - 1;
+  }
+
+  get gameEntries(): number {
+    return this.entries.filter(({ page }) => page === "game").length;
+  }
+
+  get left(): boolean {
+    return this.entries[this.index]?.page === "previous";
   }
 
   get state(): unknown {
-    return this.entries[this.index];
+    return this.entries[this.index]?.state;
   }
 
   back(): void {
-    this.index -= 1;
-    this.dispatchEvent(new Event("popstate"));
+    this.go(-1);
+  }
+
+  go(delta: number): void {
+    const target = this.entries[this.index + delta];
+    if (target === undefined) {
+      return;
+    }
+    this.index += delta;
+    this.dispatchEvent(new Event(target.page === "previous" ? "pagehide" : "popstate"));
   }
 
   pushState(data: unknown): void {
-    this.entries.splice(this.index + 1, Infinity, data);
+    this.entries.splice(this.index + 1, Infinity, { page: "game", state: data });
     this.index += 1;
+  }
+}
+
+// Runs what leaving waits for when told to, and counts the window's closes.
+class FakeLeaveHost implements LeaveHost {
+  closes = 0;
+  private readonly waiting: (() => void)[] = [];
+
+  close(): void {
+    this.closes += 1;
+  }
+
+  setTimeout(handler: () => void): void {
+    this.waiting.push(handler);
+  }
+
+  wait(): void {
+    this.waiting.splice(0).forEach((handler) => handler());
   }
 }
 
 describe("guardBackNavigation", () => {
   // A page whose player has given the first input that pushes the guard.
-  function guarded(asApp: boolean): { history: FakeHistory; seen: string[] } {
-    const history = new FakeHistory();
+  function guarded(previous: boolean) {
+    const history = new FakeHistory(previous);
+    const host = new FakeLeaveHost();
     const seen = recordEvents(history);
-    guardBackNavigation(asApp, history, history);
+    const guard = guardBackNavigation(history, host, history);
     history.dispatchEvent(new Event(BACK_GUARD_GESTURES[0]));
-    return { history, seen };
+    return { guard, history, host, seen };
   }
 
+  // A tab opened from another page, and with nothing before the game: an installed app, or a tab
+  // opened on the game.
+  it.each([true, false])(
+    "with a previous page %s, stays on the game through each back",
+    (previous) => {
+      const { history, seen } = guarded(previous);
+      history.back();
+      history.back();
+      expect(seen).toEqual([PHONE_EVENTS.backPressed, PHONE_EVENTS.backPressed]);
+      expect(history.state).toEqual(BACK_GUARD_STATE);
+      expect(history.gameEntries).toBe(2);
+    },
+  );
+
+  // Back past the guard and the game's own entry, or with nothing before them, a close the
+  // browser may refuse, the guard left in place for the next back.
   it.each([
-    { asApp: false, presses: [PHONE_EVENTS.backPressed, PHONE_EVENTS.backPressed], where: "tab" },
-    { asApp: true, presses: [], where: "installed app" },
-  ])("in a $where, stays on the game through each back", ({ asApp, presses }) => {
-    const { history, seen } = guarded(asApp);
+    { closes: 0, left: true, previous: true },
+    { closes: 1, left: false, previous: false },
+  ])("leaving with a previous page $previous leaves $left and closes $closes times", (row) => {
+    const { guard, history, host, seen } = guarded(row.previous);
+    guard.leave();
+    host.wait();
+    expect({ closes: host.closes, left: history.left, seen }).toEqual({
+      closes: row.closes,
+      left: row.left,
+      seen: [],
+    });
+  });
+
+  it("keeps back on the game after leaving finds no page to go to", () => {
+    const { guard, history, host, seen } = guarded(false);
+    guard.leave();
+    host.wait();
     history.back();
-    history.back();
-    expect(seen).toEqual(presses);
+    expect(seen).toEqual([PHONE_EVENTS.backPressed]);
     expect(history.state).toEqual(BACK_GUARD_STATE);
-    expect(history.length).toBe(2);
   });
 
   it("pushes no guard before the player's first input", () => {
-    const history = new FakeHistory();
-    guardBackNavigation(false, history, history);
-    expect(history.length).toBe(1);
+    const history = new FakeHistory(false);
+    guardBackNavigation(history, new FakeLeaveHost(), history);
+    expect(history.gameEntries).toBe(1);
   });
 
   it.each(BACK_GUARD_GESTURES)("pushes a missing guard on %s, and never a second", (type) => {
-    const history = new FakeHistory();
-    guardBackNavigation(false, history, history);
+    const history = new FakeHistory(false);
+    guardBackNavigation(history, new FakeLeaveHost(), history);
     history.dispatchEvent(new Event(type));
     expect(history.state).toEqual(BACK_GUARD_STATE);
     history.dispatchEvent(new Event(type));
-    expect(history.length).toBe(2);
+    expect(history.gameEntries).toBe(2);
   });
 
   it("does not push a second guard when the page reloads on one", () => {
     const { history } = guarded(false);
-    guardBackNavigation(false, history, history);
+    guardBackNavigation(history, new FakeLeaveHost(), history);
     history.dispatchEvent(new Event(BACK_GUARD_GESTURES[0]));
-    expect(history.length).toBe(2);
+    expect(history.gameEntries).toBe(2);
   });
 
   it("ignores a popstate that lands on the guard entry, as going forward does", () => {

@@ -48,7 +48,15 @@ import { CHANGE_LABEL_STYLE, changeLabelRoom, hudLanes } from "../hud/hudLanes";
 import { messageStripLayout, ownerLeadLayout, stripLeadSlot } from "../hud/messageStrip";
 import { FIRED_LINE_FIT, LOW_CHIP_FIT, lowHeartsText } from "../hud/moments";
 import { MONEY_LABEL } from "../hud/moneyLabels";
-import { NOTE_PLATE, PAUSE_NOTE_LINES, PAUSE_NOTE_WIDTH } from "../hud/pauseMenu";
+import {
+  HOME_QUESTION_ANSWERS,
+  NOTE_PLATE,
+  PANEL_TEXT_ROOM,
+  PAUSE_MENU_ITEMS,
+  PAUSE_NOTE_LINES,
+  PAUSE_NOTE_WIDTH,
+  QUIT_QUESTION_ANSWERS,
+} from "../hud/pauseMenu";
 import { DOG_CARD, WALK_BAR } from "../hud/walkHud";
 import { celebrationText } from "../hud/zoneCelebration";
 import { zonePillNameRoom } from "../hud/zonePill";
@@ -452,6 +460,33 @@ function pauseNoteRoles(): TextRoleCase[] {
   return plainRole("pause menu's note", "font-body", fit, notes);
 }
 
+// The pause menu's, the Home question's and Quit?'s titles, and their buttons' labels with the
+// number key that picks each.
+function questionPanelRoles(): TextRoleCase[] {
+  const { pause } = gameData.menuText;
+  const home = gameData.runText.homeQuestion;
+  const { quit } = gameData.homeText;
+  const menus = [
+    PAUSE_MENU_ITEMS.map((item) => pause[item]),
+    HOME_QUESTION_ANSWERS.map((answer) => home[answer]),
+    QUIT_QUESTION_ANSWERS.map((answer) => quit[answer]),
+  ];
+  return [
+    ...plainRole(
+      "pause menu's and questions' title",
+      "font-title",
+      { room: PANEL_TEXT_ROOM.title, style: TEXT_STYLE },
+      [pause.title, home.title, quit.title],
+    ),
+    ...plainRole(
+      "pause menu's and questions' button",
+      "font-title",
+      { room: PANEL_TEXT_ROOM.label, style: TEXT_STYLE },
+      menus.flatMap((labels) => labels.map((label, i) => `${i + 1} ${label}`)),
+    ),
+  ];
+}
+
 // A card with a title band and a close control, and every title the data puts on it.
 export interface CardTitles {
   readonly card: Rect;
@@ -527,6 +562,7 @@ export function textRoleCases(): TextRoleCase[] {
     ...changeLabelRoles(),
     ...cashRole(),
     ...pauseNoteRoles(),
+    ...questionPanelRoles(),
     ...zoneEarningsRoles(),
     ...zonePillRoles(),
     ...plainRole(

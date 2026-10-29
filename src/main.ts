@@ -24,6 +24,7 @@ import { HelpScene } from "./scenes/HelpScene";
 import { watchHomeScreen } from "./scenes/homeScreen";
 import { HudScene } from "./scenes/HudScene";
 import { PauseScene } from "./scenes/PauseScene";
+import { QuitScene } from "./scenes/QuitScene";
 import { RunScene } from "./scenes/RunScene";
 import { SCENE_KEYS } from "./scenes/sceneKeys";
 import { SettingsScene } from "./scenes/SettingsScene";
@@ -102,6 +103,7 @@ function bootGame(): Game {
       ShopScene,
       StatsScene,
       CelebrationScene,
+      QuitScene,
       SettingsScene,
       HelpScene,
       HelpPictureScene,

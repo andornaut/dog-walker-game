@@ -81,6 +81,7 @@ const none = () => [];
 const KEY_FUNCTIONS: Readonly<Record<string, () => readonly string[]>> = {
   animationKey: none,
   badgeKey: keysStarting("badge-"),
+  cardNumberForKey: none,
   debuffIconKey: keysStarting("icon-"),
   // A depth step's variant, which falls back to the full-size key while it is not loaded.
   depthVariantKey: none,
@@ -145,6 +146,7 @@ describe("the home screen's first load", () => {
       [
         HOME,
         "scenes/CelebrationScene.ts",
+        "scenes/QuitScene.ts",
         "scenes/SettingsScene.ts",
         "scenes/ShopScene.ts",
         "scenes/StatsScene.ts",
