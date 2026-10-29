@@ -4,7 +4,6 @@ import "./main.css";
 
 import { MENU_FPS } from "@andornaut/game-kit/clock/frameCap";
 import { capFrameRate } from "@andornaut/game-kit/clock/phaser/capFrameRate";
-import { fitWholePixels } from "@andornaut/game-kit/view/phaser/fitWholePixels";
 import { Core, Game, Scale, WEBGL } from "phaser";
 
 import { CRASH_SCREEN } from "./crash/crashScreen";
@@ -63,6 +62,12 @@ function watchFirstWalk(game: Game): void {
 // Boot runs first and starts the start screen. The canvas clears to the page's ink, so launch
 // shows no rectangle before the loading screen's art; the walk fills its own ink.
 function bootGame(): Game {
+  // The dev bar shows before the game measures #game: Phaser sizes the canvas as it boots and
+  // can miss a change to #game's height made just after, leaving the canvas clipped.
+  const devPanel = devToolsOn() ? document.getElementById("dev-panel") : null;
+  if (devPanel !== null) {
+    devPanel.hidden = false;
+  }
   const game = new Game({
     backgroundColor: "#181425",
     height: SCREEN_CONFIG.height,
@@ -70,8 +75,11 @@ function bootGame(): Game {
     input: { activePointers: 2 },
     parent: "game",
     pixelArt: true,
-    // Sized by whole device pixels per game pixel and placed in #game by fitWholePixels.
-    scale: { autoCenter: Scale.CENTER_BOTH, mode: Scale.NONE },
+    // Phaser's Scale Manager fits the canvas to #game at the largest zoom that fits, fractional
+    // included, keeping SCREEN_CONFIG's resolution scaled by CSS and drawn nearest-neighbour
+    // (pixelArt), at #game's top and centred across, so the spare height sits under the dog
+    // cards, where the walk steers from the page too.
+    scale: { autoCenter: Scale.CENTER_HORIZONTALLY, mode: Scale.FIT },
     // Scenes draw in this order. The Logbook, the settings and help, which the home top bar
     // opens over the Pet shop, come after it, help's pictures after help, and the tap bursts
     // over every scene but the dev overlay.
@@ -105,14 +113,11 @@ function bootGame(): Game {
     game.pause();
     game.sound.pauseAll();
   });
-  // At the top in portrait, so the spare height sits under the dog cards, where the walk
-  // steers from the page too; centred in landscape.
-  fitWholePixels("topInPortrait", SCREEN_CONFIG, game);
   // Menus draw at most about 60 frames a second; a walk (RunScene) draws every frame.
   capFrameRate(MENU_FPS, () => game.scene.isActive(SCENE_KEYS.run), game);
   // The installed app has no dev panel, so its #dev-panel stays hidden and no cheat is set.
   if (devToolsOn()) {
-    mountDevPanel(devPanelHost(game), document.getElementById("dev-panel"));
+    mountDevPanel(devPanelHost(game), devPanel);
   }
 
   // Captured before the scenes see it, so the key that opens a menu already shows its numbers.
