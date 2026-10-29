@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, LiveTuning } from "../data/types";
+import { TITLE_CAP_ROWS } from "../hud/walkHud";
 import { scrollMax } from "../input/listScroll";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { fillNames } from "../lib/lines";
@@ -15,6 +16,7 @@ import { fontFileMetrics, inkWidth, placedInk } from "../testing/fontInk";
 import { TEST_TUNING } from "../testing/tuning";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { GREYED, pictureBox, SELECT_OUTSET } from "../ui/selection";
+import { TEXT_SCALE } from "../ui/textFit";
 import { FEEDBACK } from "./feedback";
 import { gearByPrice, type Purchase } from "./home";
 import { cardBand } from "./homeLayout";
@@ -315,25 +317,50 @@ describe("the shop's message", () => {
     );
   });
 
-  // The plate sits at the top of the list area, under the tabs, across the list's width.
-  it("lies across the list's top, under the tabs", () => {
-    const { rect } = SHOP_LAYOUT.list;
-    const tabsBottom = Math.max(
-      ...shopTabRects(SHOP_TABS.length).map(({ height, y }) => y + height),
-    );
-    expect(plate).toMatchObject({ width: rect.width, x: rect.x, y: rect.y });
-    expect(plate.y + plate.height).toBeGreaterThan(tabsBottom);
-    expect(SHOP_LAYOUT.tab.drawY + SHOP_LAYOUT.tab.drawHeight).toBeLessThanOrEqual(plate.y);
+  // The plate sits at the top of the list area, under the tabs, across the tabs' span, and ends
+  // over every tab's first row as far under it as the selected tab's frame ends over it.
+  it("lies across the list's top, under the tabs, over each tab's first row", () => {
+    const { list, tab } = SHOP_LAYOUT;
+    const tabBottom = tab.drawY + tab.drawHeight + SELECT_OUTSET;
+    expect(plate).toMatchObject({ width: tab.span, x: tab.x, y: list.rect.y });
+    for (const rows of [SHOP_LAYOUT.dogs.slotRows, SHOP_LAYOUT.gear.rows]) {
+      expect(rows.y - (plate.y + plate.height)).toBe(plate.y - tabBottom);
+    }
   });
 });
 
-// A selected tab, lifted and framed, keeps 6px of card clear under the title band.
+// Every heading's capitals sit as far over its rows as under the selected tab or the rows
+// before it, and the first heading's are centred on the message's plate.
+describe("the shop's headings", () => {
+  const caps = TITLE_CAP_ROWS * TEXT_SCALE;
+  const { dogs, gear, message, tab } = SHOP_LAYOUT;
+  const tabBottom = tab.drawY + tab.drawHeight + SELECT_OUTSET;
+  const lastSlotBottom = (count: number) =>
+    dogs.slotRows.y + (count - 1) * dogs.slotRows.pitch + dogs.slotRows.height;
+  it.each<[string, number, number, number]>([
+    ["dog slots", dogs.slotHeadingY, tabBottom, dogs.slotRows.y],
+    ["dogs", dogs.dogHeadingY, lastSlotBottom(allSlots.length), dogs.dogRows.y],
+    ["gear", gear.headingY, tabBottom, gear.rows.y],
+  ])("%s: as far over its rows as under what is above it", (_, y, above, rows) => {
+    expect(rows - (y + caps)).toBe(y - above);
+  });
+
+  it("centres the first heading's capitals on the message's plate", () => {
+    const { plate } = message;
+    expect(dogs.slotHeadingY - plate.y).toBe(Math.floor((plate.height - caps) / 2));
+  });
+});
+
+// A selected tab, lifted and framed, keeps 6px of card clear under the title band, and as much
+// over the list.
 describe("the shop's tabs", () => {
-  it("clear the title band by 6px when selected", () => {
-    const { panel, tab } = SHOP_LAYOUT;
+  it("clear the title band and the list by 6px when selected", () => {
+    const { list, panel, tab } = SHOP_LAYOUT;
     const band = cardBand(panel);
-    const bandBottom = band.y + band.height;
-    expect(tab.drawY - FEEDBACK.liftPx - SELECT_OUTSET - bandBottom).toBeGreaterThanOrEqual(6);
+    const above = tab.drawY - FEEDBACK.liftPx - SELECT_OUTSET - (band.y + band.height);
+    const below = list.rect.y - (tab.drawY + tab.drawHeight + SELECT_OUTSET);
+    expect(above).toBeGreaterThanOrEqual(6);
+    expect(below).toBe(above);
   });
 
   // The shop's tabs and the Logbook's split the same span, gap apart, each a full tap target.

@@ -1,9 +1,11 @@
 import { DOG_SLOTS } from "../data/dogSlots";
+import { TITLE_CAP_ROWS } from "../hud/walkHud";
 import type { Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
 import { type FontMetrics, helpCapDy, inkRowsFromCapTop } from "../ui/fontMetrics";
 import { type ScrollbarRects, scrollbarRects } from "../ui/scrollbar";
-import { TEXT_STYLE } from "../ui/textFit";
+import { SELECT_OUTSET } from "../ui/selection";
+import { TEXT_SCALE, TEXT_STYLE } from "../ui/textFit";
 
 // The Pet shop page under the home screen's top bar, which stays in view with the bank:
 // a card with its title band and close control, the Dogs and Gear tabs, and each tab's
@@ -15,18 +17,34 @@ const ROW_X = PANEL.x + 12;
 // Rows run to the tabs' right edge, or with a scrollbar stop 6px short of its track.
 const ROW_WIDTH = 328;
 const ROW_SCROLL_WIDTH = 314;
-// The list area: from under the tabs to the card's inner edge, from the card's 8px frame to
-// 2px short of the scrollbar's track, or with no scrollbar to the card's frame.
-const LIST = { height: 431, width: 322, x: PANEL.x + 8, y: 117 };
+const TAB = { drawHeight: 28, drawY: 85, gap: 8, height: 44, span: ROW_WIDTH, x: ROW_X, y: 77 };
+// A selected tab's ui-select frame and its shadow end SELECT_OUTSET under its face. TAB_GAP clear
+// rows lie between the selected tab and the title band over it, and between it and the list.
+const TAB_BOTTOM = TAB.drawY + TAB.drawHeight + SELECT_OUTSET;
+const TAB_GAP = 6;
+// The list area: from TAB_GAP under the tabs to the card's inner edge, from the card's 8px frame
+// to 2px short of the scrollbar's track, or with no scrollbar to the card's frame.
+const LIST_Y = TAB_BOTTOM + TAB_GAP;
+const LIST = {
+  height: PANEL.y + PANEL.height - 8 - LIST_Y,
+  width: 322,
+  x: PANEL.x + 8,
+  y: LIST_Y,
+};
 const LIST_UNSCROLLED = { ...LIST, width: PANEL.width - 16 };
-// The Dogs tab's lists: each heading HEADING_TO_ROWS above its first row, and the dog heading
-// ROWS_TO_HEADING under the last slot row, so the dogs follow however many slots there are.
-const HEADING_TO_ROWS = 16;
-const ROWS_TO_HEADING = 12;
-// Each tab's first heading, its capitals 6px under the list area's top.
-const FIRST_HEADING_Y = LIST.y + 6;
+// The message's plate across the tabs' span at the list's top. Each tab's first heading takes
+// the plate's strip, its capitals centred on it as the message's are, and the first rows start
+// TAB_GAP under the plate, so a message never covers a row.
+const PLATE = { height: 28, width: TAB.span, x: TAB.x, y: LIST.y };
+const FIRST_HEADING_Y = PLATE.y + Math.floor((PLATE.height - TITLE_CAP_ROWS * TEXT_SCALE) / 2);
+const FIRST_ROWS_Y = PLATE.y + PLATE.height + TAB_GAP;
+// Every heading sits in a strip like the first's: HEADING_TO_ROWS above its rows, and
+// ROWS_TO_HEADING under the rows before it, as far as the first heading is under the tabs. The
+// dogs follow however many slots there are.
+const HEADING_TO_ROWS = FIRST_ROWS_Y - FIRST_HEADING_Y;
+const ROWS_TO_HEADING = FIRST_HEADING_Y - TAB_BOTTOM;
 const SLOT_HEADING_Y = FIRST_HEADING_Y;
-const SLOT_ROWS = { height: 48, pitch: 54, y: SLOT_HEADING_Y + HEADING_TO_ROWS };
+const SLOT_ROWS = { height: 48, pitch: 54, y: FIRST_ROWS_Y };
 const DOG_HEADING_Y =
   SLOT_ROWS.y + (DOG_SLOTS.length - 1) * SLOT_ROWS.pitch + SLOT_ROWS.height + ROWS_TO_HEADING;
 
@@ -42,7 +60,7 @@ export const SHOP_LAYOUT = {
   // The Gear tab: its heading and rows.
   gear: {
     headingY: FIRST_HEADING_Y,
-    rows: { height: 50, pitch: 60, y: 141 },
+    rows: { height: 50, pitch: 60, y: FIRST_ROWS_Y },
   },
   // Headings sit on the card at the rows' left, a note right-aligned at their right.
   headingX: ROW_X,
@@ -57,12 +75,12 @@ export const SHOP_LAYOUT = {
     rect: LIST,
     unscrolledRect: LIST_UNSCROLLED,
   },
-  // The last tap's message: one line on the ui-hint plate across the list's top, over the rows,
-  // from textDx inside the plate's left and right edges, its capitals centred on the plate.
-  // The plate's frame is frame pixels thick.
+  // The last tap's message: one line on the ui-hint plate across the tabs' span at the list's
+  // top, over the first heading, from textDx inside the plate's left and right edges, its
+  // capitals centred on the plate. The plate's frame is frame pixels thick.
   message: {
     frame: 3,
-    plate: { height: 28, width: LIST.width, x: LIST.x, y: LIST.y },
+    plate: PLATE,
     textDx: 10,
   },
   panel: PANEL,
@@ -88,12 +106,12 @@ export const SHOP_LAYOUT = {
   scrollbar: { thumbInset: 1, thumbMin: 16, thumbWidth: 6, trackWidth: 8, x: 336 },
   // The tabs split span, the rows' width from x, evenly with gap between them, each a hit
   // area height tall at y with its face drawHeight tall at drawY.
-  tab: { drawHeight: 28, drawY: 85, gap: 8, height: 44, span: ROW_WIDTH, x: ROW_X, y: 77 },
+  tab: TAB,
 } as const;
 
 // The message at 2x on one line inside its plate.
 export const SHOP_MESSAGE_FIT = {
-  room: LIST.width - 2 * SHOP_LAYOUT.message.textDx,
+  room: PLATE.width - 2 * SHOP_LAYOUT.message.textDx,
   style: TEXT_STYLE,
 } as const;
 

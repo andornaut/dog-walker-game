@@ -2385,52 +2385,52 @@
         "y": 52
       },
       "dogs": {
-        "dogHeadingY": 307,
+        "dogHeadingY": 327,
         "dogRows": {
           "height": 48,
           "pitch": 54,
-          "y": 323
+          "y": 352
         },
-        "slotHeadingY": 123,
+        "slotHeadingY": 131,
         "slotRows": {
           "height": 48,
           "pitch": 54,
-          "y": 139
+          "y": 156
         }
       },
       "gear": {
-        "headingY": 123,
+        "headingY": 131,
         "rows": {
           "height": 50,
           "pitch": 60,
-          "y": 141
+          "y": 156
         }
       },
       "headingX": 16,
       "list": {
-        "firstHeadingY": 123,
+        "firstHeadingY": 131,
         "padBottom": 8,
         "pageOverlap": 48,
         "rect": {
-          "height": 431,
+          "height": 426,
           "width": 322,
           "x": 12,
-          "y": 117
+          "y": 122
         },
         "unscrolledRect": {
-          "height": 431,
+          "height": 426,
           "width": 336,
           "x": 12,
-          "y": 117
+          "y": 122
         }
       },
       "message": {
         "frame": 3,
         "plate": {
           "height": 28,
-          "width": 322,
-          "x": 12,
-          "y": 117
+          "width": 328,
+          "x": 16,
+          "y": 122
         },
         "textDx": 10
       },
@@ -2524,7 +2524,7 @@
         "rowsY": 38,
         "ruleAbove": 6,
         "ruleDx": 2,
-        "top": 123
+        "top": 131
       },
       "panel": {
         "height": 512,
@@ -2550,15 +2550,15 @@
         "x": 336
       },
       "view": {
-        "height": 431,
+        "height": 426,
         "width": 322,
         "x": 12,
-        "y": 117
+        "y": 122
       },
       "walks": {
         "rowsY": 20,
         "sectionGap": 12,
-        "top": 123
+        "top": 131
       },
       "wall": {
         "badgeTop": 2,
@@ -2574,10 +2574,10 @@
         },
         "foot": 16,
         "gap": 8,
-        "headingY": 123,
+        "headingY": 131,
         "width": 314,
         "x": 16,
-        "y": 143
+        "y": 151
       },
       "wallText": {
         "lineHeight": 16,
