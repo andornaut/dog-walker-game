@@ -309,7 +309,7 @@ function walkersSection(data: GameData): Section {
         perkEffect(data.tuning, data.walkerPerks[walker.perk]),
         walker.unlock === "start"
           ? "Start"
-          : `Finish with ${walker.dogs} ${walker.dogs === 1 ? "dog" : "dogs"}`,
+          : `Finish a walk with ${walker.dogs} ${walker.dogs === 1 ? "dog" : "dogs"}`,
         walker.spriteKey,
         walker.portraitKey,
       ];
