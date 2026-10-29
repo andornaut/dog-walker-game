@@ -19,7 +19,7 @@ export const HELP_PAGES = [
     art: "pickups",
     body:
       "Tips are {tip} each, on top of each dog's pay. " +
-      "A treat gives its dog's owner +{treatHearts}♥. " +
+      "A treat gives its dog's owner +{treatHearts}♥, or {treatCash} when every owner is full. " +
       "Aim for a lost wallet or a friendly neighbour, and grab dropped gear: " +
       "it works for the rest of the walk.",
     title: "Tips, treats and finds",
