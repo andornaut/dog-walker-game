@@ -107,6 +107,6 @@ export const MENU_TEXT = {
       runs: "Walks",
     },
     timesFiredBy: "{count} (most: {owner})",
-    title: "Stats",
+    title: "Logbook",
   },
 } as const satisfies MenuText;

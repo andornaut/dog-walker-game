@@ -1,6 +1,6 @@
 import type { Achievement } from "./types";
 
-// The badge wall, in the order the Stats page shows it: firsts, mastery, collection, silly.
+// The badge wall, in the order the Logbook shows it: firsts, mastery, collection, silly.
 // Each is earned once every condition holds; the wall shows the goal under a locked badge.
 export const ACHIEVEMENTS = [
   {
