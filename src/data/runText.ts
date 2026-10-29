@@ -98,7 +98,6 @@ export const RUN_TEXT = {
   zoneDone: {
     button: "Onward!",
     earnings: {
-      bonus: "{amount} Walk bonus",
       fees: "{amount} pay",
       separator: " · ",
       tips: "{amount} tips",
