@@ -28,6 +28,7 @@ import {
   earnedCheck,
   STATS_LAYOUT,
   STATS_TABS,
+  statsListFrame,
   statsScrollbar,
   statsTabRects,
   walksBottom,
@@ -210,6 +211,17 @@ describe("the Walks tab's sections", () => {
     }),
   )("puts the %s heading where the Dogs tab's spacing does", (_, top, expected) => {
     expect(top).toBe(expected);
+  });
+});
+
+// A tab's values end as far in from the card's right edge as its labels start from its left,
+// with no scrollbar; beside one they end at the rows' right edge, as the shop's rows do.
+describe("the rows' right edge", () => {
+  it.each<[string, boolean, number]>([
+    ["with no scrollbar", false, panel.x + panel.width - (rows.left - panel.x)],
+    ["beside the scrollbar", true, rows.right],
+  ])("%s", (_, scrolls, right) => {
+    expect(statsListFrame(scrolls).right).toBe(right);
   });
 });
 

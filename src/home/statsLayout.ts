@@ -2,7 +2,7 @@ import type { Rect } from "../lib/rect";
 import { type FontMetrics, helpCapDy, inkRowsOfLines } from "../ui/fontMetrics";
 import { type ScrollbarRects, scrollbarRects } from "../ui/scrollbar";
 import { BADGE_STRIP, type WallCellLines } from "./badgesView";
-import { SHOP_LAYOUT, shopTabRects } from "./shopLayout";
+import { SHOP_LAYOUT, shopListFrame, shopTabRects } from "./shopLayout";
 
 export type StatsTab = "badges" | "dogs" | "runs";
 
@@ -25,8 +25,8 @@ const TOP = SHOP_LAYOUT.list.firstHeadingY;
 const PITCH = 17;
 // Between the Dogs tab's blocks and the Walks tab's sections, under the last row's pitch.
 const BLOCK_GAP = 12;
-// Label and value rows run across the shop's scrolling rows: from the headings' left edge to
-// the rows' right edge beside the scrollbar.
+// Label and value rows run across the shop's rows: from the headings' left edge to the rows'
+// right edge, beside the scrollbar at right (statsListFrame).
 const ROWS = {
   left: SHOP_LAYOUT.headingX,
   pitch: PITCH,
@@ -71,8 +71,8 @@ export const STATS_LAYOUT = {
     top: TOP,
   },
   panel: PANEL,
-  // Label and value rows: the label's left edge at left and the value's right edge at right,
-  // clear of the scrollbar, pitch apart.
+  // Label and value rows, pitch apart: the label's ink from left and the value's ink up to right
+  // beside the scrollbar, or further right on a tab with none (statsListFrame).
   rows: ROWS,
   // Content scrolled to its end keeps the shop list's padBottom of cream under its last row. A
   // page key moves it the view's height less pageOverlap; an arrow key moves it keyStep.
@@ -147,6 +147,14 @@ export function detailPanel(fonts: BadgeDetailFonts, goalLines: number, lineLine
   const line = detailTextTops(fonts, goalLines).line;
   const inkBottom = line + inkRowsOfLines(fonts.body, lineLines) * 2;
   return { ...detail, height: inkBottom + detailText.foot + detailText.frame };
+}
+
+// A tab's view, its mask, and where its values' ink ends, by whether it scrolls: as the shop's
+// list runs, a tab with no scrollbar to the tabs' right edge, as far in from the card's right
+// edge as its labels' ink is from its left, and one with a scrollbar to rows.right.
+export function statsListFrame(scrolls: boolean): { rect: Rect; right: number } {
+  const { headingRight, rect } = shopListFrame(scrolls);
+  return { rect, right: headingRight };
 }
 
 // The tabs' hit areas, in the shop's tab span.

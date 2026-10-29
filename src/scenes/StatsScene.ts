@@ -24,6 +24,7 @@ import {
   earnedCheck,
   STATS_LAYOUT,
   STATS_TABS,
+  statsListFrame,
   statsScrollbar,
   type StatsTab,
   statsTabRects,
@@ -52,6 +53,7 @@ import {
   type FontRole,
   inkSpan,
   pixelFontMetrics,
+  placePixelText,
   setPixelText,
   withProbe,
 } from "../ui/phaser/pixelText";
@@ -81,7 +83,6 @@ const TAB_RECTS: readonly Rect[] = statsTabRects();
 const CLOSE = STATS_LAYOUT.close;
 const PANEL: Rect = STATS_LAYOUT.panel;
 const LEFT = STATS_LAYOUT.rows.left;
-const RIGHT = STATS_LAYOUT.rows.right;
 const PITCH = STATS_LAYOUT.rows.pitch;
 const DOGS = STATS_LAYOUT.dogs;
 const WALL = STATS_LAYOUT.wall;
@@ -107,6 +108,8 @@ export class StatsScene extends Scene {
   // Where text() adds its text: the content while the open tab draws.
   private drawingInto: GameObjects.Container | undefined;
   private detail: number | undefined;
+  // The open tab's view and its values' right edge, by whether it scrolls.
+  private frame = statsListFrame(false);
   private pressed: Target | undefined;
   private presses: TargetPressListener | undefined;
   private resumeKey: SceneKey | undefined;
@@ -282,11 +285,14 @@ export class StatsScene extends Scene {
     return addBodyText(this, this.drawingInto, { x, y }, value, options);
   }
 
-  // Each row's label at the left and its value right-aligned at the right, from y.
+  // Each row's label's ink from the left and its value's ink up to the right, from y, so the
+  // label and the value are as far in from the card's frame on a tab with no scrollbar.
   private rows(y: number, rows: readonly StatsRow[]): void {
     rows.forEach(({ label, value }, i) => {
-      this.text(LEFT, y + i * PITCH, label, { colour: PALETTE.darkBrown });
-      this.text(RIGHT, y + i * PITCH, value, { originX: 1 });
+      const top = y + i * PITCH;
+      this.text(LEFT, top, label, { colour: PALETTE.darkBrown });
+      const shown = this.text(0, top, value);
+      placePixelText(shown, this.frame.right - inkSpan(shown).right, top);
     });
   }
 
@@ -308,11 +314,18 @@ export class StatsScene extends Scene {
     );
     const content = this.add.container(0, 0);
     root.add(content);
-    maskToRect(this, VIEW_MASK_KEY, VIEW, content);
     this.content = content;
     this.drawingInto = content;
-    const bottom = this.drawTab();
+    // Laid out with no scrollbar, then again beside one if it scrolls.
+    this.frame = statsListFrame(false);
+    let bottom = this.drawTab();
+    if (scrollMax(VIEW, bottom) > 0) {
+      content.removeAll(true);
+      this.frame = statsListFrame(true);
+      bottom = this.drawTab();
+    }
     this.drawingInto = undefined;
+    maskToRect(this, VIEW_MASK_KEY, this.frame.rect, content);
     this.scroll = resizeScroll(scrollMax(VIEW, bottom), this.scroll);
     this.scrollbar = addScrollbar(this, root, statsScrollbar(this.scroll.max, this.scroll.y));
     this.placeContent();
@@ -372,7 +385,7 @@ export class StatsScene extends Scene {
       if (i > 0) {
         fillRect(lines, PALETTE.tan, {
           height: 1,
-          width: RIGHT - LEFT + 2 * DOGS.ruleDx,
+          width: this.frame.right - LEFT + 2 * DOGS.ruleDx,
           x: LEFT - DOGS.ruleDx,
           y: top - DOGS.ruleAbove,
         });
