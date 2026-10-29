@@ -7,6 +7,9 @@ import {
   newerVersionOf,
   noticePlacement,
   type RegistrationLike,
+  RESUME_CHECK_MS,
+  resumeCheckDue,
+  type ResumeState,
   type ServiceWorkerLike,
   SKIP_WAITING_MESSAGE,
   updateAction,
@@ -139,6 +142,27 @@ describe("updateAction", () => {
   });
 });
 
+describe("resumeCheckDue", () => {
+  const home: ResumeState = {
+    lastCheck: 0,
+    now: RESUME_CHECK_MS,
+    onHome: true,
+    online: true,
+    visible: true,
+  };
+  it.each<{ expected: boolean; name: string; state: ResumeState }>([
+    { expected: true, name: "visible on the home screen", state: home },
+    { expected: true, name: "never checked", state: { ...home, lastCheck: undefined, now: 0 } },
+    { expected: false, name: "hidden", state: { ...home, visible: false } },
+    { expected: false, name: "mid-walk or in a menu", state: { ...home, onHome: false } },
+    { expected: false, name: "offline", state: { ...home, online: false } },
+    { expected: false, name: "within the throttle", state: { ...home, now: RESUME_CHECK_MS - 1 } },
+    { expected: true, name: "after the throttle", state: { ...home, now: RESUME_CHECK_MS * 2 } },
+  ])("$name: $expected", ({ expected, state }) => {
+    expect(resumeCheckDue(state)).toBe(expected);
+  });
+});
+
 describe("newerVersionOf", () => {
   const worker = new FakeWorker();
   const cases = [
@@ -200,8 +224,10 @@ describe("createUpdateFlow", () => {
     const container = new FakeContainer(controller);
     const reload = vi.fn();
     const shown: boolean[] = [];
+    const clock = { time: 0 };
     const flow = createUpdateFlow(
       container,
+      () => clock.time,
       () => online,
       reload,
       (visible) => shown.push(visible),
@@ -210,7 +236,7 @@ describe("createUpdateFlow", () => {
     void flow.bootable.then(() => {
       booted = true;
     });
-    return { booted: () => booted, container, flow, reload, shown };
+    return { booted: () => booted, clock, container, flow, reload, shown };
   };
 
   // Before watch: a controlled page waits for its check, a first visit has nothing to wait for.
@@ -342,6 +368,27 @@ describe("createUpdateFlow", () => {
       flow.setOnHome(true);
       expect(registration.updates).toBe(updates);
     }
+  });
+
+  // Every check counts toward the throttle: the load's, an arrival home's and a resume's.
+  it("checks on resuming on the home screen, at most once per throttle", () => {
+    const { clock, flow } = setup();
+    const registration = new FakeRegistration();
+    flow.watch(registration);
+    flow.setOnHome(true);
+    flow.setVisible(false);
+    clock.time = RESUME_CHECK_MS - 1;
+    flow.setVisible(true);
+    clock.time = RESUME_CHECK_MS;
+    flow.setVisible(false);
+    flow.setVisible(true);
+    flow.noteInteraction();
+    flow.setOnHome(false);
+    clock.time = RESUME_CHECK_MS * 3;
+    flow.setVisible(true);
+    flow.setOnHome(true);
+    flow.setVisible(true);
+    expect(registration.updates).toBe(3);
   });
 
   it("ignores Reload with no version waiting", () => {

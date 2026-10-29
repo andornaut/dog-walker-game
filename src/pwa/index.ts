@@ -79,6 +79,7 @@ function registerServiceWorker(): Promise<void> {
   const placeNotice = notice === null ? () => undefined : placeNoticeOverGame(notice);
   const flow = createUpdateFlow(
     container,
+    () => Date.now(),
     () => navigator.onLine,
     () => location.reload(),
     (visible) => {
@@ -93,6 +94,10 @@ function registerServiceWorker(): Promise<void> {
   for (const type of INTERACTION_EVENTS) {
     window.addEventListener(type, () => flow.noteInteraction(), { capture: true, passive: true });
   }
+  // An installed app resumed from the background without relaunching checks here, on the home
+  // screen. relayVisibilityEvents sends these, a return from the back-forward cache included.
+  window.addEventListener(PHONE_EVENTS.appHidden, () => flow.setVisible(false));
+  window.addEventListener(PHONE_EVENTS.appVisible, () => flow.setVisible(true));
   setTimeout(() => flow.endBootWait(), BOOT_WAIT_MS);
   container
     .register(serviceWorkerUrl(SERVICE_WORKER_URL, browserSoundFormat()), { scope: "/" })

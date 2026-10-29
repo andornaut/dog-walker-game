@@ -69,6 +69,30 @@ export function updateAction({
   return newer === "pending" && online && !interacted && !waitOver ? "wait" : "run";
 }
 
+// The shortest time between checks for a newer version when the page comes back into view, so
+// switching apps on the home screen asks the server at most once a minute.
+export const RESUME_CHECK_MS = 60_000;
+
+export interface ResumeState {
+  // When the last check for a newer version ran, on now()'s clock, if one has.
+  lastCheck: number | undefined;
+  now: number;
+  onHome: boolean;
+  online: boolean;
+  // The page is in view: the app or tab came back to the front.
+  visible: boolean;
+}
+
+// Whether the page coming back into view checks for a newer version. An installed app usually
+// resumes without relaunching, so the launch's check can be long past, and a player resuming on
+// the home screen never arrives there to check. Mid-walk or in a menu, the next arrival home
+// checks instead.
+export function resumeCheckDue({ lastCheck, now, onHome, online, visible }: ResumeState): boolean {
+  return (
+    visible && onHome && online && (lastCheck === undefined || now - lastCheck >= RESUME_CHECK_MS)
+  );
+}
+
 // The newer version a registration holds, and its worker once it waits. A first install has no
 // controller to wait behind, so it never counts.
 export function newerVersionOf(
@@ -138,6 +162,9 @@ export interface UpdateFlow {
   noRegistration(): void;
   // Whether the home screen is in front. Each arrival home after input checks for a newer version.
   setOnHome(onHome: boolean): void;
+  // Whether the page is in view. Coming back into view on the home screen checks for a newer
+  // version, at most once per RESUME_CHECK_MS.
+  setVisible(visible: boolean): void;
   // Follows the registration's newer versions, checking for one first unless offline.
   watch(registration: RegistrationLike): void;
 }
@@ -148,6 +175,7 @@ export interface UpdateFlow {
 // noRegistration; a first visit has none to wait for.
 export function createUpdateFlow(
   container: ContainerLike,
+  now: () => number,
   online: () => boolean,
   reload: () => void,
   show: (visible: boolean) => void,
@@ -160,6 +188,7 @@ export function createUpdateFlow(
     reloading: false,
     waitOver: false,
   };
+  let lastCheck: number | undefined;
   let shown = false;
   let waitingWorker: ServiceWorkerLike | undefined;
   let watched: RegistrationLike | undefined;
@@ -167,6 +196,10 @@ export function createUpdateFlow(
   const bootable = new Promise<void>((resolve) => {
     boot = resolve;
   });
+  const check = (registration: RegistrationLike) => {
+    lastCheck = now();
+    return registration.update();
+  };
   const switchVersion = (worker: ServiceWorkerLike) => {
     state = { ...state, reloading: true };
     activateWaitingWorker(container, reload, worker);
@@ -204,8 +237,20 @@ export function createUpdateFlow(
     setOnHome(onHome) {
       const arrived = onHome && !state.onHome && state.interacted;
       update({ onHome });
-      if (arrived && online()) {
-        watched?.update().catch(() => undefined);
+      if (arrived && online() && watched !== undefined) {
+        check(watched).catch(() => undefined);
+      }
+    },
+    setVisible(visible) {
+      const due = resumeCheckDue({
+        lastCheck,
+        now: now(),
+        onHome: state.onHome,
+        online: online(),
+        visible,
+      });
+      if (due && watched !== undefined) {
+        check(watched).catch(() => undefined);
       }
     },
     watch(registration) {
@@ -225,7 +270,7 @@ export function createUpdateFlow(
         read();
         return;
       }
-      registration.update().then(read, read);
+      check(registration).then(read, read);
     },
   };
 }
