@@ -77,6 +77,10 @@ describe("money text", () => {
       ["signedDollarText", signedDollarText, -1_250, "−$12"],
       ["signedShortDollarText", signedShortDollarText, dollars(240), "+$240"],
       ["signedShortDollarText", signedShortDollarText, -dollars(1234), "−$1.2k"],
+      ["signedShortDollarText", signedShortDollarText, 0, "$0"],
+      ["signedShortDollarText", signedShortDollarText, 99, "$0"],
+      ["signedShortDollarText", signedShortDollarText, -99, "$0"],
+      ["signedShortDollarText", signedShortDollarText, 100, "+$1"],
     ];
     for (const [, text, amount, shown] of cases) {
       expect(text(amount)).toBe(shown);

@@ -64,9 +64,10 @@ export function signedDollarText(amount: number): string {
 }
 
 // signedDollarText in the short form, for a column too narrow for the full amount: "+$240",
-// "−$1.2k".
+// "−$1.2k", and an amount under a whole dollar either way as "$0", with no sign.
 export function signedShortDollarText(amount: number): string {
-  return signedText(amount, `$${shortDollarAmountText(cents(Math.abs(amount)))}`);
+  const dollars = `$${shortDollarAmountText(cents(Math.abs(amount)))}`;
+  return Math.abs(amount) < 100 ? dollars : signedText(amount, dollars);
 }
 
 // How many dogs the player's pack may hold: one per dog slot owned, whichever slots they are,
