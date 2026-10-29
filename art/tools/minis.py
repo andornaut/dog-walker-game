@@ -265,12 +265,22 @@ def dog_frames(draw, poses, s, module=dogs, zoom=1):
         return small(module, at, draw, snap(q, s * z, up)).outlined()
 
     # zoomed, the feet of the dog standing square stay on their row at s, or, zoomed taller, go one row lower,
-    # onto the frame's spare bottom rows, for headroom
-    top = zoom != 1 and bottom(drawn({})) - bottom(drawn({}, at=s, z=1)) - (zy > 1)
+    # onto the frame's spare bottom rows, for headroom, while the frame has a spare row below them
+    feet = zoom != 1 and bottom(drawn({}))
+    top = zoom != 1 and max(feet - bottom(drawn({}, at=s, z=1)) - (zy > 1), feet - side(32, s) + 1)
 
     def frame(q, up=False):
         f = drawn(q, up)
-        return zoomed(f, s, zoom, top) if zoom != 1 else f
+        if zoom == 1:
+            return f
+        # a pose whose head would rise past the frame's top gives up its reach, then its rise, a unit at a
+        # time, so the frame keeps the whole dog
+        q = dict(q)
+        for key, toward in (("reach", -1), ("bob", 1)):
+            while any(any(row) for row in f[:top]) and q.get(key, 0) * toward < 0:
+                q[key] += toward
+                f = drawn(q, up)
+        return zoomed(f, s, zoom, top)
 
     frames = [frame(q) for q in poses]
     for i in range(1, len(frames)):
