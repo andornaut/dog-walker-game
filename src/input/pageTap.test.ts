@@ -54,24 +54,29 @@ describe("clampInto", () => {
   });
 });
 
-// The walk's hit rule across a 412x800 page whose 360x560 canvas sits at x 26-386, y 120-680:
-// a press on the canvas is at its own game point, one on the page beside it at walkPagePoint's.
-// On the screen the walk bar is y 0-40, the road's centre x 180, the dog cards y 486-556 and
-// the progress line y 556-560.
+// The walk's hit rule across two pages: a press on the canvas is at its own game point, one on
+// the page beside it at walkPagePoint's. On the screen the walk bar is y 0-40, the road's centre
+// x 180, the dog cards y 486-556 and the progress line y 556-560. portrait: a 412x800 phone, its
+// 360x560 canvas at the top of #game under the 33px nav bar (x 26-386, y 33-593), so the spare
+// height is all below it. landscape: a 1280x720 screen, its canvas centred (x 460-820, y 96-656).
 describe("where a walk press lands", () => {
-  const canvas = { left: 26, top: 120, width: 360 };
+  const canvases = {
+    landscape: { left: 460, top: 96, width: 360 },
+    portrait: { left: 26, top: 33, width: 360 },
+  } as const;
+  type Page = keyof typeof canvases;
   const context: GestureContext = {
     config: { laneCount: LANE_COUNT, swipeStartDistance: 20 },
     layout: SCREEN_LAYOUT,
     stepMoves: () => true,
   };
-  const landed = (client: Point): Point | undefined => {
-    const point = gamePoint(canvas, SCREEN_LAYOUT.screen.width, client);
+  const landed = (page: Page, client: Point): Point | undefined => {
+    const point = gamePoint(canvases[page], SCREEN_LAYOUT.screen.width, client);
     const { screen } = SCREEN_LAYOUT;
     return containsPoint(screen, point.x, point.y) ? point : walkPagePoint(SCREEN_LAYOUT, point);
   };
-  const outcome = (client: Point): string => {
-    const point = landed(client);
+  const outcome = (page: Page, client: Point): string => {
+    const point = landed(page, client);
     if (point === undefined) {
       return "nothing";
     }
@@ -86,36 +91,46 @@ describe("where a walk press lands", () => {
   };
 
   it.each([
-    ["the margin above the walk bar", { x: 206, y: 60 }, "nothing"],
-    ["the walk bar", { x: 206, y: 140 }, "the walk bar's"],
-    ["the margin beside the walk bar", { x: 10, y: 140 }, "nothing"],
-    ["the road's left half", { x: 100, y: 400 }, "taps left"],
-    ["the road's right half", { x: 300, y: 400 }, "taps right"],
-    ["the margin left of the road", { x: 10, y: 400 }, "taps left"],
-    ["the margin right of the road", { x: 405, y: 400 }, "taps right"],
-    ["a dog card", { x: 206, y: 640 }, "taps on release"],
-    ["the margin beside a dog card", { x: 5, y: 640 }, "taps on release"],
-    ["the progress line under the dog cards", { x: 100, y: 678 }, "taps left"],
-    ["the margin below the dog cards, left half", { x: 100, y: 760 }, "taps left"],
-    ["the margin below the dog cards, right half", { x: 300, y: 790 }, "taps right"],
-    ["the page's bottom-left corner", { x: 0, y: 800 }, "taps left"],
-  ])("%s: %s", (_name, client, expected) => {
-    expect(outcome(client)).toBe(expected);
-  });
+    ["portrait", "the walk bar", { x: 206, y: 50 }, "the walk bar's"],
+    ["portrait", "the margin beside the walk bar", { x: 10, y: 50 }, "nothing"],
+    ["portrait", "the road's left half", { x: 100, y: 300 }, "taps left"],
+    ["portrait", "the road's right half", { x: 300, y: 300 }, "taps right"],
+    ["portrait", "the margin left of the road", { x: 10, y: 300 }, "taps left"],
+    ["portrait", "the margin right of the road", { x: 405, y: 300 }, "taps right"],
+    ["portrait", "a dog card", { x: 206, y: 555 }, "taps on release"],
+    ["portrait", "the margin beside a dog card", { x: 5, y: 555 }, "taps on release"],
+    ["portrait", "the progress line under the dog cards", { x: 100, y: 591 }, "taps left"],
+    ["portrait", "the margin below the dog cards, left half", { x: 100, y: 700 }, "taps left"],
+    ["portrait", "the margin below the dog cards, right half", { x: 300, y: 790 }, "taps right"],
+    ["portrait", "the page's bottom-left corner", { x: 0, y: 800 }, "taps left"],
+    ["landscape", "the margin above the walk bar", { x: 640, y: 60 }, "nothing"],
+    ["landscape", "the walk bar", { x: 640, y: 110 }, "the walk bar's"],
+    ["landscape", "the margin beside the walk bar", { x: 100, y: 110 }, "nothing"],
+    ["landscape", "the road's left half", { x: 500, y: 400 }, "taps left"],
+    ["landscape", "the page's left edge beside the road", { x: 0, y: 400 }, "taps left"],
+    ["landscape", "the page's right edge beside the road", { x: 1279, y: 400 }, "taps right"],
+    ["landscape", "a dog card", { x: 640, y: 616 }, "taps on release"],
+    ["landscape", "the margin below the dog cards", { x: 500, y: 700 }, "taps left"],
+  ] satisfies readonly [Page, string, Point, string][])(
+    "%s, %s: %s",
+    (page, _name, client, expected) => {
+      expect(outcome(page, client)).toBe(expected);
+    },
+  );
 
   // Taps move nothing here, so only the drag's own steps show. A drag's points past the screen
   // clamp to its edge.
   it.each([
-    ["the margin below the dog cards", { x: 100, y: 760 }, { x: 170, y: 790 }, [1]],
-    ["the margin below the dog cards, leftward", { x: 300, y: 760 }, { x: 230, y: 700 }, [-1]],
-    ["the margin left of the road", { x: 10, y: 400 }, { x: 160, y: 420 }, [1, 1]],
-    ["a dog card, out past the right edge", { x: 300, y: 640 }, { x: 412, y: 640 }, [1]],
-  ])("a drag from %s steers", (_name, from, to, steps) => {
+    ["the margin below the dog cards", { x: 100, y: 700 }, { x: 170, y: 790 }, [1]],
+    ["the margin below the dog cards, leftward", { x: 300, y: 700 }, { x: 230, y: 640 }, [-1]],
+    ["the margin left of the road", { x: 10, y: 300 }, { x: 160, y: 320 }, [1, 1]],
+    ["a dog card, out past the right edge", { x: 300, y: 555 }, { x: 412, y: 555 }, [1]],
+  ])("portrait: a drag from %s steers", (_name, from, to, steps) => {
     const dragOnly = { ...context, stepMoves: () => false };
-    const start = landed(from);
+    const start = landed("portrait", from);
     expect(start).toBeDefined();
     const down = pointerDown(dragOnly, start ?? { x: 0, y: 0 });
-    const end = clampInto(SCREEN_LAYOUT.screen, gamePoint(canvas, 360, to));
+    const end = clampInto(SCREEN_LAYOUT.screen, gamePoint(canvases.portrait, 360, to));
     const moved = pointerMove(dragOnly, end, down.state);
     expect(moved.actions.map(({ direction }) => direction)).toEqual(steps);
   });

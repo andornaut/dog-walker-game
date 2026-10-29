@@ -68,7 +68,7 @@ function bootGame(): Game {
     input: { activePointers: 2 },
     parent: "game",
     pixelArt: true,
-    // Sized by whole device pixels per game pixel, in fitWholePixels.
+    // Sized by whole device pixels per game pixel and placed in #game by fitWholePixels.
     scale: { autoCenter: Scale.CENTER_BOTH, mode: Scale.NONE },
     // Scenes draw in this order. The Logbook, the settings and help, which the home top bar
     // opens over the Pet shop, come after it, help's pictures after help, and the tap bursts
@@ -102,7 +102,9 @@ function bootGame(): Game {
     game.pause();
     game.sound.pauseAll();
   });
-  fitWholePixels(SCREEN_CONFIG, game);
+  // At the top in portrait, so the spare height sits under the dog cards, where the walk
+  // steers from the page too; centred in landscape.
+  fitWholePixels("topInPortrait", SCREEN_CONFIG, game);
   // The installed app has no dev panel, so its #dev-panel stays hidden and no cheat is set.
   if (devToolsOn()) {
     mountDevPanel(devPanelHost(game), document.getElementById("dev-panel"));
