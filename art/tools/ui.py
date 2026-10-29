@@ -18,9 +18,8 @@ ui-scroll-thumb (6x24, three-slices with 3px caps); the walker section's ui-cork
 ui-strip-well (24x24 nine-slice, the band behind a card row's subtitle), ui-quip (24x24 nine-slice,
 8px corners), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6), ui-celebrate-burst (148x132, the
 starburst behind the walker in the zone celebration), ui-zone-banner (248x48); the start screen top
-bar's ui-home-cash-well (70x28, drawn at (5, 5)) and the same well in three pieces that stretch it
-to the bank's width, ui-home-cash-well-left, ui-home-cash-well-mid (repeated across) and
-ui-home-cash-well-right (1x28 each); the walk HUD's ui-walk-bar (360x48),
+bar's bank well, drawn at (5, 5) in three pieces that stretch it to the bank's width,
+ui-home-cash-well-left, ui-home-cash-well-mid (repeated across) and ui-home-cash-well-right (1x28 each); the walk HUD's ui-walk-bar (360x48),
 ui-effect-well (22x22), ui-dog-card-band (360x76, drawn at (0, 480)), ui-lead-tag (27x11, LEAD baked
 in with font-title) and ui-owner-tab (36x36).
 
@@ -1122,25 +1121,15 @@ def walk_bar():
 HOME_CASH_WELL = (5, 5, 70, 28)
 
 
-def home_cash_well():
-    """70x28, ui-home-cash-well: the start screen top bar's ink well for the bank, drawn at (5, 5)
-    on the bar's plum, as wide as the walk bar's cash well and as far from the edge, with its
-    clipped corners and dbrown lip, plain plum between it and the buttons. The game centres the
-    bank in it."""
-    _, _, w, h = HOME_CASH_WELL
-    g = Grid(w, h)
-    well(g, 0, 0, w, h)
-    return g
-
-
-# The bank well's three pieces, left to right, each one column of home_cash_well: its first, any
-# middle one and its last. Every middle column is the same, so the middle repeats with no seam.
+# The start screen top bar's bank well in three pieces, left to right, each one column of a well with the walk bar's
+# clipped corners and dbrown lip: its first, any middle one and its last. The game stretches it to the bank's width
+# and centres the bank in it. Every middle column is the same, so the middle repeats with no seam.
 HOME_CASH_WELL_PIECES = ("left", "mid", "right")
 
 
 def home_cash_well_piece(piece):
-    """1x28, ui-home-cash-well-<piece>: one column of ui-home-cash-well, so the game can draw the
-    well as wide as the bank needs. left: the ink side, its top and bottom pixels clipped for the
+    """1x28, ui-home-cash-well-<piece>: one column of the bank well, so the game can draw the well as
+    wide as the bank needs. left: the ink side, its top and bottom pixels clipped for the
     corners. mid: ink over the dbrown lip's row, repeated (TileSprite) between the caps. right: the
     dbrown lip's side, clipped top and bottom. left + mid x (w - 2) + right is the well w wide."""
     _, _, _, h = HOME_CASH_WELL
@@ -1558,7 +1547,6 @@ IMAGES = {
     "ui-zone-banner": lambda: to_image(zone_banner().outlined(False)),
     "ui-walk-bar": lambda: to_image(walk_bar().outlined(False)),
     "ui-effect-well": lambda: to_image(effect_well().outlined(False)),
-    "ui-home-cash-well": lambda: to_image(home_cash_well().outlined(False)),
     **{f"ui-home-cash-well-{p}": (lambda p=p: to_image(home_cash_well_piece(p).outlined(False)))
        for p in HOME_CASH_WELL_PIECES},
     "ui-dog-card-band": lambda: to_image(dog_card_band().outlined(False)),
