@@ -1,7 +1,7 @@
 import { DOG_SLOTS } from "../data/dogSlots";
 import type { Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
-import type { FontMetrics } from "../ui/fontMetrics";
+import { type FontMetrics, helpCapDy, inkRowsFromCapTop } from "../ui/fontMetrics";
 import { type ScrollbarRects, scrollbarRects } from "../ui/scrollbar";
 import { TEXT_STYLE } from "../ui/textFit";
 import { HOME_LAYOUT } from "./homeLayout";
@@ -25,7 +25,7 @@ const LIST_UNSCROLLED = { ...LIST, width: PANEL.width - 16 };
 const HEADING_TO_ROWS = 16;
 const ROWS_TO_HEADING = 12;
 const SLOT_HEADING_Y = 123;
-const SLOT_ROWS = { height: 42, pitch: 48, y: SLOT_HEADING_Y + HEADING_TO_ROWS };
+const SLOT_ROWS = { height: 48, pitch: 54, y: SLOT_HEADING_Y + HEADING_TO_ROWS };
 const DOG_HEADING_Y =
   SLOT_ROWS.y + (DOG_SLOTS.length - 1) * SLOT_ROWS.pitch + SLOT_ROWS.height + ROWS_TO_HEADING;
 
@@ -43,7 +43,7 @@ export const SHOP_LAYOUT = {
   // The Gear tab: its heading and rows.
   gear: {
     headingY: 123,
-    rows: { height: 44, pitch: 54, y: 141 },
+    rows: { height: 50, pitch: 60, y: 141 },
   },
   // Headings sit on the card at the rows' left, a note right-aligned at their right.
   headingX: ROW_X,
@@ -149,6 +149,15 @@ export function rowRects(
     x,
     y: spec.y + i * spec.pitch,
   }));
+}
+
+// The capitals' tops of a row's name and line, from the row's middle row: the line
+// LABEL_HELP_GAP clear rows under the body font's lowest ink (helpCapDy), the pair from the
+// name's capitals to the line's lowest ink centred down the row.
+export function shopRowTextTops(body: FontMetrics): { line: number; name: number } {
+  const ink = inkRowsFromCapTop(body) * 2;
+  const name = -Math.floor((helpCapDy(body, 2) + ink) / 2);
+  return { line: name + helpCapDy(body, 2), name };
 }
 
 // How wide the name and line of a row rowWidth wide may be beside the price plate or OWNED,

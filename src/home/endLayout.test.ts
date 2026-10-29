@@ -30,6 +30,7 @@ import {
 const { badges, breakdown, panel: most, quips, side } = END_LAYOUT;
 const BODY = fontFileMetrics("font-body");
 const TITLE = fontFileMetrics("font-title");
+const FONTS = { body: BODY, title: TITLE };
 
 // Fees, tips and card costs always show, the other earnings only sometimes, so a breakdown
 // runs from 3 lines to one per kind of earnings but one, since the Walk bonus (a finished walk)
@@ -68,7 +69,7 @@ describe("endPanelLayout", () => {
   it.each(panelCases)(
     "fits %i breakdown lines and %i owners' rows (fired: %s), each row under the last",
     (lines, rows, fired) => {
-      const { panel, rows: placed } = endPanelLayout(BODY, lines, quipRows(rows, fired, []));
+      const { panel, rows: placed } = endPanelLayout(FONTS, lines, quipRows(rows, fired, []));
       // The breakdown's last line's ink and the side column's total stay over the rule.
       const listInk = breakdown.top + (lines - 1) * breakdown.pitch + inkRowsFromCapTop(BODY) * 2;
       const above = Math.max(listInk, side.totalY + side.totalHeight);
@@ -78,7 +79,7 @@ describe("endPanelLayout", () => {
       expect(rule - above).toBeLessThanOrEqual(8);
       expect(panel.y + panel.height).toBe((last?.top ?? 0) + (last?.height ?? 0) + 8);
       expect(endPanelFits(true, panel)).toBe(true);
-      const two = endPanelLayout(BODY, lines, quipRows(rows, fired, [2, 2, 2])).rows;
+      const two = endPanelLayout(FONTS, lines, quipRows(rows, fired, [2, 2, 2])).rows;
       two.slice(1).forEach((row, i) => {
         const above = two[i];
         expect(row.top).toBe((above?.top ?? 0) + (above?.height ?? 0) + quips.gap);
@@ -96,9 +97,9 @@ describe("grantedQuipLines", () => {
     "grants second lines from the top while the panel fits: %i lines, %i rows, fired %s, badges %s",
     (lines, rows, fired, shown) => {
       const wanted = quipRows(rows, fired, [2, 2, 2]);
-      const granted = grantedQuipLines(BODY, shown, lines, wanted);
+      const granted = grantedQuipLines(FONTS, shown, lines, wanted);
       const layout = (given: readonly number[]) =>
-        endPanelLayout(BODY, lines, quipRows(rows, fired, given));
+        endPanelLayout(FONTS, lines, quipRows(rows, fired, given));
       expect(endPanelFits(shown, layout(granted).panel)).toBe(true);
       // Every row granted one line could not have had two.
       granted.forEach((given, i) => {
@@ -115,7 +116,7 @@ describe("grantedQuipLines", () => {
   it.each(cases)(
     "grants every row two lines with no badges: %i lines, %i rows, fired %s",
     (lines, rows, fired) => {
-      expect(grantedQuipLines(BODY, false, lines, quipRows(rows, fired, [2, 2, 2]))).toEqual(
+      expect(grantedQuipLines(FONTS, false, lines, quipRows(rows, fired, [2, 2, 2]))).toEqual(
         Array<number>(rows).fill(2),
       );
     },
@@ -135,8 +136,8 @@ describe("an owner's row", () => {
   const rows = [false, true].flatMap((fired) => [1, 2].map((lines) => ({ fired, lines })));
 
   it.each(rows)("holds its text, its well and the name under it: %o", (row) => {
-    const height = quipRowHeight(BODY, row);
-    const textTop = quipTextY(BODY, row, height);
+    const height = quipRowHeight(FONTS, row);
+    const textTop = quipTextY(FONTS, row, height);
     const textBottom = textTop + (row.lines - 1) * BODY.lineHeight * 2 + bodyInk * 2;
     expect(textBottom + bubble.padBottom).toBeLessThanOrEqual(height);
     if (row.fired) {

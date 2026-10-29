@@ -5,7 +5,7 @@ import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { fontFileMetrics } from "../testing/fontInk";
 import { inside } from "../testing/rects";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
-import { PURCHASE_CONFIRM_LAYOUT } from "./purchaseConfirmLayout";
+import { confirmLeftCapTop, PURCHASE_CONFIRM_LAYOUT } from "./purchaseConfirmLayout";
 
 const LAYOUT = PURCHASE_CONFIRM_LAYOUT;
 
@@ -39,7 +39,11 @@ describe("the purchase confirm's layout", () => {
   const texts = [
     { font: "font-title", key: "title", place: LAYOUT.title },
     { font: "font-title", key: "price", place: LAYOUT.price },
-    { font: "font-body", key: "left", place: LAYOUT.left },
+    {
+      font: "font-body",
+      key: "left",
+      place: { capTop: confirmLeftCapTop(fontFileMetrics("font-title")) },
+    },
   ] as const;
 
   it("keeps the title's capitals in its band", () => {
@@ -58,7 +62,7 @@ describe("the purchase confirm's layout", () => {
     { bottom: LAYOUT.band.y + LAYOUT.band.height, name: "band", top: LAYOUT.band.y },
     { bottom: LAYOUT.well.y + LAYOUT.well.height, name: "well", top: LAYOUT.well.y },
     { bottom: inkBottom(price), name: "price", top: LAYOUT.price.capTop },
-    { bottom: inkBottom(left), name: "bank after", top: LAYOUT.left.capTop },
+    { bottom: inkBottom(left), name: "bank after", top: left.place.capTop },
     {
       bottom: LAYOUT.buttons.buy.y + LAYOUT.buttons.buy.height,
       name: "buttons",

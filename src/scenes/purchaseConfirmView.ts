@@ -2,11 +2,11 @@ import type { GameObjects, Scene } from "phaser";
 
 import type { DetailPicture } from "../home/detail";
 import type { ConfirmChoice, ConfirmLines } from "../home/purchaseConfirm";
-import { PURCHASE_CONFIRM_LAYOUT } from "../home/purchaseConfirmLayout";
+import { confirmLeftCapTop, PURCHASE_CONFIRM_LAYOUT } from "../home/purchaseConfirmLayout";
 import type { Rect } from "../lib/rect";
 import { addDim } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import { addPixelText } from "../ui/phaser/pixelText";
+import { addPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
 import { TEXT_SCALE } from "../ui/textFit";
 import { addDetailCard, addDetailWell } from "./homePanels";
 import { addMenuButton } from "./uiKit";
@@ -61,7 +61,8 @@ export function drawPurchaseConfirm(
     layer.add(scene.add.image(at.x, at.y, picture.key).setOrigin(0).setScale(picture.scale));
   }
   centred(LAYOUT.price, lines.price, PALETTE.plum);
-  centred(LAYOUT.left, lines.left, PALETTE.darkBrown);
+  const leftTop = confirmLeftCapTop(pixelFontMetrics(scene, "title"));
+  centred({ ...LAYOUT.left, capTop: leftTop }, lines.left, PALETTE.darkBrown);
   const labels: Readonly<Record<ConfirmChoice, string>> = { buy: lines.buy, cancel: lines.cancel };
   for (const choice of ["cancel", "buy"] as const) {
     const primary = choice === "buy";

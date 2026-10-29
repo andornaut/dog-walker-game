@@ -13,20 +13,13 @@ import { veteranSave } from "../testing/saves";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { TEXT_SCALE } from "../ui/textFit";
-import {
-  BADGE_STRIP,
-  badgeProgress,
-  badgeWall,
-  wallCell,
-  wallCellLineCount,
-  wallRects,
-} from "./badgesView";
+import { BADGE_STRIP, badgeProgress, badgeWall, wallCell, wallRects } from "./badgesView";
 import { MENU_TEXT_FIELDS } from "./menuText";
 import {
   badgesBottom,
   DETAIL_TEXT_WIDTH,
-  detailLineY,
   detailPanel,
+  detailTextTops,
   DOG_STATS,
   dogBlockTop,
   dogsBottom,
@@ -38,6 +31,7 @@ import {
   statsTabRects,
   walksBottom,
   walksHeadingTops,
+  wallLineTops,
   wallRowHeight,
 } from "./statsLayout";
 import { overallRows } from "./statsView";
@@ -63,12 +57,14 @@ describe("the tabs", () => {
 // last line's lowest ink inside the row.
 describe("a wall row", () => {
   const { badgeTop } = STATS_LAYOUT.wall;
-  const { lineHeight, lines, y } = STATS_LAYOUT.wallText;
+  const { lines } = STATS_LAYOUT.wallText;
   it.each(Array.from({ length: lines }, (_, i) => [i + 1] as const))(
     "holds the badge and %i lines of text",
     (count) => {
-      const height = wallRowHeight(count);
-      const lowest = y + (count - 1) * lineHeight + inkRowsFromCapTop(BODY) * TEXT_SCALE;
+      const goal = Array.from({ length: count - 1 }, () => "goal");
+      const tops = wallLineTops(BODY, { goal, name: ["name"], progress: [] });
+      const height = wallRowHeight(tops);
+      const lowest = (tops.at(-1) ?? 0) + inkRowsFromCapTop(BODY) * TEXT_SCALE;
       expect(lowest).toBeLessThan(height);
       expect(2 * badgeTop + BADGE_STRIP.badgeSize).toBeLessThanOrEqual(height);
     },
@@ -90,9 +86,11 @@ describe("the open badge", () => {
       const text = fillLine(MENU_TEXT_FIELDS.stats, words, "badgeLine", { line: badge.badgeLine });
       const line = wrapWords(width, DETAIL_TEXT_WIDTH, text);
       expect(Math.max(...[...goal, ...line].map(width))).toBeLessThanOrEqual(DETAIL_TEXT_WIDTH);
-      const lastTop = detailLineY(BODY, goal.length) + (line.length - 1) * BODY.lineHeight * 2;
+      const fonts = { body: BODY, title: TITLE };
+      const lineTop = detailTextTops(fonts, goal.length).line;
+      const lastTop = lineTop + (line.length - 1) * BODY.lineHeight * 2;
       const inkBottom = lastTop + inkRowsFromCapTop(BODY) * 2;
-      const panel = detailPanel(BODY, goal.length, line.length);
+      const panel = detailPanel(fonts, goal.length, line.length);
       expect(panel.height).toBe(inkBottom + detailText.foot + detailText.frame);
       expect(panel.height).toBeLessThanOrEqual(detail.height);
     }
@@ -151,7 +149,7 @@ const wallCells = BADGES.map((badge) =>
 );
 const wallRows = wallRects(
   wall,
-  wallCells.map((cell) => wallRowHeight(wallCellLineCount(cell))),
+  wallCells.map((cell) => wallRowHeight(wallLineTops(BODY, cell))),
 );
 const dogStatRows = DOG_STATS.map((stat) => ({ label: words.dogColumns[stat], value: "9999" }));
 
@@ -242,7 +240,8 @@ describe("each tab's scroll", () => {
   const dogCount = dogIds.length;
   const lastRow = wallRows.at(-1) ?? wall;
   const lastCell = wallCells.at(-1);
-  const lastLines = lastCell === undefined ? 1 : wallCellLineCount(lastCell);
+  const lastTop =
+    lastCell === undefined ? wallText.y : (wallLineTops(BODY, lastCell).at(-1) ?? wallText.y);
   const fullPack = dogIds.slice(0, read(gameData.tuning, "counts", "packSizeMax"));
   const bestWalk = { dogs: fullPack, earnedCents: cents(999_900), zonesFinished: 4 };
   const { outcomes, overall } = overallRows(gameData, { ...save.stats, bestWalk });
@@ -257,12 +256,7 @@ describe("each tab's scroll", () => {
       inkBottom(dogBlockTop(dogCount - 1) + dogs.rowsY + (DOG_STATS.length - 1) * rows.pitch),
       true,
     ],
-    [
-      "Badges",
-      badgesBottom(wallRows),
-      inkBottom(lastRow.y + wallText.y + (lastLines - 1) * wallText.lineHeight),
-      true,
-    ],
+    ["Badges", badgesBottom(wallRows), inkBottom(lastRow.y + lastTop), true],
   ])("%s: brings its last row into view", (_, bottom, lastInk, scrolls) => {
     const max = scrollMax(view, bottom);
     expect(max > 0).toBe(scrolls);
@@ -282,7 +276,7 @@ describe("an earned row", () => {
   const earnedRows = wallRects(
     wall,
     earned.map((badge) =>
-      wallRowHeight(wallCellLineCount(wallCell(wallText, bodyInk, badge, undefined))),
+      wallRowHeight(wallLineTops(BODY, wallCell(wallText, bodyInk, badge, undefined))),
     ),
   );
   const bottom = badgesBottom(earnedRows);

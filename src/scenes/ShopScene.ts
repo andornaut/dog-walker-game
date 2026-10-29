@@ -37,6 +37,7 @@ import {
   shopListBottom,
   shopListFrame,
   shopMessageCapTop,
+  shopRowTextTops,
   shopScrollbar,
   shopTabFace,
   shopTabRects,
@@ -788,9 +789,14 @@ export class ShopScene extends Scene {
     const right = rect.x + rect.width - ROW.plateInset;
     this.drawRowRight(content, view.plate, row, { mid, right });
     // A row with no second line centres its name.
-    const nameY = row.line === "" ? mid - 5 : mid - 15;
+    const tops = shopRowTextTops(pixelFontMetrics(this, "body"));
+    const nameY = row.line === "" ? mid - 5 : mid + tops.name;
     addBodyText(this, content, { x: textX, y: nameY }, row.name, { colour: ink });
-    this.drawRowLine(content, row, { greyed: view.state === "disabled", mid, x: textX });
+    this.drawRowLine(content, row, {
+      greyed: view.state === "disabled",
+      x: textX,
+      y: mid + tops.line,
+    });
     if (this.focusId === row.id) {
       addSelectFrame(this, holder, rect, reducedMotion);
     }
@@ -813,16 +819,16 @@ export class ShopScene extends Scene {
     parent.add(this.add.image(at.x, at.y, shown, tagFrame(this, key, "happy")).setOrigin(0));
   }
 
-  // A row's line in words under its name: a dog's fee, a gear item's effect, a slot's note.
+  // A row's line in words under its name, its capitals' top at y: a dog's fee, a gear item's
+  // effect, a slot's note.
   private drawRowLine(
     parent: GameObjects.Container,
     row: ShopRow,
-    at: { greyed: boolean; mid: number; x: number },
+    at: { greyed: boolean; x: number; y: number },
   ): void {
     const colour = at.greyed ? PALETTE[GREYED.text] : PALETTE.darkBrown;
     if (row.line !== "") {
-      const y = at.mid + 3;
-      addBodyText(this, parent, { x: at.x, y }, row.line, { colour });
+      addBodyText(this, parent, { x: at.x, y: at.y }, row.line, { colour });
     }
   }
 

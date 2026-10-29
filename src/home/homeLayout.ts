@@ -2,7 +2,7 @@ import type { DogId } from "../data/types";
 import { ownerPhotoRect, WALK_BAR, type WalkBarButtonId } from "../hud/walkHud";
 import type { PackPlacement } from "../layout/packFormation";
 import type { Point, Rect } from "../lib/rect";
-import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
+import { type FontMetrics, helpCapDy, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import type { GridSpec } from "../ui/grid";
 import type { SectionId } from "./sections";
 
@@ -113,14 +113,15 @@ export const HOME_LAYOUT = {
   // beside the well from besideX, besideDy under its top. A dog's card puts its owner's photo,
   // name and role between them (detailOwner): their face-owner-<art> face (owner.face square) in
   // the walk card's photo mat and frame, then owner.gap right of the photo their name in 2x body
-  // text and under it their role in 2x body text, wrapped, its capitals roleGap under the name's
-  // lowest ink. The name is in owner.nameColour: plum, where the walk card's name is tan, because
-  // this card's paper is cream and the walk card's is navy; the role is in owner.roleColour.
+  // text and under it their role in 2x body text, wrapped, its capitals LABEL_HELP_GAP clear rows
+  // under the body font's lowest ink (helpCapDy). The name is in owner.nameColour: plum, where
+  // the walk card's name is tan, because this card's paper is cream and the walk card's is navy;
+  // the role is in owner.roleColour.
   card: {
     band: { height: 24, inset: 6, titleY: 7 },
     besideDy: 4,
     besideX: 90,
-    owner: { face: 32, gap: 6, nameColour: "plum", roleColour: "darkBrown", roleGap: 2 },
+    owner: { face: 32, gap: 6, nameColour: "plum", roleColour: "darkBrown" },
     pad: 12,
     rowGap: 8,
     well: { picture: 2, size: 68, x: 12, y: 36 },
@@ -352,8 +353,7 @@ export type DetailRow = number | OwnerRow;
 // The rows from the owner's name's capitals to their role's lowest ink, the role on roleLines
 // lines.
 function ownerTextRows(body: FontMetrics, roleLines: number): number {
-  const { roleGap } = HOME_LAYOUT.card.owner;
-  return inkRowsFromCapTop(body) * 2 + roleGap + inkRowsOfLines(body, roleLines) * 2;
+  return helpCapDy(body, 2) + inkRowsOfLines(body, roleLines) * 2;
 }
 
 // How tall the owner's row is, its role on roleLines lines: the photo or the text beside it,
@@ -373,7 +373,7 @@ export function detailOwner(
   at: Point,
   roleLines: number,
 ): { face: Point; name: Point; photo: Rect; role: Point & { pitch: number } } {
-  const { face, gap, roleGap } = HOME_LAYOUT.card.owner;
+  const { face, gap } = HOME_LAYOUT.card.owner;
   const height = detailOwnerHeight(body, roleLines);
   const probe = ownerPhotoRect(face, { x: 0, y: 0 });
   const photo = { ...probe, x: at.x, y: at.y + Math.floor((height - probe.height) / 2) };
@@ -386,7 +386,7 @@ export function detailOwner(
     role: {
       pitch: body.lineHeight * 2,
       x,
-      y: nameY + inkRowsFromCapTop(body) * 2 + roleGap,
+      y: nameY + helpCapDy(body, 2),
     },
   };
 }

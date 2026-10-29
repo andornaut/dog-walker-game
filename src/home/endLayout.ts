@@ -1,5 +1,5 @@
 import { WIDE_BUTTON } from "../layout/screenLayout";
-import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
+import { type FontMetrics, helpCapDy, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { TEXT_SCALE } from "../ui/textFit";
 
 // The end screen's geometry, with every text at 2x.
@@ -7,7 +7,7 @@ const PANEL = { height: 304, width: 312, x: 24, y: 112 };
 const RIBBON = { x: 144, y: 102 };
 
 export const END_LAYOUT = {
-  badges: { height: 92, width: 344, x: 8, y: 416 },
+  badges: { height: 92, width: 344, x: 8, y: 419 },
   breakdown: { amountRight: 196, label: 40, pitch: 18, top: PANEL.y + 42 },
   button: { ...WIDE_BUTTON, y: 512 },
   logo: { x: 107, y: 2 },
@@ -15,9 +15,10 @@ export const END_LAYOUT = {
   // An owner's row, mirroring the home screen's bubble: a speech bubble from x with its tail
   // at the right pointing at the face in its well, and the owner's name in rust at 1x under
   // the well, its capitals nameY under the row's top, centred on the well. A fired row's
-  // bubble has "{owner} fired you" at headerY and the closing line's first capitals at
-  // textY; a happy row's has only the line, centred down the bubble. The bubble ends
-  // padBottom under a line at textY's lowest ink, and the row is at least as tall as the
+  // bubble has "{owner} fired you" in the title font with its capitals at headerY and the
+  // closing line's first capitals LABEL_HELP_GAP clear rows under the title font's lowest ink
+  // (quipTextTop); a happy row's has only the line, centred down the bubble. The bubble ends
+  // padBottom under a line at quipTextTop's lowest ink, and the row is at least as tall as the
   // name's lowest ink; the next row starts gap under it. A 1px tan rule width wide from x
   // runs above over the first row.
   quips: {
@@ -29,7 +30,6 @@ export const END_LAYOUT = {
     rule: { above: 8, width: 288, x: 36 },
     tail: { x: 279, y: 15 },
     textX: 42,
-    textY: 22,
     well: { size: 34, x: 290, y: 0 },
   },
   // The return home, under the logo and above the panel: the walker and pack walk up the
@@ -111,6 +111,17 @@ export interface QuipRow {
   readonly lines: number;
 }
 
+// The fonts an owner's row is set in: the header in title, the closing line in body.
+export interface QuipFonts {
+  readonly body: FontMetrics;
+  readonly title: FontMetrics;
+}
+
+// A fired row's closing line's first capitals, from the row's top, under its header.
+function quipTextTop(title: FontMetrics): number {
+  return END_LAYOUT.quips.headerY + helpCapDy(title, TEXT_SCALE);
+}
+
 // From a line's capitals to its last line's lowest ink, on lines lines of the body font at 2x.
 function quipTextHeight(body: FontMetrics, lines: number): number {
   return inkRowsOfLines(body, lines) * TEXT_SCALE;
@@ -119,18 +130,18 @@ function quipTextHeight(body: FontMetrics, lines: number): number {
 // An owner's row's height, and its bubble's: down to the closing line's lowest ink under the
 // header's place and padBottom more, and at least down to the lowest ink of the name under the
 // well.
-export function quipRowHeight(body: FontMetrics, row: QuipRow): number {
-  const { bubble, nameY, textY } = END_LAYOUT.quips;
-  const text = textY + quipTextHeight(body, row.lines) + bubble.padBottom;
-  return Math.max(text, nameY + inkRowsFromCapTop(body));
+export function quipRowHeight(fonts: QuipFonts, row: QuipRow): number {
+  const { bubble, nameY } = END_LAYOUT.quips;
+  const text = quipTextTop(fonts.title) + quipTextHeight(fonts.body, row.lines) + bubble.padBottom;
+  return Math.max(text, nameY + inkRowsFromCapTop(fonts.body));
 }
 
 // The closing line's first capitals, from the row's top: under a fired row's header, or
 // centred down a happy row's bubble.
-export function quipTextY(body: FontMetrics, row: QuipRow, height: number): number {
+export function quipTextY(fonts: QuipFonts, row: QuipRow, height: number): number {
   return row.fired
-    ? END_LAYOUT.quips.textY
-    : Math.floor((height - quipTextHeight(body, row.lines)) / 2);
+    ? quipTextTop(fonts.title)
+    : Math.floor((height - quipTextHeight(fonts.body, row.lines)) / 2);
 }
 
 // The breakdown ends a pitch under its last line's top; the side column ends under its total.
@@ -147,7 +158,7 @@ interface EndPanelLayout {
 
 // The panel and the owners' rows, each row's closing line on the lines it is given.
 export function endPanelLayout(
-  body: FontMetrics,
+  fonts: QuipFonts,
   breakdownLines: number,
   quipRows: readonly QuipRow[],
 ): EndPanelLayout {
@@ -156,7 +167,7 @@ export function endPanelLayout(
   let top = Math.max(listBottom, side.totalY + side.totalHeight) + QUIPS_GAP;
   const shown = quipRows.length === 0 ? [{ fired: false, lines: 1 }] : quipRows;
   const rows = shown.map((quip) => {
-    const row = { height: quipRowHeight(body, quip), top };
+    const row = { height: quipRowHeight(fonts, quip), top };
     top += row.height + quips.gap;
     return row;
   });
@@ -175,7 +186,7 @@ export function endPanelFits(badgesShown: boolean, panel: typeof PANEL): boolean
 // The lines each owner's row gets: the lines it wants, from the top row down, while the panel
 // still fits with every row after it on one line; one line once it would not.
 export function grantedQuipLines(
-  body: FontMetrics,
+  fonts: QuipFonts,
   badgesShown: boolean,
   breakdownLines: number,
   wanted: readonly QuipRow[],
@@ -183,7 +194,7 @@ export function grantedQuipLines(
   return wanted.reduce<number[]>((granted, row, i) => {
     const above = granted.map((lines, j) => ({ fired: wanted[j]?.fired ?? false, lines }));
     const rest = wanted.slice(i + 1).map(({ fired }) => ({ fired, lines: 1 }));
-    const tried = endPanelLayout(body, breakdownLines, [...above, row, ...rest]);
+    const tried = endPanelLayout(fonts, breakdownLines, [...above, row, ...rest]);
     return [...granted, endPanelFits(badgesShown, tried.panel) ? row.lines : 1];
   }, []);
 }

@@ -3,7 +3,7 @@ import { clamp01 } from "../lib/numbers";
 import type { Rect } from "../lib/rect";
 import type { Settings } from "../save/schema";
 import { type CloseControl, closeControl } from "../ui/closeControl";
-import { type FontMetrics, inkRowsOfLines } from "../ui/fontMetrics";
+import { type FontMetrics, helpCapDy, inkRowsOfLines } from "../ui/fontMetrics";
 import { TEXT_SCALE, textOnLines } from "../ui/textFit";
 import { cardBand, HOME_LAYOUT } from "./homeLayout";
 
@@ -99,11 +99,11 @@ export interface SettingsFonts {
 
 // Offsets from a row's top-left corner, every text at 2x. Each row has its 16x16 icon 3px above
 // its title-font label's capitals. A switch or button row has its note under them in body text,
-// labelGap rows under the label's capitals, from the icon's column, wrapped onto up to
-// note.lines lines, and inkFoot rows under the note's lowest ink. Its control sits pad in from
-// the row's right, centred down from the label's capitals to the note's lowest ink. A slider row
-// is slider.height tall, with its percentage on the label's line, ending pad in from the row's
-// right, and its track under them, pad in from either side.
+// LABEL_HELP_GAP clear rows under the label font's lowest ink (helpCapDy), from the icon's
+// column, wrapped onto up to note.lines lines, and inkFoot rows under the note's lowest ink.
+// Its control sits pad in from the row's right, centred down from the label's capitals to the
+// note's lowest ink. A slider row is slider.height tall, with its percentage on the label's
+// line, ending pad in from the row's right, and its track under them, pad in from either side.
 export const SETTINGS_ROW = {
   button: { height: 24, width: 52 },
   // Between a note's room and the control beside it.
@@ -111,7 +111,6 @@ export const SETTINGS_ROW = {
   icon: { dx: 6, dy: 9 },
   inkFoot: 14,
   label: { dx: 26, dy: 12 },
-  labelGap: 10,
   note: { dx: 6, lines: 2 },
   pad: 8,
   slider: { height: 56 },
@@ -130,11 +129,9 @@ export function noteRoom(kind: "button" | "switch"): number {
 // A note: at 2x, wrapped onto up to note.lines lines.
 export const SETTINGS_NOTE_STYLE = textOnLines(SETTINGS_ROW.note.lines);
 
-// The note's first line's capitals' top, from the row's top: labelGap clear rows under the
-// label's capitals.
+// The note's first line's capitals' top, from the row's top, under its title-font label.
 export function noteDy(title: FontMetrics): number {
-  const { label, labelGap } = SETTINGS_ROW;
-  return label.dy + title.capHeight * TEXT_SCALE + labelGap;
+  return SETTINGS_ROW.label.dy + helpCapDy(title, TEXT_SCALE);
 }
 
 const PANEL = { width: 344 };

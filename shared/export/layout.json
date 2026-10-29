@@ -1385,7 +1385,7 @@
         "height": 92,
         "width": 344,
         "x": 8,
-        "y": 416
+        "y": 419
       },
       "breakdown": {
         "amountRight": 196,
@@ -1432,7 +1432,6 @@
           "y": 15
         },
         "textX": 42,
-        "textY": 22,
         "well": {
           "size": 34,
           "x": 290,
@@ -1639,8 +1638,7 @@
           "face": 32,
           "gap": 6,
           "nameColour": "plum",
-          "roleColour": "darkBrown",
-          "roleGap": 2
+          "roleColour": "darkBrown"
         },
         "pad": 12,
         "rowGap": 8,
@@ -2214,23 +2212,23 @@
         "height": 24,
         "width": 332,
         "x": 14,
-        "y": 108
+        "y": 105
       },
       "close": {
         "hit": {
           "height": 44,
           "width": 44,
           "x": 308,
-          "y": 102
+          "y": 99
         },
         "x": 324,
-        "y": 110
+        "y": 107
       },
       "panel": {
         "width": 344,
-        "height": 356,
+        "height": 362,
         "x": 8,
-        "y": 102
+        "y": 99
       },
       "rows": [
         {
@@ -2238,14 +2236,14 @@
             "height": 16,
             "width": 32,
             "x": 304,
-            "y": 161
+            "y": 159
           },
-          "noteY": 172,
+          "noteY": 171,
           "rect": {
-            "height": 60,
+            "height": 62,
             "width": 328,
             "x": 16,
-            "y": 140
+            "y": 137
           }
         },
         {
@@ -2255,7 +2253,7 @@
             "height": 56,
             "width": 328,
             "x": 16,
-            "y": 200
+            "y": 199
           }
         },
         {
@@ -2265,7 +2263,7 @@
             "height": 56,
             "width": 328,
             "x": 16,
-            "y": 256
+            "y": 255
           }
         },
         {
@@ -2275,12 +2273,12 @@
             "x": 304,
             "y": 343
           },
-          "noteY": 344,
+          "noteY": 345,
           "rect": {
-            "height": 80,
+            "height": 82,
             "width": 328,
             "x": 16,
-            "y": 312
+            "y": 311
           }
         },
         {
@@ -2288,14 +2286,14 @@
             "height": 24,
             "width": 52,
             "x": 284,
-            "y": 409
+            "y": 411
           },
-          "noteY": 424,
+          "noteY": 427,
           "rect": {
-            "height": 60,
+            "height": 62,
             "width": 328,
             "x": 16,
-            "y": 392
+            "y": 393
           }
         }
       ],
@@ -2304,30 +2302,30 @@
           "height": 1,
           "width": 320,
           "x": 20,
-          "y": 200
+          "y": 199
         },
         {
           "height": 1,
           "width": 320,
           "x": 20,
-          "y": 256
+          "y": 255
         },
         {
           "height": 1,
           "width": 320,
           "x": 20,
-          "y": 312
+          "y": 311
         },
         {
           "height": 1,
           "width": 320,
           "x": 20,
-          "y": 392
+          "y": 393
         }
       ],
       "title": {
         "x": 180,
-        "y": 115
+        "y": 112
       },
       "track": {
         "dy": 30,
@@ -2355,24 +2353,24 @@
         "y": 52
       },
       "dogs": {
-        "dogHeadingY": 289,
+        "dogHeadingY": 307,
         "dogRows": {
-          "height": 42,
-          "pitch": 48,
-          "y": 305
+          "height": 48,
+          "pitch": 54,
+          "y": 323
         },
         "slotHeadingY": 123,
         "slotRows": {
-          "height": 42,
-          "pitch": 48,
+          "height": 48,
+          "pitch": 54,
           "y": 139
         }
       },
       "gear": {
         "headingY": 123,
         "rows": {
-          "height": 44,
-          "pitch": 54,
+          "height": 50,
+          "pitch": 60,
           "y": 141
         }
       },
@@ -2480,9 +2478,8 @@
         "foot": 8,
         "frame": 3,
         "gap": 8,
-        "goalY": 136,
+        "goalDy": 24,
         "nameY": 92,
-        "statusY": 112,
         "textRight": 16,
         "x": 16
       },

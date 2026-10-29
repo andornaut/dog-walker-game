@@ -16,7 +16,7 @@ import {
   panelBadgeStrip,
 } from "../home/badgesView";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
-import { DETAIL_TEXT_WIDTH, detailLineY, detailPanel, STATS_LAYOUT } from "../home/statsLayout";
+import { DETAIL_TEXT_WIDTH, detailPanel, detailTextTops, STATS_LAYOUT } from "../home/statsLayout";
 import { fillLine } from "../lib/lines";
 import type { Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
@@ -187,8 +187,9 @@ export function addBadgeDetail(
   const line = wrap(
     fillLine(MENU_TEXT_FIELDS.stats, words, "badgeLine", { line: badge.badgeLine }),
   );
-  const body = pixelFontMetrics(scene, "body");
-  const panel = detailPanel(body, goal.length, line.length);
+  const fonts = { body: pixelFontMetrics(scene, "body"), title: pixelFontMetrics(scene, "title") };
+  const panel = detailPanel(fonts, goal.length, line.length);
+  const tops = detailTextTops(fonts, goal.length);
   parent.add([addDim(scene, SCREEN_LAYOUT.screen), addPanel(scene, panel)]);
   addCloseButton(scene, parent, closeControl(panel), false);
   const centre = DETAIL.x + DETAIL.width / 2;
@@ -214,11 +215,10 @@ export function addBadgeDetail(
     addBodyText(scene, parent, { x: centre, y: DETAIL.y + y }, value, { originX: 0.5, ...style });
   text(DETAIL_TEXT.nameY, badge.name, { colour: colours.name, font: "title" });
   const status = badge.earned ? words.badgeEarned : words.badgeLocked;
-  text(DETAIL_TEXT.statusY, status, { colour: colours.status });
+  text(tops.status, status, { colour: colours.status });
   // The goal and line centred under the name, each line of them centred on the card.
-  text(DETAIL_TEXT.goalY, goal.join("\n"), { align: "centre", colour: colours.goal });
-  const lineY = detailLineY(body, goal.length);
-  text(lineY, line.join("\n"), { align: "centre", colour: colours.line });
+  text(tops.goal, goal.join("\n"), { align: "centre", colour: colours.goal });
+  text(tops.line, line.join("\n"), { align: "centre", colour: colours.line });
   return panel;
 }
 

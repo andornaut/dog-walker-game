@@ -150,11 +150,6 @@ export function wallCell(
   return { ...fitted, whole: fitted.whole && drawn.every((line) => inkWidth(line) <= cell.width) };
 }
 
-// How many lines a wall cell draws.
-export function wallCellLineCount(cell: WallCellLines): number {
-  return cell.name.length + cell.goal.length + cell.progress.length;
-}
-
 interface WallSpec {
   readonly gap: number;
   readonly width: number;

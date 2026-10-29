@@ -1,9 +1,9 @@
 import { SCREEN_LAYOUT } from "../data/screen";
 import type { Rect } from "../lib/rect";
 import { pageCloseControl } from "../ui/closeControl";
-import { type FontMetrics, inkRowsOfLines } from "../ui/fontMetrics";
+import { type FontMetrics, helpCapDy, inkRowsOfLines } from "../ui/fontMetrics";
 import { type ScrollbarRects, scrollbarRects, type ScrollbarSpec } from "../ui/scrollbar";
-import { BADGE_STRIP } from "./badgesView";
+import { BADGE_STRIP, type WallCellLines } from "./badgesView";
 
 export type StatsTab = "badges" | "dogs" | "runs";
 
@@ -36,8 +36,9 @@ export const STATS_LAYOUT = {
   close: pageCloseControl(SCREEN_LAYOUT.screen),
   // The badge tapped open, over the wall, at most height tall: detailPanel sizes it.
   detail: { height: 268, width: 312, x: 24, y: PANEL.y + 32 },
-  // In the open badge, from its top: the badge's centre at badgeY, the name's and the status's
-  // capitals at nameY and statusY, then the goal and the badge's line at 2x, centred and
+  // In the open badge, from its top: the badge's centre at badgeY, the name's capitals at nameY,
+  // the status's LABEL_HELP_GAP clear rows under the title font's lowest ink (helpCapDy) and the
+  // goal's goalDy under the status's, then the goal and the badge's line at 2x, centred and
   // wrapped between x in from its left edge and textRight in from its right, a line of the body
   // font apart and gap between them; foot rows of cream under the line's lowest ink, then the
   // ui-panel's frame, frame rows deep, end the panel.
@@ -46,9 +47,8 @@ export const STATS_LAYOUT = {
     foot: 8,
     frame: 3,
     gap: 8,
-    goalY: 136,
+    goalDy: 24,
     nameY: 92,
-    statusY: 112,
     textRight: 16,
     x: 16,
   },
@@ -86,11 +86,12 @@ export const STATS_LAYOUT = {
   // The badge wall: the heading and the earned count with their capitals at headingY, then one
   // badge per row from y, gap apart, each the badge badgeTop under the row's top then a text
   // column of up to lines lines at 2x from x (the name, the goal, then a locked badge's
-  // progress across walks), its capitals' top y under the row's top and pad over the row's
-  // bottom. The wall ends foot under its last row. An earned badge's row lies on a band in
-  // earned.fill with a 1px earned.outline frame, bandWidth wide from bandLeft left of the row
-  // and bandY over and under it; the ui-check tick, checkSize square, sits over the badge's
-  // top-right corner, its top-left checkDx right of the row's left and checkDy below its top.
+  // progress across walks, wallLineTops), its capitals' top y under the row's top and its last
+  // line's pitch and pad over the row's bottom. The wall ends foot under its last row. An
+  // earned badge's row lies on a band in earned.fill with a 1px earned.outline frame,
+  // bandWidth wide from bandLeft left of the row and bandY over and under it; the ui-check
+  // tick, checkSize square, sits over the badge's top-right corner, its top-left checkDx right
+  // of the row's left and checkDy below its top.
   wall: {
     badgeTop: 2,
     earned: {
@@ -117,17 +118,30 @@ export const STATS_LAYOUT = {
 export const DETAIL_TEXT_WIDTH =
   STATS_LAYOUT.detail.width - STATS_LAYOUT.detailText.x - STATS_LAYOUT.detailText.textRight;
 
-// The capitals' top of the open badge's line, from its top, under a goal goalLines lines long.
-export function detailLineY(body: FontMetrics, goalLines: number): number {
-  const { gap, goalY } = STATS_LAYOUT.detailText;
-  return goalY + goalLines * body.lineHeight * 2 + gap;
+// The fonts the open badge's text is set in: its name in title, the rest in body.
+export interface BadgeDetailFonts {
+  readonly body: FontMetrics;
+  readonly title: FontMetrics;
+}
+
+// The capitals' tops of the open badge's status, goal and line, from its top, under a goal
+// goalLines lines long.
+export function detailTextTops(
+  fonts: BadgeDetailFonts,
+  goalLines: number,
+): { goal: number; line: number; status: number } {
+  const { gap, goalDy, nameY } = STATS_LAYOUT.detailText;
+  const status = nameY + helpCapDy(fonts.title, 2);
+  const goal = status + goalDy;
+  return { goal, line: goal + goalLines * fonts.body.lineHeight * 2 + gap, status };
 }
 
 // The open badge's panel, its frame detailText.foot under its line's lowest ink, under a goal
 // goalLines lines long and a line lineLines lines long, all at 2x.
-export function detailPanel(body: FontMetrics, goalLines: number, lineLines: number): Rect {
+export function detailPanel(fonts: BadgeDetailFonts, goalLines: number, lineLines: number): Rect {
   const { detail, detailText } = STATS_LAYOUT;
-  const inkBottom = detailLineY(body, goalLines) + inkRowsOfLines(body, lineLines) * 2;
+  const line = detailTextTops(fonts, goalLines).line;
+  const inkBottom = line + inkRowsOfLines(fonts.body, lineLines) * 2;
   return { ...detail, height: inkBottom + detailText.foot + detailText.frame };
 }
 
@@ -199,12 +213,29 @@ export function earnedCheck(row: Rect): Rect {
   return { height: checkSize, width: checkSize, x: row.x + checkDx, y: row.y + checkDy };
 }
 
-// A wall row's height for a badge whose text runs lines lines: as tall as the badge with
-// badgeTop over and under it, or as the text with pad under its last line, whichever is taller.
-export function wallRowHeight(lines: number): number {
+// The capitals' top of each line of a wall cell's text, from its row's top: the name's lines from
+// y, a lineHeight apart, then the goal's and the progress's, the first LABEL_HELP_GAP clear rows
+// under the body font's lowest ink on the name's last line (helpCapDy) and each after it a
+// lineHeight under the one before.
+export function wallLineTops(
+  body: FontMetrics,
+  cell: Pick<WallCellLines, "goal" | "name" | "progress">,
+): number[] {
+  const { lineHeight, y } = STATS_LAYOUT.wallText;
+  const name = cell.name.map((_, i) => y + i * lineHeight);
+  const below = y + (cell.name.length - 1) * lineHeight + helpCapDy(body, 2);
+  const rest = [...cell.goal, ...cell.progress].map((_, i) => below + i * lineHeight);
+  return [...name, ...rest];
+}
+
+// A wall row's height for a badge whose text lines' capitals' tops are tops (wallLineTops): as
+// tall as the badge with badgeTop over and under it, or as the text with its last line's pitch
+// and pad under it, whichever is taller.
+export function wallRowHeight(tops: readonly number[]): number {
   const { badgeTop } = STATS_LAYOUT.wall;
   const { lineHeight, pad, y } = STATS_LAYOUT.wallText;
-  return Math.max(BADGE_STRIP.badgeSize + 2 * badgeTop, y + lines * lineHeight + pad);
+  const last = tops.at(-1) ?? y - lineHeight;
+  return Math.max(BADGE_STRIP.badgeSize + 2 * badgeTop, last + lineHeight + pad);
 }
 
 // The scrollbar's track and thumb for content max pixels taller than the view, scrolled y, or

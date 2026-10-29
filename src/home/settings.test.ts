@@ -227,16 +227,6 @@ describe("the settings card", () => {
     },
   );
 
-  it.each(notedRows.map((row) => [row.label, SHIPPED_ROWS.indexOf(row)] as const))(
-    "leaves 10 clear rows between the %s label's lowest ink and its note's capitals",
-    (_, i) => {
-      const parts = new Map(rowParts(i));
-      const label = parts.get("label");
-      const noteCaps = layout.rows[i]?.noteY ?? 0;
-      expect(noteCaps - ((label?.y ?? 0) + (label?.height ?? 0))).toBe(10);
-    },
-  );
-
   // Centred within a pixel down from the label's top to the note's lowest ink.
   it.each(notedRows.map((row) => [row.label, SHIPPED_ROWS.indexOf(row)] as const))(
     "centres the %s row's control on its label and note",

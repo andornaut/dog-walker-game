@@ -10,7 +10,6 @@ import {
   badgeWall,
   earnedText,
   wallCell,
-  wallCellLineCount,
   type WallCellLines,
   wallRects,
 } from "../home/badgesView";
@@ -31,6 +30,7 @@ import {
   statsTabRects,
   walksBottom,
   walksHeadingTops,
+  wallLineTops,
   wallRowHeight,
 } from "../home/statsLayout";
 import { dogRows, overallRows, type StatsRow } from "../home/statsView";
@@ -49,7 +49,13 @@ import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import { rectIndexAt } from "../ui/grid";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import { type FontRole, inkSpan, setPixelText, withProbe } from "../ui/phaser/pixelText";
+import {
+  type FontRole,
+  inkSpan,
+  pixelFontMetrics,
+  setPixelText,
+  withProbe,
+} from "../ui/phaser/pixelText";
 import { addBadge, addBadgeDetail, BADGE_SIZE } from "./badges";
 import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
 import { currentSettings, profileSave } from "./profileStore";
@@ -417,22 +423,29 @@ export class StatsScene extends Scene {
         wallCell(WALL_TEXT, inkWidth, badge, badgeProgress(gameData, save, badge)),
       );
     });
+    // Each line's capitals' top, the goal's clear of the name's line.
+    const body = pixelFontMetrics(this, "body");
+    const tops = cells.map((cell) => wallLineTops(body, cell));
     // Each row as tall as its badge or its text, whichever is taller.
-    this.wallRows = wallRects(
-      WALL,
-      cells.map((cell) => wallRowHeight(wallCellLineCount(cell))),
-    );
+    this.wallRows = wallRects(WALL, tops.map(wallRowHeight));
     badges.forEach((badge, i) => {
       const rect = this.wallRows[i];
       const cell = cells[i];
       if (rect !== undefined && cell !== undefined) {
-        this.drawWallBadge(badge, cell, rect);
+        this.drawWallBadge(badge, cell, { rect, tops: tops[i] ?? [] });
       }
     });
     return badgesBottom(this.wallRows);
   }
 
-  private drawWallBadge(badge: BadgeView, cell: WallCellLines, rect: Rect): void {
+  // A wall row: its badge, and its text's lines with their capitals' tops at tops under the
+  // row's top.
+  private drawWallBadge(
+    badge: BadgeView,
+    cell: WallCellLines,
+    at: { rect: Rect; tops: readonly number[] },
+  ): void {
+    const { rect } = at;
     if (badge.earned) {
       const band = earnedBand(rect);
       const g = this.add.graphics();
@@ -450,18 +463,15 @@ export class StatsScene extends Scene {
         this.content?.add(tick);
       }
     }
-    const x = rect.x + WALL_TEXT.x;
-    let y = rect.y + WALL_TEXT.y;
-    const draw = (lines: readonly string[], colour: number) => {
-      for (const line of lines) {
-        this.text(x, y, line, { colour });
-        y += WALL_TEXT.lineHeight;
-      }
-    };
     const colours = BADGE_TEXT_COLOURS[badge.earned ? "earned" : "locked"];
-    draw(cell.name, PALETTE[colours.name]);
-    draw(cell.goal, PALETTE[colours.goal]);
-    draw(cell.progress, PALETTE[colours.goal]);
+    const lines = [
+      ...cell.name.map((line) => [line, colours.name] as const),
+      ...[...cell.goal, ...cell.progress].map((line) => [line, colours.goal] as const),
+    ];
+    lines.forEach(([line, colour], i) => {
+      const y = rect.y + (at.tops[i] ?? 0);
+      this.text(rect.x + WALL_TEXT.x, y, line, { colour: PALETTE[colour] });
+    });
   }
 
   // The tapped badge's card (addBadgeDetail); an earned one bursts with confetti as it opens.

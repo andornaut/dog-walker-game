@@ -181,6 +181,7 @@ export class EndScene extends Scene {
     const title = (x: number, y: number, value: string, colour: number, originX = 0) =>
       addBodyText(this, undefined, { x, y }, value, { colour, font: "title", originX });
     const body = pixelFontMetrics(this, "body");
+    const fonts = { body, title: pixelFontMetrics(this, "title") };
     // A closing line wraps onto a second line at 2x while the panel has room for it, the panel
     // growing into the badge strip's area when no badge shows.
     const quipFit = (lines: number) => ({ room: QUIP_TEXT_ROOM, style: textOnLines(lines) });
@@ -191,9 +192,9 @@ export class EndScene extends Scene {
       });
       return { fired: line.fired, lines: Math.min(QUIP_LINES, shown.length) };
     });
-    const quipLines = grantedQuipLines(body, earned.length > 0, lines.length, wanted);
+    const quipLines = grantedQuipLines(fonts, earned.length > 0, lines.length, wanted);
     const quipRows = closing.map(({ fired }, i) => ({ fired, lines: itemAt(quipLines, i) }));
-    const { panel, rows } = endPanelLayout(body, lines.length, quipRows);
+    const { panel, rows } = endPanelLayout(fonts, lines.length, quipRows);
     addPanel(this, panel);
     const g = this.add.graphics();
 
@@ -236,7 +237,7 @@ export class EndScene extends Scene {
     // The walk's total under the pips in the body font, as the breakdown's amounts are, on
     // TOTAL's row, clear of its title-font label.
     const totalText = signedShortDollarText(walk.earnedCents);
-    const totalY = sideTotalAmountY(body, pixelFontMetrics(this, "title"));
+    const totalY = sideTotalAmountY(body, fonts.title);
     text(SIDE.right, totalY, totalText, PALETTE.forest, 1);
     title(SIDE.x, SIDE.totalY, words.total, PALETTE.plum);
 
@@ -269,7 +270,7 @@ export class EndScene extends Scene {
         title(textX, row + headerY, header, PALETTE.darkRed);
       }
       const quipRow = itemAt(quipRows, i);
-      const textY = row + quipTextY(body, quipRow, height);
+      const textY = row + quipTextY(fonts, quipRow, height);
       const quip = text(textX, textY, line.text, PALETTE.plum);
       fitPixelText(quip, quipFit(quipRow.lines), textX, textY);
     });
