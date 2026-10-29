@@ -262,9 +262,10 @@ export const HOME_LAYOUT = {
   // The top bar: the bank in its well at the left, then plain plum, then the buttons. The well
   // is as wide as the bank needs (bankWell), at most well.maxWidth, drawn from wellKeys: its left
   // column, the middle column repeated, and its right column. It is ink on its first
-  // well.height - lip rows, its lip on the last. The bank, the title font's "$" and amount one
-  // font advance apart, is set at bank.scale in full with thousands separated (bankAmountText),
-  // its ink bank.pad columns in from the well's left, its capitals' top at bank.capsY.
+  // well.height - lip rows and well.width - lip columns, its lip on the rest. The bank, the title
+  // font's "$" and amount one font advance apart, is set at bank.scale in full with thousands
+  // separated (bankAmountText), its ink bank.pad columns in from the well's left, its capitals'
+  // top at bank.capsY.
   topBar: {
     bank: { capsY: 11, pad: 3, scale: WALK_BAR.cash.scale },
     faceSize: TOP_BAR_FACE,
@@ -327,14 +328,15 @@ export const HOME_LAYOUT = {
   yardSign: Rect;
 };
 
-// How wide the bank's ink may be: the widest well less its padding.
-export const BANK_ROOM = HOME_LAYOUT.topBar.well.maxWidth - 2 * HOME_LAYOUT.topBar.bank.pad;
+// How wide the bank's ink may be: the widest well less its lip and padding.
+export const BANK_ROOM =
+  HOME_LAYOUT.topBar.well.maxWidth - HOME_LAYOUT.topBar.well.lip - 2 * HOME_LAYOUT.topBar.bank.pad;
 
-// The bank's well for its ink inkWidth wide on screen: bank.pad columns either side of the ink,
-// at most well.maxWidth wide.
+// The bank's well for its ink inkWidth wide on screen: bank.pad ink columns either side of the
+// bank's ink, then the lip, at most well.maxWidth wide.
 export function bankWell(inkWidth: number): Rect {
   const { bank, well } = HOME_LAYOUT.topBar;
-  const width = Math.min(well.maxWidth, inkWidth + 2 * bank.pad);
+  const width = Math.min(well.maxWidth, inkWidth + 2 * bank.pad + well.lip);
   return { height: well.height, width, x: well.x, y: well.y };
 }
 

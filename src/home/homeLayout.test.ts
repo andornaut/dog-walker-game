@@ -14,7 +14,8 @@ import { cents } from "../lib/units";
 import { unlockPrice } from "../rules/shop";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
-import { fontFileMetrics, fontInk, inkWidth } from "../testing/fontInk";
+import { fontFileMetrics, fontInk, fontInkRows, inkWidth } from "../testing/fontInk";
+import { decodePng } from "../testing/png";
 import { inside } from "../testing/rects";
 import { inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { gridRects } from "../ui/grid";
@@ -299,7 +300,8 @@ describe("the top bar's bank", () => {
   };
   // From nothing to the most a save can hold.
   const amounts = [
-    0, 5, 88, 888, 999, 1_000, 1_234, 12_345, 99_999, 1_000_000, 123_456_789, 90_071_992_547_409,
+    0, 5, 88, 888, 999, 1_000, 1_234, 12_345, 99_999, 1_000_000, 123_456_789, 999_999_999,
+    90_071_992_547_409,
   ].map(shown);
 
   it.each<[string, number, string]>([
@@ -314,11 +316,11 @@ describe("the top bar's bank", () => {
     expect(bankAmountText(measure, { full: "full", short: "short" })).toBe(expected);
   });
 
-  // The well is the ink and pad columns either side, no wider than its widest.
-  const { maxWidth } = HOME_LAYOUT.topBar.well;
+  // The well is the ink, pad columns either side and the lip, no wider than its widest.
+  const { lip, maxWidth } = HOME_LAYOUT.topBar.well;
   it.each<[number, number]>([
-    [0, 2 * bank.pad],
-    [1, 1 + 2 * bank.pad],
+    [0, 2 * bank.pad + lip],
+    [1, 1 + 2 * bank.pad + lip],
     [BANK_ROOM - 1, maxWidth - 1],
     [BANK_ROOM, maxWidth],
     [BANK_ROOM + 1, maxWidth],
@@ -327,12 +329,66 @@ describe("the top bar's bank", () => {
     expect(bankWell(ink)).toEqual({ height, width: wellWidth, x, y });
   });
 
-  // Every amount's ink inside its well's ink columns, pad columns in from either side.
-  it.each(amounts)("holds %s inside its well", (text) => {
-    const ink = width(text) * bank.scale;
-    const well = bankWell(ink);
-    expect(well.x + bank.pad + ink).toBeLessThanOrEqual(well.x + well.width - bank.pad);
+  // Each of the well's pieces, a column each, as the colour of each row, or null where clear.
+  const { well: wellSpec, wellKeys } = HOME_LAYOUT.topBar;
+  const pieceColours = (key: string) => {
+    const png = decodePng(readFileSync(`public/art/images/${key}.png`));
+    return Array.from({ length: png.height }, (_, row) => {
+      const [r = 0, g = 0, b = 0, a = 0] = png.data.subarray(row * png.width * 4);
+      return a === 0 ? null : (r << 16) | (g << 8) | b;
+    });
+  };
+  const colours = {
+    left: pieceColours(wellKeys.left),
+    mid: pieceColours(wellKeys.mid),
+    right: pieceColours(wellKeys.right),
+  };
+  // The well's ink, the middle piece's colour on its middle row, not its lip's.
+  const fill = colours.mid[wellSpec.height / 2];
+  const pieces = {
+    left: (row: number) => colours.left[row] === fill,
+    mid: (row: number) => colours.mid[row] === fill,
+    right: (row: number) => colours.right[row] === fill,
+  };
+  // The first ink cell of flags from start and the one past its last.
+  const inkEdges = (start: number, flags: readonly boolean[]) => ({
+    end: start + flags.lastIndexOf(true) + 1,
+    start: start + flags.indexOf(true),
   });
+
+  // Each amount's ink as the font inks it, from bank.pad columns into its well and its capitals'
+  // top on bank.capsY, as clear of the well's ink edges on the right as on the left, along the
+  // well's middle row, and below as above, down its middle column.
+  it.each(amounts)(
+    "sets %s as clear of its well's ink edges right as left and below as above",
+    (text) => {
+      const style = { scale: bank.scale };
+      const columns = fontInk("font-title", style, text);
+      const well = bankWell(columns.right - columns.left);
+      const middleRow = well.height / 2;
+      const across = inkEdges(well.x, [
+        pieces.left(middleRow),
+        ...Array.from({ length: well.width - 2 }, () => pieces.mid(middleRow)),
+        pieces.right(middleRow),
+      ]);
+      const down = inkEdges(
+        well.y,
+        Array.from({ length: well.height }, (_, row) => pieces.mid(row)),
+      );
+      const left = well.x + bank.pad;
+      const rows = fontInkRows("font-title", style, text);
+      const clear = {
+        above: bank.capsY + rows.top - down.start,
+        below: down.end - (bank.capsY + rows.bottom),
+        left: left - across.start,
+        right: across.end - (left + columns.right - columns.left),
+      };
+      expect(clear.left).toBeGreaterThan(0);
+      expect(clear.right).toBe(clear.left);
+      expect(clear.above).toBeGreaterThan(0);
+      expect(clear.below).toBe(clear.above);
+    },
+  );
 });
 
 // An owned dog's name sits centred on its face, a locked dog's over its price plate, and each

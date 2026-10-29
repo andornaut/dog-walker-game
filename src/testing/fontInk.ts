@@ -92,6 +92,26 @@ export function fontInk(
   return inkWithPills(style.scale, laidChars(font, style, text)) ?? { left: 0, right: 0 };
 }
 
+// The screen rows text inks in a font at a style, from the top of its capitals: top is its
+// first inked row and bottom the row past its last.
+export function fontInkRows(
+  font: string,
+  style: TextFitStyle,
+  text: string,
+): { bottom: number; top: number } {
+  const { capTop } = fontFileMetrics(font);
+  const glyphs = gameGlyphs(font);
+  const inked = [...text].flatMap((char) => {
+    const glyph = glyphs.get(char);
+    return glyph === undefined || glyph.height === 0 ? [] : [glyph];
+  });
+  const top = Math.min(...inked.map((glyph) => glyph.yOffset));
+  const bottom = Math.max(...inked.map((glyph) => glyph.yOffset + glyph.height));
+  return inked.length === 0
+    ? { bottom: 0, top: 0 }
+    : { bottom: (bottom - capTop) * style.scale, top: (top - capTop) * style.scale };
+}
+
 // The screen columns text inks in a font at a style from the x addPixelText places a
 // left-aligned label at: font-title's label sits left by its first glyph's left side bearing.
 export function placedInk(
