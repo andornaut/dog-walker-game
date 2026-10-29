@@ -136,7 +136,7 @@ Each neighbourhood also has its own card obstacle (see Encounters and debuffs) a
 
 ### Dogs
 
-A roster of 9, three in each size, each a fixed, named character with its own art and one fixed owner. You start with 1 dog slot and Archie, and buy up to 2 more slots and the other 8 dogs at the Pet shop. Dog prices mix sizes: each price band ($200 to $400, $600 to $800, $1,100 to $1,500) has dogs of at least two sizes, so a cheap dog can be large and a pricey one small; the dog slots are the big purchases. Walking more dogs is the main progression: more pay and a longer-lasting walk, but more owners who can fire you.
+A roster of 9, three in each size, each a fixed, named character with its own art and one fixed owner. You start with 1 dog slot and Archie, and buy up to 2 more slots and the other 8 dogs at the Pet shop. Dog prices mix sizes: each price band ($200 to $400, $600 to $800, $1,100 to $2,200) has dogs of at least two sizes, so a cheap dog can be large and a pricey one small. Walking more dogs is the main progression: more pay and a longer-lasting walk, but more owners who can fire you.
 
 Dogs differ in play by size only:
 
