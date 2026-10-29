@@ -6,26 +6,7 @@ import { type TextRoleCase, textRoleCases } from "../testing/textRoles";
 // their words are shortened in the data or their layout is decided. Remove each once it fits;
 // the list ends empty.
 const OVERFLOWING: Readonly<Record<string, readonly string[]>> = {
-  "card effect": [
-    "Bolt past: Zoomies: the pack drifts for 40s",
-    "Dogs give chase: Zoomies: the pack drifts for 40s",
-    "Help the keeper: Muddy: 67% slower moves for 30s",
-    "Let them lick it: Muddy: 67% slower moves for 30s",
-    "Pull away: Zoomies: the pack drifts for 40s",
-    "Wade through: Muddy: 67% slower moves for 30s",
-  ],
-  "enlarged card's changes": [
-    "Drag them away: −1♥ each",
-    "Grab it back: −1♥ each",
-    "Hold your nose: −1♥ each",
-    "Hurry on: −1♥ each",
-    "Hurry past: −1♥ each",
-    "Let them sniff: +1♥ each, −$20",
-    "Push through: −1♥ each",
-    "Walk around: −1♥ each",
-    "Walk on by: −1♥ each",
-  ],
-  "heart change": ["−10♥ Aunt Judy fired you!", "−10♥ Big screen promo"],
+  "enlarged card's changes": ["Let them sniff: +1♥ each, −$20"],
 };
 
 const named = ({ role, text }: TextRoleCase) => `${role}: ${text}`;
