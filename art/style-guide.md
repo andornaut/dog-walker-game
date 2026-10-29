@@ -163,7 +163,7 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 ### Feedback and selected state
 
 - A press shows at once: the item dips 2px (a button into its lip) and `fx-tap` bursts under the finger.
-- Anything picked, equipped, toggled on or active shows three cues: the selected state's gold frame and yellow face (or a yellow face inside `ui-select`), a 2px lift onto a plum shadow, and a `ui-check` badge at its top-left. A picked tab (the Pet shop's and the logbook's) shows only the first two.
+- Anything picked, equipped, toggled on or active shows three cues: the selected state's gold frame and yellow face (or a yellow face inside `ui-select`), a 2px lift onto a plum shadow, and a `ui-check` badge at its top-left. A picked tab (the Pet shop's and the Logbook's) shows only the first two, and its `ui-select` frame holds its first frame instead of pulsing.
 - `ui-afford` goes 2px outside the Pet shop building while something in the shop is affordable; no tile or shop row takes it.
 - With reduced motion, highlights stay and movement is skipped.
 
