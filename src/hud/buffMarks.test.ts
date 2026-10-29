@@ -19,7 +19,8 @@ import {
   extraHearts,
   optionMarks,
   type PoppedValue,
-  popsOf,
+  type ReachLine,
+  roadMarks,
   walkStartMarks,
 } from "./buffMarks";
 import { type EffectItem, effectName } from "./effectIcons";
@@ -114,7 +115,7 @@ describe("optionMarks", () => {
   });
 });
 
-describe("popsOf", () => {
+describe("roadMarks", () => {
   const item = (kind: WalkItem["kind"], id = 1): WalkItem => ({
     height: 12,
     id,
@@ -123,19 +124,12 @@ describe("popsOf", () => {
     laneSpan: 1,
     y: 0,
   });
-  const plain = { chip: null, forgiven: null, index: 0, reach: null };
+  const plain = { chip: null, forgiven: null, index: 0 };
+  const longReach = { kind: "perk", perk: "longReach" } as const;
   const big = { kind: "upgrade", upgrade: "bigTipper" } as const;
   const hallPass = { gear: "hallPass", kind: "gear" } as const;
-  it.each<{ expected: BuffPop[]; name: string; popped: PoppedValue }>([
+  it.each<{ name: string; popped: PoppedValue; pops: BuffPop[]; reaches?: ReachLine[] }>([
     {
-      expected: [
-        {
-          ...plain,
-          at: { kind: "walker" },
-          forgiven: { dog: "kilo", whole: true },
-          item: caseyPerk,
-        },
-      ],
       name: "a bump forgiven whole, by the walker",
       popped: {
         bump: true,
@@ -143,9 +137,16 @@ describe("popsOf", () => {
         item: item("trashCan"),
         value: value({ dog: "kilo", kind: "hearts" }, -1, [[1, CASEY]]),
       },
+      pops: [
+        {
+          ...plain,
+          at: { kind: "walker" },
+          forgiven: { dog: "kilo", whole: true },
+          item: caseyPerk,
+        },
+      ],
     },
     {
-      expected: [{ ...plain, at: { item: 1, kind: "item" }, item: big }],
       name: "a tip Big tipper raised, as its charm with no chip",
       popped: {
         bump: false,
@@ -153,12 +154,9 @@ describe("popsOf", () => {
         item: item("tip"),
         value: value({ kind: "money" }, 100, [[100, big]]),
       },
+      pops: [{ ...plain, at: { item: 1, kind: "item" }, item: big }],
     },
     {
-      expected: [
-        { ...plain, at: { item: 1, kind: "item" }, item: big },
-        { ...plain, at: { item: 1, kind: "item" }, index: 1, item: hallPass },
-      ],
       name: "a tip two buffs raised, as their charms with no chip",
       popped: {
         bump: false,
@@ -169,17 +167,13 @@ describe("popsOf", () => {
           [100, hallPass],
         ]),
       },
+      pops: [
+        { ...plain, at: { item: 1, kind: "item" }, item: big },
+        { ...plain, at: { item: 1, kind: "item" }, index: 1, item: hallPass },
+      ],
     },
     {
-      expected: [
-        {
-          ...plain,
-          at: { item: 1, kind: "item" },
-          item: { kind: "perk", perk: "longReach" },
-          reach: { dog: "kilo", item: 1 },
-        },
-      ],
-      name: "a treat Long reach grabbed, with its line",
+      name: "a treat Long reach grabbed, as its line from the dog and its well's glint",
       popped: {
         bump: false,
         dog: "kilo",
@@ -188,16 +182,23 @@ describe("popsOf", () => {
           [1, { kind: "walker", walker: "trista" }],
         ]),
       },
+      pops: [],
+      reaches: [{ dog: "kilo", glint: longReach, item: 1 }],
     },
     {
-      expected: [
-        {
-          ...plain,
-          at: { kind: "pack" },
-          chip: fillNames(seconds, { seconds: "4" }),
-          item: { kind: "perk", perk: "quickRecovery" },
-        },
-      ],
+      name: "a tip Long reach grabbed, as its line from the pack's lead and its well's glint",
+      popped: {
+        bump: false,
+        dog: null,
+        item: item("tip", 2),
+        value: value({ kind: "reach", pickup: "tip" }, 0, [
+          [1, { kind: "walker", walker: "trista" }],
+        ]),
+      },
+      pops: [],
+      reaches: [{ dog: null, glint: longReach, item: 2 }],
+    },
+    {
       name: "a debuff Quick recovery shortened, with its charm and the new seconds' chip",
       popped: {
         bump: false,
@@ -207,16 +208,16 @@ describe("popsOf", () => {
           [-4, { kind: "walker", walker: "ada" }],
         ]),
       },
-    },
-    {
-      expected: [
+      pops: [
         {
           ...plain,
           at: { kind: "pack" },
-          chip: gameData.runText.waivedCost,
-          item: { kind: "upgrade", upgrade: "sweetTalker" },
+          chip: fillNames(seconds, { seconds: "4" }),
+          item: { kind: "perk", perk: "quickRecovery" },
         },
       ],
+    },
+    {
       name: "a card option's cost Sweet talker waived, with its charm and the waived cost's chip",
       popped: {
         bump: false,
@@ -224,9 +225,16 @@ describe("popsOf", () => {
         item: null,
         value: value({ kind: "money" }, -300, [[300, SWEET_TALKER]]),
       },
+      pops: [
+        {
+          ...plain,
+          at: { kind: "pack" },
+          chip: gameData.runText.waivedCost,
+          item: { kind: "upgrade", upgrade: "sweetTalker" },
+        },
+      ],
     },
     {
-      expected: [],
       name: "nothing for a debuff's change",
       popped: {
         bump: false,
@@ -234,15 +242,16 @@ describe("popsOf", () => {
         item: item("tip"),
         value: value({ kind: "money" }, 100, [[-100, { debuff: "stinky", kind: "debuff" }]]),
       },
+      pops: [],
     },
-  ])("pops $name", ({ expected, popped }) => {
-    expect(popsOf(gameData, [popped])).toEqual(expected);
+  ])("marks $name", ({ popped, pops, reaches = [] }) => {
+    expect(roadMarks(gameData, [popped])).toEqual({ pops, reaches });
   });
 
   it("stacks a second pop at the same place", () => {
     const raised = value({ kind: "money" }, 100, [[100, big]]);
     const tip = { bump: false, dog: null, item: item("tip"), value: raised };
-    expect(popsOf(gameData, [tip, tip]).map(({ index }) => index)).toEqual([0, 1]);
+    expect(roadMarks(gameData, [tip, tip]).pops.map(({ index }) => index)).toEqual([0, 1]);
   });
 });
 

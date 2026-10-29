@@ -3,7 +3,15 @@ import type { Scene } from "phaser";
 import { choiceCues, pullCues, stepCues } from "../../audio/stepCues";
 import { gameData } from "../../data";
 import type { DogId, HintId, HintTrigger } from "../../data/types";
-import { type BuffPop, leashPops, popsOf, stepValues, walkStartMarks } from "../../hud/buffMarks";
+import {
+  type BuffPop,
+  leashPops,
+  type ReachLine,
+  type RoadMarks,
+  roadMarks,
+  stepValues,
+  walkStartMarks,
+} from "../../hud/buffMarks";
 import { type EffectItem, effectItems, gearWell } from "../../hud/effectIcons";
 import { heartPopFrame } from "../../hud/feedback";
 import { changeLabels, totalLabel } from "../../hud/hudView";
@@ -278,7 +286,7 @@ export class RunMoments {
   // around the pack at pack.
   walked(step: WalkStep, pack: Point): void {
     this.pack = pack;
-    this.popBuffs(popsOf(gameData, stepValues(step)));
+    this.markRoad(roadMarks(gameData, stepValues(step)));
     this.deps.items.strike(step);
     const sound = soundboardOf(this.scene);
     stepCues(gameData, step).forEach((cue) => sound.play(cue));
@@ -500,7 +508,7 @@ export class RunMoments {
       item: null,
       value,
     }));
-    this.popBuffs(popsOf(gameData, values));
+    this.markRoad(roadMarks(gameData, values));
   }
 
   // The walk's start: a strip line for each gear that changes it from the start, its well
@@ -511,9 +519,18 @@ export class RunMoments {
     marks.glints.forEach((item) => this.scene.events.emit(BUFF_GLINT_EVENT, item));
   }
 
+  // Each reach's dotted line, its well glinting, and each buff's pop.
+  private markRoad({ pops, reaches }: RoadMarks): void {
+    for (const reach of reaches) {
+      this.reachLine(reach);
+      this.scene.events.emit(BUFF_GLINT_EVENT, reach.glint);
+    }
+    this.popBuffs(pops);
+  }
+
   // Each buff's pop: its well glinting, its charm, lit, a chip of the value it made over the
-  // charm, if any, a reach's dotted line, and a forgiven bump's heart turning from loss to gain
-  // as its charm shows beside the walker.
+  // charm, if any, and a forgiven bump's heart turning from loss to gain as its charm shows
+  // beside the walker.
   private popBuffs(pops: readonly BuffPop[]): void {
     const still = this.deps.still();
     for (const pop of pops) {
@@ -531,9 +548,6 @@ export class RunMoments {
           floatValue(this.scene, { depth: DEPTH.fx + 1, shownAtMs, still }, anchor, pop.chip);
         }
       };
-      if (pop.reach !== null) {
-        this.reachLine(pop.reach);
-      }
       if (pop.forgiven === null) {
         show();
       } else {
@@ -576,7 +590,7 @@ export class RunMoments {
   }
 
   // Long reach's 1px amber dotted line from its dog, or the pack, to the item it grabbed.
-  private reachLine(reach: NonNullable<BuffPop["reach"]>): void {
+  private reachLine(reach: ReachLine): void {
     const from = reach.dog === null ? this.pack : this.deps.pack.dogPoint(reach.dog);
     const to = this.deps.items.point(reach.item);
     if (from === undefined || to === null) {

@@ -28,7 +28,8 @@ export const CHARM = {
 // row. At fadeAtMs the charm fades out over fadeMs, rising rise rows unless motion is reduced.
 // The bar's well glints with it: its amber ring blinks blinks times, blinkMs on and blinkMs
 // off. A forgiven bump's heart pop turns from loss to gain at switchMs, as its charm shows.
-// Long reach draws a 1px amber dotted line from its dog to the item for reachMs.
+// Long reach pops no charm: it draws a 1px amber dotted line from its dog to the item for
+// reachMs as its well glints.
 export const BUFF_POP = {
   blinkMs: 120,
   blinks: 2,
