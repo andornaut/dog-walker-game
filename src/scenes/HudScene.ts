@@ -30,6 +30,7 @@ import { cardOwnerMood, FORGIVEN_EVENT, type ForgivenCue } from "../hud/moments"
 import {
   cashChipPlace,
   freeCashSlot,
+  LABEL_FADE_MS,
   mergeTips,
   MONEY_LABEL,
   moneyChipPlace,
@@ -78,6 +79,7 @@ import { ownerMaxHearts } from "../rules/dogs";
 import { debuffLasting } from "../rules/durations";
 import { hintFor, hintJumpsQueue } from "../rules/hints";
 import { currentZone } from "../rules/route";
+import { walkEarnings } from "../rules/run";
 import { faceMood } from "../rules/treats";
 import { read } from "../rules/units";
 import { heartsOf, slotIndexOf } from "../state/pack";
@@ -144,8 +146,6 @@ const LAYOUT = SCREEN_LAYOUT;
 const BAR = walkBarLayout(LAYOUT.topBar);
 // The spare treat pip's art, which spareTreatPipAt places: the road's smallest treat.
 const SPARE_TREAT_PIP_KEY = "treat@50";
-
-const LABEL = { ms: 1100 };
 
 // A change label's parts on screen, and its chip's rect.
 interface ChangeChip {
@@ -538,7 +538,7 @@ export class HudScene extends Scene {
     const state: Record<string, unknown> = {
       effects: effectItemsKey(effects),
       modifiers: view.run.modifiers,
-      money: this.shownMoney(view.run.money),
+      money: this.shownMoney(view.run),
       muted: isMuted(this),
       pack: view.run.pack,
       pauseIcon: pauseButtonIcon(pause),
@@ -562,9 +562,10 @@ export class HudScene extends Scene {
     }
   }
 
-  // The counter leaves out fees and money changes still flying to it.
-  private shownMoney(money: Cents): Cents {
-    const landed = cents(money - this.moneyInFlight);
+  // The cash the walk keeps (walkEarnings), less fees and money changes still flying to it, so
+  // the cash lost with the last firing counts down once its label lands.
+  private shownMoney(run: RunState): Cents {
+    const landed = cents(walkEarnings(run).banked - this.moneyInFlight);
     return this.feedback?.shownMoney(landed) ?? landed;
   }
 
@@ -712,7 +713,7 @@ export class HudScene extends Scene {
     }
     const { run } = view;
     g.clear();
-    this.showMoney(dollarAmountText(this.shownMoney(run.money)));
+    this.showMoney(dollarAmountText(this.shownMoney(run)));
     const zone = currentZone(gameData, run);
     if (this.zoneLabel !== undefined) {
       setPixelText(this.zoneLabel, zone.name);
@@ -865,9 +866,9 @@ export class HudScene extends Scene {
   }
 
   // Each change shows where it happened: a money loss pops where it changed hands, a money gain
-  // by the cash, and either flies into the cash; a heart change pops over its dog and flies into
-  // its card (heartFeedback.ts), its label then fading in place on the card's bottom rows, while
-  // its owner pops in on the card for ownerMs.
+  // and the cash lost with the last firing by the cash, and each flies into the cash; a heart
+  // change pops over its dog and flies into its card (heartFeedback.ts), its label then fading in
+  // place on the card's bottom rows, while its owner pops in on the card for ownerMs.
   private floatLabels(ownerMs: number, labels: ChangeLabel[]): void {
     const run = this.walk();
     const body = pixelFontMetrics(this, "body");
@@ -886,7 +887,7 @@ export class HudScene extends Scene {
         if (label.target.tip) {
           this.showTipLabel(label);
         } else {
-          this.showGainLabel(label);
+          this.showCashLabel(label);
         }
       }
     }
@@ -951,10 +952,11 @@ export class HudScene extends Scene {
     this.labels.after(this, MONEY_LABEL.holdMs, () => this.sendMoneyLabel(chip, held, left));
   }
 
-  // A money gain's label that is not a tip's pops by the cash in the cash column's first free
-  // slot, which it holds until it leaves, and goes in as any money label does (showMoneyLabel).
-  // It never adds up with a tip's.
-  private showGainLabel(label: ChangeLabel): void {
+  // A money gain's label that is not a tip's, or the cash lost with the last firing
+  // (cashLostLabel), pops by the cash in the cash column's first free slot, which it holds until
+  // it leaves, and goes in as any money label does (showMoneyLabel). It never adds up with a
+  // tip's.
+  private showCashLabel(label: ChangeLabel): void {
     const body = pixelFontMetrics(this, "body");
     const slot = this.takeCashSlot();
     this.showMoneyLabel(
@@ -1033,7 +1035,7 @@ export class HudScene extends Scene {
   private sendMoneyLabel(chip: ChangeChip, held: number, left: () => void): void {
     if (this.walk().reducedMotion()) {
       this.moneyInFlight -= held;
-      this.labels.join(fadeAway(this, chip.parts, { ms: LABEL.ms, rise: 0 }, left));
+      this.labels.join(fadeAway(this, chip.parts, { ms: LABEL_FADE_MS, rise: 0 }, left));
       return;
     }
     left();
@@ -1064,7 +1066,7 @@ export class HudScene extends Scene {
     const chip = this.addChangeChip(label, changeLabelRoom(lane.width), (shown) =>
       changeChipPlace(body, lane, shown),
     );
-    this.labels.join(fadeAway(this, chip.parts, { ms: LABEL.ms, rise: 0 }));
+    this.labels.join(fadeAway(this, chip.parts, { ms: LABEL_FADE_MS, rise: 0 }));
   }
 
   // A change on a cream chip in its changeLabelColour, so it reads over anything; fitted to room

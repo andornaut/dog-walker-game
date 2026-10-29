@@ -25,6 +25,7 @@ import {
   TREAT_EVENT,
   type TreatCue,
 } from "../../hud/moments";
+import { cashLostLabel, cashLostMs } from "../../hud/moneyLabels";
 import {
   bumpLines,
   debuffChanges,
@@ -63,6 +64,7 @@ import { type ChoiceOutcome, outcomeChanges, type QuipCue, quipLine } from "../.
 import { hitWord } from "../../rules/encounters";
 import { hintFor } from "../../rules/hints";
 import { walkLength } from "../../rules/route";
+import { walkEarnings } from "../../rules/run";
 import { spareTreatGiver, spareTreatSource } from "../../rules/spareTreats";
 import { read } from "../../rules/units";
 import type { PullStep } from "../../runner/pulls";
@@ -149,6 +151,13 @@ export function showHint(scene: Scene, event: HintTrigger): void {
   }
 }
 
+// Nothing for the end screen to wait for.
+const NO_END_MOMENTS: Readonly<Parameters<typeof endScreenDelayMs>[0]> = {
+  firingSeconds: 0,
+  lossMs: 0,
+  payoutMs: 0,
+};
+
 // A zone's payout: how long until its coins have landed and their amounts faded, and every
 // change the zone made, its fees included.
 interface ZonePayout {
@@ -171,8 +180,8 @@ export class RunMoments {
   private achievements: AchievementPreview = NOTHING_PREVIEWED;
   private readonly changes: Change[] = [];
   private readonly deps: RunMomentsDeps;
-  // How long the end screen waits for a final firing or payout.
-  private endMoments = { firingSeconds: 0, payoutMs: 0 };
+  // How long the end screen waits for a final firing, the cash it lost, or a payout.
+  private endMoments = { ...NO_END_MOMENTS };
   // The pack's point on the last step walked, for pops away from a dog or an item.
   private pack: Point | undefined;
   private readonly scene: Scene;
@@ -198,7 +207,7 @@ export class RunMoments {
   takeEndDelayMs(): number {
     const delayMs = endScreenDelayMs(this.endMoments);
     if (delayMs > 0) {
-      this.endMoments = { firingSeconds: 0, payoutMs: 0 };
+      this.endMoments = { ...NO_END_MOMENTS };
     }
     return delayMs;
   }
@@ -414,7 +423,10 @@ export class RunMoments {
   }
 
   // Each owner who fired you has their dog trot off the road over the firing's hold, with
-  // their fired line.
+  // their fired line. When the last one fires you, the cash the walk carried and lost
+  // (walkEarnings) pops by the cash and the counter counts down to what the walk keeps, all
+  // before the end screen opens. The loss stays out of the banked changes: the end screen's
+  // breakdown takes it from the run's result.
   private fired(dogs: readonly DogId[], run: RunState): void {
     if (dogs.length === 0) {
       return;
@@ -424,8 +436,14 @@ export class RunMoments {
     const still = this.deps.still();
     const { trotMs } = firingTimeline(firingSeconds(), still);
     dogs.forEach((dog) => this.deps.pack.trotOff(dog, trotMs, still));
-    if (run.phase.kind === "ended") {
-      this.endMoments.firingSeconds = firingSeconds();
+    if (run.phase.kind !== "ended") {
+      return;
+    }
+    this.endMoments.firingSeconds = firingSeconds();
+    const { lost } = walkEarnings(run);
+    if (lost > 0) {
+      this.scene.events.emit(CHANGE_LABELS_EVENT, [cashLostLabel(lost)]);
+      this.endMoments.lossMs = cashLostMs(still, lost);
     }
   }
 

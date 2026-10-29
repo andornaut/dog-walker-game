@@ -1,21 +1,22 @@
 import type { Point, Rect } from "../lib/rect";
+import { type Cents, cents } from "../lib/units";
 import { amountText } from "../rules/causes";
 import type { FontMetrics } from "../ui/fontMetrics";
-import { FEEDBACK } from "./feedback";
+import { FEEDBACK, tickMs } from "./feedback";
 import { CHANGE_LABEL_STYLES, changeChipAt, changeLabelRoom } from "./hudLanes";
 import type { ChangeLabel } from "./hudView";
 import { messagePanel } from "./messageStrip";
 import { arcControl, TOP_BAR_POINTS } from "./moments";
 import { WALK_BAR } from "./walkHud";
 
-// A money gain's label, a tip's included, pops by the cash total (cashChipPlace), in the first
-// slot of the cash's column no label showing there holds; a tip grabbed while a tip's label
-// shows adds up with it (mergeTips), restarting its hold. A money loss's label pops on its chip
-// where the money changed hands, centred over that point with its bottom lift pixels above it,
-// kept gutter pixels inside the screen's sides; each later label from the same point in one
-// batch stacks gap pixels above the one before. Either holds for holdMs, as long as a heart's
-// pop plays, then flies into the cash total as a heart flies into its card (FEEDBACK.heart).
-// Its text fits the cash well's width.
+// A money gain's label, a tip's included, and the cash lost with the last firing pop by the cash
+// total (cashChipPlace), in the first slot of the cash's column no label showing there holds; a
+// tip grabbed while a tip's label shows adds up with it (mergeTips), restarting its hold. Any
+// other money loss's label pops on its chip where the money changed hands, centred over that
+// point with its bottom lift pixels above it, kept gutter pixels inside the screen's sides; each
+// later label from the same point in one batch stacks gap pixels above the one before. Each
+// holds for holdMs, as long as a heart's pop plays, then flies into the cash total as a heart
+// flies into its card (FEEDBACK.heart). Its text fits the cash well's width.
 export const MONEY_LABEL = {
   gap: 2,
   gutter: 2,
@@ -23,6 +24,28 @@ export const MONEY_LABEL = {
   lift: 4,
   room: changeLabelRoom(WALK_BAR.cash.well.width),
 } as const;
+
+// How long a change label takes to fade in place.
+export const LABEL_FADE_MS = 1100;
+
+// The label for the cash a walk carried and lost when the last owner fired you
+// (walkEarnings): a loss that pops by the cash, as a gain does (cashChipPlace), and goes into it.
+export function cashLostLabel(lost: Cents): ChangeLabel {
+  const amount = cents(-lost);
+  return {
+    amount,
+    gain: false,
+    target: { kind: "cash", tip: false },
+    text: amountText("money", amount),
+  };
+}
+
+// How long the cash lost takes to show: its label's hold and flight into the cash, then the
+// counter counting down by it. With reduced motion (still) the counter drops at once and the
+// label fades in place.
+export function cashLostMs(still: boolean, lost: Cents): number {
+  return still ? LABEL_FADE_MS : MONEY_LABEL.holdMs + FEEDBACK.heart.flyMs + tickMs(cents(0), lost);
+}
 
 // Each label's place in its stack: how many labels before it in the batch pop from the same
 // point.

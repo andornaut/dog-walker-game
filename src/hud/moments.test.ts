@@ -316,10 +316,14 @@ describe("payoutFlights", () => {
 });
 
 describe("endScreenDelayMs", () => {
-  it("waits for the longer of a final firing and a final payout", () => {
-    expect(endScreenDelayMs({ firingSeconds: 1, payoutMs: 0 })).toBe(1000);
-    expect(endScreenDelayMs({ firingSeconds: 0, payoutMs: 1950 })).toBe(1950);
-    expect(endScreenDelayMs({ firingSeconds: 0, payoutMs: 0 })).toBe(0);
+  it.each([
+    ["a final firing", { firingSeconds: 1, lossMs: 0, payoutMs: 0 }, 1000],
+    ["the cash lost outlasting its firing", { firingSeconds: 1, lossMs: 1400, payoutMs: 0 }, 1400],
+    ["a firing outlasting the cash lost", { firingSeconds: 3, lossMs: 1400, payoutMs: 0 }, 3000],
+    ["a final payout", { firingSeconds: 0, lossMs: 0, payoutMs: 1950 }, 1950],
+    ["nothing", { firingSeconds: 0, lossMs: 0, payoutMs: 0 }, 0],
+  ])("waits for %s", (_name, moments, ms) => {
+    expect(endScreenDelayMs(moments)).toBe(ms);
   });
 });
 

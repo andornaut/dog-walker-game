@@ -360,10 +360,14 @@ export function payoutMs(flights: readonly PayoutFlight[]): number {
   return lastLandMs(flights) + MOMENTS.payout.chipMs;
 }
 
-// A run that ends on a firing or a payout waits for the longest of them before the end
-// screen, so the moment is seen.
-export function endScreenDelayMs(moments: { firingSeconds: number; payoutMs: number }): number {
-  return Math.max(0, moments.firingSeconds * 1000, moments.payoutMs);
+// A run that ends on a firing or a payout waits for the longest of them, and of the cash lost
+// with the last firing showing (cashLostMs), before the end screen, so the moment is seen.
+export function endScreenDelayMs(moments: {
+  firingSeconds: number;
+  lossMs: number;
+  payoutMs: number;
+}): number {
+  return Math.max(0, moments.firingSeconds * 1000, moments.lossMs, moments.payoutMs);
 }
 
 // A point t of the way along the quadratic curve from from to to, pulled toward control.

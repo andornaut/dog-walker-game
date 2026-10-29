@@ -2,16 +2,20 @@ import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { rectsOverlap } from "../lib/rect";
+import { cents } from "../lib/units";
 import { amountText } from "../rules/causes";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { inkRowsOfLines } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
+import { FEEDBACK } from "./feedback";
 import { CHANGE_CHIP, CHANGE_LABEL_STYLES } from "./hudLanes";
 import type { ChangeLabel } from "./hudView";
 import { MESSAGE_STRIP } from "./messageStrip";
 import { curvePoint, TOP_BAR_POINTS } from "./moments";
 import {
   cashChipPlace,
+  cashLostLabel,
+  cashLostMs,
   freeCashSlot,
   mergeTips,
   MONEY_LABEL,
@@ -198,5 +202,31 @@ describe("a money change's label", () => {
     const fitted = fitInFont("font-body", CHANGE_LABEL_STYLES, room, plainMarks(text));
     expect(fitted.lines).toHaveLength(1);
     expect(fitted.widest).toBeLessThanOrEqual(room);
+  });
+});
+
+describe("cashLostLabel", () => {
+  it.each([100, 2_500])("pops a loss of %i cents by the cash, as a gain's does", (lost) => {
+    expect(cashLostLabel(cents(lost))).toEqual({
+      amount: -lost,
+      gain: false,
+      target: { kind: "cash", tip: false },
+      text: amountText("money", -lost),
+    });
+  });
+});
+
+describe("cashLostMs", () => {
+  const { holdMs } = MONEY_LABEL;
+  const { flyMs } = FEEDBACK.heart;
+
+  it("holds and flies the label, then counts the counter down, longer for more cash", () => {
+    const small = cashLostMs(false, cents(100));
+    expect(small).toBeGreaterThan(holdMs + flyMs);
+    expect(cashLostMs(false, cents(300))).toBeGreaterThan(small);
+  });
+
+  it("with reduced motion fades the label in place, whatever the cash", () => {
+    expect(cashLostMs(true, cents(100))).toBe(cashLostMs(true, cents(9_000)));
   });
 });
