@@ -101,7 +101,6 @@ import {
   addSelectTile,
   addTagImage,
   addTapBurst,
-  afterTapFx,
   clearScene,
   selectOuter,
   tagFrame,
@@ -486,13 +485,10 @@ export class ShopScene extends Scene {
   private openDetail(): void {
     const purchase = this.pressedPurchase();
     this.pressed = undefined;
-    this.render();
     if (purchase !== undefined && purchase.kind !== "dogSlot") {
-      afterTapFx(this, () => {
-        this.detail = purchase;
-        this.render();
-      });
+      this.detail = purchase;
     }
+    this.render();
   }
 
   override update(_time: number, deltaMs: number): void {
@@ -558,10 +554,7 @@ export class ShopScene extends Scene {
       const request = requestPurchase(gameData, save, row.name, row.purchase);
       if (request.kind === "confirm") {
         this.message = null;
-        afterTapFx(this, () => {
-          this.confirm = request.pending;
-          this.render();
-        });
+        this.confirm = request.pending;
       } else if (request.reason === "cantAfford" && row.price !== null) {
         this.shakes.set(id, this.time.now);
         this.action = {
@@ -597,8 +590,7 @@ export class ShopScene extends Scene {
     this.message = { refused: false, text: messageLine(gameData.homeText, this.action) ?? "" };
     this.game.events.emit(SHOP_CHANGED_EVENT);
     this.render();
-    // Badges are taken once the Buy tap's burst has played out, so an open dropped loses none.
-    afterTapFx(this, () => this.celebrate(pending.purchase));
+    this.celebrate(pending.purchase);
   }
 
   // Badges a purchase earned burst in over the shop, the bought dog's owner cheering.

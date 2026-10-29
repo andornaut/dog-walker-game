@@ -64,7 +64,7 @@ export interface TrackContext<Target> extends GestureContext {
 }
 
 // tapped: where a tap landed on something that opens its explanation on a tap. The caller opens
-// it (explainAt there) once the tap's burst has played out, as a button opens what it opens.
+// it (explainAt there) at once, as a button opens what it opens.
 interface PointerResult<Target> {
   actions: GestureAction[];
   tapped?: Point;

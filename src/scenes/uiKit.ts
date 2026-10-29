@@ -4,7 +4,6 @@ import type { GameObjects, Scene, Tweens } from "phaser";
 import { animationKey } from "../assets/asepriteAnimations";
 import { SCREEN_LAYOUT } from "../data/screen";
 import { FEEDBACK, loopFrame } from "../home/feedback";
-import { type TapBurstWatch, type TapGate, tapGate } from "../input/afterTap";
 import type { CloseControl } from "../ui/closeControl";
 import {
   type ArtLook,
@@ -711,56 +710,10 @@ export function setDollarAmount(
   scalePixelText(amount, scale, left + (wholeAdvance - amount.width) * scale, top);
 }
 
-// Each tapped scene's latest tap burst, and its gate for what a tap opens (afterTapFx).
-const tapBursts = new WeakMap<Scene, GameObjects.Sprite>();
-const tapGates = new WeakMap<Scene, TapGate>();
-
 // fx-tap bursts where the finger lands on scene, drawn in the tap burst layer (TapBurstScene)
-// over every scene, so it plays out whatever scene does next.
+// over every scene, so it plays out over whatever the tap opens or whatever scene does next.
 export function addTapBurst(scene: Scene, x: number, y: number): void {
-  const layer = scene.scene.get(TAP_BURST_SCENE_KEY);
-  const burst = playEffect(layer, "fx-tap", "play", { x, y }, 0);
-  if (burst !== undefined) {
-    tapBursts.set(scene, burst);
-  }
-}
-
-// Opens what a tap opens over scene (an overlay, a card or a confirm) once the tap's burst has
-// played out, so the burst never shows over the dim; at once while none runs, as for a key.
-// While one open waits, another is dropped, and the open is dropped if the scene pauses, sleeps
-// or shuts down first (tapGate).
-export function afterTapFx(scene: Scene, open: () => void): void {
-  let gate = tapGates.get(scene);
-  if (gate === undefined) {
-    gate = tapGate();
-    tapGates.set(scene, gate);
-  }
-  gate(tapBurstWatch(scene), open);
-}
-
-// The burst ends when it is destroyed, as playEffect does when its animation completes.
-function tapBurstWatch(scene: Scene): TapBurstWatch {
-  let left = false;
-  const leave = () => {
-    left = true;
-  };
-  const leaving = ["pause", "sleep", "shutdown"] as const;
-  return {
-    awaitBurst: (ended) => {
-      const burst = tapBursts.get(scene);
-      // A burst being destroyed is still active while its destroy listeners run.
-      if (burst === undefined || !burst.active || burst.isDestroyed) {
-        return false;
-      }
-      leaving.forEach((event) => scene.events.once(event, leave));
-      burst.once("destroy", () => {
-        leaving.forEach((event) => scene.events.off(event, leave));
-        ended();
-      });
-      return true;
-    },
-    stayed: () => !left && scene.sys.isActive(),
-  };
+  playEffect(scene.scene.get(TAP_BURST_SCENE_KEY), "fx-tap", "play", { x, y }, 0);
 }
 
 // The screen's art, or dark brown over the whole screen while it is missing or the screen has

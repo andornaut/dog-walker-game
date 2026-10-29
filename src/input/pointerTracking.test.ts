@@ -517,8 +517,8 @@ describe("hold to explain", () => {
   type Step = PointerStep | { at: number; kind: "tick"; presses?: PressMode };
 
   // Every action, and each change of the open explanation as "<target>@<step>" or
-  // "closed@<step>", and each tap that opens one once its burst has played out as
-  // "tapped <target>@<step>". The walk is paused exactly while one is open.
+  // "closed@<step>", and each tap that opens one as "tapped <target>@<step>". The walk is
+  // paused exactly while one is open.
   function play(steps: readonly Step[]): { actions: GestureAction[]; changes: string[] } {
     const actions: GestureAction[] = [];
     const changes: string[] = [];

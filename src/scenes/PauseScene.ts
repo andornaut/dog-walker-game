@@ -19,7 +19,6 @@ import { addQuestionPanel, type PanelEntry } from "./questionPanel";
 import { SCENE_KEYS } from "./sceneKeys";
 import { SETTINGS_CLOSED_EVENT, type SettingsData } from "./SettingsScene";
 import { soundboardOf } from "./soundboard";
-import { afterTapFx } from "./uiKit";
 
 // Help or the settings, opened at once over the menu from the walk bar: alone, closing it
 // resumes the walk; opened over the menu or the question, closing it shows the menu again.
@@ -117,14 +116,11 @@ export class PauseScene extends Scene {
   }
 
   // The settings over the walk, dimmed as the menu dims it. The menu hides under them, dim and
-  // all, so they dim the walk alone, and shows again as they resume it. It hides once the tap's
-  // burst has played out, as the settings open (openOverlay).
+  // all, so they dim the walk alone, and shows again as they resume it.
   private openSettings(): void {
-    afterTapFx(this, () => {
-      this.scene.setVisible(false);
-      onceSceneEvent(this, this.events, Scenes.Events.RESUME, () => this.scene.setVisible(true));
-      const data: SettingsData = { region: "walk", resume: SCENE_KEYS.pause };
-      openOverlay(this, SCENE_KEYS.settings, data);
-    });
+    this.scene.setVisible(false);
+    onceSceneEvent(this, this.events, Scenes.Events.RESUME, () => this.scene.setVisible(true));
+    const data: SettingsData = { region: "walk", resume: SCENE_KEYS.pause };
+    openOverlay(this, SCENE_KEYS.settings, data);
   }
 }

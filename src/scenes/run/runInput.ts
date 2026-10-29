@@ -27,7 +27,7 @@ import type { LaneDirection } from "../../layout/lanes";
 import { read } from "../../rules/units";
 import type { SessionInput } from "../../runner/session";
 import { steerWalk, type Walk } from "../../runner/walk";
-import { addTapBurst, afterTapFx } from "../uiKit";
+import { addTapBurst } from "../uiKit";
 import { leadWalk } from "./interpolate";
 import { LAYOUT } from "./stage";
 
@@ -113,8 +113,8 @@ export class RunInput {
   // Phaser reports a cancelled touch as a release with wasCanceled set. The run scene keeps
   // running while a card, the zone celebration or the pause menu covers the walk, and the press
   // is theirs then, but for what explains itself in what they leave in view. A press on what
-  // opens on a tap bursts as it lands, as a button's does, and its tap opens the explanation once
-  // the burst has played out.
+  // opens on a tap bursts as it lands, as a button's does, and its tap opens the explanation at
+  // once, the burst playing on over it.
   private onPointer(phase: "down" | "move" | "up", pointer: Input.Pointer): void {
     const presses = this.presses();
     const context = this.context(presses);
@@ -137,12 +137,12 @@ export class RunInput {
     result.actions.forEach((action) => this.act(action));
     const { tapped } = result;
     if (tapped !== undefined) {
-      afterTapFx(this.scene, () => this.openTapped(tapped));
+      this.openTapped(tapped);
     }
   }
 
-  // Opens the explanation of what a tap at point landed on, if presses still reach it and it
-  // still explains itself, dropping every press as a hold's opening does.
+  // Opens the explanation of what a tap at point landed on, if presses reach it and none is
+  // open, dropping every press as a hold's opening does.
   private openTapped(point: Point): void {
     const presses = this.presses();
     if (presses === "none" || this.pointers.open !== undefined) {

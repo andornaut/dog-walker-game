@@ -1,6 +1,7 @@
 import type { Events, Scene } from "phaser";
 
 import { gameData } from "../data";
+import { openGuard } from "../input/openGuard";
 import {
   type OutsideArea,
   type OutsidePress,
@@ -13,7 +14,6 @@ import { PHONE_EVENTS } from "../pwa";
 import { read } from "../rules/units";
 import { listenOnePress } from "./onePress";
 import type { SceneKey } from "./sceneKeys";
-import { afterTapFx } from "./uiKit";
 
 // Emitted on game.events, with whether sound is now muted, when a top bar's Sound button is
 // tapped over an overlay (the home top bar's, or the walk bar's), so the screen under it and the
@@ -25,10 +25,13 @@ export interface OverlayData {
   resume?: SceneKey;
 }
 
-// Pauses scene and launches the overlay key over it, once the tap burst that asked for it has
-// played out (afterTapFx), so the burst never shows over the dim.
-export function openOverlay(scene: Scene, key: SceneKey, data: OverlayData): void {
-  afterTapFx(scene, () => {
+const overlayGuard = openGuard();
+
+// Pauses scene and launches the overlay key over it at once, a tap's burst playing on over the
+// overlay (addTapBurst). Phaser applies both at its next step, so a second open asked of scene
+// before then is dropped (openGuard). Returns whether it opened.
+export function openOverlay(scene: Scene, key: SceneKey, data: OverlayData): boolean {
+  return overlayGuard(scene.game.events, scene, () => {
     scene.scene.pause();
     scene.scene.launch(key, data);
   });

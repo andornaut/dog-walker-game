@@ -73,15 +73,7 @@ import {
 } from "./scrollView";
 import { addCountNote, addShopPage, addShopTabs, placeInkRight } from "./shopPage";
 import { listenTargetPress, sameByValue, type TargetPressListener } from "./targetPress";
-import {
-  addBodyText,
-  addTagImage,
-  addTapBurst,
-  afterTapFx,
-  BODY_TEXT,
-  clearScene,
-  tagFrame,
-} from "./uiKit";
+import { addBodyText, addTagImage, addTapBurst, BODY_TEXT, clearScene, tagFrame } from "./uiKit";
 
 type Tab = StatsTab;
 type Target = "close" | { badge: number } | { tab: number };
@@ -159,12 +151,8 @@ export class StatsScene extends Scene {
         } else if ("tab" in target) {
           this.openTab(TABS[target.tab] ?? this.tab);
         } else {
-          const { badge } = target;
-          afterTapFx(this, () => {
-            this.detail = badge;
-            this.burst = true;
-            this.render();
-          });
+          this.detail = target.badge;
+          this.burst = true;
         }
         this.render();
       },

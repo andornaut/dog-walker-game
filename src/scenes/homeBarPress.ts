@@ -1,6 +1,7 @@
 import type { Scene } from "phaser";
 
 import { homeBarAction, type HomeBarButton, homeBarButtonAt } from "../home/homeBar";
+import { openGuard } from "../input/openGuard";
 import { whenArtReady } from "./artReady";
 import { openHelp } from "./helpScreen";
 import { BAR_MUTED_EVENT, onSceneEvent, openOverlay } from "./overlay";
@@ -8,7 +9,6 @@ import { toggleMuted } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import type { SettingsData } from "./SettingsScene";
 import { listenTargetPress } from "./targetPress";
-import { afterTapFx } from "./uiKit";
 
 // Emitted on game.events as the top bar opens help, the Logbook or the settings: the Logbook,
 // the settings and the badge celebration close, and the start screen and the Pet shop close any
@@ -17,10 +17,14 @@ export const HOME_PAGE_OPENING_EVENT = "home-page-opening";
 
 export type HomePage = "help" | "logbook" | "settings";
 
-// Opens page from the top bar, tapped on from, once the tap's burst has played out: over the Pet
-// shop while it is open, else over the start screen, in place of every other overlay and card.
+const homePageGuard = openGuard();
+
+// Opens page from the top bar, tapped on from, at once: over the Pet shop while it is open, else
+// over the start screen, in place of every other overlay and card. The overlays it closes and
+// the one it opens change at Phaser's next step, so a second page asked of from before then is
+// dropped (openGuard).
 export function openHomePage(from: Scene, page: HomePage): void {
-  afterTapFx(from, () => {
+  homePageGuard(from.game.events, from, () => {
     from.game.events.emit(HOME_PAGE_OPENING_EVENT);
     const { shop, start } = SCENE_KEYS;
     const resume = from.scene.isActive(shop) || from.scene.isPaused(shop) ? shop : start;
