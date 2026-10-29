@@ -43,8 +43,8 @@ export const MENU_TEXT = {
   pause: {
     headHome: "Head home",
     help: "Help",
-    note: "Ends the walk and keeps {kept} of {cash}.",
-    noteAll: "Ends the walk and keeps all {cash}.",
+    note: "Heading home keeps {kept} of {cash}.",
+    noteAll: "Heading home keeps all {cash}.",
     resume: "Resume",
     settings: "Settings",
     title: "Paused",
