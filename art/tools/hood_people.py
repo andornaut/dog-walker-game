@@ -6,20 +6,20 @@ walker on 32x64, and drawn road.SCALE (1.5) times bigger on a
 minis.Mini), with the road outline (pixel.road_edge) and road.LIT's lit rim,
 cel shaded.
 
-tourist             48x72   Distillery District and Yonge Street; a stepper facing the player, as the
-                            mail carrier is: a straw sun hat with a red band, a turquoise holiday shirt
-                            with a few pink flowers, a silver-topped camera on a strap round
-                            the neck, a rust backpack (its straps and its top showing over the
-                            shoulders), driftwood shorts and sandals, an open map in the right hand
-                            (screen left); walk (4 frames, 100ms): road.PERSON_WALK, the free arm
-                            swinging; idle (2 frames, 400ms): road.BREATH
-couple              112x72  Distillery District, 2 lanes; two people strolling arm in arm, a stepper
-                            facing the player as the tourist is: on the left a man in a red sweater
-                            and grey trousers carrying a kraft shopping bag, on the right a woman with
-                            long copper hair and a fringe in a lilac dress with a mauve shoulder bag,
-                            their inner arms hooked together between them; walk (4 frames, 160ms, the
-                            stroller's pace): road.PERSON_WALK, in step, the outer arms swinging; idle
-                            (2 frames, 400ms): road.BREATH
+tourist             48x72   Distillery District, Kensington Market and Yonge Street; a stepper facing the
+                            player, as the mail carrier is: a straw sun hat with a red band, a turquoise
+                            holiday shirt with a few pink flowers, a silver-topped camera on a strap round
+                            the neck, a rust backpack (its straps and its top showing over the shoulders),
+                            driftwood shorts and sandals, an open map in the right hand (screen left); walk
+                            (4 frames, 100ms): road.PERSON_WALK, the free arm swinging; idle (2 frames,
+                            400ms): road.BREATH
+couple              112x72  High Park, Kensington Market and The Beaches, 2 lanes; two people strolling arm
+                            in arm, a stepper facing the player as the tourist is: on the left a man in a
+                            red sweater and grey trousers carrying a kraft shopping bag, on the right a
+                            woman with long copper hair and a fringe in a lilac dress with a mauve shoulder
+                            bag, their inner arms hooked together between them; walk (4 frames, 160ms, the
+                            stroller's pace): road.PERSON_WALK, in step, the outer arms swinging; idle (2
+                            frames, 400ms): road.BREATH
 busker              48x72   Yonge Street; a fixed busker facing the player,
                             playing an acoustic guitar behind its open case: curly brown hair and a
                             beard, an olive plaid shirt, the case lying open at his feet, lined in red

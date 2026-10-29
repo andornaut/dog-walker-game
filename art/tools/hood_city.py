@@ -64,13 +64,13 @@ newspaper-box       48x48   minor, 1 lane: a row of three street newspaper boxes
                             in bold colours a lane wide, unlike Kensington's roadside curb-mailbox, a
                             single red box under a dome. idle (4 frames, 400ms): the lid paper's corner
                             lifts 1px on frame 2
-pedicab             48x72   minor rider, 1 lane, coming down its lane at the pack, facing the player: a
-                            bike taxi, its cobalt canopy edged in a white scalloped valance shading a
-                            padded red bench on two wheels, a passenger in a
-                            green top and a gold bob sitting on its left, and in front the rider, who
-                            wears a purple tee and a white headband, a lit headlamp on the fork crown.
-                            ride (4 frames, 120ms): the pedals going round, the front tire's tread
-                            falling 1px a frame
+pedicab             48x72   minor rider, 1 lane, also in the Distillery District, coming down its lane at
+                            the pack, facing the player: a bike taxi, its cobalt canopy edged in a white
+                            scalloped valance shading a padded red bench on two wheels, a passenger in a
+                            green top and a gold bob sitting on its left, and in front the rider, who wears
+                            a purple tee and a white headband, a lit headlamp on the fork crown. ride (4
+                            frames, 120ms): the pedals going round, the front tire's tread falling 1px a
+                            frame
 streetcar-platform  176x48  minor, 3 lanes, Yonge Street's own 3-lane static: a TTC streetcar stop
                             island in front elevation, a long low concrete platform, grey under an
                             lgrey top and a white lit curb edge; on it a glass shelter as tall as a

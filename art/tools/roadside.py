@@ -23,7 +23,7 @@ roadside-cafe-patio      72x72    a café patio: a bistro table with a coffee cu
 roadside-dune-grass      60x48    a tuft of dune grass, moss and olive blades with gold tips
 roadside-fruit-stand     108x84   a tiered fruit stand under a little striped awning
 roadside-garden-car      108x96   the Garden Car on Augusta Avenue from the front, a mural-painted sedan heaped with
-                                  plants in flower, its wheels sunk in greenery; drawn but no longer placed
+                                  plants in flower, its wheels sunk in greenery; drawn but not placed
 roadside-gas-lamp       36x150   a heritage street lamp, its lantern lit gold
 roadside-hot-dog-stand   90x126   a red park kiosk under a flat white roof, a hot dog on its sign
 roadside-ice-cream-stand 90x126   a foam beach kiosk under a flat turquoise roof, a soft-serve cone on top
@@ -1255,9 +1255,10 @@ def check_placement():
 
 
 def table():
-    """The placement table as JSON, with the shadowed keys."""
+    """The placement table as JSON, with the shadowed keys that a zone places."""
     check_placement()
     out = {}
+    placed = set()
     for zone, p in PLACEMENT.items():
         def props(group):
             return [{"key": k, "across": a, "dz": dz} for k, a, dz in group]
@@ -1265,7 +1266,9 @@ def table():
                      "sides": p["sides"], "shadowColour": K[SHADOWS[zone]]}
         if zone in CURB:
             out[zone]["curb"] = {"groups": [props(g) for g in CURB[zone]["groups"]], "sides": CURB[zone]["sides"]}
-    return {"shadowed": list(SHADOWED), "zones": out}
+        groups = p["lots"] + p["gaps"] + (CURB[zone]["groups"] if zone in CURB else ())
+        placed.update(k for group in groups for k, _, _ in group)
+    return {"shadowed": [k for k in SHADOWED if k in placed], "zones": out}
 
 
 def write_table():

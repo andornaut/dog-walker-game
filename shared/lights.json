@@ -21,7 +21,7 @@
         "dx": 0.5,
         "dy": -10.5,
         "light": "rider-headlamp",
-        "zones": ["homeStretch"]
+        "zones": ["homeStretch", "street"]
       },
       {
         "angle": 90,
@@ -37,7 +37,7 @@
         "dx": 0.5,
         "dy": -18.5,
         "light": "rider-headlamp",
-        "zones": ["homeStretch"]
+        "zones": ["homeStretch", "street"]
       },
       {
         "angle": 90,
@@ -85,7 +85,7 @@
           }
         ],
         "light": "rider-headlamp",
-        "zones": ["homeStretch"]
+        "zones": ["homeStretch", "street"]
       },
       {
         "angle": 90,
@@ -149,7 +149,7 @@
         "dx": 0.5,
         "dy": -14.5,
         "light": "rider-headlamp",
-        "zones": ["homeStretch"]
+        "zones": ["homeStretch", "street"]
       },
       {
         "angle": 90,
@@ -187,7 +187,7 @@
           }
         ],
         "light": "rider-headlamp",
-        "zones": ["homeStretch"]
+        "zones": ["homeStretch", "street"]
       },
       {
         "angle": 90,
@@ -233,7 +233,7 @@
         "dx": 0.5,
         "dy": -15.5,
         "light": "rider-headlamp",
-        "zones": ["homeStretch"]
+        "zones": ["homeStretch", "street"]
       },
       {
         "angle": 90,
