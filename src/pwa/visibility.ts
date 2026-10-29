@@ -1,8 +1,6 @@
-import { dispatchPhoneEvent, PHONE_EVENTS } from "./events";
+import type { VisibilitySource } from "@andornaut/game-kit/pwa/wakeLock";
 
-export interface VisibilitySource extends EventTarget {
-  readonly visibilityState: DocumentVisibilityState;
-}
+import { dispatchPhoneEvent, PHONE_EVENTS } from "./events";
 
 // Relays the page's visibility as app-hidden and app-visible on eventTarget, each once per
 // change. pagehide and pageshow count too, for a page leaving or returning from the back-forward

@@ -9,7 +9,12 @@ import {
 } from "@andornaut/game-kit/pwa/installFlow";
 import type { InstallState, MenuInstallBrowser } from "@andornaut/game-kit/pwa/installState";
 import { serviceWorkerUrl } from "@andornaut/game-kit/pwa/serviceWorkerUrl";
+import {
+  requestPersistentStorage,
+  type StoragePersistence,
+} from "@andornaut/game-kit/pwa/storagePersistence";
 import { createUpdateFlow, type UpdateFlow } from "@andornaut/game-kit/pwa/updateReady";
+import { createScreenWakeLock, type ScreenWakeLock } from "@andornaut/game-kit/pwa/wakeLock";
 import { localSaveStorage } from "@andornaut/game-kit/save/storage";
 
 import { chooseSoundFormat, type SoundFormat } from "../audio/soundFormat";
@@ -24,19 +29,17 @@ import {
 import { dispatchPhoneEvent, PHONE_EVENTS } from "./events";
 import { createInstallNudge, type InstallNudge } from "./installNudge";
 import { type OrientationRelay, relayOrientationEvents, type Viewport } from "./orientation";
-import { requestPersistentStorage, type StoragePersistence } from "./storagePersistence";
 import { relayVisibilityEvents } from "./visibility";
-import { createScreenWakeLock, type ScreenWakeLock } from "./wakeLock";
 
 export { AUDIO_UNLOCK_EVENTS, unlockAudioOnFirstGesture } from "./audioUnlock";
 export { PHONE_EVENTS } from "./events";
-export type { StoragePersistence } from "./storagePersistence";
 export type { InstallOutcome } from "@andornaut/game-kit/pwa/installFlow";
 export {
   type InstallState,
   type MenuInstallBrowser,
   offersInstall,
 } from "@andornaut/game-kit/pwa/installState";
+export type { StoragePersistence } from "@andornaut/game-kit/pwa/storagePersistence";
 
 const SERVICE_WORKER_URL = "/sw.js";
 // An element in pages/play/index.html.

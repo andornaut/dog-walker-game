@@ -1,4 +1,10 @@
-import type { VisibilitySource } from "./visibility";
+// Keeps the screen on while a game wants it (start and stop, such as during play) and the page is
+// visible.
+
+// The page's visibility, as document reports it, so tests can pass a fake.
+export interface VisibilitySource extends EventTarget {
+  readonly visibilityState: DocumentVisibilityState;
+}
 
 // The parts of the Screen Wake Lock API this uses, so tests can pass a fake.
 export interface WakeLockSentinelLike extends EventTarget {

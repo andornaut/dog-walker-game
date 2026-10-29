@@ -1,5 +1,5 @@
-// Asks the browser to keep the site's storage, the save included, when it would otherwise evict
-// it: under storage pressure, or Safari's 7 days without a visit. Only the installed app asks: in
+// Asks the browser to keep the site's storage, a game's save included, when it would otherwise
+// evict it: under storage pressure, or Safari's 7 days without a visit. Only the installed app asks: in
 // a browser tab Firefox would ask the player, while Chromium grants it on its own heuristics
 // (an installed app is one) without asking.
 

@@ -5,10 +5,10 @@
 import "./devPanel.css";
 
 import { BUILD_LABEL } from "@andornaut/game-kit/build/buildLabel";
+import type { StoragePersistence } from "@andornaut/game-kit/pwa/storagePersistence";
 import { sessionRead, sessionRemove, sessionWrite } from "@andornaut/game-kit/sessionStore";
 
 import { gameData } from "../data";
-import type { StoragePersistence } from "../pwa/storagePersistence";
 import { saveContextFrom } from "../save/load";
 import { loadedSave, newPlayerOnDevice } from "../save/profile";
 import { createDefaultSave } from "../save/schema";
