@@ -61,7 +61,8 @@ export const HOME_TEXT_FIELDS = {
   unsaved: [],
   walkerInfo: ["agility", "perk", "walker"],
   walkerInfoBase: ["perk", "walker"],
-  walkerLocked: ["zone"],
+  walkerLocked: ["count"],
+  walkerLockedOne: [],
 } as const satisfies Record<LineKey, readonly string[]> & FieldTable;
 
 type Fields<K extends LineKey> = Record<(typeof HOME_TEXT_FIELDS)[K][number], string>;

@@ -1,4 +1,4 @@
-import type { GameData, WalkerId, ZoneId } from "../data/types";
+import type { GameData, WalkerId } from "../data/types";
 import { earningsKind } from "../home/endView";
 import { signedDollarText } from "../home/home";
 import { fillLine, fillNames } from "../lib/lines";
@@ -10,18 +10,19 @@ import type { RunState } from "../state/runState";
 import { perkIconKey } from "./effectIcons";
 import { RUN_TEXT_FIELDS as FIELDS } from "./runText";
 
-// What plays once a zone's fee coins have landed: the walker that zone unlocks for the first
-// time joins, or else the walker in use cheers over the zone's fees and tips. After the last zone,
-// the only one that pays the Walk bonus, only a joining walker plays, before the end screen.
-export type ZoneCelebration =
-  | { readonly kind: "newWalker"; readonly walker: WalkerId }
-  | {
-      readonly fees: Cents;
-      readonly kind: "zoneDone";
-      readonly tips: Cents;
-      readonly walker: WalkerId;
-      readonly zone: string;
-    };
+// The walker in use cheering over a zone's fees and tips, once its fee coins have landed, after
+// each zone but the last.
+interface ZoneDone {
+  readonly fees: Cents;
+  readonly kind: "zoneDone";
+  readonly tips: Cents;
+  readonly walker: WalkerId;
+  readonly zone: string;
+}
+
+// What plays over the paused walk: a zone's ZoneDone, or, before the end screen, a walker the
+// walk unlocked joining.
+export type ZoneCelebration = { readonly kind: "newWalker"; readonly walker: WalkerId } | ZoneDone;
 
 // The zone's earnings in the order the plate says them.
 export const ZONE_EARNINGS = ["fees", "tips"] as const;
@@ -29,25 +30,24 @@ export const ZONE_EARNINGS = ["fees", "tips"] as const;
 interface ZoneFinish {
   // The changes made since the zone began, its fees included.
   readonly changes: readonly Change[];
-  // The zones the run has finished, in order, this one included.
-  readonly finished: readonly ZoneId[];
   readonly walker: WalkerId;
   // The finished zone's name.
   readonly zone: string;
 }
 
-// owned is the walkers owned when the walk began: a walk unlocks walkers only once banked, so
-// one that joined after an earlier zone of this walk is left out by the zones before.
-export function zoneCelebration(
+// The New walker celebrations that play before the end screen, one per walker the walk unlocks,
+// in unlock order (newWalkers). owned is the walkers owned when the walk began, since a walk
+// unlocks walkers only once banked; finishedWith is the dogs still walking at the end of a
+// finished walk (dogsFinishedWith), or null for a walk not finished.
+export function newWalkerCelebrations(
   data: Pick<GameData, "walkers">,
   owned: readonly WalkerId[],
-  finish: ZoneFinish,
-): ZoneCelebration {
-  const before = newWalkers(data, owned, finish.finished.slice(0, -1));
-  const joining = newWalkers(data, owned, finish.finished).find((id) => !before.includes(id));
-  if (joining !== undefined) {
-    return { kind: "newWalker", walker: joining };
-  }
+  finishedWith: number | null,
+): ZoneCelebration[] {
+  return newWalkers(data, owned, finishedWith).map((walker) => ({ kind: "newWalker", walker }));
+}
+
+export function zoneCelebration(finish: ZoneFinish): ZoneDone {
   let fees = 0;
   let tips = 0;
   for (const change of finish.changes) {

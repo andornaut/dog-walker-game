@@ -58,9 +58,10 @@ function atLineTop<T extends GameObjects.BitmapText>(label: T, top: number): T {
   return label.setY(top);
 }
 
-// Between zones, over the paused walk: the walker cheers on a starburst under the zone's name
-// and earnings over a button, and waits for a tap or key 1; or a newly unlocked walker hops in,
-// greets the pack in a bubble with their agility and perk, and waits for Welcome! (key 1).
+// Over the paused walk: between zones, the walker cheers on a starburst under the zone's name
+// and earnings over a button, and waits for a tap or key 1; before the end screen, a walker the
+// walk unlocked hops in, greets the pack in a bubble with their agility and perk, and waits for
+// Welcome! (key 1).
 // Confetti falls in both, unless motion is reduced. Both take no input for
 // seconds.screenTapGuard from their first drawn frame.
 export class ZoneCelebrationScene extends Scene {

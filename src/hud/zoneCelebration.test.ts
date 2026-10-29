@@ -1,14 +1,20 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { WalkerId, ZoneId } from "../data/types";
+import type { WalkerId } from "../data/types";
 import { fillNames } from "../lib/lines";
 import { keysOf } from "../lib/records";
 import { cents, type Hearts } from "../lib/units";
 import type { Change, MoneyChange } from "../rules/causes";
 import { agilityPercent } from "../rules/effectText";
+import { walkerGoal, walkerOrder } from "../rules/walkers";
 import { perkIconKey } from "./effectIcons";
-import { celebrationText, zoneBannerHeading, zoneCelebration } from "./zoneCelebration";
+import {
+  celebrationText,
+  newWalkerCelebrations,
+  zoneBannerHeading,
+  zoneCelebration,
+} from "./zoneCelebration";
 
 const DISTILLERY_DISTRICT =
   gameData.world.zones.find(({ id }) => id === "distilleryDistrict")?.name ?? "";
@@ -39,37 +45,53 @@ const ZONE_CHANGES: readonly Change[] = [
   money("pay", 6000),
 ];
 
-describe("zoneCelebration", () => {
-  // Each zone's walker joins only while not owned; a walker who joined earlier in the walk is
-  // not owned yet, and still does not join again.
-  // Each walker joins on finishing the zone their data names, while not owned.
-  const goal = (walker: WalkerId): ZoneId => {
-    const data = gameData.walkers[walker];
-    return data.unlock === "start" ? "distilleryDistrict" : data.zone;
-  };
-  it("lets a walker join on finishing their zone only while not owned", () => {
-    for (const { expected, finished, owned } of [
-      { expected: "mrB", finished: ["distilleryDistrict", goal("mrB")], owned: ["casey"] },
-      { expected: "ada", finished: ["distilleryDistrict", goal("ada")], owned: ["casey"] },
-      { expected: "trista", finished: ["distilleryDistrict", goal("trista")], owned: ["casey"] },
-      { expected: null, finished: ["distilleryDistrict", goal("mrB")], owned: ["casey", "mrB"] },
-      { expected: null, finished: ["distilleryDistrict"], owned: ["casey"] },
-      { expected: null, finished: [goal("mrB")], owned: ["ada", "mrB", "casey", "trista"] },
-    ] satisfies readonly { expected: WalkerId | null; finished: ZoneId[]; owned: WalkerId[] }[]) {
-      const finish = { changes: [], finished, walker: "casey", zone: DISTILLERY_DISTRICT } as const;
-      const joined = zoneCelebration(gameData, owned, finish);
-      expect(joined.kind === "newWalker" ? joined.walker : null).toBe(expected);
+describe("newWalkerCelebrations", () => {
+  const goal = (walker: WalkerId) => walkerGoal(gameData.walkers[walker]) ?? 0;
+  const starting = keysOf(gameData.walkers).filter(
+    (id) => walkerGoal(gameData.walkers[id]) === null,
+  );
+  const joins = (walkers: readonly WalkerId[]) =>
+    walkers.map((walker) => ({ kind: "newWalker", walker }));
+  // The walkers a walk finished with this many dogs still walking reaches, in unlock order.
+  const reached = (dogs: number) =>
+    walkerOrder(gameData).filter((id) => !starting.includes(id) && goal(id) <= dogs);
+
+  it.each([1, 2, 3])(
+    "plays one New walker per walker a walk finished with %i dogs unlocks, fewest dogs first",
+    (dogs) => {
+      const played = newWalkerCelebrations(gameData, starting, dogs);
+      expect(played).toEqual(joins(reached(dogs)));
+      expect(played.map(({ walker }) => goal(walker))).toEqual(
+        reached(dogs)
+          .map(goal)
+          .sort((a, b) => a - b),
+      );
+    },
+  );
+
+  it.each([1, 2, 3])("plays none for a walker already unlocked, of those %i dogs reach", (dogs) => {
+    const owned = [...starting, ...reached(dogs)];
+    expect(newWalkerCelebrations(gameData, owned, dogs)).toEqual([]);
+    const first = reached(dogs)[0];
+    const rest = reached(dogs).slice(1);
+    if (first !== undefined) {
+      expect(newWalkerCelebrations(gameData, [...starting, first], dogs)).toEqual(joins(rest));
     }
   });
 
+  it("plays none for a walk not finished", () => {
+    expect(newWalkerCelebrations(gameData, starting, null)).toEqual([]);
+  });
+});
+
+describe("zoneCelebration", () => {
   it("counts the zone's fees and tips, and leaves out bumps and hearts", () => {
     const finish = {
       changes: ZONE_CHANGES,
-      finished: ["distilleryDistrict"],
       walker: "mrB",
       zone: DISTILLERY_DISTRICT,
     } as const;
-    expect(zoneCelebration(gameData, ["mrB", "casey"], finish)).toEqual({
+    expect(zoneCelebration(finish)).toEqual({
       fees: 18000,
       kind: "zoneDone",
       tips: 800,

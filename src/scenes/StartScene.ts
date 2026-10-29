@@ -84,7 +84,7 @@ import {
 } from "../home/sections";
 import { shopAffordable } from "../home/shop";
 import { slotSign, slotSignPurchase } from "../home/slotSign";
-import { tapWalker, walkerOrder, walkerTile } from "../home/walkers";
+import { tapWalker, walkerTile } from "../home/walkers";
 import {
   EFFECT_ICON_SIZE,
   effectIconFallback,
@@ -117,6 +117,7 @@ import {
   stopWakeLock,
   updatePlateShown,
 } from "../pwa";
+import { walkerOrder } from "../rules/walkers";
 import type { SaveDocument } from "../save/schema";
 import { walksFinished, walksPlayed } from "../save/stats";
 import { packDogsOf } from "../state/pack";

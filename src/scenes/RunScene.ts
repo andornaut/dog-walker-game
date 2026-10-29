@@ -20,7 +20,11 @@ import { cardHintTriggers, startHintTriggers } from "../hud/hintTriggers";
 import { homeQuestionNote, pauseNote } from "../hud/homeQuestion";
 import { NOTHING_PAUSED, type RunPause, walkPaused } from "../hud/topBar";
 import { type ExplainShown } from "../hud/walkHud";
-import { type ZoneCelebration, zoneCelebration } from "../hud/zoneCelebration";
+import {
+  newWalkerCelebrations,
+  type ZoneCelebration,
+  zoneCelebration,
+} from "../hud/zoneCelebration";
 import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
 import { type CardView, type Choice, outcomeChanges } from "../rules/choices";
 import { currentZone, currentZoneId, previousZone, previousZoneId } from "../rules/route";
@@ -45,6 +49,7 @@ import {
   stepSession,
 } from "../runner/session";
 import { startRoad, type Walk } from "../runner/walk";
+import { dogsFinishedWith } from "../save/checkpoint";
 import { checkpointOf, runResultOf } from "../save/runSlices";
 import { type Loadout, newRun, type RunState } from "../state/runState";
 import { colourFromHex, PALETTE } from "../ui/phaser/palette";
@@ -101,9 +106,10 @@ const STEPPING: FixedStepLimits = { maxFrameMs: 1000, stepMs: STEP_MS };
 // Before the walk starts, the HUD shows nothing to explain.
 const NOTHING_SHOWN: ExplainShown = { debuffs: [], dogs: [], effects: 0 };
 
-// The zone celebration due once a zone's fee coins have landed, delayMs from its end.
+// The celebrations due, one after another, once a zone's fee coins have landed, delayMs from its
+// end.
 interface Celebration {
-  celebration: ZoneCelebration;
+  celebrations: readonly ZoneCelebration[];
   delayMs: number;
 }
 
@@ -456,7 +462,7 @@ export class RunScene extends Scene implements HudRun {
       if (run.phase.reason === "wentHome") {
         this.world?.moments.headedHome(run);
       }
-      // A walker the last zone unlocks joins before the end screen.
+      // Each walker a finished walk unlocks joins before the end screen.
       if (celebration === undefined) {
         this.endWalk();
       } else {
@@ -477,7 +483,8 @@ export class RunScene extends Scene implements HudRun {
   }
 
   // Pays out the zone's fees. Unless replayed, saves the walk between zones and returns the
-  // celebration that plays once the coins land: after the last zone, only a New walker's.
+  // celebrations that play once the coins land: Neighbourhood done between zones, and after the
+  // last zone a New walker for each walker the walk unlocks (newWalkerCelebrations).
   private endZone(event: Extract<SessionEvent, { kind: "zoneEnded" }>): Celebration | undefined {
     const world = this.world;
     if (world === undefined) {
@@ -488,36 +495,43 @@ export class RunScene extends Scene implements HudRun {
     if (world.recorder.replaying()) {
       return undefined;
     }
-    const ended = after.phase.kind === "ended";
-    if (!ended) {
-      void checkpointRun(this, checkpointOf(gameData, after));
+    if (after.phase.kind === "ended") {
+      const finishedWith = dogsFinishedWith(runResultOf(gameData, after));
+      const owned = profileSave(this).owned.walkers;
+      const celebrations = newWalkerCelebrations(gameData, owned, finishedWith);
+      return celebrations.length === 0 ? undefined : { celebrations, delayMs: payout.ms };
     }
-    const celebration = zoneCelebration(gameData, profileSave(this).owned.walkers, {
+    void checkpointRun(this, checkpointOf(gameData, after));
+    const celebration = zoneCelebration({
       changes: payout.changes,
-      finished: before.route.slice(0, before.zoneIndex + 1),
       walker: before.walker,
       zone: currentZone(gameData, before).name,
     });
-    return ended && celebration.kind !== "newWalker"
-      ? undefined
-      : { celebration, delayMs: payout.ms };
+    return { celebrations: [celebration], delayMs: payout.ms };
   }
 
-  // The celebration holds the walk while the fee coins land, then plays; next follows it.
-  private celebrate({ celebration, delayMs }: Celebration, next: () => void): void {
+  // The celebrations hold the walk while the fee coins land, then play one after another; next
+  // follows the last.
+  private celebrate({ celebrations, delayMs }: Celebration, next: () => void): void {
     const menus = this.world?.menus;
     if (menus === undefined) {
       return;
     }
-    menus.holdForCelebration();
-    this.time.delayedCall(delayMs, () => {
+    const play = ([celebration, ...rest]: readonly ZoneCelebration[]) => {
+      if (celebration === undefined) {
+        next();
+        return;
+      }
+      menus.holdForCelebration();
       menus.showCelebration({
         celebration,
-        onDone: next,
+        onDone: () => play(rest),
         openPause: () => this.openPause(),
         resume: SCENE_KEYS.run,
       });
-    });
+    };
+    menus.holdForCelebration();
+    this.time.delayedCall(delayMs, () => play(celebrations));
   }
 
   // An event's sounds, bursts, hints and labels, and the input log.

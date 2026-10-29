@@ -38,10 +38,12 @@ function pageFacts(): [string, string][] {
   );
   const { large, medium, small } = tuning.hearts.maxBySize;
   const unlocks = Object.values(walkers)
-    .flatMap((walker) => (walker.unlock === "finishZone" ? [walker] : []))
-    .sort((a, b) => zoneIndex(a.zone) - zoneIndex(b.zone))
-    .map(
-      ({ name, zone }, i) => `${name} ${i ? "" : "joins when you first finish "}${zoneName(zone)}`,
+    .flatMap((walker) => (walker.unlock === "finishWalk" ? [walker] : []))
+    .sort((a, b) => a.dogs - b.dogs)
+    .map(({ dogs, name }, i) =>
+      i
+        ? `${name} with ${count(dogs)}`
+        : `${name} joins when you first finish a walk with ${count(dogs)} dog${dogs === 1 ? "" : "s"}`,
     );
   return [
     ["the world", `Walk a pack of dogs through ${world.name}.`],

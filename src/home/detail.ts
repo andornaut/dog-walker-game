@@ -147,7 +147,7 @@ export function gearDetail(
 }
 
 // A walker's agility and perk lines. An owned walker's status says so; one not owned is
-// locked, and its status names the zone whose finish unlocks it.
+// locked, and its status says how many dogs a walk must finish with to unlock it.
 export function walkerDetail(
   data: DetailData,
   owned: Pick<Owned, "walkers">,

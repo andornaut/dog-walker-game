@@ -1,6 +1,5 @@
 import type { GameData, WalkerId } from "../data/types";
 import { fillLine } from "../lib/lines";
-import { keysOf } from "../lib/records";
 import { agilityPercent, perkEffect } from "../rules/effectText";
 import { walkerGoal } from "../rules/walkers";
 import type { Owned, SaveDocument } from "../save/schema";
@@ -8,31 +7,18 @@ import { type ItemTile, itemTile } from "../ui/interaction";
 import { togglePick } from "./home";
 import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
 
-type WalkerText = Pick<GameData, "homeText" | "tuning" | "walkerPerks" | "walkers" | "world">;
+type WalkerText = Pick<GameData, "homeText" | "tuning" | "walkerPerks" | "walkers">;
 
-// The name of the zone whose finish unlocks the walker.
-function goalZone(data: Pick<GameData, "walkers" | "world">, walker: WalkerId): string {
-  const goal = walkerGoal(data.walkers[walker]);
-  return data.world.zones.find(({ id }) => id === goal)?.name ?? "";
-}
-
-// What unlocks a walker not owned, naming its goal's zone.
+// What unlocks a walker not owned: finishing a walk with its goal's dogs still walking, in
+// walkerLockedOne for one dog.
 export function walkerLockedLine(
-  data: Pick<GameData, "homeText" | "walkers" | "world">,
+  data: Pick<GameData, "homeText" | "walkers">,
   walker: WalkerId,
 ): string {
-  return homeLine(data.homeText, "walkerLocked", { zone: goalZone(data, walker) });
-}
-
-// The walkers as the picker shows them, left to right in the order they unlock: the starting
-// walkers, then by the zone that unlocks each in the world's order, ties in data order.
-export function walkerOrder(data: Pick<GameData, "walkers" | "world">): WalkerId[] {
-  const ids = data.world.zones.map(({ id }) => id);
-  const goal = (walker: WalkerId) => {
-    const zone = walkerGoal(data.walkers[walker]);
-    return zone === null ? -1 : ids.indexOf(zone);
-  };
-  return keysOf(data.walkers).sort((a, b) => goal(a) - goal(b));
+  const count = walkerGoal(data.walkers[walker]) ?? 0;
+  return count === 1
+    ? homeLine(data.homeText, "walkerLockedOne", {})
+    : homeLine(data.homeText, "walkerLocked", { count: String(count) });
 }
 
 // A walker's tile on the home screen: the walker in use is picked, another owned one is

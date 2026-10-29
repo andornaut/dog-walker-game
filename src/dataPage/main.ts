@@ -298,7 +298,7 @@ function walkersSection(data: GameData): Section {
     headers: ["Walker", "Agility", "Perk", "Effect", "Unlock", "Sprite", "Portrait"],
     note:
       "A new player starts with the default walker. The others unlock the first time a walk " +
-      "finishes their zone.",
+      "finishes with at least their dogs still walking at the end.",
     rows: keysOf(data.walkers).map((id) => {
       const walker = data.walkers[id];
       const name = id === data.defaultWalker ? `${walker.name} (default)` : walker.name;
@@ -307,7 +307,9 @@ function walkersSection(data: GameData): Section {
         `${agilityPercent(walker.agility) ?? "Base"} (${walker.agility})`,
         data.walkerPerks[walker.perk].name,
         perkEffect(data.tuning, data.walkerPerks[walker.perk]),
-        walker.unlock === "start" ? "Start" : `Finish zone ${walker.zone}`,
+        walker.unlock === "start"
+          ? "Start"
+          : `Finish with ${walker.dogs} ${walker.dogs === 1 ? "dog" : "dogs"}`,
         walker.spriteKey,
         walker.portraitKey,
       ];

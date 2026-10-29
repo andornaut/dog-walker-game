@@ -552,9 +552,10 @@ export interface Gear {
 // most one dog per owned slot.
 export type DogSlot = Unlock;
 
-// A walker walks from the start, or unlocks the first time a walk finishes zone.
+// A walker walks from the start, or unlocks the first time a walk finishes with at least dogs
+// still walking at its end.
 type WalkerUnlock =
-  { readonly unlock: "finishZone"; readonly zone: ZoneId } | { readonly unlock: "start" };
+  { readonly dogs: number; readonly unlock: "finishWalk" } | { readonly unlock: "start" };
 
 // A walker's perk: its name, its effect in one line, and its effects, which last every walk the
 // walker walks, as gear's do.
@@ -569,8 +570,7 @@ export interface WalkerPerk {
 // A walker the player can pick, walking with its agility and the effects of its perk. agility
 // multiplies the pack's lane-change speed. spriteKey and portraitKey are keys into the art
 // manifest.
-// greeting is what the walker says as they join, the first time a walk finishes the zone that
-// unlocks them.
+// greeting is what the walker says as they join, after the first walk that unlocks them.
 export type Walker = WalkerUnlock & {
   readonly agility: number;
   readonly greeting: string;
@@ -810,8 +810,10 @@ export interface HomeText {
   // perk alone in walkerInfoBase for a walker at the base lane-change speed.
   readonly walkerInfo: string;
   readonly walkerInfoBase: string;
-  // What a locked walker's hold card and a tap on its tile say: the goal that unlocks it.
+  // What a locked walker's hold card and a tap on its tile say: the goal that unlocks it, the
+  // {count} of dogs a walk must finish with, or walkerLockedOne for a count of 1.
   readonly walkerLocked: string;
+  readonly walkerLockedOne: string;
 }
 
 // What a perk, gear item or upgrade did to a card option, by the effect that did it, as its

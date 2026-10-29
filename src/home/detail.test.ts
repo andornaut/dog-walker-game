@@ -127,11 +127,11 @@ describe("walkerDetail", () => {
       const card = walkerDetail(data, walkerOwned([]), walker);
       expect(card.locked).toBe(true);
       expect(card.lines).toEqual(walkerDetailLines(data, walker));
-      const goal = walkerGoal(data.walkers[walker]);
+      const goal = walkerGoal(data.walkers[walker]) ?? 0;
       expect(card.status).toBe(
-        homeLine(data.homeText, "walkerLocked", {
-          zone: data.world.zones.find(({ id }) => id === goal)?.name ?? "",
-        }),
+        goal === 1
+          ? data.homeText.walkerLockedOne
+          : homeLine(data.homeText, "walkerLocked", { count: String(goal) }),
       );
     }
   });

@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, WalkerId, ZoneId } from "../data/types";
+import { keysOf } from "../lib/records";
 import { cents } from "../lib/units";
+import { walkerGoal } from "../rules/walkers";
 import type { EndReason } from "../state/runState";
 import { packOf, runFactsFor } from "../testing/achievements";
 import { newPlayerSave, quietCounters, testAwards, veteranSave } from "../testing/saves";
@@ -35,31 +37,15 @@ const checkpoint: Checkpoint = {
   zonesFinished: 2,
 };
 
-// A walk from the first zone through every zone that unlocks a walker, to the last zone.
-const WALKERS = Object.entries(gameData.walkers) as [
-  WalkerId,
-  (typeof gameData.walkers)[WalkerId],
-][];
+// A walk from the first zone to the last.
 const { firstZone, lastZone } = gameData.world;
-const ROUTE = [
-  firstZone,
-  ...WALKERS.flatMap(([, walker]) =>
-    walker.unlock === "finishZone" && walker.zone !== firstZone && walker.zone !== lastZone
-      ? [walker.zone]
-      : [],
-  ),
-  lastZone,
-] as ZoneId[];
+const ROUTE = [firstZone, "cabbagetown", "theBeaches", lastZone] as ZoneId[];
 
-// The walkers owned once these zones are finished: those walking from the start, and those
-// those zones unlock.
-const unlockedBy = (finished: readonly ZoneId[]) =>
-  WALKERS.filter(
-    ([, walker]) =>
-      walker.unlock === "start" ||
-      (walker.unlock === "finishZone" && finished.includes(walker.zone)),
-  )
-    .map(([id]) => id)
+// The walkers owned after a walk finished with this many dogs still walking: those walking from
+// the start, and those whose goal that many dogs reach.
+const unlockedBy = (dogs: number) =>
+  keysOf(gameData.walkers)
+    .filter((id) => (walkerGoal(gameData.walkers[id]) ?? 0) <= dogs)
     .sort();
 
 const runResult = (changes: Partial<RunResult> = {}): RunResult => ({
@@ -152,19 +138,45 @@ describe("recordRunEnd", () => {
     }
   });
 
-  it("unlocks the walkers of the zones the run finished, not those a dev start skipped", () => {
-    const walkers = (changes: Partial<RunResult>) =>
-      recordRunEnd(testAwards, newPlayerSave, runResult(changes)).owned.walkers;
-    expect([...walkers({ outcome: "wentHome", zone: 3 })].sort()).toEqual(
-      unlockedBy(ROUTE.slice(0, 2)),
+  // A pack of 3 whose last 3 - walking owners fired you in zone 2.
+  const walkingOf = (walking: number) => ({
+    dogs: (["kilo", "lady", "penny"] as const).map((id, i) => ({
+      firedInZone: i < walking ? null : 2,
+      id,
+    })),
+  });
+  const walkersAfter = (changes: Partial<RunResult>, save: SaveDocument = newPlayerSave) =>
+    [...recordRunEnd(testAwards, save, runResult(changes)).owned.walkers].sort();
+
+  it.each([0, 1, 2, 3])(
+    "unlocks, for a walk finished with %i dogs still walking, every walker that many reach",
+    (walking) => {
+      expect(walkersAfter(walkingOf(walking))).toEqual(unlockedBy(walking));
+    },
+  );
+
+  it.each([
+    ["headed home", { ...walkingOf(3), outcome: "wentHome", zone: 3 }],
+    ["fired out", { ...walkingOf(0), outcome: "noDogs", zone: 2 }],
+    [
+      "begun past zone 1 by a dev start",
+      { ...walkingOf(3), counters: { ...quietCounters(), firstZone: 2 } },
+    ],
+  ] satisfies [string, Partial<RunResult>][])("unlocks none for a walk %s", (_, changes) => {
+    expect(walkersAfter(changes)).toEqual(unlockedBy(0));
+  });
+
+  it("unlocks none for a walk banked from its checkpoint at a zone's end", () => {
+    const save = recordCheckpoint(newPlayerSave, { ...checkpoint, ...walkingOf(3) });
+    expect([...bankCheckpoint(testAwards, save).owned.walkers].sort()).toEqual(unlockedBy(0));
+  });
+
+  it("keeps every walker unlocked before, adding each only once", () => {
+    const owned = { ...newPlayerSave.owned, walkers: keysOf(gameData.walkers) };
+    const save = { ...newPlayerSave, owned };
+    expect(recordRunEnd(testAwards, save, runResult(walkingOf(1))).owned.walkers).toEqual(
+      owned.walkers,
     );
-    const devStart = { counters: { ...quietCounters(), firstZone: 2 } };
-    expect([...walkers({ ...devStart, outcome: "wentHome", zone: 3 })].sort()).toEqual(
-      unlockedBy(ROUTE.slice(2, 2)),
-    );
-    expect([...walkers(devStart)].sort()).toEqual(unlockedBy(ROUTE.slice(2)));
-    expect([...walkers({})].sort()).toEqual(unlockedBy(ROUTE));
-    expect(unlockedBy(ROUTE)).toEqual(WALKERS.map(([id]) => id).sort());
   });
 
   it("banks no money, starting cash or best walk for a dev start past zone 1, and counts the zones it walked", () => {

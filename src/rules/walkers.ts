@@ -1,4 +1,4 @@
-import type { Effect, GameData, Modifier, Walker, WalkerId, ZoneId } from "../data/types";
+import type { Effect, GameData, Modifier, Walker, WalkerId } from "../data/types";
 import { keysOf } from "../lib/records";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
@@ -66,21 +66,31 @@ export function slowestDebuffedAgility(
   );
 }
 
-// The zone whose finish unlocks the walker, or null for a starting walker.
-export function walkerGoal(walker: Walker): ZoneId | null {
-  return walker.unlock === "start" ? null : walker.zone;
+// The dogs a walk must finish with still walking to unlock the walker, or null for a starting
+// walker.
+export function walkerGoal(walker: Walker): number | null {
+  return walker.unlock === "start" ? null : walker.dogs;
 }
 
-// The walkers a walk that finished the zones in finished unlocks and owned lacks, in data
-// order. At a zone's end, with the zones the run has finished so far, it names the walker who
-// greets the pack; when a run is banked, the walkers it adds.
+// The walkers in the order they unlock: the starting walkers, then by the dogs that unlock each,
+// fewest first, ties in data order.
+export function walkerOrder(data: Pick<GameData, "walkers">): WalkerId[] {
+  const goal = (walker: WalkerId) => walkerGoal(data.walkers[walker]) ?? -1;
+  return keysOf(data.walkers).sort((a, b) => goal(a) - goal(b));
+}
+
+// The walkers owned lacks that a walk unlocks, in unlock order (walkerOrder): every starting
+// walker, and each walker whose goal is at most finishedWith, the dogs still walking at the end
+// of a finished walk (dogsFinishedWith), or none for a walk not finished (null).
 export function newWalkers(
   data: Pick<GameData, "walkers">,
   owned: readonly WalkerId[],
-  finished: readonly ZoneId[],
+  finishedWith: number | null,
 ): WalkerId[] {
-  return keysOf(data.walkers).filter((id) => {
+  return walkerOrder(data).filter((id) => {
     const goal = walkerGoal(data.walkers[id]);
-    return !owned.includes(id) && (goal === null || finished.includes(goal));
+    return (
+      !owned.includes(id) && (goal === null || (finishedWith !== null && goal <= finishedWith))
+    );
   });
 }

@@ -1,11 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { DogId, Size, WalkerId, ZoneId } from "../data/types";
+import type { DogId, Size, WalkerId } from "../data/types";
 import { keysOf } from "../lib/records";
 import { newRun } from "../state/runState";
 import { read } from "./units";
-import { newWalkers, packAgility, slowestPackAgility, walkerAgility } from "./walkers";
+import {
+  newWalkers,
+  packAgility,
+  slowestPackAgility,
+  walkerAgility,
+  walkerGoal,
+  walkerOrder,
+} from "./walkers";
 
 const WALKER_IDS = keysOf(gameData.walkers);
 
@@ -97,15 +104,31 @@ describe("packAgility", () => {
   );
 });
 
-describe("newWalkers", () => {
-  const ZONES = gameData.world.zones.map(({ id }) => id as ZoneId);
+describe("walkerOrder", () => {
+  it("lists the starting walker, then the others by the dogs that unlock them", () => {
+    expect(walkerOrder(gameData)).toEqual(["casey", "mrB", "ada", "trista"]);
+  });
+});
 
-  it("unlocks each walker not owned yet for finishing its zone, in data order", () => {
-    const ada = gameData.walkers.ada;
-    expect(newWalkers(gameData, [], [])).toEqual(["casey"]);
-    if (ada.unlock !== "start") {
-      expect(newWalkers(gameData, ["casey"], [ada.zone])).toEqual(["ada"]);
-    }
-    expect(newWalkers(gameData, ["casey", "trista"], ZONES)).toEqual(["ada", "mrB"]);
+describe("newWalkers", () => {
+  const goal = (walker: WalkerId) => walkerGoal(gameData.walkers[walker]);
+  const starting = WALKER_IDS.filter((walker) => goal(walker) === null);
+
+  // A pack holds at most 3 dogs; 0 and 4 bound the goals from either side.
+  it.each([0, 1, 2, 3, 4])(
+    "unlocks, for a walk finished with %i dogs still walking, every walker that many reach",
+    (dogs) => {
+      expect(newWalkers(gameData, starting, dogs)).toEqual(
+        walkerOrder(gameData).filter((walker) => (goal(walker) ?? Infinity) <= dogs),
+      );
+    },
+  );
+
+  it.each(WALKER_IDS)("leaves %s out once owned", (walker) => {
+    expect(newWalkers(gameData, [walker], 4)).not.toContain(walker);
+  });
+
+  it("unlocks only the starting walkers for a walk not finished", () => {
+    expect(newWalkers(gameData, [], null)).toEqual(starting);
   });
 });

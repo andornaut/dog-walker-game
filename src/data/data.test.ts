@@ -342,18 +342,22 @@ describe("run, world and walkers", () => {
     expect(rest.every((price) => price > 0)).toBe(true);
   });
 
-  it("gives each walker its own sprite, portrait, agility, perk and unlock zone, the default walker free", () => {
+  it("gives each walker its own sprite, portrait, agility, perk and dogs to unlock, the default walker free", () => {
     const list = Object.values(walkers);
     expect(new Set(list.map((walker) => walker.spriteKey)).size).toBe(list.length);
     expect(new Set(list.map((walker) => walker.portraitKey)).size).toBe(list.length);
     expect(new Set(list.map(({ agility }) => agility)).size).toBe(list.length);
     expect(new Set(list.map(({ perk }) => perk)).size).toBe(list.length);
     const goals = Object.values(walkers).map(walkerGoal);
-    const zones = world.zones.map(({ id }) => id);
     expect(walkers[defaultWalker].unlock).toBe("start");
     expect(goals.filter((goal) => goal === null)).toHaveLength(1);
     expect(new Set(goals).size).toBe(goals.length);
-    expect(goals.every((goal) => goal === null || zones.includes(goal))).toBe(true);
+    // A walk takes at most one dog per dog slot.
+    expect(
+      goals.every(
+        (goal) => goal === null || (Number.isInteger(goal) && goal >= 1 && goal <= dogSlots.length),
+      ),
+    ).toBe(true);
   });
 
   it("gives every owner two distinct lines for every moment", () => {

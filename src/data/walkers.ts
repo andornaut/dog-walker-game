@@ -44,18 +44,19 @@ export const WALKER_PERKS = {
 } as const satisfies Record<string, WalkerPerk>;
 
 // The walkers the player picks from, never sold: each walks from the start or unlocks the
-// first time any walk finishes its zone. agility multiplies the pack's lane-change speed.
-// spriteKey and portraitKey are keys into the art manifest.
+// first time any walk finishes with at least its dogs still walking at the end. agility
+// multiplies the pack's lane-change speed. spriteKey and portraitKey are keys into the art
+// manifest.
 export const WALKERS = {
   ada: {
     agility: 1.4,
+    dogs: 2,
     greeting: "Tidy lane work. May I walk with you?",
     name: "Ada",
     perk: "quickRecovery",
     portraitKey: "face-walker-ada",
     spriteKey: "walker-ada",
-    unlock: "finishZone",
-    zone: "theBeaches",
+    unlock: "finishWalk",
   },
   casey: {
     agility: 1.1,
@@ -68,23 +69,23 @@ export const WALKERS = {
   },
   mrB: {
     agility: 1,
+    dogs: 1,
     greeting: "Nice pack! Mind if I tag along?",
     name: "Mr. B",
     perk: "keenEye",
     portraitKey: "face-walker-mr-b",
     spriteKey: "walker-mr-b",
-    unlock: "finishZone",
-    zone: "cabbagetown",
+    unlock: "finishWalk",
   },
   trista: {
     agility: 1.2,
+    dogs: 3,
     greeting: "Great pace! Race you to the next one?",
     name: "Trista",
     perk: "longReach",
     portraitKey: "face-walker-trista",
     spriteKey: "walker-trista",
-    unlock: "finishZone",
-    zone: "yongeStreet",
+    unlock: "finishWalk",
   },
 } as const satisfies Record<string, Walker>;
 

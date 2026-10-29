@@ -8,19 +8,13 @@ import { agilityPercent, perkEffect } from "../rules/effectText";
 import { newPlayerSave } from "../testing/saves";
 import { type ItemTile, itemTileLook, type TileState } from "../ui/interaction";
 import { homeLine } from "./homeText";
-import { tapWalker, walkerDetailLines, walkerOrder, type WalkerTap, walkerTile } from "./walkers";
+import { tapWalker, walkerDetailLines, type WalkerTap, walkerTile } from "./walkers";
 
 const save = {
   ...newPlayerSave,
   owned: { ...newPlayerSave.owned, walkers: ["casey", "mrB"] as WalkerId[] },
   walker: "mrB" as const,
 };
-
-describe("walkerOrder", () => {
-  it("lists the starting walker, then the others by the zone that unlocks them", () => {
-    expect(walkerOrder(gameData)).toEqual(["casey", "mrB", "ada", "trista"]);
-  });
-});
 
 describe("walkerTile", () => {
   it("shows the picked walker selected, an owned one normal and a locked one by its goal", () => {
@@ -47,13 +41,14 @@ const info = (walker: WalkerId) => {
     ? homeLine(gameData.homeText, "walkerInfoBase", { perk: perkName, walker: name })
     : homeLine(gameData.homeText, "walkerInfo", { agility: percent, perk: perkName, walker: name });
 };
-// The locked line names the zone whose finish unlocks the walker.
+// The locked line counts the dogs a walk must finish with to unlock the walker, or for one dog
+// says walkerLockedOne.
 const locked = (walker: WalkerId) => {
   const data = gameData.walkers[walker];
-  const goal = data.unlock === "start" ? undefined : data.zone;
-  return homeLine(gameData.homeText, "walkerLocked", {
-    zone: gameData.world.zones.find(({ id }) => id === goal)?.name ?? "",
-  });
+  const dogs = data.unlock === "start" ? 0 : data.dogs;
+  return dogs === 1
+    ? gameData.homeText.walkerLockedOne
+    : homeLine(gameData.homeText, "walkerLocked", { count: String(dogs) });
 };
 const WALKER_IDS = keysOf(gameData.walkers);
 // A walker at the base lane-change speed and one off it: a walker's lines read only which it is.
@@ -74,6 +69,16 @@ describe("tapWalker", () => {
       expect(tapWalker(gameData, save.owned, save.walker, walker)).toEqual(tap());
     }
   });
+
+  it.each(WALKER_IDS.filter((walker) => gameData.walkers[walker].unlock !== "start"))(
+    "says how many dogs a walk must finish with to unlock %s, without a count for one",
+    (walker) => {
+      expect(tapWalker(gameData, { walkers: [] }, null, walker)).toEqual({
+        kind: "locked",
+        text: locked(walker),
+      });
+    },
+  );
 
   it.each(SAMPLED)("says %s's agility, if not at the base, and perk on a pick", (walker) => {
     expect(tapWalker(gameData, { walkers: WALKER_IDS }, null, walker)).toEqual({

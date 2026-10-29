@@ -29,6 +29,19 @@ export function zonesFinishedBy(result: Pick<RunResult, "outcome" | "zone">): nu
   return result.outcome === "finished" ? result.zone : result.zone - 1;
 }
 
+// The dogs still walking at the end of a finished walk: those whose owner never fired you, which
+// are the dogs the last zone paid and the Walk bonus counts (packDogs), since an owner at 0 hearts
+// fires you at once. null for a walk not finished: headed home, every owner having fired you, or
+// begun past zone 1 by a dev start.
+export function dogsFinishedWith(
+  run: Pick<RunResult, "counters" | "dogs" | "outcome">,
+): number | null {
+  if (run.outcome !== "finished" || !walkedFromTheStart(run.counters)) {
+    return null;
+  }
+  return run.dogs.filter(({ firedInZone }) => firedInZone === null).length;
+}
+
 // Lifetime counts with a run's added, key by key: the tallies, the bumps by kind, or an
 // encounter's option picks.
 function addCounts<Key extends string>(
@@ -92,8 +105,8 @@ type BankedRun = Pick<
 
 // Banks the earnings, counts the outcome and updates every stat and the logbook. A run a dev start
 // began past zone 1 banks no money, adds no starting cash and sets no best walk, and its zone
-// counts leave out the zones it skipped. Unlocks the walkers whose goal zone the run finished,
-// skipped zones left out. Clears the checkpoint, since the run it belonged to is now banked. Then
+// counts leave out the zones it skipped. Unlocks the walkers that a finished walk's dogs still
+// walking at its end reach (dogsFinishedWith). Clears the checkpoint, since the run it belonged to is now banked. Then
 // awards what the run earned.
 function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): SaveDocument {
   const { stats } = save;
@@ -137,11 +150,7 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
       ...owned,
       walkers: [
         ...owned.walkers,
-        ...newWalkers(
-          context.data,
-          owned.walkers,
-          run.route.slice(run.counters.firstZone, zonesFinished),
-        ),
+        ...newWalkers(context.data, owned.walkers, dogsFinishedWith(run)),
       ],
     },
     stats: {

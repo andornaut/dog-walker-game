@@ -114,5 +114,6 @@ export const HOME_TEXT = {
   },
   walkerInfo: "{walker}: {perk}, {agility} lane change speed.",
   walkerInfoBase: "{walker}: {perk}.",
-  walkerLocked: "Finish {zone} to unlock.",
+  walkerLocked: "Finish a walk with {count} dogs to unlock.",
+  walkerLockedOne: "Finish a walk to unlock.",
 } as const satisfies HomeText;
