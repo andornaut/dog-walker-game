@@ -7,17 +7,13 @@ import { type TextRoleCase, textRoleCases } from "../testing/textRoles";
 // the list ends empty.
 const OVERFLOWING: Readonly<Record<string, readonly string[]>> = {
   "card effect": [
-    "Bolt past: Zoomies: the pack drifts on its own for 40s",
-    "Dogs give chase: Zoomies: the pack drifts on its own for 40s",
-    "Help the keeper: Muddy: lane changes 67% slower for 30s",
-    "Let them lick it: Muddy: lane changes 67% slower for 30s",
-    "Pose: Spotlight: bumps also cost $20 for 30s",
-    "Pull away: Zoomies: the pack drifts on its own for 40s",
-    "Skip",
-    "Wade through: Muddy: lane changes 67% slower for 30s",
-    "Wave hello: Spotlight: bumps also cost $20 for 30s",
+    "Bolt past: Zoomies: the pack drifts for 40s",
+    "Dogs give chase: Zoomies: the pack drifts for 40s",
+    "Help the keeper: Muddy: 67% slower moves for 30s",
+    "Let them lick it: Muddy: 67% slower moves for 30s",
+    "Pull away: Zoomies: the pack drifts for 40s",
+    "Wade through: Muddy: 67% slower moves for 30s",
   ],
-  "end screen's breakdown label": ["Starting cash"],
   "enlarged card's changes": [
     "Drag them away: −1♥ each",
     "Grab it back: −1♥ each",
@@ -30,14 +26,6 @@ const OVERFLOWING: Readonly<Record<string, readonly string[]>> = {
     "Walk on by: −1♥ each",
   ],
   "heart change": ["−10♥ Aunt Judy fired you!", "−10♥ Big screen promo"],
-  "shop row's line": [
-    "+1 max ♥ for every dog's owner",
-    "+50% lane change speed",
-    "Medium and large dogs dodge too",
-    "Saves a spare treat for later",
-    "Skip 1 card each neighbourhood",
-  ],
-  "start screen's dog name": ["Duchess"],
 };
 
 const named = ({ role, text }: TextRoleCase) => `${role}: ${text}`;
