@@ -827,6 +827,7 @@ export interface RunText {
     // In an option's text, in place of a dog's heart loss Second chance would forgive; it may
     // name the loss as {hearts}.
     readonly heartForgiven: string;
+    readonly heartsEach: string;
     // A money option's plaque, with its price.
     readonly need: string;
     readonly pickOne: string;

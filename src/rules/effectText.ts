@@ -314,8 +314,9 @@ export interface CardTextContext {
   readonly seconds: (debuff: DebuffId) => number;
 }
 
-// Each owner's change by their dog's name, a loss the walker's perk would forgive saying so in
-// place of its cost: "♥ Ginger's safe!, −1♥ Kilo".
+// The change for several dogs said once ("−1♥ each"), or, where the walker's perk would forgive
+// a loss, each owner's change by their dog's name, the forgiven one saying so in place of its
+// cost: "♥ Ginger's safe!, −1♥ Kilo".
 function cardHeartsText(
   data: CardTextData,
   context: CardTextContext,
@@ -323,7 +324,13 @@ function cardHeartsText(
 ): string | undefined {
   const hearts = String(Math.abs(effect.amount));
   const change = heartsChangeText(effect.amount);
-  const names = context.dogs(effect.target).map((id) => {
+  const dogs = context.dogs(effect.target);
+  const forgiven = effect.amount < 0 && dogs.some((id) => context.forgiven(id));
+  if (dogs.length > 1 && !forgiven) {
+    const each = signedText(effect.amount, hearts);
+    return fillNames(data.runText.card.heartsEach, { hearts: each });
+  }
+  const names = dogs.map((id) => {
     const dog = data.dogs[id].name;
     return effect.amount < 0 && context.forgiven(id)
       ? fillNames(data.runText.card.heartForgiven, { dog, hearts })

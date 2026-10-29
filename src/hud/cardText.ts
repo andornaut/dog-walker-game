@@ -30,8 +30,10 @@ export function plaqueTexts(
 
 type PillData = Pick<GameData, "debuffs" | "shopGear" | "upgrades" | "walkerPerks">;
 
-// The enlarged card's body: each change the option makes, cause by cause, a line each, or its
-// effect, its effects' names in their pills, where it names none; Skip's line for the skip card.
+// The enlarged card's body: each change the option makes, cause by cause, a line each, led by
+// its dog's name and naming its cause, but for the option itself, whose name the card's band
+// shows; or its effect, its effects' names in their pills, where it names none; Skip's line for
+// the skip card.
 export function largeBodyText(
   data: Pick<GameData, "dogs" | "runText"> & PillData,
   option?: OptionView,
@@ -44,7 +46,7 @@ export function largeBodyText(
   }
   return option.breakdown
     .map(({ dog, name, text }) =>
-      [dog === null ? "" : `${data.dogs[dog].name}:`, text, name]
+      [dog === null ? "" : `${data.dogs[dog].name}:`, text, name === option.label ? "" : name]
         .filter((part) => part !== "")
         .join(" "),
     )

@@ -15,6 +15,7 @@ export const RUN_TEXT = {
     forkTitle: "Which way?",
     free: "FREE",
     heartForgiven: "♥ {dog}'s safe!",
+    heartsEach: "{hearts}♥ each",
     need: "{amount}",
     pickOne: "Pick one",
     skip: "Skip (Hall pass)",
