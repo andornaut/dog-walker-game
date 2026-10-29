@@ -7,7 +7,11 @@ sfx-tip            0.35s  coin chime: a square B5 hopping up to a ringing E6
 sfx-treat          0.40s  bubbly triangle arpeggio up C6 E6 G6 C7
 sfx-bump           0.30s  cushioned thud: a falling filtered square over a triangle, with a puff of low noise
 sfx-bark           0.20s  one "wuf": a falling square with a triangle body
+sfx-dodge          0.23s  near miss: a swell of filtered noise and two light rising triangle skips
 sfx-card           0.44s  paper swish, then a triangle chime G5 D6
+sfx-gear-found     0.55s  sparkle: a narrow-pulse glissando D5 up to D6 into a shimmering D major chord
+sfx-lost-wallet    0.45s  ka-ching: a drawer click, a shimmering C#7 E7 bell, then a jingle of two coins
+sfx-petting-neighbour 0.52s warm "aww": a triangle rising C5 to E5 with vibrato, then a soft G5 C6 chime
 sfx-fired          1.80s  sad "wah wah wah waaah" down G4 F#4 F4 E4, muted square
 sfx-hit-skunk      0.50s  spray hiss: pink noise stepping down three bands over a falling "pfff"
 sfx-hit-puddle     0.50s  splash: a pink noise burst and low plop, then rising triangle bubbles
@@ -34,7 +38,7 @@ music-yonge-street 29.09s 16 bars at about 132 BPM in D dorian, loops seamlessly
                           with a dotted-eighth echo, octave square bass, offbeat stabs, kick and snare
 
 Each effect is levelled to the same loudness on a phone speaker (EFFECT_LUFS), with
-sfx-badge, sfx-fired and sfx-new-best 2 LU louder, and padded with silence at both
+sfx-badge, sfx-fired and sfx-new-best 2 LU louder and sfx-dodge 3 LU quieter, and padded with silence at both
 ends; the times above are the sounding lengths. Each sound ships as mono 44.1kHz Ogg
 Vorbis plus AAC (.m4a), since iOS Safari cannot play Ogg, and a build stops if either
 file decodes to a peak at or over -1 dBFS.
@@ -70,6 +74,8 @@ STEP = 6608
 EFFECT_LUFS = -17
 # The walk's big moments sit this many LU above the other effects.
 LOUDER = {"sfx-badge": 2, "sfx-fired": 2, "sfx-new-best": 2}
+# A frequent, minor cue sits this many LU under the other effects.
+QUIETER = {"sfx-dodge": 3}
 # Silence before and after every effect, in samples: AAC overshoots an onset inside the file's first 1024-sample
 # frame, and the encoders' ringing dies out before the file ends.
 EFFECT_LEAD = 1024
@@ -165,6 +171,40 @@ EFFECTS = {
         ("square", 0.18, (680, 300), 0.02, dict(duty=35, low=1800, attack=0.012, release=0.55, shape="h")),
         ("triangle", 0.18, (460, 220), 0.02, dict(vol=0.4, attack=0.012, release=0.55, shape="h")),
         ("pinknoise", 0.05, None, 0.015, dict(vol=0.12, low=2500, high=600, attack=0.006, release=0.8)),
+    ],
+    # A near miss: the air swells past and the dog skips up out of the way, with no thud.
+    "sfx-dodge": [
+        ("pinknoise", 0.2, None, 0, dict(vol=0.4, low=3200, high=900, attack=0.05, release=0.6, shape="h", fx=DARK)),
+        ("triangle", 0.08, (520, 880), 0.07, dict(attack=0.003, release=0.6)),
+        ("triangle", 0.08, (700, 1180), 0.15, dict(vol=0.7, attack=0.003, release=0.6)),
+    ],
+    # Rarer than a tip: a glissando up an octave lands on a ringing chord, its top voice shimmering.
+    "sfx-gear-found": [
+        ("square", 0.14, ("D5", "D6"), 0, dict(vol=0.6, duty=25, low=2600, attack=0.004, release=0.3, fx=DARK)),
+        ("square", 0.42, "D6", 0.13, dict(vol=0.5, duty=25, low=3000, attack=0.004, release=0.9,
+                                          fx=("tremolo", "11", "30", *DARK))),
+        ("triangle", 0.4, "A6", 0.15, dict(vol=0.3, attack=0.004, release=0.9)),
+        ("square", 0.42, "F#5", 0.13, dict(vol=0.3, duty=25, low=2200, attack=0.004, release=0.9, fx=DARK)),
+    ],
+    # A till's drawer clicks open on a bell, above the tip's coin in pitch, and two coins jingle after.
+    "sfx-lost-wallet": [
+        ("pinknoise", 0.025, None, 0, dict(vol=0.6, low=3500, high=1500, attack=0.001, release=0.8, fx=DARK)),
+        ("square", 0.04, (640, 420), 0, dict(vol=0.5, low=1600, attack=0.002, release=0.8, shape="h")),
+        ("square", 0.34, "C#7", 0.05, dict(vol=0.5, duty=25, low=3000, attack=0.003, release=0.9,
+                                           fx=("tremolo", "14", "40", *DARK))),
+        ("triangle", 0.3, "E7", 0.05, dict(vol=0.3, low=3500, attack=0.003, release=0.9,
+                                           fx=("tremolo", "14", "40"))),
+        ("square", 0.3, "A6", 0.05, dict(vol=0.3, duty=25, low=3000, attack=0.003, release=0.9, fx=DARK)),
+        ("triangle", 0.06, "A6", 0.24, dict(vol=0.5, low=3500, attack=0.002, release=0.8)),
+        ("triangle", 0.06, "C#7", 0.3, dict(vol=0.4, low=3500, attack=0.002, release=0.8)),
+    ],
+    # Warm and low where the treat is bright and quick: one voice rising a third, then a soft chime.
+    "sfx-petting-neighbour": [
+        ("triangle", 0.4, ("C5", "E5"), 0, dict(vol=0.9, attack=0.03, release=0.6, shape="h",
+                                                fx=("tremolo", "6", "20"))),
+        ("square", 0.4, ("C5", "E5"), 0, dict(vol=0.25, duty=25, low=1800, attack=0.03, release=0.6, shape="h")),
+        ("triangle", 0.22, "G5", 0.24, dict(vol=0.6, release=0.9)),
+        ("triangle", 0.22, "C6", 0.3, dict(vol=0.35, release=0.9)),
     ],
     "sfx-card": [
         ("pinknoise", 0.16, None, 0, dict(vol=0.3, low=3500, high=900, attack=0.07, release=0.55, shape="h")),
@@ -370,7 +410,7 @@ def effect(tmp, key, notes, out):
         layers.append(path)
     mixed = f"{tmp}/{key}-mix.wav"
     mix([(path, 1 / len(layers)) for path in layers], mixed)
-    gain = round(EFFECT_LUFS + LOUDER.get(key, 0) - phone_loudness(mixed), 1)
+    gain = round(EFFECT_LUFS + LOUDER.get(key, 0) - QUIETER.get(key, 0) - phone_loudness(mixed), 1)
     if gain > EFFECT_BAND:
         sys.exit(f"{key} is {gain} LU under its phone loudness at its {PEAK_DB} dBFS peak: move its energy above "
                  "300 Hz or soften its loudest onset")

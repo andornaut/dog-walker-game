@@ -14480,9 +14480,19 @@
       "m4a": "sounds/sfx-card.m4a"
     },
     {
+      "key": "sfx-dodge",
+      "ogg": "sounds/sfx-dodge.ogg",
+      "m4a": "sounds/sfx-dodge.m4a"
+    },
+    {
       "key": "sfx-fired",
       "ogg": "sounds/sfx-fired.ogg",
       "m4a": "sounds/sfx-fired.m4a"
+    },
+    {
+      "key": "sfx-gear-found",
+      "ogg": "sounds/sfx-gear-found.ogg",
+      "m4a": "sounds/sfx-gear-found.m4a"
     },
     {
       "key": "sfx-hit-capybara",
@@ -14550,9 +14560,19 @@
       "m4a": "sounds/sfx-hit-wedding-shoot.m4a"
     },
     {
+      "key": "sfx-lost-wallet",
+      "ogg": "sounds/sfx-lost-wallet.ogg",
+      "m4a": "sounds/sfx-lost-wallet.m4a"
+    },
+    {
       "key": "sfx-new-best",
       "ogg": "sounds/sfx-new-best.ogg",
       "m4a": "sounds/sfx-new-best.m4a"
+    },
+    {
+      "key": "sfx-petting-neighbour",
+      "ogg": "sounds/sfx-petting-neighbour.ogg",
+      "m4a": "sounds/sfx-petting-neighbour.m4a"
     },
     {
       "key": "sfx-tip",
