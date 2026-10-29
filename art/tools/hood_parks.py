@@ -69,10 +69,6 @@ little-free-library 48x48   1 lane, a little free library: a turquoise cabinet s
                             on a cream post set in a wooden planter of leaves; idle (4 frames,
                             400ms): a glint crosses the glass, its left half on frame 2 and its
                             right half on frame 3
-picnic-blanket      112x36  2 lanes, a red and white checked blanket on the road with a plain ochre basket
-                            on it, a baguette leaning out of the basket, a lemonade jug and two
-                            apples; idle (4 frames, 450ms): the blanket's near right corner lifts
-                            1px in a breeze on frame 2
 porch-steps         48x48   1 lane, three brick steps with stone treads in a front elevation,
                             tall white newel posts under ball caps either side,
                             a jack-o'-lantern with a dark carved face on the top step;
@@ -667,62 +663,6 @@ def little_free_library(glint=0):
     return lit(g, dict(brick=("clay", None), dbrick=("brick", None), dturq=("turquoise", None)))
 
 
-# The blanket's idle: rest, rest, the near right corner lifted, rest.
-PICNIC_IDLE = (0, 0, 1, 0), 450
-# Checks along the blanket, in layout pixels at full size.
-CHECK = 6
-
-
-def picnic_blanket(lift=0, w=obstacles.span(2)):
-    """A checked picnic blanket spread on the road, seen from a low camera: a band of red and white checks
-    narrowing to its far edge, with an ochre basket standing on it under its arched handle, a baguette
-    leaning out from under the lid, a jug of lemonade at the left and two apples at the right. lift raises the
-    near right corner 1 drawn pixel and folds it back, showing its dred underside."""
-    g = edged(Grid(w, ROW))
-    u = obstacles.unit(g)[1]
-    # the blanket: a trapezoid, its far edge at row 22, its near edge at 28, checked in dred and white
-    for y in range(22, 29):
-        inset = (28 - y) * 0.9
-        for x0 in range(0, int(w), CHECK):
-            left, right = max(2 + inset, x0), min(w - 2 - inset, x0 + CHECK)
-            if right <= left:
-                continue
-            on = (x0 // CHECK + (y - 22) // 2) % 2
-            g.rect(left, y, right - left, 1, "dred" if on else "white")
-    g.rect(2, 28, w - 4, 1, "red")
-    if lift:
-        g.rect(w - 9, 28 - u, 7, u, None)
-        g.rect(w - 9, 27, 7, 2 * u, "dred")
-        g.tri((w - 9, 28), (w - 2, 28 - 2 * u), (w - 2, 28), "plum")
-    # a lemonade jug on the left of the blanket, two apples on the right
-    g.rect(15, 16, 7, 9, "yellow")
-    g.rect(20, 16, 2, 9, "amber")
-    g.rect(15, 15, 7, 2, "white")
-    g.rect(16, 13, 5, 2, "lgrey")
-    g.rect(13, 18, 2, 4, "amber")
-    g.rect(16, 19, 4, 1, "amber")
-    for x in (w - 24, w - 18):
-        g.cel(x, 22.5, 3, 2.8, "red", "dred")
-        g.rect(x - 0.5, 18.5, 1, 1.5, "bark")
-        g.rect(x + 0.5, 18.5, 1.5, 1, "green")
-    # the baguette, leaning out from under the lid at the right
-    bx, bw = w / 2 - 9, 18
-    bar(g, (bx + 11, 15), (bx + 20, 6), 3, "tan")
-    bar(g, (bx + 12, 15.5), (bx + 21, 6.5), 1, "brown")
-    # the handle, an arch over the lid
-    for k in range(13):
-        t = math.pi * k / 12
-        g.rect(w / 2 - 0.75 - math.cos(t) * 7, 13 - math.sin(t) * 8, 1.5, 1.5, "dbrown")
-    # the basket: ochre, shaded at its right, its lid a brown band lit along its top
-    g.rect(bx, 16, bw, 9, "ochre")
-    g.rect(bx + bw - 3, 16, 3, 9, "rust")
-    g.rect(bx - 1, 13, bw + 2, 3, "brown")
-    g.rect(bx - 1, 13, bw + 2, 1, "tan")
-    g.rect(bx + bw - 2, 14, 3, 2, "dbrown")
-    g.rect(bx, 24, bw, 1, "dbrown")
-    return lit(g)
-
-
 # The log's idle: rest, rest, the leaf on its back stirred 1px right and up, rest.
 FALLEN_LOG_IDLE = ((0, 0), (0, 0), (1, -1), (0, 0)), 450
 # The trunk, in layout pixels at full size: its top and bottom rows and its broken end's column.
@@ -1264,7 +1204,6 @@ def road_sprites(suffix, step):
                                   ("fallen-log", fallen_log, FALLEN_LOG_IDLE),
                                   ("leaf-pile", leaf_pile, LEAF_PILE_IDLE),
                                   ("little-free-library", little_free_library, LIBRARY_IDLE),
-                                  ("picnic-blanket", picnic_blanket, PICNIC_IDLE),
                                   ("porch-steps", porch_steps, PORCH_STEPS_IDLE)):
         yield f"{key}{suffix}", [("idle", [minis.small(sys.modules[__name__], o, draw, f).outlined() for f in args],
                                   ms)]
@@ -1279,7 +1218,7 @@ def road_sprites(suffix, step):
 SOURCES = {"escaped-capybara": "art/encounters", "porch-cat": "art/encounters", "cherry-trees": "art/obstacles",
            "fallen-log": "art/obstacles", "ferrets": "art/obstacles", "hen": "art/obstacles",
            "iron-fence-2": "art/obstacles", "iron-fence-3": "art/obstacles", "leaf-pile": "art/obstacles",
-           "little-free-library": "art/obstacles", "picnic-blanket": "art/obstacles", "porch-steps": "art/obstacles"}
+           "little-free-library": "art/obstacles", "porch-steps": "art/obstacles"}
 
 
 def sprites():
