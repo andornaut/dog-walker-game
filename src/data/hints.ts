@@ -20,7 +20,7 @@ export const HINTS = {
     trigger: { kind: "fork" },
   },
   homeButton: {
-    text: "Head home from the pause menu to keep your cash.",
+    text: "Head home at a fork to keep all your cash.",
     trigger: { kind: "homeButton" },
   },
   luckyFind: {

@@ -56,8 +56,8 @@ export const HELP_PAGES = [
     body:
       "Walk {walkLength} neighbourhoods of {world}; at a fork, each path brings an upgrade. " +
       "Bring every dog home for the {walkBonus} Walk bonus. " +
-      "If every owner fires you, you keep only your pay: " +
-      "head home from the pause menu or a fork to keep your cash.",
+      "Heading home, or losing every dog, keeps only " +
+      "what each finished neighbourhood earned.",
     title: "Neighbourhoods",
   },
 ] as const satisfies readonly [HelpPage, ...HelpPage[]];
