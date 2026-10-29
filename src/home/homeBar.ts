@@ -45,10 +45,10 @@ export function homeBarButtonAt(x: number, y: number): HomeBarButton | undefined
 }
 
 // What a top bar button does over an overlay on a home page, given which of the Logbook and the
-// settings are open: as on the bare start screen, help, the Logbook and the settings open over
-// the overlay on top and close back to it, and Sound mutes or unmutes. While the button's own
-// overlay is open, the button closes the overlay on top, back to it or past it, as the walk
-// bar's pause button resumes from its menu; each opens at most once.
+// settings is open: Sound mutes or unmutes, and help, the Logbook and the settings open as on
+// the bare start screen or the Pet shop, in place of any other overlay (openHomePage). While the
+// button's own page is open, the button closes it, as the walk bar's pause button resumes from
+// its menu.
 export function homeBarAction(
   open: { readonly logbook: boolean; readonly settings: boolean },
   button: HomeBarButton,

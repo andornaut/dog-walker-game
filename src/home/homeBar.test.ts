@@ -67,9 +67,7 @@ describe("homeBarAction", () => {
   const NONE = { logbook: false, settings: false };
   const LOGBOOK = { logbook: true, settings: false };
   const SETTINGS = { logbook: false, settings: true };
-  const BOTH = { logbook: true, settings: true };
-  // open: whether the Logbook and the settings are open, the shop or a celebration perhaps
-  // under them.
+  // open: which of the Logbook and the settings is open, over the start screen or the shop.
   it.each([
     ["neither open", NONE, "help", "openHelp"],
     ["neither open", NONE, "logbook", "openLogbook"],
@@ -80,9 +78,7 @@ describe("homeBarAction", () => {
     ["the settings open", SETTINGS, "logbook", "openLogbook"],
     ["the settings open", SETTINGS, "mute", "mute"],
     ["the settings open", SETTINGS, "settings", "close"],
-    ["both open", BOTH, "logbook", "close"],
-    ["both open", BOTH, "settings", "close"],
-    ["both open", BOTH, "help", "openHelp"],
+    ["the settings open", SETTINGS, "help", "openHelp"],
   ] satisfies readonly [string, typeof NONE, HomeBarButton, HomeBarAction][])(
     "with %s, %s does %s",
     (_, open, button, action) => {

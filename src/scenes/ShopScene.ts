@@ -284,7 +284,16 @@ export class ShopScene extends Scene {
       () => (this.confirm === undefined ? this.close() : this.back()),
       () => this.back(),
     );
-    listenHomeBar(this, () => this.close());
+    // A page the top bar opens over the shop closes an open card or confirm first.
+    listenHomeBar(
+      this,
+      () => this.close(),
+      () => {
+        if (this.confirm !== undefined || this.detail !== undefined) {
+          this.back();
+        }
+      },
+    );
   }
 
   // The confirm's answer at a point, or undefined off its answers or with no confirm open.

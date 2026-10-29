@@ -148,7 +148,7 @@ import type { CelebrationSceneData } from "./CelebrationScene";
 import { addNamePills } from "./effectNameColours";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
-import { HOME_MUTED_EVENT } from "./homeBarPress";
+import { HOME_MUTED_EVENT, HOME_PAGE_OPENING_EVENT, openHomePage } from "./homeBarPress";
 import { addAffordFrame, drawDetailCard } from "./homePanels";
 import {
   addPlate,
@@ -181,7 +181,7 @@ import {
 import { nextRunStart } from "./run/runRecorder";
 import { type RunPick, runSceneData } from "./run/runStart";
 import { SCENE_KEYS } from "./sceneKeys";
-import { SETTINGS_CLOSED_EVENT, type SettingsData } from "./SettingsScene";
+import { SETTINGS_CLOSED_EVENT } from "./SettingsScene";
 import {
   SHOP_CHANGED_EVENT,
   SHOP_CLOSED_EVENT,
@@ -591,6 +591,12 @@ export class StartScene extends Scene {
     onSceneEvent(this, this.game.events, HOME_MUTED_EVENT, (muted: boolean) =>
       this.showMuted(muted),
     );
+    // A page the top bar opens closes the detail card first.
+    onSceneEvent(this, this.game.events, HOME_PAGE_OPENING_EVENT, () => {
+      if (this.overlay !== undefined) {
+        this.closeOverlay();
+      }
+    });
     // The shop draws under the top bar, so the bank there follows each purchase; on close
     // the walker says the shop's last purchase or refusal.
     onSceneEvent(this, this.game.events, SHOP_CHANGED_EVENT, () => this.render());
@@ -889,17 +895,15 @@ export class StartScene extends Scene {
         this.showMuted(toggleMuted(this));
         return;
       case "help":
-        this.afterArt("help", () => openHelp(this, SCENE_KEYS.start));
+        this.afterArt("help", () => openHomePage(this, "help"));
         return;
       case "logbook":
         // The Logbook opens on its first tab, Badges.
-        openOverlay(this, SCENE_KEYS.stats, { resume: SCENE_KEYS.start });
+        openHomePage(this, "logbook");
         return;
-      case "settings": {
-        const data: SettingsData = { region: "home", resume: SCENE_KEYS.start };
-        openOverlay(this, SCENE_KEYS.settings, data);
+      case "settings":
+        openHomePage(this, "settings");
         return;
-      }
       case "start":
         this.startWalk();
         return;
