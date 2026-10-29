@@ -442,7 +442,8 @@ describe("chooseShownCard", () => {
 describe("quick lane changes across a row", { timeout: 10_000 }, () => {
   // The game's road for the pack, the pack in the first lane and a row of kind in lanes, the
   // row's near edge just reaching the top of the pack's outline: the drawn pack meets the row as
-  // it steers across.
+  // it steers across. The road is left unplanned: a step reads only its pending spawns, and
+  // there are none.
   const crossing = (
     walker: WalkerId,
     dogs: PackDogs,
@@ -450,9 +451,6 @@ describe("quick lane changes across a row", { timeout: 10_000 }, () => {
     lanes: readonly number[],
   ): Session => {
     const run = newRun(gameData, 3, { dogs, gear: null, walker });
-    const session = emptyRoad(
-      startSession(gameData, runStreams(1), screenRoadGeometry, { road: startRoad(5), run }),
-    );
     const road = screenRoadGeometry(run);
     const height = itemHeight(gameData, road, kind, false);
     const items = lanes.map((lane, id) => ({
@@ -464,10 +462,7 @@ describe("quick lane changes across a row", { timeout: 10_000 }, () => {
       y: road.packBand.top - height + 1,
     }));
     const control = laneControlIn(stillInLane(0));
-    return {
-      ...session,
-      walk: { ...session.walk, road: { ...session.walk.road, control, items } },
-    };
+    return { ...STARTED, walk: { road: { ...startRoad(5), control, items }, run } };
   };
 
   // A tap every other step, as quick as a thumb taps, until the pack is taps lanes over, then
