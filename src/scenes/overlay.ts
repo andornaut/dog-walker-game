@@ -21,7 +21,7 @@ export interface OverlayData {
 }
 
 // Pauses scene and launches the overlay key over it, once the tap burst that asked for it has
-// played out (afterTapFx), so the burst never freezes under the paused scene or the dim.
+// played out (afterTapFx), so the burst never shows over the dim.
 export function openOverlay(scene: Scene, key: SceneKey, data: OverlayData): void {
   afterTapFx(scene, () => {
     scene.scene.pause();

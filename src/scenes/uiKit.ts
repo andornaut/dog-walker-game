@@ -42,6 +42,7 @@ import {
   selectLook,
 } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
+import { TAP_BURST_SCENE_KEY } from "./sceneKeys";
 import { playEffect, playTag } from "./sprites";
 import { listenTargetPress } from "./targetPress";
 
@@ -708,30 +709,24 @@ export function setDollarAmount(
   scalePixelText(amount, scale, left + (wholeAdvance - amount.width) * scale, top);
 }
 
-// Kept by clearScene, so a tap's sparkle plays on while the screen is drawn again under it.
-const KEEP_ON_REDRAW = "keep-on-redraw";
-const TAP_BURST_DEPTH = 100;
-
-// Each scene's latest tap burst, and its gate for what a tap opens (afterTapFx).
+// Each tapped scene's latest tap burst, and its gate for what a tap opens (afterTapFx).
 const tapBursts = new WeakMap<Scene, GameObjects.Sprite>();
 const tapGates = new WeakMap<Scene, TapGate>();
 
-// fx-tap bursts where the finger lands, over everything else.
+// fx-tap bursts where the finger lands on scene, drawn in the tap burst layer (TapBurstScene)
+// over every scene, so it plays out whatever scene does next.
 export function addTapBurst(scene: Scene, x: number, y: number): void {
-  const burst = playEffect(scene, "fx-tap", "play", { x, y }, TAP_BURST_DEPTH);
+  const layer = scene.scene.get(TAP_BURST_SCENE_KEY);
+  const burst = playEffect(layer, "fx-tap", "play", { x, y }, 0);
   if (burst !== undefined) {
-    tapBursts.set(scene, burst.setName(KEEP_ON_REDRAW));
-    // A burst never freezes under an overlay: a scene paused mid-burst drops it.
-    const drop = () => burst.destroy();
-    scene.events.once("pause", drop);
-    burst.once("destroy", () => scene.events.off("pause", drop));
+    tapBursts.set(scene, burst);
   }
 }
 
-// Opens what a tap opens over scene (an overlay, a card or a confirm) once the scene's running
-// tap burst has played out, so the burst never shows over the dim or freezes under a paused
-// scene; at once while none runs, as for a key. While one open waits, another is dropped, and
-// the open is dropped if the scene pauses, sleeps or shuts down first (tapGate).
+// Opens what a tap opens over scene (an overlay, a card or a confirm) once the tap's burst has
+// played out, so the burst never shows over the dim; at once while none runs, as for a key.
+// While one open waits, another is dropped, and the open is dropped if the scene pauses, sleeps
+// or shuts down first (tapGate).
 export function afterTapFx(scene: Scene, open: () => void): void {
   let gate = tapGates.get(scene);
   if (gate === undefined) {
@@ -741,8 +736,7 @@ export function afterTapFx(scene: Scene, open: () => void): void {
   gate(tapBurstWatch(scene), open);
 }
 
-// The burst ends when it is destroyed: playEffect destroys it as its animation completes, and
-// the scene's shutdown destroys it unfinished.
+// The burst ends when it is destroyed, as playEffect does when its animation completes.
 function tapBurstWatch(scene: Scene): TapBurstWatch {
   let left = false;
   const leave = () => {
@@ -777,11 +771,10 @@ export function addScreenBackdrop(scene: Scene, key?: string): void {
   }
 }
 
-// Destroys everything the scene drew except tap bursts still playing and keep, such as an
-// overlay's ramp dim.
+// Destroys everything the scene drew except keep, such as an overlay's ramp dim.
 export function clearScene(scene: Scene, keep: readonly GameObjects.GameObject[] = []): void {
   for (const child of [...scene.children.list]) {
-    if (child.name !== KEEP_ON_REDRAW && !keep.includes(child)) {
+    if (!keep.includes(child)) {
       child.destroy();
     }
   }

@@ -19,3 +19,6 @@ export const SCENE_KEYS = {
 } as const;
 
 export type SceneKey = (typeof SCENE_KEYS)[keyof typeof SCENE_KEYS];
+
+// The tap burst layer (TapBurstScene), apart from SCENE_KEYS: no overlay opens or resumes it.
+export const TAP_BURST_SCENE_KEY = "tap-burst";

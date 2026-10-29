@@ -30,6 +30,7 @@ import { SettingsScene } from "./scenes/SettingsScene";
 import { ShopScene } from "./scenes/ShopScene";
 import { StartScene } from "./scenes/StartScene";
 import { StatsScene } from "./scenes/StatsScene";
+import { TapBurstScene } from "./scenes/TapBurstScene";
 import { ZoneCelebrationScene } from "./scenes/ZoneCelebrationScene";
 
 // The dev panel's view of the game: the cheats are a registry entry RunScene reads each frame.
@@ -86,8 +87,9 @@ function bootGame(): Game {
     pixelArt: true,
     // Sized by whole device pixels per game pixel, in fitWholePixels.
     scale: { autoCenter: Scale.CENTER_BOTH, mode: Scale.NONE },
-    // Scenes draw in this order. The home pages' overlays come before the settings, and help
-    // with its pictures after every overlay it can open over (the top bar opens it over any).
+    // Scenes draw in this order. The Logbook, the settings and help, which the home top bar
+    // opens over the Pet shop, come after it, help's pictures after help, and the tap bursts
+    // over every scene but the dev overlay.
     scene: [
       BootScene,
       StartScene,
@@ -105,6 +107,7 @@ function bootGame(): Game {
       HelpPictureScene,
       new HudScene(SCENE_KEYS.helpHud),
       new CardScene(SCENE_KEYS.helpCard),
+      TapBurstScene,
       DevOverlayScene,
     ],
     type: AUTO,
