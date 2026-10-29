@@ -5,11 +5,21 @@ import { ROAD_CAMERA, SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { HelpPictureId } from "../data/types";
 import { cardRowIn } from "../layout/cardLayout";
 import { screenYAt } from "../layout/projection";
+import { itemAt } from "../lib/arrays";
 import { currentZoneId, forkPaths } from "../rules/route";
 import { walkProjection } from "../runner/walkGeometry";
 import { cardHeader } from "../ui/cardRow";
 import { HELP_LAYOUT } from "./helpLayout";
-import { HELP_SCENES, helpPicture, type PictureStrip } from "./helpPictures";
+import {
+  dragGlide,
+  type DragLoop,
+  dragMomentAt,
+  HELP_SCENES,
+  helpPicture,
+  type PictureStrip,
+  stillDragMoment,
+  TOUCH_DRAG,
+} from "./helpPictures";
 
 const SCREEN = SCREEN_LAYOUT;
 const PROJECTION = walkProjection(ROAD_CAMERA, SCREEN.road);
@@ -89,9 +99,69 @@ describe("helpPicture", () => {
     },
   );
 
+  // A minor obstacle or card obstacle on a picture's road, or its card's encounter, is one its
+  // neighbourhood brings.
+  it.each(IDS)("shows on %s only obstacles its neighbourhood brings", (id) => {
+    const { card, walk } = helpPicture(gameData, id);
+    const zoneId = currentZoneId(gameData, walk.run);
+    const zone = gameData.world.zones.find((candidate) => candidate.id === zoneId);
+    const weights: Readonly<Record<string, number>> = {
+      ...zone?.weights.minorObstacles,
+      ...zone?.weights.obstacles,
+    };
+    const encounter = card?.source.kind === "encounter" ? [card.source.encounter] : [];
+    const kinds = [...walk.road.items.map((item) => item.kind), ...encounter];
+    expect(kinds.filter((kind) => weights[kind] === 0)).toEqual([]);
+  });
+
   it("shows the fork after the first neighbourhood, its paths easiest first", () => {
     const { card, walk } = helpPicture(gameData, "zones");
     const paths = forkPaths(gameData, () => 0, walk.run.route);
     expect(card?.options.map((option) => option.path?.zone)).toEqual(paths);
+  });
+});
+
+describe("dragMomentAt", () => {
+  const loop = helpPicture(gameData, "lanes").drag as DragLoop;
+  const { fromLane, toLane } = loop;
+  const { dragPx } = TOUCH_DRAG;
+  // A swipe of even frames, frame ms apart, its drag frames followed by two more.
+  const frame = 100;
+  const frameMs = Array.from({ length: dragPx.from + dragPx.px.length + 2 }, () => frame);
+  const swipe = frameMs.length * frame;
+  const swipeStart = itemAt(dragPx.px, 2);
+  const glide = dragGlide(frameMs, swipeStart);
+  const at = (ms: number) => dragMomentAt(frameMs, swipeStart, loop, ms / 1000);
+  const nudge = 1;
+
+  it("glides the pack from the frame whose drag reaches the first lane step", () => {
+    expect(glide.start).toBe((dragPx.from + 2) * frame);
+    expect(glide.end - glide.start).toBe(HELP_SCENES.lanes.glideFrames * frame);
+  });
+
+  // Each moment: ms into the loop, then the swipe's tag and frame, and the pack's lane (or
+  // "moving").
+  it.each([
+    ["the swipe right's first frame", nudge, "right", 0, fromLane],
+    ["the swipe right before its glide", glide.start - nudge, "right", dragPx.from + 1, fromLane],
+    ["the swipe right's glide", glide.start + nudge, "right", dragPx.from + 2, "moving"],
+    ["the swipe right after its glide", glide.end + nudge, "right", dragPx.from + 5, toLane],
+    ["the swipe right's last frame", swipe - nudge, "right", frameMs.length - 1, toLane],
+    ["the swipe left's first frame", swipe + nudge, "left", 0, toLane],
+    ["the swipe left's glide", swipe + glide.start + nudge, "left", dragPx.from + 2, "moving"],
+    ["the swipe left's last frame", 2 * swipe - nudge, "left", frameMs.length - 1, fromLane],
+    ["the swipe right again", 2 * swipe + nudge, "right", 0, fromLane],
+  ] as const)("shows %s", (_name, ms, tag, index, lane) => {
+    const moment = at(ms);
+    expect(moment.touch).toEqual({ index, tag });
+    expect(moment.motion.kind === "still" ? moment.motion.lane : "moving").toBe(lane);
+    expect(moment.packMove).toBeNull();
+  });
+
+  it("holds the still swipe with the pack in its new lane and the move's marks", () => {
+    const still = stillDragMoment(loop);
+    expect(still.touch).toEqual({ index: 0, tag: "still" });
+    expect(still.motion).toEqual({ kind: "still", lane: toLane });
+    expect(still.packMove).toEqual(loop.packMove);
   });
 });

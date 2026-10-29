@@ -36,7 +36,7 @@ import { musicKey } from "../audio/music";
 import { hitCue, SOUND_KEYS, soundKeyFor, soundKeysOf } from "../audio/sound";
 import { gameData } from "../data";
 import type { CardSource, EncounterId, ZoneId } from "../data/types";
-import { helpPicture, TOUCH_DRAG } from "../help/helpPictures";
+import { TOUCH_DRAG } from "../help/helpPictures";
 import { badgeWall } from "../home/badgesView";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { effectIconKey, type EffectItem, walkBarIconKey } from "../hud/effectIcons";
@@ -264,14 +264,16 @@ describe("image art", () => {
 });
 
 describe("help art", () => {
-  it("tags ui-touch-drag with the drag frame the lanes page shows", () => {
-    const { key, tag } = TOUCH_DRAG;
-    const frame = helpPicture(gameData, "lanes").touch?.frame ?? -1;
-    const drag = animationSpecs(key, sheetOf(key)).find(
-      (spec) => spec.key === animationKey(key, tag),
-    );
-    expect(missingTags(key, [tag])).toEqual([]);
-    expect(frame).toBeLessThan(drag?.frames.length ?? 0);
+  it("tags ui-touch-drag with swipes as long as each other, past every drag frame, and a still", () => {
+    const { dragPx, key, tags } = TOUCH_DRAG;
+    const specs = animationSpecs(key, sheetOf(key));
+    const durations = (tag: string) =>
+      specs
+        .find((spec) => spec.key === animationKey(key, tag))
+        ?.frames.map(({ duration }) => duration) ?? [];
+    expect(missingTags(key, Object.values(tags))).toEqual([]);
+    expect(durations(tags.left)).toEqual(durations(tags.right));
+    expect(durations(tags.right).length).toBeGreaterThan(dragPx.from + dragPx.px.length);
   });
 });
 

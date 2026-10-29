@@ -19,7 +19,7 @@ import { firstZoneId, forkPaths, middleZoneId } from "../rules/route";
 import { tipValue } from "../rules/run";
 import { read } from "../rules/units";
 import { laneControlIn } from "../runner/laneControl";
-import { stillInLane } from "../runner/laneMotion";
+import { type LaneMotion, stillInLane } from "../runner/laneMotion";
 import type { MoverOnRoad } from "../runner/movers";
 import { NO_PULLS, type Pulls } from "../runner/pulls";
 import { screenRoadGeometry } from "../runner/screenGeometry";
@@ -31,10 +31,11 @@ import { newRun, type PackDogs, type PackSlot, type RunState } from "../state/ru
 import { cardHeader } from "../ui/cardRow";
 import { HELP_LAYOUT } from "./helpLayout";
 
-// Each help page's picture: a still moment of the walk screen, drawn by the game's own road,
-// pack, HUD and card renderers at their screen positions. The picture shows strips of the
-// screen's rows, top to bottom. This module says which rows, and what the walk holds at that
-// moment, built by the game's rules, so every name and number in a picture is the game's.
+// Each help page's picture: a moment of the walk screen, drawn by the game's own road, pack, HUD
+// and card renderers at their screen positions, still but for the lanes page's drag. The
+// picture shows strips of the screen's rows, top to bottom. This module says which rows, and
+// what the walk holds at that moment, built by the game's rules, so every name and number in a
+// picture is the game's.
 
 const SCREEN = SCREEN_LAYOUT;
 const PROJECTION = walkProjection(ROAD_CAMERA, SCREEN.road);
@@ -49,52 +50,85 @@ export interface PictureStrip {
   readonly screenY: number;
 }
 
-// The ui-touch-drag sprite, drawn dragging right: its anchor, frame pixel (20,6), stands on the
-// drag's start, and its drag tag's frames move the fingertip along.
-export const TOUCH_DRAG = { anchor: { x: 20, y: 6 }, key: "ui-touch-drag", tag: "drag" } as const;
+// The ui-touch-drag sprite: its anchor, frame pixel (20,6), stands on the drag's start. Its
+// right tag swipes a lane's width right, its frames dragPx.from on moving the fingertip
+// dragPx.px along; left is right mirrored, swiping back from where right ends, with the same
+// frame times; still is the swipe right, held for reduced motion.
+export const TOUCH_DRAG = {
+  anchor: { x: 20, y: 6 },
+  dragPx: { from: 3, px: [4, 12, 24, 38, 51, 60, 64] },
+  key: "ui-touch-drag",
+  tags: { left: "left", right: "right", still: "still" },
+} as const;
+
+export type TouchTag = keyof typeof TOUCH_DRAG.tags;
+
+// The pack's move on a drag right: dots along row y from fromX, stopping at toX, then a
+// chevron pointing right at chevronX.
+export interface PackMove {
+  readonly chevronX: number;
+  readonly fromX: number;
+  readonly toX: number;
+  readonly y: number;
+}
+
+// The lanes page's drag: a swipe right from touchStart moves the pack from fromLane to toLane,
+// then a swipe left brings it back, in a loop.
+export interface DragLoop {
+  readonly fromLane: number;
+  // The marks of the move right, shown only with reduced motion.
+  readonly packMove: PackMove;
+  readonly toLane: number;
+  readonly touchStart: Point;
+}
+
+// One moment of the drag: the touch frame, the pack's lane motion and the move's marks.
+export interface DragMoment {
+  readonly motion: LaneMotion;
+  readonly packMove: PackMove | null;
+  readonly touch: { readonly index: number; readonly tag: TouchTag };
+}
 
 export interface HelpPicture {
   // A card over the dimmed walk, as the card scene draws it.
   readonly card: CardView | null;
+  // A drag that moves the pack, its touch hint and the pack's move drawn over the walk.
+  readonly drag: DragLoop | null;
   // Changes the walk raises, which the HUD shows: a heart change pops over its dog.
   readonly changes: readonly Change[];
   // Whether the walk is held, as under a card: the pack and items stand idle.
   readonly halted: boolean;
   // Whether the HUD (the walk bar and the dog cards) is drawn.
   readonly hud: boolean;
-  // The pack's move on a drag: dots along row y from fromX, stopping at toX, then a chevron
-  // pointing right at chevronX.
-  readonly packMove: {
-    readonly chevronX: number;
-    readonly fromX: number;
-    readonly toX: number;
-    readonly y: number;
-  } | null;
   readonly pulls: Pulls;
   readonly strips: readonly PictureStrip[];
   // Whether the pack has just bumped something: the walker stumbles and the dogs react.
   readonly stumble: boolean;
-  // The touch hint's drag frame, its anchor on start.
-  readonly touch: { readonly frame: number; readonly start: Point } | null;
   readonly walk: Walk;
 }
 
 // The pages' choices: who walks, in which lane (from 0, left to right), what is on the road
 // and how far ahead of the walker's feet in road pixels, and the moment shown.
 export const HELP_SCENES = {
-  // The card scene's title stands this many rows into a card page's picture.
-  cardTitleInset: 8,
+  // The card scene's header band starts this many rows into a card page's picture, clear of
+  // its top rule.
+  cardBandInset: 6,
   cards: { dogs: ["archie"], encounter: "skunk", lane: 2 },
   lanes: {
     dogs: ["archie", "biscuit", "duchess"],
+    // The pack glides a lane over glideFrames of the swipe's frames, from the first whose drag
+    // reaches the walk's first lane step.
+    glideFrames: 3,
     lane: 3,
     mover: { distance: 190, kind: "cat" },
-    // The pack's move from the lane before: dots from dotsFrom right of that lane's centre,
+    // The pack's move from the lane it left: dots from dotsFrom past that lane's centre,
     // stopping dotsShort before the pack's, and the chevron chevronInset before it, on the
     // row rise above the walker's feet.
     packMove: { chevronInset: 26, dotsFrom: 4, dotsShort: 30, rise: 12 },
-    // The drag starts on lane fromLane's centre, rise rows above the walker's feet.
-    touch: { frame: 3, fromLane: 1, rise: 120 },
+    // The drag right starts on lane fromLane's centre, rise rows above the walker's feet.
+    touch: { fromLane: 1, rise: 144 },
+    // A neighbourhood where cats cross, its grey road setting off the touch hint.
+    zone: "snoozeCrescent",
   },
   owners: {
     // The dog that loses a heart to a bump.
@@ -137,11 +171,11 @@ function roadStrip(height: number): PictureStrip {
   return { height, screenY: SCREEN.roadView.y + SCREEN.roadView.height - height };
 }
 
-// The card scene's three-card row, its title cardTitleInset rows into the strip.
+// The card scene's three-card row, its header band cardBandInset rows into the strip.
 function cardStrip(): PictureStrip {
   const rows = cardRowIn(SCREEN.walkView, MAX_CARD_OPTIONS, MAX_CARD_OPTIONS);
-  const { titleTop } = cardHeader(false, rows);
-  return { height: HELP_PICTURE_HEIGHT, screenY: titleTop - HELP_SCENES.cardTitleInset };
+  const { band } = cardHeader(false, rows);
+  return { height: HELP_PICTURE_HEIGHT, screenY: band.y - HELP_SCENES.cardBandInset };
 }
 
 function startRun(data: GameData, dogs: readonly DogId[]): RunState {
@@ -181,17 +215,16 @@ function walkIn(run: RunState, lane: number, items: readonly WalkItem[]): Walk {
 const STILL: Omit<HelpPicture, "strips" | "walk"> = {
   card: null,
   changes: [],
+  drag: null,
   halted: false,
   hud: false,
-  packMove: null,
   pulls: NO_PULLS,
   stumble: false,
-  touch: null,
 };
 
 function lanes(data: GameData): HelpPicture {
-  const { dogs, lane, mover, packMove, touch } = HELP_SCENES.lanes;
-  const run = startRun(data, dogs);
+  const { dogs, lane, mover, packMove, touch, zone } = HELP_SCENES.lanes;
+  const run: RunState = { ...startRun(data, dogs), route: [zone] };
   // A mover about to dart across from the left, showing its cue.
   const kind: MinorObstacleId = mover.kind;
   const crosser = itemAhead(
@@ -214,21 +247,87 @@ function lanes(data: GameData): HelpPicture {
       since: 0,
     },
   );
-  const arriving = itemAt(LANES, lane);
   return {
     ...STILL,
-    packMove: {
-      chevronX: arriving - packMove.chevronInset,
-      fromX: itemAt(LANES, lane - 1) + packMove.dotsFrom,
-      toX: arriving - packMove.dotsShort,
-      y: PROJECTION.footY - packMove.rise,
+    drag: {
+      fromLane: lane - 1,
+      packMove: {
+        chevronX: itemAt(LANES, lane) - packMove.chevronInset,
+        fromX: itemAt(LANES, lane - 1) + packMove.dotsFrom,
+        toX: itemAt(LANES, lane) - packMove.dotsShort,
+        y: PROJECTION.footY - packMove.rise,
+      },
+      toLane: lane,
+      touchStart: { x: itemAt(LANES, touch.fromLane), y: PROJECTION.footY - touch.rise },
     },
     strips: [roadStrip(HELP_PICTURE_HEIGHT)],
-    touch: {
-      frame: touch.frame,
-      start: { x: itemAt(LANES, touch.fromLane), y: PROJECTION.footY - touch.rise },
-    },
     walk: walkIn(run, lane, [crosser]),
+  };
+}
+
+// The drag held still, for reduced motion: the swipe right done, the pack in its new lane and
+// the move's marks.
+export function stillDragMoment(loop: DragLoop): DragMoment {
+  return {
+    motion: stillInLane(loop.toLane),
+    packMove: loop.packMove,
+    touch: { index: 0, tag: "still" },
+  };
+}
+
+// Which frame of a tag whose frames last frameMs plays at ms into it, from 0, its last frame
+// holding past its end.
+function frameAt(frameMs: readonly number[], ms: number): number {
+  let end = 0;
+  for (const [index, duration] of frameMs.entries()) {
+    end += duration;
+    if (ms < end) {
+      return index;
+    }
+  }
+  return frameMs.length - 1;
+}
+
+// The ms into the swipe at which the pack glides: from the start of the first frame whose drag
+// reaches the walk's first lane step, swipeStart px, over glideFrames frames.
+export function dragGlide(
+  frameMs: readonly number[],
+  swipeStart: number,
+): { readonly end: number; readonly start: number } {
+  const { from, px } = TOUCH_DRAG.dragPx;
+  const passed = px.findIndex((travel) => travel >= swipeStart);
+  const first = from + (passed < 0 ? px.length - 1 : passed);
+  const before = (count: number) => frameMs.slice(0, count).reduce((sum, ms) => sum + ms, 0);
+  return { end: before(first + HELP_SCENES.lanes.glideFrames), start: before(first) };
+}
+
+// The drag at seconds into its loop: a swipe right as the right tag plays, the pack gliding a
+// lane over its glide, then a swipe left that brings it back, and again. frameMs is each
+// frame's time, the same in both tags.
+export function dragMomentAt(
+  frameMs: readonly number[],
+  swipeStart: number,
+  loop: DragLoop,
+  seconds: number,
+): DragMoment {
+  const swipe = frameMs.reduce((sum, ms) => sum + ms, 0);
+  const ms = (((seconds * 1000) % (2 * swipe)) + 2 * swipe) % (2 * swipe);
+  const right = ms < swipe;
+  const into = right ? ms : ms - swipe;
+  const [from, to] = right ? [loop.fromLane, loop.toLane] : [loop.toLane, loop.fromLane];
+  const glide = dragGlide(frameMs, swipeStart);
+  const duration = (glide.end - glide.start) / 1000;
+  const elapsed = (into - glide.start) / 1000;
+  const motion: LaneMotion =
+    elapsed < 0
+      ? stillInLane(from)
+      : elapsed >= duration
+        ? stillInLane(to)
+        : { duration, elapsed, from, kind: "moving", to };
+  return {
+    motion,
+    packMove: null,
+    touch: { index: frameAt(frameMs, into), tag: right ? "right" : "left" },
   };
 }
 
