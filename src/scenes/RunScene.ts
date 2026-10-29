@@ -30,6 +30,7 @@ import { NOTHING_PAUSED, type RunPause, walkBackAction, walkPaused } from "../hu
 import { type ExplainShown } from "../hud/walkHud";
 import {
   newWalkerCelebrations,
+  playInTurn,
   type ZoneCelebration,
   zoneCelebration,
 } from "../hud/zoneCelebration";
@@ -530,27 +531,19 @@ export class RunScene extends Scene implements HudRun {
     return { celebrations: [celebration], delayMs: payout.ms };
   }
 
-  // The celebrations hold the walk while the fee coins land, then play one after another; next
-  // follows the last.
+  // The celebrations hold the walk while the fee coins land, then play one after another, each
+  // on its button (playInTurn); next follows the last.
   private celebrate({ celebrations, delayMs }: Celebration, next: () => void): void {
     const menus = this.world?.menus;
     if (menus === undefined) {
       return;
     }
-    const play = ([celebration, ...rest]: readonly ZoneCelebration[]) => {
-      if (celebration === undefined) {
-        next();
-        return;
-      }
+    const show = (celebration: ZoneCelebration, done: () => void) => {
       menus.holdForCelebration();
-      menus.showCelebration({
-        celebration,
-        onDone: () => play(rest),
-        openPause: () => this.openPause(),
-      });
+      menus.showCelebration({ celebration, onDone: done, openPause: () => this.openPause() });
     };
     menus.holdForCelebration();
-    this.time.delayedCall(delayMs, () => play(celebrations));
+    this.time.delayedCall(delayMs, () => playInTurn(show, next, celebrations));
   }
 
   // An event's sounds, bursts, hints and labels, and the input log.

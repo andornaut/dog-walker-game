@@ -12,7 +12,9 @@ import { perkIconKey } from "./effectIcons";
 import {
   celebrationText,
   newWalkerCelebrations,
+  playInTurn,
   zoneBannerHeading,
+  type ZoneCelebration,
   zoneCelebration,
 } from "./zoneCelebration";
 
@@ -56,16 +58,16 @@ describe("newWalkerCelebrations", () => {
   const reached = (dogs: number) =>
     walkerOrder(gameData).filter((id) => !starting.includes(id) && goal(id) <= dogs);
 
-  it.each([1, 2, 3])(
-    "plays one New walker per walker a walk finished with %i dogs unlocks, fewest dogs first",
-    (dogs) => {
-      const played = newWalkerCelebrations(gameData, starting, dogs);
-      expect(played).toEqual(joins(reached(dogs)));
-      expect(played.map(({ walker }) => goal(walker))).toEqual(
-        reached(dogs)
-          .map(goal)
-          .sort((a, b) => a - b),
-      );
+  // Mr. B unlocks at 1 dog, Ada at 2 and Trista at 3, so they join in that order.
+  it.each([
+    [1, ["casey", "mrB", "ada"], 3, ["trista"]],
+    [2, ["casey"], 2, ["mrB", "ada"]],
+    [2, ["casey", "mrB"], 3, ["ada", "trista"]],
+    [3, ["casey"], 3, ["mrB", "ada", "trista"]],
+  ] as const)(
+    "plays a New walker for each of %i unlocking at once, owning %j, finished with %i dogs",
+    (_count, owned, dogs, walkers) => {
+      expect(newWalkerCelebrations(gameData, owned, dogs)).toEqual(joins(walkers));
     },
   );
 
@@ -82,6 +84,33 @@ describe("newWalkerCelebrations", () => {
   it("plays none for a walk not finished", () => {
     expect(newWalkerCelebrations(gameData, starting, null)).toEqual([]);
   });
+});
+
+describe("playInTurn", () => {
+  it.each([
+    [1, ["mrB"]],
+    [2, ["mrB", "ada"]],
+    [3, ["mrB", "ada", "trista"]],
+  ] as const)(
+    "shows %i new walkers one at a time, each as the one before closes, then the end screen",
+    (dogs, walkers) => {
+      const shown: string[] = [];
+      const presses: (() => void)[] = [];
+      const show = (celebration: ZoneCelebration, done: () => void) => {
+        shown.push(celebration.kind === "newWalker" ? celebration.walker : celebration.kind);
+        presses.push(done);
+      };
+      playInTurn(show, () => shown.push("end"), newWalkerCelebrations(gameData, ["casey"], dogs));
+      expect(shown).toEqual([walkers[0]]);
+      walkers.forEach((_walker, i) => {
+        presses[i]?.();
+        expect(shown).toEqual([
+          ...walkers.slice(0, i + 2),
+          ...(i === walkers.length - 1 ? ["end"] : []),
+        ]);
+      });
+    },
+  );
 });
 
 describe("zoneCelebration", () => {

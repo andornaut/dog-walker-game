@@ -48,6 +48,21 @@ export function newWalkerCelebrations(
   return newWalkers(data, owned, finishedWith).map((walker) => ({ kind: "newWalker", walker }));
 }
 
+// Shows the celebrations one at a time, each once the one before it is done (show calls done as
+// it closes), then runs next after the last, or at once for none.
+export function playInTurn(
+  show: (celebration: ZoneCelebration, done: () => void) => void,
+  next: () => void,
+  celebrations: readonly ZoneCelebration[],
+): void {
+  const [first, ...rest] = celebrations;
+  if (first === undefined) {
+    next();
+    return;
+  }
+  show(first, () => playInTurn(show, next, rest));
+}
+
 export function zoneCelebration(finish: ZoneFinish): ZoneDone {
   let fees = 0;
   let tips = 0;
