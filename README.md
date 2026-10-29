@@ -36,7 +36,7 @@ Requires Node 24 (`.nvmrc`). Run `npm install`, then:
 | `npm run simulate -- --help`                | Simulate runs ([src/README.md](src/README.md), Simulator)                  |
 | `npm test`                                  | Run the unit tests                                                         |
 
-The site's pages are in `pages/`, each at its URL's path (`pages/play/index.html` is `/play/`), and Vite bundles the TypeScript they load. `public/` is copied into the build unchanged: the art, the nav bar, the icons, and the art gallery, `public/art/index.html`. `shared/` holds the files art's tools and the game both read. [`packages/game-kit/`](packages/game-kit/README.md) holds the game-agnostic helpers, which the game imports as `@andornaut/game-kit/<path>`.
+The site's pages are in `pages/`, each at its URL's path (`pages/play/index.html` is `/play/`), and Vite bundles the TypeScript they load. `public/` is copied into the build unchanged: the art, the nav bar, the icons, and the art gallery, `public/art/index.html`. `shared/` holds the files art's tools and the game both read. [`vendor/game-kit/`](vendor/game-kit/README.md) holds the game-agnostic helpers, a copy of the game-kit repository's `kit/` that its `scripts/sync-into.sh` writes and nothing here edits, which the game imports as `@andornaut/game-kit/<path>`.
 
 CI runs check, lint, test and build, and the AI attributions scan.
 
@@ -55,4 +55,4 @@ npm run deploy
 
 ## Licence
 
-Everything here (code, art, sound, music and writing) is licensed [CC BY-NC-SA 4.0](./LICENSE): share and remix it with credit to andornaut and a link to this project, for non-commercial use, under the same licence. The game's names and logos are not licensed, so a remix must use its own name. The exception is `packages/game-kit/`, the game-agnostic helpers, which is licensed [MIT](./packages/game-kit/LICENSE).
+Everything here (code, art, sound, music and writing) is licensed [CC BY-NC-SA 4.0](./LICENSE): share and remix it with credit to andornaut and a link to this project, for non-commercial use, under the same licence. The game's names and logos are not licensed, so a remix must use its own name. The exception is `vendor/game-kit/`, the game-agnostic helpers, which is licensed [MIT](./vendor/game-kit/LICENSE).
