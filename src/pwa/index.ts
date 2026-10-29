@@ -4,7 +4,12 @@
 // scenes listen for PHONE_EVENTS on window and call the functions below.
 import { chooseSoundFormat, type SoundFormat } from "../audio/soundFormat";
 import { browserStorage, lazyStorage } from "../save/storage";
-import { type BackGuard, guardBackNavigation } from "./backNavigation";
+import {
+  type BackGuard,
+  type CloseWatcherFactory,
+  type CloseWatcherLike,
+  guardBackNavigation,
+} from "./backNavigation";
 import { dispatchPhoneEvent, PHONE_EVENTS } from "./events";
 import { type InstallFlow, type InstallOutcome, watchInstall } from "./installFlow";
 import { createInstallNudge, type InstallNudge } from "./installNudge";
@@ -122,7 +127,7 @@ export function setupPhoneApp(): Promise<void> {
   relayVisibilityEvents(window, document);
   showTurnUprightNotice();
   orientation = relayOrientationEvents(readViewport, window);
-  backGuard = guardBackNavigation(window, window, history);
+  backGuard = guardBackNavigation(window, window, closeWatcherFactory(), history);
   const wakeLock = "wakeLock" in navigator ? navigator.wakeLock : undefined;
   screenWakeLock = createScreenWakeLock(wakeLock, document);
   // Held whenever the game is visible until the scenes take over with stopWakeLock and
@@ -131,7 +136,13 @@ export function setupPhoneApp(): Promise<void> {
   return bootable;
 }
 
-// Leaves the game for the previous page, or closes the installed app (BackGuard.leave).
+// The browser's CloseWatcher, where it has one (Chrome 120 and later, Firefox 149 and later).
+function closeWatcherFactory(): CloseWatcherFactory | undefined {
+  const CloseWatcher = (globalThis as { CloseWatcher?: new () => CloseWatcherLike }).CloseWatcher;
+  return CloseWatcher === undefined ? undefined : () => new CloseWatcher();
+}
+
+// Closes the game's window, or leaves the game for the previous page (BackGuard.leave).
 export function leaveGame(): void {
   backGuard?.leave();
 }
