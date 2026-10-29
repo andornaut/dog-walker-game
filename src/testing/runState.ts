@@ -27,7 +27,7 @@ export function testState(
     ...blankRun({
       gear: null,
       pack: pack as readonly PackSlot[] as Pack,
-      route: ["street"],
+      route: ["distilleryDistrict"],
       walker: "casey",
     }),
     ...overrides,

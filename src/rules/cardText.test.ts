@@ -9,8 +9,8 @@ import { activeModifier, testState } from "../testing/runState";
 import { cardFor } from "./choices";
 import { read } from "./units";
 
-const PACK: readonly DogId[] = ["kilo", "duchess", "reggie"];
-const state = testState({ duchess: 5, kilo: 5, reggie: 5 }, { money: cents(10_000) });
+const PACK: readonly DogId[] = ["kilo", "ginger", "reggie"];
+const state = testState({ ginger: 5, kilo: 5, reggie: 5 }, { money: cents(10_000) });
 const { encounterHigh, thiefLetGo } = gameData.tuning.money;
 
 // The name the data gives a card option, by its id.
@@ -54,14 +54,14 @@ describe("a card's text for the dogs it catches", () => {
   it("words each option's effects as its card shows them", () => {
     for (const { affected, id, label, text } of [
       {
-        affected: ["duchess", "kilo"],
+        affected: ["ginger", "kilo"],
         id: "thief",
         label: grabBack,
-        text: heartsText(["duchess", "kilo"], -1),
+        text: heartsText(["ginger", "kilo"], -1),
         why: "says a change the dogs it reaches share once",
       },
       {
-        affected: ["kilo", "duchess"],
+        affected: ["kilo", "ginger"],
         id: "skunk",
         label: "Full groom",
         text: `−$${encounterHigh}`,
@@ -103,18 +103,18 @@ describe("a card's text for the dogs it catches", () => {
 
     it("says each effect's line", () => {
       for (const [, used, text] of [
-        ["the first dog's loss forgiven", 0, `${forgiven("duchess")}, ${heartsText(["kilo"], -1)}`],
+        ["the first dog's loss forgiven", 0, `${forgiven("ginger")}, ${heartsText(["kilo"], -1)}`],
         [
           "nothing forgiven once Second chance is used",
           allowance,
-          heartsText(["duchess", "kilo"], -1),
+          heartsText(["ginger", "kilo"], -1),
         ],
       ] as const) {
         const kind = testState(
-          { duchess: 5, kilo: 5 },
+          { ginger: 5, kilo: 5 },
           { heartsForgiven: used, modifiers: [secondChance] },
         );
-        const source = encounter("thief", ["duchess", "kilo"]);
+        const source = encounter("thief", ["ginger", "kilo"]);
         const view = cardFor(gameData, kind, source).options.find(
           ({ label }) => label === grabBack,
         );
@@ -154,7 +154,7 @@ describe("a card's text for the dogs it catches", () => {
       },
     ])("$why, on the small and large card", ({ cardsThisZone, large, modifiers, text }) => {
       const run = testState(
-        { duchess: 5, kilo: 5 },
+        { ginger: 5, kilo: 5 },
         { cardsThisZone, modifiers, money: cents(10_000) },
       );
       const view = cardFor(gameData, run, encounter("skunk", ["kilo"])).options.find(

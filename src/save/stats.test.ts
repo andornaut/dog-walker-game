@@ -25,11 +25,11 @@ describe("statsPage", () => {
     const tied = {
       ...stats,
       dogs: {
-        biscuit: { timesFired: 2, walks: 2, zonesFinished: 6 },
+        ginger: { timesFired: 2, walks: 2, zonesFinished: 6 },
         kilo: { timesFired: 2, walks: 5, zonesFinished: 12 },
       },
     };
-    expect(statsPage(tied)).toMatchObject({ mostFiredBy: "biscuit", timesFired: 4 });
+    expect(statsPage(tied)).toMatchObject({ mostFiredBy: "ginger", timesFired: 4 });
     expect(statsPage(newPlayerSave.stats)).toMatchObject({
       bestRunCents: 0,
       bestRunDogs: [],

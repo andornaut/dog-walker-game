@@ -140,7 +140,7 @@ describe("movers", { timeout: 120_000 }, () => {
   // The rulebook's lucky finds: the friendly neighbour walks about, the lost wallet lies still.
   it.each([
     { kind: "lostWallet", walks: false },
-    { kind: "pettingNeighbour", walks: true },
+    { kind: "friendlyNeighbour", walks: true },
   ] as const)("walks the $kind about: $walks", ({ kind, walks }) => {
     expect(movementOf(kind) !== null).toBe(walks);
   });
@@ -682,10 +682,10 @@ describe("movers", { timeout: 120_000 }, () => {
     const since = 532;
     expect(inMotion(path, since)).toBe(moving);
     const met = (item: WalkItem) => withHearts(1, walkWith(["kilo"], [item]));
-    const walk = met(moverAt("pettingNeighbour", path, since));
+    const walk = met(moverAt("friendlyNeighbour", path, since));
     const after = step(walk);
-    const standing = step(met(atPack("pettingNeighbour")));
-    expect(after.instants.map(({ encounter }) => encounter)).toEqual(["pettingNeighbour"]);
+    const standing = step(met(atPack("friendlyNeighbour")));
+    expect(after.instants.map(({ encounter }) => encounter)).toEqual(["friendlyNeighbour"]);
     expect(heartsByDog(after.walk.run)).not.toEqual(heartsByDog(walk.run));
     expect(after.walk.run).toEqual(standing.walk.run);
     expect(after.bumps).toEqual([]);
@@ -978,7 +978,7 @@ describe("movers", { timeout: 120_000 }, () => {
   it("opens a mover's card on contact", () => {
     for (const { dogs, encounter, item } of [
       {
-        dogs: ["duchess"],
+        dogs: ["ginger"],
         encounter: "otherDog",
         item: moverAt("otherDog", crossing, 82),
         name: "a loose dog",

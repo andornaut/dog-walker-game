@@ -101,9 +101,9 @@ describe("lucky finds", () => {
   // Two or three finds, a walking neighbour among them where the zone's mover share has one walk,
   // each in its own spaced stretch of the zone.
   const SPACINGS = [
-    { counts: { lostWallet: 2, pettingNeighbour: 0 }, finds: 2 },
-    { counts: { lostWallet: 1, pettingNeighbour: 1 }, finds: 2 },
-    { counts: { lostWallet: 2, pettingNeighbour: 1 }, finds: 3 },
+    { counts: { friendlyNeighbour: 0, lostWallet: 2 }, finds: 2 },
+    { counts: { friendlyNeighbour: 1, lostWallet: 1 }, finds: 2 },
+    { counts: { friendlyNeighbour: 1, lostWallet: 2 }, finds: 3 },
   ];
   it.each(SPACINGS.flatMap((spacing) => FIRST_PLACES.map((place) => ({ ...spacing, ...place }))))(
     "spaces $finds finds a stretch apart in $zone: $counts",

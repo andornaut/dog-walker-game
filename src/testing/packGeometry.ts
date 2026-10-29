@@ -12,7 +12,7 @@ const FLAT_LENS = { focal: FLAT_FOCAL, footY: FOOT_Y, horizonY: FOOT_Y - FLAT_FO
 // pack's. The road's rect only sets the feet row; the rest of the test road is its own.
 const { packBand, packParts } = walkGeometry(
   5,
-  { dogs: ["kilo", "biscuit", "buddy"], walker: "casey" },
+  { dogs: ["kilo", "lady", "buddy"], walker: "casey" },
   { ...FLAT_LENS, visibleDistance: 0 },
   { height: FOOT_Y, width: 280, x: 0, y: 4 },
 );

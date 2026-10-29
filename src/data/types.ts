@@ -12,21 +12,21 @@ import type { WORLD } from "./world";
 
 // The rule vocabulary: adding a value means new rules code, not only data.
 export type EncounterId =
-  | "capybara"
+  | "escapedCapybara"
   | "cheeseCrates"
-  | "droppedCone"
-  | "greenBin"
+  | "droppedIceCream"
+  | "greenBinSpill"
   | "lostWallet"
   | "otherDog"
-  | "pettingNeighbour"
+  | "friendlyNeighbour"
   | "porchCat"
   | "pothole"
-  | "promoTeam"
+  | "bigScreenPromo"
   | "puddle"
   | "skunk"
   | "squirrel"
   | "thief"
-  | "weddingShoot";
+  | "weddingPhotoShoot";
 // How many dogs a walk sets out with.
 export type PackSize = 1 | 2 | 3;
 export type Size = "large" | "medium" | "small";

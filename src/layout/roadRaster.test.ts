@@ -57,7 +57,7 @@ const look = (zone: ZoneId, rgb: number): RoadLook => ({
   zone,
 });
 const frameOf = (overrides: Partial<RoadFrame>): RoadFrame => ({
-  current: look("street", 0x3a4466),
+  current: look("distilleryDistrict", 0x3a4466),
   scroll: 0,
   transition: null,
   zoneStart: 0,
@@ -337,7 +337,9 @@ describe("drawRoad", () => {
   };
 
   it("samples each road pixel from the strip column under its centre", () => {
-    const out = draw(frameOf({ current: { strip: [labelled, labelled, labelled], zone: "park" } }));
+    const out = draw(
+      frameOf({ current: { strip: [labelled, labelled, labelled], zone: "highPark" } }),
+    );
     for (const [x, y] of [
       [200, NEAR_Y],
       [111, FAR_Y],
@@ -353,7 +355,7 @@ describe("drawRoad", () => {
   });
 
   it("moves the road toward the pack as the walk scrolls", () => {
-    const strips = { strip: stripLevels(labelled), zone: "park" as const };
+    const strips = { strip: stripLevels(labelled), zone: "highPark" as const };
     const row = (scroll: number) =>
       Math.floor(
         ((pixelAt(draw(frameOf({ current: strips, scroll })), 180, MID_Y) ?? 1) - 1) / STRIP.width,
@@ -374,7 +376,7 @@ describe("drawRoad", () => {
   it("draws the moving road surface up to the cross street, leaving the verge beside it", () => {
     expect(raster.junctionRows).toBe(junction.height);
     expect(raster.approachRows).toBe(junction.height + approach.height);
-    const strips = { strip: stripLevels(labelled), zone: "street" as const };
+    const strips = { strip: stripLevels(labelled), zone: "distilleryDistrict" as const };
     const stripRow = (out: Uint32Array, y: number) =>
       Math.floor(((pixelAt(out, 180, y) ?? 1) - 1) / STRIP.width);
     const [before, after] = [0, 24].map((scroll) => draw(frameOf({ current: strips, scroll })));
@@ -394,9 +396,9 @@ describe("drawRoad", () => {
   });
 
   it("rolls the start strip in at the far edge over the previous zone's road", () => {
-    const previous = look("street", 0x111111);
-    const start = look("park", 0x222222);
-    const current = look("park", 0x333333);
+    const previous = look("distilleryDistrict", 0x111111);
+    const start = look("highPark", 0x222222);
+    const current = look("highPark", 0x333333);
     const at = (zoneDistance: number, y: number) =>
       pixelAt(
         draw(
@@ -421,15 +423,16 @@ describe("drawRoad", () => {
   });
 
   it("puts the previous zone's verge beside the start strip's cross street", () => {
-    // street's curb runs 4 past the road's edge; park has none, so its lawn starts at the road.
+    // distilleryDistrict's curb runs 4 past the road's edge; highPark has none, so its lawn starts
+    // at the road.
     const y = MID_Y;
     const row = itemAt(raster.rows, y - view.y);
     const curbX = Array.from(row.across).findIndex(
       (across) => across >= ROAD_HALF && across < ROAD_HALF + 4,
     );
     expect(curbX).toBeGreaterThanOrEqual(0);
-    const previous = look("street", 0x111111);
-    const start = look("park", 0x222222);
+    const previous = look("distilleryDistrict", 0x111111);
+    const start = look("highPark", 0x222222);
     // A strip row counts down from the start strip's far end, so along = 63 - stripRow.
     const vergeAt = (stripRow: number) => {
       const zoneStart = 5000;
@@ -438,8 +441,10 @@ describe("drawRoad", () => {
       const frame = frameOf({ current: start, scroll, transition: { previous, start }, zoneStart });
       return draw(frame)[(y - view.y) * view.width + curbX];
     };
-    expect(vergeAt(START_STRIP_ZONE_ROWS - 1)).not.toBe(pixelWord(VERGES.street.curbColour));
-    expect(vergeAt(START_STRIP_ZONE_ROWS)).toBe(pixelWord(VERGES.street.curbColour));
+    expect(vergeAt(START_STRIP_ZONE_ROWS - 1)).not.toBe(
+      pixelWord(VERGES.distilleryDistrict.curbColour),
+    );
+    expect(vergeAt(START_STRIP_ZONE_ROWS)).toBe(pixelWord(VERGES.distilleryDistrict.curbColour));
   });
 
   // A strip of one colour with a line down one column over its first rows.
@@ -451,7 +456,7 @@ describe("drawRoad", () => {
       pixels[y * STRIP.width + column] = LINE;
     }
     const strip = { ...STRIP, pixels };
-    return { lines: stripLines(strip), strip: stripLevels(strip), zone: "street" };
+    return { lines: stripLines(strip), strip: stripLevels(strip), zone: "distilleryDistrict" };
   };
   const showsLine = (out: Uint32Array, y: number) =>
     out.subarray(y * view.width, (y + 1) * view.width).includes(LINE);
@@ -509,7 +514,7 @@ describe("drawRoad", () => {
   const approachVerge = (out: Uint32Array, band: Uint32Array) =>
     Array.from(band, (word, i) => (word === 0 ? 0 : (out[i] ?? 0)));
 
-  it.each<ZoneId>(["shops", "street"])(
+  it.each<ZoneId>(["kensingtonMarket", "distilleryDistrict"])(
     "moves %s's verge detail up the approach where the backdrop shows its verge",
     (zone) => {
       const band = backdropOf(zone);
@@ -526,14 +531,18 @@ describe("drawRoad", () => {
   );
 
   it("leaves the backdrop's own pixels on the approach where it does not show the verge", () => {
-    const band = backdropOf("street", () => 0x010203);
-    const out = draw(frameOf({ approach: band, current: look("street", 0x3a4466), scroll: 7 }));
+    const band = backdropOf("distilleryDistrict", () => 0x010203);
+    const out = draw(
+      frameOf({ approach: band, current: look("distilleryDistrict", 0x3a4466), scroll: 7 }),
+    );
     expect(approachVerge(out, band).every((word) => word === 0)).toBe(true);
   });
 
   it("leaves the near corners beside the junction to the backdrop, verge or not", () => {
-    const band = backdropOf("shops", undefined, 0, raster.junctionRows);
-    const out = draw(frameOf({ approach: band, current: look("shops", 0x3a4466), scroll: 7 }));
+    const band = backdropOf("kensingtonMarket", undefined, 0, raster.junctionRows);
+    const out = draw(
+      frameOf({ approach: band, current: look("kensingtonMarket", 0x3a4466), scroll: 7 }),
+    );
     expect(approachVerge(out, band).every((word) => word === 0)).toBe(true);
   });
 
@@ -720,7 +729,7 @@ describe("seams across the road", () => {
     const look: RoadLook = {
       seams,
       strip: stripLevels({ ...strip, pixels }, seams),
-      zone: "street",
+      zone: "distilleryDistrict",
     };
     return { look, runs };
   };

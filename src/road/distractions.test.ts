@@ -51,7 +51,7 @@ import {
 const LAYOUT = SCREEN_LAYOUT;
 const CENTRE_X = walkProjection(ROAD_CAMERA, LAYOUT.road).centreX;
 const FIRST_LANE_X = defined(laneCentreXs(LANE_COUNT, LAYOUT.road)[0]);
-const RUN = newRun(gameData, 3, { dogs: ["kilo", "biscuit"], gear: null, walker: "casey" });
+const RUN = newRun(gameData, 3, { dogs: ["kilo", "lady"], gear: null, walker: "casey" });
 const GEOMETRY = screenRoadGeometry(RUN);
 const END = distractionScroll(gameData, GEOMETRY);
 const COUNT = gameData.tuning.counts.distractionsPerZone;

@@ -122,12 +122,12 @@ describe("zonePips", () => {
 describe("closingLines", () => {
   it("has each owner say a happier line, or their fired line if they fired you", () => {
     const walk = {
-      dogs: ["kilo", "biscuit"] as const,
-      firings: ["biscuit" as const],
+      dogs: ["kilo", "lady"] as const,
+      firings: ["lady" as const],
     };
     expect(closingLines({ quips: QUIPS }, () => 0, { ...walk, dogs: [...walk.dogs] })).toEqual([
       { dog: "kilo", fired: false, text: QUIPS.kilo.happier[0] },
-      { dog: "biscuit", fired: true, text: QUIPS.biscuit.fired[0] },
+      { dog: "lady", fired: true, text: QUIPS.lady.fired[0] },
     ]);
   });
 });

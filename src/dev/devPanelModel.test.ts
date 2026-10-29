@@ -112,13 +112,13 @@ describe("stored cheats", () => {
 });
 
 describe("withCheats", () => {
-  const run = testState({ biscuit: 2 });
+  const run = testState({ lady: 2 });
   const loss = [{ amount: -1, kind: "bump" }] as const;
   const gain = [{ amount: 1, kind: "treat" }] as const;
 
   it("keeps an invincible owner's hearts from falling", () => {
     const hearts = (cheats: Cheats, causes: typeof loss | typeof gain) =>
-      heartsOf(changeHearts(gameData, causes, "biscuit", withCheats(cheats, run)).state, "biscuit");
+      heartsOf(changeHearts(gameData, causes, "lady", withCheats(cheats, run)).state, "lady");
     const invincible = setCheat("invincible", true, CHEATS_OFF);
     expect(hearts(invincible, loss)).toBe(2);
     expect(hearts(invincible, gain)).toBe(3);
@@ -160,16 +160,16 @@ describe("staged settings", () => {
 
   it("stages changes without applying them, and Cancel drops them", () => {
     expect(opened).toEqual({ applied: hitBoxes, staged: hitBoxes, start: START_SCREEN });
-    expect(stageAll([{ kind: "start", start: "park" }])).toEqual({
+    expect(stageAll([{ kind: "start", start: "highPark" }])).toEqual({
       applied: hitBoxes,
       staged: hitBoxes,
-      start: "park",
+      start: "highPark",
     });
     expect(stageAll([{ kind: "speed", speed: "slow" }]).staged).toEqual(setSpeed("slow", hitBoxes));
     const cancelled: PanelAction[] = [
       { kind: "speed", speed: "fast" },
       { id: "hitBoxes", kind: "toggle", on: false },
-      { kind: "start", start: "park" },
+      { kind: "start", start: "highPark" },
       { kind: "cancel" },
     ];
     expect(stageAll(cancelled)).toEqual(opened);
@@ -217,13 +217,13 @@ describe("hasStagedChanges", () => {
       name: "no cheats, the applied speed staged",
     },
     {
-      actions: [{ kind: "start", start: "park" }],
+      actions: [{ kind: "start", start: "highPark" }],
       applied: CHEATS_OFF,
       enabled: true,
       name: "no cheats, a walk chosen as the start",
     },
     {
-      actions: [{ kind: "start", start: "park" }, { kind: "cancel" }],
+      actions: [{ kind: "start", start: "highPark" }, { kind: "cancel" }],
       applied: CHEATS_OFF,
       enabled: false,
       name: "no cheats, a walk chosen then cancelled",

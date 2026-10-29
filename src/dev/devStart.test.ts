@@ -11,7 +11,7 @@ const setup: RunSetup<DogId, GearId, WalkerId> = { dev: false, seed: 1, speed: 1
 describe("namesRunSetup", () => {
   it("reads which queries name a run setup", () => {
     for (const [search, expected] of [
-      ["?seed=123&pack=kilo,duchess&zone=1&dev=1", true],
+      ["?seed=123&pack=kilo,ginger&zone=1&dev=1", true],
       ["?speed=2", true],
       ["?gear=none", true],
       ["?walker=ada", true],
@@ -28,15 +28,15 @@ describe("devRunLoadout", () => {
     for (const [, saved, overrides, expected] of [
       [
         "takes the link's pack, gear and walker over the saved loadout",
-        { dogs: ["biscuit"], gear: null },
-        { gear: "luckyCollar", pack: ["kilo", "duchess"], walker: "trista" },
-        { dogs: ["kilo", "duchess"], gear: "luckyCollar", walker: "trista" },
+        { dogs: ["lady"], gear: null },
+        { gear: "luckyCollar", pack: ["kilo", "ginger"], walker: "trista" },
+        { dogs: ["kilo", "ginger"], gear: "luckyCollar", walker: "trista" },
       ],
       [
         "keeps the saved loadout and walker for what the link leaves out",
-        { dogs: ["biscuit"], gear: "fannyPack" },
+        { dogs: ["lady"], gear: "fannyPack" },
         {},
-        { dogs: ["biscuit"], gear: "fannyPack", walker: "mrB" },
+        { dogs: ["lady"], gear: "fannyPack", walker: "mrB" },
       ],
       [
         "walks the first owned dog when nothing was picked yet",

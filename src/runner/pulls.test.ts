@@ -194,12 +194,12 @@ describe("what a dog pulls toward", () => {
 
   it("never strains toward anything but a squirrel", () => {
     for (const kind of ["treat", "otherDog", "tip"] as const) {
-      expect(after(walkWith(["biscuit"], [item(kind, 0, 4)]), 2).tells).toEqual([]);
+      expect(after(walkWith(["lady"], [item(kind, 0, 4)]), 2).tells).toEqual([]);
     }
   });
 
   it("never pulls without a target: no random pulls", () => {
-    expect(after(walkWith(["kilo", "biscuit", "buddy"]), 30).tells).toEqual([]);
+    expect(after(walkWith(["kilo", "lady", "buddy"]), 30).tells).toEqual([]);
   });
 
   it("does not chase with Good leash, or toward a squirrel in the pack's lane", () => {
@@ -224,19 +224,19 @@ describe("what a dog pulls toward", () => {
   // Of three dogs, the biggest leads, the next walks front-left and the smallest front-right.
   it("strains one dog at a time, the one nearest the squirrel, each squirrel once", () => {
     const walk = walkWith(
-      ["buddy", "biscuit", "kilo"],
+      ["buddy", "lady", "kilo"],
       [item("squirrel", 0, 0), item("squirrel", 1, 4, 60)],
     );
     const { pulled, tells } = after(walk, 4);
-    expect(tells.map(({ dog }) => dog)).toEqual(["biscuit", "buddy"]);
+    expect(tells.map(({ dog }) => dog)).toEqual(["lady", "buddy"]);
     expect(pulled.map(({ direction, dog }) => [dog, direction])).toEqual([
-      ["biscuit", -1],
+      ["lady", -1],
       ["buddy", 1],
     ]);
   });
 
   it("ends the strain without a pull once the straining dog's owner fires you", () => {
-    const straining = after(walkWith(["kilo", "biscuit"], [item("squirrel", 0, 0)]), 0.3);
+    const straining = after(walkWith(["kilo", "lady"], [item("squirrel", 0, 0)]), 0.3);
     const dog = straining.pulls.strain?.dog;
     const { run } = straining.walk;
     const fired = {
@@ -422,7 +422,7 @@ describe("replay with pulls", () => {
     // As RunScene steps: the moves due now, each logged, then the pulls, then the walk.
     const play = (seed: number, movesAt: (frame: number, timeMs: number) => LaneDirection[]) => {
       const setup = { dev: true, seed, speed: 1, zone: 1 };
-      const start = planZone(data, geometry, plannerStreams(seed), walkWith(["biscuit", "kilo"]));
+      const start = planZone(data, geometry, plannerStreams(seed), walkWith(["lady", "kilo"]));
       const rolls = seededRandom(seed + 4);
       let log = startInputLog(setup);
       let walk = start;

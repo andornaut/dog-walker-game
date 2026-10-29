@@ -44,7 +44,7 @@ describe("a treat grabbed", () => {
   ] as const)(
     "at max $atMax $pack gives $hearts hearts, stores $stored and pays $cash",
     ({ atMax, cash, gear, hearts, held, line, stored }) => {
-      const geared = walkGeared(gear, held, ["kilo", "biscuit"], [atPack("treat")]);
+      const geared = walkGeared(gear, held, ["kilo", "lady"], [atPack("treat")]);
       const walk = atMax ? geared : withHearts(1, geared);
       const { tips, treats, walk: after } = step(walk);
       const [grab] = treats;

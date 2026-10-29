@@ -26,8 +26,8 @@ import {
 } from "./simulate";
 import { type Skill, SKILL_PRESETS } from "./skills";
 
-const TRIO: PackDogs = ["duchess", "biscuit", "kilo"];
-const RISKY: PackDogs = ["buddy", "archie", "snowball"];
+const TRIO: PackDogs = ["ginger", "lady", "kilo"];
+const RISKY: PackDogs = ["buddy", "archie", "sequoia"];
 // A bot that misses every lane change it plans, so it walks into whatever comes.
 const BLIND: Skill = {
   driftReactionSeconds: 0,
@@ -246,14 +246,14 @@ describe("noteDebuffCosts", () => {
     const tipItem = {} as WalkStep["tips"][number]["item"];
     return {
       bumps: [
-        { cash: bumpCash(gameData, state), change: null, dodged: false, dog: "duchess", item },
-        { cash: null, change: null, dodged: true, dog: "duchess", item },
+        { cash: bumpCash(gameData, state), change: null, dodged: false, dog: "ginger", item },
+        { cash: null, change: null, dodged: true, dog: "ginger", item },
       ] as const satisfies WalkStep["bumps"],
       tips: [{ change: tipValue(gameData, state), item: tipItem }],
       walk: { run: state },
     };
   };
-  const plain = testState({ duchess: 3 }, { money: cents(5000) });
+  const plain = testState({ ginger: 3 }, { money: cents(5000) });
   const costsWhile = (debuff: DebuffId) => {
     const state = { ...plain, debuffs: held(debuff) };
     const costs = zeros();
@@ -295,7 +295,7 @@ describe("noteDebuffCosts", () => {
 
 describe("noteZoneDebuffs", () => {
   const debuff = itemAt(keysOf(gameData.debuffs), 0);
-  const plain = testState({ duchess: 3 });
+  const plain = testState({ ginger: 3 });
   const zone = currentZoneId(gameData, plain);
   const at = (holds: boolean, got: number) => ({
     ...plain,

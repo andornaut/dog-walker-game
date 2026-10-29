@@ -9,38 +9,36 @@ import type { Encounter, EncounterId } from "./types";
 // art is a key into the art manifest's images. A card option's id, unique on its card, is what
 // the save counts its picks by: keep it when the option is renamed.
 export const ENCOUNTERS = {
-  // A neighbourhood card obstacle comes only in its zones.
-  capybara: {
-    hitLabel: "CAPYBARA!",
-    hitWord: "SQUEAK!",
+  bigScreenPromo: {
+    hitLabel: "FREE SAMPLE!",
+    hitWord: "FLASH!",
     kind: "obstacle",
-    movement: { kind: "step", steps: { max: 2, min: 1 } },
-    name: "Escaped capybara",
+    name: "Big screen promo",
     resolution: {
       kind: "card",
       options: [
         {
-          art: "card-capybara-help",
-          effects: [{ debuff: "muddy", kind: "debuff" }],
-          id: "help",
-          name: "Help the keeper",
+          art: "card-big-screen-promo-wave",
+          effects: [{ debuff: "spotlight", kind: "debuff" }],
+          id: "wave",
+          name: "Wave hello",
         },
         {
-          art: "card-capybara-call-zoo",
-          effects: [{ amount: "capybaraCall", change: "lose", kind: "money" }],
-          id: "callZoo",
-          name: "Call the zoo",
+          art: "card-big-screen-promo-merch",
+          effects: [{ amount: "promoMerch", change: "lose", kind: "money" }],
+          id: "merch",
+          name: "Buy the merch",
         },
         {
-          art: "card-capybara-drag",
+          art: "card-big-screen-promo-push-through",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
-          id: "drag",
-          name: "Drag them away",
+          id: "pushThrough",
+          name: "Push through",
         },
       ],
     },
     shape: { lanes: 1, rows: 1 },
-    zones: ["park"],
+    zones: ["yongeStreet"],
   },
   cheeseCrates: {
     hitLabel: "PEE-YEW!",
@@ -71,9 +69,9 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
-    zones: ["shops", "street"],
+    zones: ["kensingtonMarket", "distilleryDistrict"],
   },
-  droppedCone: {
+  droppedIceCream: {
     hitLabel: "MELTDOWN!",
     hitWord: "SPLAT!",
     kind: "obstacle",
@@ -82,19 +80,19 @@ export const ENCOUNTERS = {
       kind: "card",
       options: [
         {
-          art: "card-dropped-cone-lick",
+          art: "card-dropped-ice-cream-lick",
           effects: [{ debuff: "muddy", kind: "debuff" }],
           id: "lick",
           name: "Let them lick it",
         },
         {
-          art: "card-dropped-cone-buy",
+          art: "card-dropped-ice-cream-buy",
           effects: [{ amount: "newCone", change: "lose", kind: "money" }],
           id: "buy",
           name: "Buy a new cone",
         },
         {
-          art: "card-dropped-cone-walk-on-by",
+          art: "card-dropped-ice-cream-walk-on-by",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
           id: "walkOnBy",
           name: "Walk on by",
@@ -102,9 +100,53 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
-    zones: ["pawsPromenade"],
+    zones: ["theBeaches"],
   },
-  greenBin: {
+  // A neighbourhood card obstacle comes only in its zones.
+  escapedCapybara: {
+    hitLabel: "CAPYBARA!",
+    hitWord: "SQUEAK!",
+    kind: "obstacle",
+    movement: { kind: "step", steps: { max: 2, min: 1 } },
+    name: "Escaped capybara",
+    resolution: {
+      kind: "card",
+      options: [
+        {
+          art: "card-escaped-capybara-help",
+          effects: [{ debuff: "muddy", kind: "debuff" }],
+          id: "help",
+          name: "Help the keeper",
+        },
+        {
+          art: "card-escaped-capybara-call-zoo",
+          effects: [{ amount: "escapedCapybaraCall", change: "lose", kind: "money" }],
+          id: "callZoo",
+          name: "Call the zoo",
+        },
+        {
+          art: "card-escaped-capybara-drag",
+          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          id: "drag",
+          name: "Drag them away",
+        },
+      ],
+    },
+    shape: { lanes: 1, rows: 1 },
+    zones: ["highPark"],
+  },
+  friendlyNeighbour: {
+    kind: "lucky",
+    movement: { kind: "step", steps: { max: 2, min: 1 } },
+    name: "Friendly neighbour",
+    resolution: {
+      art: "card-friendly-neighbour-take",
+      effects: [{ amount: "neighbourHearts", kind: "sharedHearts" }],
+      kind: "instant",
+      tally: "neighboursMet",
+    },
+  },
+  greenBinSpill: {
     hitLabel: "BIN SPILL!",
     hitWord: "GLOP!",
     kind: "obstacle",
@@ -113,19 +155,19 @@ export const ENCOUNTERS = {
       kind: "card",
       options: [
         {
-          art: "card-green-bin-wade-through",
+          art: "card-green-bin-spill-wade-through",
           effects: [{ debuff: "muddy", kind: "debuff" }],
           id: "wadeThrough",
           name: "Wade through",
         },
         {
-          art: "card-green-bin-pay",
-          effects: [{ amount: "greenBinCleanUp", change: "lose", kind: "money" }],
+          art: "card-green-bin-spill-pay",
+          effects: [{ amount: "greenBinSpillCleanUp", change: "lose", kind: "money" }],
           id: "pay",
           name: "Pay for cleanup",
         },
         {
-          art: "card-green-bin-hurry-past",
+          art: "card-green-bin-spill-hurry-past",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
           id: "hurryPast",
           name: "Hurry past",
@@ -133,7 +175,7 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
-    zones: ["shops"],
+    zones: ["kensingtonMarket"],
   },
   lostWallet: {
     kind: "lucky",
@@ -173,17 +215,6 @@ export const ENCOUNTERS = {
     },
     shape: { lanes: 1, rows: 1 },
   },
-  pettingNeighbour: {
-    kind: "lucky",
-    movement: { kind: "step", steps: { max: 2, min: 1 } },
-    name: "Friendly neighbour",
-    resolution: {
-      art: "card-petting-neighbour-take",
-      effects: [{ amount: "neighbourHearts", kind: "sharedHearts" }],
-      kind: "instant",
-      tally: "neighboursMet",
-    },
-  },
   porchCat: {
     hitLabel: "STANDOFF!",
     hitWord: "HISS!",
@@ -213,7 +244,7 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
-    zones: ["snoozeCrescent"],
+    zones: ["cabbagetown"],
   },
   pothole: {
     kind: "obstacle",
@@ -224,38 +255,7 @@ export const ENCOUNTERS = {
       kind: "contact",
     },
     shape: { lanes: 2, rows: 1 },
-    zones: ["shops", "homeStretch"],
-  },
-  promoTeam: {
-    hitLabel: "FREE SAMPLE!",
-    hitWord: "FLASH!",
-    kind: "obstacle",
-    name: "Big screen promo",
-    resolution: {
-      kind: "card",
-      options: [
-        {
-          art: "card-promo-team-wave",
-          effects: [{ debuff: "spotlight", kind: "debuff" }],
-          id: "wave",
-          name: "Wave hello",
-        },
-        {
-          art: "card-promo-team-merch",
-          effects: [{ amount: "promoMerch", change: "lose", kind: "money" }],
-          id: "merch",
-          name: "Buy the merch",
-        },
-        {
-          art: "card-promo-team-push-through",
-          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
-          id: "pushThrough",
-          name: "Push through",
-        },
-      ],
-    },
-    shape: { lanes: 1, rows: 1 },
-    zones: ["homeStretch"],
+    zones: ["kensingtonMarket", "yongeStreet"],
   },
   puddle: {
     kind: "obstacle",
@@ -266,7 +266,7 @@ export const ENCOUNTERS = {
       kind: "contact",
     },
     shape: { lanes: 2, rows: 1 },
-    zones: ["snoozeCrescent", "park", "pawsPromenade"],
+    zones: ["cabbagetown", "highPark", "theBeaches"],
   },
   skunk: {
     hitLabel: "SPRAYED!",
@@ -343,7 +343,7 @@ export const ENCOUNTERS = {
     },
     shape: { lanes: 1, rows: 1 },
   },
-  weddingShoot: {
+  weddingPhotoShoot: {
     hitLabel: "SAY CHEESE!",
     hitWord: "CLICK!",
     kind: "obstacle",
@@ -352,19 +352,19 @@ export const ENCOUNTERS = {
       kind: "card",
       options: [
         {
-          art: "card-wedding-shoot-pose",
+          art: "card-wedding-photo-shoot-pose",
           effects: [{ debuff: "spotlight", kind: "debuff" }],
           id: "pose",
           name: "Pose",
         },
         {
-          art: "card-wedding-shoot-walk-around",
+          art: "card-wedding-photo-shoot-walk-around",
           effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
           id: "walkAround",
           name: "Walk around",
         },
         {
-          art: "card-wedding-shoot-reshoot",
+          art: "card-wedding-photo-shoot-reshoot",
           effects: [{ amount: "weddingApology", change: "lose", kind: "money" }],
           id: "reshoot",
           name: "Pay for a reshoot",
@@ -372,6 +372,6 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 2, rows: 1 },
-    zones: ["pawsPromenade", "street"],
+    zones: ["theBeaches", "distilleryDistrict"],
   },
 } as const satisfies Record<EncounterId, Encounter>;

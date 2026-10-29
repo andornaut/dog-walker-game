@@ -30,7 +30,7 @@ function replay(log: InputLog): RunState {
   // As the run scene reads it, over a saved pick the setup replaces.
   const typed = setup as Parameters<typeof loadoutFor>[1];
   const loadout = loadoutFor(
-    { dogs: ["duchess"], gear: null, walker: gameData.defaultWalker },
+    { dogs: ["ginger"], gear: null, walker: gameData.defaultWalker },
     typed,
   );
   const run = withSetupStart(gameData, setup, newRun(gameData, loadout.dogs.length, loadout));
@@ -81,10 +81,10 @@ describe("a simulated run", { timeout: 60_000 }, () => {
     skill: SkillPresetId;
     spares: number;
   }>([
-    { gear: null, pack: "kilo,biscuit", policy: "mixed", seed: 1, skill: "typical", spares: 0 },
+    { gear: null, pack: "kilo,lady", policy: "mixed", seed: 1, skill: "typical", spares: 0 },
     {
       gear: null,
-      pack: "buddy,archie,snowball",
+      pack: "buddy,archie,sequoia",
       policy: "alwaysPay",
       seed: 3,
       skill: "novice",
@@ -92,7 +92,7 @@ describe("a simulated run", { timeout: 60_000 }, () => {
     },
     {
       gear: "fannyPack",
-      pack: "kilo,biscuit",
+      pack: "kilo,lady",
       policy: "mixed",
       seed: 1,
       skill: "novice",

@@ -110,7 +110,7 @@ function walk(
   layer: Layer | null,
 ): { events: SessionEvent[]; out: number; session: Session } {
   const streams = runStreams(seed);
-  const run = newRun(gameData, 3, { dogs: ["kilo", "biscuit"], gear: null, walker: "casey" });
+  const run = newRun(gameData, 3, { dogs: ["kilo", "lady"], gear: null, walker: "casey" });
   let session = startSession(gameData, streams, screenRoadGeometry, {
     road: startRoad(LANE_COUNT),
     run,

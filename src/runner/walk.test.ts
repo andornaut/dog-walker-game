@@ -676,7 +676,7 @@ describe("stepWalk", () => {
       ["below their max", (walk) => withHearts(1, walk)],
       ["at their max, as every walk starts", (walk) => walk],
     ] satisfies readonly [string, (walk: Walk) => Walk][]) {
-      const walk = hearts(walkWith(["kilo", "biscuit"], [atPack("treat")]));
+      const walk = hearts(walkWith(["kilo", "lady"], [atPack("treat")]));
       const before = walk.run.tallies.treats ?? 0;
       expect(step(walk).walk.run.tallies.treats).toBe(before + 1);
     }
@@ -696,14 +696,14 @@ describe("stepWalk", () => {
   });
 
   it("gives a treat the front dog grabs at its owner's max to the hurt owner behind", () => {
-    const walk = walkWith(["kilo", "biscuit"], [atPack("treat")]);
+    const walk = walkWith(["kilo", "lady"], [atPack("treat")]);
     const hurt: Walk = {
       ...walk,
       run: {
         ...walk.run,
         pack: mapPack(
           (slot) =>
-            slot.dog === "biscuit" && slot.status === "walking"
+            slot.dog === "lady" && slot.status === "walking"
               ? { ...slot, hearts: clampHearts(slot.hearts, 1) }
               : slot,
           walk.run.pack,
@@ -711,8 +711,8 @@ describe("stepWalk", () => {
       },
     };
     const { treats, walk: after } = step(hurt);
-    expect(treats.map(({ dog }) => dog)).toEqual(["biscuit"]);
-    expect(heartsByDog(after.run).biscuit).toBe(1 + read(tuning, "hearts", "treat"));
+    expect(treats.map(({ dog }) => dog)).toEqual(["lady"]);
+    expect(heartsByDog(after.run).lady).toBe(1 + read(tuning, "hearts", "treat"));
   });
 
   // Every treat that reaches the pack's band before the zone ends: one planned less than the
@@ -740,10 +740,8 @@ describe("stepWalk", () => {
   });
 
   it("hits an obstacle, holding its card for the dogs it affects, and starts the grace window", () => {
-    const { cards, encounterHits, walk } = step(
-      walkWith(["kilo", "duchess"], [atPack("otherDog")]),
-    );
-    const card = { affected: ["kilo", "duchess"], encounter: "otherDog", kind: "encounter" };
+    const { cards, encounterHits, walk } = step(walkWith(["kilo", "ginger"], [atPack("otherDog")]));
+    const card = { affected: ["kilo", "ginger"], encounter: "otherDog", kind: "encounter" };
     expect(encounterHits).toEqual([card]);
     expect(cards).toEqual([]);
     expect(walk.road.hitStop?.cards).toEqual([card]);
@@ -758,7 +756,7 @@ describe("stepWalk", () => {
   });
 
   it("costs a plain hit's dog's owner a heart, with no money, and starts the grace window", () => {
-    const walk = walkWith(["kilo", "duchess"], [atPack("cone"), atPack("otherDog", 1)]);
+    const walk = walkWith(["kilo", "ginger"], [atPack("cone"), atPack("otherDog", 1)]);
     const { bumps, cards, walk: after } = step(walk);
     const bump = read(tuning, "hearts", "bump");
     expect(bumps.map(({ change, dodged, dog }) => [dog, dodged, change?.causes])).toEqual([
@@ -788,7 +786,7 @@ describe("stepWalk", () => {
     keysOf(WALKERS)
       .slice(0, 1)
       .flatMap((walker) =>
-        ([["biscuit"], ["kilo", "penny"]] as const).map((dogs) => ({ dogs, walker })),
+        ([["lady"], ["kilo", "penny"]] as const).map((dogs) => ({ dogs, walker })),
       ),
   )("slows $walker's lane moves with $dogs while Muddy", ({ dogs, walker }) => {
     const run = newRun(data, dogs.length, { dogs, gear: null, walker });
@@ -807,11 +805,11 @@ describe("stepWalk", () => {
       tuning: { ...tuning, seconds: { ...tuning.seconds, collisionGrace: 0 } },
     };
     const items = [atPack("cone"), { ...atPack("otherDog", 1), y: 556 }, atPack("treat", 2)];
-    const walk = withHearts(read(tuning, "hearts", "bump"), walkWith(["kilo", "biscuit"], items));
+    const walk = withHearts(read(tuning, "hearts", "bump"), walkWith(["kilo", "lady"], items));
     const stepped = stepWalk(ungraced, geometry, seededRandom(1), 0.01, walk);
-    const card = { affected: ["biscuit"], encounter: "otherDog", kind: "encounter" };
+    const card = { affected: ["lady"], encounter: "otherDog", kind: "encounter" };
     expect(stepped.fired).toEqual(["kilo"]);
-    expect(stepped.treats.map(({ dog }) => dog)).toEqual(["biscuit"]);
+    expect(stepped.treats.map(({ dog }) => dog)).toEqual(["lady"]);
     expect(stepped.encounterHits).toEqual([card]);
     expect(stepped.walk.road.hitStop?.cards).toEqual([card]);
   });
@@ -820,9 +818,9 @@ describe("stepWalk", () => {
   // order the dogs were picked in, and a head-on hit lands on the lead.
   it("lands a plain hit head-on on the biggest dog, ties in roster order", () => {
     for (const [, dogs, dog] of [
-      ["on the front dog", ["kilo", "biscuit"], "kilo"],
-      ["on the bigger dog, picked second", ["biscuit", "kilo"], "kilo"],
-      ["on the first in roster order of two of a size", ["pierre", "archie"], "archie"],
+      ["on the front dog", ["kilo", "lady"], "kilo"],
+      ["on the bigger dog, picked second", ["lady", "kilo"], "kilo"],
+      ["on the first in roster order of two of a size", ["pepe", "archie"], "archie"],
     ] satisfies readonly [string, PackDogs, string][]) {
       const { bumps } = step(walkWith(dogs, [atPack("cone")]));
       expect(bumps.map((bump) => bump.dog)).toEqual([dog]);
@@ -840,7 +838,7 @@ describe("stepWalk", () => {
       WalkItem["kind"],
       (step: ReturnType<typeof stepWalk>) => number,
     ][]) {
-      const walk = walkWith(["kilo", "biscuit"], [atPack(kind, 0, 1)]);
+      const walk = walkWith(["kilo", "lady"], [atPack(kind, 0, 1)]);
       const steered = steerWalk(data, 5, -1, steerWalk(data, 5, -1, walk));
       const step = stepWalk(
         data,
@@ -920,7 +918,7 @@ describe("stepWalk", () => {
     source: RAINCOATS,
   }));
 
-  // Raincoats keep every contact obstacle's Muddy off; the capybara's Help the keeper muddies the
+  // Raincoats keep every contact obstacle's Muddy off; the Escaped capybara's Help the keeper muddies the
   // pack anyway (chooseOption). Without them, the next test muddies the pack.
   it.each(CONTACTS)("keeps a %s's Muddy off with Raincoats", (encounter) => {
     const walk = walkWith(["kilo"], [atPack(encounter)]);
@@ -931,7 +929,7 @@ describe("stepWalk", () => {
   it.each(CONTACTS)(
     "muddies the whole pack on a %s, with no card or heart and a plain obstacle's stop",
     (encounter) => {
-      const dogs: PackDogs = ["kilo", "duchess"];
+      const dogs: PackDogs = ["kilo", "ginger"];
       const walk = walkWith(dogs, [atPack(encounter)]);
       const after = step(walk);
       const { resolution } = ENCOUNTERS[encounter];
@@ -1018,7 +1016,7 @@ describe("stepWalk", () => {
   });
 
   it("applies an instant lucky find at once, with no card", () => {
-    const walk = walkWith(["kilo", "snowball"], [atPack("lostWallet")]);
+    const walk = walkWith(["kilo", "sequoia"], [atPack("lostWallet")]);
     const { cards, instants, walk: after } = step(walk);
     expect(cards).toEqual([]);
     expect(instants.map(({ encounter }) => encounter)).toEqual(["lostWallet"]);
@@ -1040,7 +1038,7 @@ describe("stepWalk", () => {
       expect(Math.min(...parts.map(({ top }) => top))).toBeGreaterThan(outline.top + into);
       const height = geometry.itemHeights.lucky;
       const item = { ...atPack(kind), height, y: outline.top + into - height };
-      const after = step(inLane(2, walkWith(["kilo", "snowball"], [item])), 0);
+      const after = step(inLane(2, walkWith(["kilo", "sequoia"], [item])), 0);
       expect(after.walk.road.items.some(({ id }) => id === item.id)).toBe(!found);
     }
   });
@@ -1351,7 +1349,7 @@ describe("hit stop", () => {
 
   it("never stops for a lucky find without a hit label", () => {
     expect(step(walkWith(["kilo"], [atPack("lostWallet")])).walk.road.hitStop).toBeNull();
-    expect(step(walkWith(["kilo"], [atPack("pettingNeighbour")])).walk.road.hitStop).toBeNull();
+    expect(step(walkWith(["kilo"], [atPack("friendlyNeighbour")])).walk.road.hitStop).toBeNull();
   });
 
   it("advances neither distance, the spawn plan, the road nor the pack during the stop", () => {
@@ -1405,7 +1403,7 @@ describe("hit stop", () => {
 
   it("replays a run with hit stops exactly from its input log", () => {
     const setup = { dev: true, seed: 5, speed: 1, zone: 1 };
-    const start = planZone(data, geometry, plannerStreams(5), walkWith(["kilo", "duchess"]));
+    const start = planZone(data, geometry, plannerStreams(5), walkWith(["kilo", "ginger"]));
     const steps = 60 * 30;
     // As RunScene steps: the moves due now, each logged at the run time it is applied, then the
     // walk. A move every 13 frames, alternating sides, runs into obstacles.
@@ -1453,7 +1451,7 @@ describe("hit stop", () => {
 
   it("replays lane moves, card choices and heading home to the same final state", () => {
     const setup = { dev: true, seed: 1, speed: 1, zone: 1 };
-    const start = planZone(data, geometry, plannerStreams(1), walkWith(["kilo", "duchess"]));
+    const start = planZone(data, geometry, plannerStreams(1), walkWith(["kilo", "ginger"]));
     const homeFrame = 60 * 25;
     // As RunScene steps: the inputs due now, each logged at the run time it is applied, then
     // the walk, then each card it opened, chosen and logged at the run time after the step.
@@ -1544,12 +1542,12 @@ describe("finishZone", () => {
   const pay = read(tuning, "money", "payPerDog");
 
   it("banks every walking dog's pay and moves on to the next zone", () => {
-    const { run } = walkWith(["kilo", "duchess"]);
+    const { run } = walkWith(["kilo", "ginger"]);
     const { fees, run: next } = finishZone(data, { ...run, zoneDistance: zoneLength(data) });
     expect(next.money).toBe(run.money + 2 * pay);
     expect(fees.map(({ amount, dog }) => ({ amount, dog }))).toEqual([
       { amount: pay, dog: "kilo" },
-      { amount: pay, dog: "duchess" },
+      { amount: pay, dog: "ginger" },
     ]);
     expect(next.zoneIndex).toBe(1);
     expect(next.zoneDistance).toBe(0);
@@ -1584,7 +1582,7 @@ describe("finishZone", () => {
   });
 
   it("ends the run, finished, after the last zone, banking its pay and the Walk bonus", () => {
-    const { run } = walkWith(["kilo", "duchess"]);
+    const { run } = walkWith(["kilo", "ginger"]);
     const end = finishZone(data, { ...run, zoneIndex: WORLD.walkLength - 1 });
     const bonus = read(tuning, "money", "walkBonus");
     expect(end.run.phase).toEqual({ kind: "ended", reason: "finished" });
@@ -1593,12 +1591,12 @@ describe("finishZone", () => {
   });
 
   it("pays no Walk bonus once an owner has fired you", () => {
-    const { run } = walkWith(["kilo", "duchess"]);
+    const { run } = walkWith(["kilo", "ginger"]);
     const fired = {
       ...run,
       pack: mapPack(
         (slot) =>
-          slot.dog === "duchess" ? { dog: slot.dog, status: "fired" as const, zoneIndex: 0 } : slot,
+          slot.dog === "ginger" ? { dog: slot.dog, status: "fired" as const, zoneIndex: 0 } : slot,
         run.pack,
       ),
       zoneIndex: WORLD.walkLength - 1,
@@ -1611,7 +1609,7 @@ describe("finishZone", () => {
 
 describe("headHome", () => {
   it("keeps the money banked and pays nothing for the current zone", () => {
-    const { run } = walkWith(["kilo", "duchess"]);
+    const { run } = walkWith(["kilo", "ginger"]);
     const banked = finishZone(data, run).run;
     const home = headHome(banked);
     expect(home.money).toBe(banked.money);
@@ -1621,7 +1619,7 @@ describe("headHome", () => {
 
 describe("obstacleWeights", () => {
   it("weighs every obstacle encounter, and no lucky one", () => {
-    const ids = obstacleWeights(data, walkWith(["biscuit"]).run).map(([id]) => id as string);
+    const ids = obstacleWeights(data, walkWith(["lady"]).run).map(([id]) => id as string);
     const obstacles = Object.entries(ENCOUNTERS)
       .filter(([, encounter]) => encounter.kind === "obstacle")
       .map(([id]) => id);

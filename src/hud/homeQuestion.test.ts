@@ -30,9 +30,9 @@ describe("homeQuestionNote", () => {
   const words = gameData.runText.homeQuestion;
 
   it.each([
-    ["three dogs walking, nothing earned yet", { buddy: 3, duchess: 5, kilo: 2 }, 1, zoneEnd],
-    ["three dogs walking, with tips earned", { buddy: 3, duchess: 5, kilo: 2 }, 1, zoneEnd + tip],
-    ["one dog walking of two, with tips earned", { duchess: 5, kilo: "fired" }, 1, zoneEnd + tip],
+    ["three dogs walking, nothing earned yet", { buddy: 3, ginger: 5, kilo: 2 }, 1, zoneEnd],
+    ["three dogs walking, with tips earned", { buddy: 3, ginger: 5, kilo: 2 }, 1, zoneEnd + tip],
+    ["one dog walking of two, with tips earned", { ginger: 5, kilo: "fired" }, 1, zoneEnd + tip],
     ["card costs spent below the last zone's end money", { buddy: 3 }, 1, zoneEnd - tip],
     ["a lone dog in the last zone, with tips earned", { buddy: 4 }, zones - 1, zoneEnd + tip],
   ] satisfies [string, Slots, number, number][])(
@@ -56,8 +56,8 @@ describe("homeQuestionNote", () => {
   );
 
   it.each([
-    ["a full pack", { duchess: 5 }],
-    ["an owner who fired you", { duchess: 5, kilo: "fired" }],
+    ["a full pack", { ginger: 5 }],
+    ["an owner who fired you", { ginger: 5, kilo: "fired" }],
   ] satisfies [string, Slots][])("gives up nothing at a fork, with %s", (_name, slots) => {
     const fork = { ...holding(zoneEnd), route: route.slice(0, 1), zoneIndex: 1 };
     const lines = homeQuestionNote(gameData, testState(slots, fork));
@@ -72,14 +72,14 @@ describe("pauseNote", () => {
     ["with nothing earned since the last zone's end", zoneEnd],
     ["after card costs spent below the last zone's end money", zoneEnd - tip],
   ])("says Head home keeps all the cash %s", (_name, money) => {
-    const run = testState({ duchess: 5 }, holding(money));
+    const run = testState({ ginger: 5 }, holding(money));
     expect(pauseNote(gameData, run)).toBe(
       fillNames(words.noteAll, { cash: dollarText(cents(money)) }),
     );
   });
 
   it("says how much of the cash Head home keeps once the zone has earned some", () => {
-    const run = testState({ duchess: 5 }, holding(zoneEnd + tip));
+    const run = testState({ ginger: 5 }, holding(zoneEnd + tip));
     expect(pauseNote(gameData, run)).toBe(
       fillNames(words.note, { cash: dollarText(run.money), kept: dollarText(zoneEnd) }),
     );

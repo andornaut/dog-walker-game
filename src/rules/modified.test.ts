@@ -80,7 +80,7 @@ function runWith(
         data.upgrades[upgrade].effects,
         state,
       ),
-    newRun(data, 3, { dogs: ["duchess"], gear, walker }),
+    newRun(data, 3, { dogs: ["ginger"], gear, walker }),
   );
 }
 
@@ -107,7 +107,7 @@ function optionWith<Kind extends CardOption["effects"][number]["kind"]>(
 }
 
 const cardSource = (encounter: EncounterId): CardSource => ({
-  affected: ["duchess"],
+  affected: ["ginger"],
   encounter,
   kind: "encounter",
 });
@@ -172,7 +172,7 @@ describe("a card option's modified values", () => {
               source: sources.secondChance,
             },
           ],
-          subject: { dog: "duchess", kind: "hearts" },
+          subject: { dog: "ginger", kind: "hearts" },
         },
       ],
     ],
@@ -210,8 +210,8 @@ describe("a card option's modified values", () => {
 describe("standingModified", () => {
   const agility = (walker: WalkerId) => data.walkers[walker].agility;
   const reach = read(tuning, "counts", "longReachLanes");
-  const duchess = (state: RunState, modifiers: RunState["modifiers"]) =>
-    maxHearts(tuning, modifiers, placeInPack(state, "duchess"), DOGS.duchess);
+  const ginger = (state: RunState, modifiers: RunState["modifiers"]) =>
+    maxHearts(tuning, modifiers, placeInPack(state, "ginger"), DOGS.ginger);
   it.each([
     [
       "Lucky collar",
@@ -219,10 +219,10 @@ describe("standingModified", () => {
       sources.luckyCollar,
       (state: RunState) => [
         {
-          after: duchess(state, state.modifiers),
-          before: duchess(state, []),
-          by: by(duchess(state, state.modifiers) - duchess(state, []), sources.luckyCollar),
-          subject: { dog: "duchess", kind: "maxHearts" },
+          after: ginger(state, state.modifiers),
+          before: ginger(state, []),
+          by: by(ginger(state, state.modifiers) - ginger(state, []), sources.luckyCollar),
+          subject: { dog: "ginger", kind: "maxHearts" },
         },
       ],
     ],

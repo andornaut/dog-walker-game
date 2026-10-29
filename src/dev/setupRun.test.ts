@@ -7,7 +7,7 @@ import { testState } from "../testing/runState";
 import type { RunSetup } from "./runSetup";
 import { loadoutFor, withSetupStart } from "./setupRun";
 
-const fallback: Loadout = { dogs: ["biscuit"], gear: "luckyCollar", walker: "casey" };
+const fallback: Loadout = { dogs: ["lady"], gear: "luckyCollar", walker: "casey" };
 const setup: RunSetup<DogId, GearId, WalkerId> = { dev: false, seed: 1, speed: 1, zone: 1 };
 
 describe("loadoutFor", () => {
@@ -47,7 +47,7 @@ describe("withSetupStart", () => {
     });
   });
 
-  const route = ["street", "pawsPromenade", "snoozeCrescent", "park"];
+  const route = ["distilleryDistrict", "theBeaches", "cabbagetown", "highPark"];
   it.each([
     ["keeps the run's own route from the first zone", setup, state.route],
     ["walks the setup's route up to its zone", { ...setup, route, zone: 3 }, route.slice(0, 3)],

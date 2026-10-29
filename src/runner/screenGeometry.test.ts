@@ -66,7 +66,7 @@ describe("screenRoadGeometry", () => {
   });
 
   it("is the run's own pack's, one per walker and dogs", () => {
-    const run = testState({ duchess: 3, kilo: 3 });
+    const run = testState({ ginger: 3, kilo: 3 });
     const other = { ...run, walker: "trista" } as const;
     expect(screenRoadGeometry(run)).toBe(screenRoadGeometry({ ...run }));
     expect(screenRoadGeometry(other)).not.toBe(screenRoadGeometry(run));

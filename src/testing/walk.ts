@@ -25,7 +25,7 @@ export const tuning = {
   ...TEST_TUNING,
   counts: {
     ...TEST_TUNING.counts,
-    luckyFindsPerZone: { lostWallet: 1, pettingNeighbour: 1 },
+    luckyFindsPerZone: { friendlyNeighbour: 1, lostWallet: 1 },
     minorObstaclesFirstZone: 4,
     minorObstaclesGainPerZone: 1,
     obstaclesFirstZone: 6,

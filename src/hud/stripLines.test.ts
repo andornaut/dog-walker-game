@@ -149,7 +149,7 @@ describe("the strip's other lines", () => {
 describe("luckyLine: the friendly neighbour", () => {
   it("says the hearts the neighbour shares", () => {
     const hearts = String(read(gameData.tuning, "hearts", "neighbourHearts"));
-    expect(luckyLine(gameData, "pettingNeighbour")).toEqual({
+    expect(luckyLine(gameData, "friendlyNeighbour")).toEqual({
       icon: "lucky",
       text: fillNames(strip.luckyNeighbour, { hearts }),
     });

@@ -59,8 +59,8 @@ describe("dog stats", () => {
 
   it.each([
     [["kilo"], "kilo", { lead: true, size: 1 }],
-    [["kilo", "duchess"], "kilo", { lead: true, size: 2 }],
-    [["kilo", "duchess"], "duchess", { lead: false, size: 2 }],
+    [["kilo", "ginger"], "kilo", { lead: true, size: 2 }],
+    [["kilo", "ginger"], "ginger", { lead: false, size: 2 }],
   ] as const)("places a dog in the pack %j: %s", (order, dog, place) => {
     expect(packPlace(order, dog)).toEqual(place);
   });
@@ -72,9 +72,9 @@ describe("ownerMaxHearts", () => {
     { gear: "luckyCollar", kind: "gear" },
     { by: "luckyCollarMax", operation: "add", stat: "maxHearts" },
   );
-  const run = testState({ biscuit: "fired", buddy: 2, kilo: 3 }, { modifiers: [collar] });
+  const run = testState({ buddy: 2, kilo: 3, lady: "fired" }, { modifiers: [collar] });
   it.each([
-    ["biscuit", { lead: true, size: 3 }],
+    ["lady", { lead: true, size: 3 }],
     ["kilo", { lead: false, size: 3 }],
   ] as const)(
     "caps %s's owner at the max of its place in the pack it set out with",

@@ -19,19 +19,19 @@ import { bestWalkCents, timesFired } from "./stats";
 
 // veteranSave: bank 12,345, best walk 9,000 over 4 zones, lifetime 30,000 of which 2,000 starting
 // cash, best zone 4, runs
-// finished 2 / noDogs 1 / wentHome 2, 1 firing; kilo 1 fired / 5 walks / 12 zones, biscuit
+// finished 2 / noDogs 1 / wentHome 2, 1 firing; kilo 1 fired / 5 walks / 12 zones, lady
 // 0 / 2 / 6.
 
-// After zone 2: kilo and duchess walked both zones, penny was fired in zone 2.
+// After zone 2: kilo and ginger walked both zones, penny was fired in zone 2.
 const checkpoint: Checkpoint = {
   counters: quietCounters(),
   dogs: [
     { firedInZone: null, id: "kilo" },
-    { firedInZone: null, id: "duchess" },
+    { firedInZone: null, id: "ginger" },
     { firedInZone: 2, id: "penny" },
   ],
   earnedCents: cents(4_250),
-  route: ["street", "snoozeCrescent"],
+  route: ["distilleryDistrict", "cabbagetown"],
   zonesFinished: 2,
 };
 
@@ -66,7 +66,7 @@ const runResult = (changes: Partial<RunResult> = {}): RunResult => ({
   counters: quietCounters(),
   dogs: [
     { firedInZone: null, id: "kilo" },
-    { firedInZone: 2, id: "biscuit" },
+    { firedInZone: 2, id: "lady" },
   ],
   earnedCents: cents(6_000),
   lastHeartOwners: 0,
@@ -118,9 +118,9 @@ describe("bankCheckpoint", () => {
 
   it("credits each dog with a walk, its zones finished and its firing", () => {
     expect(banked.stats.dogs).toEqual({
-      biscuit: { timesFired: 0, walks: 2, zonesFinished: 6 },
-      duchess: { timesFired: 0, walks: 1, zonesFinished: 2 },
+      ginger: { timesFired: 0, walks: 1, zonesFinished: 2 },
       kilo: { timesFired: 1, walks: 6, zonesFinished: 14 },
+      lady: { timesFired: 0, walks: 2, zonesFinished: 6 },
       penny: { timesFired: 1, walks: 1, zonesFinished: 1 },
     });
     expect(timesFired(banked.stats)).toBe(2);
@@ -128,11 +128,11 @@ describe("bankCheckpoint", () => {
 
   it("records the last walk with the zone that just ended", () => {
     expect(banked.stats.lastWalk).toEqual({
-      dogs: ["kilo", "duchess", "penny"],
+      dogs: ["kilo", "ginger", "penny"],
       earnedCents: 4_250,
       firings: ["penny"],
       outcome: "wentHome",
-      route: ["street", "snoozeCrescent"],
+      route: ["distilleryDistrict", "cabbagetown"],
       zonesFinished: 2,
     });
   });
@@ -180,8 +180,8 @@ describe("recordRunEnd", () => {
     expect(stats.bestZoneFinished).toBe(2);
     expect(stats.runs).toEqual({ finished: 0, noDogs: 0, wentHome: 1 });
     expect(stats.dogs).toEqual({
-      biscuit: { timesFired: 1, walks: 1, zonesFinished: 0 },
       kilo: { timesFired: 0, walks: 1, zonesFinished: 2 },
+      lady: { timesFired: 1, walks: 1, zonesFinished: 0 },
     });
   });
 
@@ -204,15 +204,15 @@ describe("recordRunEnd", () => {
     expect(low.stats.bestWalk).toEqual(veteranSave().stats.bestWalk);
     expect(low.stats.bestZoneFinished).toBe(4);
     expect(low.stats.lastWalk).toEqual({
-      dogs: ["kilo", "biscuit"],
+      dogs: ["kilo", "lady"],
       earnedCents: 100,
-      firings: ["biscuit"],
+      firings: ["lady"],
       outcome: "finished",
       route: ROUTE,
       zonesFinished: 1,
     });
     const high = recordRunEnd(testAwards, veteranSave(), runResult({ earnedCents: cents(9_999) }));
-    expect(high.stats.bestWalk).toEqual({ dogs: ["kilo", "biscuit"], zonesFinished: 4 });
+    expect(high.stats.bestWalk).toEqual({ dogs: ["kilo", "lady"], zonesFinished: 4 });
     expect(bestWalkCents(high.stats)).toBe(9_999);
   });
 
@@ -240,7 +240,7 @@ describe("achievements at banking", () => {
     expect(banked.achievements).toEqual([...before.achievements, "cleanPaws"]);
   });
 
-  // veteranSave is 2 finished walks into a streak with no firing, and biscuit finished one.
+  // veteranSave is 2 finished walks into a streak with no firing, and lady finished one.
   const walks: [string, Partial<RunResult>, number, DogId[]][] = [
     [
       "a finished walk with no firing adds to the streak, with the dogs that finished it",
@@ -251,14 +251,14 @@ describe("achievements at banking", () => {
         ],
       },
       3,
-      ["biscuit", "kilo", "penny"],
+      ["lady", "kilo", "penny"],
     ],
-    ["a finished walk with a firing resets the streak", {}, 0, ["biscuit", "kilo"]],
+    ["a finished walk with a firing resets the streak", {}, 0, ["lady", "kilo"]],
     [
       "a walk headed home early with no firing leaves the streak",
       { dogs: [{ firedInZone: null, id: "penny" }], outcome: "wentHome", zone: 3 },
       2,
-      ["biscuit"],
+      ["lady"],
     ],
     [
       "a walk headed home early with a firing resets the streak",
@@ -271,13 +271,13 @@ describe("achievements at banking", () => {
         zone: 3,
       },
       0,
-      ["biscuit"],
+      ["lady"],
     ],
     [
       "a walk that ran out of dogs resets the streak",
       { dogs: [{ firedInZone: 2, id: "penny" }], outcome: "noDogs", zone: 2 },
       0,
-      ["biscuit"],
+      ["lady"],
     ],
   ];
 
@@ -312,16 +312,16 @@ describe("achievements at banking", () => {
   it("adds the run's option picks to the lifetime ones, option by option", () => {
     const counters = {
       ...quietCounters(),
-      optionPicks: { capybara: { help: 1 }, weddingShoot: { pose: 2 } },
+      optionPicks: { escapedCapybara: { help: 1 }, weddingPhotoShoot: { pose: 2 } },
     };
     const before = {
       ...newPlayerSave,
-      stats: { ...newPlayerSave.stats, optionPicks: { capybara: { callZoo: 3, help: 4 } } },
+      stats: { ...newPlayerSave.stats, optionPicks: { escapedCapybara: { callZoo: 3, help: 4 } } },
     };
     const { stats } = recordRunEnd(testAwards, before, runResult({ counters }));
     expect(stats.optionPicks).toEqual({
-      capybara: { callZoo: 3, help: 5 },
-      weddingShoot: { pose: 2 },
+      escapedCapybara: { callZoo: 3, help: 5 },
+      weddingPhotoShoot: { pose: 2 },
     });
   });
 

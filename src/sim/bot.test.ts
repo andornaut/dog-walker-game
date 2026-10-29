@@ -94,7 +94,7 @@ function withoutPulls(data: GameData): GameData {
 }
 
 const SHORT = shortZones(gameData, 0.25);
-const NO_CHASER: PackDogs = ["duchess", "biscuit", "snowball"];
+const NO_CHASER: PackDogs = ["ginger", "lady", "sequoia"];
 
 function run(
   data: SimData,
@@ -178,7 +178,7 @@ describe("a steering bot", { timeout: 60_000 }, () => {
     "avoids every obstacle no pull forces, as an ideal player by foresight, with $name",
     ({ busy }) => {
       const results = [
-        run(busy, 1, IDEAL_SKILL, ["duchess"], "foresight"),
+        run(busy, 1, IDEAL_SKILL, ["ginger"], "foresight"),
         run(busy, 2, IDEAL_SKILL, NO_CHASER, "foresight"),
       ];
       const counts = obstacleCounts(busy, results);
@@ -206,7 +206,7 @@ describe("a steering bot", { timeout: 60_000 }, () => {
       );
 
       expect(
-        obstacleCounts(busy, [run(busy, seed, IDEAL_SKILL, ["duchess"], "foresight")]).hit,
+        obstacleCounts(busy, [run(busy, seed, IDEAL_SKILL, ["ginger"], "foresight")]).hit,
       ).toBe(0);
     },
   );
@@ -215,7 +215,7 @@ describe("a steering bot", { timeout: 60_000 }, () => {
   // never hit right after one, whatever the pack pulls toward. Steering away during a strain
   // cancels its pull, so only some strains pull. Read by foresight, no mover's surprise counts.
   it("is never hit right after a pull, as an ideal player by foresight, with pulls on", () => {
-    const pulling: PackDogs = ["kilo", "biscuit", "buddy"];
+    const pulling: PackDogs = ["kilo", "lady", "buddy"];
     const results = [1, 2, 3].map((seed) => run(SHORT, seed, IDEAL_SKILL, pulling, "foresight"));
     const hits = results.reduce((sum, result) => sum + result.hits.afterPull, 0);
     const pulls = results.reduce((sum, result) => sum + result.pullsMoved, 0);
@@ -240,12 +240,12 @@ describe("a steering bot", { timeout: 60_000 }, () => {
 // The friendly neighbour in lane 2, stepping once as she comes down the road: the bot plans her as
 // a prize in the lane she meets the pack's rows in, as soon as she reaches them.
 describe("a moving prize", () => {
-  const run = testState({ biscuit: 3 });
+  const run = testState({ lady: 3 });
   const geometry = screenRoadGeometry(run);
   const speed = walkScrollSpeed(gameData, run);
   const road: BotRoad = { data: gameData, geometry, speed };
   const { cell, packBand, roadTop } = geometry;
-  const height = itemHeight(gameData, geometry, "pettingNeighbour", true);
+  const height = itemHeight(gameData, geometry, "friendlyNeighbour", true);
   it.each([
     { lane: 3, name: "a lane right", step: { lanes: 1, travel: 0 } },
     { lane: 1, name: "a lane left", step: { lanes: -1, travel: 0 } },
@@ -261,7 +261,7 @@ describe("a moving prize", () => {
     const item: WalkItem = {
       height,
       id: 1,
-      kind: "pettingNeighbour",
+      kind: "friendlyNeighbour",
       lane: 2,
       laneSpan: 1,
       mover: { path, since: 0 },
@@ -402,7 +402,7 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
   // The walk a case is placed on, and the places the planner may put its mover there.
   const placedCase = (mover: Omit<(typeof cases)[number], "lift"> & { lift?: number }) => {
     const run = testState(
-      { biscuit: 3, duchess: 3, snowball: 3 },
+      { ginger: 3, lady: 3, sequoia: 3 },
       { route, zoneIndex: mover.zoneIndex },
     );
     const geometry = screenRoadGeometry(run);
@@ -742,7 +742,7 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
 // ahead in the lane it planned to leave, it stays in the lane the pack drifted to, whichever way
 // that is.
 describe("a steering bot whose pack drifts", () => {
-  const run = testState({ biscuit: 3, duchess: 3, snowball: 3 });
+  const run = testState({ ginger: 3, lady: 3, sequoia: 3 });
   const geometry = screenRoadGeometry(run);
   const road: BotRoad = {
     data: gameData,
@@ -827,7 +827,7 @@ describe("a steering bot whose pack drifts", () => {
 // A Muddy pack changes lanes slower, and the bot plans with its old lane speed until it has
 // reacted to the Muddy beginning, driftReactionSeconds after it sees it.
 describe("a steering bot whose pack gets Muddy", () => {
-  const run = testState({ biscuit: 3, duchess: 3, snowball: 3 });
+  const run = testState({ ginger: 3, lady: 3, sequoia: 3 });
   const muddy = {
     ...run,
     debuffs: [{ debuff: "muddy", secondsLeft: 30, untilZone: 0 }] as const,

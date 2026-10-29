@@ -56,11 +56,11 @@ describe("an option that would fire an owner", () => {
 
 describe("firesText", () => {
   it("names each fatal option", () => {
-    const [kilo, duchess, biscuit] = [owner("kilo"), owner("duchess"), owner("biscuit")];
+    const [kilo, ginger, lady] = [owner("kilo"), owner("ginger"), owner("lady")];
     for (const { dogs, owners } of [
       { dogs: ["kilo"], owners: kilo },
-      { dogs: ["kilo", "duchess"], owners: `${kilo} and ${duchess}` },
-      { dogs: ["kilo", "duchess", "biscuit"], owners: `${kilo}, ${duchess} and ${biscuit}` },
+      { dogs: ["kilo", "ginger"], owners: `${kilo} and ${ginger}` },
+      { dogs: ["kilo", "ginger", "lady"], owners: `${kilo}, ${ginger} and ${lady}` },
     ] as const) {
       expect(firesText(data, dogs)).toBe(fillNames(gameData.runText.card.fires, { owners }));
     }

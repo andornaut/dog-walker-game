@@ -304,9 +304,9 @@ describe("the parts' hit rectangles", () => {
 
   // Every slot of every formation, filled with the largest dog of each size.
   const SIZE_DOGS: Readonly<Record<Size, DogId>> = {
-    large: "snowball",
-    medium: "pierre",
-    small: "duchess",
+    large: "sequoia",
+    medium: "pepe",
+    small: "ginger",
   };
   const CASES = PACK_SLOTS.flatMap((slots) =>
     keysOf(SIZE_DOGS).flatMap((size) =>

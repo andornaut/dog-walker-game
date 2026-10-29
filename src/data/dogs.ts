@@ -14,19 +14,6 @@ export const DOGS = {
     size: "medium",
     unlock: "start",
   },
-  biscuit: {
-    art: "biscuit",
-    breed: "Beagle",
-    look: "Tricolour, floppy ears, green collar",
-    name: "Lady",
-    owner: {
-      name: "Clare",
-      role: "Psychologist",
-    },
-    price: "biscuit",
-    size: "medium",
-    unlock: "shop",
-  },
   buddy: {
     art: "buddy",
     breed: "Jack Russell",
@@ -40,8 +27,8 @@ export const DOGS = {
     size: "small",
     unlock: "shop",
   },
-  duchess: {
-    art: "duchess",
+  ginger: {
+    art: "ginger",
     breed: "Maltese",
     look: "White coat, pink bow",
     name: "Ginger",
@@ -49,7 +36,7 @@ export const DOGS = {
       name: "Eve",
       role: "YouTuber",
     },
-    price: "duchess",
+    price: "ginger",
     size: "small",
     unlock: "shop",
   },
@@ -66,6 +53,19 @@ export const DOGS = {
     size: "large",
     unlock: "shop",
   },
+  lady: {
+    art: "lady",
+    breed: "Beagle",
+    look: "Tricolour, floppy ears, green collar",
+    name: "Lady",
+    owner: {
+      name: "Clare",
+      role: "Psychologist",
+    },
+    price: "lady",
+    size: "medium",
+    unlock: "shop",
+  },
   penny: {
     art: "penny",
     breed: "Golden Retriever mix",
@@ -79,8 +79,8 @@ export const DOGS = {
     size: "large",
     unlock: "shop",
   },
-  pierre: {
-    art: "pierre",
+  pepe: {
+    art: "pepe",
     breed: "Miniature Poodle",
     look: "Black coat, a white stripe from head to tail tip, show-clip pom-poms",
     name: "Pepe",
@@ -88,7 +88,7 @@ export const DOGS = {
       name: "Ms. Tara",
       role: "Dog-Show Judge",
     },
-    price: "pierre",
+    price: "pepe",
     size: "medium",
     unlock: "shop",
   },
@@ -105,8 +105,8 @@ export const DOGS = {
     size: "small",
     unlock: "shop",
   },
-  snowball: {
-    art: "snowball",
+  sequoia: {
+    art: "sequoia",
     breed: "Great Pyrenees",
     look: "Giant white fluff, collar with a bell",
     name: "Sequoia",
@@ -114,7 +114,7 @@ export const DOGS = {
       name: "Aunt Judy",
       role: "Tennis Star",
     },
-    price: "snowball",
+    price: "sequoia",
     size: "large",
     unlock: "shop",
   },

@@ -80,11 +80,11 @@ function placeholderSizes(): Map<string, Size> {
     sizes.set(ownerCardFaceKey(gameData, dog), box(20, 20, PALETTE.brown));
   }
   const tall: readonly EncounterId[] = [
-    "droppedCone",
-    "pettingNeighbour",
-    "promoTeam",
+    "droppedIceCream",
+    "friendlyNeighbour",
+    "bigScreenPromo",
     "thief",
-    "weddingShoot",
+    "weddingPhotoShoot",
   ];
   for (const encounter of keysOf(gameData.encounters)) {
     const height = FLAT_ENCOUNTERS.has(encounter)

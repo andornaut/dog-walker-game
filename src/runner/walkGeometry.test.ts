@@ -12,7 +12,7 @@ const projection = walkProjection(ROAD_CAMERA, gameRoad);
 const PACKS = [
   { dogs: ["kilo"], walker: "ada" },
   { dogs: ["buddy", "penny"], walker: "mrB" },
-  { dogs: ["snowball", "duchess", "pierre"], walker: "trista" },
+  { dogs: ["sequoia", "ginger", "pepe"], walker: "trista" },
 ] as const;
 
 describe("walkGeometry", () => {

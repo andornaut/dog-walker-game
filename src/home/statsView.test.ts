@@ -54,8 +54,8 @@ describe("dogRows", () => {
       walks: 5,
       zonesFinished: 12,
     });
-    expect(rows.find((row) => row.dog === "duchess")).toMatchObject({ walks: 0 });
+    expect(rows.find((row) => row.dog === "ginger")).toMatchObject({ walks: 0 });
     const unowned = dogRows(data, { dogs: [] }, save.stats);
-    expect(unowned.map((row) => row.dog).sort()).toEqual(["biscuit", "kilo"]);
+    expect(unowned.map((row) => row.dog).sort()).toEqual(["kilo", "lady"]);
   });
 });

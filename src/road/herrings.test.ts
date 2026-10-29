@@ -146,7 +146,7 @@ describe("red herrings", { timeout: 120_000 }, () => {
         }
         return steps;
       };
-      const walk = plan?.walk ?? planned(herring.zones[0] ?? "park", 0, 1);
+      const walk = plan?.walk ?? planned(herring.zones[0] ?? "highPark", 0, 1);
       expect(walked({ ...walk, road: { ...walk.road, herrings: [] } })).toEqual(walked(walk));
     },
   );

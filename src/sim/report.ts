@@ -185,14 +185,14 @@ function namedByDogs(dogs: PackDogs): NamedPack {
 }
 
 const PACKS: readonly NamedPack[] = [
-  namedByDogs(["duchess"]),
-  namedByDogs(["biscuit"]),
+  namedByDogs(["ginger"]),
+  namedByDogs(["lady"]),
   namedByDogs(["kilo"]),
   namedByDogs(["penny"]),
-  namedByDogs(["kilo", "biscuit"]),
-  namedByDogs(["reggie", "pierre"]),
-  namedByDogs(["duchess", "biscuit", "kilo"]),
-  { dogs: ["buddy", "archie", "snowball"], name: "Risky trio" },
+  namedByDogs(["kilo", "lady"]),
+  namedByDogs(["reggie", "pepe"]),
+  namedByDogs(["ginger", "lady", "kilo"]),
+  { dogs: ["buddy", "archie", "sequoia"], name: "Risky trio" },
 ];
 
 const SKILL_PLAYERS: readonly MatrixPlayer[] = SKILL_PRESET_IDS.map((preset) => ({

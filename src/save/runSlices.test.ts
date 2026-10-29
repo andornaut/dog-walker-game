@@ -22,13 +22,13 @@ const data = {
   tuning: TEST_TUNING,
   world: WORLD,
 };
-const start = newRun(data, 3, { dogs: ["kilo", "duchess"], gear: null, walker: "casey" });
-// In zone 3 with 2 zones paid and $12.50 earned since; duchess fired you in zone 2.
+const start = newRun(data, 3, { dogs: ["kilo", "ginger"], gear: null, walker: "casey" });
+// In zone 3 with 2 zones paid and $12.50 earned since; ginger fired you in zone 2.
 const midRun: RunState = {
   ...start,
   money: cents(4_250),
-  pack: [defined(start.pack[0]), { dog: "duchess", status: "fired", zoneIndex: 1 }],
-  route: ["street", "pawsPromenade", "park"],
+  pack: [defined(start.pack[0]), { dog: "ginger", status: "fired", zoneIndex: 1 }],
+  route: ["distilleryDistrict", "theBeaches", "highPark"],
   zoneEndMoney: cents(3_000),
   zoneIndex: 2,
 };
@@ -44,10 +44,10 @@ describe("checkpointOf", () => {
       counters: { ...quietCounters(), startCents: start.startMoney },
       dogs: [
         { firedInZone: null, id: "kilo" },
-        { firedInZone: 2, id: "duchess" },
+        { firedInZone: 2, id: "ginger" },
       ],
       earnedCents: midRun.zoneEndMoney,
-      route: ["street", "pawsPromenade", "park"],
+      route: ["distilleryDistrict", "theBeaches", "highPark"],
       zonesFinished: 2,
     });
   });
@@ -58,7 +58,7 @@ describe("checkpointOf", () => {
       bumpsByKind: { raccoon: 2 },
       bumpsByZone: [0, 2],
       debuffsGot: { stinky: 1 },
-      optionPicks: { capybara: { help: 2 } },
+      optionPicks: { escapedCapybara: { help: 2 } },
       startMoney: cents(500),
       tallies: { squirrelPulls: 3 },
     };
@@ -67,7 +67,7 @@ describe("checkpointOf", () => {
       bumpsByZone: [0, 2],
       debuffsGot: { stinky: 1 },
       firstZone: 0,
-      optionPicks: { capybara: { help: 2 } },
+      optionPicks: { escapedCapybara: { help: 2 } },
       startCents: 500,
       tallies: { squirrelPulls: 3 },
     });
@@ -86,13 +86,13 @@ describe("runResultOf", () => {
       counters: { ...quietCounters(), startCents: start.startMoney },
       dogs: [
         { firedInZone: null, id: "kilo" },
-        { firedInZone: 2, id: "duchess" },
+        { firedInZone: 2, id: "ginger" },
       ],
       earnedCents: 4_250,
       lastHeartOwners: 0,
       lostCents: 0,
       outcome: "finished",
-      route: ["street", "pawsPromenade", "park"],
+      route: ["distilleryDistrict", "theBeaches", "highPark"],
       walker: start.walker,
       zone: 4,
     });
@@ -125,7 +125,7 @@ describe("runResultOf", () => {
       ...midRun,
       pack: [
         { dog: "kilo", status: "fired", zoneIndex: 2 },
-        { dog: "duchess", status: "fired", zoneIndex: 1 },
+        { dog: "ginger", status: "fired", zoneIndex: 1 },
       ],
       phase: { kind: "ended", reason: "noDogs" },
     };

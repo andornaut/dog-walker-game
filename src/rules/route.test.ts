@@ -20,9 +20,9 @@ describe("forkPaths", () => {
 
   it("offers three unwalked zones but the last, easiest on the left", () => {
     for (let seed = 1; seed <= 20; seed++) {
-      const paths = forkPaths(data, seededRandom(seed), ["street"]);
+      const paths = forkPaths(data, seededRandom(seed), ["distilleryDistrict"]);
       expect(paths).toHaveLength(3);
-      expect(paths).not.toContain("street");
+      expect(paths).not.toContain("distilleryDistrict");
       expect(paths).not.toContain(last);
       expect([...paths].sort((a, b) => order.indexOf(a) - order.indexOf(b))).toEqual(paths);
     }
@@ -36,11 +36,11 @@ describe("forkPaths", () => {
   it("draws each unwalked zone but the last at some early fork", () => {
     const seen = new Set(
       Array.from({ length: 40 }, (_, seed) =>
-        forkPaths(data, seededRandom(seed), ["street"]),
+        forkPaths(data, seededRandom(seed), ["distilleryDistrict"]),
       ).flat(),
     );
     expect([...seen].sort()).toEqual(
-      unwalkedZones(data, ["street"])
+      unwalkedZones(data, ["distilleryDistrict"])
         .filter((zone) => zone !== last)
         .sort(),
     );
@@ -55,9 +55,11 @@ describe("the walk's zones", () => {
   });
 
   it("is the last zone walked between a zone's end and the fork after it", () => {
-    expect(zoneAt(data, ["street", "park"], 1).id).toBe("park");
-    expect(zoneAt(data, ["street", "park"], 2).id).toBe("park");
-    expect(currentZone(data, { route: ["street"], zoneIndex: 0 }).id).toBe("street");
+    expect(zoneAt(data, ["distilleryDistrict", "highPark"], 1).id).toBe("highPark");
+    expect(zoneAt(data, ["distilleryDistrict", "highPark"], 2).id).toBe("highPark");
+    expect(currentZone(data, { route: ["distilleryDistrict"], zoneIndex: 0 }).id).toBe(
+      "distilleryDistrict",
+    );
   });
 
   it("starts a later dev start on the pre-fork route", () => {

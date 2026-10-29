@@ -22,7 +22,7 @@ const limits: RunSetupLimits<"bo" | "kilo", "collar"> = {
   speed: { max: 10, min: 0.1 },
   walkerIds: ["ada", "casey"],
   zoneCount: 4,
-  zoneIds: ["street", "park", "shops", "homeStretch", "pawsPromenade"],
+  zoneIds: ["distilleryDistrict", "highPark", "kensingtonMarket", "yongeStreet", "theBeaches"],
 };
 const setup: RunSetup<"bo" | "kilo", "collar"> = {
   dev: false,

@@ -48,11 +48,11 @@ import {
 } from "./moments";
 import { ownerTabRect } from "./walkHud";
 
-const walking = (dog: "biscuit" | "duchess" | "kilo", hearts: number) =>
+const walking = (dog: "lady" | "ginger" | "kilo", hearts: number) =>
   ({ dog, hearts: clampHearts(10, hearts), status: "walking" }) as const;
 const PACK: Pack = [
-  walking("duchess", 1),
-  { dog: "biscuit", status: "fired", zoneIndex: 0 },
+  walking("ginger", 1),
+  { dog: "lady", status: "fired", zoneIndex: 0 },
   walking("kilo", 4),
 ];
 const fee = (dog: PayoutCue["dog"], amount: number): PayoutCue => ({ amount: cents(amount), dog });
@@ -239,13 +239,13 @@ describe("trotOffX", () => {
 
 describe("lowHeartDogs and newlyLow", () => {
   it("finds the walking owners on their last heart, not fired ones", () => {
-    expect(lowHeartDogs(PACK)).toEqual(["duchess"]);
+    expect(lowHeartDogs(PACK)).toEqual(["ginger"]);
   });
 
   it("cues only an owner who has just dropped to their last heart", () => {
-    expect(newlyLow([], ["duchess"])).toEqual(["duchess"]);
-    expect(newlyLow(["duchess"], ["duchess"])).toEqual([]);
-    expect(newlyLow(["duchess"], ["duchess", "kilo"])).toEqual(["kilo"]);
+    expect(newlyLow([], ["ginger"])).toEqual(["ginger"]);
+    expect(newlyLow(["ginger"], ["ginger"])).toEqual([]);
+    expect(newlyLow(["ginger"], ["ginger", "kilo"])).toEqual(["kilo"]);
   });
 });
 
@@ -288,7 +288,7 @@ describe("cardOwnerMood", () => {
 });
 
 describe("payoutFlights", () => {
-  const cues = [fee("kilo", 2000), fee("duchess", 2000), fee("biscuit", 3000)];
+  const cues = [fee("kilo", 2000), fee("ginger", 2000), fee("lady", 3000)];
 
   it("sends each paid dog's coins in slot order, staggered, and skips dogs not in the pack", () => {
     const { flightMs, staggerMs } = MOMENTS.payout;
@@ -296,8 +296,8 @@ describe("payoutFlights", () => {
     expect(
       flights.map(({ dog, landMs, slot, startMs }) => ({ dog, landMs, slot, startMs })),
     ).toEqual([
-      { dog: "duchess", landMs: flightMs, slot: 0, startMs: 0 },
-      { dog: "biscuit", landMs: staggerMs + flightMs, slot: 1, startMs: staggerMs },
+      { dog: "ginger", landMs: flightMs, slot: 0, startMs: 0 },
+      { dog: "lady", landMs: staggerMs + flightMs, slot: 1, startMs: staggerMs },
       { dog: "kilo", landMs: 2 * staggerMs + flightMs, slot: 2, startMs: 2 * staggerMs },
     ]);
   });

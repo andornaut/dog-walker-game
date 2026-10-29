@@ -178,7 +178,7 @@ describe("stepAmbient", () => {
 
   it.each(CROWDED)("hands a $path mover's slot to the next within a frame", ({ mover }) => {
     const { width } = LAYOUT.backdrop;
-    const frames = walkThrough("homeStretch", 120, 1, undefined, [mover]);
+    const frames = walkThrough("yongeStreet", 120, 1, undefined, [mover]);
     const handovers = frames.flatMap((out, i) =>
       out.filter(
         (each) =>
@@ -206,7 +206,7 @@ describe("stepAmbient", () => {
 
   it("plays the same movers for the same seed, and others for another", () => {
     const places = (seed: number) =>
-      walkThrough("street", 60, seed).map((out) => out.map(({ place }) => place));
+      walkThrough("distilleryDistrict", 60, seed).map((out) => out.map(({ place }) => place));
     expect(places(3)).toEqual(places(3));
     expect(places(4)).not.toEqual(places(3));
   });
@@ -217,13 +217,13 @@ describe("stepAmbient", () => {
     { name: "SKY_ROWS", rows: undefined },
     { name: "its own rows", rows: { from: 26, to: 40 } },
   ])("flies a sky mover across $name both ways at full size", ({ rows }) => {
-    const planes = gameData.ambient.street
+    const planes = gameData.ambient.distilleryDistrict
       .filter(({ path }) => path === "crossStreet")
       .slice(0, 1)
       .map((car): AmbientMover => ({ ...car, path: "sky", ...(rows && { rows }) }));
     expect(planes).toHaveLength(1);
     const allowed = rows ?? SKY_ROWS;
-    const shown = walkThrough("homeStretch", 600, 1, undefined, planes).flat();
+    const shown = walkThrough("yongeStreet", 600, 1, undefined, planes).flat();
     const wrong = shown.filter(
       ({ place }) =>
         !place.band ||
@@ -237,7 +237,12 @@ describe("stepAmbient", () => {
   });
 
   it("sets out no mover that has no art", () => {
-    const drawn = walkThrough("street", 120, 1, (mover) => mover.path !== "crossStreet");
+    const drawn = walkThrough(
+      "distilleryDistrict",
+      120,
+      1,
+      (mover) => mover.path !== "crossStreet",
+    );
     expect(drawn.flat().filter(({ mover }) => mover.path === "crossStreet")).toEqual([]);
     expect(drawn.flat().length).toBeGreaterThan(0);
   });
@@ -267,12 +272,17 @@ describe("stepAmbient", () => {
     for (let now = 0; now < 60; now += 1) {
       stepAmbient(
         using,
-        { movers: gameData.ambient.street, now, travelled: 0, zone: "street" },
+        {
+          movers: gameData.ambient.distilleryDistrict,
+          now,
+          travelled: 0,
+          zone: "distilleryDistrict",
+        },
         state,
       );
     }
     expect(state.slots.some((slot) => slot.active)).toBe(true);
-    stepAmbient(using, { movers: [], now: 60, travelled: 0, zone: "park" }, state);
+    stepAmbient(using, { movers: [], now: 60, travelled: 0, zone: "highPark" }, state);
     expect(state.slots.filter((slot) => slot.active)).toEqual([]);
   });
 
@@ -282,7 +292,7 @@ describe("stepAmbient", () => {
     for (let now = 0; now < 60; now += 1) {
       stepAmbient(
         using,
-        { movers: gameData.ambient.shops, now, travelled: 0, zone: "shops" },
+        { movers: gameData.ambient.kensingtonMarket, now, travelled: 0, zone: "kensingtonMarket" },
         state,
       );
     }

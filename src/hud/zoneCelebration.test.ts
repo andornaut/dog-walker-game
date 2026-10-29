@@ -10,7 +10,8 @@ import { agilityPercent } from "../rules/effectText";
 import { perkIconKey } from "./effectIcons";
 import { celebrationText, zoneBannerHeading, zoneCelebration } from "./zoneCelebration";
 
-const STREET = gameData.world.zones.find(({ id }) => id === "street")?.name ?? "";
+const DISTILLERY_DISTRICT =
+  gameData.world.zones.find(({ id }) => id === "distilleryDistrict")?.name ?? "";
 
 function money(kind: "bump" | "pay" | "tip", amount: number): MoneyChange {
   return {
@@ -44,18 +45,18 @@ describe("zoneCelebration", () => {
   // Each walker joins on finishing the zone their data names, while not owned.
   const goal = (walker: WalkerId): ZoneId => {
     const data = gameData.walkers[walker];
-    return data.unlock === "start" ? "street" : data.zone;
+    return data.unlock === "start" ? "distilleryDistrict" : data.zone;
   };
   it("lets a walker join on finishing their zone only while not owned", () => {
     for (const { expected, finished, owned } of [
-      { expected: "mrB", finished: ["street", goal("mrB")], owned: ["casey"] },
-      { expected: "ada", finished: ["street", goal("ada")], owned: ["casey"] },
-      { expected: "trista", finished: ["street", goal("trista")], owned: ["casey"] },
-      { expected: null, finished: ["street", goal("mrB")], owned: ["casey", "mrB"] },
-      { expected: null, finished: ["street"], owned: ["casey"] },
+      { expected: "mrB", finished: ["distilleryDistrict", goal("mrB")], owned: ["casey"] },
+      { expected: "ada", finished: ["distilleryDistrict", goal("ada")], owned: ["casey"] },
+      { expected: "trista", finished: ["distilleryDistrict", goal("trista")], owned: ["casey"] },
+      { expected: null, finished: ["distilleryDistrict", goal("mrB")], owned: ["casey", "mrB"] },
+      { expected: null, finished: ["distilleryDistrict"], owned: ["casey"] },
       { expected: null, finished: [goal("mrB")], owned: ["ada", "mrB", "casey", "trista"] },
     ] satisfies readonly { expected: WalkerId | null; finished: ZoneId[]; owned: WalkerId[] }[]) {
-      const finish = { changes: [], finished, walker: "casey", zone: STREET } as const;
+      const finish = { changes: [], finished, walker: "casey", zone: DISTILLERY_DISTRICT } as const;
       const joined = zoneCelebration(gameData, owned, finish);
       expect(joined.kind === "newWalker" ? joined.walker : null).toBe(expected);
     }
@@ -64,16 +65,16 @@ describe("zoneCelebration", () => {
   it("counts the zone's fees and tips, and leaves out bumps and hearts", () => {
     const finish = {
       changes: ZONE_CHANGES,
-      finished: ["street"],
+      finished: ["distilleryDistrict"],
       walker: "mrB",
-      zone: STREET,
+      zone: DISTILLERY_DISTRICT,
     } as const;
     expect(zoneCelebration(gameData, ["mrB", "casey"], finish)).toEqual({
       fees: 18000,
       kind: "zoneDone",
       tips: 800,
       walker: "mrB",
-      zone: STREET,
+      zone: DISTILLERY_DISTRICT,
     });
   });
 });

@@ -45,7 +45,7 @@ const fannyModifiers = modifiersOf(SHOP_GEAR.fannyPack.effects).map((modifier) =
 );
 const room = spareTreatRoom(data, { modifiers: fannyModifiers });
 const treat = read(TEST_TUNING, "hearts", "treat");
-const TRIO = packOrder(DOGS, ["kilo", "biscuit", "duchess"] as const);
+const TRIO = packOrder(DOGS, ["kilo", "lady", "ginger"] as const);
 
 // A run walking dogs at hearts, in pack order, with the Fanny pack's modifiers and held spare
 // treats, unless gear is false.

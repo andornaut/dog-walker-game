@@ -25,7 +25,7 @@ export const TUNING = {
     longReachLanes: 1,
     // The lucky finds of each kind a neighbourhood places on average, before its luckyFinds
     // density: the whole part always, and one more at the fractional part's chance.
-    luckyFindsPerZone: { lostWallet: 1, pettingNeighbour: 0.5 },
+    luckyFindsPerZone: { friendlyNeighbour: 0.5, lostWallet: 1 },
     // At most this many movers are on screen at once, of them at most maxDartMovers darting
     // and maxSlowVehicles in-lane slower than the road.
     maxDartMovers: 6,
@@ -74,14 +74,14 @@ export const TUNING = {
   money: {
     // Added to each tip while Big tipper is on.
     bigTipperTipBonus: 1,
-    // The Escaped capybara's Call the zoo.
-    capybaraCall: 20,
     // The Cheese crates' Buy the cheese.
     cheeseBuy: 20,
     encounterHigh: 20,
     encounterLow: 20,
+    // The Escaped capybara's Call the zoo.
+    escapedCapybaraCall: 20,
     // The Green bin spill's Pay for cleanup.
-    greenBinCleanUp: 20,
+    greenBinSpillCleanUp: 20,
     lostWalletKeep: 20,
     missedTips: 20,
     // The Dropped ice cream's Buy a new cone.
@@ -91,21 +91,21 @@ export const TUNING = {
     // The Porch cat's Treat bribe.
     porchCatTreat: 20,
     prices: {
-      biscuit: 300,
       buddy: 600,
       // The second and third dog slots; every player starts with one.
       dogSlot2: 2000,
       dogSlot3: 2000,
-      duchess: 200,
       fannyPack: 500,
+      ginger: 200,
       hallPass: 800,
       kilo: 400,
+      lady: 300,
       luckyCollar: 1700,
       penny: 800,
-      pierre: 700,
+      pepe: 700,
       reggie: 1100,
       runningShoes: 1200,
-      snowball: 1500,
+      sequoia: 1500,
       whistle: 2500,
     },
     // The Big screen promo's Buy the merch.

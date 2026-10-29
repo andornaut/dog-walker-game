@@ -103,7 +103,7 @@ export const HELP_SCENES = {
   cardBandInset: 6,
   cards: { dogs: ["archie"], encounter: "skunk", lane: 2 },
   lanes: {
-    dogs: ["archie", "biscuit", "duchess"],
+    dogs: ["archie", "lady", "ginger"],
     // The pack glides a lane over glideFrames of the swipe's frames, from the first whose drag
     // reaches the walk's first lane step.
     glideFrames: 3,
@@ -112,20 +112,20 @@ export const HELP_SCENES = {
     // The drag right starts on lane fromLane's centre, rise rows above the walker's feet.
     touch: { fromLane: 1, rise: 144 },
     // A neighbourhood where cats cross, its grey road setting off the touch hint.
-    zone: "snoozeCrescent",
+    zone: "cabbagetown",
   },
   owners: {
     // The dog that loses a heart to a bump.
     bumped: { dog: "archie", lost: 1 },
-    dogs: ["kilo", "archie", "duchess"],
-    fired: "duchess",
+    dogs: ["kilo", "archie", "ginger"],
+    fired: "ginger",
     lane: 1,
     // How far through the neighbourhood the walk is, which the progress line under the cards
     // shows.
     zoneFraction: 0.6,
   },
   pickups: {
-    dogs: ["archie", "biscuit"],
+    dogs: ["archie", "lady"],
     lane: 2,
     // Tips, a treat, a lucky find and a gear drop.
     pickups: [
@@ -141,13 +141,13 @@ export const HELP_SCENES = {
     zoneFraction: 0.4,
   },
   pulls: {
-    dogs: ["archie", "biscuit"],
+    dogs: ["archie", "lady"],
     lane: 2,
     squirrel: { distance: 260, lane: 3 },
-    strainer: "biscuit",
-    zone: "park",
+    strainer: "lady",
+    zone: "highPark",
   },
-  zones: { dogs: ["archie", "biscuit", "duchess"], lane: 2 },
+  zones: { dogs: ["archie", "lady", "ginger"], lane: 2 },
 } as const;
 
 // The strip of height rows ending on the road's last row.

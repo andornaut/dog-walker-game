@@ -24,7 +24,7 @@ describe("an upgrade's duration", () => {
     const upgrades: UpgradeId[] = ["bellyRubs", "rushHour", "raincoats"];
     const card = cardFor(gameData, testState({ kilo: 5 }), {
       kind: "fork",
-      paths: ["snoozeCrescent", "park", "street"],
+      paths: ["cabbagetown", "highPark", "distilleryDistrict"],
       upgrades,
     });
     expect(card.options.map(({ duration }) => duration)).toEqual(

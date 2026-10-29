@@ -10,7 +10,7 @@ import { type WalkItem, type WalkItemKind } from "../runner/walkItems";
 import { testState } from "../testing/runState";
 import { sightPaths } from "./sight";
 
-const run = testState({ biscuit: 3 });
+const run = testState({ lady: 3 });
 const road = {
   data: gameData,
   geometry: screenRoadGeometry(run),

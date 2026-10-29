@@ -156,7 +156,7 @@ describe("messageLine", () => {
 describe("bubbleSpeech", () => {
   const quips = new Map<DogId, string>([
     ["kilo", "He already did 10K."],
-    ["biscuit", "Snacks are in the left pocket."],
+    ["lady", "Snacks are in the left pocket."],
     ["reggie", "Tag me in everything."],
   ]);
   const none: HomeAction = { kind: "none" };
@@ -171,8 +171,8 @@ describe("bubbleSpeech", () => {
     }[] = [
       {
         action: none,
-        dogs: ["kilo", "biscuit"],
-        expected: { owner: "biscuit", paragraphs: ["Snacks are in the left pocket."] },
+        dogs: ["kilo", "lady"],
+        expected: { owner: "lady", paragraphs: ["Snacks are in the left pocket."] },
         line: "afterWalk",
         name: "lets the owner of the latest pick still in the pack speak",
       },
@@ -246,9 +246,9 @@ describe("packBonusLine", () => {
   it.each<[string, LiveTuning, readonly DogId[], string | null]>([
     ["no dog picked", TEST_TUNING, [], null],
     ["a lone dog", TEST_TUNING, ["kilo"], line(hearts.packSizeBonus[1])],
-    ["a pair", TEST_TUNING, ["duchess", "kilo"], line(hearts.packSizeBonus[2])],
-    ["a full pack", TEST_TUNING, ["kilo", "duchess", "pierre"], line(hearts.packSizeBonus[3])],
-    ["a lead already at the cap", capped, ["duchess", "kilo"], null],
+    ["a pair", TEST_TUNING, ["ginger", "kilo"], line(hearts.packSizeBonus[2])],
+    ["a full pack", TEST_TUNING, ["kilo", "ginger", "pepe"], line(hearts.packSizeBonus[3])],
+    ["a lead already at the cap", capped, ["ginger", "kilo"], null],
   ])("shows how far the lead's owner's max rises for %s", (_name, tuning, dogs, expected) => {
     expect(packBonusLine({ ...data, tuning }, { dogs, gear: null })).toBe(expected);
   });

@@ -97,10 +97,10 @@ describe("types", () => {
     {
       const picks = { count: 1, kind: "optionPicks" } as const;
       // @ts-expect-error: an option of another encounter's card
-      check<AchievementCondition>({ ...picks, encounter: "capybara", option: "pose" });
+      check<AchievementCondition>({ ...picks, encounter: "escapedCapybara", option: "pose" });
       // @ts-expect-error: an encounter that opens no card
       check<AchievementCondition>({ ...picks, encounter: "lostWallet", option: "keep" });
-      const help = { ...picks, encounter: "capybara", option: "help" } as const;
+      const help = { ...picks, encounter: "escapedCapybara", option: "help" } as const;
       expect(check<AchievementCondition>(help).kind).toBe("optionPicks");
     }
 

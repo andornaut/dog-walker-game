@@ -36,7 +36,7 @@ export const ZONE_IDS = WORLD.zones.map(({ id }) => id);
 // The game's road, as RunScene lays it out for realRun's pack.
 export const GAME_ROAD = (() => {
   const road = SCREEN_LAYOUT.road;
-  const pack: PackSprites = { dogs: ["duchess", "biscuit", "kilo"], walker: DEFAULT_WALKER };
+  const pack: PackSprites = { dogs: ["ginger", "lady", "kilo"], walker: DEFAULT_WALKER };
   return walkGeometry(LANE_COUNT, pack, walkProjection(ROAD_CAMERA, road), road);
 })();
 export const ROAD_LENGTH = GAME_ROAD.roadBottom - GAME_ROAD.roadTop;
@@ -60,7 +60,7 @@ export const widerRows = (tuned: Real, wider: number): Real => ({
   },
 });
 export const realRun = (tuned: Real, walker: WalkerId = DEFAULT_WALKER) =>
-  newRun(tuned, 3, { dogs: ["duchess", "biscuit", "kilo"], gear: null, walker });
+  newRun(tuned, 3, { dogs: ["ginger", "lady", "kilo"], gear: null, walker });
 // The world with every zone's weights changed by reweigh.
 export function reweighed(reweigh: (weights: Zone["weights"]) => Zone["weights"]): World {
   return mapZones((zone) => ({ ...zone, weights: reweigh(zone.weights) }), WORLD);

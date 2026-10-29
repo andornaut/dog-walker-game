@@ -34,7 +34,7 @@ const walkData = {
 };
 
 const GEAR = keysOf(SHOP_GEAR);
-const SMALL_DOG = keysOf(DOGS).find((id) => DOGS[id].size === "small") ?? "biscuit";
+const SMALL_DOG = keysOf(DOGS).find((id) => DOGS[id].size === "small") ?? "lady";
 const SECOND_CHANCE: WalkerId =
   keysOf(WALKERS).find((id) => WALKERS[id].perk === "secondChance") ?? "casey";
 
@@ -116,7 +116,7 @@ const CASES: readonly Case[] = [
   {
     cue: "treat",
     item: atPack("treat"),
-    meeting: { dogs: ["kilo", "biscuit"], gear: "fannyPack" },
+    meeting: { dogs: ["kilo", "lady"], gear: "fannyPack" },
     name: "a treat stored as a spare treat",
   },
 ];

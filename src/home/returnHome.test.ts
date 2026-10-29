@@ -14,10 +14,10 @@ describe("homecomers", () => {
       walk: Pick<LastWalk, "dogs" | "firings">;
     }[] = [
       {
-        expected: ["kilo", "biscuit"],
+        expected: ["kilo", "lady"],
         name: "brings home the dogs still walking, in pack order, without the fired ones",
         walk: {
-          dogs: ["kilo", "reggie", "biscuit"],
+          dogs: ["kilo", "reggie", "lady"],
           firings: ["reggie"],
         },
       },

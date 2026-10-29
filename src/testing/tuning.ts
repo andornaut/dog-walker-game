@@ -35,7 +35,7 @@ const PINNED_TUNING: LiveTuning = {
     encounterLow: 5,
     missedTips: 5,
     payPerDog: 10,
-    prices: { ...TUNING.money.prices, biscuit: 600, dogSlot2: 800, dogSlot3: 1800, reggie: 600 },
+    prices: { ...TUNING.money.prices, dogSlot2: 800, dogSlot3: 1800, lady: 600, reggie: 600 },
     tip: 1,
   },
   multipliers: {

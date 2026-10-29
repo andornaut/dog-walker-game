@@ -70,7 +70,7 @@ describe("ProfileSession.open", () => {
       counters: quietCounters(),
       dogs: [{ firedInZone: null, id: "kilo" as const }],
       earnedCents: cents(1_000),
-      route: ["street" as const, "park" as const],
+      route: ["distilleryDistrict" as const, "highPark" as const],
       zonesFinished: 2,
     };
     const { entries, session } = await opened({ ...veteranSave(), checkpoint });
@@ -200,7 +200,12 @@ const result = {
   lastHeartOwners: 0,
   lostCents: cents(0),
   outcome: "finished" as const,
-  route: ["street" as const, "park" as const, "shops" as const, "homeStretch" as const],
+  route: [
+    "distilleryDistrict" as const,
+    "highPark" as const,
+    "kensingtonMarket" as const,
+    "yongeStreet" as const,
+  ],
   walker: "casey" as const,
   zone: 4,
 };
@@ -212,7 +217,7 @@ describe("runs", () => {
       counters: quietCounters(),
       dogs: result.dogs,
       earnedCents: cents(500),
-      route: ["street"],
+      route: ["distilleryDistrict"],
       zonesFinished: 1,
     });
     expect(stored(entries).checkpoint?.zonesFinished).toBe(1);
@@ -276,7 +281,7 @@ describe("a save from a newer version", () => {
           counters: quietCounters(),
           dogs: result.dogs,
           earnedCents: cents(500),
-          route: ["street"],
+          route: ["distilleryDistrict"],
           zonesFinished: 1,
         }),
     ],

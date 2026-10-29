@@ -20,7 +20,7 @@ import { START_STRIP_LENGTH } from "./roadsideProps";
 vi.mock("../../shared/verges.json", async (importOriginal) => {
   const { default: table } = await importOriginal<{ default: Record<string, unknown> }>();
   const { PAVED_VERGE } = await import("../testing/verges");
-  const yongeOnly = PAVED_VERGE.pools.map((pool) => ({ ...pool, zones: ["homeStretch"] }));
+  const yongeOnly = PAVED_VERGE.pools.map((pool) => ({ ...pool, zones: ["yongeStreet"] }));
   return {
     default: {
       ...table,
@@ -30,8 +30,8 @@ vi.mock("../../shared/verges.json", async (importOriginal) => {
   };
 });
 
-const LIT: ZoneId = "homeStretch";
-const UNLIT: ZoneId = "pawsPromenade";
+const LIT: ZoneId = "yongeStreet";
+const UNLIT: ZoneId = "theBeaches";
 const pool = itemAt(VERGES[LIT].pools, 0);
 const { road } = screenLayout(SCREEN_CONFIG);
 const projection = roadProjection(ROAD_CAMERA, walkerFootY(road), road);

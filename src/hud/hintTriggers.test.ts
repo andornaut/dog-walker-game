@@ -39,9 +39,9 @@ describe("runHintTriggers", () => {
   it("raises the fired-owner hint for an owner at 1 heart, not a calm walk or a fired owner", () => {
     const kinds = (run: ReturnType<typeof testState>) =>
       runHintTriggers(run).map(({ kind }) => kind);
-    expect(kinds(testState({ biscuit: 5, duchess: 5, kilo: 5 }))).toEqual([]);
-    expect(kinds(testState({ duchess: 5, kilo: 1 }))).toEqual(["firedOwner"]);
-    expect(kinds(testState({ duchess: 5, kilo: "fired" }))).toEqual([]);
+    expect(kinds(testState({ ginger: 5, kilo: 5, lady: 5 }))).toEqual([]);
+    expect(kinds(testState({ ginger: 5, kilo: 1 }))).toEqual(["firedOwner"]);
+    expect(kinds(testState({ ginger: 5, kilo: "fired" }))).toEqual([]);
   });
 });
 
@@ -50,8 +50,8 @@ describe("startHintTriggers", () => {
 
   it.each([
     ["a lone dog", testState({ kilo: 5 }), packSizeBonus[1]],
-    ["a pair", testState({ duchess: 5, kilo: 5 }), packSizeBonus[2]],
-    ["a full pack", testState({ biscuit: 5, duchess: 5, kilo: 5 }), packSizeBonus[3]],
+    ["a pair", testState({ ginger: 5, kilo: 5 }), packSizeBonus[2]],
+    ["a full pack", testState({ ginger: 5, kilo: 5, lady: 5 }), packSizeBonus[3]],
   ])(
     "raises the pack-bonus hint for %s only when its lead's owner gets a bonus",
     (_, run, bonus) => {

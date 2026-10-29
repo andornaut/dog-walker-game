@@ -17,7 +17,7 @@ import {
 } from "./policies";
 
 // The thief's card less its debuff option: a money option and a hearts option, and no debuff.
-const THIEF: CardSource = { affected: ["duchess"], encounter: "thief", kind: "encounter" };
+const THIEF: CardSource = { affected: ["ginger"], encounter: "thief", kind: "encounter" };
 const THIEF_OPTIONS = ((): CardOptions => {
   const { resolution } = gameData.encounters.thief;
   const options = resolution.kind === "card" ? resolution.options : [];
@@ -72,14 +72,14 @@ describe("chooseCardOption", () => {
       ["alwaysHearts", LOW, HEARTS],
       ["alwaysPay", SAFE, PAY],
     ] as const) {
-      const state = testState({ duchess: hearts }, { money: cents(5000) });
+      const state = testState({ ginger: hearts }, { money: cents(5000) });
 
       expect(thiefChoice(policy, state)).toBe(expected);
     }
   });
 
   it("takes hearts when no money option is affordable", () => {
-    const state = testState({ duchess: SAFE }, { money: cents(0) });
+    const state = testState({ ginger: SAFE }, { money: cents(0) });
 
     expect(thiefChoice("heartsUnlessLow", state)).toBe(HEARTS);
     expect(thiefChoice("alwaysPay", state)).toBe(HEARTS);
@@ -95,10 +95,10 @@ describe("chooseCardOption", () => {
     "on a %s card, %s at %i hearts takes %s with Hall pass",
     (encounter, policy, hearts, expected) => {
       const state = testState(
-        { duchess: hearts },
+        { ginger: hearts },
         { money: cents(5000), skipPass: { gear: "hallPass", kind: "gear" } },
       );
-      const source: CardSource = { affected: ["duchess"], encounter, kind: "encounter" };
+      const source: CardSource = { affected: ["ginger"], encounter, kind: "encounter" };
 
       expect(
         chooseCardOption(
@@ -114,7 +114,7 @@ describe("chooseCardOption", () => {
 });
 
 describe("the mixed policy", () => {
-  const rich = (hearts: number) => testState({ duchess: hearts }, { money: cents(5000) });
+  const rich = (hearts: number) => testState({ ginger: hearts }, { money: cents(5000) });
 
   it("pays for the cheapest safe option on a draw below the pay share, else takes hearts", () => {
     expect(thiefChoice("mixed", rich(SAFE), () => MIXED_PAY_SHARE - 0.01)).toBe(PAY);
@@ -123,7 +123,7 @@ describe("the mixed policy", () => {
 
   it("keeps heartsUnlessLow's guard, and takes hearts with nothing affordable, without drawing", () => {
     expect(thiefChoice("mixed", rich(LOW))).toBe(PAY);
-    expect(thiefChoice("mixed", testState({ duchess: SAFE }, { money: cents(0) }))).toBe(HEARTS);
+    expect(thiefChoice("mixed", testState({ ginger: SAFE }, { money: cents(0) }))).toBe(HEARTS);
   });
 
   it("makes the same choices from the same seed, about half of them paid", () => {
@@ -174,8 +174,8 @@ describe("the debuff policies", () => {
   ] as const)(
     "%s at %i hearts with %i cents, drawing %s, takes the %s option",
     (policy, hearts, money, draw, expected) => {
-      const state = testState({ duchess: hearts }, { money: cents(money) });
-      const source: CardSource = { affected: ["duchess"], encounter: TRIPLE, kind: "encounter" };
+      const state = testState({ ginger: hearts }, { money: cents(money) });
+      const source: CardSource = { affected: ["ginger"], encounter: TRIPLE, kind: "encounter" };
       const random = draw === null ? NO_DRAWS : () => draw;
 
       expect(
@@ -192,7 +192,7 @@ describe("the debuff policies", () => {
   ] as const)(
     "%s plays as mixed on a card with no debuff, drawing %s",
     (policy, draw, expected) => {
-      const state = testState({ duchess: SAFE }, { money: cents(5000) });
+      const state = testState({ ginger: SAFE }, { money: cents(5000) });
 
       expect(thiefChoice(policy, state, () => draw)).toBe(expected);
     },
@@ -213,10 +213,10 @@ describe("pickCardOption", () => {
   ] as const)(
     "%s on the %s card at %i hearts with %i cents fell back: %s",
     (policy, card, hearts, money, expected) => {
-      const state = testState({ duchess: hearts }, { money: cents(money) });
+      const state = testState({ ginger: hearts }, { money: cents(money) });
       const data = card === "thief" ? NO_DEBUFF_DATA : gameData;
       const encounter = card === "thief" ? "thief" : TRIPLE;
-      const source: CardSource = { affected: ["duchess"], encounter, kind: "encounter" };
+      const source: CardSource = { affected: ["ginger"], encounter, kind: "encounter" };
       const view = cardFor(data, state, source);
 
       expect(pickCardOption(data, () => 0, policy, state, view).fellBack).toBe(expected);

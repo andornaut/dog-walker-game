@@ -17,7 +17,7 @@ const limits: RunSetupLimits<"bo" | "kilo" | "rex" | "zip", "collar" | "shoes"> 
   speed: { max: 10, min: 0.1 },
   walkerIds: ["ada", "casey"],
   zoneCount: 4,
-  zoneIds: ["street", "park", "shops", "homeStretch", "pawsPromenade"],
+  zoneIds: ["distilleryDistrict", "highPark", "kensingtonMarket", "yongeStreet", "theBeaches"],
 };
 const NEW_SEED = 777;
 const parse = (search: string) => parseRunSetup(limits, () => NEW_SEED, search);
@@ -120,15 +120,19 @@ describe("parseRunSetup", () => {
 
 describe("the route parameter", () => {
   it("reads the zones walked up to the starting zone", () => {
-    expect(parse("route=street,park,shops&zone=2").setup.route).toEqual([
-      "street",
-      "park",
-      "shops",
+    expect(parse("route=distilleryDistrict,highPark,kensingtonMarket&zone=2").setup.route).toEqual([
+      "distilleryDistrict",
+      "highPark",
+      "kensingtonMarket",
     ]);
   });
 
   it("ignores a route of unknown or repeated zones, or one that doesn't reach the zone, with a warning", () => {
-    for (const search of ["route=street,bogus", "route=street,street", "route=street&zone=3"]) {
+    for (const search of [
+      "route=distilleryDistrict,bogus",
+      "route=distilleryDistrict,distilleryDistrict",
+      "route=distilleryDistrict&zone=3",
+    ]) {
       const { setup, warnings } = parse(search);
       expect(setup.route, search).toBeUndefined();
       expect(warnings, search).toHaveLength(1);
@@ -156,7 +160,7 @@ describe("runSetupToQuery", () => {
       defaults,
       { ...defaults, gear: null },
       { dev: true, gear: "collar", money: 0, pack: ["zip"], seed: 0, speed: 0.1, zone: 4 },
-      { ...defaults, route: ["street", "pawsPromenade"], walker: "casey", zone: 2 },
+      { ...defaults, route: ["distilleryDistrict", "theBeaches"], walker: "casey", zone: 2 },
       { ...defaults, speed: 0.1 + 0.2 },
     ];
     for (const setup of setups) {

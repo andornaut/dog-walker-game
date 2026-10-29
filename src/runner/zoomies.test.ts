@@ -21,7 +21,7 @@ import { hasZoomies, stepZoomies } from "./zoomies";
 // The game's road for the pack of three the drift test walks; walkIn's lone Kilo leads it.
 const ROAD = (() => {
   const road = SCREEN_LAYOUT.road;
-  const pack = { dogs: ["kilo", "biscuit", "duchess"], walker: "casey" } as const;
+  const pack = { dogs: ["kilo", "lady", "ginger"], walker: "casey" } as const;
   return walkGeometry(LANE_COUNT, pack, walkProjection(ROAD_CAMERA, road), road);
 })();
 const EVERY = read(gameData.tuning, "seconds", "zoomiesDriftSeconds");
@@ -139,7 +139,7 @@ describe("the Zoomies on every zone's road", { timeout: 120_000 }, () => {
   it("drift into no unavoidable hit on any zone's road", () => {
     for (const [zone, seed] of zones.map((zone) => [zone, 1] as const)) {
       const start = newRun(gameData, 3, {
-        dogs: ["kilo", "biscuit", "duchess"],
+        dogs: ["kilo", "lady", "ginger"],
         gear: null,
         walker: "casey",
       });

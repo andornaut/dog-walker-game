@@ -28,14 +28,14 @@ export const WALKER_SILHOUETTES: Readonly<Record<WalkerId, Silhouette>> = {
 
 export const DOG_SILHOUETTES: Readonly<Record<DogId, Silhouette>> = {
   archie: { above: 39, left: -11, right: 12 },
-  biscuit: { above: 38, left: -12, right: 12 },
   buddy: { above: 31, left: -9, right: 10 },
-  duchess: { above: 32, left: -10, right: 10 },
+  ginger: { above: 32, left: -10, right: 10 },
   kilo: { above: 45, left: -15, right: 15 },
+  lady: { above: 38, left: -12, right: 12 },
   penny: { above: 42, left: -14, right: 14 },
-  pierre: { above: 39, left: -13, right: 13 },
+  pepe: { above: 39, left: -13, right: 13 },
   reggie: { above: 31, left: -10, right: 10 },
-  snowball: { above: 46, left: -15, right: 15 },
+  sequoia: { above: 46, left: -15, right: 15 },
 };
 
 // How far a dog reaches either side of its column, mirrored too, as a pull draws it.
@@ -283,14 +283,14 @@ export const WALKER_HANDS = { heightAboveFeet: 20, leftDx: -16, rightDx: 16 };
 // medium 21 and small 16.
 export const COLLAR_HEIGHTS: Readonly<Record<DogId, number>> = {
   archie: 20,
-  biscuit: 21,
   buddy: 16,
-  duchess: 16,
+  ginger: 16,
   kilo: 21,
+  lady: 21,
   penny: 22,
-  pierre: 21,
+  pepe: 21,
   reggie: 16,
-  snowball: 22,
+  sequoia: 22,
 };
 
 // A dog on the left of the walker is held in the left hand.

@@ -106,7 +106,7 @@ describe("a one-dog pack", () => {
 // around them all; obstacles touch the parts.
 const chevron = packOf({ bottom: 100, left: -10, right: 10, top: 50 }, [
   { bottom: 20, dog: "kilo", left: -10, right: 10, top: -20 },
-  { bottom: 40, dog: "biscuit", left: -30, right: -12, top: 0 },
+  { bottom: 40, dog: "lady", left: -30, right: -12, top: 0 },
   { bottom: 40, dog: "buddy", left: 12, right: 30, top: 0 },
 ]);
 // Between the side dogs, under Kilo and over the walker: inside the outline, on no part.
@@ -138,7 +138,7 @@ describe("hitDog", () => {
       [
         "on the nearer side dog when it touches both and not the lead",
         { bottom: 38, left: -28, right: 14, top: 22 },
-        "biscuit",
+        "lady",
       ],
       ["on nothing in the gap between the parts", GAP, null],
       ["on nothing outside the outline", { bottom: 10, left: 40, right: 60, top: -10 }, null],
@@ -166,7 +166,7 @@ describe("pickupDog", () => {
   it("gives a pickup to the dog it reaches first", () => {
     for (const [, box, dog] of [
       ["to the dog nearest the contact", { bottom: 30, left: 20, right: 40, top: 10 }, "buddy"],
-      ["to the dog nearest the contact in the gap between the parts", GAP, "biscuit"],
+      ["to the dog nearest the contact in the gap between the parts", GAP, "lady"],
       [
         "to the front dog when the walker is nearest",
         { bottom: 120, left: -5, right: 5, top: 90 },
@@ -195,7 +195,7 @@ describe("a pack with no dog", () => {
 });
 
 describe("a settled pack", () => {
-  const DOGS: DogId[] = ["kilo", "biscuit", "buddy"];
+  const DOGS: DogId[] = ["kilo", "lady", "buddy"];
   const runOf = (count: number) =>
     testState(Object.fromEntries(DOGS.slice(0, count).map((dog) => [dog, 3])));
   // A goose, drawn about as wide as a lane's hit box, standing level with the lead's rectangle, in

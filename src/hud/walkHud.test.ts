@@ -606,7 +606,7 @@ describe("the walk bar's neighbourhood name and count", () => {
 });
 
 describe("explainTargetAt", () => {
-  const dogs: (DogId | undefined)[] = ["kilo", "biscuit", undefined];
+  const dogs: (DogId | undefined)[] = ["kilo", "lady", undefined];
   const debuffs: DebuffId[] = ["muddy", "stinky"];
   const shown = (effects: number): ExplainShown => ({ debuffs, dogs, effects });
   const holdAt = (i: number) => centre(BAR.effectHolds[i] ?? topBar);
@@ -617,7 +617,7 @@ describe("explainTargetAt", () => {
   const muddy: ExplainTarget = { debuff: "muddy", kind: "debuff" };
   const stinky: ExplainTarget = { debuff: "stinky", kind: "debuff" };
   const kilo: ExplainTarget = { dog: "kilo", kind: "dog" };
-  const biscuit: ExplainTarget = { dog: "biscuit", kind: "dog" };
+  const lady: ExplainTarget = { dog: "lady", kind: "dog" };
   // What a press explains on the walk, and under the pause menu's dim, where the debuff bars
   // are the dim's.
   it.each<[string, number, Point, ExplainTarget | undefined, ExplainTarget | undefined]>([
@@ -636,7 +636,7 @@ describe("explainTargetAt", () => {
     ["the first debuff bar", 0, centre(bars[0] ?? topBar), muddy, undefined],
     ["the second debuff bar", 0, centre(bars[1] ?? topBar), stinky, undefined],
     ["the first card", 0, centre(dogSlots[0] ?? topBar), kilo, kilo],
-    ["the second card", 0, centre(dogSlots[1] ?? topBar), biscuit, biscuit],
+    ["the second card", 0, centre(dogSlots[1] ?? topBar), lady, lady],
     ["a card with no dog", 0, centre(dogSlots[2] ?? topBar), undefined, undefined],
     ["the road", 0, centre(LAYOUT.road), undefined, undefined],
   ])("finds what %s explains", (_name, effects, point, walking, dimmed) => {

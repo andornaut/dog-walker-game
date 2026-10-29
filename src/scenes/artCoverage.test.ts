@@ -315,7 +315,7 @@ describe("card art", () => {
         encounter,
         kind: "encounter",
       })),
-      { kind: "fork", paths: ["park"], upgrades: ["bellyRubs"] },
+      { kind: "fork", paths: ["highPark"], upgrades: ["bellyRubs"] },
     ];
     const tags = [...new Set(sources.map((source) => cardFrameTag(source)))];
     expect(tags).toHaveLength(2);

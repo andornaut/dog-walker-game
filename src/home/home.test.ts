@@ -55,7 +55,7 @@ const data = {
 } as const;
 const owned: Owned = {
   dogSlots: [1, 2, 3],
-  dogs: ["biscuit", "duchess", "kilo"],
+  dogs: ["lady", "ginger", "kilo"],
   gear: ["fannyPack"],
   walkers: ["casey"],
 };
@@ -113,29 +113,29 @@ describe("tapDog and tapGear", () => {
   it("picks and drops owned dogs and gear, refuses a dog past the slots and opens the shop on one not owned", () => {
     const cases: readonly { expected: HomeTap; name: string; tap: () => HomeTap }[] = [
       {
-        expected: { kind: "loadout", loadout: { dogs: ["kilo", "duchess"], gear: null } },
+        expected: { kind: "loadout", loadout: { dogs: ["kilo", "ginger"], gear: null } },
         name: "adds an owned dog to the pack, in the order picked",
-        tap: () => tapDog(data, owned, "duchess", { dogs: ["kilo"], gear: null }),
+        tap: () => tapDog(data, owned, "ginger", { dogs: ["kilo"], gear: null }),
       },
       {
-        expected: { kind: "loadout", loadout: { dogs: ["duchess"], gear: null } },
+        expected: { kind: "loadout", loadout: { dogs: ["ginger"], gear: null } },
         name: "takes a picked dog back out of the pack",
-        tap: () => tapDog(data, owned, "kilo", { dogs: ["kilo", "duchess"], gear: null }),
+        tap: () => tapDog(data, owned, "kilo", { dogs: ["kilo", "ginger"], gear: null }),
       },
       {
         expected: { kind: "full" },
         name: "refuses a dog past the slots owned",
         tap: () =>
-          tapDog(data, { ...owned, dogSlots: [1, 3] }, "biscuit", {
-            dogs: ["kilo", "duchess"],
+          tapDog(data, { ...owned, dogSlots: [1, 3] }, "lady", {
+            dogs: ["kilo", "ginger"],
             gear: null,
           }),
       },
       {
-        expected: { kind: "loadout", loadout: { dogs: ["duchess"], gear: null } },
+        expected: { kind: "loadout", loadout: { dogs: ["ginger"], gear: null } },
         name: "swaps the dog of a full one-slot pack",
         tap: () =>
-          tapDog(data, { ...owned, dogSlots: [1] }, "duchess", { dogs: ["kilo"], gear: null }),
+          tapDog(data, { ...owned, dogSlots: [1] }, "ginger", { dogs: ["kilo"], gear: null }),
       },
       {
         expected: { kind: "shop", purchase: { dog: "reggie", kind: "dog" } },

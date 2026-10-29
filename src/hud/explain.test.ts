@@ -80,7 +80,7 @@ describe("explainDetail", () => {
   it.each<[string, ExplainTarget]>([
     ["an effect past the walk's", { effect: 4, kind: "effect" }],
     ["a debuff that wore off", { debuff: "stinky", kind: "debuff" }],
-    ["a dog not in the pack", { dog: "biscuit", kind: "dog" }],
+    ["a dog not in the pack", { dog: "lady", kind: "dog" }],
   ])("shows nothing for %s", (_name, target) => {
     expect(explainDetail(gameData, newPlayerSave, run, target)).toBeUndefined();
   });

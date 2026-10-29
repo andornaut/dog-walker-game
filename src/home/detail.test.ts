@@ -26,7 +26,7 @@ const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
 const owned: Owned = {
   dogSlots: [1],
-  dogs: [...STARTER_DOGS, "duchess", "kilo"],
+  dogs: [...STARTER_DOGS, "ginger", "kilo"],
   gear: ["luckyCollar"],
   walkers: ["casey"],
 };
@@ -78,12 +78,12 @@ describe("dogDetail", () => {
     },
   );
 
-  const price = purchasePrice(data, owned, { dog: "biscuit", kind: "dog" }) ?? cents(0);
+  const price = purchasePrice(data, owned, { dog: "lady", kind: "dog" }) ?? cents(0);
   it.each([
     { bank: cents(price - 1), key: "priceLocked", state: "a cent short" },
     { bank: price, key: "priceBuy", state: "affordable" },
   ] as const)("shows a dog not owned at its price, $state", ({ bank, key }) => {
-    expect(dogDetail(data, owned, bank, "biscuit").status).toBe(
+    expect(dogDetail(data, owned, bank, "lady").status).toBe(
       fillNames(data.homeText.detail[key], { price: dollarText(price) }),
     );
   });
@@ -142,8 +142,8 @@ describe("detailParts", () => {
   const none: Owned = { dogSlots: [], dogs: [], gear: [], walkers: [] };
   const status = (card: DetailCard) => ({ text: card.status, tone: "status" });
   it.each([
-    { card: dogDetail(data, none, dollars(0), "biscuit"), kind: "dog", place: "below" },
-    { card: dogDetail(data, owned, dollars(0), "duchess"), kind: "dog", place: "beside" },
+    { card: dogDetail(data, none, dollars(0), "lady"), kind: "dog", place: "below" },
+    { card: dogDetail(data, owned, dollars(0), "ginger"), kind: "dog", place: "beside" },
     {
       card: gearDetail(data, none, dollars(0), { gear: null }, "hallPass"),
       kind: "gear",

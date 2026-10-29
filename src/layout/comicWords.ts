@@ -15,16 +15,16 @@ export const COMIC_WORDS = {
     ringAboveStar: 5,
     // By encounter, as fx-hit-<encounter> draws its star.
     starRows: {
-      capybara: 48,
+      bigScreenPromo: 43,
       cheeseCrates: 46,
-      droppedCone: 48,
-      greenBin: 46,
+      droppedIceCream: 48,
+      escapedCapybara: 48,
+      greenBinSpill: 46,
       otherDog: 46,
       porchCat: 43,
-      promoTeam: 43,
       skunk: 38,
       thief: 48,
-      weddingShoot: 43,
+      weddingPhotoShoot: 43,
     } as Readonly<Partial<Record<EncounterId, number>>>,
   },
   // DODGE! on fx-dodge's 48x48 frame, over its first frames.

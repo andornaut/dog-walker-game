@@ -42,7 +42,7 @@ export class LightsView {
   private readonly baseKeys = new Map<string, string>();
   private readonly carriers: GameObjects.Sprite[] = [];
   private readonly frame: VergeLightFrame = {
-    current: "park",
+    current: "highPark",
     currentStart: 0,
     previous: null,
     previousStart: 0,

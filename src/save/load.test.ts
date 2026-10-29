@@ -38,7 +38,7 @@ const checkpointWith = (
   counters: quietCounters(),
   dogs: [{ firedInZone: null, id: "kilo" }],
   earnedCents: 4_250,
-  route: ["street", "park"],
+  route: ["distilleryDistrict", "highPark"],
   zonesFinished: 2,
   ...fields,
 });
@@ -50,13 +50,13 @@ describe("loadSave", () => {
 
   it("picks a new save's free dogs, as many as its slots walk", () => {
     const picked = (dogSlots: number[]) =>
-      createDefaultSave({ ...testContext.defaults, dogSlots, freeDogs: ["biscuit", "kilo"] })
+      createDefaultSave({ ...testContext.defaults, dogSlots, freeDogs: ["lady", "kilo"] })
         .lastLoadout.dogs;
-    expect([picked([1]), picked([1, 3])]).toEqual([["biscuit"], ["biscuit", "kilo"]]);
+    expect([picked([1]), picked([1, 3])]).toEqual([["lady"], ["lady", "kilo"]]);
   });
 
   it("keeps every dog a save owns, adding the starters", () => {
-    const dogs: DogId[] = ["duchess", "kilo", "penny"];
+    const dogs: DogId[] = ["ginger", "kilo", "penny"];
     const save = loaded((document) => {
       document.owned.dogs = dogs;
     });
@@ -112,10 +112,12 @@ describe("loadSave", () => {
     [
       "a checkpoint's route, dropping zones the game no longer has",
       (document) => {
-        document.checkpoint = checkpointWith({ route: ["street", "oldZone", "pawsPromenade"] });
+        document.checkpoint = checkpointWith({
+          route: ["distilleryDistrict", "oldZone", "theBeaches"],
+        });
       },
       (save) => save.checkpoint?.route,
-      ["street", "pawsPromenade"],
+      ["distilleryDistrict", "theBeaches"],
     ],
     [
       "an empty loadout, as a stored save keeps it",
@@ -139,10 +141,10 @@ describe("loadSave", () => {
       (document) => {
         document.achievements = ["retiredBadge", "wholeCity"];
         document.stats.dogsFinishedWith = ["kilo", "ghost"];
-        document.stats.zonesEverFinished = ["park", "atlantis"];
+        document.stats.zonesEverFinished = ["highPark", "atlantis"];
       },
       (save) => [save.achievements, save.stats.dogsFinishedWith, save.stats.zonesEverFinished],
-      [["wholeCity"], ["kilo"], ["park"]],
+      [["wholeCity"], ["kilo"], ["highPark"]],
     ],
     [
       "without unknown or duplicate owned ids",
@@ -163,10 +165,10 @@ describe("loadSave", () => {
       },
     ],
     [
-      // pierre is a known dog that this player has not bought.
+      // pepe is a known dog that this player has not bought.
       "without unknown or unowned loadout picks",
       (document) => {
-        document.lastLoadout = { dogs: ["ghost", "penny", "pierre"], gear: "luckyCollar" };
+        document.lastLoadout = { dogs: ["ghost", "penny", "pepe"], gear: "luckyCollar" };
       },
       (save) => save.lastLoadout,
       { dogs: ["penny"], gear: null },
@@ -219,7 +221,7 @@ describe("loadSave", () => {
         document.stats.dogs.ghost = { timesFired: 2, walks: 3, zonesFinished: 4 };
       },
       (save) => Object.keys(save.stats.dogs).sort(),
-      ["biscuit", "kilo"],
+      ["kilo", "lady"],
     ],
     [
       "without bumps by unknown obstacles",
@@ -276,7 +278,10 @@ describe("loadSave", () => {
             bumpsByZone: [2, 1],
             debuffsGot: { retiredDebuff: 1, stinky: 2 },
             firstZone: 1,
-            optionPicks: { capybara: { help: 1, retiredOption: 2 }, retiredCard: { help: 3 } },
+            optionPicks: {
+              escapedCapybara: { help: 1, retiredOption: 2 },
+              retiredCard: { help: 3 },
+            },
             startCents: 1_500,
             tallies: { retiredTally: 4, squirrelPulls: 3 },
           },
@@ -288,7 +293,7 @@ describe("loadSave", () => {
         bumpsByZone: [2, 1],
         debuffsGot: { stinky: 2 },
         firstZone: 1,
-        optionPicks: { capybara: { help: 1 } },
+        optionPicks: { escapedCapybara: { help: 1 } },
         startCents: 1_500,
         tallies: { squirrelPulls: 3 },
       },
@@ -297,12 +302,12 @@ describe("loadSave", () => {
       "without picks of options or cards the game no longer has",
       (document) => {
         document.stats.optionPicks = {
-          capybara: { callZoo: 4, help: 2, retiredOption: 1 },
+          escapedCapybara: { callZoo: 4, help: 2, retiredOption: 1 },
           retiredCard: { help: 5 },
         };
       },
       (save) => save.stats.optionPicks,
-      { capybara: { callZoo: 4, help: 2 } },
+      { escapedCapybara: { callZoo: 4, help: 2 } },
     ],
     [
       "without unknown, removed (pause) or duplicate hints shown",
@@ -382,7 +387,7 @@ describe("loadSave", () => {
       [
         "a loadout of four dogs",
         withChanges((document) => {
-          document.lastLoadout.dogs = ["kilo", "biscuit", "duchess", "penny"];
+          document.lastLoadout.dogs = ["kilo", "lady", "ginger", "penny"];
         }),
       ],
       [

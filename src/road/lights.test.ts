@@ -42,7 +42,7 @@ describe("lightsFrom", () => {
   });
 
   it("reads a sprite's lights, a cone pointing down, steady, in every zone, unless set", () => {
-    const zone = "homeStretch";
+    const zone = "yongeStreet";
     const read = (attach: Record<string, unknown>) =>
       lightsFrom(tableOf(DEF, attach)).attach.get("some-sprite");
     expect(read(ATTACHED)).toEqual([

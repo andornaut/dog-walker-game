@@ -13,7 +13,7 @@ const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
 const owned: Owned = {
   dogSlots: [1],
-  dogs: [...STARTER_DOGS, "duchess", "kilo"],
+  dogs: [...STARTER_DOGS, "ginger", "kilo"],
   gear: [],
   walkers: ["casey"],
 };
@@ -22,7 +22,7 @@ const walk = (earned: number): LastWalk => ({
   earnedCents: dollars(earned),
   firings: [],
   outcome: "finished",
-  route: ["street", "park", "shops", "homeStretch"],
+  route: ["distilleryDistrict", "highPark", "kensingtonMarket", "yongeStreet"],
   zonesFinished: 4,
 });
 
@@ -40,8 +40,8 @@ describe("isAffordable", () => {
           ];
     });
     const cases: readonly [string, Owned, number, Purchase, boolean][] = [
-      ["holds for a dog priced at the bank", owned, 600, { dog: "biscuit", kind: "dog" }, true],
-      ["fails for a dog priced over the bank", owned, 599, { dog: "biscuit", kind: "dog" }, false],
+      ["holds for a dog priced at the bank", owned, 600, { dog: "lady", kind: "dog" }, true],
+      ["fails for a dog priced over the bank", owned, 599, { dog: "lady", kind: "dog" }, false],
       ...slots,
       ["never holds for an owned dog", owned, 100_000, { dog: "kilo", kind: "dog" }, false],
       [

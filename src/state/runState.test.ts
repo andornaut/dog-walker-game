@@ -35,7 +35,7 @@ const startsOf = (dogs: readonly DogId[]) =>
 
 describe("newRun", () => {
   it("starts each owner at full hearts, walking, with the starting purse", () => {
-    const dogs = ["duchess", "reggie", "pierre"] as const;
+    const dogs = ["ginger", "reggie", "pepe"] as const;
     const state = newRun(data, 3, { dogs, gear: null, walker: "casey" });
     expect(heartsByDog(state)).toEqual(startsOf(dogs));
     expect(state.money).toBe(read(TEST_TUNING, "money", "startPurse"));
@@ -47,9 +47,9 @@ describe("newRun", () => {
   // Each pack, as picked, with its lead: the largest dog, ties in roster order.
   it.each([
     [["kilo"], "kilo"],
-    [["pierre", "kilo"], "kilo"],
-    [["duchess", "pierre"], "pierre"],
-    [["duchess", "kilo", "pierre"], "kilo"],
+    [["pepe", "kilo"], "kilo"],
+    [["ginger", "pepe"], "pepe"],
+    [["ginger", "kilo", "pepe"], "kilo"],
   ] as const)(
     "adds the pack-size bonus to the lead's owner's max only, walking %j",
     (dogs, lead) => {
@@ -92,7 +92,7 @@ describe("newRun", () => {
   });
 
   it("takes no more dogs than the player owns slots", () => {
-    const pair = { dogs: ["duchess", "kilo"], gear: null, walker: "casey" } as const;
+    const pair = { dogs: ["ginger", "kilo"], gear: null, walker: "casey" } as const;
     expect(() => newRun(data, 1, pair)).toThrow("needs that many dog slots");
     expect(heartsByDog(newRun(data, 2, pair))).toEqual(startsOf(pair.dogs));
     expect(newRun(data, 1, { dogs: ["kilo"], gear: null, walker: "casey" }).pack).toHaveLength(1);
@@ -106,7 +106,7 @@ describe("newRun", () => {
 
   it("survives a round trip through JSON unchanged", () => {
     const state = newRun(data, 3, {
-      dogs: ["duchess", "kilo"],
+      dogs: ["ginger", "kilo"],
       gear: "luckyCollar",
       walker: "casey",
     });

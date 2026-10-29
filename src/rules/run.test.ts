@@ -28,7 +28,7 @@ const stinky = { debuffs: [{ debuff: "stinky", secondsLeft: 20, untilZone: 0 }] 
 
 describe("tipValue", () => {
   const tip = read(TEST_TUNING, "money", "tip");
-  const three = { duchess: 5, kilo: 5, reggie: 5 };
+  const three = { ginger: 5, kilo: 5, reggie: 5 };
 
   it("pays tips by their modifiers", () => {
     for (const [, state, amount] of [
@@ -75,14 +75,14 @@ describe("payZone", () => {
 
   it("banks each walking dog's pay", () => {
     for (const [, run, walking] of [
-      ["a lone dog", testState({ duchess: 5 }), ["duchess"]],
+      ["a lone dog", testState({ ginger: 5 }), ["ginger"]],
       [
         "two dogs walking of three",
-        testState({ buddy: 3, duchess: 5, kilo: "fired" }),
-        ["buddy", "duchess"],
+        testState({ buddy: 3, ginger: 5, kilo: "fired" }),
+        ["buddy", "ginger"],
       ],
-      ["three dogs", testState({ buddy: 3, duchess: 5, kilo: 5 }), ["buddy", "duchess", "kilo"]],
-    ] satisfies readonly [string, RunState, readonly ("buddy" | "duchess" | "kilo")[]][]) {
+      ["three dogs", testState({ buddy: 3, ginger: 5, kilo: 5 }), ["buddy", "ginger", "kilo"]],
+    ] satisfies readonly [string, RunState, readonly ("buddy" | "ginger" | "kilo")[]][]) {
       const { changes, state } = payZone(data, { ...run, money: cents(500) });
       expect(state.money).toBe(500 + pay * walking.length);
       expect(state.zoneEndMoney).toBe(state.money);
@@ -100,7 +100,7 @@ describe("payZone", () => {
   it.each(WORLD.zones.map((zone) => [zone.name, zone.id as ZoneId] as const))(
     "pays each dog the same in %s as in every zone",
     (_name, zone) => {
-      const run = testState({ buddy: 5, duchess: 5, kilo: 5 }, { route: [zone] });
+      const run = testState({ buddy: 5, ginger: 5, kilo: 5 }, { route: [zone] });
       const { changes } = payZone(data, run);
       expect(changes.map(({ amount, causes }) => ({ amount, causes }))).toEqual(
         Array.from({ length: 3 }, () => ({ amount: pay, causes: [{ amount: pay, kind: "pay" }] })),
@@ -116,10 +116,10 @@ describe("fullPackBonus", () => {
     for (const [, run, paid] of [
       [
         "pays the bonus once when every dog is still walking",
-        testState({ buddy: 3, duchess: 5 }),
+        testState({ buddy: 3, ginger: 5 }),
         1,
       ],
-      ["pays nothing once an owner has fired you", testState({ buddy: "fired", duchess: 5 }), 0],
+      ["pays nothing once an owner has fired you", testState({ buddy: "fired", ginger: 5 }), 0],
     ] satisfies readonly [string, RunState, number][]) {
       const { changes, state } = fullPackBonus(data, run);
       expect(state.money).toBe(run.money + bonus * paid);
@@ -130,10 +130,10 @@ describe("fullPackBonus", () => {
 
 describe("fireOwnersAtZero", () => {
   it("marks the dog fired and keeps the money banked", () => {
-    const banked = payZone(data, testState({ buddy: 5, duchess: 5 })).state;
+    const banked = payZone(data, testState({ buddy: 5, ginger: 5 })).state;
     const emptied = {
       ...banked,
-      pack: testState({ buddy: 0, duchess: 1 }).pack,
+      pack: testState({ buddy: 0, ginger: 1 }).pack,
       zoneIndex: 2,
     };
     const { fired, state } = fireOwnersAtZero(emptied);
@@ -143,15 +143,15 @@ describe("fireOwnersAtZero", () => {
     expect(state.phase).toEqual({ kind: "walking" });
     expect(state.pack).toEqual([
       { dog: "buddy", status: "fired", zoneIndex: 2 },
-      { dog: "duchess", hearts: 1, status: "walking" },
+      { dog: "ginger", hearts: 1, status: "walking" },
     ]);
-    expect(heartsByDog(state)).toEqual({ duchess: 1 });
+    expect(heartsByDog(state)).toEqual({ ginger: 1 });
   });
 
   it("pays the fired dog nothing at the end of the zone it was fired in", () => {
-    const { state } = fireOwnersAtZero(testState({ buddy: 0, duchess: 5 }));
+    const { state } = fireOwnersAtZero(testState({ buddy: 0, ginger: 5 }));
     const { changes } = payZone(data, state);
-    expect(changes.map((change) => change.dog)).toEqual(["duchess"]);
+    expect(changes.map((change) => change.dog)).toEqual(["ginger"]);
   });
 });
 
@@ -168,7 +168,7 @@ describe("endReasonOf", () => {
 
 describe("walkEarnings", () => {
   // Paid at a zone's end, then a tip earned in the next zone.
-  const paid = payZone(data, testState({ buddy: 5, duchess: 5 })).state;
+  const paid = payZone(data, testState({ buddy: 5, ginger: 5 })).state;
   const tip = tipValue(data, paid).amount;
   const tipped: RunState = { ...paid, money: cents(paid.money + tip) };
   // A card cost that spends the tip and some of the zone's end money too.

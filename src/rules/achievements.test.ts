@@ -171,7 +171,7 @@ describe("profile conditions", () => {
     n: number,
   ) => ({ count: n, kind }) as const;
   const helpKeeper = (n: number) =>
-    ({ count: n, encounter: "capybara", kind: "optionPicks", option: "help" }) as const;
+    ({ count: n, encounter: "escapedCapybara", kind: "optionPicks", option: "help" }) as const;
   const tally = (name: TallyId, n: number) => ({ count: n, kind: "tally", tally: name }) as const;
   const birds = (n: number) => ({ count: n, kind: "bumps", kinds: ["goose", "pigeons"] }) as const;
   const lifetime = { dollars: 200, kind: "lifetimeEarnings" } as const;
@@ -214,19 +214,19 @@ describe("profile conditions", () => {
     [
       "optionPicks below the count",
       helpKeeper(10),
-      withStats({ optionPicks: { capybara: { help: 9 } } }),
+      withStats({ optionPicks: { escapedCapybara: { help: 9 } } }),
       false,
     ],
     [
       "optionPicks at the count",
       helpKeeper(10),
-      withStats({ optionPicks: { capybara: { help: 10 } } }),
+      withStats({ optionPicks: { escapedCapybara: { help: 10 } } }),
       true,
     ],
     [
       "optionPicks, another option of the card",
       helpKeeper(10),
-      withStats({ optionPicks: { capybara: { callZoo: 10, drag: 10 } } }),
+      withStats({ optionPicks: { escapedCapybara: { callZoo: 10, drag: 10 } } }),
       false,
     ],
     [
@@ -238,7 +238,7 @@ describe("profile conditions", () => {
     [
       "timesFired at the count, over every owner",
       count("timesFired", 10),
-      withStats({ dogs: { biscuit: firedTimes(4), kilo: firedTimes(6) } }),
+      withStats({ dogs: { kilo: firedTimes(6), lady: firedTimes(4) } }),
       true,
     ],
     ["tally below", tally("dodges", 5), withStats({ tallies: { dodges: 4 } }), false],
@@ -494,18 +494,18 @@ describe("counters", () => {
   it("counts option picks by encounter and option id, each apart", () => {
     const run = testState({ kilo: 5 });
     const picked = [
-      ["capybara", "help"],
-      ["capybara", "help"],
-      ["capybara", "drag"],
-      ["greenBin", "wadeThrough"],
+      ["escapedCapybara", "help"],
+      ["escapedCapybara", "help"],
+      ["escapedCapybara", "drag"],
+      ["greenBinSpill", "wadeThrough"],
     ] as const;
     const after = picked.reduce(
       (state, [encounter, option]) => countOptionPick(encounter, option, state),
       run,
     );
     expect(after.optionPicks).toEqual({
-      capybara: { drag: 1, help: 2 },
-      greenBin: { wadeThrough: 1 },
+      escapedCapybara: { drag: 1, help: 2 },
+      greenBinSpill: { wadeThrough: 1 },
     });
     expect(runCountersOf(after).optionPicks).toEqual(after.optionPicks);
   });

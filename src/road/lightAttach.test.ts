@@ -26,7 +26,7 @@ vi.mock("../../shared/lights.json", async (importOriginal) => {
         "test-lamp": [{ angle: 180, dx: 4, dy: -6, facesRoad: true, light: "test-beam" }],
         "test-rider": [{ dx: 0, dy: -10, light: "test-beam" }],
         "test-sprite": [
-          { dx: 10, dy: -20, light: "test-glow", pulse: [1, 0.6, 0.2], zones: ["homeStretch"] },
+          { dx: 10, dy: -20, light: "test-glow", pulse: [1, 0.6, 0.2], zones: ["yongeStreet"] },
           { angle: 180, dx: 4, dy: 0, light: "test-beam" },
         ],
       },
@@ -94,7 +94,7 @@ describe("placeAttachedLights", () => {
       ],
     },
   ])("follows $name", ({ anchor, want }) => {
-    expect(placed("homeStretch", [anchor])).toEqual(want);
+    expect(placed("yongeStreet", [anchor])).toEqual(want);
   });
 
   // A lamp's beam, set out for the road's right, points left toward the road there and right
@@ -103,33 +103,33 @@ describe("placeAttachedLights", () => {
     { leftOfRoad: false, rotation: QUARTER, x: 302 },
     { leftOfRoad: true, rotation: -QUARTER, x: 298 },
   ])("turns a lamp left of the road $leftOfRoad toward the road", ({ leftOfRoad, ...want }) => {
-    expect(placed("shops", [anchorOf({ key: "test-lamp", leftOfRoad })])).toEqual([
+    expect(placed("kensingtonMarket", [anchorOf({ key: "test-lamp", leftOfRoad })])).toEqual([
       { ...beam, ...want, y: 197 },
     ]);
   });
 
   // A sprite drawn facing the pack shines its headlamp down the screen, flipped or not.
   it.each([false, true])("shines a rider's headlamp down, flipped %s", (flipX) => {
-    expect(placed("shops", [anchorOf({ flipX, key: "test-rider" })])).toEqual([
+    expect(placed("kensingtonMarket", [anchorOf({ flipX, key: "test-rider" })])).toEqual([
       { ...beam, rotation: 0, x: 300, y: 195 },
     ]);
   });
 
   it("leaves out a light in a zone it does not show in", () => {
-    expect(placed("shops", [anchorOf({})]).map(({ key }) => key)).toEqual(["test-beam"]);
+    expect(placed("kensingtonMarket", [anchorOf({})]).map(({ key }) => key)).toEqual(["test-beam"]);
   });
 
   it("follows each sprite, at its own place and scale", () => {
     const near = anchorOf({ scale: 1, x: 100, y: 400 });
     const far = anchorOf({ scale: 0.25, x: 200, y: 150 });
-    expect(placed("shops", [near, far])).toEqual([
+    expect(placed("kensingtonMarket", [near, far])).toEqual([
       { ...beam, groundY: 400, rotation: QUARTER, scale: 1, x: 104, y: 400 },
       { ...beam, anchor: 1, groundY: 150, rotation: QUARTER, scale: 0.25, x: 201, y: 150 },
     ]);
   });
 
   it("places nothing for a sprite that carries no light", () => {
-    expect(placed("homeStretch", [anchorOf({ key: "no-such-sprite" })])).toEqual([]);
+    expect(placed("yongeStreet", [anchorOf({ key: "no-such-sprite" })])).toEqual([]);
   });
 });
 

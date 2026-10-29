@@ -1,43 +1,43 @@
 {
   "cards": [
     {
-      "art": "card-capybara-help",
+      "art": "card-big-screen-promo-wave",
       "frame": "encounter",
-      "id": "help",
+      "id": "wave",
       "index": 0,
-      "name": "Help the keeper",
+      "name": "Wave hello",
       "source": {
-        "id": "capybara",
+        "id": "bigScreenPromo",
         "kind": "encounter"
       },
-      "text": "Muddy: slower for 30s",
-      "title": "Escaped capybara"
+      "text": "Spotlight: bumps cost $20 for 30s",
+      "title": "Big screen promo"
     },
     {
-      "art": "card-capybara-call-zoo",
+      "art": "card-big-screen-promo-merch",
       "frame": "encounter",
-      "id": "call-zoo",
+      "id": "merch",
       "index": 1,
-      "name": "Call the zoo",
+      "name": "Buy the merch",
       "source": {
-        "id": "capybara",
+        "id": "bigScreenPromo",
         "kind": "encounter"
       },
       "text": "−$20",
-      "title": "Escaped capybara"
+      "title": "Big screen promo"
     },
     {
-      "art": "card-capybara-drag",
+      "art": "card-big-screen-promo-push-through",
       "frame": "encounter",
-      "id": "drag",
+      "id": "push-through",
       "index": 2,
-      "name": "Drag them away",
+      "name": "Push through",
       "source": {
-        "id": "capybara",
+        "id": "bigScreenPromo",
         "kind": "encounter"
       },
       "text": "−1♥ each",
-      "title": "Escaped capybara"
+      "title": "Big screen promo"
     },
     {
       "art": "card-cheese-crates-sniff",
@@ -79,78 +79,117 @@
       "title": "Cheese crates"
     },
     {
-      "art": "card-dropped-cone-lick",
+      "art": "card-dropped-ice-cream-lick",
       "frame": "encounter",
       "id": "lick",
       "index": 0,
       "name": "Let them lick it",
       "source": {
-        "id": "droppedCone",
+        "id": "droppedIceCream",
         "kind": "encounter"
       },
       "text": "Muddy: slower for 30s",
       "title": "Dropped ice cream"
     },
     {
-      "art": "card-dropped-cone-buy",
+      "art": "card-dropped-ice-cream-buy",
       "frame": "encounter",
       "id": "buy",
       "index": 1,
       "name": "Buy a new cone",
       "source": {
-        "id": "droppedCone",
+        "id": "droppedIceCream",
         "kind": "encounter"
       },
       "text": "−$20",
       "title": "Dropped ice cream"
     },
     {
-      "art": "card-dropped-cone-walk-on-by",
+      "art": "card-dropped-ice-cream-walk-on-by",
       "frame": "encounter",
       "id": "walk-on-by",
       "index": 2,
       "name": "Walk on by",
       "source": {
-        "id": "droppedCone",
+        "id": "droppedIceCream",
         "kind": "encounter"
       },
       "text": "−1♥ each",
       "title": "Dropped ice cream"
     },
     {
-      "art": "card-green-bin-wade-through",
+      "art": "card-escaped-capybara-help",
+      "frame": "encounter",
+      "id": "help",
+      "index": 0,
+      "name": "Help the keeper",
+      "source": {
+        "id": "escapedCapybara",
+        "kind": "encounter"
+      },
+      "text": "Muddy: slower for 30s",
+      "title": "Escaped capybara"
+    },
+    {
+      "art": "card-escaped-capybara-call-zoo",
+      "frame": "encounter",
+      "id": "call-zoo",
+      "index": 1,
+      "name": "Call the zoo",
+      "source": {
+        "id": "escapedCapybara",
+        "kind": "encounter"
+      },
+      "text": "−$20",
+      "title": "Escaped capybara"
+    },
+    {
+      "art": "card-escaped-capybara-drag",
+      "frame": "encounter",
+      "id": "drag",
+      "index": 2,
+      "name": "Drag them away",
+      "source": {
+        "id": "escapedCapybara",
+        "kind": "encounter"
+      },
+      "text": "−1♥ each",
+      "title": "Escaped capybara"
+    },
+    {
+      "art": "card-green-bin-spill-wade-through",
       "frame": "encounter",
       "id": "wade-through",
       "index": 0,
       "name": "Wade through",
       "source": {
-        "id": "greenBin",
+        "id": "greenBinSpill",
         "kind": "encounter"
       },
       "text": "Muddy: slower for 30s",
       "title": "Green bin spill"
     },
     {
-      "art": "card-green-bin-pay",
+      "art": "card-green-bin-spill-pay",
       "frame": "encounter",
       "id": "pay",
       "index": 1,
       "name": "Pay for cleanup",
       "source": {
-        "id": "greenBin",
+        "id": "greenBinSpill",
         "kind": "encounter"
       },
       "text": "−$20",
       "title": "Green bin spill"
     },
     {
-      "art": "card-green-bin-hurry-past",
+      "art": "card-green-bin-spill-hurry-past",
       "frame": "encounter",
       "id": "hurry-past",
       "index": 2,
       "name": "Hurry past",
       "source": {
-        "id": "greenBin",
+        "id": "greenBinSpill",
         "kind": "encounter"
       },
       "text": "−1♥ each",
@@ -220,45 +259,6 @@
       },
       "text": "Zoomies: drifts for 40s",
       "title": "Porch cat"
-    },
-    {
-      "art": "card-promo-team-wave",
-      "frame": "encounter",
-      "id": "wave",
-      "index": 0,
-      "name": "Wave hello",
-      "source": {
-        "id": "promoTeam",
-        "kind": "encounter"
-      },
-      "text": "Spotlight: bumps cost $20 for 30s",
-      "title": "Big screen promo"
-    },
-    {
-      "art": "card-promo-team-merch",
-      "frame": "encounter",
-      "id": "merch",
-      "index": 1,
-      "name": "Buy the merch",
-      "source": {
-        "id": "promoTeam",
-        "kind": "encounter"
-      },
-      "text": "−$20",
-      "title": "Big screen promo"
-    },
-    {
-      "art": "card-promo-team-push-through",
-      "frame": "encounter",
-      "id": "push-through",
-      "index": 2,
-      "name": "Push through",
-      "source": {
-        "id": "promoTeam",
-        "kind": "encounter"
-      },
-      "text": "−1♥ each",
-      "title": "Big screen promo"
     },
     {
       "art": "card-skunk-grooming",
@@ -339,39 +339,39 @@
       "title": "Thief"
     },
     {
-      "art": "card-wedding-shoot-pose",
+      "art": "card-wedding-photo-shoot-pose",
       "frame": "encounter",
       "id": "pose",
       "index": 0,
       "name": "Pose",
       "source": {
-        "id": "weddingShoot",
+        "id": "weddingPhotoShoot",
         "kind": "encounter"
       },
       "text": "Spotlight: bumps cost $20 for 30s",
       "title": "Wedding photo shoot"
     },
     {
-      "art": "card-wedding-shoot-walk-around",
+      "art": "card-wedding-photo-shoot-walk-around",
       "frame": "encounter",
       "id": "walk-around",
       "index": 1,
       "name": "Walk around",
       "source": {
-        "id": "weddingShoot",
+        "id": "weddingPhotoShoot",
         "kind": "encounter"
       },
       "text": "−1♥ each",
       "title": "Wedding photo shoot"
     },
     {
-      "art": "card-wedding-shoot-reshoot",
+      "art": "card-wedding-photo-shoot-reshoot",
       "frame": "encounter",
       "id": "reshoot",
       "index": 2,
       "name": "Pay for a reshoot",
       "source": {
-        "id": "weddingShoot",
+        "id": "weddingPhotoShoot",
         "kind": "encounter"
       },
       "text": "−$20",
@@ -380,11 +380,11 @@
     {
       "art": "card-zone-high-park",
       "frame": "route",
-      "id": "park",
+      "id": "highPark",
       "index": null,
       "name": "High Park",
       "source": {
-        "id": "park",
+        "id": "highPark",
         "kind": "fork"
       },
       "text": "Easiest",
@@ -393,11 +393,11 @@
     {
       "art": "card-zone-cabbagetown",
       "frame": "route",
-      "id": "snoozeCrescent",
+      "id": "cabbagetown",
       "index": null,
       "name": "Cabbagetown",
       "source": {
-        "id": "snoozeCrescent",
+        "id": "cabbagetown",
         "kind": "fork"
       },
       "text": "Easy",
@@ -406,11 +406,11 @@
     {
       "art": "card-zone-kensington-market",
       "frame": "route",
-      "id": "shops",
+      "id": "kensingtonMarket",
       "index": null,
       "name": "Kensington Market",
       "source": {
-        "id": "shops",
+        "id": "kensingtonMarket",
         "kind": "fork"
       },
       "text": "Normal",
@@ -419,11 +419,11 @@
     {
       "art": "card-zone-the-beaches",
       "frame": "route",
-      "id": "pawsPromenade",
+      "id": "theBeaches",
       "index": null,
       "name": "The Beaches",
       "source": {
-        "id": "pawsPromenade",
+        "id": "theBeaches",
         "kind": "fork"
       },
       "text": "Normal",
@@ -432,11 +432,11 @@
     {
       "art": "card-zone-distillery-district",
       "frame": "route",
-      "id": "street",
+      "id": "distilleryDistrict",
       "index": null,
       "name": "Distillery District",
       "source": {
-        "id": "street",
+        "id": "distilleryDistrict",
         "kind": "fork"
       },
       "text": "Hard",
@@ -445,11 +445,11 @@
     {
       "art": "card-zone-yonge-street",
       "frame": "route",
-      "id": "homeStretch",
+      "id": "yongeStreet",
       "index": null,
       "name": "Yonge Street",
       "source": {
-        "id": "homeStretch",
+        "id": "yongeStreet",
         "kind": "fork"
       },
       "text": "Hardest",
@@ -618,33 +618,6 @@
       }
     },
     {
-      "id": "biscuit",
-      "art": "biscuit",
-      "breed": "Beagle",
-      "look": "Tricolour, floppy ears, green collar",
-      "name": "Lady",
-      "owner": {
-        "name": "Clare",
-        "role": "Psychologist"
-      },
-      "price": "biscuit",
-      "size": "medium",
-      "unlock": "shop",
-      "figures": {
-        "maxHearts": 3,
-        "startHearts": 3,
-        "startMood": "happy"
-      },
-      "keys": {
-        "dogCardTag": "biscuit",
-        "face": "face-dog-biscuit",
-        "ownerCardFace": "face-owner-biscuit-20",
-        "ownerFace": "face-owner-biscuit",
-        "portrait": "portrait-dog-biscuit",
-        "sprite": "dog-biscuit"
-      }
-    },
-    {
       "id": "buddy",
       "art": "buddy",
       "breed": "Jack Russell",
@@ -672,8 +645,8 @@
       }
     },
     {
-      "id": "duchess",
-      "art": "duchess",
+      "id": "ginger",
+      "art": "ginger",
       "breed": "Maltese",
       "look": "White coat, pink bow",
       "name": "Ginger",
@@ -681,7 +654,7 @@
         "name": "Eve",
         "role": "YouTuber"
       },
-      "price": "duchess",
+      "price": "ginger",
       "size": "small",
       "unlock": "shop",
       "figures": {
@@ -690,12 +663,12 @@
         "startMood": "happy"
       },
       "keys": {
-        "dogCardTag": "duchess",
-        "face": "face-dog-duchess",
-        "ownerCardFace": "face-owner-duchess-20",
-        "ownerFace": "face-owner-duchess",
-        "portrait": "portrait-dog-duchess",
-        "sprite": "dog-duchess"
+        "dogCardTag": "ginger",
+        "face": "face-dog-ginger",
+        "ownerCardFace": "face-owner-ginger-20",
+        "ownerFace": "face-owner-ginger",
+        "portrait": "portrait-dog-ginger",
+        "sprite": "dog-ginger"
       }
     },
     {
@@ -726,6 +699,33 @@
       }
     },
     {
+      "id": "lady",
+      "art": "lady",
+      "breed": "Beagle",
+      "look": "Tricolour, floppy ears, green collar",
+      "name": "Lady",
+      "owner": {
+        "name": "Clare",
+        "role": "Psychologist"
+      },
+      "price": "lady",
+      "size": "medium",
+      "unlock": "shop",
+      "figures": {
+        "maxHearts": 3,
+        "startHearts": 3,
+        "startMood": "happy"
+      },
+      "keys": {
+        "dogCardTag": "lady",
+        "face": "face-dog-lady",
+        "ownerCardFace": "face-owner-lady-20",
+        "ownerFace": "face-owner-lady",
+        "portrait": "portrait-dog-lady",
+        "sprite": "dog-lady"
+      }
+    },
+    {
       "id": "penny",
       "art": "penny",
       "breed": "Golden Retriever mix",
@@ -753,8 +753,8 @@
       }
     },
     {
-      "id": "pierre",
-      "art": "pierre",
+      "id": "pepe",
+      "art": "pepe",
       "breed": "Miniature Poodle",
       "look": "Black coat, a white stripe from head to tail tip, show-clip pom-poms",
       "name": "Pepe",
@@ -762,7 +762,7 @@
         "name": "Ms. Tara",
         "role": "Dog-Show Judge"
       },
-      "price": "pierre",
+      "price": "pepe",
       "size": "medium",
       "unlock": "shop",
       "figures": {
@@ -771,12 +771,12 @@
         "startMood": "happy"
       },
       "keys": {
-        "dogCardTag": "pierre",
-        "face": "face-dog-pierre",
-        "ownerCardFace": "face-owner-pierre-20",
-        "ownerFace": "face-owner-pierre",
-        "portrait": "portrait-dog-pierre",
-        "sprite": "dog-pierre"
+        "dogCardTag": "pepe",
+        "face": "face-dog-pepe",
+        "ownerCardFace": "face-owner-pepe-20",
+        "ownerFace": "face-owner-pepe",
+        "portrait": "portrait-dog-pepe",
+        "sprite": "dog-pepe"
       }
     },
     {
@@ -807,8 +807,8 @@
       }
     },
     {
-      "id": "snowball",
-      "art": "snowball",
+      "id": "sequoia",
+      "art": "sequoia",
       "breed": "Great Pyrenees",
       "look": "Giant white fluff, collar with a bell",
       "name": "Sequoia",
@@ -816,7 +816,7 @@
         "name": "Aunt Judy",
         "role": "Tennis Star"
       },
-      "price": "snowball",
+      "price": "sequoia",
       "size": "large",
       "unlock": "shop",
       "figures": {
@@ -825,57 +825,50 @@
         "startMood": "happy"
       },
       "keys": {
-        "dogCardTag": "snowball",
-        "face": "face-dog-snowball",
-        "ownerCardFace": "face-owner-snowball-20",
-        "ownerFace": "face-owner-snowball",
-        "portrait": "portrait-dog-snowball",
-        "sprite": "dog-snowball"
+        "dogCardTag": "sequoia",
+        "face": "face-dog-sequoia",
+        "ownerCardFace": "face-owner-sequoia-20",
+        "ownerFace": "face-owner-sequoia",
+        "portrait": "portrait-dog-sequoia",
+        "sprite": "dog-sequoia"
       }
     }
   ],
   "encounters": [
     {
-      "id": "capybara",
-      "hitLabel": "CAPYBARA!",
-      "hitWord": "SQUEAK!",
+      "id": "bigScreenPromo",
+      "hitLabel": "FREE SAMPLE!",
+      "hitWord": "FLASH!",
       "kind": "obstacle",
-      "movement": {
-        "kind": "step",
-        "steps": {
-          "max": 2,
-          "min": 1
-        }
-      },
-      "name": "Escaped capybara",
+      "name": "Big screen promo",
       "resolution": {
         "kind": "card",
         "options": [
           {
-            "art": "card-capybara-help",
+            "art": "card-big-screen-promo-wave",
             "effects": [
               {
-                "debuff": "muddy",
+                "debuff": "spotlight",
                 "kind": "debuff"
               }
             ],
-            "id": "help",
-            "name": "Help the keeper"
+            "id": "wave",
+            "name": "Wave hello"
           },
           {
-            "art": "card-capybara-call-zoo",
+            "art": "card-big-screen-promo-merch",
             "effects": [
               {
-                "amount": "capybaraCall",
+                "amount": "promoMerch",
                 "change": "lose",
                 "kind": "money"
               }
             ],
-            "id": "callZoo",
-            "name": "Call the zoo"
+            "id": "merch",
+            "name": "Buy the merch"
           },
           {
-            "art": "card-capybara-drag",
+            "art": "card-big-screen-promo-push-through",
             "effects": [
               {
                 "amount": -1,
@@ -885,8 +878,8 @@
                 }
               }
             ],
-            "id": "drag",
-            "name": "Drag them away"
+            "id": "pushThrough",
+            "name": "Push through"
           }
         ]
       },
@@ -895,9 +888,9 @@
         "rows": 1
       },
       "zones": [
-        "park"
+        "yongeStreet"
       ],
-      "spriteKey": "capybara"
+      "spriteKey": "big-screen-promo"
     },
     {
       "id": "cheeseCrates",
@@ -952,13 +945,13 @@
         "rows": 1
       },
       "zones": [
-        "shops",
-        "street"
+        "kensingtonMarket",
+        "distilleryDistrict"
       ],
       "spriteKey": "cheese-crates"
     },
     {
-      "id": "droppedCone",
+      "id": "droppedIceCream",
       "hitLabel": "MELTDOWN!",
       "hitWord": "SPLAT!",
       "kind": "obstacle",
@@ -967,7 +960,7 @@
         "kind": "card",
         "options": [
           {
-            "art": "card-dropped-cone-lick",
+            "art": "card-dropped-ice-cream-lick",
             "effects": [
               {
                 "debuff": "muddy",
@@ -978,7 +971,7 @@
             "name": "Let them lick it"
           },
           {
-            "art": "card-dropped-cone-buy",
+            "art": "card-dropped-ice-cream-buy",
             "effects": [
               {
                 "amount": "newCone",
@@ -990,7 +983,7 @@
             "name": "Buy a new cone"
           },
           {
-            "art": "card-dropped-cone-walk-on-by",
+            "art": "card-dropped-ice-cream-walk-on-by",
             "effects": [
               {
                 "amount": -1,
@@ -1010,12 +1003,100 @@
         "rows": 1
       },
       "zones": [
-        "pawsPromenade"
+        "theBeaches"
       ],
-      "spriteKey": "dropped-cone"
+      "spriteKey": "dropped-ice-cream"
     },
     {
-      "id": "greenBin",
+      "id": "escapedCapybara",
+      "hitLabel": "CAPYBARA!",
+      "hitWord": "SQUEAK!",
+      "kind": "obstacle",
+      "movement": {
+        "kind": "step",
+        "steps": {
+          "max": 2,
+          "min": 1
+        }
+      },
+      "name": "Escaped capybara",
+      "resolution": {
+        "kind": "card",
+        "options": [
+          {
+            "art": "card-escaped-capybara-help",
+            "effects": [
+              {
+                "debuff": "muddy",
+                "kind": "debuff"
+              }
+            ],
+            "id": "help",
+            "name": "Help the keeper"
+          },
+          {
+            "art": "card-escaped-capybara-call-zoo",
+            "effects": [
+              {
+                "amount": "escapedCapybaraCall",
+                "change": "lose",
+                "kind": "money"
+              }
+            ],
+            "id": "callZoo",
+            "name": "Call the zoo"
+          },
+          {
+            "art": "card-escaped-capybara-drag",
+            "effects": [
+              {
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "id": "drag",
+            "name": "Drag them away"
+          }
+        ]
+      },
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "highPark"
+      ],
+      "spriteKey": "escaped-capybara"
+    },
+    {
+      "id": "friendlyNeighbour",
+      "kind": "lucky",
+      "movement": {
+        "kind": "step",
+        "steps": {
+          "max": 2,
+          "min": 1
+        }
+      },
+      "name": "Friendly neighbour",
+      "resolution": {
+        "art": "card-friendly-neighbour-take",
+        "effects": [
+          {
+            "amount": "neighbourHearts",
+            "kind": "sharedHearts"
+          }
+        ],
+        "kind": "instant",
+        "tally": "neighboursMet"
+      },
+      "spriteKey": "friendly-neighbour"
+    },
+    {
+      "id": "greenBinSpill",
       "hitLabel": "BIN SPILL!",
       "hitWord": "GLOP!",
       "kind": "obstacle",
@@ -1024,7 +1105,7 @@
         "kind": "card",
         "options": [
           {
-            "art": "card-green-bin-wade-through",
+            "art": "card-green-bin-spill-wade-through",
             "effects": [
               {
                 "debuff": "muddy",
@@ -1035,10 +1116,10 @@
             "name": "Wade through"
           },
           {
-            "art": "card-green-bin-pay",
+            "art": "card-green-bin-spill-pay",
             "effects": [
               {
-                "amount": "greenBinCleanUp",
+                "amount": "greenBinSpillCleanUp",
                 "change": "lose",
                 "kind": "money"
               }
@@ -1047,7 +1128,7 @@
             "name": "Pay for cleanup"
           },
           {
-            "art": "card-green-bin-hurry-past",
+            "art": "card-green-bin-spill-hurry-past",
             "effects": [
               {
                 "amount": -1,
@@ -1067,9 +1148,9 @@
         "rows": 1
       },
       "zones": [
-        "shops"
+        "kensingtonMarket"
       ],
-      "spriteKey": "green-bin"
+      "spriteKey": "green-bin-spill"
     },
     {
       "id": "lostWallet",
@@ -1146,30 +1227,6 @@
       "spriteKey": "other-dog"
     },
     {
-      "id": "pettingNeighbour",
-      "kind": "lucky",
-      "movement": {
-        "kind": "step",
-        "steps": {
-          "max": 2,
-          "min": 1
-        }
-      },
-      "name": "Friendly neighbour",
-      "resolution": {
-        "art": "card-petting-neighbour-take",
-        "effects": [
-          {
-            "amount": "neighbourHearts",
-            "kind": "sharedHearts"
-          }
-        ],
-        "kind": "instant",
-        "tally": "neighboursMet"
-      },
-      "spriteKey": "petting-neighbour"
-    },
-    {
       "id": "porchCat",
       "hitLabel": "STANDOFF!",
       "hitWord": "HISS!",
@@ -1222,7 +1279,7 @@
         "rows": 1
       },
       "zones": [
-        "snoozeCrescent"
+        "cabbagetown"
       ],
       "spriteKey": "porch-cat"
     },
@@ -1245,67 +1302,10 @@
         "rows": 1
       },
       "zones": [
-        "shops",
-        "homeStretch"
+        "kensingtonMarket",
+        "yongeStreet"
       ],
       "spriteKey": "pothole"
-    },
-    {
-      "id": "promoTeam",
-      "hitLabel": "FREE SAMPLE!",
-      "hitWord": "FLASH!",
-      "kind": "obstacle",
-      "name": "Big screen promo",
-      "resolution": {
-        "kind": "card",
-        "options": [
-          {
-            "art": "card-promo-team-wave",
-            "effects": [
-              {
-                "debuff": "spotlight",
-                "kind": "debuff"
-              }
-            ],
-            "id": "wave",
-            "name": "Wave hello"
-          },
-          {
-            "art": "card-promo-team-merch",
-            "effects": [
-              {
-                "amount": "promoMerch",
-                "change": "lose",
-                "kind": "money"
-              }
-            ],
-            "id": "merch",
-            "name": "Buy the merch"
-          },
-          {
-            "art": "card-promo-team-push-through",
-            "effects": [
-              {
-                "amount": -1,
-                "kind": "hearts",
-                "target": {
-                  "kind": "affected"
-                }
-              }
-            ],
-            "id": "pushThrough",
-            "name": "Push through"
-          }
-        ]
-      },
-      "shape": {
-        "lanes": 1,
-        "rows": 1
-      },
-      "zones": [
-        "homeStretch"
-      ],
-      "spriteKey": "promo-team"
     },
     {
       "id": "puddle",
@@ -1326,9 +1326,9 @@
         "rows": 1
       },
       "zones": [
-        "snoozeCrescent",
-        "park",
-        "pawsPromenade"
+        "cabbagetown",
+        "highPark",
+        "theBeaches"
       ],
       "spriteKey": "puddle"
     },
@@ -1477,7 +1477,7 @@
       "spriteKey": "thief"
     },
     {
-      "id": "weddingShoot",
+      "id": "weddingPhotoShoot",
       "hitLabel": "SAY CHEESE!",
       "hitWord": "CLICK!",
       "kind": "obstacle",
@@ -1486,7 +1486,7 @@
         "kind": "card",
         "options": [
           {
-            "art": "card-wedding-shoot-pose",
+            "art": "card-wedding-photo-shoot-pose",
             "effects": [
               {
                 "debuff": "spotlight",
@@ -1497,7 +1497,7 @@
             "name": "Pose"
           },
           {
-            "art": "card-wedding-shoot-walk-around",
+            "art": "card-wedding-photo-shoot-walk-around",
             "effects": [
               {
                 "amount": -1,
@@ -1511,7 +1511,7 @@
             "name": "Walk around"
           },
           {
-            "art": "card-wedding-shoot-reshoot",
+            "art": "card-wedding-photo-shoot-reshoot",
             "effects": [
               {
                 "amount": "weddingApology",
@@ -1529,10 +1529,10 @@
         "rows": 1
       },
       "zones": [
-        "pawsPromenade",
-        "street"
+        "theBeaches",
+        "distilleryDistrict"
       ],
-      "spriteKey": "wedding-shoot"
+      "spriteKey": "wedding-photo-shoot"
     }
   ],
   "gear": [
@@ -1652,7 +1652,7 @@
         "rows": 1
       },
       "zones": [
-        "street"
+        "distilleryDistrict"
       ],
       "spriteKey": "art-sculpture"
     },
@@ -1682,7 +1682,7 @@
         "rows": 1
       },
       "zones": [
-        "street"
+        "distilleryDistrict"
       ],
       "spriteKey": "barrel-stack"
     },
@@ -1694,7 +1694,7 @@
         "rows": 1
       },
       "zones": [
-        "pawsPromenade"
+        "theBeaches"
       ],
       "spriteKey": "beach-umbrella"
     },
@@ -1734,7 +1734,7 @@
         "rows": 1
       },
       "zones": [
-        "street"
+        "distilleryDistrict"
       ],
       "spriteKey": "brewery-dray"
     },
@@ -1766,7 +1766,7 @@
         "rows": 1
       },
       "zones": [
-        "homeStretch"
+        "yongeStreet"
       ],
       "spriteKey": "busker"
     },
@@ -1795,7 +1795,7 @@
         "rows": 2
       },
       "zones": [
-        "shops"
+        "kensingtonMarket"
       ],
       "spriteKey": "cargo-bike"
     },
@@ -1826,7 +1826,7 @@
         "rows": 1
       },
       "zones": [
-        "park"
+        "highPark"
       ],
       "spriteKey": "cherry-trees"
     },
@@ -1838,7 +1838,7 @@
         "rows": 1
       },
       "zones": [
-        "shops"
+        "kensingtonMarket"
       ],
       "spriteKey": "clothing-rack"
     },
@@ -1850,8 +1850,8 @@
         "rows": 1
       },
       "zones": [
-        "homeStretch",
-        "shops"
+        "yongeStreet",
+        "kensingtonMarket"
       ],
       "spriteKey": "cone"
     },
@@ -1872,9 +1872,9 @@
         "rows": 1
       },
       "zones": [
-        "park",
-        "pawsPromenade",
-        "shops"
+        "highPark",
+        "theBeaches",
+        "kensingtonMarket"
       ],
       "spriteKey": "couple"
     },
@@ -1894,6 +1894,37 @@
         "rows": 1
       },
       "spriteKey": "coyote"
+    },
+    {
+      "id": "crosstownBus",
+      "movement": {
+        "kind": "stopAndGoAcross",
+        "speed": 0.65,
+        "stopSeconds": 1,
+        "stops": [
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            4
+          ]
+        ]
+      },
+      "name": "Crosstown bus",
+      "shape": {
+        "lanes": 3,
+        "rows": 1
+      },
+      "zones": [
+        "yongeStreet"
+      ],
+      "spriteKey": "crosstown-bus"
     },
     {
       "id": "cyclist",
@@ -1922,8 +1953,8 @@
         "rows": 1
       },
       "zones": [
-        "shops",
-        "homeStretch"
+        "kensingtonMarket",
+        "yongeStreet"
       ],
       "spriteKey": "delivery-cyclist"
     },
@@ -1966,7 +1997,7 @@
         "rows": 1
       },
       "zones": [
-        "park"
+        "highPark"
       ],
       "spriteKey": "fallen-log"
     },
@@ -1988,7 +2019,7 @@
         "rows": 1
       },
       "zones": [
-        "park"
+        "highPark"
       ],
       "spriteKey": "ferrets"
     },
@@ -2011,7 +2042,7 @@
         "rows": 1
       },
       "zones": [
-        "shops"
+        "kensingtonMarket"
       ],
       "spriteKey": "food-cart-vendor"
     },
@@ -2065,7 +2096,7 @@
         "rows": 1
       },
       "zones": [
-        "snoozeCrescent"
+        "cabbagetown"
       ],
       "spriteKey": "gardener"
     },
@@ -2099,7 +2130,7 @@
         "rows": 1
       },
       "zones": [
-        "shops"
+        "kensingtonMarket"
       ],
       "spriteKey": "granny-cart-shopper"
     },
@@ -2111,8 +2142,8 @@
         "rows": 1
       },
       "zones": [
-        "pawsPromenade",
-        "snoozeCrescent"
+        "theBeaches",
+        "cabbagetown"
       ],
       "spriteKey": "hedge"
     },
@@ -2134,7 +2165,7 @@
         "rows": 1
       },
       "zones": [
-        "snoozeCrescent"
+        "cabbagetown"
       ],
       "spriteKey": "hen"
     },
@@ -2155,8 +2186,8 @@
         "rows": 1
       },
       "zones": [
-        "snoozeCrescent",
-        "shops"
+        "cabbagetown",
+        "kensingtonMarket"
       ],
       "spriteKey": "hopscotch-kid"
     },
@@ -2187,7 +2218,7 @@
         "rows": 1
       },
       "zones": [
-        "pawsPromenade"
+        "theBeaches"
       ],
       "spriteKey": "ice-cream-bike"
     },
@@ -2212,7 +2243,7 @@
         "rows": 1
       },
       "zones": [
-        "snoozeCrescent"
+        "cabbagetown"
       ],
       "spriteKey": "iron-fence-2"
     },
@@ -2224,7 +2255,7 @@
         "rows": 1
       },
       "zones": [
-        "snoozeCrescent"
+        "cabbagetown"
       ],
       "spriteKey": "iron-fence-3"
     },
@@ -2261,12 +2292,12 @@
         "rows": 1
       },
       "zones": [
-        "street"
+        "distilleryDistrict"
       ],
       "spriteKey": "keg-dolly-worker"
     },
     {
-      "id": "kidOnBike",
+      "id": "kidOnABike",
       "movement": {
         "factor": 1.35,
         "kind": "inLane"
@@ -2276,7 +2307,7 @@
         "lanes": 1,
         "rows": 1
       },
-      "spriteKey": "kid-on-bike"
+      "spriteKey": "kid-on-a-bike"
     },
     {
       "id": "leafPile",
@@ -2286,7 +2317,7 @@
         "rows": 1
       },
       "zones": [
-        "snoozeCrescent"
+        "cabbagetown"
       ],
       "spriteKey": "leaf-pile"
     },
@@ -2298,7 +2329,7 @@
         "rows": 1
       },
       "zones": [
-        "pawsPromenade"
+        "theBeaches"
       ],
       "spriteKey": "lifeguard-chair"
     },
@@ -2310,7 +2341,7 @@
         "rows": 1
       },
       "zones": [
-        "snoozeCrescent"
+        "cabbagetown"
       ],
       "spriteKey": "little-free-library"
     },
@@ -2339,7 +2370,7 @@
         "rows": 1
       },
       "zones": [
-        "shops"
+        "kensingtonMarket"
       ],
       "spriteKey": "market-stall-2"
     },
@@ -2351,7 +2382,7 @@
         "rows": 1
       },
       "zones": [
-        "shops"
+        "kensingtonMarket"
       ],
       "spriteKey": "market-stall-3"
     },
@@ -2363,9 +2394,31 @@
         "rows": 1
       },
       "zones": [
-        "homeStretch"
+        "yongeStreet"
       ],
       "spriteKey": "newspaper-box"
+    },
+    {
+      "id": "parkRangersCart",
+      "movement": {
+        "factor": 0.7,
+        "goSeconds": 0.5,
+        "kind": "stopAndGo",
+        "stopSeconds": 0.6,
+        "stops": {
+          "max": 3,
+          "min": 2
+        }
+      },
+      "name": "Park ranger's cart",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "zones": [
+        "highPark"
+      ],
+      "spriteKey": "park-rangers-cart"
     },
     {
       "id": "parkedCar",
@@ -2384,7 +2437,7 @@
         "rows": 1
       },
       "zones": [
-        "street"
+        "distilleryDistrict"
       ],
       "spriteKey": "patio-rail"
     },
@@ -2411,7 +2464,7 @@
         "rows": 1
       },
       "zones": [
-        "pawsPromenade"
+        "theBeaches"
       ],
       "spriteKey": "patrol-buggy"
     },
@@ -2427,8 +2480,8 @@
         "rows": 2
       },
       "zones": [
-        "homeStretch",
-        "street"
+        "yongeStreet",
+        "distilleryDistrict"
       ],
       "spriteKey": "pedicab"
     },
@@ -2440,7 +2493,7 @@
         "rows": 1
       },
       "zones": [
-        "park"
+        "highPark"
       ],
       "spriteKey": "picnic-blanket"
     },
@@ -2471,7 +2524,7 @@
         "rows": 1
       },
       "zones": [
-        "snoozeCrescent"
+        "cabbagetown"
       ],
       "spriteKey": "porch-steps"
     },
@@ -2483,7 +2536,7 @@
         "rows": 1
       },
       "zones": [
-        "shops"
+        "kensingtonMarket"
       ],
       "spriteKey": "produce-crates"
     },
@@ -2505,28 +2558,6 @@
       "spriteKey": "snatch-raccoon"
     },
     {
-      "id": "rangerCart",
-      "movement": {
-        "factor": 0.7,
-        "goSeconds": 0.5,
-        "kind": "stopAndGo",
-        "stopSeconds": 0.6,
-        "stops": {
-          "max": 3,
-          "min": 2
-        }
-      },
-      "name": "Park ranger's cart",
-      "shape": {
-        "lanes": 1,
-        "rows": 1
-      },
-      "zones": [
-        "park"
-      ],
-      "spriteKey": "ranger-cart"
-    },
-    {
       "id": "rollerblader",
       "movement": {
         "factor": 2,
@@ -2538,7 +2569,7 @@
         "rows": 1
       },
       "zones": [
-        "pawsPromenade"
+        "theBeaches"
       ],
       "spriteKey": "rollerblader"
     },
@@ -2559,7 +2590,7 @@
         "rows": 1
       },
       "zones": [
-        "street"
+        "distilleryDistrict"
       ],
       "spriteKey": "rolling-barrel"
     },
@@ -2571,7 +2602,7 @@
         "rows": 1
       },
       "zones": [
-        "pawsPromenade"
+        "theBeaches"
       ],
       "spriteKey": "sandcastle"
     },
@@ -2583,7 +2614,7 @@
         "rows": 1
       },
       "zones": [
-        "homeStretch"
+        "yongeStreet"
       ],
       "spriteKey": "sandwich-board"
     },
@@ -2620,7 +2651,7 @@
       "spriteKey": "snatch-seagull"
     },
     {
-      "id": "segwayRider",
+      "id": "segwayTourRider",
       "movement": {
         "factor": 1.1,
         "kind": "inLane"
@@ -2631,9 +2662,9 @@
         "rows": 1
       },
       "zones": [
-        "street"
+        "distilleryDistrict"
       ],
-      "spriteKey": "segway-rider"
+      "spriteKey": "segway-tour-rider"
     },
     {
       "id": "signSpinner",
@@ -2652,7 +2683,7 @@
         "rows": 1
       },
       "zones": [
-        "homeStretch"
+        "yongeStreet"
       ],
       "spriteKey": "sign-spinner"
     },
@@ -2673,8 +2704,8 @@
         "rows": 1
       },
       "zones": [
-        "shops",
-        "street"
+        "kensingtonMarket",
+        "distilleryDistrict"
       ],
       "spriteKey": "stilt-walker"
     },
@@ -2699,7 +2730,7 @@
         "rows": 1
       },
       "zones": [
-        "homeStretch"
+        "yongeStreet"
       ],
       "spriteKey": "streetcar-platform"
     },
@@ -2734,7 +2765,7 @@
         "rows": 1
       },
       "zones": [
-        "shops"
+        "kensingtonMarket"
       ],
       "spriteKey": "strolling-busker"
     },
@@ -2752,7 +2783,7 @@
         "rows": 2
       },
       "zones": [
-        "homeStretch"
+        "yongeStreet"
       ],
       "spriteKey": "taxi"
     },
@@ -2773,7 +2804,7 @@
         "rows": 1
       },
       "zones": [
-        "street"
+        "distilleryDistrict"
       ],
       "spriteKey": "tour-group"
     },
@@ -2793,9 +2824,9 @@
         "rows": 1
       },
       "zones": [
-        "homeStretch",
-        "shops",
-        "street"
+        "yongeStreet",
+        "kensingtonMarket",
+        "distilleryDistrict"
       ],
       "spriteKey": "tourist"
     },
@@ -2827,7 +2858,7 @@
         "rows": 1
       },
       "zones": [
-        "park"
+        "highPark"
       ],
       "spriteKey": "tourist-train"
     },
@@ -2852,40 +2883,9 @@
         "rows": 3
       },
       "zones": [
-        "homeStretch"
+        "yongeStreet"
       ],
       "spriteKey": "ttc-bus"
-    },
-    {
-      "id": "ttcBusCrossing",
-      "movement": {
-        "kind": "stopAndGoAcross",
-        "speed": 0.65,
-        "stopSeconds": 1,
-        "stops": [
-          [
-            0,
-            2
-          ],
-          [
-            1,
-            3
-          ],
-          [
-            2,
-            4
-          ]
-        ]
-      },
-      "name": "Crosstown bus",
-      "shape": {
-        "lanes": 3,
-        "rows": 1
-      },
-      "zones": [
-        "homeStretch"
-      ],
-      "spriteKey": "ttc-bus-crossing"
     },
     {
       "id": "velvetRope",
@@ -2895,7 +2895,7 @@
         "rows": 1
       },
       "zones": [
-        "street"
+        "distilleryDistrict"
       ],
       "spriteKey": "velvet-rope"
     },
@@ -2907,7 +2907,7 @@
         "rows": 1
       },
       "zones": [
-        "pawsPromenade"
+        "theBeaches"
       ],
       "spriteKey": "volleyball-net-2"
     },
@@ -2919,7 +2919,7 @@
         "rows": 1
       },
       "zones": [
-        "pawsPromenade"
+        "theBeaches"
       ],
       "spriteKey": "volleyball-net-3"
     },
@@ -2941,7 +2941,7 @@
         "rows": 1
       },
       "zones": [
-        "pawsPromenade"
+        "theBeaches"
       ],
       "spriteKey": "volleyball-player"
     }
@@ -2962,8 +2962,8 @@
       "loadoutMax": 1,
       "longReachLanes": 1,
       "luckyFindsPerZone": {
-        "lostWallet": 1,
-        "pettingNeighbour": 0.5
+        "friendlyNeighbour": 0.5,
+        "lostWallet": 1
       },
       "maxDartMovers": 6,
       "maxEmptyRows": 3,
@@ -3002,31 +3002,31 @@
     },
     "money": {
       "bigTipperTipBonus": 1,
-      "capybaraCall": 20,
       "cheeseBuy": 20,
       "encounterHigh": 20,
       "encounterLow": 20,
-      "greenBinCleanUp": 20,
+      "escapedCapybaraCall": 20,
+      "greenBinSpillCleanUp": 20,
       "lostWalletKeep": 20,
       "missedTips": 20,
       "newCone": 20,
       "payPerDog": 20,
       "porchCatTreat": 20,
       "prices": {
-        "biscuit": 300,
         "buddy": 600,
         "dogSlot2": 2000,
         "dogSlot3": 2000,
-        "duchess": 200,
         "fannyPack": 500,
+        "ginger": 200,
         "hallPass": 800,
         "kilo": 400,
+        "lady": 300,
         "luckyCollar": 1700,
         "penny": 800,
-        "pierre": 700,
+        "pepe": 700,
         "reggie": 1100,
         "runningShoes": 1200,
-        "snowball": 1500,
+        "sequoia": 1500,
         "whistle": 2500
       },
       "promoMerch": 20,
@@ -3246,7 +3246,7 @@
       "portraitKey": "face-walker-ada",
       "spriteKey": "walker-ada",
       "unlock": "finishZone",
-      "zone": "pawsPromenade"
+      "zone": "theBeaches"
     },
     {
       "id": "casey",
@@ -3267,7 +3267,7 @@
       "portraitKey": "face-walker-mr-b",
       "spriteKey": "walker-mr-b",
       "unlock": "finishZone",
-      "zone": "snoozeCrescent"
+      "zone": "cabbagetown"
     },
     {
       "id": "trista",
@@ -3278,18 +3278,18 @@
       "portraitKey": "face-walker-trista",
       "spriteKey": "walker-trista",
       "unlock": "finishZone",
-      "zone": "homeStretch"
+      "zone": "yongeStreet"
     }
   ],
   "world": {
-    "firstZone": "park",
-    "lastZone": "homeStretch",
+    "firstZone": "highPark",
+    "lastZone": "yongeStreet",
     "name": "Toronto",
     "preForkRoute": [
-      "park",
-      "street",
-      "shops",
-      "homeStretch"
+      "highPark",
+      "distilleryDistrict",
+      "kensingtonMarket",
+      "yongeStreet"
     ],
     "walkLength": 4
   },
@@ -3304,7 +3304,7 @@
       },
       "difficulty": 1,
       "difficultyName": "Easiest",
-      "id": "park",
+      "id": "highPark",
       "leashColour": "#a22633",
       "moverShare": 1,
       "name": "High Park",
@@ -3329,6 +3329,7 @@
           "cone": 0,
           "couple": 1,
           "coyote": 0.5,
+          "crosstownBus": 0,
           "cyclist": 3,
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
@@ -3351,7 +3352,7 @@
           "ironFence3": 0,
           "jogger": 8,
           "kegDollyWorker": 0,
-          "kidOnBike": 0,
+          "kidOnABike": 0,
           "leafPile": 0,
           "lifeguardChair": 0,
           "littleFreeLibrary": 0,
@@ -3359,6 +3360,7 @@
           "marketStall2": 0,
           "marketStall3": 0,
           "newspaperBox": 0,
+          "parkRangersCart": 2,
           "parkedCar": 0,
           "patioRail": 0,
           "patrolBuggy": 0,
@@ -3368,14 +3370,13 @@
           "porchSteps": 0,
           "produceCrates": 0,
           "raccoon": 0,
-          "rangerCart": 2,
           "rollerblader": 0,
           "rollingBarrel": 0,
           "sandcastle": 0,
           "sandwichBoard": 0,
           "scooter": 0,
           "seagull": 0,
-          "segwayRider": 0,
+          "segwayTourRider": 0,
           "signSpinner": 0,
           "stiltWalker": 0,
           "streetcar": 0,
@@ -3388,26 +3389,25 @@
           "touristTrain": 0.75,
           "trashCan": 9,
           "ttcBus": 0,
-          "ttcBusCrossing": 0,
           "velvetRope": 0,
           "volleyballNet2": 0,
           "volleyballNet3": 0,
           "volleyballPlayer": 0
         },
         "obstacles": {
-          "capybara": 1,
+          "bigScreenPromo": 0,
           "cheeseCrates": 0,
-          "droppedCone": 0,
-          "greenBin": 0,
+          "droppedIceCream": 0,
+          "escapedCapybara": 1,
+          "greenBinSpill": 0,
           "otherDog": 2.2,
           "porchCat": 0,
           "pothole": 0,
-          "promoTeam": 0,
           "puddle": 2,
           "skunk": 1.8,
           "squirrel": 1,
           "thief": 0,
-          "weddingShoot": 0
+          "weddingPhotoShoot": 0
         }
       },
       "keys": {
@@ -3428,7 +3428,7 @@
       },
       "difficulty": 2,
       "difficultyName": "Easy",
-      "id": "snoozeCrescent",
+      "id": "cabbagetown",
       "leashColour": "#3e2731",
       "moverShare": 1,
       "name": "Cabbagetown",
@@ -3453,6 +3453,7 @@
           "cone": 0,
           "couple": 0,
           "coyote": 1,
+          "crosstownBus": 0,
           "cyclist": 0,
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
@@ -3475,7 +3476,7 @@
           "ironFence3": 3.5,
           "jogger": 3.5,
           "kegDollyWorker": 0,
-          "kidOnBike": 3,
+          "kidOnABike": 3,
           "leafPile": 3.75,
           "lifeguardChair": 0,
           "littleFreeLibrary": 3.5,
@@ -3483,6 +3484,7 @@
           "marketStall2": 0,
           "marketStall3": 0,
           "newspaperBox": 0,
+          "parkRangersCart": 0,
           "parkedCar": 2,
           "patioRail": 0,
           "patrolBuggy": 0,
@@ -3492,14 +3494,13 @@
           "porchSteps": 3.75,
           "produceCrates": 0,
           "raccoon": 1.5,
-          "rangerCart": 0,
           "rollerblader": 0,
           "rollingBarrel": 0,
           "sandcastle": 0,
           "sandwichBoard": 0,
           "scooter": 0,
           "seagull": 0,
-          "segwayRider": 0,
+          "segwayTourRider": 0,
           "signSpinner": 0,
           "stiltWalker": 0,
           "streetcar": 0,
@@ -3512,26 +3513,25 @@
           "touristTrain": 0,
           "trashCan": 3.5,
           "ttcBus": 0,
-          "ttcBusCrossing": 0,
           "velvetRope": 0,
           "volleyballNet2": 0,
           "volleyballNet3": 0,
           "volleyballPlayer": 0
         },
         "obstacles": {
-          "capybara": 0,
+          "bigScreenPromo": 0,
           "cheeseCrates": 0,
-          "droppedCone": 0,
-          "greenBin": 0,
+          "droppedIceCream": 0,
+          "escapedCapybara": 0,
+          "greenBinSpill": 0,
           "otherDog": 1.1,
           "porchCat": 1,
           "pothole": 0,
-          "promoTeam": 0,
           "puddle": 1,
           "skunk": 1.8,
           "squirrel": 1,
           "thief": 0,
-          "weddingShoot": 0
+          "weddingPhotoShoot": 0
         }
       },
       "keys": {
@@ -3552,7 +3552,7 @@
       },
       "difficulty": 3,
       "difficultyName": "Normal",
-      "id": "shops",
+      "id": "kensingtonMarket",
       "leashColour": "#3e2731",
       "moverShare": 1,
       "name": "Kensington Market",
@@ -3577,6 +3577,7 @@
           "cone": 3.75,
           "couple": 2,
           "coyote": 0,
+          "crosstownBus": 0,
           "cyclist": 10,
           "deliveryCyclist": 3,
           "deliveryTruck": 2,
@@ -3599,7 +3600,7 @@
           "ironFence3": 0,
           "jogger": 0,
           "kegDollyWorker": 0,
-          "kidOnBike": 3,
+          "kidOnABike": 3,
           "leafPile": 0,
           "lifeguardChair": 0,
           "littleFreeLibrary": 0,
@@ -3607,6 +3608,7 @@
           "marketStall2": 3.75,
           "marketStall3": 3.75,
           "newspaperBox": 0,
+          "parkRangersCart": 0,
           "parkedCar": 0,
           "patioRail": 0,
           "patrolBuggy": 0,
@@ -3616,14 +3618,13 @@
           "porchSteps": 0,
           "produceCrates": 9.75,
           "raccoon": 1,
-          "rangerCart": 0,
           "rollerblader": 0,
           "rollingBarrel": 0,
           "sandcastle": 0,
           "sandwichBoard": 0,
           "scooter": 3,
           "seagull": 0,
-          "segwayRider": 0,
+          "segwayTourRider": 0,
           "signSpinner": 0,
           "stiltWalker": 2,
           "streetcar": 0,
@@ -3636,26 +3637,25 @@
           "touristTrain": 0,
           "trashCan": 0,
           "ttcBus": 0,
-          "ttcBusCrossing": 0,
           "velvetRope": 0,
           "volleyballNet2": 0,
           "volleyballNet3": 0,
           "volleyballPlayer": 0
         },
         "obstacles": {
-          "capybara": 0,
+          "bigScreenPromo": 0,
           "cheeseCrates": 1,
-          "droppedCone": 0,
-          "greenBin": 1,
+          "droppedIceCream": 0,
+          "escapedCapybara": 0,
+          "greenBinSpill": 1,
           "otherDog": 1.1,
           "porchCat": 0,
           "pothole": 1,
-          "promoTeam": 0,
           "puddle": 0,
           "skunk": 1.8,
           "squirrel": 1,
           "thief": 2.2,
-          "weddingShoot": 0
+          "weddingPhotoShoot": 0
         }
       },
       "keys": {
@@ -3676,7 +3676,7 @@
       },
       "difficulty": 3,
       "difficultyName": "Normal",
-      "id": "pawsPromenade",
+      "id": "theBeaches",
       "leashColour": "#a22633",
       "moverShare": 1,
       "name": "The Beaches",
@@ -3701,6 +3701,7 @@
           "cone": 0,
           "couple": 4,
           "coyote": 0,
+          "crosstownBus": 0,
           "cyclist": 4,
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
@@ -3723,7 +3724,7 @@
           "ironFence3": 0,
           "jogger": 5,
           "kegDollyWorker": 0,
-          "kidOnBike": 2,
+          "kidOnABike": 2,
           "leafPile": 0,
           "lifeguardChair": 4,
           "littleFreeLibrary": 0,
@@ -3731,6 +3732,7 @@
           "marketStall2": 0,
           "marketStall3": 0,
           "newspaperBox": 0,
+          "parkRangersCart": 0,
           "parkedCar": 0,
           "patioRail": 0,
           "patrolBuggy": 2,
@@ -3740,14 +3742,13 @@
           "porchSteps": 0,
           "produceCrates": 0,
           "raccoon": 0,
-          "rangerCart": 0,
           "rollerblader": 1.5,
           "rollingBarrel": 0,
           "sandcastle": 3.75,
           "sandwichBoard": 0,
           "scooter": 0,
           "seagull": 3,
-          "segwayRider": 0,
+          "segwayTourRider": 0,
           "signSpinner": 0,
           "stiltWalker": 0,
           "streetcar": 0,
@@ -3760,26 +3761,25 @@
           "touristTrain": 0,
           "trashCan": 0,
           "ttcBus": 0,
-          "ttcBusCrossing": 0,
           "velvetRope": 0,
           "volleyballNet2": 3.75,
           "volleyballNet3": 3.75,
           "volleyballPlayer": 4
         },
         "obstacles": {
-          "capybara": 0,
+          "bigScreenPromo": 0,
           "cheeseCrates": 0,
-          "droppedCone": 1,
-          "greenBin": 0,
+          "droppedIceCream": 1,
+          "escapedCapybara": 0,
+          "greenBinSpill": 0,
           "otherDog": 0,
           "porchCat": 0,
           "pothole": 0,
-          "promoTeam": 0,
           "puddle": 3,
           "skunk": 1.8,
           "squirrel": 1,
           "thief": 1.1,
-          "weddingShoot": 1.5
+          "weddingPhotoShoot": 1.5
         }
       },
       "keys": {
@@ -3800,7 +3800,7 @@
       },
       "difficulty": 4,
       "difficultyName": "Hard",
-      "id": "street",
+      "id": "distilleryDistrict",
       "leashColour": "#f6757a",
       "moverShare": 1,
       "name": "Distillery District",
@@ -3825,6 +3825,7 @@
           "cone": 0,
           "couple": 0,
           "coyote": 0,
+          "crosstownBus": 0,
           "cyclist": 0,
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
@@ -3847,7 +3848,7 @@
           "ironFence3": 0,
           "jogger": 0,
           "kegDollyWorker": 4,
-          "kidOnBike": 0,
+          "kidOnABike": 0,
           "leafPile": 0,
           "lifeguardChair": 0,
           "littleFreeLibrary": 0,
@@ -3855,6 +3856,7 @@
           "marketStall2": 0,
           "marketStall3": 0,
           "newspaperBox": 0,
+          "parkRangersCart": 0,
           "parkedCar": 0,
           "patioRail": 6,
           "patrolBuggy": 0,
@@ -3864,14 +3866,13 @@
           "porchSteps": 0,
           "produceCrates": 0,
           "raccoon": 0,
-          "rangerCart": 0,
           "rollerblader": 0,
           "rollingBarrel": 4,
           "sandcastle": 0,
           "sandwichBoard": 0,
           "scooter": 5,
           "seagull": 0,
-          "segwayRider": 6,
+          "segwayTourRider": 6,
           "signSpinner": 0,
           "stiltWalker": 3,
           "streetcar": 0,
@@ -3884,26 +3885,25 @@
           "touristTrain": 0,
           "trashCan": 0,
           "ttcBus": 0,
-          "ttcBusCrossing": 0,
           "velvetRope": 4,
           "volleyballNet2": 0,
           "volleyballNet3": 0,
           "volleyballPlayer": 0
         },
         "obstacles": {
-          "capybara": 0,
+          "bigScreenPromo": 0,
           "cheeseCrates": 1.1,
-          "droppedCone": 0,
-          "greenBin": 0,
+          "droppedIceCream": 0,
+          "escapedCapybara": 0,
+          "greenBinSpill": 0,
           "otherDog": 1.1,
           "porchCat": 0,
           "pothole": 0,
-          "promoTeam": 0,
           "puddle": 0,
           "skunk": 0,
           "squirrel": 1,
           "thief": 1.1,
-          "weddingShoot": 2
+          "weddingPhotoShoot": 2
         }
       },
       "keys": {
@@ -3924,7 +3924,7 @@
       },
       "difficulty": 5,
       "difficultyName": "Hardest",
-      "id": "homeStretch",
+      "id": "yongeStreet",
       "leashColour": "#f6757a",
       "moverShare": 1,
       "name": "Yonge Street",
@@ -3949,6 +3949,7 @@
           "cone": 6,
           "couple": 0,
           "coyote": 0,
+          "crosstownBus": 2,
           "cyclist": 0,
           "deliveryCyclist": 5,
           "deliveryTruck": 4,
@@ -3971,7 +3972,7 @@
           "ironFence3": 0,
           "jogger": 0,
           "kegDollyWorker": 0,
-          "kidOnBike": 0,
+          "kidOnABike": 0,
           "leafPile": 0,
           "lifeguardChair": 0,
           "littleFreeLibrary": 0,
@@ -3979,6 +3980,7 @@
           "marketStall2": 0,
           "marketStall3": 0,
           "newspaperBox": 10,
+          "parkRangersCart": 0,
           "parkedCar": 0.5,
           "patioRail": 0,
           "patrolBuggy": 0,
@@ -3988,14 +3990,13 @@
           "porchSteps": 0,
           "produceCrates": 0,
           "raccoon": 12,
-          "rangerCart": 0,
           "rollerblader": 0,
           "rollingBarrel": 0,
           "sandcastle": 0,
           "sandwichBoard": 6,
           "scooter": 5,
           "seagull": 0,
-          "segwayRider": 0,
+          "segwayTourRider": 0,
           "signSpinner": 2,
           "stiltWalker": 0,
           "streetcar": 5,
@@ -4008,26 +4009,25 @@
           "touristTrain": 0,
           "trashCan": 0,
           "ttcBus": 4,
-          "ttcBusCrossing": 2,
           "velvetRope": 0,
           "volleyballNet2": 0,
           "volleyballNet3": 0,
           "volleyballPlayer": 0
         },
         "obstacles": {
-          "capybara": 0,
+          "bigScreenPromo": 2,
           "cheeseCrates": 0,
-          "droppedCone": 0,
-          "greenBin": 0,
+          "droppedIceCream": 0,
+          "escapedCapybara": 0,
+          "greenBinSpill": 0,
           "otherDog": 0,
           "porchCat": 0,
           "pothole": 1,
-          "promoTeam": 2,
           "puddle": 0,
           "skunk": 1.1,
           "squirrel": 1,
           "thief": 1.1,
-          "weddingShoot": 0
+          "weddingPhotoShoot": 0
         }
       },
       "keys": {

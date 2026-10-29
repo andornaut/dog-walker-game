@@ -7,14 +7,14 @@ import type { RunState } from "../state/runState";
 import { testState } from "../testing/runState";
 import { affectedDogs, hitLabel, opensCard } from "./encounters";
 
-const pack = testState({ duchess: 5, kilo: 5, pierre: 5 });
-const everyDog: DogId[] = ["duchess", "kilo", "pierre"];
+const pack = testState({ ginger: 5, kilo: 5, pepe: 5 });
+const everyDog: DogId[] = ["ginger", "kilo", "pepe"];
 
 describe("affectedDogs", () => {
   it("classifies each encounter", () => {
     for (const [, state, affected] of [
       ["every walking dog", pack, everyDog],
-      ["no fired dog", testState({ duchess: 5, kilo: "fired", pierre: 5 }), ["duchess", "pierre"]],
+      ["no fired dog", testState({ ginger: 5, kilo: "fired", pepe: 5 }), ["ginger", "pepe"]],
     ] satisfies readonly [string, RunState, DogId[]][]) {
       expect(affectedDogs(state)).toEqual(affected);
     }
@@ -38,9 +38,9 @@ describe("opensCard", () => {
       [
         "no card for an encounter the pack is immune to",
         "thief",
-        ["duchess"],
+        ["ginger"],
         testState(
-          { duchess: 5 },
+          { ginger: 5 },
           {
             immunities: [{ encounter: "thief", source: { kind: "upgrade", upgrade: "raincoats" } }],
           },

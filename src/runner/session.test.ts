@@ -40,7 +40,7 @@ const FIRING_SECONDS = read(gameData.tuning, "seconds", "firingHoldSeconds");
 // time, so every test shares the one start, which no step changes.
 const STARTED = startSession(gameData, runStreams(1), geometry, {
   road: startRoad(5),
-  run: newRun(gameData, 3, { dogs: ["kilo", "biscuit"], gear: null, walker: "casey" }),
+  run: newRun(gameData, 3, { dogs: ["kilo", "lady"], gear: null, walker: "casey" }),
 });
 
 // A started walk with nothing on its road or still to come, so a step only walks.
@@ -304,7 +304,7 @@ describe("a firing's hold", { timeout: 60_000 }, () => {
     return { ...session, walk: { ...session.walk, road } };
   };
   // The data with encounter costing the dogs it meets a heart.
-  const costing = (encounter: "pettingNeighbour" | "puddle"): SessionData => {
+  const costing = (encounter: "friendlyNeighbour" | "puddle"): SessionData => {
     const effects = [{ amount: -1, kind: "hearts", target: { kind: "affected" } }] as const;
     const shown = gameData.encounters[encounter];
     return {
@@ -357,8 +357,8 @@ describe("a firing's hold", { timeout: 60_000 }, () => {
     },
     {
       cause: "a lucky find",
-      data: costing("pettingNeighbour"),
-      fire: (data, session) => walkOn(data, meeting("pettingNeighbour", session)),
+      data: costing("friendlyNeighbour"),
+      fire: (data, session) => walkOn(data, meeting("friendlyNeighbour", session)),
     },
     {
       cause: "a plain obstacle's bump",
@@ -477,21 +477,14 @@ describe("quick lane changes across a row", { timeout: 10_000 }, () => {
       [
         "three dogs across tips in three lanes",
         "casey",
-        ["kilo", "biscuit", "pierre"],
+        ["kilo", "lady", "pepe"],
         "tip",
         3,
         [1, 2, 3],
       ],
-      ["two dogs across tips in two lanes", "ada", ["duchess", "snowball"], "tip", 2, [1, 2]],
+      ["two dogs across tips in two lanes", "ada", ["ginger", "sequoia"], "tip", 2, [1, 2]],
       ["one dog across tips in two lanes", "trista", ["reggie"], "tip", 2, [1, 2]],
-      [
-        "three dogs past a cone two lanes back",
-        "casey",
-        ["kilo", "biscuit", "pierre"],
-        "cone",
-        3,
-        [1],
-      ],
+      ["three dogs past a cone two lanes back", "casey", ["kilo", "lady", "pepe"], "cone", 3, [1]],
       ["one dog past a cone a lane back", "trista", ["reggie"], "cone", 2, [1]],
     ] satisfies readonly [string, WalkerId, PackDogs, "cone" | "tip", number, number[]][]) {
       let session = crossing(walker, dogs, kind, lanes);

@@ -43,13 +43,13 @@ describe("applyEffects: hearts", () => {
 
   it("applies hearts within 0 and the max, the same to every owner", () => {
     for (const [, affected, effect, slots, expected, modifiers = []] of [
-      ["never below 0", ["duchess"], loseTwo, { duchess: 1 }, { duchess: 0 }],
+      ["never below 0", ["ginger"], loseTwo, { ginger: 1 }, { ginger: 0 }],
       [
         "never above the dog's max, which depends on its size",
         [],
         gainOne,
-        { duchess: 6, kilo: 9, pierre: 8 },
-        { duchess: 6, kilo: 10, pierre: 8 },
+        { ginger: 6, kilo: 9, pepe: 8 },
+        { ginger: 6, kilo: 10, pepe: 8 },
       ],
       [
         "the same amount to every owner",
@@ -62,8 +62,8 @@ describe("applyEffects: hearts", () => {
         "the max raised by a maxHearts modifier",
         [],
         gainOne,
-        { duchess: 6 },
-        { duchess: 7 },
+        { ginger: 6 },
+        { ginger: 7 },
         [luckyCollar],
       ],
     ] satisfies readonly [string, DogId[], Effect, Slots, Slots, ActiveModifier[]?][]) {
@@ -87,31 +87,31 @@ describe("shareHearts", () => {
     ],
     [
       "a trio gets one each",
-      ["reggie", "pierre", "kilo"],
+      ["reggie", "pepe", "kilo"],
       3,
       [
         ["kilo", 1],
-        ["pierre", 1],
+        ["pepe", 1],
         ["reggie", 1],
       ],
     ],
     [
       "the front dogs first, when more are left over",
-      ["reggie", "pierre", "kilo"],
+      ["reggie", "pepe", "kilo"],
       5,
       [
         ["kilo", 2],
-        ["pierre", 2],
+        ["pepe", 2],
         ["reggie", 1],
       ],
     ],
     [
       "nothing for a dog whose share is nothing",
-      ["reggie", "pierre", "kilo"],
+      ["reggie", "pepe", "kilo"],
       2,
       [
         ["kilo", 1],
-        ["pierre", 1],
+        ["pepe", 1],
       ],
     ],
     ["nothing among no dogs", [], 3, []],
@@ -137,8 +137,8 @@ describe("applyEffects: hearts shared by the pack", () => {
     ],
     [
       "among the dogs still walking, leaving out a fired owner's",
-      { duchess: 1, kilo: "fired", reggie: 1 },
-      { duchess: 3, reggie: 2 },
+      { ginger: 1, kilo: "fired", reggie: 1 },
+      { ginger: 3, reggie: 2 },
     ],
     [
       "within each owner's max, losing the hearts past it",
@@ -206,7 +206,7 @@ describe("resolveEffects: changes and their causes", () => {
 
   it("reports no change for an owner whose meter does not move", () => {
     const gainOne: Effect = { amount: 1, kind: "hearts", target: { kind: "all" } };
-    const full = testState({ duchess: maxHearts(TEST_TUNING, [], LONE, DOGS.duchess) });
+    const full = testState({ ginger: maxHearts(TEST_TUNING, [], LONE, DOGS.ginger) });
     const { changes } = resolveEffects(data, context([]), [gainOne], full);
     expect(changes).toEqual([]);
   });
@@ -265,19 +265,19 @@ describe("resolveEffects: changes and their causes", () => {
       change: "lose",
       kind: "money",
     };
-    const state = testState({ duchess: 5, kilo: 5 }, { modifiers: [sweetTalker] });
-    const { changes } = resolveEffects(data, context(["duchess", "kilo"]), [towel], state);
+    const state = testState({ ginger: 5, kilo: 5 }, { modifiers: [sweetTalker] });
+    const { changes } = resolveEffects(data, context(["ginger", "kilo"]), [towel], state);
     expect(changes).toEqual([]);
     expect(moneyCost(data, state, [towel])).toBe(0);
   });
 });
 
 describe("targetDogs", () => {
-  const pack = testState({ duchess: 3, pierre: "fired", reggie: 3 });
+  const pack = testState({ ginger: 3, pepe: "fired", reggie: 3 });
 
   it.each<[string, Parameters<typeof targetDogs>[3], DogId[], DogId[]]>([
-    ["all, leaving out a fired owner's dog", { kind: "all" }, [], ["duchess", "reggie"]],
-    ["affected, leaving out a fired owner's dog", { kind: "affected" }, ["pierre"], []],
+    ["all, leaving out a fired owner's dog", { kind: "all" }, [], ["ginger", "reggie"]],
+    ["affected, leaving out a fired owner's dog", { kind: "affected" }, ["pepe"], []],
   ])("picks %s", (_name, target, affected, expected) => {
     expect(targetDogs(data, { affected }, pack, target)).toEqual(expected);
   });
@@ -304,24 +304,24 @@ describe("moneyCost and applyEffects: money", () => {
 
   it("charges a cost once, nothing on the zone's first card with Sweet talker", () => {
     for (const [, effect, state, cost] of [
-      ["a cost once, whatever the pack", towel, testState({ duchess: 5, kilo: 5, reggie: 5 }), low],
-      ["another cost once too", letGo, testState({ duchess: 5, kilo: 5 }), letGoCost],
+      ["a cost once, whatever the pack", towel, testState({ ginger: 5, kilo: 5, reggie: 5 }), low],
+      ["another cost once too", letGo, testState({ ginger: 5, kilo: 5 }), letGoCost],
       [
         "nothing on the zone's first card with Sweet talker",
         towel,
-        talked({ duchess: 5, kilo: 5 }),
+        talked({ ginger: 5, kilo: 5 }),
         0,
       ],
-      ["a flat cost free too on that card", letGo, talked({ duchess: 5 }), 0],
-      ["in full on the zone's next card", towel, talked({ duchess: 5, kilo: 5 }, 1), low],
-      ["nothing for a gain", gain, testState({ duchess: 5, kilo: 5 }), 0],
+      ["a flat cost free too on that card", letGo, talked({ ginger: 5 }), 0],
+      ["in full on the zone's next card", towel, talked({ ginger: 5, kilo: 5 }, 1), low],
+      ["nothing for a gain", gain, testState({ ginger: 5, kilo: 5 }), 0],
     ] satisfies readonly [string, Effect, RunState, number][]) {
       expect(moneyCost(data, state, [effect])).toBe(cost);
     }
   });
 
   it("adds gains and subtracts costs", () => {
-    const start = testState({ duchess: 5, kilo: 5 }, { money: cents(5000) });
+    const start = testState({ ginger: 5, kilo: 5 }, { money: cents(5000) });
     const gained = read(TEST_TUNING, "money", "missedTips");
     expect(applyEffects(data, context([]), [gain], start).money).toBe(5000 + gained);
     expect(applyEffects(data, context([]), [letGo], start).money).toBe(5000 - letGoCost);
@@ -383,7 +383,7 @@ describe("applyEffects: other kinds", () => {
 
   it("offers a free Skip, naming what gave it", () => {
     const skip: Effect = { kind: "skipOption" };
-    const state = applyEffects(data, context([]), [skip], testState({ duchess: 5, kilo: 5 }));
+    const state = applyEffects(data, context([]), [skip], testState({ ginger: 5, kilo: 5 }));
     expect(state.skipPass).toEqual(SKUNK_IGNORE);
   });
 });

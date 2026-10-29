@@ -27,16 +27,16 @@ const bursts = keysOf(gameData.encounters).filter((id) => sprites.has(`fx-hit-${
 // Art's measured place (the ring's top-left) and size of each word on its 77x77 burst frame,
 // for each burst the manifest has.
 const ART_PLACES: Readonly<Partial<Record<EncounterId, [number, number, number]>>> = {
-  capybara: [16, 43, 43],
+  bigScreenPromo: [20, 38, 36],
   cheeseCrates: [20, 41, 35],
-  droppedCone: [20, 43, 37],
-  greenBin: [23, 41, 30],
+  droppedIceCream: [20, 43, 37],
+  escapedCapybara: [16, 43, 43],
+  greenBinSpill: [23, 41, 30],
   otherDog: [21, 41, 34],
   porchCat: [24, 38, 27],
-  promoTeam: [20, 38, 36],
   skunk: [22, 33, 32],
   thief: [20, 43, 35],
-  weddingShoot: [22, 38, 33],
+  weddingPhotoShoot: [22, 38, 33],
 };
 
 describe("font-comic", () => {

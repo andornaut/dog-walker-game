@@ -55,7 +55,7 @@ export const WALKERS = {
     portraitKey: "face-walker-ada",
     spriteKey: "walker-ada",
     unlock: "finishZone",
-    zone: "pawsPromenade",
+    zone: "theBeaches",
   },
   casey: {
     agility: 1.1,
@@ -74,7 +74,7 @@ export const WALKERS = {
     portraitKey: "face-walker-mr-b",
     spriteKey: "walker-mr-b",
     unlock: "finishZone",
-    zone: "snoozeCrescent",
+    zone: "cabbagetown",
   },
   trista: {
     agility: 1.2,
@@ -84,7 +84,7 @@ export const WALKERS = {
     portraitKey: "face-walker-trista",
     spriteKey: "walker-trista",
     unlock: "finishZone",
-    zone: "homeStretch",
+    zone: "yongeStreet",
   },
 } as const satisfies Record<string, Walker>;
 
