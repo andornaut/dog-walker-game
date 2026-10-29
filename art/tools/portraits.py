@@ -262,11 +262,55 @@ def biscuit(g):
 
 # ---------- Archie: Australian Shepherd, medium, brown and white, one blue eye, red bandana ----------
 
+# Archie's eye, 5x6 as drawn: the shine at the top left, the pupil at the right, the iris round its lower left
+# and top right (k ink, w white, i the iris, . left as drawn). Both eyes take it, so they match and look the
+# same way; it is laid pixel for pixel, as scaled ellipses would round the two eyes differently.
+ARCHIE_EYE = [".kkk.", "kwwik", "kwkkk", "kikkk", "kiiik", ".kkk."]
+
+
+def stamp(g, x, y, rows, ink):
+    """rows laid pixel for pixel at g's drawn size, their top left at design (x, y); ink maps each letter to a
+    colour, and a dot leaves what is drawn."""
+    px, k = raster(g).px, scale_of(g)
+    x0, y0 = math.floor(x * k + 0.5), math.floor(y * k + 0.5)
+    for dy, row in enumerate(rows):
+        for dx, ch in enumerate(row):
+            if ch != ".":
+                px[y0 + dy][x0 + dx] = K[ink[ch]]
+
+
+def inlay(g, line, draw):
+    """dogs.inlay on a blank grid at g's own scale, so a portrait drawn smaller than its design (a Mini built
+    outside minis.small) lines up with it."""
+    t = minis.Mini(g.s, g.w, g.h, g.sy) if isinstance(g, minis.Mini) else Grid(g.w, g.h)
+    draw(t)
+    gp, tp = raster(g).px, raster(t).px
+    h, w = len(gp), len(gp[0])
+    shape = {(x, y) for y in range(h) for x in range(w) if tp[y][x]}
+    ring = {(x + dx, y + dy) for x, y in shape for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0))} - shape
+    for x, y in ring:
+        if 0 <= x < w and 0 <= y < h and gp[y][x]:
+            gp[y][x] = K.get(line, line)
+    for x, y in shape:
+        gp[y][x] = tp[y][x]
+
+
 def archie(g):
+    """Sat with his hindquarters to the right: a round rump and thigh tucked beside the white chest, lit from the
+    top left, a white hind paw on the ground in front of it, and a fluffy bobtail tuft at the back of the rump,
+    each set off from the coat by a line two ramp steps darker."""
     coat, (ear, tip) = dogs.COAT, dogs.EAR
-    # brown haunch and bobtail behind, a white ruff down the chest in front
-    g.cel(45, 54, 12, 9, *coat)
-    g.cel(53, 46, 3.5, 3, *coat)
+    line = dk2(coat[0])
+    # the bobtail: a tuft in three locks, white at the tip
+    inlay(g, line, lambda t: [t.cel(x, y, r, r, c, *sh) for x, y, r, c, sh in (
+        (55, 48, 3.2, coat[0], coat[1:]), (58, 45.8, 2.7, coat[0], coat[1:]), (55.5, 44.2, 2.4, coat[0], coat[1:]),
+        (58.6, 42.6, 2, "white", ("lgrey",)))])
+    # the rump and thigh, one round mass highest at the back, then the hind paw with two toe lines
+    inlay(g, line, lambda t: t.cel(46.5, 54, 10.5, 10, *coat))
+    inlay(g, dk2("white"), lambda t: t.cel(47.5, 60.5, 4.5, 2.6, "white", "lgrey"))
+    for x in (45.5, 48.5):
+        g.rect(x, 61.5, 1, 2, "lgrey")
+    # the white chest and front legs, copper where they meet the coat
     g.cel(31, 52, 13, 11, "white", "lgrey")
     legs(g, (23, 33), 53, "white", "lgrey")
     for x in (23, 33):
@@ -288,14 +332,9 @@ def archie(g):
     g.rect(34, 19, 3, 1, "ochre")
     g.cel(38, 32, 3, 2.5, "ochre", "rust")
     g.cel(25, 33, 9, 6.5, "white", "lgrey")
-    # odd eyes, the far one blue and the near one amber, each iris ringing a pupil kept to its middle so the
-    # colour still shows when the portrait is drawn smaller
-    for x, w, iris in ((18, 4, "sky"), (33, 5, "amber")):
-        eye(g, x, 22, w, iris)
-        g.rect(x + 1, 23, w - 2, 4, iris)
-        g.rect(x + w - 3, 24, 2 if w > 4 else 1, 2, "ink")
-        g.p(x + 1, 23, "white")
-    g.p(36, 26, "orange")
+    # odd eyes, the far one sky and the near one amber
+    for x, iris in ((17.5, "sky"), (32.5, "amber")):
+        stamp(g, x, 21.5, ARCHIE_EYE, {"k": "ink", "w": "white", "i": iris})
     nose(g, 20, 29)
     # a liver nose
     g.rect(21, 29, 4, 4, "plum")

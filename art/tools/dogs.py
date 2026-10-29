@@ -511,11 +511,12 @@ def archie_face(mood):
     g.rect(22, 18, 2, 2, "ochre")
     g.cel(16, 20.5, 5, 3.5, "white", "lgrey")
     eyes(g, 10, 19, 14, iris="sky", mood=mood)
-    # the other eye amber
-    g.rect(19, 14, 3, 3, "amber")
-    g.p(20, 15, "ink")
-    g.p(21, 16, "orange")
-    g.p(19, 14, "white")
+    # odd eyes, the far one sky and the near one amber, drawn alike so they look the same way: the shine at
+    # the iris's top left and the pupil at its lower right
+    for x, iris in ((10, "sky"), (19, "amber")):
+        g.rect(x, 14, 3, 3, iris)
+        g.rect(x + 1, 15, 2, 2, "ink")
+        g.p(x, 14, "white")
     # a liver nose
     g.rect(14, 18, 4, 2, "plum")
     g.p(14, 18, "dbrown")
