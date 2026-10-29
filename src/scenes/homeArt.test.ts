@@ -26,12 +26,19 @@ function resolveModule(from: string, specifier: string): string | undefined {
 }
 
 const IMPORT = /^import (?!type )[^;]*?from "(\.[^"]+)";/gms;
-const OVERLAY = /openOverlay\(this, SCENE_KEYS\.(\w+)/g;
+const OVERLAY = /openOverlay\(\w+, SCENE_KEYS\.(\w+)/g;
 const HOME = "scenes/StartScene.ts";
+// The home screen and the top bar's pages, which it opens through openHomePage.
+const OPENERS = [HOME, "scenes/homeBarPress.ts"];
 const sceneFile = (key: string) => `scenes/${key[0]?.toUpperCase()}${key.slice(1)}Scene.ts`;
 
 // The home screen and each menu it opens over itself.
-const roots = [HOME, ...[...read(HOME).matchAll(OVERLAY)].map(([, key]) => sceneFile(key ?? ""))];
+const roots = [
+  HOME,
+  ...OPENERS.flatMap((path) =>
+    [...read(path).matchAll(OVERLAY)].map(([, key]) => sceneFile(key ?? "")),
+  ),
+];
 
 // Every module the roots import at run time, other than the game data and other scenes.
 function reachable(): string[] {
