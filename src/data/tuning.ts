@@ -100,13 +100,13 @@ export const TUNING = {
       fannyPack: 500,
       hallPass: 800,
       kilo: 400,
-      luckyCollar: 2200,
+      luckyCollar: 1700,
       penny: 800,
       pierre: 700,
       reggie: 1100,
       runningShoes: 1200,
       snowball: 1500,
-      whistle: 3000,
+      whistle: 2500,
     },
     // The Big screen promo's Buy the merch.
     promoMerch: 20,
@@ -172,7 +172,7 @@ export const TUNING = {
     // How long a debuff lasts while Ada's Quick recovery walks.
     quickRecoveryDebuffFactor: 0.5,
     // Running shoes add this much to the walker's agility.
-    runningShoesAgility: 0.5,
+    runningShoesAgility: 1,
     rushHourObstacles: 1.5,
     rushHourTips: 2,
     rushHourTreats: 2,
