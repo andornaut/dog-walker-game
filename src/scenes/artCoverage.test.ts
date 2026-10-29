@@ -1,10 +1,11 @@
+import { animationKey } from "@andornaut/game-kit/art/aseprite";
 import { keysOf } from "@andornaut/game-kit/records";
 import type { Scene } from "phaser";
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 
 import shippedManifest from "../../public/art/manifest.json";
-import { animationKey, animationSpecs } from "../assets/asepriteAnimations";
+import { animationSpecs } from "../assets/asepriteAnimations";
 import { splitDepthKey, stepSize } from "../assets/depthSteps";
 import { debuffIconKey, SQUIRREL_ICON_KEY } from "../assets/iconKeys";
 import { parseManifest } from "../assets/manifest";

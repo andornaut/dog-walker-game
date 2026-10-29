@@ -1,3 +1,4 @@
+import { animationKey } from "@andornaut/game-kit/art/aseprite";
 import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
@@ -5,7 +6,7 @@ import manifest from "../../public/art/manifest.json";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { SHOP_GEAR } from "../data/shop";
 import { WORLD } from "../data/world";
-import { animationKey, animationSpecs } from "./asepriteAnimations";
+import { animationSpecs } from "./asepriteAnimations";
 import {
   backdropKey,
   CARD_FRAME_KEY,

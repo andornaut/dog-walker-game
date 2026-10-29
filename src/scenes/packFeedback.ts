@@ -1,7 +1,7 @@
+import { animationKey } from "@andornaut/game-kit/art/aseprite";
 import type { Point } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene } from "phaser";
 
-import { animationKey } from "../assets/asepriteAnimations";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { chipLeft, FEEDBACK, type LabelAnchor, stackOverPop } from "../hud/feedback";

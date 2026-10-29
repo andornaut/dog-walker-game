@@ -29,8 +29,9 @@ export interface PagePressHandlers {
 export function listenPagePresses(scene: Scene, handlers: PagePressHandlers): void {
   const { canvas } = scene.game;
   const bare = [document.documentElement, document.body, canvas.parentElement];
+  // The game is drawn upright: its frame has no turn.
   const toGame = (event: PagePointerEvent) =>
-    pageToGame(canvas.getBoundingClientRect(), scene.scale.gameSize, clientPoint(event));
+    pageToGame(0, canvas.getBoundingClientRect(), scene.scale.gameSize, clientPoint(event));
   const press = ({ downTime, pointerId }: PagePress): Press => ({ downTime, id: -1 - pointerId });
   const remove = listenKitPagePresses(
     (event) => scene.sys.isActive() && scene.input.enabled && onBarePage(bare, event.target),

@@ -53,7 +53,7 @@ describe("animationSpecs", () => {
   it("rejects a malformed sheet, naming the tag or frame", () => {
     const cases: { error: string; json: unknown; name: string }[] = [
       {
-        error: 'dog-kilo tag "walk" refers to missing frame 1',
+        error: "dog-kilo: Tag walk refers to missing frame 1",
         json: sheet([150], [tag("forward", 0, 4)]),
         name: "a tag that points past the last frame, naming it",
       },

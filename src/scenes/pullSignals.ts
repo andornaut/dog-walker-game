@@ -1,6 +1,6 @@
+import { animationKey } from "@andornaut/game-kit/art/aseprite";
 import type { GameObjects, Scene } from "phaser";
 
-import { animationKey } from "../assets/asepriteAnimations";
 import { PULL_ART } from "../assets/spriteKeys";
 import type { DogId } from "../data/types";
 import { arrowheadPixels } from "../ui/arrowhead";

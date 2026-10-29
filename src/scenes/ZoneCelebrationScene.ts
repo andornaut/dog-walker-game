@@ -1,6 +1,6 @@
+import { animationKey } from "@andornaut/game-kit/art/aseprite";
 import { type GameObjects, Math as PhaserMath, Scene } from "phaser";
 
-import { animationKey } from "../assets/asepriteAnimations";
 import { ZONE_CELEBRATION_ART as ART } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import {

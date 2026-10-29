@@ -1,8 +1,8 @@
+import { animationKey } from "@andornaut/game-kit/art/aseprite";
 import { getOrInsertComputed } from "@andornaut/game-kit/maps";
 import type { Random } from "@andornaut/game-kit/random";
 import type { GameObjects, Scene } from "phaser";
 
-import { animationKey } from "../../assets/asepriteAnimations";
 import { AMBIENT_VARIANTS, IDLE_TAG } from "../../assets/spriteKeys";
 import type { AmbientMover, ZoneId } from "../../data/types";
 import {

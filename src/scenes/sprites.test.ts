@@ -1,7 +1,7 @@
+import { animationKey } from "@andornaut/game-kit/art/aseprite";
 import type { GameObjects } from "phaser";
 import { describe, expect, it } from "vitest";
 
-import { animationKey } from "../assets/asepriteAnimations";
 import { playTag, playTagOnce, showAtDepth } from "./sprites";
 
 const KEY = "dog-kilo";

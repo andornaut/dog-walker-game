@@ -1,8 +1,8 @@
+import { animationKey } from "@andornaut/game-kit/art/aseprite";
 import { getOrInsertComputed } from "@andornaut/game-kit/maps";
 import { opaqueBoundsOfRgba, type PixelBounds } from "@andornaut/game-kit/opaqueBounds";
 import type { GameObjects, Scene } from "phaser";
 
-import { animationKey } from "../assets/asepriteAnimations";
 import type { SpriteAnchor } from "../assets/manifest";
 import { spriteAnchor } from "../assets/spriteAnchor";
 import { depthVariantKey, ROAD_SPRITE_SIZE, standsOnGround } from "../assets/spriteKeys";

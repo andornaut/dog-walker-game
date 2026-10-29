@@ -23,7 +23,7 @@ describe("where a walk press lands", () => {
     stepMoves: () => true,
   };
   const landed = (page: Page, client: Point): Point | undefined => {
-    const point = pageToGame(canvases[page], SCREEN_LAYOUT.screen, client);
+    const point = pageToGame(0, canvases[page], SCREEN_LAYOUT.screen, client);
     const { screen } = SCREEN_LAYOUT;
     return containsPoint(screen, point.x, point.y) ? point : walkPagePoint(SCREEN_LAYOUT, point);
   };
@@ -84,7 +84,7 @@ describe("where a walk press lands", () => {
     const down = pointerDown(dragOnly, start ?? { x: 0, y: 0 });
     const end = clampInto(
       SCREEN_LAYOUT.screen,
-      pageToGame(canvases.portrait, SCREEN_LAYOUT.screen, to),
+      pageToGame(0, canvases.portrait, SCREEN_LAYOUT.screen, to),
     );
     const moved = pointerMove(dragOnly, end, down.state);
     expect(moved.actions.map(({ direction }) => direction)).toEqual(steps);

@@ -1,7 +1,7 @@
+import { animationKey } from "@andornaut/game-kit/art/aseprite";
 import type { Rect } from "@andornaut/game-kit/rect";
 import { Events, type GameObjects, Scene, Scenes } from "phaser";
 
-import { animationKey } from "../assets/asepriteAnimations";
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
 import type { HelpPictureId } from "../data/types";

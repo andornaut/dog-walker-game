@@ -1,7 +1,7 @@
+import { animationKey } from "@andornaut/game-kit/art/aseprite";
 import type { Point, Rect } from "@andornaut/game-kit/rect";
 import type { Animations, GameObjects, Scene, Tweens, Types } from "phaser";
 
-import { animationKey } from "../assets/asepriteAnimations";
 import { ownerFaceKey, WARNING_KEY, WARNING_TAG } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
