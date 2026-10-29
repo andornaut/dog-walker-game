@@ -56,7 +56,7 @@ function isIosDevice(userAgent: string, maxTouchPoints: number): boolean {
 
 // Firefox for Android, which never fires beforeinstallprompt. Chromium-based browsers name Chrome
 // in their user agent, and Firefox on iOS names itself FxiOS, not Firefox/.
-function isFirefoxAndroid(userAgent: string): boolean {
+export function isFirefoxAndroid(userAgent: string): boolean {
   return /Android/.test(userAgent) && /Firefox\//.test(userAgent) && !/Chrom/.test(userAgent);
 }
 

@@ -1,4 +1,5 @@
 import { dispatchPhoneEvent, PHONE_EVENTS } from "./events";
+import { isFirefoxAndroid } from "./installState";
 
 export interface HistoryLike {
   go(delta: number): void;
@@ -29,9 +30,11 @@ export interface LeaveHost {
 export const BACK_GUARD_STATE = { dogWalkerBackGuard: true } as const;
 
 // The player's input that pushes the guard entry, or creates the close watcher, when it is
-// missing. Each one is, or comes with, a user activation, so the browser counts the entry when
-// going back.
-export const BACK_GUARD_GESTURES = ["keydown", "pointerdown", "pointerup"] as const;
+// missing. The browser records each one, an Escape keydown aside, as user interaction on the
+// current history entry before the page sees it, so the guard goes on top of an entry that back
+// may return to. A touch's pointerdown is recorded on none: a guard pushed from it would take the
+// interaction its pointerup brings, leaving the game's entry without one.
+export const BACK_GUARD_GESTURES = ["keydown", "pointerup"] as const;
 
 // How long leaving waits for the page to go before it tries closing the window instead.
 export const LEAVE_WAIT_MS = 500;
@@ -45,9 +48,20 @@ export interface BackGuard {
   // opened on the game), it closes the window, which the browser allows while the history holds
   // only that entry. Otherwise it goes back over the guard entry, without pushing it again, and
   // past the game's own entry to the previous page, and closes the window if the page is still
-  // there after LEAVE_WAIT_MS. Where the window stays, nothing catches the next back (an
-  // installed app closes) unless the player's input first restores the guard or the watcher.
+  // there after LEAVE_WAIT_MS. Where the window stays (Firefox for Android's installed app ignores
+  // a script's close), nothing catches the next back (an installed app closes) unless the
+  // player's input first restores the guard or the watcher.
   leave(): void;
+}
+
+// The close watchers that catch back, or undefined where the guard entry must: where the browser
+// has none, and in Firefox for Android, which hands back to a close watcher only when its history
+// can go back, and otherwise leaves the page (an installed app shows a blank screen, then closes).
+export function backCloseWatcher(
+  userAgent: string,
+  createCloseWatcher: CloseWatcherFactory | undefined,
+): CloseWatcherFactory | undefined {
+  return isFirefoxAndroid(userAgent) ? undefined : createCloseWatcher;
 }
 
 function isBackGuardState(state: unknown): boolean {
@@ -64,12 +78,14 @@ function eventKey(event: Event): unknown {
 // - A close watcher, where the browser has CloseWatcher, created at load and again after each
 //   close it fires. It adds no history entry, so with nothing before the game the history holds
 //   one entry and leave may close the window.
-// - A guard history entry for back to pop, pushed again on each pop, where there is no
-//   CloseWatcher or the history already holds more than one entry, so the window could not close
-//   anyway. It also catches a desktop browser's Back button, which is not a close request.
-//   Chrome and Firefox skip an entry added without user activation when going back (Firefox
-//   skips the entry under it), so the guard is pushed from the player's first input, not at
-//   load, and again from any later input that finds it missing.
+// - A guard history entry for back to pop, pushed again on each pop, where there is no close
+//   watcher (backCloseWatcher) or the history already holds more than one entry, so the window
+//   could not close anyway. It also catches a desktop browser's Back button, which is not a close
+//   request. The user's back skips an entry with no user interaction recorded on it (Firefox) or
+//   one that added an entry without user activation (Chrome), and with no other entry before it
+//   leaves the page. So the guard goes on top of the game's entry only from the player's first
+//   input (BACK_GUARD_GESTURES), never at load, and again from any later input that finds it
+//   missing; back before that input is the browser's own.
 // This cannot stop the system closing the app or a browser showing its own leave prompt.
 export function guardBackNavigation(
   eventTarget: EventTarget,
@@ -104,13 +120,15 @@ export function guardBackNavigation(
     }
   };
   const onGesture = (event: Event) => {
+    // Escape is no user activation, so it pushes no guard.
     if (event.type === "keydown" && eventKey(event) === ESCAPE_KEY) {
       escaping = true;
       host.setTimeout(() => {
         escaping = false;
       }, 0);
+    } else {
+      pushGuard();
     }
-    pushGuard();
     watchClose();
   };
   const onPopState = () => {

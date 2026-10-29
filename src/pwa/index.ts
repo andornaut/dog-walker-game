@@ -5,6 +5,7 @@
 import { chooseSoundFormat, type SoundFormat } from "../audio/soundFormat";
 import { browserStorage, lazyStorage } from "../save/storage";
 import {
+  backCloseWatcher,
   type BackGuard,
   type CloseWatcherFactory,
   type CloseWatcherLike,
@@ -127,7 +128,12 @@ export function setupPhoneApp(): Promise<void> {
   relayVisibilityEvents(window, document);
   showTurnUprightNotice();
   orientation = relayOrientationEvents(readViewport, window);
-  backGuard = guardBackNavigation(window, window, closeWatcherFactory(), history);
+  backGuard = guardBackNavigation(
+    window,
+    window,
+    backCloseWatcher(navigator.userAgent, closeWatcherFactory()),
+    history,
+  );
   const wakeLock = "wakeLock" in navigator ? navigator.wakeLock : undefined;
   screenWakeLock = createScreenWakeLock(wakeLock, document);
   // Held whenever the game is visible until the scenes take over with stopWakeLock and

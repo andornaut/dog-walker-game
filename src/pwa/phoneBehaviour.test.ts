@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { AUDIO_UNLOCK_EVENTS, unlockAudioOnFirstGesture } from "./audioUnlock";
 import {
   BACK_GUARD_GESTURES,
-  BACK_GUARD_STATE,
+  backCloseWatcher,
   type CloseWatcherLike,
   guardBackNavigation,
   type HistoryLike,
@@ -127,17 +127,27 @@ describe("createScreenWakeLock", () => {
 // The page's session history: the previous page's entry, if the game was opened from one, then
 // the game's own entries. Going back past the game's first entry leaves the page, which hides it;
 // going further than the history reaches does nothing, and the user's back there is the
-// browser's own (an installed app closes), which systemBacks counts.
+// browser's own (an installed app closes), which systemBacks counts. The user's back, as in
+// Firefox, reaches only an entry the user interacted with while it was current, and is the
+// browser's own when no entry before the current one has interaction.
 class FakeHistory extends EventTarget implements HistoryLike {
   systemBacks = 0;
-  private readonly entries: { page: "game" | "previous"; state: unknown }[];
+  private readonly entries: { interacted: boolean; page: "game" | "previous"; state: unknown }[];
   private index: number;
 
   constructor(previous: boolean) {
     super();
-    const game = { page: "game", state: null } as const;
-    this.entries = previous ? [{ page: "previous", state: null }, game] : [game];
+    const game = { interacted: false, page: "game", state: null } as const;
+    this.entries = previous
+      ? [{ interacted: true, page: "previous", state: null }, { ...game }]
+      : [{ ...game }];
     this.index = this.entries.length - 1;
+  }
+
+  // Whether the user's back stays in the history: an entry before the current one has
+  // interaction.
+  get canGoBack(): boolean {
+    return this.entries.slice(0, this.index).some(({ interacted }) => interacted);
   }
 
   get gameEntries(): number {
@@ -156,13 +166,26 @@ class FakeHistory extends EventTarget implements HistoryLike {
     return this.entries[this.index]?.state;
   }
 
-  // The browser's Back: the browser's own where the history reaches no further.
+  // The user's back: over entries without interaction, and the browser's own where none before
+  // the current one has it.
   back(): void {
-    if (this.index === 0) {
+    if (!this.canGoBack) {
       this.systemBacks += 1;
       return;
     }
-    this.go(-1);
+    let target = this.index - 1;
+    while (this.entries[target]?.interacted !== true) {
+      target -= 1;
+    }
+    this.go(target - this.index);
+  }
+
+  // The player's input, recorded on the current entry.
+  interact(): void {
+    const entry = this.entries[this.index];
+    if (entry !== undefined) {
+      entry.interacted = true;
+    }
   }
 
   go(delta: number): void {
@@ -175,7 +198,11 @@ class FakeHistory extends EventTarget implements HistoryLike {
   }
 
   pushState(data: unknown): void {
-    this.entries.splice(this.index + 1, Infinity, { page: "game", state: data });
+    this.entries.splice(this.index + 1, Infinity, {
+      interacted: false,
+      page: "game",
+      state: data,
+    });
     this.index += 1;
   }
 }
@@ -236,28 +263,58 @@ class FakeLeaveHost implements LeaveHost {
   }
 }
 
+const CHROME_ANDROID_UA =
+  "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36";
+const FIREFOX_ANDROID_UA = "Mozilla/5.0 (Android 15; Mobile; rv:150.0) Gecko/150.0 Firefox/150.0";
+
+// A browser with CloseWatcher or without, Chrome's user agent or Firefox for Android's.
 interface Browser {
   closeWatcher: boolean;
+  firefoxAndroid?: boolean;
   previous: boolean;
 }
 
 describe("guardBackNavigation", () => {
-  // A page in a browser with CloseWatcher or without, opened from a previous page or with nothing
-  // before the game (an installed app's launch, or a tab opened on the game).
-  function open({ closeWatcher, previous }: Browser) {
+  // A page in a browser opened from a previous page or with nothing before the game (an
+  // installed app's launch, or a tab opened on the game).
+  function open({ closeWatcher, firefoxAndroid = false, previous }: Browser) {
     const history = new FakeHistory(previous);
     const host = new FakeLeaveHost();
     const watchers = closeWatcher ? new FakeCloseWatchers() : undefined;
     const seen = recordEvents(history);
-    const guard = guardBackNavigation(history, host, watchers?.create, history);
+    const userAgent = firefoxAndroid ? FIREFOX_ANDROID_UA : CHROME_ANDROID_UA;
+    const guard = guardBackNavigation(
+      history,
+      host,
+      backCloseWatcher(userAgent, watchers?.create),
+      history,
+    );
     // The Android back gesture: a close request, which the history takes when no watcher does.
+    // Firefox for Android makes one only when its history can go back, and is otherwise the
+    // browser's own.
     const back = () => {
+      if (firefoxAndroid && !history.canGoBack) {
+        history.systemBacks += 1;
+        return;
+      }
       if (watchers?.request() !== true) {
         history.back();
       }
     };
+    // A key press, or with no key a tap, whose pointerdown the browser records on no entry and
+    // whose pointerup it records on the current one before the page sees it. Escape is no user
+    // activation.
     const input = (key?: string) => {
-      history.dispatchEvent(Object.assign(new Event(BACK_GUARD_GESTURES[0]), { key }));
+      if (key === undefined) {
+        history.dispatchEvent(new Event("pointerdown"));
+        history.interact();
+        history.dispatchEvent(new Event("pointerup"));
+        return;
+      }
+      if (key !== "Escape") {
+        history.interact();
+      }
+      history.dispatchEvent(Object.assign(new Event("keydown"), { key }));
     };
     return { back, guard, history, host, input, seen, watchers };
   }
@@ -274,20 +331,46 @@ describe("guardBackNavigation", () => {
     { closeWatcher: false, previous: true },
     { closeWatcher: true, previous: false },
     { closeWatcher: true, previous: true },
+    { closeWatcher: true, firefoxAndroid: true, previous: false },
+    { closeWatcher: true, firefoxAndroid: true, previous: true },
   ];
 
-  // A guard entry only where a close could not work anyway: no CloseWatcher, or a previous page.
+  // Whether the browser catches back with close watchers, so the guard entry is needed only with
+  // a previous page.
+  const watchesClose = ({ closeWatcher, firefoxAndroid = false }: Browser) =>
+    closeWatcher && !firefoxAndroid;
+
+  // A guard entry only where a close watcher does not catch back, or a previous page means the
+  // window could not close anyway.
   it.each(BROWSERS)(
-    "with CloseWatcher $closeWatcher and a previous page $previous, stays on the game through each back",
+    "CloseWatcher $closeWatcher, Firefox Android $firefoxAndroid, previous $previous: stays through each back",
     (browser) => {
       const { back, history, seen } = played(browser);
       back();
       back();
-      expect({ gameEntries: history.gameEntries, left: history.left, seen }).toEqual({
-        gameEntries: browser.closeWatcher && !browser.previous ? 1 : 2,
+      expect({
+        gameEntries: history.gameEntries,
+        left: history.left,
+        seen,
+        systemBacks: history.systemBacks,
+      }).toEqual({
+        gameEntries: watchesClose(browser) && !browser.previous ? 1 : 2,
         left: false,
         seen: [PHONE_EVENTS.backPressed, PHONE_EVENTS.backPressed],
+        systemBacks: 0,
       });
+    },
+  );
+
+  it.each([
+    { closeWatcher: true, name: "Chrome", userAgent: CHROME_ANDROID_UA, watches: true },
+    { closeWatcher: true, name: "Firefox", userAgent: FIREFOX_ANDROID_UA, watches: false },
+    { closeWatcher: false, name: "Chrome", userAgent: CHROME_ANDROID_UA, watches: false },
+  ])(
+    "$name for Android with CloseWatcher $closeWatcher catches back with close watchers $watches",
+    ({ closeWatcher, userAgent, watches }) => {
+      const create = closeWatcher ? new FakeCloseWatchers().create : undefined;
+      expect(backCloseWatcher(userAgent, create) !== undefined).toBe(watches);
     },
   );
 
@@ -311,8 +394,10 @@ describe("guardBackNavigation", () => {
     { closeWatcher: false, closes: [0, 0], left: true, previous: true },
     { closeWatcher: true, closes: [1, 1], left: false, previous: false },
     { closeWatcher: true, closes: [0, 0], left: true, previous: true },
+    { closeWatcher: true, closes: [0, 1], firefoxAndroid: true, left: false, previous: false },
+    { closeWatcher: true, closes: [0, 0], firefoxAndroid: true, left: true, previous: true },
   ])(
-    "leaving with CloseWatcher $closeWatcher and a previous page $previous closes $closes",
+    "CloseWatcher $closeWatcher, Firefox Android $firefoxAndroid, previous $previous: leaving closes $closes",
     (row) => {
       const { guard, history, host, seen } = played(row);
       guard.leave();
@@ -330,12 +415,12 @@ describe("guardBackNavigation", () => {
   // Where the window stays after leaving, the next back is the system's, which closes an
   // installed app, unless an input first restores the guard or the watcher.
   it.each(
-    BROWSERS.filter(({ previous }) => !previous).flatMap(({ closeWatcher }) => [
-      { closeWatcher, input: false },
-      { closeWatcher, input: true },
+    BROWSERS.filter(({ previous }) => !previous).flatMap((browser) => [
+      { ...browser, input: false },
+      { ...browser, input: true },
     ]),
   )(
-    "after leaving finds no page, with CloseWatcher $closeWatcher and input $input before back",
+    "CloseWatcher $closeWatcher, Firefox Android $firefoxAndroid: after leaving, input $input before back",
     (row) => {
       const { back, guard, history, host, input, seen } = played({ ...row, previous: false });
       guard.leave();
@@ -355,8 +440,9 @@ describe("guardBackNavigation", () => {
   it.each([
     { closeWatcher: false, presses: [], watching: 0 },
     { closeWatcher: true, presses: [PHONE_EVENTS.backPressed], watching: 1 },
+    { closeWatcher: true, firefoxAndroid: true, presses: [], watching: 0 },
   ])(
-    "before the player's first input, with CloseWatcher $closeWatcher, back presses $presses",
+    "CloseWatcher $closeWatcher, Firefox Android $firefoxAndroid: back before any input presses $presses",
     (row) => {
       const { back, history, seen, watchers } = open({ ...row, previous: false });
       back();
@@ -400,13 +486,20 @@ describe("guardBackNavigation", () => {
     expect([afterLeaving, watchers?.active]).toEqual([0, 1]);
   });
 
-  it.each(BACK_GUARD_GESTURES)("pushes a missing guard on %s, and never a second", (type) => {
+  // Only input the browser records before the page sees it pushes the guard: a key press other
+  // than Escape, or a pointerup.
+  it.each([
+    { gameEntries: 2, key: "a", type: "keydown" },
+    { gameEntries: 1, key: "Escape", type: "keydown" },
+    { gameEntries: 1, key: undefined, type: "pointerdown" },
+    { gameEntries: 2, key: undefined, type: "pointerup" },
+  ])("$type with key $key, twice, leaves $gameEntries game entries", (row) => {
     const history = new FakeHistory(false);
     guardBackNavigation(history, new FakeLeaveHost(), undefined, history);
-    history.dispatchEvent(new Event(type));
-    expect(history.state).toEqual(BACK_GUARD_STATE);
-    history.dispatchEvent(new Event(type));
-    expect(history.gameEntries).toBe(2);
+    for (let press = 0; press < 2; press += 1) {
+      history.dispatchEvent(Object.assign(new Event(row.type), { key: row.key }));
+    }
+    expect(history.gameEntries).toBe(row.gameEntries);
   });
 
   it("does not push a second guard when the page reloads on one", () => {
