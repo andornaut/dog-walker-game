@@ -396,14 +396,13 @@ export class StatsScene extends Scene {
     return dogsBottom(dogs.length);
   }
 
-  // The heading and the earned count, then a badge per row: earned ones in colour with a green name
+  // The earned count at the rows' left, then a badge per row: earned ones in colour with a green name
   // on a gold band, ticked, locked ones greyed; each with its goal, or its short goal where the
   // full one does not fit, and a locked one that counts across walks with its progress.
   private drawBadges(): number {
     const save = profileSave(this);
     const badges = this.badges();
-    this.text(LEFT, WALL.headingY, gameData.menuText.stats.badges, { font: "title" });
-    this.text(RIGHT, WALL.headingY, earnedText(gameData, badges), { originX: 1 });
+    this.text(LEFT, WALL.headingY, earnedText(gameData, badges));
     const cells = withProbe(this, BODY_TEXT, (probe) => {
       const inkWidth = (line: string) => {
         setPixelText(probe, line);

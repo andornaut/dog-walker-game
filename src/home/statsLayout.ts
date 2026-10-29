@@ -87,7 +87,7 @@ export const STATS_LAYOUT = {
   // tab's first block, each section's rows rowsY under its heading, and the next heading
   // sectionGap under the last row's pitch, as far as the Dogs tab's blocks are apart.
   walks: { rowsY: 20, sectionGap: BLOCK_GAP, top: TOP },
-  // The badge wall: the heading and the earned count with their capitals at headingY, then one
+  // The badge wall: the earned count at the rows' left with its capitals at headingY, then one
   // badge per row from y, gap apart, each the badge badgeTop under the row's top then a text
   // column of up to lines lines at 2x from x (the name, the goal, then a locked badge's
   // progress across walks, wallLineTops), its capitals' top y under the row's top and its last
