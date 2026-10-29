@@ -58,7 +58,8 @@ export function playForgiven(
 // Body text at 2x on a cream chip, as a change label's (CHANGE_CHIP), centred on the anchor
 // (moved in to stay on screen) with its bottom on the anchor's line bottom; held fully opaque
 // for holdMs, then rising and fading out over the rest of ms; with reduced motion it fades in
-// place.
+// place. The chip and its text are one container, the text after the chip, so the text always
+// draws over it.
 export function floatLabel(
   scene: Scene,
   moment: PackMoment,
@@ -77,8 +78,8 @@ export function floatLabel(
   placePixelText(label, placed.text.x - ink.left, placed.text.y);
   const box = scene.add.graphics();
   drawFramedRect(box, CREAM_PANEL_COLOURS, placed.chip);
-  const parts = [box.setDepth(moment.depth), label.setDepth(moment.depth)];
-  fadeAway(scene, parts, {
+  const chip = scene.add.container(0, 0, [box, label]).setDepth(moment.depth);
+  fadeAway(scene, [chip], {
     delayMs: timing.holdMs,
     ms: timing.ms - timing.holdMs,
     rise: moment.still ? 0 : timing.rise,
