@@ -45,7 +45,13 @@ import {
   ZONE_PROGRESS,
   zoneProgressLayout,
 } from "../hud/walkHud";
-import { CARD_LAYOUT, cardRows, largeCardRect } from "../layout/cardLayout";
+import {
+  CARD_LAYOUT,
+  cardEffectArea,
+  cardRows,
+  largeBodyBox,
+  largeCardRect,
+} from "../layout/cardLayout";
 import { COMIC_WORDS } from "../layout/comicWords";
 import { laneCentreXs, laneDividerXs } from "../layout/lanes";
 import { LOADING_TRACK, LOADING_WALKER } from "../layout/loadingScreen";
@@ -120,6 +126,7 @@ export function layoutExport(
   const scrollSpeed = read(data.tuning, "pixels", "roadScrollSpeed");
   const bandRows = Array.from({ length: road.y - rasterView.y }, (_, i) => rasterView.y + i);
   const body = fontMetrics(readBitmapFont("font-body"));
+  const title = fontMetrics(readBitmapFont("font-title"));
   return {
     camera: {
       ...ROAD_CAMERA,
@@ -206,6 +213,13 @@ export function layoutExport(
     scenes: {
       cards: {
         ...CARD_LAYOUT,
+        // The effect's area, in card pixels, on a card that fires an owner and one that does not.
+        effect: {
+          ...CARD_LAYOUT.effect,
+          area: { fires: cardEffectArea(body, true), plain: cardEffectArea(body, false) },
+        },
+        // The enlarged card's changes' top in its body, under no firing warning.
+        large: { ...CARD_LAYOUT.large, changesTop: largeBodyBox({ body, title }, 0).top },
         largeRect: largeCardRect(walkView),
         // By count of cards, from 1.
         rows: cardRows(MAX_CARD_OPTIONS, walkView),
@@ -232,7 +246,7 @@ export function layoutExport(
         // the icon's top.
         updatePlate: {
           ...HOME_LAYOUT.updatePlate,
-          ...updatePlateText(fontMetrics(readBitmapFont("font-title"))),
+          ...updatePlateText(title),
         },
         walkerRects: gridRects(
           HOME_LAYOUT.walkerTiles,
@@ -249,11 +263,7 @@ export function layoutExport(
           noteLines: PAUSE_NOTE_LINES,
         }),
       },
-      settings: settingsLayout(
-        { body, title: fontMetrics(readBitmapFont("font-title")) },
-        SCREEN_CONFIG,
-        SETTINGS_EXPORT_ROWS,
-      ),
+      settings: settingsLayout({ body, title }, SCREEN_CONFIG, SETTINGS_EXPORT_ROWS),
       shop: { ...SHOP_LAYOUT, tabRects: shopTabRects(SHOP_TABS.length) },
       stats: { ...STATS_LAYOUT, tabRects: statsTabRects() },
     },

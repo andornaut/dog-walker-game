@@ -1,3 +1,5 @@
+import type { FontMetrics } from "@andornaut/game-kit/text/bitmapFont";
+
 // A name set in a pill inside a line of text: a pale rounded box behind the name, laid into the
 // line so that measuring, fitting and wrapping the text make room for it. The text carries the
 // pill as characters the fonts draw as blank advances: an opener, which says which pill, before
@@ -109,4 +111,25 @@ export function inkWithPills(
 // A pill's top below its line's top (negative: above it) and its height, at scale.
 export function pillRows(scale: number): { height: number; top: number } {
   return { height: PILL.height * scale, top: -PILL.rise * scale };
+}
+
+// The rows a pill keeps clear of an image over or under it, in screen pixels at any scale.
+export const PILL_IMAGE_GAP = 2;
+
+// The rows a line's pills reach over its capitals, which start capTop rows under the line's top,
+// at scale.
+export function pillRiseOverCaps(metrics: Pick<FontMetrics, "capTop">, scale: number): number {
+  return metrics.capTop * scale - pillRows(scale).top;
+}
+
+// The rows a line's pills reach under its lowest ink, inkBottom rows under the line's top, at
+// scale.
+export function pillDropUnderInk(metrics: Pick<FontMetrics, "inkBottom">, scale: number): number {
+  const { height, top } = pillRows(scale);
+  return top + height - metrics.inkBottom * scale;
+}
+
+// Whether text sets a name in a pill.
+export function hasPill(text: string): boolean {
+  return [...text].some((char) => pillIndex(char) !== undefined);
 }

@@ -70,6 +70,7 @@ import { zonePillNameRoom } from "../hud/zonePill";
 import {
   boxStyle,
   CARD_LAYOUT,
+  cardEffectArea,
   FIRES_FIT,
   largeBodyBox,
   largeBodyStyle,
@@ -191,7 +192,9 @@ function changeLabelRoles(): TextRoleCase[] {
 // Each card the data can deal: its small effect in the box its paws and warning leave it, its
 // firing warning, and the enlarged card's warning and changes.
 function cardRoles(): TextRoleCase[] {
-  const { effect: area, large } = CARD_LAYOUT;
+  const { large } = CARD_LAYOUT;
+  // A forgiven loss's rows in the smaller area, a firing card's.
+  const area = cardEffectArea(BODY, true);
   const bodyWidth = (style: TextFitStyle, line: string) =>
     inkWidth("font-body", style, plainMarks(line));
   const forgiven = keysOf(gameData.dogs).map((dog) =>
@@ -215,7 +218,7 @@ function cardRoles(): TextRoleCase[] {
           ? 0
           : fitInFont("font-title", FIRES_FIT.large.style, FIRES_FIT.large.room, shownWarning).lines
               .length;
-      const box = largeBodyBox(TITLE, warningLines);
+      const box = largeBodyBox({ body: BODY, title: TITLE }, warningLines);
       const style = largeBodyStyle(BODY, box.height, SCREEN_LAYOUT.walkView);
       const changes = { room: large.body.width, style };
       const enlarged = plainRole("enlarged card's changes", "font-body", changes, [

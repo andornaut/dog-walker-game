@@ -10,6 +10,7 @@ import { ownerPhotoRect, WALK_BAR, type WalkBarButtonId } from "../hud/walkHud";
 import type { PackPlacement } from "../layout/packFormation";
 import type { GridSpec } from "../ui/grid";
 import { helpCapDy } from "../ui/labelHelpGap";
+import { hasPill, PILL_IMAGE_GAP, pillDropUnderInk, pillRiseOverCaps } from "../ui/namePills";
 import { BUTTON_LIP_PX } from "../ui/selection";
 import { TOP_BAR_FACE, TOP_BAR_HEIGHT, TOP_BAR_MID, TOP_BAR_WELL } from "../ui/topBarTrim";
 import type { SectionId } from "./sections";
@@ -249,6 +250,8 @@ export const HOME_LAYOUT = {
     padBottom: 3,
     padTop: 4,
     padX: 5,
+    // The rows the quip art inks at its top and bottom edges.
+    rim: { bottom: 3, top: 2 },
     top: 6,
   },
   startButton: START_BUTTON,
@@ -374,10 +377,26 @@ export const SPEECH_ROOM =
   HOME_LAYOUT.speech.margin -
   2 * HOME_LAYOUT.speech.padX;
 
-// The speech bubble's height for lines lines of 2x body text.
-export function speechBubbleHeight(body: FontMetrics, lines: number): number {
-  const { padBottom, padTop } = HOME_LAYOUT.speech;
-  return padTop + inkRowsOfLines(body, lines) * 2 + padBottom;
+// The speech bubble's rows over and under lines of 2x body text: padTop to the first line's
+// capitals and padBottom under the last line's lowest ink, or more where that line's pills
+// would come within PILL_IMAGE_GAP rows of the quip art's rim.
+export function speechPads(
+  body: FontMetrics,
+  lines: readonly string[],
+): { bottom: number; top: number } {
+  const { padBottom, padTop, rim } = HOME_LAYOUT.speech;
+  const over = rim.top + PILL_IMAGE_GAP + pillRiseOverCaps(body, 2);
+  const under = pillDropUnderInk(body, 2) + PILL_IMAGE_GAP + rim.bottom;
+  return {
+    bottom: hasPill(lines.at(-1) ?? "") ? Math.max(padBottom, under) : padBottom,
+    top: hasPill(lines[0] ?? "") ? Math.max(padTop, over) : padTop,
+  };
+}
+
+// The speech bubble's height for lines of 2x body text.
+export function speechBubbleHeight(body: FontMetrics, lines: readonly string[]): number {
+  const pads = speechPads(body, lines);
+  return pads.top + inkRowsOfLines(body, lines.length) * 2 + pads.bottom;
 }
 
 // The owner's row on a dog's card, with its role on roleLines lines.

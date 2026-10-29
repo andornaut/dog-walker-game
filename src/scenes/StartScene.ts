@@ -1581,7 +1581,7 @@ export class StartScene extends Scene {
     const pitch = body.lineHeight * TEXT_SCALE;
     const labels = lines.map((line) => this.text(root, 0, 0, line, PALETTE.plum, { originX: 0.5 }));
     const widest = Math.ceil(Math.max(...labels.map((label) => label.width)));
-    const size = bubbleSize(body, lines.length, widest, faced ? column : null);
+    const size = bubbleSize(body, lines, widest, faced ? column : null);
     // A bubble tall enough to reach the Pet shop's board moves left to keep clear of it.
     const board = PET_SHOP_BOARD;
     const rect = bubbleRect(board, SPEECH, { x, y: top }, size);

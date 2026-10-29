@@ -83,7 +83,7 @@ const CARD = CARD_LAYOUT;
 // Card-pixel positions of the frame's parts.
 const BAND = CARD_LAYOUT.band;
 const ART: Rect = CARD_LAYOUT.art;
-const EFFECT: Rect = CARD_LAYOUT.effect;
+const EFFECT = CARD_LAYOUT.effect;
 const BADGE: Rect = CARD_LAYOUT.badge;
 const SELECTED_OUTLINE = 2;
 const COST_KEY = "card-cost";
@@ -455,7 +455,8 @@ export class CardScene extends Scene {
       fireLines = fitPixelText(warning, FIRES_FIT.large, x, top).lines.length;
       parts.push(warning);
     }
-    const box = largeBodyBox(pixelFontMetrics(this, "title"), fireLines);
+    const metrics = pixelFontMetrics(this, "body");
+    const box = largeBodyBox({ body: metrics, title: pixelFontMetrics(this, "title") }, fireLines);
     const forgiven =
       this.view === undefined ? null : optionMarks(gameData, this.view, option).forgiven;
     if (forgiven !== null) {
@@ -463,7 +464,6 @@ export class CardScene extends Scene {
     }
     const text = largeBodyText(gameData, option);
     const body = addPixelText(this, x, top + box.top, text, { colour: PALETTE.plum, scale: 2 });
-    const metrics = pixelFontMetrics(this, "body");
     const style = largeBodyStyle(metrics, box.height, SCREEN_LAYOUT.walkView);
     const { lines } = fitPixelText(body, { room: LARGE.body.width, style }, x, top + box.top);
     addNamePills([body]);
@@ -654,7 +654,7 @@ export class CardScene extends Scene {
     if (path !== undefined) {
       const paws = tagFrame(this, DIFFICULTY_KEY, String(path.difficulty));
       if (paws !== undefined) {
-        this.add.image(x + CARD.width / 2, y + EFFECT.y, DIFFICULTY_KEY, paws).setOrigin(0.5, 0);
+        this.add.image(x + CARD.width / 2, y + CARD.paws.y, DIFFICULTY_KEY, paws).setOrigin(0.5, 0);
       }
     }
 

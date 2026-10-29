@@ -2,7 +2,7 @@ import { wrapWords } from "@andornaut/game-kit/lines";
 import type { Rect } from "@andornaut/game-kit/rect";
 import type { FontMetrics } from "@andornaut/game-kit/text/bitmapFont";
 
-import { HOME_LAYOUT, SPEECH_ROOM, speechBubbleHeight } from "./homeLayout";
+import { HOME_LAYOUT, SPEECH_ROOM, speechBubbleHeight, speechPads } from "./homeLayout";
 
 const OWNER = HOME_LAYOUT.speech.owner;
 
@@ -49,15 +49,16 @@ export function bubbleLines(
   return { faced: column !== null, lines: speechLines(width, room, paragraphs) };
 }
 
-// The bubble's size for lines lines of text whose widest line is widest, beside an owner's
-// column column wide (null for none), and how far its first line's capitals sit under its top.
+// The bubble's size for lines of text whose widest line is widest, beside an owner's column
+// column wide (null for none), and how far its first line's capitals sit under its top.
 export function bubbleSize(
   body: FontMetrics,
-  lines: number,
+  lines: readonly string[],
   widest: number,
   column: number | null,
 ): { height: number; textTop: number; width: number } {
-  const { padTop, padX } = HOME_LAYOUT.speech;
+  const { padX } = HOME_LAYOUT.speech;
+  const padTop = speechPads(body, lines).top;
   const natural = speechBubbleHeight(body, lines);
   if (column === null) {
     return { height: natural, textTop: padTop, width: widest + 2 * padX };

@@ -1153,6 +1153,7 @@
     "cards": {
       "art": {
         "height": 56,
+        "outline": 1,
         "width": 75,
         "x": 18,
         "y": 16
@@ -1161,7 +1162,7 @@
         "height": 13,
         "width": 71,
         "x": 20,
-        "y": 134
+        "y": 136
       },
       "band": {
         "height": 11,
@@ -1169,15 +1170,29 @@
         "y": 2
       },
       "effect": {
-        "height": 55,
+        "plaqueGap": 1,
         "width": 100,
         "x": 6,
-        "y": 76
+        "area": {
+          "fires": {
+            "height": 53,
+            "width": 100,
+            "x": 6,
+            "y": 81
+          },
+          "plain": {
+            "height": 54,
+            "width": 100,
+            "x": 6,
+            "y": 81
+          }
+        }
       },
       "fires": {
+        "inkTop": 1,
         "size": 16,
         "x": 18,
-        "y": 132
+        "y": 134
       },
       "forkHome": {
         "gap": 6,
@@ -1187,6 +1202,7 @@
       "height": 153,
       "large": {
         "art": {
+          "outline": 2,
           "x": 8,
           "y": 32
         },
@@ -1214,12 +1230,14 @@
         },
         "height": 280,
         "warningGap": 4,
-        "width": 166
+        "width": 166,
+        "changesTop": 2
       },
       "paws": {
-        "gap": 4,
-        "height": 10
+        "height": 10,
+        "y": 76
       },
+      "pillGap": 2,
       "plaquePadX": 2,
       "row": {
         "gap": 6
@@ -1928,6 +1946,10 @@
         "padBottom": 3,
         "padTop": 4,
         "padX": 5,
+        "rim": {
+          "bottom": 3,
+          "top": 2
+        },
         "top": 6
       },
       "startButton": {

@@ -7,30 +7,37 @@ import {
 import { type TextFitStyle } from "@andornaut/game-kit/text/textFit";
 
 import { CARD_HEADER, cardRowRects, type CardRowSpec } from "../ui/cardRow";
+import { PILL_IMAGE_GAP, pillRiseOverCaps } from "../ui/namePills";
 import { TEXT_SCALE } from "../ui/textFit";
 import { CARD_CHARMS_HEIGHT } from "./buffLayout";
 
 // The choice cards: the card-frame sprite's parts in card pixels, the row of cards centred
 // on the road, and the enlarged card a hold opens, card-frame-large, centred in the dimmed band
-// and road. A band's label is body text at 1x, at most room wide. An option
-// that would fire an owner says so at the foot of the effect, warningGap over the plaque, its
-// lowest ink at the effect's bottom, the effect ending warningGap over it; the ui-fires marker,
-// fires.size square at its scale, sits over the plaque's left rivet at fires. A path card's
-// difficulty paws, paws.height tall, sit at the effect's top, the effect paws.gap under them.
-// A plaque's text keeps plaquePadX inside the plaque or its part right of the marker.
+// and road. A band's label is body text at 1x, at most room wide. The frame outlines the
+// illustration's window art.outline rows deep, which counts as the image. A card's effect, at 2x,
+// starts under the art and ends effect.plaqueGap rows over the plaque, or over the ui-fires
+// marker's top ink (fires.inkTop rows into it) on an option that would fire an owner, which
+// says so at the foot of the effect, its lowest ink at the effect's bottom, the effect ending
+// warningGap over it; the marker, fires.size square at its scale, sits over the plaque's left
+// rivet at fires. A path card's difficulty paws, paws.height tall, sit at paws.y, the effect
+// under them. Every pill keeps pillGap rows clear of the lowest ink of the image over it: the
+// art's outline, or the paws. A plaque's text keeps plaquePadX inside the plaque or its part
+// right of the marker.
 export const CARD_LAYOUT = {
-  art: { height: 56, width: 75, x: 18, y: 16 },
-  badge: { height: 13, width: 71, x: 20, y: 134 },
+  art: { height: 56, outline: 1, width: 75, x: 18, y: 16 },
+  badge: { height: 13, width: 71, x: 20, y: 136 },
   band: { height: 11, room: 106, y: 2 },
-  effect: { height: 55, width: 100, x: 6, y: 76 },
-  fires: { size: 16, x: 18, y: 132 },
+  effect: { plaqueGap: 1, width: 100, x: 6 },
+  fires: { inkTop: 1, size: 16, x: 18, y: 134 },
   // A fork card's Head home button, centred under the paths, gap rows below their charms.
   forkHome: { gap: 6, height: 44, width: 160 },
   height: 153,
-  // The enlarged card's body: a firing warning in the title font at 1x, warningGap over the
-  // changes, which take the rest of the body and bodyGap rows under their lowest ink.
+  // The enlarged card's body, the frame's rows that grow with it: a firing warning in the title
+  // font at 1x, warningGap over the changes, which take the rest of the body and bodyGap rows
+  // under their lowest ink; with no warning, the changes start under the art as a card's effect
+  // does.
   large: {
-    art: { x: 8, y: 32 },
+    art: { outline: 2, x: 8, y: 32 },
     badge: { height: 26, width: 142, x: 12, y: 242 },
     band: { height: 18, room: 154, y: 4 },
     body: { height: 82, width: 142, x: 12, y: 152 },
@@ -40,7 +47,8 @@ export const CARD_LAYOUT = {
     warningGap: 4,
     width: 166,
   },
-  paws: { gap: 4, height: 10 },
+  paws: { height: 10, y: 76 },
+  pillGap: PILL_IMAGE_GAP,
   plaquePadX: 2,
   row: { gap: 6 },
   warningGap: 2,
@@ -65,29 +73,52 @@ export const FIRES_FIT = {
   small: { room: CARD_LAYOUT.effect.width, style: { lines: 2, scale: 1 } },
 } as const satisfies Record<string, { room: number; style: TextFitStyle }>;
 
+// The row where 2x body text under an image, whose lowest ink is on the row over row foot,
+// puts its first line's capitals, its pills pillGap rows clear of the image.
+function capsUnder(body: FontMetrics, foot: number): number {
+  return foot + CARD_LAYOUT.pillGap + pillRiseOverCaps(body, TEXT_SCALE);
+}
+
+// A card's effect area, in card pixels, on a card that fires an owner or not: from the
+// capitals under the art and its outline to plaqueGap rows over the plaque, or over the fires
+// marker's top ink where it rises above the plaque.
+export function cardEffectArea(body: FontMetrics, fires: boolean): Rect {
+  const { art, badge, effect, fires: marker } = CARD_LAYOUT;
+  const y = capsUnder(body, art.y + art.height + art.outline);
+  const foot = (fires ? Math.min(badge.y, marker.y + marker.inkTop) : badge.y) - effect.plaqueGap;
+  return { height: foot - y, width: effect.width, x: effect.x, y };
+}
+
 // A card's effect box, in card pixels: its top and height, under a path card's paws and over a
-// firing warning fireLines lines long, whose capitals start at warningY.
+// firing warning fireLines lines long, whose capitals start at warningY, on a card that fires
+// an owner or not.
 export function cardEffectBox(
   body: FontMetrics,
-  parts: { fireLines: number; path: boolean },
+  parts: { fireLines: number; fires: boolean; path: boolean },
 ): { height: number; warningY: number; y: number } {
-  const { effect, paws, warningGap } = CARD_LAYOUT;
-  const y = effect.y + (parts.path ? paws.height + paws.gap : 0);
-  const foot = effect.y + effect.height;
+  const { paws, warningGap } = CARD_LAYOUT;
+  const area = cardEffectArea(body, parts.fires);
+  const y = parts.path ? capsUnder(body, paws.y + paws.height) : area.y;
+  const foot = area.y + area.height;
   const warningY = foot - (parts.fireLines > 0 ? inkRowsOfLines(body, parts.fireLines) : 0);
   const bottom = parts.fireLines > 0 ? warningY - warningGap : foot;
   return { height: bottom - y, warningY, y };
 }
 
-// The enlarged card's body: the changes' top, under a firing warning fireLines lines long in
-// title, and the height they may take.
+// The enlarged card's body: the changes' top, from the body's, under a firing warning
+// fireLines lines long in title or else under the art at 2x and its outline, and the height
+// they may take.
 export function largeBodyBox(
-  title: FontMetrics,
+  fonts: { body: FontMetrics; title: FontMetrics },
   fireLines: number,
 ): { height: number; top: number } {
-  const { body, warningGap } = CARD_LAYOUT.large;
-  const top = fireLines > 0 ? inkRowsOfLines(title, fireLines) + warningGap : 0;
-  return { height: body.height - top, top };
+  const { art, large } = CARD_LAYOUT;
+  const artFoot = large.art.y + 2 * art.height + large.art.outline;
+  const top =
+    fireLines > 0
+      ? inkRowsOfLines(fonts.title, fireLines) + large.warningGap
+      : Math.max(0, capsUnder(fonts.body, artFoot) - large.body.y);
+  return { height: large.body.height - top, top };
 }
 
 // How wide a plaque's text may be: the plaque from left, width wide, or its part right of a

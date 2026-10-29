@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { wrapWords } from "@andornaut/game-kit/lines";
 import { keysOf } from "@andornaut/game-kit/records";
 import { insetRect, rectsOverlap } from "@andornaut/game-kit/rect";
@@ -10,6 +12,8 @@ import { withNamePills } from "../hud/effectNames";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
+import { decodePng } from "../testing/png";
+import { hasPill, PILL_SPACE, pillRows } from "../ui/namePills";
 import { plainMarks } from "../ui/pixelFont";
 import { cents } from "../units";
 import {
@@ -107,7 +111,7 @@ describe("the walker's speech", () => {
       const room = faced && column !== null ? SPEECH_ROOM - column - 4 : SPEECH_ROOM;
       const whole = parts.flatMap((part) => wrapWords(width, room, part));
       const widest = Math.ceil(Math.max(...lines.map(width)));
-      const size = bubbleSize(body, lines.length, widest, faced ? column : null);
+      const size = bubbleSize(body, lines, widest, faced ? column : null);
       const rect = bubbleRect(board, HOME_LAYOUT.speech, { x: walkerAtGate.x, y: top }, size);
       const bubbleFits =
         lines.join("\n") === whole.join("\n") &&
@@ -136,12 +140,56 @@ describe("the walker's speech", () => {
     expect(offenders.map(({ parts }) => parts.join(" / "))).toEqual([]);
   });
 
+  // The rows the quip art inks at its top and bottom edges, down its middle column.
+  const quip = decodePng(readFileSync("public/art/images/ui-quip.png"));
+  const quipPixel = (y: number) => {
+    const at = (y * quip.width + quip.width / 2) * 4;
+    return Array.from(quip.data.subarray(at, at + 4)).join();
+  };
+  const quipInked = (row: number) => quipPixel(row) !== quipPixel(quip.height / 2);
+  const rimTop = Array.from({ length: quip.height / 2 }, (_, y) => y).filter(quipInked).length;
+  const rimBottom = Array.from({ length: quip.height / 2 }, (_, y) => quip.height - 1 - y).filter(
+    quipInked,
+  ).length;
+  // Each speech whose first or last line sets a name in a pill.
+  const pilled = speeches.flatMap(({ owner, parts }) => {
+    const column = owner === null ? null : ownerColumn(nameInk(owner));
+    const { faced, lines } = bubbleLines(width, column, parts);
+    const ends = [lines[0] ?? "", lines.at(-1) ?? ""];
+    return ends.some(hasPill)
+      ? [
+          {
+            column: faced ? column : null,
+            lines,
+            name: plainMarks(lines.join(" ").replaceAll(PILL_SPACE, " ")),
+          },
+        ]
+      : [];
+  });
+
+  it.each(pilled)(
+    "keeps the pills 2 rows clear of the bubble's rim: $name",
+    ({ column, lines }) => {
+      const widest = Math.ceil(Math.max(...lines.map(width)));
+      const size = bubbleSize(body, lines, widest, column);
+      const pill = pillRows(2);
+      const lineTop = (i: number) => size.textTop + i * body.lineHeight * 2 - body.capTop * 2;
+      if (hasPill(lines[0] ?? "")) {
+        expect(lineTop(0) + pill.top - rimTop).toBeGreaterThanOrEqual(2);
+      }
+      if (hasPill(lines.at(-1) ?? "")) {
+        const pillBottom = lineTop(lines.length - 1) + pill.top + pill.height;
+        expect(size.height - rimBottom - pillBottom).toBeGreaterThanOrEqual(2);
+      }
+    },
+  );
+
   it.each(dogs)(
     "centres %s's owner's face over their name, the text centred down the bubble",
     (dog) => {
       const column = ownerColumn(nameInk(dog));
       const lines = bubbleLines(width, column, [gameData.quips[dog].parting[0] ?? ""]);
-      const size = bubbleSize(body, lines.lines.length, 100, column);
+      const size = bubbleSize(body, lines.lines, 100, column);
       const rect = { ...size, x: 0, y: 0 };
       const { face, name } = ownerPlace(rect, column);
       const ink = inkRowsOfLines(body, lines.lines.length) * 2;

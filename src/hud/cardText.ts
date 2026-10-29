@@ -85,9 +85,14 @@ export function smallCardText(
       : fittingText(FIRES_FIT.small.style, inkWidth, room, firesText(data, fires));
   const warnings = said !== null && fits(said) ? [said, null] : [null];
   const path = option?.path !== undefined;
+  const firing = fires.length > 0;
   const texts = smallEffectTexts(data, option);
   for (const warning of warnings) {
-    const box = cardEffectBox(body, { fireLines: warning?.lines.length ?? 0, path });
+    const box = cardEffectBox(body, {
+      fireLines: warning?.lines.length ?? 0,
+      fires: firing,
+      path,
+    });
     for (const text of texts) {
       const effect = fittingText(boxStyle(body, box.height), inkWidth, room, text);
       if (fits(effect)) {
@@ -95,7 +100,7 @@ export function smallCardText(
       }
     }
   }
-  const box = cardEffectBox(body, { fireLines: 0, path });
+  const box = cardEffectBox(body, { fireLines: 0, fires: firing, path });
   const effect = fittingText(boxStyle(body, box.height), inkWidth, room, texts.at(-1) ?? "");
   return { box, effect, warning: null };
 }

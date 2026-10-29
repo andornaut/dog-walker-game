@@ -3,7 +3,7 @@ import type { TextFitStyle } from "@andornaut/game-kit/text/textFit";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { CARD_LAYOUT, plaqueRoom } from "../layout/cardLayout";
+import { CARD_LAYOUT, cardEffectArea, plaqueRoom } from "../layout/cardLayout";
 import { hasPlaque, type OptionView } from "../rules/choices";
 import { everyCardOption } from "../testing/everyCardOption";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
@@ -38,7 +38,7 @@ describe("every card the data can deal", () => {
   // The warning ends on the effect box's foot, where it shows (every effect and warning fits its
   // box: ui/textRoles.test.ts).
   it("sets its firing warning's lowest ink on the effect box's foot", () => {
-    const { effect: area } = CARD_LAYOUT;
+    const area = cardEffectArea(BODY, true);
     expect(
       misfits((option) => {
         const { box, warning } = smallCardText(gameData, BODY, bodyWidth, option);
