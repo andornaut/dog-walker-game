@@ -10,6 +10,7 @@ import {
   type CloseWatcherFactory,
   type CloseWatcherLike,
   guardBackNavigation,
+  isFirefoxAndroidApp,
 } from "./backNavigation";
 import { dispatchPhoneEvent, PHONE_EVENTS } from "./events";
 import { type InstallFlow, type InstallOutcome, watchInstall } from "./installFlow";
@@ -128,12 +129,15 @@ export function setupPhoneApp(): Promise<void> {
   relayVisibilityEvents(window, document);
   showTurnUprightNotice();
   orientation = relayOrientationEvents(readViewport, window);
-  backGuard = guardBackNavigation(
-    window,
-    window,
-    backCloseWatcher(navigator.userAgent, closeWatcherFactory()),
-    history,
-  );
+  // Firefox for Android's installed app keeps its own back.
+  if (!isFirefoxAndroidApp(navigator.userAgent, (query) => matchMedia(query).matches)) {
+    backGuard = guardBackNavigation(
+      window,
+      window,
+      backCloseWatcher(navigator.userAgent, closeWatcherFactory()),
+      history,
+    );
+  }
   const wakeLock = "wakeLock" in navigator ? navigator.wakeLock : undefined;
   screenWakeLock = createScreenWakeLock(wakeLock, document);
   // Held whenever the game is visible until the scenes take over with stopWakeLock and

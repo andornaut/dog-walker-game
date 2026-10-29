@@ -48,20 +48,34 @@ export interface BackGuard {
   // opened on the game), it closes the window, which the browser allows while the history holds
   // only that entry. Otherwise it goes back over the guard entry, without pushing it again, and
   // past the game's own entry to the previous page, and closes the window if the page is still
-  // there after LEAVE_WAIT_MS. Where the window stays (Firefox for Android's installed app ignores
-  // a script's close), nothing catches the next back (an installed app closes) unless the
-  // player's input first restores the guard or the watcher.
+  // there after LEAVE_WAIT_MS. Where the window stays, nothing catches the next back (an
+  // installed app closes) unless the player's input first restores the guard or the watcher.
   leave(): void;
 }
 
 // The close watchers that catch back, or undefined where the guard entry must: where the browser
 // has none, and in Firefox for Android, which hands back to a close watcher only when its history
-// can go back, and otherwise leaves the page (an installed app shows a blank screen, then closes).
+// can go back, and otherwise leaves the page.
 export function backCloseWatcher(
   userAgent: string,
   createCloseWatcher: CloseWatcherFactory | undefined,
 ): CloseWatcherFactory | undefined {
   return isFirefoxAndroid(userAgent) ? undefined : createCloseWatcher;
+}
+
+// The display modes an installed app runs in, any of which Firefox for Android may report.
+export const INSTALLED_APP_DISPLAY_QUERY =
+  "(display-mode: fullscreen), (display-mode: standalone), (display-mode: minimal-ui)";
+
+// Whether the page runs as Firefox for Android's installed app, where the game leaves back to the
+// browser: no close watcher, no guard entry and so no Quit?, since the app ignores a script's
+// close and its back with nothing to go back to shows a blank screen before it closes, which the
+// page cannot skip. displayModeMatches answers a media query.
+export function isFirefoxAndroidApp(
+  userAgent: string,
+  displayModeMatches: (query: string) => boolean,
+): boolean {
+  return isFirefoxAndroid(userAgent) && displayModeMatches(INSTALLED_APP_DISPLAY_QUERY);
 }
 
 function isBackGuardState(state: unknown): boolean {

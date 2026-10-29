@@ -7,6 +7,8 @@ import {
   type CloseWatcherLike,
   guardBackNavigation,
   type HistoryLike,
+  INSTALLED_APP_DISPLAY_QUERY,
+  isFirefoxAndroidApp,
   type LeaveHost,
 } from "./backNavigation";
 import { PHONE_EVENTS } from "./events";
@@ -373,6 +375,20 @@ describe("guardBackNavigation", () => {
       expect(backCloseWatcher(userAgent, create) !== undefined).toBe(watches);
     },
   );
+
+  it.each([
+    { app: true, firefoxApp: false, name: "Chrome", userAgent: CHROME_ANDROID_UA },
+    { app: false, firefoxApp: false, name: "Firefox", userAgent: FIREFOX_ANDROID_UA },
+    { app: true, firefoxApp: true, name: "Firefox", userAgent: FIREFOX_ANDROID_UA },
+  ])("$name for Android, installed $app, is Firefox's installed app $firefoxApp", (row) => {
+    const asked: string[] = [];
+    const displayModeMatches = (query: string) => {
+      asked.push(query);
+      return row.app;
+    };
+    expect(isFirefoxAndroidApp(row.userAgent, displayModeMatches)).toBe(row.firefoxApp);
+    expect(asked.every((query) => query === INSTALLED_APP_DISPLAY_QUERY)).toBe(true);
+  });
 
   // A desktop browser's Back is no close request: the guard entry takes it.
   it.each([false, true])(
