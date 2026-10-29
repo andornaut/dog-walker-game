@@ -724,6 +724,7 @@ export class RunScene extends Scene implements HudRun {
       previousZoneId(gameData, walk.run),
       distanceBeforeZone,
       distanceBeforeZone + walk.run.zoneDistance,
+      world.roadside.lightCarriers(),
     );
   }
 }

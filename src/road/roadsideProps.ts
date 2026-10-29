@@ -74,13 +74,15 @@ const ROADSIDE_SIDES = [
   { name: "left", sign: -1 },
   { name: "right", sign: 1 },
 ] as const;
-type RoadsideSign = (typeof ROADSIDE_SIDES)[number]["sign"];
+export type RoadsideSign = (typeof ROADSIDE_SIDES)[number]["sign"];
 
 // No prop stands on a zone's start strip, so its cross street stays clear.
 export const START_STRIP_LENGTH = STRIP.height;
 
 // At most this many props are drawn at once, lawn and curb props together.
 export const ROADSIDE_LIMIT = 40;
+// At most this many props whose art is left out carry lights still on screen at once.
+export const ROADSIDE_LIGHT_LIMIT = 12;
 
 const NO_PROPS: readonly RoadsideProp[] = [];
 
@@ -226,8 +228,8 @@ export interface RoadsidePlace {
   y: number;
 }
 
-export function newRoadsidePlaces(): RoadsidePlace[] {
-  return Array.from({ length: ROADSIDE_LIMIT }, () => ({
+export function newRoadsidePlaces(count = ROADSIDE_LIMIT): RoadsidePlace[] {
+  return Array.from({ length: count }, () => ({
     key: "",
     phase: 0,
     scale: 1,
@@ -260,9 +262,31 @@ export interface RoadsideFrame {
   scroll: number;
 }
 
+// How far across a prop's lights reach from its feet, in px at full size, left negative.
+export interface RoadsideLightReach {
+  readonly left: number;
+  readonly right: number;
+}
+
+// What placeRoadsideLights reads of the lights props carry: how far behind the walker's feet,
+// in road px, a prop's lights can still show, and how far across the lights a prop of key
+// carries reach on the side of the road sign gives (undefined for a key that carries none).
+export interface RoadsideLights {
+  readonly behind: number;
+  readonly reach: (key: string, sign: RoadsideSign) => RoadsideLightReach | undefined;
+}
+
+// Slack, in px, on a prop's lights' reach across: a depth step can draw a prop a little larger
+// than its projected scale, and its lights with it.
+const LIGHT_SLACK = 4;
+
 // Scratch shared by placeRoadside and the visitor it passes, so placing allocates nothing.
+// artFrom is the z the zone's props' art shows from; lights, null to place the props whose art
+// shows, or what places the props whose art is left out but whose lights may show.
 const placing = {
+  artFrom: 0,
   count: 0,
+  lights: null as RoadsideLights | null,
   origin: 0,
   out: [] as RoadsidePlace[],
   scroll: 0,
@@ -271,7 +295,7 @@ const placing = {
 };
 
 function placeProp(prop: RoadsideProp, sign: RoadsideSign, z: number): void {
-  const { out, stage } = placing;
+  const { lights, out, stage } = placing;
   const place = out[placing.count];
   if (stage === null || place === undefined) {
     return;
@@ -279,8 +303,10 @@ function placeProp(prop: RoadsideProp, sign: RoadsideSign, z: number): void {
   const { projection } = stage;
   const distance = placing.origin + z - placing.scroll;
   const placed = project(projection, { distance, x: projection.centreX + sign * prop.across });
-  const half = (stage.frameWidth(prop.key) * Math.min(1, placed.scale)) / 2;
-  if (placed.x + half <= 0 || placed.x - half >= stage.width) {
+  const scale = Math.min(1, placed.scale);
+  const half = (stage.frameWidth(prop.key) * scale) / 2;
+  const art = z >= placing.artFrom && placed.x + half > 0 && placed.x - half < stage.width;
+  if (lights === null ? !art : art || !lightsAcross(lights, prop.key, sign, placed.x, scale)) {
     return;
   }
   place.key = prop.key;
@@ -292,9 +318,34 @@ function placeProp(prop: RoadsideProp, sign: RoadsideSign, z: number): void {
   placing.count += 1;
 }
 
+// Whether a prop of key at screen x, drawn at scale, carries lights reaching across into the
+// screen.
+function lightsAcross(
+  lights: RoadsideLights,
+  key: string,
+  sign: RoadsideSign,
+  x: number,
+  scale: number,
+): boolean {
+  const reach = lights.reach(key, sign);
+  const width = placing.stage?.width ?? 0;
+  return (
+    reach !== undefined &&
+    x + reach.right * scale + LIGHT_SLACK > 0 &&
+    x + reach.left * scale - LIGHT_SLACK < width
+  );
+}
+
 // The props of the zone with art id art, which began at road distance start, from road distance
-// from to to (to excluded); none for a zone with no table.
-function placeZone(art: string | null, start: number, from: number, to: number): void {
+// from to to (to excluded), their art showing from road distance artFrom; none for a zone with
+// no table.
+function placeZone(
+  art: string | null,
+  start: number,
+  from: number,
+  artFrom: number,
+  to: number,
+): void {
   const { stage } = placing;
   const zone = art === null || stage === null ? undefined : stage.table.zones[art];
   if (zone === undefined || stage === null || to <= from) {
@@ -302,32 +353,61 @@ function placeZone(art: string | null, start: number, from: number, to: number):
   }
   // A zone's z counts from its start strip's near edge, visibleDistance past where it began.
   const origin = start + stage.projection.visibleDistance;
+  placing.artFrom = artFrom - origin;
   placing.origin = origin;
   placing.shadow = Number.parseInt(zone.shadowColour, 16);
   eachRoadsideProp(zone, from - origin, to - origin, placeProp);
 }
 
 // Writes the props in view into out, at most out.length of them, and returns how many: every
-// prop from the feet to the stage's reach, on the zone whose road lies there. Past its start
-// strip a zone shows its own props; short of it, the zone before it's, or with none, its own.
+// prop from the feet to the stage's reach, on the zone whose road lies there, whose frame lies
+// partly across the screen. Past its start strip a zone shows its own props; short of it, the
+// zone before it's, or with none, its own.
 export function placeRoadside(
   stage: RoadsideStage,
   frame: RoadsideFrame,
   out: RoadsidePlace[],
 ): number {
+  return placeInView(stage, null, frame, out);
+}
+
+// Writes into out, as placeRoadside does, the props that carry lights whose art placeRoadside
+// leaves out but whose lights may still show: standing from lights.behind behind the feet to the
+// stage's reach, with their lights reaching across into the screen. A light is culled by its own
+// rect, never by its prop's, so these props' lights follow where they stand while their art is
+// gone.
+export function placeRoadsideLights(
+  stage: RoadsideStage,
+  lights: RoadsideLights,
+  frame: RoadsideFrame,
+  out: RoadsidePlace[],
+): number {
+  return placeInView(stage, lights, frame, out);
+}
+
+function placeInView(
+  stage: RoadsideStage,
+  lights: RoadsideLights | null,
+  frame: RoadsideFrame,
+  out: RoadsidePlace[],
+): number {
   placing.count = 0;
+  placing.lights = lights;
   placing.out = out;
   placing.scroll = frame.scroll;
   placing.stage = stage;
-  const from = frame.scroll;
+  const artFrom = frame.scroll;
+  const from = artFrom - (lights?.behind ?? 0);
   const to = frame.scroll + stage.reach + 1;
   if (frame.previous === null) {
-    placeZone(frame.current, frame.currentStart, from, to);
+    placeZone(frame.current, frame.currentStart, from, artFrom, to);
   } else {
     const strip = frame.currentStart + stage.projection.visibleDistance;
-    placeZone(frame.previous, frame.previousStart, from, Math.min(to, strip));
-    placeZone(frame.current, frame.currentStart, Math.max(from, strip + START_STRIP_LENGTH), to);
+    const past = strip + START_STRIP_LENGTH;
+    placeZone(frame.previous, frame.previousStart, from, artFrom, Math.min(to, strip));
+    placeZone(frame.current, frame.currentStart, Math.max(from, past), Math.max(artFrom, past), to);
   }
+  placing.lights = null;
   placing.stage = null;
   return placing.count;
 }

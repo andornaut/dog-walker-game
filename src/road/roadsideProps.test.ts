@@ -7,18 +7,33 @@ import shippedManifest from "../../public/art/manifest.json";
 import { DEPTH_STEPS } from "../assets/depthSteps";
 import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
-import { distanceAtY } from "../layout/projection";
+import type { ZoneId } from "../data/types";
+import { WORLD } from "../data/world";
+import { distanceAtY, project } from "../layout/projection";
+import { itemAt } from "../lib/arrays";
+import type { Point } from "../lib/rect";
 import { walkProjection } from "../runner/walkGeometry";
+import {
+  CARRIED_LIGHT_UP,
+  carriedLightReach,
+  distanceBehind,
+  newAttachedLightPlaces,
+  placeAttachedLights,
+} from "./lightPlaces";
+import { LIGHT_ATTACHMENTS } from "./lights";
 import { curbBand, curbFits, VERGES, VERGES_BY_ART, walkFrom } from "./roadside";
 import {
   eachRoadsideProp,
   idleFrame,
   newRoadsidePlaces,
   placeRoadside,
+  placeRoadsideLights,
   ROADSIDE,
+  ROADSIDE_LIGHT_LIMIT,
   ROADSIDE_LIMIT,
   type RoadsideCurb,
   type RoadsideFrame,
+  type RoadsideLights,
   roadsidePhase,
   type RoadsidePlace,
   type RoadsideStage,
@@ -401,6 +416,88 @@ describe("placeRoadside", () => {
         expect(phases.get(key)?.size).toBe(count);
       }
     }
+  });
+});
+
+describe("placeRoadsideLights", () => {
+  const VIEW = LAYOUT.walkView;
+  const LIGHTS_STAGE: RoadsideLights = {
+    behind: distanceBehind(PROJECTION, VIEW.y + VIEW.height, CARRIED_LIGHT_UP),
+    reach: carriedLightReach,
+  };
+  const carried = (table: RoadsideTable, at: RoadsideFrame) => {
+    const out = newRoadsidePlaces(ROADSIDE_LIGHT_LIMIT);
+    return out.slice(0, placeRoadsideLights(stageOf(table), LIGHTS_STAGE, at, out));
+  };
+  const samePlace = (a: Point, b: Point) =>
+    Math.abs(a.x - b.x) < 1e-6 && Math.abs(a.y - b.y) < 1e-6;
+  // How many of a prop's lights in zone show, drawn at its feet at spot, at its art's scale.
+  const lightsShown = (zone: ZoneId, key: string, spot: Point & { readonly scale: number }) => {
+    const anchor = {
+      flipX: false,
+      frame: 0,
+      key,
+      leftOfRoad: spot.x < PROJECTION.centreX,
+      scale: Math.min(1, spot.scale),
+      x: spot.x,
+      y: spot.y,
+    };
+    return placeAttachedLights(VIEW, zone, [anchor], newAttachedLightPlaces());
+  };
+  // Each shipped prop that carries lights, at its shipped across, in a zone its lights show in.
+  const LIT = KEYS.filter((key) => LIGHT_ATTACHMENTS.has(key)).map((key) => {
+    const prop = itemAt(
+      [...PROPS, ...CURB_PROPS].filter((candidate) => candidate.key === key),
+      0,
+    );
+    const zones = LIGHT_ATTACHMENTS.get(key)?.[0]?.zones ?? null;
+    const zone = itemAt(
+      WORLD.zones.filter(({ id }) => zones === null || zones.includes(id)),
+      0,
+    );
+    return { across: prop.across, art: zone.art, id: zone.id, key };
+  });
+
+  // Every slot holds the prop on both sides. Each prop the art leaves out whose lights still
+  // show, behind the feet or past the screen's side, stands where the projection puts it.
+  it.each(LIT)(
+    "keeps $key's lights where it stands once its art leaves the screen, until theirs do",
+    ({ across, art, id, key }) => {
+      const prop = { across, dz: 0, key };
+      const table = tableOf({ gaps: [[prop]], lots: [[prop]] }, art);
+      const zone = itemAt(Object.values(table.zones), 0);
+      const origin = PROJECTION.visibleDistance;
+      for (let scroll = 2000; scroll < 2000 + 2 * SLOT; scroll += 1) {
+        const at = frame({ current: art, scroll });
+        const drawn = placed(table, at);
+        const lit = carried(table, at);
+        expect(lit.filter((place) => drawn.some((standing) => samePlace(standing, place)))).toEqual(
+          [],
+        );
+        const from = scroll - LIGHTS_STAGE.behind - SLOT - origin;
+        eachRoadsideProp(zone, from, scroll + REACH + 1 - origin, (shown, sign, z) => {
+          const spot = project(PROJECTION, {
+            distance: origin + z - scroll,
+            x: PROJECTION.centreX + sign * shown.across,
+          });
+          if (!drawn.some((place) => samePlace(place, spot)) && lightsShown(id, key, spot) > 0) {
+            expect(lit.some((place) => samePlace(place, spot))).toBe(true);
+          }
+        });
+      }
+    },
+  );
+
+  it("carries some lamp's lights past its art, and never more than the limit", () => {
+    let total = 0;
+    for (const [art, zone] of ZONES) {
+      for (let scroll = 0; scroll < repeatSlots(zone) * zone.slot; scroll += 3) {
+        const lit = carried(ROADSIDE, frame({ current: art, scroll }));
+        total += lit.length;
+        expect(lit.length).toBeLessThan(ROADSIDE_LIGHT_LIMIT);
+      }
+    }
+    expect(total).toBeGreaterThan(0);
   });
 });
 

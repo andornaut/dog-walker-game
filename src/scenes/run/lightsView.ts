@@ -6,11 +6,13 @@ import { distanceAtY } from "../../layout/projection";
 import { getOrInsertComputed } from "../../lib/maps";
 import {
   anchorSprite,
+  distanceBehind,
   type LightAnchor,
   newAttachedLightPlaces,
   newLightPlaces,
   placeAttachedLights,
   placeVergeLights,
+  POOL_LIGHT_UP,
   VERGE_LIGHT_LIMIT,
   type VergeLightFrame,
   type VergeLightStage,
@@ -32,7 +34,10 @@ import { DEPTH, JUNCTURE_Y, LAYOUT, PROJECTION, sceneryFade, showOnRoad } from "
 // the scenery from the juncture. The rest follow every sprite of a key that carries lights,
 // whichever view drew it this frame: at its feet, scale, flip and sheet frame, at its own opacity
 // times their pulse's strength, just under it, and cut off at the juncture as it is, while a band mover's
-// stay whole. Cosmetic only.
+// stay whole. A sprite a view hides only because its art has left the screen (a roadside prop's
+// light carrier) still carries its lights. Every light is culled by its own rect, once wholly
+// outside the walk view, never by its sprite's; a light gone with its sprite, a mover ended,
+// goes with it. Cosmetic only.
 export class LightsView {
   private readonly anchors: LightAnchor[] = [];
   private readonly attached = newAttachedLightPlaces();
@@ -52,9 +57,10 @@ export class LightsView {
   private readonly scene: Scene;
   private readonly sprites: GameObjects.Sprite[];
   private readonly stage: VergeLightStage = {
+    behind: distanceBehind(PROJECTION, LAYOUT.walkView.y + LAYOUT.walkView.height, POOL_LIGHT_UP),
     projection: PROJECTION,
     reach: distanceAtY(PROJECTION, JUNCTURE_Y),
-    width: LAYOUT.roadView.width,
+    view: LAYOUT.walkView,
   };
 
   constructor(scene: Scene) {
@@ -76,9 +82,15 @@ export class LightsView {
 
   // The zone being walked and the one before it (null in the first); zoneStart is the road
   // distance from the walk's start where the current zone began, and scroll the road distance
-  // at the walker's feet. Drawn after every other view, so lights follow where their sprites
-  // stand this frame.
-  draw(current: ZoneId, previous: ZoneId | null, zoneStart: number, scroll: number): void {
+  // at the walker's feet; hidden lists the sprites hidden this frame whose lights still show.
+  // Drawn after every other view, so lights follow where their sprites stand this frame.
+  draw(
+    current: ZoneId,
+    previous: ZoneId | null,
+    zoneStart: number,
+    scroll: number,
+    hidden: readonly GameObjects.Sprite[],
+  ): void {
     const { attached, frame, places } = this;
     frame.current = current;
     frame.previous = previous;
@@ -94,8 +106,8 @@ export class LightsView {
         showOnRoad(Math.round(y), sceneryFade(Math.round(y)), sprite);
       }
     });
-    const anchors = this.collectAnchors();
-    const attachedCount = placeAttachedLights(current, anchors, attached);
+    const anchors = this.collectAnchors(hidden);
+    const attachedCount = placeAttachedLights(LAYOUT.walkView, current, anchors, attached);
     this.attachedSprites.forEach((light, i) => {
       const place = attached[i];
       const carrier = place === undefined ? undefined : this.carriers[place.anchor];
@@ -121,40 +133,48 @@ export class LightsView {
     });
   }
 
-  // Every visible sprite this frame of a key that carries lights, as an anchor, beside the
-  // sprite it stands for.
-  private collectAnchors(): readonly LightAnchor[] {
+  // Every visible sprite this frame of a key that carries lights, and every hidden one, as an
+  // anchor, beside the sprite it stands for.
+  private collectAnchors(hidden: readonly GameObjects.Sprite[]): readonly LightAnchor[] {
     const { anchors, carriers } = this;
     carriers.length = 0;
     for (const object of this.scene.children.list) {
-      if (!(object instanceof GameObjects.Sprite) || !object.visible || object.alpha <= 0) {
-        continue;
+      if (object instanceof GameObjects.Sprite && object.visible) {
+        this.addCarrier(object);
       }
-      const textureKey = object.texture.key;
-      const key = this.baseKey(textureKey);
-      if (!LIGHT_ATTACHMENTS.has(key)) {
-        continue;
-      }
-      const drawn = spriteMetrics(textureKey);
-      const anchor = anchors[carriers.length] ?? newAnchor();
-      anchors[carriers.length] = anchor;
-      anchorSprite(
-        PROJECTION.centreX,
-        key,
-        object,
-        {
-          feetY: drawn.feetY,
-          fullHeight: spriteMetrics(key).frameHeight,
-          height: drawn.frameHeight,
-          width: drawn.frameWidth,
-        },
-        sheetFrame(object.frame.name),
-        anchor,
-      );
-      carriers.push(object);
+    }
+    for (const sprite of hidden) {
+      this.addCarrier(sprite);
     }
     anchors.length = carriers.length;
     return anchors;
+  }
+
+  // Adds a sprite, of a key that carries lights and not wholly faded, as an anchor.
+  private addCarrier(sprite: GameObjects.Sprite): void {
+    const { anchors, carriers } = this;
+    const textureKey = sprite.texture.key;
+    const key = this.baseKey(textureKey);
+    if (sprite.alpha <= 0 || !LIGHT_ATTACHMENTS.has(key)) {
+      return;
+    }
+    const drawn = spriteMetrics(textureKey);
+    const anchor = anchors[carriers.length] ?? newAnchor();
+    anchors[carriers.length] = anchor;
+    anchorSprite(
+      PROJECTION.centreX,
+      key,
+      sprite,
+      {
+        feetY: drawn.feetY,
+        fullHeight: spriteMetrics(key).frameHeight,
+        height: drawn.frameHeight,
+        width: drawn.frameWidth,
+      },
+      sheetFrame(sprite.frame.name),
+      anchor,
+    );
+    carriers.push(sprite);
   }
 
   private baseKey(textureKey: string): string {

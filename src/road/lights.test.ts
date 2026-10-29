@@ -31,6 +31,8 @@ const tableOf = (def: Record<string, unknown>, attach?: Record<string, unknown>)
 });
 // A light attached to a sprite, as art writes it.
 const ATTACHED = { dx: 2, dy: -3, light: "glow" };
+// A view wide enough that no light lies outside it.
+const EVERYWHERE = { height: 1e6, width: 1e6, x: -5e5, y: -5e5 };
 
 describe("lightsFrom", () => {
   it("reads every light art sets out", () => {
@@ -259,7 +261,7 @@ describe("LIGHT_ATTACHMENTS", () => {
           y: ANCHORS.get(view.step) ?? 0,
         };
         const out = newAttachedLightPlaces();
-        const places = out.slice(0, placeAttachedLights(cone.zone, [anchor], out));
+        const places = out.slice(0, placeAttachedLights(EVERYWHERE, cone.zone, [anchor], out));
         const apex = places.find(({ key: light }) => light === cone.light);
         const brightest = frames.reduce(
           (best, _, frame) => (strength(frame) > strength(best) ? frame : best),

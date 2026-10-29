@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { ZoneId } from "../data/types";
+import type { Rect } from "../lib/rect";
 import {
   anchorSprite,
   type LightAnchor,
@@ -9,8 +10,8 @@ import {
 } from "./lightPlaces";
 
 // Art's lights, with test sprites: one carrying a pulsing glow in Yonge Street alone and a cone
-// set to point left, one whose cone faces the road, and one drawn facing the pack with a
-// headlamp shining down.
+// set to point left, one whose cone faces the road, one drawn facing the pack with a headlamp
+// shining down, and a lamp of each shape with its light 20 px left of its feet.
 vi.mock("../../shared/lights.json", async (importOriginal) => {
   const { default: table } = await importOriginal<{
     default: { attach?: Record<string, unknown>; defs: Record<string, unknown> };
@@ -23,6 +24,9 @@ vi.mock("../../shared/lights.json", async (importOriginal) => {
     default: {
       attach: {
         ...table.attach,
+        "test-band-lamp": [{ dx: -20, dy: 0, light: "test-band" }],
+        "test-cone-lamp": [{ dx: -20, dy: 0, light: "test-beam" }],
+        "test-ellipse-lamp": [{ dx: -20, dy: 0, light: "test-glow" }],
         "test-lamp": [{ angle: 180, dx: 4, dy: -6, facesRoad: true, light: "test-beam" }],
         "test-rider": [{ dx: 0, dy: -10, light: "test-beam" }],
         "test-sprite": [
@@ -32,6 +36,7 @@ vi.mock("../../shared/lights.json", async (importOriginal) => {
       },
       defs: {
         ...table.defs,
+        "test-band": { colour: "cream", height: 8, rings, shape: "band", width: 16 },
         "test-beam": { colour: "cream", height: 12, rings, shape: "cone", width: 8 },
         "test-glow": { colour: "cream", height: 8, rings, shape: "ellipse", width: 16 },
       },
@@ -49,9 +54,11 @@ const anchorOf = (overrides: Partial<LightAnchor>): LightAnchor => ({
   y: 200,
   ...overrides,
 });
-const placed = (zone: ZoneId, anchors: readonly LightAnchor[]) => {
+// A view wide enough that no light lies outside it.
+const EVERYWHERE = { height: 1e6, width: 1e6, x: -5e5, y: -5e5 };
+const placed = (zone: ZoneId, anchors: readonly LightAnchor[], view: Rect = EVERYWHERE) => {
   const out = newAttachedLightPlaces();
-  return out.slice(0, placeAttachedLights(zone, anchors, out)).map((place) => ({ ...place }));
+  return out.slice(0, placeAttachedLights(view, zone, anchors, out)).map((place) => ({ ...place }));
 };
 const QUARTER = Math.PI / 2;
 const glow = { anchor: 0, groundY: 200, key: "test-glow", rotation: 0, scale: 0.5 };
@@ -131,6 +138,33 @@ describe("placeAttachedLights", () => {
   it("places nothing for a sprite that carries no light", () => {
     expect(placed("yongeStreet", [anchorOf({ key: "no-such-sprite" })])).toEqual([]);
   });
+
+  // A 200 x 300 screen. Each lamp's sprite stands past the screen's right or bottom edge; its
+  // light, 20 px left of its feet at full size (the ellipse and band 16 x 8 about it, the cone 8
+  // wide and 12 down from its apex), reaches 1 px into the screen, or stops 1 px short of it.
+  const SCREEN = { height: 300, width: 200, x: 0, y: 0 };
+  it.each([
+    { key: "test-ellipse-lamp", shown: true, x: 227, y: 150 },
+    { key: "test-ellipse-lamp", shown: false, x: 229, y: 150 },
+    { key: "test-ellipse-lamp", shown: true, x: 100, y: 303 },
+    { key: "test-ellipse-lamp", shown: false, x: 100, y: 305 },
+    { key: "test-band-lamp", shown: true, x: 227, y: 150 },
+    { key: "test-band-lamp", shown: false, x: 229, y: 150 },
+    { key: "test-band-lamp", shown: true, x: 100, y: 303 },
+    { key: "test-band-lamp", shown: false, x: 100, y: 305 },
+    { key: "test-cone-lamp", shown: true, x: 223, y: 150 },
+    { key: "test-cone-lamp", shown: false, x: 225, y: 150 },
+    { key: "test-cone-lamp", shown: true, x: 100, y: 299 },
+    { key: "test-cone-lamp", shown: false, x: 100, y: 301 },
+  ])(
+    "draws $key's light at its sprite at $x, $y off screen while its own rect shows: $shown",
+    ({ key, shown, x, y }) => {
+      const lights = placed("yongeStreet", [anchorOf({ key, scale: 1, x, y })], SCREEN);
+      expect(lights.map((light) => ({ x: light.x, y: light.y }))).toEqual(
+        shown ? [{ x: x - 20, y }] : [],
+      );
+    },
+  );
 });
 
 describe("anchorSprite", () => {

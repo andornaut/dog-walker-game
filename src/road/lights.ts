@@ -230,6 +230,12 @@ function ringAt(def: LightDef, x: number, y: number): number {
   return ring;
 }
 
+// A light's anchor down its texture, as a share of its height: a cone's apex on its top row, any
+// other shape's centre.
+export function lightOriginY(shape: LightShape): number {
+  return shape === "cone" ? 0 : 0.5;
+}
+
 export function bakeLight(def: LightDef): BakedLight {
   const { colour, height, rings, width } = def;
   const ringOf = new Int8Array(width * height);
@@ -252,7 +258,7 @@ export function bakeLight(def: LightDef): BakedLight {
   return {
     height,
     originX: 0.5,
-    originY: def.shape === "cone" ? 0 : 0.5,
+    originY: lightOriginY(def.shape),
     pixels,
     rings: ringOf,
     width,

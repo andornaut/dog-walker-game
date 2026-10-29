@@ -6,12 +6,16 @@ import { project, roadProjection } from "../layout/projection";
 import { screenLayout, walkerFootY } from "../layout/screenLayout";
 import { itemAt } from "../lib/arrays";
 import {
+  distanceBehind,
   type LightPlace,
   newLightPlaces,
   placeVergeLights,
+  POOL_LIGHT_UP,
   poolZs,
   type VergeLightFrame,
+  type VergeLightStage,
 } from "./lightPlaces";
+import { lightOriginY, LIGHTS } from "./lights";
 import { VERGES } from "./roadside";
 import { START_STRIP_LENGTH } from "./roadsideProps";
 
@@ -35,8 +39,13 @@ const UNLIT: ZoneId = "theBeaches";
 const pool = itemAt(VERGES[LIT].pools, 0);
 const { road } = screenLayout(SCREEN_CONFIG);
 const projection = roadProjection(ROAD_CAMERA, walkerFootY(road), road);
-// Wide enough that no light is left out for lying off screen.
-const stage = { projection, reach: 600, width: 1e6 };
+// Wide enough that no light is left out for lying off screen, from the feet on.
+const stage = {
+  behind: 0,
+  projection,
+  reach: 600,
+  view: { height: 1e6, width: 1e6, x: -5e5, y: -5e5 },
+};
 
 const frameOf = (overrides: Partial<VergeLightFrame>): VergeLightFrame => ({
   current: LIT,
@@ -46,9 +55,9 @@ const frameOf = (overrides: Partial<VergeLightFrame>): VergeLightFrame => ({
   scroll: 0,
   ...overrides,
 });
-const placed = (frame: VergeLightFrame): LightPlace[] => {
+const placed = (frame: VergeLightFrame, on: VergeLightStage = stage): LightPlace[] => {
   const out = newLightPlaces(64);
-  return out.slice(0, placeVergeLights(stage, frame, out)).map((place) => ({ ...place }));
+  return out.slice(0, placeVergeLights(on, frame, out)).map((place) => ({ ...place }));
 };
 
 describe("poolZs", () => {
@@ -90,6 +99,38 @@ describe("placeVergeLights", () => {
       expect(places).toEqual(expected(start, frame.scroll, frame.scroll, reachOf(frame.scroll)));
       expect(places).toEqual(placed(frameOf({ scroll: into })));
     }
+  });
+
+  // The screen's walk view, the road's rows down to the dog cards a few rows under the feet,
+  // and lights placed from as far behind the feet as one can still show above its bottom.
+  const VIEW = screenLayout(SCREEN_CONFIG).walkView;
+  const screen = {
+    ...stage,
+    behind: distanceBehind(projection, VIEW.y + VIEW.height, POOL_LIGHT_UP),
+    view: VIEW,
+  };
+  it("places each light, behind the feet or beside the screen, while its own rect shows", () => {
+    const def = LIGHTS.get(pool.light);
+    if (def === undefined) {
+      throw new Error(`${pool.light} names no light`);
+    }
+    // The light's rect, its anchor its apex for a cone and its centre for any other shape.
+    const shows = ({ scale, x, y }: LightPlace) => {
+      const top = y - lightOriginY(def.shape) * def.height * scale;
+      return (
+        x + (def.width * scale) / 2 > VIEW.x &&
+        x - (def.width * scale) / 2 < VIEW.x + VIEW.width &&
+        top + def.height * scale > VIEW.y &&
+        top < VIEW.y + VIEW.height
+      );
+    };
+    let behindFeet = 0;
+    for (let scroll = 0; scroll < 2 * pool.every; scroll += 1) {
+      const lit = placed(frameOf({ scroll }), screen);
+      behindFeet += lit.filter(({ y }) => y > projection.footY).length;
+      expect(lit).toEqual(expected(0, scroll, scroll - 1000, reachOf(scroll)).filter(shows));
+    }
+    expect(behindFeet).toBeGreaterThan(0);
   });
 
   it("places no light in a zone its pools leave out", () => {
