@@ -1,22 +1,28 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { cents } from "../lib/units";
+import { decodePng } from "../tools/atlas/atlasBuild";
 import { readBitmapFont } from "../tools/fontFile";
 import { plainMarks } from "../ui/pixelFont";
 import {
   chipLeft,
   FEEDBACK,
+  FLY_HEART,
   heartLabelAt,
   heartPopBlocked,
   heartPopCovers,
   heartPopFrame,
   type MoneyTick,
+  reachIconBeside,
   retarget,
   tickMs,
   tickShown,
 } from "./feedback";
+import { REACH_ICON } from "./hudLanes";
 
 describe("heartLabelAt", () => {
   it("sets the number right of the heart, left of it at the screen's edge, and out of the lane below", () => {
@@ -112,5 +118,45 @@ describe("money tick", () => {
     });
     expect(retarget(true, 1_200, to, undefined)).toEqual(settled);
     expect(retarget(false, 1_200, to, { ...tick, to: cents(9_999) })).toEqual(settled);
+  });
+});
+
+describe("the small heart a reached treat flies", () => {
+  // The leftmost opaque column of each of a heart sprite's fly frames.
+  const flyInkLefts = (key: string): number[] => {
+    const sheet = JSON.parse(readFileSync(`public/art/sprites/${key}.json`, "utf8")) as {
+      frames: Record<string, { frame: { h: number; w: number; x: number; y: number } }>;
+      meta: { frameTags: { from: number; name: string; to: number }[] };
+    };
+    const image = decodePng(readFileSync(`public/art/sprites/${key}.png`));
+    const fly = sheet.meta.frameTags.find(({ name }) => name === "fly");
+    const frames = Object.values(sheet.frames).slice(fly?.from ?? 0, (fly?.to ?? -1) + 1);
+    return frames.map(({ frame }) =>
+      Array.from({ length: frame.w }, (_, x) => x).findIndex((x) =>
+        Array.from({ length: frame.h }, (_, y) => y).some(
+          (y) => (image.data[((frame.y + y) * image.width + frame.x + x) * 4 + 3] ?? 0) > 0,
+        ),
+      ),
+    );
+  };
+
+  it.each(["fx-heart-gain", "fx-heart-loss"])(
+    "inks %s's fly frames from FLY_HEART's column",
+    (key) => {
+      const inkLefts = flyInkLefts(key);
+      expect(inkLefts.length).toBeGreaterThan(0);
+      expect(new Set(inkLefts)).toEqual(new Set([FLY_HEART.inkLeft]));
+    },
+  );
+
+  it.each([
+    { x: 40, y: 300 },
+    { x: 180.5, y: 412.25 },
+  ])("carries the reach icon gap columns left of the heart at %o, centred on it", (heart) => {
+    const { gap, size } = REACH_ICON;
+    const icon = reachIconBeside(heart);
+    const heartInkLeft = heart.x - FLY_HEART.frame / 2 + FLY_HEART.inkLeft;
+    expect(heartInkLeft - (icon.x + size)).toBe(gap);
+    expect(icon.y + size / 2).toBe(heart.y);
   });
 });

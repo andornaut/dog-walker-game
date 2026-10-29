@@ -1,5 +1,6 @@
 import { type Point, type Rect, rectsOverlap } from "../lib/rect";
 import { type Cents, cents } from "../lib/units";
+import { REACH_ICON } from "./hudLanes";
 
 // The dodge label shows for ms: fully opaque for holdMs, so it can be read, then rising rise
 // pixels and fading out over the rest.
@@ -46,6 +47,19 @@ export interface LabelAnchor {
 // screenWidth wide.
 export function chipLeft(screenWidth: number, centreX: number, width: number): number {
   return Math.max(0, Math.min(screenWidth - width, Math.round(centreX - width / 2)));
+}
+
+// The fly tag's small heart, drawn centred on its frame frame pixels square, inks from column
+// inkLeft (fx-heart-gain and fx-heart-loss alike).
+export const FLY_HEART = { frame: 32, inkLeft: 9 } as const;
+
+// A reached treat's reach icon rides beside its small heart as it flies into the card: its
+// top-left for the heart's frame centred on heart, REACH_ICON.gap columns left of the heart's
+// ink and vertically centred on the frame.
+export function reachIconBeside(heart: Point): Point {
+  const { gap, size } = REACH_ICON;
+  const inkLeft = heart.x - FLY_HEART.frame / 2 + FLY_HEART.inkLeft;
+  return { x: inkLeft - gap - size, y: heart.y - size / 2 };
 }
 
 // The 32x32 heart pop's top-left: its centre column on the dog's, its bottom row 4px below

@@ -19,11 +19,12 @@ import {
   extraHearts,
   optionMarks,
   type PoppedValue,
+  reachIcons,
   type ReachLine,
   roadMarks,
   walkStartMarks,
 } from "./buffMarks";
-import { type EffectItem, effectName } from "./effectIcons";
+import { effectIconKey, type EffectItem, effectName } from "./effectIcons";
 
 const { card, seconds } = gameData.runText;
 const SWEET_TALKER: ModifierSource = { kind: "upgrade", upgrade: "sweetTalker" };
@@ -322,4 +323,33 @@ describe("walkStartMarks", () => {
       );
     },
   );
+});
+
+describe("reachIcons", () => {
+  const longReach = { kind: "perk", perk: "longReach" } as const;
+  const big = { kind: "upgrade", upgrade: "bigTipper" } as const;
+  it.each<{ icons: [number, string][]; name: string; reaches: ReachLine[] }>([
+    { icons: [], name: "no reach", reaches: [] },
+    {
+      icons: [
+        [1, effectIconKey(longReach)],
+        [2, effectIconKey(longReach)],
+      ],
+      name: "a tip and a treat reached",
+      reaches: [
+        { dog: null, glint: longReach, item: 1 },
+        { dog: "kilo", glint: longReach, item: 2 },
+      ],
+    },
+    {
+      icons: [[1, effectIconKey(longReach)]],
+      name: "a pickup reached by two buffs",
+      reaches: [
+        { dog: null, glint: longReach, item: 1 },
+        { dog: null, glint: big, item: 1 },
+      ],
+    },
+  ])("gives $name its first reaching buff's icon", ({ icons, reaches }) => {
+    expect([...reachIcons(reaches)]).toEqual(icons);
+  });
 });

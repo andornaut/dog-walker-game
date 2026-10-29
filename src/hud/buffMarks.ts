@@ -289,6 +289,18 @@ export function roadMarks(
   };
 }
 
+// The icon each pickup grabbed by reach shows on its change's label, by its item's id: its first
+// reach line's buff's.
+export function reachIcons(reaches: readonly ReachLine[]): ReadonlyMap<number, string> {
+  const icons = new Map<number, string>();
+  for (const { glint, item } of reaches) {
+    if (!icons.has(item)) {
+      icons.set(item, effectIconKey(glint));
+    }
+  }
+  return icons;
+}
+
 function popsOf(
   data: Pick<GameData, "runText" | "walkers">,
   values: readonly PoppedValue[],

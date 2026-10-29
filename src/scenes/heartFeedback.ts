@@ -9,6 +9,7 @@ import {
   heartPopBlocked,
   heartPopCovers,
   heartPopFrame,
+  reachIconBeside,
 } from "../hud/feedback";
 import type { ChangeLabel } from "../hud/hudView";
 import { arcControl } from "../hud/moments";
@@ -72,8 +73,10 @@ interface Shake {
 
 // Every heart change, whatever its cause: the heart pops over the dog on the road with its
 // number beside it, then flies down into its card's bottom rows, where the change's label
-// shows; a lost heart flashes its card's hearts and shakes the card as it lands. Reduced
-// motion keeps the pop and the flash, and drops the flight and the shake. Everything it plays
+// shows; a treat grabbed by reach flies its reach icon beside the small heart
+// (reachIconBeside). A lost heart flashes its card's hearts and shakes the card as it lands.
+// Reduced motion keeps the pop and the flash, and drops the flight, the icon's included, and
+// the shake. Everything it plays
 // holds while hold says so.
 export class HeartFeedback {
   private readonly active = new Set<ActivePop>();
@@ -185,7 +188,12 @@ export class HeartFeedback {
         this.finish(active);
         return;
       }
-      active.tween = this.fly(heart, art, { from: centre, to }, () => this.finish(active));
+      const reachIcon = this.addReachIcon(pop.label, centre);
+      if (reachIcon !== undefined) {
+        active.parts.push(reachIcon);
+      }
+      const path = { from: centre, to };
+      active.tween = this.fly({ art, heart, reachIcon }, path, () => this.finish(active));
     });
     this.group.animate(heart);
   }
@@ -224,13 +232,29 @@ export class HeartFeedback {
     return { chip, rect };
   }
 
-  // The fly tag's small heart, from the pop's centre down into the card's bottom rows.
+  // A reached label's reach icon beside the small heart centred on centre, or undefined for a
+  // label with none or whose icon art is missing.
+  private addReachIcon(label: ChangeLabel, centre: Point): GameObjects.Image | undefined {
+    const icon = label.reachIcon;
+    if (icon === undefined || !this.scene.textures.exists(icon)) {
+      return undefined;
+    }
+    const at = reachIconBeside(centre);
+    return this.scene.add.image(at.x, at.y, icon).setOrigin(0).setDepth(HUD_DEPTH.heart);
+  }
+
+  // The fly tag's small heart, from the pop's centre down into the card's bottom rows, with its
+  // reach icon, if any, beside it.
   private fly(
-    heart: GameObjects.Sprite,
-    art: { fly: string; key: string },
+    sprites: {
+      art: { fly: string; key: string };
+      heart: GameObjects.Sprite;
+      reachIcon: GameObjects.Image | undefined;
+    },
     path: { from: Point; to: Point },
     done: () => void,
   ): Tweens.Tween {
+    const { art, heart, reachIcon } = sprites;
     this.group.animate(heart.play(animationKey(art.key, art.fly)));
     const { from, to } = path;
     const control = arcControl(from, to, FEEDBACK.heart.peak);
@@ -239,12 +263,17 @@ export class HeartFeedback {
       ease: "Sine.easeIn",
       onComplete: () => {
         heart.destroy();
+        reachIcon?.destroy();
         done();
       },
     };
     return this.group.tween(
       this.scene,
-      arcFlight({ control, from, to }, flight, ({ x, y }) => heart.setPosition(x, y)),
+      arcFlight({ control, from, to }, flight, (point) => {
+        heart.setPosition(point.x, point.y);
+        const at = reachIconBeside(point);
+        reachIcon?.setPosition(at.x, at.y);
+      }),
     );
   }
 

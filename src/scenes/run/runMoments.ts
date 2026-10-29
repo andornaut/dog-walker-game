@@ -6,6 +6,7 @@ import type { DogId, HintId, HintTrigger } from "../../data/types";
 import {
   type BuffPop,
   leashPops,
+  reachIcons,
   type ReachLine,
   type RoadMarks,
   roadMarks,
@@ -14,7 +15,7 @@ import {
 } from "../../hud/buffMarks";
 import { type EffectItem, effectItems, gearWell } from "../../hud/effectIcons";
 import { heartPopFrame } from "../../hud/feedback";
-import { changeLabels, totalLabel } from "../../hud/hudView";
+import { changeLabels, reachedLabels, totalLabel } from "../../hud/hudView";
 import type { MessageLine } from "../../hud/messageStrip";
 import {
   endScreenDelayMs,
@@ -220,11 +221,17 @@ export class RunMoments {
   }
 
   // The changes' labels, a money loss's from from, where it changed hands, and a money gain's by
-  // the cash (changeLabels), and each loss the walker's perk forgave: its strip line, the
-  // forgiven label over its dog forgivenAtMs on and the forgiven heart flashing back on its card.
-  addChanges(from: Point, changes: readonly Change[], forgivenAtMs = 0): void {
+  // the cash (changeLabels), each carrying reachIcon for a pickup grabbed by reach
+  // (reachedLabels), and each loss the walker's perk forgave: its strip line, the forgiven label
+  // over its dog forgivenAtMs on and the forgiven heart flashing back on its card.
+  addChanges(
+    from: Point,
+    changes: readonly Change[],
+    forgivenAtMs = 0,
+    reachIcon: string | undefined = undefined,
+  ): void {
     this.changes.push(...changes);
-    const labels = changeLabels(from, changes);
+    const labels = reachedLabels(reachIcon, changeLabels(from, changes));
     if (labels.length > 0) {
       this.scene.events.emit(CHANGE_LABELS_EVENT, labels);
     }
@@ -286,16 +293,19 @@ export class RunMoments {
   // around the pack at pack.
   walked(step: WalkStep, pack: Point): void {
     this.pack = pack;
-    this.markRoad(roadMarks(gameData, stepValues(step)));
+    const marks = roadMarks(gameData, stepValues(step));
+    this.markRoad(marks);
+    const reached = reachIcons(marks.reaches);
     this.deps.items.strike(step);
     const sound = soundboardOf(this.scene);
     stepCues(gameData, step).forEach((cue) => sound.play(cue));
     if (step.tips.length > 0) {
       this.hint({ kind: "tip" });
     }
-    // A tip's label pops by the cash, wherever its pickup (changeLabels).
-    for (const { change } of step.tips) {
-      this.addChanges(overPack(pack), [change]);
+    // A tip's label pops by the cash, wherever its pickup (changeLabels), with the reaching
+    // buff's icon when grabbed by reach.
+    for (const { change, item } of step.tips) {
+      this.addChanges(overPack(pack), [change], 0, reached.get(item.id));
     }
     for (const item of step.collected) {
       playEffect(this.scene, "fx-sparkle", "play", overPack(pack), DEPTH.fx);
@@ -305,20 +315,22 @@ export class RunMoments {
     }
     // A treat cheers the owner of the dog that grabbed it, or with every owner at their max goes
     // into the gear that holds spare treats, such as the Fanny pack, whose well glints, or pays
-    // cash, whose label pops by the cash as a lucky find's does (changeLabels).
+    // cash, whose label pops by the cash as a lucky find's does (changeLabels). A treat grabbed
+    // by reach carries the reaching buff's icon on its heart and label, or its cash's label.
     for (const grab of step.treats) {
-      const { cash, change, dog, stored } = grab;
+      const { cash, change, dog, item, stored } = grab;
       this.say(treatGrabLine(gameData, grab, step.walk.run));
       if (stored) {
         this.glintGear(spareTreatSource(step.walk.run));
         continue;
       }
       if (cash !== null) {
-        this.addChanges(overPack(pack), [cash]);
+        this.addChanges(overPack(pack), [cash], 0, reached.get(item.id));
       }
       if (change !== null) {
         this.changes.push(change);
-        const cue: TreatCue = { dog, labels: changeLabels(overPack(pack), [change]) };
+        const labels = changeLabels(overPack(pack), [change]);
+        const cue: TreatCue = { dog, labels: reachedLabels(reached.get(item.id), labels) };
         this.scene.events.emit(TREAT_EVENT, cue);
       }
     }

@@ -8,14 +8,25 @@ import { zoneById } from "../rules/route";
 // the bank (bank), or, for a money gain, from by the cash total into it (cash), tip marking a
 // tip's, which adds up with the tip showing. amount is the change in hearts or cents. zeroedBy:
 // the debuff that cancelled a change to nothing, as Stinky zeroes a tip, so its label never adds
-// up with a paying tip's.
+// up with a paying tip's. reachIcon: the 16x16 icon of the buff that grabbed the change's pickup
+// by reach, such as Long reach's, which its chip shows at its left (reachChipPlace).
 export interface ChangeLabel {
   amount: number;
   gain: boolean;
+  reachIcon?: string;
   target:
     { dog: DogId; kind: "dog" } | { from: Point; kind: "bank" } | { kind: "cash"; tip: boolean };
   text: string;
   zeroedBy?: DebuffId;
+}
+
+// labels for a pickup grabbed by reach, each carrying icon, the reaching buff's; labels as they
+// are with no icon, a pickup the pack touched.
+export function reachedLabels(
+  icon: string | undefined,
+  labels: readonly ChangeLabel[],
+): ChangeLabel[] {
+  return icon === undefined ? [...labels] : labels.map((label) => ({ ...label, reachIcon: icon }));
 }
 
 // The debuff among a change's causes when the change came to nothing, or undefined.

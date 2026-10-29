@@ -64,6 +64,44 @@ export function changeChipAt(
   return { chip, text: { x: at.x + padX, y: at.y + Math.floor((height - ink) / 2) } };
 }
 
+// The text a change label's chip is placed for: on lines lines at scale, its ink width wide.
+export interface ChipText {
+  lines: number;
+  scale: number;
+  width: number;
+}
+
+// A reached pickup's change label shows the reaching buff's icon, size square, inside its chip at
+// its left, vertically centred, gap columns left of its text; the chip widens by span to hold it.
+const REACH_ICON_SIZE = 16;
+const REACH_ICON_GAP = 2;
+export const REACH_ICON = {
+  gap: REACH_ICON_GAP,
+  size: REACH_ICON_SIZE,
+  span: REACH_ICON_SIZE + REACH_ICON_GAP,
+} as const;
+
+// A change label's chip as place puts it, and where its ink's left edge and capitals' top go,
+// for text; with reached, its chip widened by REACH_ICON.span and placed as place places a chip
+// that wide, the icon's top-left at its left and the text's ink past the icon. icon is null
+// without reached.
+export function reachChipPlace(
+  place: (text: ChipText) => { chip: Rect; text: Point },
+  reached: boolean,
+  text: ChipText,
+): { chip: Rect; icon: Point | null; text: Point } {
+  if (!reached) {
+    return { ...place(text), icon: null };
+  }
+  const { size, span } = REACH_ICON;
+  const placed = place({ ...text, width: text.width + span });
+  return {
+    chip: placed.chip,
+    icon: { x: placed.text.x, y: placed.chip.y + Math.floor((placed.chip.height - size) / 2) },
+    text: { x: placed.text.x + span, y: placed.text.y },
+  };
+}
+
 // A change label's chip in the middle of lane, and where its ink's left edge and capitals' top
 // go, for text on lines lines at scale, its ink width wide.
 export function changeChipPlace(

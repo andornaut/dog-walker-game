@@ -5,9 +5,10 @@ import { cents } from "../lib/units";
 import { amountText } from "../rules/causes";
 import { fontFileMetrics } from "../testing/fontInk";
 import { inkRowsOfLines } from "../ui/fontMetrics";
+import { perkIconKey } from "./effectIcons";
 import { FEEDBACK } from "./feedback";
 import { CHANGE_CHIP, CHANGE_LABEL_STYLE } from "./hudLanes";
-import { type ChangeLabel, changeLabels } from "./hudView";
+import { type ChangeLabel, changeLabels, reachedLabels } from "./hudView";
 import { curvePoint, TOP_BAR_POINTS } from "./moments";
 import {
   cashChipPlace,
@@ -149,6 +150,17 @@ describe("mergeTips", () => {
     ["a tip into a treat's cash", treatCash, tip(100)],
   ])("keeps %s apart", (_name, showing, next) => {
     expect(mergeTips(showing, next)).toBeUndefined();
+  });
+
+  const reach = perkIconKey("longReach");
+  const reached = (icon: string | undefined) => reachedLabels(icon, [tip(100)])[0] as ChangeLabel;
+  it.each([
+    ["neither tip was reached", undefined, undefined, undefined],
+    ["the showing tip was reached", reach, undefined, reach],
+    ["the new tip was reached", undefined, reach, reach],
+    ["both tips were reached", reach, reach, reach],
+  ])("shows the reach icon on two tips' chip when %s", (_name, showing, next, icon) => {
+    expect(mergeTips(reached(showing), reached(next))?.reachIcon).toBe(icon);
   });
 });
 

@@ -110,9 +110,10 @@ function tallestChip(body: FontMetrics): number {
 }
 
 // The tip label showing adding up next, a tip grabbed before it flies: one label for both, their
-// total. Undefined when either is not a tip's label, so another gain never adds up with a tip,
-// or when a debuff zeroed one and not the other, or zeroed them by different debuffs, so a
-// zeroed "+$0" never adds up with a paying tip.
+// total, carrying the reach icon either carries, so the chip keeps it when any of its tips was
+// grabbed by reach. Undefined when either is not a tip's label, so another gain never adds up
+// with a tip, or when a debuff zeroed one and not the other, or zeroed them by different
+// debuffs, so a zeroed "+$0" never adds up with a paying tip.
 export function mergeTips(showing: ChangeLabel, next: ChangeLabel): ChangeLabel | undefined {
   if (
     showing.target.kind !== "cash" ||
@@ -124,11 +125,13 @@ export function mergeTips(showing: ChangeLabel, next: ChangeLabel): ChangeLabel 
     return undefined;
   }
   const amount = showing.amount + next.amount;
+  const reachIcon = showing.reachIcon ?? next.reachIcon;
   return {
     amount,
     gain: amount > 0,
     target: { kind: "cash", tip: true },
     text: amountText("money", amount),
+    ...(reachIcon === undefined ? {} : { reachIcon }),
     ...(showing.zeroedBy === undefined ? {} : { zeroedBy: showing.zeroedBy }),
   };
 }

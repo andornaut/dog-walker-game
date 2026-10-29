@@ -23,6 +23,7 @@ import {
   changeLabelRoom,
   type HudLanes,
   hudLanes,
+  reachChipPlace,
 } from "../hud/hudLanes";
 import type { ChangeLabel } from "../hud/hudView";
 import type { MessageLine } from "../hud/messageStrip";
@@ -150,7 +151,7 @@ const SPARE_TREAT_PIP_KEY = "treat@50";
 
 // A change label's parts on screen, and its chip's rect.
 interface ChangeChip {
-  parts: (GameObjects.Graphics | GameObjects.BitmapText)[];
+  parts: (GameObjects.Graphics | GameObjects.BitmapText | GameObjects.Image)[];
   rect: Rect;
 }
 
@@ -1097,8 +1098,9 @@ export class HudScene extends Scene {
   }
 
   // A change on a cream chip in its changeLabelColour, so it reads over anything; set within
-  // room in CHANGE_LABEL_STYLE, placed by place, at depth (its text a depth over it). Its parts,
-  // and its chip's rect.
+  // room in CHANGE_LABEL_STYLE, placed by place, at depth (its text a depth over it). A label
+  // with a reach icon shows it at the chip's left, over the chip as its text is, the chip widened
+  // to hold it (reachChipPlace). Its parts, and its chip's rect.
   private addChangeChip(
     label: ChangeLabel,
     room: number,
@@ -1109,12 +1111,23 @@ export class HudScene extends Scene {
     const text = addPixelText(this, 0, 0, label.text, { colour, scale: 2 });
     const { lines, style } = fitPixelText(text, { room, style: CHANGE_LABEL_STYLE }, 0, 0);
     const ink = inkSpan(text);
-    const placed = place({ lines: lines.length, scale: style.scale, width: ink.right - ink.left });
+    const icon = label.reachIcon;
+    const reached = icon !== undefined && this.textures.exists(icon);
+    const placed = reachChipPlace(place, reached, {
+      lines: lines.length,
+      scale: style.scale,
+      width: ink.right - ink.left,
+    });
     placePixelText(text, placed.text.x - ink.left, placed.text.y);
     const chip = this.add.graphics().setDepth(depth);
     drawFramedRect(chip, CREAM_PANEL_COLOURS, placed.chip);
     text.setDepth(depth + HUD_DEPTH.overPart);
-    return { parts: [chip, text], rect: placed.chip };
+    const parts: ChangeChip["parts"] = [chip, text];
+    if (reached && placed.icon !== null) {
+      const image = this.add.image(placed.icon.x, placed.icon.y, icon).setOrigin(0);
+      parts.push(image.setDepth(depth + HUD_DEPTH.overPart));
+    }
+    return { parts, rect: placed.chip };
   }
 
   // The first-time hints the run's state raises, each said on the message strip once.

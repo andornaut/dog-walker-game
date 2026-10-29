@@ -10,7 +10,8 @@ import { formatDollars } from "../rules/effectText";
 import { bumpCash, tipValue } from "../rules/run";
 import { read } from "../rules/units";
 import { activeModifier, testState } from "../testing/runState";
-import { type ChangeLabel, changeLabels, heartRows, totalLabel } from "./hudView";
+import { perkIconKey } from "./effectIcons";
+import { type ChangeLabel, changeLabels, heartRows, reachedLabels, totalLabel } from "./hudView";
 
 const { tuning } = gameData;
 // Where the money changed hands.
@@ -279,5 +280,39 @@ describe("heartRows", () => {
       [o, x, x],
     ]);
     expect(heartRows(8, 0, 0)).toEqual([]);
+  });
+});
+
+describe("reachedLabels", () => {
+  const reach = perkIconKey("longReach");
+  const tip: Change = {
+    amount: cents(200),
+    causes: [{ amount: 200, kind: "tip" }],
+    dog: null,
+    kind: "money",
+  };
+  const treat: Change = {
+    after: clampHearts(10, 3),
+    before: clampHearts(10, 2),
+    causes: [{ amount: 1, kind: "treat" }],
+    dog: "kilo",
+    kind: "hearts",
+  };
+  it.each([
+    ["a tip's money", tip],
+    ["a treat's heart", treat],
+  ])("carries the reaching buff's icon on %s label", (_name, change) => {
+    const labels = changeLabels(AT, [change]);
+    expect(reachedLabels(reach, labels)).toEqual(
+      labels.map((label) => ({ ...label, reachIcon: reach })),
+    );
+  });
+
+  it.each([
+    ["a tip's money", tip],
+    ["a treat's heart", treat],
+  ])("keeps %s label as it is when not reached", (_name, change) => {
+    const labels = changeLabels(AT, [change]);
+    expect(reachedLabels(undefined, labels)).toEqual(labels);
   });
 });
