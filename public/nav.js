@@ -4,9 +4,10 @@
 // <link rel="stylesheet" href="/nav.css"> and <script src="/nav.js" defer></script> in its head
 // and adds nothing else. The page links the stylesheet, rather than this script injecting it, so
 // the bar's style blocks the first paint and the CSP's 'self' covers it. The bar is one row that
-// scrolls sideways where its links are wider than the screen. On /play/ in the installed app
-// (fullscreen or standalone display mode, or iOS's navigator.standalone) there is no bar, so no
-// link leaves the app and the game takes the full height.
+// scrolls sideways where its links are wider than the screen. On /play/ in an installed app
+// (fullscreen, standalone or minimal-ui display mode, which Firefox for Android's app may report,
+// or iOS's navigator.standalone) there is no bar, so no link leaves the app and the game takes
+// the full height.
 (() => {
   "use strict";
   const REPO = "https://github.com/andornaut/dog-walker-game";
@@ -42,7 +43,9 @@
     item("Cloudflare", DASHBOARD),
   );
 
-  const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)");
+  const installed = matchMedia(
+    "(display-mode: fullscreen), (display-mode: standalone), (display-mode: minimal-ui)",
+  );
   const hide = () => here === "/play" && (installed.matches || navigator.standalone === true);
   const mount = () => {
     if (hide()) nav.remove();

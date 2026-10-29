@@ -411,8 +411,8 @@ const LAST_VISIT_BANK_KEY = "homeLastVisitBank";
 const LAST_VISIT_WALKERS_KEY = "homeLastVisitWalkers";
 
 // The screen before a walk: the bank at the top bar's left and Logbook, Help, Sound, Settings
-// and Exit at its right (Exit where exitShown); the walker and pack at the gate beside the Pet shop; the Walker, Dogs
-// and Pocket sections and Start walk. While a newer version of the game waits, the update plate
+// and Exit at its right (Exit where exitShown); the walker and pack at the gate beside the Pet
+// shop; the Walker, Dogs and Pocket sections and Start walk. While a newer version of the game waits, the update plate
 // under the top bar takes the walker's bubble's place until tapped. Buying happens only in the
 // shop: tapping the building opens it, and tapping a locked dog, gear item or the dog slot sign
 // opens it on that item. Holding a dog or gear tile opens its detail card.

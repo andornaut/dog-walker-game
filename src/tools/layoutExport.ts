@@ -233,7 +233,7 @@ export function layoutExport(
       home: {
         ...HOME_LAYOUT,
         // The top bar's buttons left to right, each its face and hit: with Exit, and where Exit
-        // is hidden (Firefox for Android's installed app).
+        // is hidden (an installed app whose window a script cannot close).
         barButtons: {
           exitHidden: Object.fromEntries(homeBarButtons(false)),
           exitShown: Object.fromEntries(homeBarButtons(true)),

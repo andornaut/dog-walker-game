@@ -2,11 +2,11 @@
 // lock, the back gesture, visibility and orientation events, the turn-upright notice, audio
 // unlock, the install offer and persistent storage. setupPhoneApp runs once from main.ts; the
 // scenes listen for PHONE_EVENTS on window and call the functions below.
+import { appCannotClose } from "@andornaut/game-kit/pwa/appWindow";
 import {
   backCloseWatcher,
   browserCloseWatcher,
   guardBackNavigation,
-  isFirefoxAndroidApp,
 } from "@andornaut/game-kit/pwa/backNavigation";
 import {
   type InstallFlow,
@@ -50,6 +50,8 @@ export function browserSoundFormat(): SoundFormat | undefined {
   return chooseSoundFormat((mimeType) => audio.canPlayType(mimeType));
 }
 
+// Whether the game offers to leave, read once at load (exitShown).
+let leaveOffered = false;
 let installFlow: InstallFlow | undefined;
 let installNudge: InstallNudge | undefined;
 let orientation: OrientationRelay | undefined;
@@ -139,9 +141,11 @@ export function setupPhoneApp(): void {
   );
   showTurnUprightNotice();
   orientation = relayOrientationEvents(readViewport, window);
-  // Firefox for Android's installed app keeps its own back.
-  // WORKAROUND: https://bugzilla.mozilla.org/show_bug.cgi?id=2079243 (see isFirefoxAndroidApp).
-  if (!isFirefoxAndroidApp(navigator.userAgent, (query) => matchMedia(query).matches)) {
+  // Read before the guard pushes any entry. An installed app that cannot close its window keeps
+  // its own back, so the game never asks Quit? there.
+  const closeWatcher = backCloseWatcher(navigator.userAgent, browserCloseWatcher());
+  leaveOffered = !appCannotClose(closeWatcher, window);
+  if (leaveOffered) {
     // Each back the guard keeps opens the pause menu or Quit?, as the scenes decide.
     guardBackNavigation(
       {
@@ -150,7 +154,7 @@ export function setupPhoneApp(): void {
       },
       window,
       window,
-      backCloseWatcher(navigator.userAgent, browserCloseWatcher()),
+      closeWatcher,
       history,
     );
   }
@@ -168,11 +172,12 @@ export function launchReady(): Promise<void> {
   return ready;
 }
 
-// Whether the home top bar shows Exit: everywhere but Firefox for Android's installed app,
-// which ignores a script's close, so Exit could only go to the site's home page inside the app.
-// WORKAROUND: https://bugzilla.mozilla.org/show_bug.cgi?id=2079243 (see isFirefoxAndroidApp).
+// Whether the game offers to leave (the home top bar's Exit, Q and back's Quit?), as read at load:
+// in a browser tab, which goes to the site's home page, and in an installed app that can close its
+// window, which closes; never in another installed app (the kit's appCannotClose: an app whose
+// platform never closes, by APP_WINDOW_CLOSES, or whose history holds more than the game's entry).
 export function exitShown(): boolean {
-  return !isFirefoxAndroidApp(navigator.userAgent, (query) => matchMedia(query).matches);
+  return leaveOffered;
 }
 
 // Whether the phone is on its side now, with the turn-upright notice over the game.

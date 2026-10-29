@@ -331,8 +331,8 @@ export const HOME_LAYOUT = {
   yardSign: Rect;
 };
 
-// The top bar's buttons, left to right. Exit, last, is left out in Firefox for Android's
-// installed app, which ignores a script's close (exitShown in src/pwa).
+// The top bar's buttons, left to right. Exit, last, is left out in an installed app whose window a
+// script cannot close (exitShown in src/pwa).
 export const HOME_BAR_BUTTONS = ["logbook", "help", "mute", "settings", "exit"] as const;
 export type HomeBarButton = (typeof HOME_BAR_BUTTONS)[number];
 
