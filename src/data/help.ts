@@ -28,7 +28,7 @@ export const HELP_PAGES = [
     art: "cards",
     body:
       "Skunks, thieves, dogs and more open cards. " +
-      "Each option costs cash, hearts or a debuff; one never costs cash. " +
+      "Each option costs cash, hearts or a debuff, and at least one is free of cash. " +
       "Puddles and potholes make the pack Muddy. Debuffs wear off in time. " +
       "Hold a card, icon or bar for details.",
     title: "Some obstacles bring cards",
@@ -54,11 +54,10 @@ export const HELP_PAGES = [
   {
     art: "zones",
     body:
-      "Walk {walkLength} neighbourhoods of {world}, each busier than the last. " +
-      "Each dog's pay is banked as you finish one. " +
-      "At a fork, each path brings an upgrade. " +
-      "Bring every dog home for the {walkBonus} Walk bonus, " +
-      "or pause to head home early with your cash.",
+      "Walk {walkLength} neighbourhoods of {world}; at a fork, each path brings an upgrade. " +
+      "Bring every dog home for the {walkBonus} Walk bonus. " +
+      "If every owner fires you, you keep only your pay: " +
+      "head home from the pause menu to keep your cash.",
     title: "Neighbourhoods",
   },
 ] as const satisfies readonly [HelpPage, ...HelpPage[]];
