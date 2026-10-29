@@ -3,7 +3,7 @@ import { fillLine, fillNames } from "../lib/lines";
 import { type Change, type HeartChange, heartsForgiven, type MoneyChange } from "../rules/causes";
 import { debuffFields, formatDollars } from "../rules/effectText";
 import { spareTreatGiver, spareTreatSource } from "../rules/spareTreats";
-import type { FaceMood } from "../rules/treats";
+import type { FaceMood, TreatGrabbed } from "../rules/treats";
 import { read } from "../rules/units";
 import type { ActiveDebuff, EffectSource, RunState } from "../state/runState";
 import { debuffNameMarks } from "./effectNames";
@@ -147,6 +147,22 @@ export function spareTreatSavedLine(
     icon: spareTreatIcon(spareTreatSource(run)),
     text: stripLine(data, "spareTreatSaved", {}),
   };
+}
+
+// A treat grabbed's line: the owner it cheered (treatLine), or with every owner at their max, the
+// spare treat run's gear held or the cash it paid, whose label shows the amount.
+export function treatGrabLine(
+  data: StripData,
+  grab: Pick<TreatGrabbed, "cash" | "change" | "stored">,
+  run: Pick<RunState, "modifiers">,
+): MessageLine | null {
+  if (grab.stored) {
+    return spareTreatSavedLine(data, run);
+  }
+  if (grab.cash !== null) {
+    return { icon: "treat", text: stripLine(data, "treatCash", {}) };
+  }
+  return treatLine(data, grab.change);
 }
 
 // A spare treat given back to the owner who just lost a heart, who keeps it.

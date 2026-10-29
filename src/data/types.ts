@@ -144,6 +144,7 @@ export interface Tuning {
     readonly prices: Table<string>;
     readonly startPurse: number;
     readonly tip: number;
+    readonly treatCash: number;
   };
   readonly multipliers: OpenGroup & {
     readonly distractionLeaveLingerShare: number;
@@ -934,6 +935,9 @@ export interface RunText {
     readonly spareTreatSaved: string;
     readonly spareTreatUsed: string;
     readonly treat: string;
+    // A treat grabbed while every owner is at their max that paid cash; its label shows the
+    // amount.
+    readonly treatCash: string;
   };
   // The walk bar's place in the walk beside the neighbourhood's name: the zone's number, n, of
   // the walk's total.

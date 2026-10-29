@@ -3034,6 +3034,7 @@
       "startPurse": 0,
       "thiefLetGo": 20,
       "tip": 1,
+      "treatCash": 5,
       "walkBonus": 50,
       "weddingApology": 20
     },

@@ -36,9 +36,8 @@ import {
   gearFoundLine,
   luckyLine,
   pullLine,
-  spareTreatSavedLine,
   spareTreatUsedLine,
-  treatLine,
+  treatGrabLine,
 } from "../../hud/stripLines";
 import { BUFF_POP, CHARM, charmByWalkerRect, charmOverRect } from "../../layout/buffLayout";
 import { bumpFlash, type BumpSource } from "../../layout/bumpFlash";
@@ -297,14 +296,18 @@ export class RunMoments {
       }
     }
     // A treat cheers the owner of the dog that grabbed it, or with every owner at their max goes
-    // into the gear that holds spare treats, such as the Fanny pack, whose well glints.
-    for (const { change, dog, stored } of step.treats) {
+    // into the gear that holds spare treats, such as the Fanny pack, whose well glints, or pays
+    // cash, whose label pops by the cash as a lucky find's does (changeLabels).
+    for (const grab of step.treats) {
+      const { cash, change, dog, stored } = grab;
+      this.say(treatGrabLine(gameData, grab, step.walk.run));
       if (stored) {
-        this.say(spareTreatSavedLine(gameData, step.walk.run));
         this.glintGear(spareTreatSource(step.walk.run));
         continue;
       }
-      this.say(treatLine(gameData, change));
+      if (cash !== null) {
+        this.addChanges(overPack(pack), [cash]);
+      }
       if (change !== null) {
         this.changes.push(change);
         const cue: TreatCue = { dog, labels: changeLabels(overPack(pack), [change]) };

@@ -20,6 +20,7 @@ export const STRIP_LINE_FIELDS = {
   spareTreatSaved: [],
   spareTreatUsed: ["owner"],
   treat: ["dog", "hearts", "owner"],
+  treatCash: [],
 } as const;
 
 // The {name}s each walk text line may use, by group; a line left out uses none. A line is

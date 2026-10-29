@@ -42,7 +42,7 @@ const STEP_CUES: Readonly<Record<keyof WalkStep, CuesOf>> = {
   spareTreat: NONE,
   // A tip, a Stinky one included.
   tips: (_data, { tips }) => tips.map((): SoundCue => "tip"),
-  // A treat to an owner, or stored as a spare treat.
+  // A treat to an owner, stored as a spare treat, or paid as cash.
   treats: (_data, { treats }) => treats.map((): SoundCue => "treat"),
   walk: NONE,
   zoneEnded: NONE,

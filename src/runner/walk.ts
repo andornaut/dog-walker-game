@@ -40,9 +40,9 @@ import {
   payZone,
   tipValue,
 } from "../rules/run";
-import { spendSpareTreat, storeSpareTreat } from "../rules/spareTreats";
+import { spendSpareTreat } from "../rules/spareTreats";
 import { reachModified } from "../rules/standing";
-import { treatRecipient } from "../rules/treats";
+import { grabTreat, type TreatGrabbed } from "../rules/treats";
 import { read } from "../rules/units";
 import { packAgility } from "../rules/walkers";
 import { zoneScrollSpeed } from "../rules/zones";
@@ -209,15 +209,9 @@ export interface MinorBump {
   item: MoverItem<MinorObstacleId>;
 }
 
-// A treat the pack grabbed: the dog whose owner it went to, by treatRecipient, and the hearts
-// that owner gained, or null at their max. stored is set when, with every owner at their max, the
-// pack held it as a spare treat (storeSpareTreat) instead.
-interface TreatGrab {
-  change: HeartChange | null;
-  dog: DogId;
-  item: WalkItem;
-  stored: boolean;
-}
+// A treat the pack grabbed, and what it did (grabTreat): the hearts its owner gained, or with
+// every owner at their max, the spare treat the pack held (stored) or the cash it paid.
+type TreatGrab = Omit<TreatGrabbed, "state"> & { readonly item: WalkItem };
 
 export type EncounterCard = Extract<CardSource, { kind: "encounter" }>;
 
@@ -528,16 +522,6 @@ export function collectTip(
 ): { readonly run: RunState; readonly tip: MoneyChange } {
   const tip = tipValue(data, run);
   return { run: { ...run, money: addCents(run.money, tip.amount) }, tip };
-}
-
-// A treat grabbed: the dog's owner gains hearts.treat, up to their max.
-function grabTreat(data: WalkData, dog: DogId, run: RunState): ReturnType<typeof changeHearts> {
-  return changeHearts(
-    data,
-    [{ amount: read(data.tuning, "hearts", "treat"), kind: "treat" }],
-    dog,
-    run,
-  );
 }
 
 // A minor bump costs the dog's owner the hearts a bump costs now (bumpParts), with the value
@@ -916,13 +900,9 @@ export function stepWalk(
       collected.push(item);
       modifiedAt(item, [changeModified(pickup.tip)]);
     } else if (kind === "treat") {
-      const counted = countTally("treats", nextRun);
-      const recipient = treatRecipient(data, counted, dog);
-      const stored = storeSpareTreat(data, counted);
-      const grab =
-        stored === null ? grabTreat(data, recipient, counted) : { change: null, state: stored };
-      nextRun = grab.state;
-      treats.push({ change: grab.change, dog: recipient, item, stored: stored !== null });
+      const { state, ...grab } = grabTreat(data, dog, countTally("treats", nextRun));
+      nextRun = state;
+      treats.push({ ...grab, item });
       collected.push(item);
       modifiedAt(item, [grab.change === null ? null : changeModified(grab.change)]);
     } else if (isMinorObstacle(data, kind)) {

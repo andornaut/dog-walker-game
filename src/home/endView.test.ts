@@ -14,6 +14,7 @@ const money = (amount: number, base: Cause): MoneyChange => ({
 });
 const pay = (amount: number) => money(amount, { amount, kind: "pay" });
 const tip = (amount: number) => money(amount, { amount, kind: "tip" });
+const treat = (amount: number) => money(amount, { amount, kind: "treat" });
 const card = (amount: number) =>
   money(amount, {
     amount,
@@ -37,6 +38,19 @@ describe("earningsBreakdown", () => {
       { amount: 2_000, kind: "fees", label: labels.fees },
       { amount: 250, kind: "tips", label: labels.tips },
       { amount: -400, kind: "cardCosts", label: labels.cardCosts },
+    ]);
+  });
+
+  it("counts a treat's cash in the Tips row", () => {
+    const changes = [pay(1_000), tip(100), treat(500)];
+    expect(
+      earningsBreakdown(gameData, changes, { earned: cents(1_600), lost: cents(0) }).map(
+        ({ amount, kind }) => [kind, amount],
+      ),
+    ).toEqual([
+      ["fees", 1_000],
+      ["tips", 600],
+      ["cardCosts", 0],
     ]);
   });
 

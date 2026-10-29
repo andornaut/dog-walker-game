@@ -8,7 +8,7 @@ import { modifiedStat } from "./modifiers";
 import { read } from "./units";
 
 // Spare treats: with a spareTreats modifier in effect, such as the Fanny pack's, a treat grabbed
-// while every walking owner is at their max is held for later instead of wasted, and the next
+// while every walking owner is at their max is held for later instead of paying cash, and the next
 // heart lost is given back from it in the same step, before any owner fires you.
 
 type SpareData = Pick<GameData, "dogs" | "tuning">;
@@ -31,7 +31,8 @@ export function holdSpareTreats(data: Pick<GameData, "tuning">, run: RunState): 
 }
 
 // A treat grabbed held as a spare, or null when it goes to an owner as usual: some walking owner
-// is below their max, or the pack holds no more spares, so a treat at every max is wasted.
+// is below their max, or the pack holds no more spares, so a treat at every max pays cash
+// (grabTreat in treats.ts).
 export function storeSpareTreat(data: SpareData, run: RunState): RunState | null {
   if (run.spareTreats.held >= spareTreatRoom(data, run)) {
     return null;

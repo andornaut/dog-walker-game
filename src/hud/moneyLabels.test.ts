@@ -8,7 +8,7 @@ import { fontFileMetrics } from "../testing/fontInk";
 import { inkRowsOfLines } from "../ui/fontMetrics";
 import { FEEDBACK } from "./feedback";
 import { CHANGE_CHIP, CHANGE_LABEL_STYLE } from "./hudLanes";
-import type { ChangeLabel } from "./hudView";
+import { type ChangeLabel, changeLabels } from "./hudView";
 import { MESSAGE_STRIP } from "./messageStrip";
 import { curvePoint, TOP_BAR_POINTS } from "./moments";
 import {
@@ -126,6 +126,10 @@ describe("mergeTips", () => {
   });
   const zeroed: ChangeLabel = { ...tip(0), zeroedBy: "stinky" };
   const find: ChangeLabel = { ...tip(2000), target: { kind: "cash", tip: false } };
+  // A treat's cash, labelled as the walk labels it.
+  const treatCash = changeLabels({ x: 0, y: 0 }, [
+    { amount: cents(500), causes: [{ amount: 500, kind: "treat" }], dog: null, kind: "money" },
+  ])[0] as ChangeLabel;
   const bump: ChangeLabel = {
     amount: -1000,
     gain: false,
@@ -150,6 +154,8 @@ describe("mergeTips", () => {
     ["a lucky find into a tip", tip(100), find],
     ["a tip into a lucky find", find, tip(100)],
     ["two lucky finds", find, find],
+    ["a treat's cash into a tip", tip(100), treatCash],
+    ["a tip into a treat's cash", treatCash, tip(100)],
   ])("keeps %s apart", (_name, showing, next) => {
     expect(mergeTips(showing, next)).toBeUndefined();
   });

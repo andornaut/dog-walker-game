@@ -27,8 +27,8 @@ const ORDER: readonly EarningsKind[] = [
   "start",
 ];
 
-// A money change counts under its base cause: a fee or tip, or a card or lucky find's effect,
-// as a cost or a gain.
+// A money change counts under its base cause: a fee, a tip or a treat's cash (with the tips),
+// or a card or lucky find's effect, as a cost or a gain.
 export function earningsKind(change: MoneyChange): EarningsKind {
   const base = change.causes[0];
   switch (base?.kind) {
@@ -37,6 +37,7 @@ export function earningsKind(change: MoneyChange): EarningsKind {
     case "bonus":
       return "fullPack";
     case "tip":
+    case "treat":
       return "tips";
     default:
   }

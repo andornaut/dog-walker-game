@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { GearId } from "../data/types";
+import { treatGrabLine, treatLine } from "../hud/stripLines";
 import { spareTreatRoom } from "../rules/spareTreats";
 import { read } from "../rules/units";
 import { newRun, type PackDogs } from "../state/runState";
@@ -22,31 +23,45 @@ const room = spareTreatRoom(
 );
 const bump = read(tuning, "hearts", "bump");
 const treat = read(tuning, "hearts", "treat");
+const treatCash = read(tuning, "money", "treatCash");
 
-describe("a treat grabbed at every owner's max", () => {
+// A treat grabbed with every owner at their max or not, and the Fanny pack with room, full or not
+// owned: the front owner's hearts it gave, the spare treat it stored, the cash it paid and the
+// strip line it said (treatGrabLine): the treat's own line, the spare treat's or the cash's.
+describe("a treat grabbed", () => {
+  const ROOM = { gear: "fannyPack", held: 0, pack: "with room in the Fanny pack" } as const;
+  const FULL = { gear: "fannyPack", held: room, pack: "with the Fanny pack full" } as const;
+  const NONE = { gear: null, held: 0, pack: "with no Fanny pack" } as const;
+  const fed = { atMax: false, cash: 0, hearts: treat, line: "treat", stored: 0 } as const;
+  const paid = { atMax: true, cash: treatCash, hearts: 0, line: "treatCash", stored: 0 } as const;
   it.each([
-    { gear: "fannyPack", held: 0, name: "goes into the Fanny pack", stored: true },
-    { gear: "fannyPack", held: room, name: "is wasted with the Fanny pack full", stored: false },
-    { gear: null, held: 0, name: "is wasted with no Fanny pack", stored: false },
-  ] as const)("$name", ({ gear, held, stored }) => {
-    const walk = walkGeared(gear, held, ["kilo", "biscuit"], [atPack("treat")]);
-    const { treats, walk: after } = step(walk);
-    expect(treats.map((grab) => [grab.change, grab.stored])).toEqual([[null, stored]]);
-    expect(heartsByDog(after.run)).toEqual(heartsByDog(walk.run));
-    expect(after.run.spareTreats).toEqual({
-      held: held + (stored ? 1 : 0),
-      spent: 0,
-      stored: stored ? 1 : 0,
-    });
-  });
-
-  it("goes to an owner below their max as ever, with room in the Fanny pack", () => {
-    const walk = withHearts(1, walkGeared("fannyPack", 0, ["kilo"], [atPack("treat")]));
-    const { treats, walk: after } = step(walk);
-    expect(treats.map((grab) => grab.stored)).toEqual([false]);
-    expect(heartsByDog(after.run).kilo).toBe(1 + treat);
-    expect(after.run.spareTreats.held).toBe(0);
-  });
+    { ...ROOM, ...fed },
+    { ...FULL, ...fed },
+    { ...NONE, ...fed },
+    { ...ROOM, atMax: true, cash: 0, hearts: 0, line: "spareTreatSaved", stored: 1 },
+    { ...FULL, ...paid },
+    { ...NONE, ...paid },
+  ] as const)(
+    "at max $atMax $pack gives $hearts hearts, stores $stored and pays $cash",
+    ({ atMax, cash, gear, hearts, held, line, stored }) => {
+      const geared = walkGeared(gear, held, ["kilo", "biscuit"], [atPack("treat")]);
+      const walk = atMax ? geared : withHearts(1, geared);
+      const { tips, treats, walk: after } = step(walk);
+      const [grab] = treats;
+      expect(treats).toHaveLength(1);
+      expect((heartsByDog(after.run).kilo ?? 0) - (heartsByDog(walk.run).kilo ?? 0)).toBe(hearts);
+      expect(after.run.spareTreats).toEqual({ held: held + stored, spent: 0, stored });
+      expect(after.run.money - walk.run.money).toBe(cash);
+      expect(grab?.cash?.amount ?? 0).toBe(cash);
+      const said = grab === undefined ? null : treatGrabLine(data, grab, after.run);
+      expect(said?.text).toBe(
+        line === "treat" ? treatLine(data, grab?.change ?? null)?.text : data.runText.strip[line],
+      );
+      // The cash is never a tip: no tip grabbed, and the tips tally unchanged.
+      expect(tips).toEqual([]);
+      expect(after.run.tallies.tips).toBe(walk.run.tallies.tips);
+    },
+  );
 });
 
 describe("a bump with a spare treat held", () => {

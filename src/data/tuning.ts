@@ -116,6 +116,9 @@ export const TUNING = {
     startPurse: 0,
     thiefLetGo: 20,
     tip: 1,
+    // A treat grabbed while every walking owner is at their max and the pack can't hold it as a
+    // spare treat pays this as cash.
+    treatCash: 5,
     // The Walk bonus: paid into the bank when every dog set out with gets home after the last
     // zone, whatever the pack's size.
     walkBonus: 50,
