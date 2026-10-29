@@ -32,6 +32,7 @@ import {
 } from "../testing/planner";
 import { heartsByDog } from "../testing/runState";
 import { atPack, data, geometry, inLane, step, walkWith, withHearts } from "../testing/walk";
+import { weighedUp } from "../testing/world";
 import { DART_VERGE_LANES, dartOutcome, drawMover, hopShapes } from "./moverPlanning";
 import {
   inMotion,
@@ -522,11 +523,11 @@ describe("movers", { timeout: 120_000 }, () => {
     const movement = movementOf(kind);
     return movement?.kind === "stopAndGoAcross" ? movement.stops : [];
   };
-  const stopsOn = (kind: WalkItem["kind"], seed: number): StandingStop[] =>
+  const stopsOn = (tuned: Real, kind: WalkItem["kind"], seed: number): StandingStop[] =>
     zonesOf(kind).flatMap((zone) =>
       [0, WORLD.walkLength - 1].flatMap((zoneIndex) => {
-        const run = inZone(realRun(everyMover, FASTEST_WALKER), zone, zoneIndex);
-        const { road } = planZone(everyMover, GAME_ROAD, plannerStreams(seed), {
+        const run = inZone(realRun(tuned, FASTEST_WALKER), zone, zoneIndex);
+        const { road } = planZone(tuned, GAME_ROAD, plannerStreams(seed), {
           road: startRoad(LANE_COUNT),
           run,
         });
@@ -551,16 +552,16 @@ describe("movers", { timeout: 120_000 }, () => {
         });
       }),
     );
-  // Plans a seed at a time from seed 1 until found holds of the stops or the search has planned
-  // its most seeds.
-  const STOP_SEEDS_MOST = 200;
+  // Plans tuned a seed at a time from seed 1 until found holds of the stops or the search has
+  // planned its most seeds.
   const searchStops = (
+    tuned: Real,
     kind: WalkItem["kind"],
     found: (stops: readonly StandingStop[]) => boolean,
   ): StandingStop[] => {
     const stops: StandingStop[] = [];
-    for (let seed = 1; seed <= STOP_SEEDS_MOST && !found(stops); seed++) {
-      stops.push(...stopsOn(kind, seed));
+    for (let seed = 1; seed <= SEARCH_SEEDS_MOST && !found(stops); seed++) {
+      stops.push(...stopsOn(tuned, kind, seed));
     }
     return stops;
   };
@@ -579,7 +580,7 @@ describe("movers", { timeout: 120_000 }, () => {
   // On whole lanes, so it covers only as many lanes as it is wide: a 2-lane one never straddles
   // three; and in a stop that leaves the path open on its row.
   it.each(stopKinds)("stands each %s in one of its stops, never over the path's lane", (kind) => {
-    const stops = searchStops(kind, (found) => found.length >= SEARCH_ENOUGH);
+    const stops = searchStops(everyMover, kind, (found) => found.length >= SEARCH_ENOUGH);
     expect(stops.length).toBeGreaterThan(0);
     for (const { open, stands, whole } of stops) {
       expect(whole).toBe(true);
@@ -589,11 +590,14 @@ describe("movers", { timeout: 120_000 }, () => {
   // A kind with several stops draws one, each as likely, and stands in it on a row where it leaves
   // the path open, so where a row leaves several open, the row does not fix which: across seeds
   // each stop is stood in on some row where another was open too. Searched until each has been.
+  // Whether a row fixes the stop is a matter of each mover and its row alone, whatever else its
+  // zone plans, so its zones weigh it up (weighedUp) to bring more of them a plan.
   const severalStops = stopKinds.filter((kind) => stopsOf(kind).length > 1);
   const choseOver = (stop: StopLanes, found: readonly StandingStop[]) =>
     found.some(({ open, stands }) => stands[0] === stop[0] && open.length > 1);
   it.each(severalStops)("stands %s in each of its stops where another is open too", (kind) => {
-    const stops = searchStops(kind, (found) =>
+    const tuned = weighedUp(kind as MinorObstacleId | ObstacleEncounterId, everyMover);
+    const stops = searchStops(tuned, kind, (found) =>
       stopsOf(kind).every((stop) => choseOver(stop, found)),
     );
     expect(stopsOf(kind).filter((stop) => !choseOver(stop, stops))).toEqual([]);

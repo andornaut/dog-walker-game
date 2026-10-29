@@ -11,7 +11,7 @@ import { startRoad, stepWalk, type Walk, zoneLength } from "../runner/walk";
 import { planZone } from "../runner/zonePlan";
 import { plannerStreams } from "../testing/movers";
 import { FASTEST_WALKER, GAME_ROAD, inZone, REAL, type Real, realRun } from "../testing/planner";
-import { mapZones } from "../testing/world";
+import { weighedUp } from "../testing/world";
 import { distractionScroll } from "./distractions";
 import { herringNow } from "./herrings";
 
@@ -32,23 +32,6 @@ const HERRING_SHARE_TOLERANCE = 0.1;
 // Enough draws that the tolerance is 4 standard deviations of their share, sqrt(0.25 / n) at most.
 const HERRING_MOVERS_ENOUGH = Math.ceil(0.25 / (HERRING_SHARE_TOLERANCE / 4) ** 2);
 const HERRING_SEEDS_MOST = 240;
-
-// The real data with each zone that weighs kind above 0 weighing it as much as all its other minor
-// obstacles together, so about half of what such a zone plans of them is kind.
-const weighedUp = (kind: MinorObstacleId): Real => ({
-  ...REAL,
-  world: mapZones((zone) => {
-    const weights = zone.weights.minorObstacles;
-    if (weights[kind] === 0) {
-      return zone;
-    }
-    const others = Object.values<number>(weights).reduce((sum, weight) => sum + weight, 0);
-    return {
-      ...zone,
-      weights: { ...zone.weights, minorObstacles: { ...weights, [kind]: others - weights[kind] } },
-    };
-  }, REAL.world),
-});
 
 // A zone planned on a seed at the walk's first or last position.
 const planned = (data: Real, zone: ZoneId, zoneIndex: number, seed: number): Walk =>
@@ -74,7 +57,7 @@ describe("red herrings", { timeout: 120_000 }, () => {
   // seed 1 until HERRING_MOVERS_ENOUGH of the kind's movers come up or the search has planned
   // HERRING_SEEDS_MOST seeds.
   it.each(HERRING_KINDS)("plans about $share of $kind's movers as red herrings", (herring) => {
-    const data = weighedUp(herring.kind);
+    const data = weighedUp(herring.kind, REAL);
     let movers = 0;
     let herrings = 0;
     for (let seed = 1; seed <= HERRING_SEEDS_MOST && movers < HERRING_MOVERS_ENOUGH; seed++) {
