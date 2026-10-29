@@ -55,7 +55,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 - **Tap:** moves one lane toward the tapped half of the road, as soon as the finger lands; on the doghouse row, when it lifts, so holding a card only explains it. A drag shorter than the first lane step counts as a tap, and a drag whose first step goes against the tap takes the tap back, so the pack ends where the drag alone puts it
 - **Keyboard:** ←/→, A/D or H/L; one lane per press; holding a key doesn't repeat
 - While moving between lanes, the pack can hit things in either lane. A reverse press turns the pack around at once; each other press queues one more lane
-- Taps on the top bar never move the pack; taps and drags on the doghouse row steer like anywhere on the road
+- Taps on the top bar never move the pack; taps and drags on the doghouse row steer like anywhere on the road. During a walk, every part of the screen below the top bar steers, the margins around the game included: a drag or tap there acts as one at the nearest edge of the game area, and the top bar and the margin beside or above it keep their own input
 
 ### The pack and hits
 
