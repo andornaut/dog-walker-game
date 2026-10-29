@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 
+import { decodePng } from "@andornaut/game-kit/art/png";
 import { keysOf } from "@andornaut/game-kit/records";
 import { type Point, type Rect, rectsOverlap } from "@andornaut/game-kit/rect";
 import { inkRowsFromCapTop } from "@andornaut/game-kit/text/bitmapFont";
@@ -18,7 +19,6 @@ import { zoneLength } from "../runner/walk";
 import { fontFileMetrics, fontInk } from "../testing/fontInk";
 import { LONE } from "../testing/packPlaces";
 import { inside } from "../testing/rects";
-import { decodePng } from "../tools/atlas/atlasBuild";
 import { opaqueRect } from "../tools/atlas/atlasPixels";
 import { plainMarks } from "../ui/pixelFont";
 import { cents } from "../units";

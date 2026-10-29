@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { contentHash } from "@andornaut/game-kit/build/contentHash";
 
 import { ATLAS_MANIFEST_PATH, type AtlasManifest } from "../../assets/atlasManifest";
 import type { AssetManifest } from "../../assets/manifest";
@@ -12,9 +12,6 @@ export const ART_FILES_MODULE = "virtual:art-files";
 // Where a build writes the hashed art: /art/'s layout, under the path the headers and the service
 // worker treat as content-hashed build output.
 const HASHED_ART_DIR = "assets/art";
-
-// Vite's hash length, which the headers' check for an unhashed name expects.
-const HASH_LENGTH = 8;
 
 // Every file under /art/ a build's game loads: the art manifest, the atlas manifest and its
 // pages, each font's .fnt, both files of each sound (the page plays one format), and the files
@@ -32,11 +29,6 @@ function gameArtPaths(manifest: AssetManifest, atlas: AtlasManifest): string[] {
     ...manifest.sprites.filter(own).flatMap(({ json, png }) => [json, png]),
   ];
   return [...new Set(paths)].sort();
-}
-
-// The first HASH_LENGTH characters of the bytes' SHA-256, in URL-safe base64, as Vite hashes.
-export function contentHash(bytes: Uint8Array): string {
-  return createHash("sha256").update(bytes).digest("base64url").slice(0, HASH_LENGTH);
 }
 
 // A file's name in the build output: its path under /art/, in HASHED_ART_DIR, with a dash and

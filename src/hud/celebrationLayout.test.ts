@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 
+import { decodePng } from "@andornaut/game-kit/art/png";
 import { keysOf } from "@andornaut/game-kit/records";
 import { fitsRoom, fittingText, type TextFitStyle } from "@andornaut/game-kit/text/textFit";
 import { describe, expect, it } from "vitest";
@@ -9,7 +10,6 @@ import { SCREEN_LAYOUT } from "../data/screen";
 import type { WalkerId } from "../data/types";
 import { bodyRunWidth } from "../testing/bodyFont";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
-import { decodePng } from "../testing/png";
 import { inside } from "../testing/rects";
 import { plainMarks } from "../ui/pixelFont";
 import { TEXT_SCALE } from "../ui/textFit";

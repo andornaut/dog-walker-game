@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 
 import { itemAt } from "@andornaut/game-kit/arrays";
+import { decodePng } from "@andornaut/game-kit/art/png";
 import { keysOf } from "@andornaut/game-kit/records";
 import { insetRect, type Rect, rectsOverlap } from "@andornaut/game-kit/rect";
 import { inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
@@ -18,7 +19,6 @@ import { pillKind } from "../hud/effectNames";
 import { MAX_CARD_OPTIONS } from "../rules/choices";
 import { everyCardOption } from "../testing/everyCardOption";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
-import { decodePng } from "../testing/png";
 import { inside } from "../testing/rects";
 import { CARD_HEADER } from "../ui/cardRow";
 import { pillIndex, pillRows } from "../ui/namePills";

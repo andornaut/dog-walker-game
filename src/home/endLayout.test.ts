@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 
+import { decodePng } from "@andornaut/game-kit/art/png";
 import { fillLine } from "@andornaut/game-kit/lines";
 import { insetRect, type Rect, rectsOverlap } from "@andornaut/game-kit/rect";
 import { inkRowsFromCapTop, inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
@@ -11,7 +12,6 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { defined } from "../testing/defined";
 import { fontFileMetrics, fontInkRows, inkWidth, placedInk } from "../testing/fontInk";
-import { decodePng } from "../testing/png";
 import { TEXT_SCALE, TEXT_STYLE, textOnLines } from "../ui/textFit";
 import { cents } from "../units";
 import {

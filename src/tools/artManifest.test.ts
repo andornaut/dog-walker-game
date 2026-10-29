@@ -1,10 +1,10 @@
 import { readFile } from "node:fs/promises";
 
+import { blankImage } from "@andornaut/game-kit/art/rgbaImage";
 import { describe, expect, it } from "vitest";
 
 import { type ArtFiles, artManifestText, generateArtManifest } from "./artManifest";
 import { encodePng } from "./atlas/atlasBuild";
-import { blankImage } from "./atlas/atlasPixels";
 import { nodeArtFiles } from "./files";
 
 const ART_DIR = new URL("../../public/art/", import.meta.url);

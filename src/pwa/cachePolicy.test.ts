@@ -1,3 +1,4 @@
+import { contentHash } from "@andornaut/game-kit/build/contentHash";
 import {
   cacheNameFor,
   precacheFetchOptions,
@@ -5,7 +6,7 @@ import {
 } from "@andornaut/game-kit/pwa/cachePolicy";
 import { describe, expect, it } from "vitest";
 
-import { contentHash, hashedArtFileName } from "../tools/atlas/hashedArt";
+import { hashedArtFileName } from "../tools/atlas/hashedArt";
 import { CACHE_POLICY } from "./cachePolicy";
 
 // The kit tests the strategies; these test the game's policy on its own files.

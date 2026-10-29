@@ -1,5 +1,7 @@
 import { readFile } from "node:fs/promises";
 
+import { decodePng } from "@andornaut/game-kit/art/png";
+import type { RgbaImage } from "@andornaut/game-kit/art/rgbaImage";
 import { webpDecodesTo } from "@andornaut/game-kit/art/webp";
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -15,13 +17,11 @@ import {
   type AtlasBuild,
   buildAtlases,
   compactFrames,
-  decodePng,
   encodePng,
   trimsFrames,
   WEBP_PAGES,
 } from "./atlasBuild";
 import { ATLAS_MAX_SIZE } from "./atlasLayout";
-import type { RgbaImage } from "./atlasPixels";
 import { COLOUR_TYPE_INDEXED } from "./indexedPng";
 
 const ART_DIR = new URL("../../../public/art/", import.meta.url);

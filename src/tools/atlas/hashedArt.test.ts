@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 
+import { contentHash } from "@andornaut/game-kit/build/contentHash";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import shippedManifest from "../../../public/art/manifest.json";
@@ -7,7 +8,7 @@ import { ATLAS_MANIFEST_PATH, type AtlasManifest } from "../../assets/atlasManif
 import { type AssetManifest, parseManifest } from "../../assets/manifest";
 import { ART_MANIFEST } from "../artManifest";
 import { buildAtlases } from "./atlasBuild";
-import { contentHash, type HashedArtFile, hashedArtFileName, hashGameArt } from "./hashedArt";
+import { type HashedArtFile, hashedArtFileName, hashGameArt } from "./hashedArt";
 
 const ART_DIR = new URL("../../../public/art/", import.meta.url);
 const readArt = async (path: string) => new Uint8Array(await readFile(new URL(path, ART_DIR)));
@@ -21,16 +22,6 @@ describe("hashedArtFileName", () => {
     ["manifest.json", "assets/art/manifest-Bq3x_9-Z.json"],
   ])("names %s %s", (path, fileName) => {
     expect(hashedArtFileName(path, "Bq3x_9-Z")).toBe(fileName);
-  });
-});
-
-describe("contentHash", () => {
-  const bytes = (text: string) => new TextEncoder().encode(text);
-
-  it("is eight URL-safe characters that follow the content", () => {
-    expect(contentHash(bytes("a"))).toMatch(/^[\w-]{8}$/);
-    expect(contentHash(bytes("a"))).toBe(contentHash(bytes("a")));
-    expect(contentHash(bytes("a"))).not.toBe(contentHash(bytes("b")));
   });
 });
 

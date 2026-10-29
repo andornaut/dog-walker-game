@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 
+import type { RgbaImage } from "@andornaut/game-kit/art/rgbaImage";
 import { keysOf } from "@andornaut/game-kit/records";
 import type { Scene, Textures } from "phaser";
 import { describe, expect, it } from "vitest";
@@ -10,7 +11,6 @@ import { addAtlasFrame, smoothDepthArt } from "../../../assets/phaser/manifestAr
 import { sheetFromRows } from "../../../testing/sheetImage";
 import { compactFrames, drawPage } from "../atlasBuild";
 import { layoutAtlases } from "../atlasLayout";
-import type { RgbaImage } from "../atlasPixels";
 
 // Phaser's frame and its image render nodes, which place a sprite's quad and pick its texels,
 // loaded from its sources: the package's bundle needs a browser.

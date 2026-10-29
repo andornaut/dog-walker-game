@@ -1,39 +1,5 @@
-import { clampIndex } from "@andornaut/game-kit/arrays";
-import type { Point, Rect } from "@andornaut/game-kit/rect";
-
-// Pixels as RGBA bytes, row by row from the top-left.
-export interface RgbaImage {
-  data: Uint8Array;
-  height: number;
-  width: number;
-}
-
-export function blankImage(width: number, height: number): RgbaImage {
-  return { data: new Uint8Array(width * height * 4), height, width };
-}
-
-// Copies the from rect of source to target with its top-left at, and the extrude pixels around
-// it on every side as source holds them inside bounds, repeating bounds' edge pixels past its
-// edges. bounds is the whole frame a trimmed rect was cut from, so the border holds what the
-// whole frame's pixels hold there.
-export function blitExtruded(
-  source: RgbaImage,
-  from: Rect,
-  extrude: number,
-  target: RgbaImage,
-  at: Point,
-  bounds: Rect = from,
-): void {
-  for (let dy = -extrude; dy < from.height + extrude; dy++) {
-    const sourceY = bounds.y + clampIndex(bounds.height, from.y - bounds.y + dy);
-    for (let dx = -extrude; dx < from.width + extrude; dx++) {
-      const sourceX = bounds.x + clampIndex(bounds.width, from.x - bounds.x + dx);
-      const read = (sourceY * source.width + sourceX) * 4;
-      const write = ((at.y + dy) * target.width + at.x + dx) * 4;
-      target.data.set(source.data.subarray(read, read + 4), write);
-    }
-  }
-}
+import type { RgbaImage } from "@andornaut/game-kit/art/rgbaImage";
+import type { Rect } from "@andornaut/game-kit/rect";
 
 // The smallest rect inside within that holds every pixel of image with any opacity, or
 // undefined when all of within is clear.

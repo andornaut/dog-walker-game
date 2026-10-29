@@ -1,10 +1,10 @@
+import type { RgbaImage } from "@andornaut/game-kit/art/rgbaImage";
 import type { Plugin } from "vite";
 
 import type { ArtFileMap } from "../../assets/artUrl";
 import { ART_DIR, ART_MANIFEST, artManifestText, generateArtManifest } from "../artManifest";
 import { nodeArtFiles, writeIfChanged } from "../files";
 import { buildAtlases, WEBP_PAGES } from "./atlasBuild";
-import type { RgbaImage } from "./atlasPixels";
 import { ART_FILES_MODULE, hashGameArt } from "./hashedArt";
 
 // Vite's prefix for a module id that names no file.

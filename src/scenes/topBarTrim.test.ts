@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 
+import { decodePng } from "@andornaut/game-kit/art/png";
 import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG } from "../data/screen";
-import { decodePng } from "../testing/png";
 import { PALETTE } from "../ui/palette";
 import { TOP_BAR_TRIM, topBarRects } from "../ui/topBarTrim";
 

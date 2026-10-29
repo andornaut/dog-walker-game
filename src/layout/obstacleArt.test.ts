@@ -1,10 +1,10 @@
 import { readFileSync } from "node:fs";
 
+import { decodePng } from "@andornaut/game-kit/art/png";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { EncounterId, MinorObstacleId } from "../data/types";
-import { decodePng } from "../tools/atlas/atlasBuild";
 import { spriteSource } from "../tools/atlas/atlasLayout";
 import { OBSTACLE_SILHOUETTES, obstacleParts, POSE_SILHOUETTES } from "./obstacleArt";
 

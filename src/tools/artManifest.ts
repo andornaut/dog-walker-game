@@ -1,3 +1,5 @@
+import { decodePng } from "@andornaut/game-kit/art/png";
+import type { RgbaImage } from "@andornaut/game-kit/art/rgbaImage";
 import { opaqueBoundsOfRgba } from "@andornaut/game-kit/opaqueBounds";
 import * as v from "valibot";
 
@@ -13,9 +15,7 @@ import {
 } from "../assets/manifest";
 import { spriteAnchor } from "../assets/spriteAnchor";
 import { standsOnGround } from "../assets/spriteKeys";
-import { decodePng } from "./atlas/atlasBuild";
 import { spriteSource } from "./atlas/atlasLayout";
-import type { RgbaImage } from "./atlas/atlasPixels";
 import { jsonText } from "./files";
 
 // public/art/manifest.json, derived from the files under public/art/. A key is its file's

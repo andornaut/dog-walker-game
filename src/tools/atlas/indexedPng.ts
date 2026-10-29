@@ -1,6 +1,6 @@
 import { crc32, deflateSync } from "node:zlib";
 
-import type { RgbaImage } from "./atlasPixels";
+import type { RgbaImage } from "@andornaut/game-kit/art/rgbaImage";
 
 // An 8-bit indexed PNG holds at most this many colours, each an RGBA value: PLTE holds the RGB
 // and tRNS the alpha.

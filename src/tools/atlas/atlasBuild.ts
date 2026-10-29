@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 
+import { decodePng } from "@andornaut/game-kit/art/png";
+import { blankImage, blitExtruded, type RgbaImage } from "@andornaut/game-kit/art/rgbaImage";
 import { encodeLosslessWebp } from "@andornaut/game-kit/art/webp";
 import { getOrInsertComputed } from "@andornaut/game-kit/maps";
 import { PNG } from "pngjs";
@@ -17,7 +19,7 @@ import {
   type SourceTexture,
   spriteSource,
 } from "./atlasLayout";
-import { blankImage, blitExtruded, opaqueRect, type RgbaImage } from "./atlasPixels";
+import { opaqueRect } from "./atlasPixels";
 import { encodeIndexedPng } from "./indexedPng";
 
 export interface AtlasBuild {
@@ -26,11 +28,6 @@ export interface AtlasBuild {
   manifest: AtlasManifest;
   // Keys left to load from their own files, and why.
   warnings: string[];
-}
-
-export function decodePng(bytes: Uint8Array): RgbaImage {
-  const { data, height, width } = PNG.sync.read(Buffer.from(bytes));
-  return { data: new Uint8Array(data), height, width };
 }
 
 // image as a lossless PNG: indexed when it has at most MAX_PALETTE colours, as every atlas page
