@@ -83,7 +83,7 @@ export const HOME_TEXT = {
   packCount: "{count}/{max}",
   pocket: {
     note: "One per walk",
-    title: "Pocket",
+    title: "Pick your gear",
   },
   sectionDogs: "Pick your dogs",
   sectionWalker: "Pick a walker",
