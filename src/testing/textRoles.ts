@@ -1,3 +1,4 @@
+import { buildLabel } from "../buildLabel";
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
 import { BADGE_NAME_STYLE, BADGE_STRIP, badgeStrip } from "../home/badgesView";
@@ -33,6 +34,7 @@ import {
   INSTALL_STEPS_FIT,
   installStepsLayout,
   noteRoom,
+  SETTINGS_BUILD_LABEL,
   SETTINGS_NOTE_STYLE,
   settingsLayout,
 } from "../home/settings";
@@ -66,6 +68,7 @@ import { payFor } from "../rules/run";
 import { startingDogSlots } from "../rules/shop";
 import { read } from "../rules/units";
 import type { Owned } from "../save/schema";
+import { UNKNOWN_COMMIT } from "../tools/buildVersion";
 import { readBitmapFont } from "../tools/fontFile";
 import { barTitleRoom } from "../ui/barTitle";
 import { closeControl } from "../ui/closeControl";
@@ -573,6 +576,15 @@ export function textRoleCases(): TextRoleCase[] {
       "font-body",
       { room: noteRoom("button"), style: SETTINGS_NOTE_STYLE },
       [settings.installNote],
+    ),
+    ...plainRole(
+      "settings build label",
+      "font-body",
+      SETTINGS_BUILD_LABEL,
+      // A long version with a full 8-character commit, and a local build's "dev".
+      ["0.0.1", "99.99.99"].flatMap((version) =>
+        [UNKNOWN_COMMIT, "01234567", "89abcdef"].map((commit) => buildLabel(version, commit)),
+      ),
     ),
     ...plainRole(
       "install steps",

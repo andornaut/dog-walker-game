@@ -4,6 +4,7 @@
 // module needs no Phaser.
 import "./devPanel.css";
 
+import { BUILD_LABEL } from "../buildLabel";
 import { gameData } from "../data";
 import { sessionRead, sessionRemove, sessionWrite } from "../lib/sessionStore";
 import type { StoragePersistence } from "../pwa/storagePersistence";
@@ -11,7 +12,6 @@ import { saveContextFrom } from "../save/load";
 import { loadedSave, newPlayerOnDevice } from "../save/profile";
 import { createDefaultSave } from "../save/schema";
 import { pageSaveStore } from "../save/storage";
-import { BUILD_LABEL } from "./buildLabel";
 import {
   applyPanel,
   applySaveEdit,

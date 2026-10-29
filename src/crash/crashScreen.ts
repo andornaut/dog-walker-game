@@ -3,8 +3,8 @@
 // already saved, and the next launch banks it.
 import "./crash.css";
 
+import { BUILD_LABEL } from "../buildLabel";
 import { MENU_TEXT } from "../data/menuText";
-import { BUILD_LABEL } from "../dev/buildLabel";
 import {
   crashGate,
   type CrashReport,

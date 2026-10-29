@@ -1,5 +1,6 @@
 import { type GameObjects, Scene, Scenes } from "phaser";
 
+import { BUILD_LABEL } from "../buildLabel";
 import { gameData } from "../data";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { MenuText } from "../data/types";
@@ -13,6 +14,7 @@ import {
   installStepsLayout,
   knobX,
   noteRoom,
+  SETTINGS_BUILD_LABEL,
   SETTINGS_NOTE_STYLE,
   SETTINGS_ROW,
   type SettingsFonts,
@@ -47,8 +49,10 @@ import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,
+  inkSpan,
   labelInkWidth,
   pixelFontMetrics,
+  placePixelText,
   setPixelText,
   withProbe,
 } from "../ui/phaser/pixelText";
@@ -204,12 +208,13 @@ export interface SettingsData extends OverlayData {
 // Sound on or off, music and effects volume, reduced motion and, until the game is installed
 // where it can be, Install, reachable from the home screen and the pause menu. The card draws
 // over the screen it opens from, its dim part ramp-dimmed as under the pause menu. Every change
-// is saved and applied at once. A switch row is normal and shows its setting in its switch; a
-// tap dips the row, then flips it. A tap anywhere on the Install row, its Get button included,
-// dips it, then opens the browser's install prompt or, in a browser that installs only from its
-// own menu (iOS, Firefox for Android), a card with that browser's steps over the settings. Up and
-// Down move the keyboard's focus through the rows and the close control; Enter or Space presses
-// the focused row, and on a slider the left and right keys, Home and End set the volume.
+// is saved and applied at once. The build's label sits under the rows. A switch row is normal and
+// shows its setting in its switch; a tap dips the row, then flips it. A tap anywhere on the
+// Install row, its Get button included, dips it, then opens the browser's install prompt or, in
+// a browser that installs only from its own menu (iOS, Firefox for Android), a card with that
+// browser's steps over the settings. Up and Down move the keyboard's focus through the rows and
+// the close control; Enter or Space presses the focused row, and on a slider the left and right
+// keys, Home and End set the volume.
 export class SettingsScene extends Scene {
   private dim: Rect = SCREEN_LAYOUT.screen;
   // The ramp dim's objects, kept as the card redraws over them.
@@ -486,6 +491,7 @@ export class SettingsScene extends Scene {
         this.drawSlider(row, settings);
       }
     }
+    this.drawBuildLabel();
     // Over the rows, since a switch row's face covers its top row.
     const separators = this.add.graphics();
     this.layout.separators.forEach((rect) => fillRect(separators, PALETTE.tan, rect));
@@ -498,6 +504,18 @@ export class SettingsScene extends Scene {
     if (this.steps !== undefined) {
       this.drawSteps(this.steps);
     }
+  }
+
+  // The build's label, as the Dev bar shows it, centred across the panel under the rows.
+  private drawBuildLabel(): void {
+    const { buildLabelY, panel } = this.layout;
+    const label = addPixelText(this, 0, 0, BUILD_LABEL, {
+      colour: PALETTE[SETTINGS_BUILD_LABEL.colour],
+      scale: SETTINGS_BUILD_LABEL.style.scale,
+    });
+    const ink = inkSpan(label);
+    const left = panel.x + Math.round((panel.width - (ink.right - ink.left)) / 2);
+    placePixelText(label, left - ink.left, buildLabelY);
   }
 
   // The install steps' card over the dimmed settings: its title in the band, its close control,

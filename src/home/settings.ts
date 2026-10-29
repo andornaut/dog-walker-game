@@ -3,7 +3,7 @@ import { clamp01 } from "../lib/numbers";
 import type { Rect } from "../lib/rect";
 import type { Settings } from "../save/schema";
 import { type CloseControl, closeControl } from "../ui/closeControl";
-import { type FontMetrics, helpCapDy, inkRowsOfLines } from "../ui/fontMetrics";
+import { type FontMetrics, helpCapDy, inkRowsOfLines, LABEL_HELP_GAP } from "../ui/fontMetrics";
 import { TEXT_SCALE, textOnLines } from "../ui/textFit";
 import { cardBand, HOME_LAYOUT } from "./homeLayout";
 
@@ -82,6 +82,8 @@ export interface SettingsLayout {
   // The title band across the card's top, its title placed beside the close control
   // (barTitleLeft).
   band: Rect;
+  // The build label's capitals' top; the label is centred across the panel.
+  buildLabelY: number;
   close: CloseControl;
   panel: Rect;
   // The rows, top to bottom.
@@ -136,11 +138,23 @@ export function noteDy(title: FontMetrics): number {
 
 const PANEL = { width: 344 };
 // The first row starts at the band's bottom edge, as each later row starts at its separator, so
-// its icon and label are as far under the band as a later row's are under its separator. The
-// panel ends PANEL_FOOT under the last row.
+// its icon and label are as far under the band as a later row's are under its separator.
 const ROWS_TOP = HOME_LAYOUT.card.band.inset + HOME_LAYOUT.card.band.height;
-const PANEL_FOOT = 6;
 const SEPARATOR_INSET = 4;
+
+// The build label (BUILD_LABEL) closes the card in 1x dark brown body text, centred across the
+// panel with no separator over it: its capitals LABEL_HELP_GAP clear rows under the last row's
+// lowest ink, as a note sits under its label, and its lowest ink BUILD_LABEL_FOOT clear rows over
+// the card's inner bottom edge. The last row ends halfway down that gap, so a tap on the label
+// misses the row and the row's focus ring stays clear of it.
+export const SETTINGS_BUILD_LABEL = {
+  colour: "darkBrown",
+  room: SETTINGS_ROW.width,
+  style: { scale: 1 },
+} as const;
+const BUILD_LABEL_FOOT = 6;
+// ui-detail-card's frame along its bottom: a tan shade, a dark brown line and an ink line.
+const CARD_FRAME_BOTTOM = 3;
 
 // The note's lowest ink, from the row's top.
 function noteInkBottom(fonts: SettingsFonts, noteLines: number): number {
@@ -168,15 +182,39 @@ function rowControl(fonts: SettingsFonts, row: Rect, shape: SettingsRowShape): R
   };
 }
 
-// The rows on a card centred on the screen, under its title band with the close control in it.
-// Settings covers the screen wherever it opens from.
+// A row's lowest ink, from its top: a noted row's note or control, whichever reaches lower. A
+// slider row counts whole, its knob's art setting its lowest ink.
+function rowInkBottom(fonts: SettingsFonts, shape: SettingsRowShape): number {
+  if (shape.kind === "slider") {
+    return SETTINGS_ROW.slider.height;
+  }
+  const control = rowControl(fonts, { height: 0, width: 0, x: 0, y: 0 }, shape);
+  return Math.max(
+    noteInkBottom(fonts, shape.noteLines),
+    (control?.y ?? 0) + (control?.height ?? 0),
+  );
+}
+
+// The rows on a card centred on the screen, under its title band with the close control in it,
+// and the build label under them. Settings covers the screen wherever it opens from.
 export function settingsLayout(
   fonts: SettingsFonts,
   screen: { height: number; width: number },
   shapes: readonly SettingsRowShape[],
 ): SettingsLayout {
-  const heights = shapes.map((shape) => rowHeight(fonts, shape));
-  const height = ROWS_TOP + heights.reduce((sum, rows) => sum + rows, 0) + PANEL_FOOT;
+  const lastShape = shapes.at(-1);
+  const lastInk = lastShape === undefined ? 0 : rowInkBottom(fonts, lastShape);
+  const heights = shapes.map((shape, i) =>
+    i === shapes.length - 1 ? lastInk + Math.floor(LABEL_HELP_GAP / 2) : rowHeight(fonts, shape),
+  );
+  // From the panel's top: the last row's lowest ink (the band's bottom with no rows), and the
+  // build label's capitals.
+  const rowsInk = ROWS_TOP + heights.slice(0, -1).reduce((sum, rows) => sum + rows, 0) + lastInk;
+  const labelDy = rowsInk + LABEL_HELP_GAP;
+  // The label's digits, hex letters and "v" stand on the baseline, so its ink ends with its
+  // capitals.
+  const labelInk = fonts.body.capHeight * SETTINGS_BUILD_LABEL.style.scale;
+  const height = labelDy + labelInk + BUILD_LABEL_FOOT + CARD_FRAME_BOTTOM;
   const x = Math.round((screen.width - PANEL.width) / 2);
   const y = Math.round((screen.height - height) / 2);
   const rowX = x + (PANEL.width - SETTINGS_ROW.width) / 2;
@@ -195,6 +233,7 @@ export function settingsLayout(
   const { pad, track } = SETTINGS_ROW;
   return {
     band,
+    buildLabelY: y + labelDy,
     close: closeControl(panel),
     panel,
     rows,

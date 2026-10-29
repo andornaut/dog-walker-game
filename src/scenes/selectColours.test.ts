@@ -4,6 +4,7 @@ import { greyFor } from "../assets/greyRamp";
 import { gameData } from "../data";
 import { BADGE_TEXT_COLOURS } from "../home/badgesView";
 import { END_LAYOUT } from "../home/endLayout";
+import { SETTINGS_BUILD_LABEL } from "../home/settings";
 import { STATS_LAYOUT } from "../home/statsLayout";
 import type { EffectNameKind } from "../hud/effectNames";
 import { changeLabels } from "../hud/hudView";
@@ -79,6 +80,12 @@ describe("interaction-state colours", () => {
         EXEMPT,
       ],
       ["a muted volume row's label on the panel", PALETTE[GREYED.text], PALETTE.cream, TEXT],
+      [
+        "Settings' build label on the panel",
+        PALETTE[SETTINGS_BUILD_LABEL.colour],
+        PALETTE.cream,
+        TEXT,
+      ],
       [
         "a disabled card's effect",
         PALETTE[GREYED.text],

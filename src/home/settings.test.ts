@@ -1,15 +1,18 @@
 import { describe, expect, it } from "vitest";
 
+import { buildLabel } from "../buildLabel";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { fillLine } from "../lib/lines";
 import { keysOf } from "../lib/records";
 import type { Rect } from "../lib/rect";
 import { DEFAULT_SETTINGS } from "../save/schema";
+import { defined } from "../testing/defined";
 import { fitInFont, fontFileMetrics, gameGlyphs, inkWidth, placedInk } from "../testing/fontInk";
 import { inside } from "../testing/rects";
 import { SETTINGS_EXPORT_ROWS } from "../tools/layoutExport";
 import { closeFace } from "../ui/closeControl";
+import { LABEL_HELP_GAP } from "../ui/fontMetrics";
 import { fittingText, type TextFitStyle } from "../ui/textFit";
 import { MENU_TEXT_FIELDS } from "./menuText";
 import {
@@ -249,6 +252,52 @@ describe("the settings card", () => {
     expect(inkWidth("font-title", TWO_X, words.installButton)).toBeLessThan(
       (control?.width ?? 0) - 8,
     );
+  });
+});
+
+// The build label under the last row, with the Install row and without it: the widest label a
+// build shows, its glyphs' rows at 1x from its capitals' top.
+const WIDEST_LABEL = buildLabel("99.99.99", "89abcdef");
+const labelGlyphs = [...WIDEST_LABEL].flatMap((char) => {
+  const glyph = gameGlyphs("font-body").get(char);
+  return glyph === undefined || glyph.height === 0 ? [] : [glyph];
+});
+const labelInkBottom =
+  Math.max(...labelGlyphs.map((glyph) => glyph.yOffset + glyph.height)) - bodyFont.capTop;
+// ui-detail-card's frame along its bottom: a tan shade, a dark brown line and an ink line.
+const CARD_FRAME_BOTTOM = 3;
+
+describe.each([
+  ["with the Install row", shapes],
+  ["without the Install row", shapes.slice(0, -1)],
+])("the build label %s", (_, rowShapes) => {
+  const placed = settingsLayout({ body: bodyFont, title: titleFont }, SCREEN_CONFIG, rowShapes);
+  const { buildLabelY, panel } = placed;
+  const last = defined(placed.rows.at(-1));
+  const lastShape = defined(rowShapes.at(-1));
+  const noteLines = lastShape.kind === "slider" ? 1 : lastShape.noteLines;
+  // The last row's lowest ink: its note's, down to the font's deepest descender, or its control's.
+  const lastInk = Math.max(
+    (last.noteY ?? 0) +
+      ((noteLines - 1) * bodyFont.lineHeight + bodyFont.inkBottom - bodyFont.capTop) * 2,
+    (last.control?.y ?? 0) + (last.control?.height ?? 0),
+  );
+
+  it("sets its capitals the label-to-help gap under the last row's lowest ink", () => {
+    expect(buildLabelY - lastInk).toBe(LABEL_HELP_GAP);
+  });
+
+  it("leaves 6 clear rows from its lowest ink to the card's inner bottom edge", () => {
+    const innerBottom = panel.y + panel.height - CARD_FRAME_BOTTOM;
+    expect(innerBottom - (buildLabelY + labelInkBottom)).toBe(6);
+  });
+
+  // A tap on the label lands on the card outside every row, so it neither acts nor closes it.
+  it("lies under the last row, which stays a tap target at least 44 px tall", () => {
+    const labelTop =
+      buildLabelY + Math.min(...labelGlyphs.map((glyph) => glyph.yOffset)) - bodyFont.capTop;
+    expect(labelTop).toBeGreaterThanOrEqual(last.rect.y + last.rect.height);
+    expect(last.rect.height).toBeGreaterThanOrEqual(44);
   });
 });
 
