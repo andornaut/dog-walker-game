@@ -22,7 +22,6 @@ export const RUN_TEXT = {
     skipEffect: "Skip this card for free.",
     skipHeld: "Skip this card: nothing happens.",
     upgradeDuration: { nextZone: "Next", now: "Now", run: "All walk" },
-    upgradeDurationShort: { nextZone: "Next", now: "Now", run: "All walk" },
   },
   causes: {
     atMax: "full",

@@ -8,22 +8,14 @@ import { fitsRoom, type FittedText, fittingText, type TextFitStyle } from "../ui
 import { withNamePills } from "./effectNames";
 import { RUN_TEXT_FIELDS } from "./runText";
 
-// A card drawn small in a row, or enlarged while held.
-export type PlaqueSize = "enlarged" | "small";
-
 // What a card's plaque may say, longest first: the first that fits its room is shown. A path
-// card's plaque shows how long its upgrade lasts instead of a cost, in short on a small card;
-// another option's, its price, greyed with the card when the player cannot afford it. A free
-// option and Skip show no plaque.
-export function plaqueTexts(
-  data: Pick<GameData, "runText">,
-  size: PlaqueSize,
-  option: OptionView,
-): string[] {
+// card's plaque shows how long its upgrade lasts instead of a cost; another option's, its
+// price, greyed with the card when the player cannot afford it. A free option and Skip show no
+// plaque.
+export function plaqueTexts(data: Pick<GameData, "runText">, option: OptionView): string[] {
   const text = data.runText.card;
   if (option.path !== undefined) {
-    const durations = size === "small" ? text.upgradeDurationShort : text.upgradeDuration;
-    return option.duration === undefined ? [] : [durations[option.duration]];
+    return option.duration === undefined ? [] : [text.upgradeDuration[option.duration]];
   }
   return [fillLine(RUN_TEXT_FIELDS.card, text, "need", { amount: formatDollars(option.cost) })];
 }

@@ -844,10 +844,8 @@ export interface RunText {
     // The Skip card's effect on its face, and in its body when held.
     readonly skipEffect: string;
     readonly skipHeld: string;
-    // A fork's path card plaque, by how long its upgrade lasts: upgradeDuration on the enlarged
-    // card, upgradeDurationShort on the small one.
+    // A fork's path card plaque, by how long its upgrade lasts.
     readonly upgradeDuration: { readonly [D in UpgradeDuration]: string };
-    readonly upgradeDurationShort: { readonly [D in UpgradeDuration]: string };
   };
   // What a breakdown names a base cause by (a bump or a treat), and atMax for a meter held at
   // its max. A change's floating label shows its amount alone.
