@@ -1,3 +1,5 @@
+import type { SaveStore, StoreLoadResult } from "@andornaut/game-kit/save/saveStore";
+
 import type { AchievementId, HintId } from "../data/types";
 import { newlyEarned } from "../rules/achievements";
 import type { Change } from "../rules/causes";
@@ -5,9 +7,7 @@ import type { Cents } from "../units";
 import { earnedIfBanked } from "./achievementPreview";
 import { awardAchievements, type AwardContext, earnedSince } from "./achievements";
 import { bankCheckpoint, recordCheckpoint, recordRunEnd, type RunResult } from "./checkpoint";
-import type { SaveContext } from "./load";
 import type { Checkpoint, SaveDocument, Settings } from "./schema";
-import type { SaveStore, StoreLoadResult } from "./storage";
 
 // "unavailable" once storage could not be read, or while the last write failed: play goes on with
 // the save in memory, and the home screen says progress won't be saved. A later write that succeeds
@@ -44,14 +44,14 @@ export function newPlayerOnDevice(save: SaveDocument): SaveDocument {
 // The save a load gives: the stored one, or else (none stored, or one that could not be kept)
 // a new player's, through newPlayer.
 export function loadedSave(
-  load: StoreLoadResult,
+  load: StoreLoadResult<SaveDocument>,
   newPlayer: (save: SaveDocument) => SaveDocument,
 ): SaveDocument {
   return load.status === "loaded" ? load.save : newPlayer(load.save);
 }
 
 interface OpenedProfile {
-  load: StoreLoadResult;
+  load: StoreLoadResult<SaveDocument>;
   session: ProfileSession;
 }
 
@@ -67,9 +67,8 @@ export class ProfileSession {
   private writes: Promise<void> = Promise.resolve();
 
   private constructor(
-    private readonly context: SaveContext,
     private readonly awards: AwardContext,
-    private readonly store: SaveStore,
+    private readonly store: SaveStore<SaveDocument>,
     document: SaveDocument,
     state: StorageState,
   ) {
@@ -82,16 +81,15 @@ export class ProfileSession {
   // headed home, and the banked save is written back. Achievements the save already meets
   // (such as one from before they existed) are awarded and wait to be celebrated.
   static async open(
-    context: SaveContext,
     awards: AwardContext,
-    store: SaveStore,
+    store: SaveStore<SaveDocument>,
     newPlayer: (save: SaveDocument) => SaveDocument = (save) => save,
   ): Promise<OpenedProfile> {
-    const load = await store.load(context);
+    const load = await store.load();
     const state =
       load.status === "newer" || load.status === "unavailable" ? load.status : "available";
     const loaded = loadedSave(load, newPlayer);
-    const session = new ProfileSession(context, awards, store, loaded, state);
+    const session = new ProfileSession(awards, store, loaded, state);
     if (loaded.checkpoint !== null) {
       await session.update((save) => bankCheckpoint(session.awards, save));
     }
@@ -125,7 +123,7 @@ export class ProfileSession {
     }
     const document = this.document;
     this.writes = this.writes.then(async () => {
-      const result = await this.store.save(this.context, document);
+      const result = await this.store.save(document);
       if (result.status === "invalid") {
         console.error(`The save was not written: ${result.reason}`);
       } else {

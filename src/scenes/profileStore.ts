@@ -1,3 +1,4 @@
+import type { StoreLoadResult } from "@andornaut/game-kit/save/saveStore";
 import { type Scene, Scenes } from "phaser";
 
 import { gameData } from "../data";
@@ -19,7 +20,7 @@ import {
   type SaveDocument,
   type Settings,
 } from "../save/schema";
-import { pageSaveStore, type StoreLoadResult } from "../save/storage";
+import { pageSaveStore } from "../save/storage";
 import { soundboardOf } from "./soundboard";
 
 export type { Settings } from "../save/schema";
@@ -50,11 +51,10 @@ export function applySound(scene: Scene, settings: Settings): void {
 
 // Loads the save from localStorage, banks a run left at a checkpoint, and applies the saved
 // volumes. A new player's reduced motion follows the device's setting.
-export async function openProfile(scene: Scene): Promise<StoreLoadResult> {
+export async function openProfile(scene: Scene): Promise<StoreLoadResult<SaveDocument>> {
   const { load, session: opened } = await ProfileSession.open(
-    saveContextFrom(gameData),
     { data: gameData },
-    pageSaveStore(),
+    pageSaveStore(saveContextFrom(gameData)),
     newPlayerOnDevice,
   );
   scene.registry.set(SESSION_KEY, opened);

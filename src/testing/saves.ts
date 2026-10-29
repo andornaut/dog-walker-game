@@ -7,7 +7,6 @@ import type { RunCounters } from "../rules/achievements";
 import type { AwardContext } from "../save/achievements";
 import type { SaveContext } from "../save/load";
 import { createDefaultSave, SAVE_VERSION, type SaveDocument } from "../save/schema";
-import type { SaveStorage } from "../save/storage";
 import { cents } from "../units";
 
 // The dogs every player owns from the start, as the data marks them.
@@ -125,14 +124,5 @@ export function veteranSave(): SaveDocument {
     },
     version: SAVE_VERSION,
     walker: "ada",
-  };
-}
-
-export function memoryStorage(entries: Map<string, string> = new Map()): SaveStorage {
-  return {
-    read: async (key) => entries.get(key) ?? null,
-    write: async (key, value) => {
-      entries.set(key, value);
-    },
   };
 }

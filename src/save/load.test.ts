@@ -1,3 +1,4 @@
+import { loadSave } from "@andornaut/game-kit/save/versionedSave";
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 
@@ -11,7 +12,7 @@ import {
   testContext,
   veteranSave,
 } from "../testing/saves";
-import { loadSave, saveContextFrom } from "./load";
+import { saveContextFrom, saveFormat } from "./load";
 import { createDefaultSave, SAVE_VERSION, type SaveDocument, saveSchema } from "./schema";
 
 const stored = (document: unknown) => JSON.stringify(document);
@@ -29,7 +30,7 @@ function withChanges(change: (document: StoredInput) => void): string {
 }
 
 const loaded = (change: (document: StoredInput) => void): SaveDocument =>
-  loadSave(testContext, withChanges(change)).save;
+  loadSave(saveFormat(testContext), withChanges(change)).save;
 
 // A stored checkpoint two zones in, with each given field in place of its own.
 const checkpointWith = (
@@ -45,7 +46,7 @@ const checkpointWith = (
 
 describe("loadSave", () => {
   it("gives a new player the free dogs, the default walker and the starter dog picked", () => {
-    expect(loadSave(testContext, null)).toEqual({ save: newPlayerSave, status: "new" });
+    expect(loadSave(saveFormat(testContext), null)).toEqual({ save: newPlayerSave, status: "new" });
   });
 
   it("picks a new save's free dogs, as many as its slots walk", () => {
@@ -91,7 +92,7 @@ describe("loadSave", () => {
     const raw = withChanges((document) => {
       untyped(document).version = SAVE_VERSION + offset;
     });
-    expect(loadSave(testContext, raw)).toEqual(expected(raw));
+    expect(loadSave(saveFormat(testContext), raw)).toEqual(expected(raw));
   });
 
   // Each row changes the stored veteran save, then reads part of what loads.
@@ -321,7 +322,7 @@ describe("loadSave", () => {
 
   it("loads a save, dropping what the game no longer has and repairing what it can", () => {
     for (const [name, change, read, expected] of repairs) {
-      const { save, status } = loadSave(testContext, withChanges(change));
+      const { save, status } = loadSave(saveFormat(testContext), withChanges(change));
       expect(status, name).toBe("loaded");
       expect(read(save), name).toEqual(expected);
     }
@@ -418,7 +419,7 @@ describe("loadSave", () => {
 
     it("returns a default save and the raw text for each", () => {
       for (const [name, raw] of corruptCases) {
-        expect(loadSave(testContext, raw), name).toEqual({
+        expect(loadSave(saveFormat(testContext), raw), name).toEqual({
           raw,
           reason: expect.any(String),
           save: newPlayerSave,

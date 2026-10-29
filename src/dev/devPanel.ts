@@ -87,9 +87,9 @@ export async function applyPendingSaveEdits(): Promise<void> {
   }
   try {
     const context = saveContextFrom(gameData);
-    const store = pageSaveStore();
+    const store = pageSaveStore(context);
     const newPlayer = () => newPlayerOnDevice(createDefaultSave(context.defaults));
-    const loaded = await store.load(context);
+    const loaded = await store.load();
     if (loaded.status === "newer" || loaded.status === "unavailable") {
       console.warn(`Dev panel: save edits not applied: ${loaded.reason}`);
       return;
@@ -98,7 +98,7 @@ export async function applyPendingSaveEdits(): Promise<void> {
       (save, edit) => applySaveEdit(gameData, newPlayer, edit, save),
       loadedSave(loaded, newPlayerOnDevice),
     );
-    const saved = await store.save(context, edited);
+    const saved = await store.save(edited);
     if (saved.status !== "saved") {
       console.warn(`Dev panel: save edits not applied: ${saved.reason}`);
     }

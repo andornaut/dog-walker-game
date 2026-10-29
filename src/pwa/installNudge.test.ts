@@ -1,6 +1,6 @@
+import type { SaveStorage } from "@andornaut/game-kit/save/storage";
 import { describe, expect, it } from "vitest";
 
-import type { SaveStorage } from "../save/storage";
 import { createInstallNudge, INSTALL_NUDGE_KEY } from "./installNudge";
 import type { InstallState } from "./installState";
 

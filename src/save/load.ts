@@ -1,5 +1,6 @@
 import { clamp01 } from "@andornaut/game-kit/numbers";
 import { keysOf } from "@andornaut/game-kit/records";
+import type { Checked, SaveFormat } from "@andornaut/game-kit/save/versionedSave";
 import * as v from "valibot";
 
 import type {
@@ -26,6 +27,7 @@ import {
   type SaveDocument,
   saveSchema,
   type StoredSave,
+  storedSave,
   TALLY_IDS,
 } from "./schema";
 
@@ -49,14 +51,6 @@ export interface SaveContext {
   defaults: SaveDefaults;
   known: KnownIds;
 }
-
-// "new" when nothing was stored. "corrupt" carries the stored text so the caller can
-// keep it as a backup; its save is a fresh default. "newer" is a save from a later version
-// than this game: its save is a fresh default, and the stored save must be left as it is.
-type LoadResult =
-  | { raw: string; reason: string; save: SaveDocument; status: "corrupt" }
-  | { reason: string; save: SaveDocument; status: "newer" }
-  | { save: SaveDocument; status: "loaded" | "new" };
 
 type SaveData = Pick<
   GameData,
@@ -247,50 +241,26 @@ function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
   };
 }
 
-function corrupt(context: SaveContext, raw: string, reason: string): LoadResult {
-  return { raw, reason, save: createDefaultSave(context.defaults), status: "corrupt" };
+// A stored save checked against the game's schema, or the schema's summary of why it fails.
+function checked(stored: unknown): Checked<StoredSave> {
+  const validated = v.safeParse(saveSchema, stored);
+  return validated.success
+    ? { ok: true, value: validated.output }
+    : { ok: false, reason: v.summarize(validated.issues) };
 }
 
-// The stored version, if the document is an object with an integer one.
-function storedVersion(document: unknown): number | undefined {
-  if (typeof document !== "object" || document === null || !("version" in document)) {
-    return undefined;
-  }
-  const { version } = document;
-  return typeof version === "number" && Number.isSafeInteger(version) ? version : undefined;
-}
-
-// Parses and validates the stored text. Never throws: a save from a later version yields a
-// fresh default save with status "newer", and anything else unreadable, a save from an earlier
-// version included, one with status "corrupt".
-export function loadSave(context: SaveContext, raw: string | null): LoadResult {
-  if (raw === null) {
-    return { save: createDefaultSave(context.defaults), status: "new" };
-  }
-  try {
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(raw);
-    } catch {
-      return corrupt(context, raw, "the save is not valid JSON");
-    }
-    const version = storedVersion(parsed);
-    if (version !== undefined && version > SAVE_VERSION) {
-      return {
-        reason: `the save is from version ${version}, newer than this game`,
-        save: createDefaultSave(context.defaults),
-        status: "newer",
-      };
-    }
-    if (version !== undefined && version < SAVE_VERSION) {
-      return corrupt(context, raw, `the save is from version ${version}, older than this game`);
-    }
-    const validated = v.safeParse(saveSchema, parsed);
-    if (!validated.success) {
-      return corrupt(context, raw, v.summarize(validated.issues));
-    }
-    return { save: dropUnknownIds(context, validated.output), status: "loaded" };
-  } catch (error) {
-    return corrupt(context, raw, String(error));
-  }
+// The game's save format for context: checked against saveSchema, with ids the game no longer
+// has dropped on load and what a load adds back left out on save (storedSave). It has no
+// migrations: a save from an earlier version loads as corrupt and the player starts over.
+export function saveFormat(context: SaveContext): SaveFormat<SaveDocument> {
+  return {
+    decode: (stored) => {
+      const save = checked(stored);
+      return save.ok ? { ok: true, value: dropUnknownIds(context, save.value) } : save;
+    },
+    encode: (save) => checked(storedSave(context.defaults, save)),
+    fresh: () => createDefaultSave(context.defaults),
+    migrations: {},
+    version: SAVE_VERSION,
+  };
 }

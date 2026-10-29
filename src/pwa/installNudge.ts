@@ -1,7 +1,8 @@
 // Remembers, per device, that the start screen has suggested installing the game, so it does so
 // once. Installing is per device, so the flag sits beside the save under its own key rather
 // than in it.
-import type { SaveStorage } from "../save/storage";
+import type { SaveStorage } from "@andornaut/game-kit/save/storage";
+
 import { type InstallState, offersInstall } from "./installState";
 
 export const INSTALL_NUDGE_KEY = "dog-walker-game:install-nudged";

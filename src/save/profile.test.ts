@@ -1,36 +1,30 @@
 import { keysOf } from "@andornaut/game-kit/records";
+import { memoryStorage, type SaveStorage } from "@andornaut/game-kit/save/storage";
 import { describe, expect, it, vi } from "vitest";
 
 import { gameData } from "../data";
 import { packOf, runFactsFor, saveFor } from "../testing/achievements";
-import {
-  memoryStorage,
-  quietCounters,
-  testAwards,
-  testContext,
-  veteranSave,
-} from "../testing/saves";
+import { quietCounters, testAwards, testContext, veteranSave } from "../testing/saves";
 import { cents } from "../units";
 import { earnedSince } from "./achievements";
 import { ProfileSession } from "./profile";
 import { DEFAULT_SETTINGS, SAVE_VERSION, type SaveDocument } from "./schema";
-import { SAVE_KEY, type SaveStorage, saveStore } from "./storage";
+import { gameSaveStore, SAVE_KEYS } from "./storage";
 
 const awards = testAwards;
 
 function stored(entries: Map<string, string>): SaveDocument {
-  return JSON.parse(entries.get(SAVE_KEY) ?? "null") as SaveDocument;
+  return JSON.parse(entries.get(SAVE_KEYS.save) ?? "null") as SaveDocument;
 }
 
 async function opened(save: SaveDocument | null = null) {
   const entries = new Map<string, string>();
   if (save !== null) {
-    entries.set(SAVE_KEY, JSON.stringify(save));
+    entries.set(SAVE_KEYS.save, JSON.stringify(save));
   }
   const { load, session } = await ProfileSession.open(
-    testContext,
     awards,
-    saveStore(memoryStorage(entries)),
+    gameSaveStore(testContext, memoryStorage(entries)),
   );
   return { entries, load, session };
 }
@@ -49,9 +43,8 @@ const throwing: SaveStorage = {
 describe("ProfileSession.open", () => {
   it("starts a new player from the defaults, through newPlayer", async () => {
     const { session } = await ProfileSession.open(
-      testContext,
       awards,
-      saveStore(memoryStorage()),
+      gameSaveStore(testContext, memoryStorage()),
       (save) => ({ ...save, settings: { ...save.settings, reducedMotion: true } }),
     );
     expect(session.save.settings.reducedMotion).toBe(true);
@@ -81,7 +74,10 @@ describe("ProfileSession.open", () => {
   });
 
   it("plays on in memory when storage throws", async () => {
-    const { load, session } = await ProfileSession.open(testContext, awards, saveStore(throwing));
+    const { load, session } = await ProfileSession.open(
+      awards,
+      gameSaveStore(testContext, throwing),
+    );
     expect(load.status).toBe("unavailable");
     expect(session.storage).toBe("unavailable");
     await session.update((save) => ({ ...save, bankCents: cents(5) }));
@@ -108,9 +104,9 @@ describe("achievements away from a run", () => {
   });
 
   it("leaves a save that meets nothing new unwritten", async () => {
-    const storage = memoryStorage(new Map([[SAVE_KEY, JSON.stringify(veteranSave())]]));
+    const storage = memoryStorage(new Map([[SAVE_KEYS.save, JSON.stringify(veteranSave())]]));
     const write = vi.spyOn(storage, "write");
-    await ProfileSession.open(testContext, awards, saveStore(storage));
+    await ProfileSession.open(awards, gameSaveStore(testContext, storage));
     expect(write).not.toHaveBeenCalled();
   });
 });
@@ -133,7 +129,7 @@ describe("ProfileSession.update", () => {
         written.push(bankCents);
       },
     };
-    const { session } = await ProfileSession.open(testContext, awards, saveStore(storage));
+    const { session } = await ProfileSession.open(awards, gameSaveStore(testContext, storage));
     const first = session.update((save) => ({ ...save, bankCents: cents(100) }));
     expect(session.save.bankCents).toBe(100);
     const second = session.update((save) => ({ ...save, bankCents: cents(200) }));
@@ -149,7 +145,7 @@ describe("ProfileSession.update", () => {
       read: async () => null,
       write: () => (full ? Promise.reject(new Error("quota")) : Promise.resolve()),
     };
-    const { session } = await ProfileSession.open(testContext, awards, saveStore(flaky));
+    const { session } = await ProfileSession.open(awards, gameSaveStore(testContext, flaky));
     await session.update((save) => save);
     expect(session.storage).toBe("unavailable");
     full = false;
@@ -162,7 +158,7 @@ describe("ProfileSession.update", () => {
       read: () => Promise.reject(new Error("blocked")),
       write: () => Promise.resolve(),
     };
-    const { session } = await ProfileSession.open(testContext, awards, saveStore(unreadable));
+    const { session } = await ProfileSession.open(awards, gameSaveStore(testContext, unreadable));
     await session.update((save) => save);
     expect(session.storage).toBe("unavailable");
   });
@@ -257,10 +253,13 @@ const newerRaw = JSON.stringify({ ...veteranSave(), version: SAVE_VERSION + 1 })
 
 describe("a save from a newer version", () => {
   async function openedNewer() {
-    const entries = new Map([[SAVE_KEY, newerRaw]]);
+    const entries = new Map([[SAVE_KEYS.save, newerRaw]]);
     const storage = memoryStorage(entries);
     const write = vi.spyOn(storage, "write");
-    const { load, session } = await ProfileSession.open(testContext, awards, saveStore(storage));
+    const { load, session } = await ProfileSession.open(
+      awards,
+      gameSaveStore(testContext, storage),
+    );
     return { entries, load, session, write };
   }
 
@@ -270,7 +269,7 @@ describe("a save from a newer version", () => {
     expect(session.storage).toBe("newer");
     expect(session.save.bankCents).toBe(0);
     expect(write).not.toHaveBeenCalled();
-    expect(entries.get(SAVE_KEY)).toBe(newerRaw);
+    expect(entries.get(SAVE_KEYS.save)).toBe(newerRaw);
   });
 
   it.each<[string, (session: ProfileSession) => Promise<void>]>([
@@ -297,6 +296,6 @@ describe("a save from a newer version", () => {
     expect(session.save).not.toEqual(before);
     expect(session.storage).toBe("newer");
     expect(write).not.toHaveBeenCalled();
-    expect(entries.get(SAVE_KEY)).toBe(newerRaw);
+    expect(entries.get(SAVE_KEYS.save)).toBe(newerRaw);
   });
 });

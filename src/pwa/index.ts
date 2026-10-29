@@ -2,8 +2,9 @@
 // lock, the back gesture, visibility and orientation events, the turn-upright notice, audio
 // unlock, the install offer and persistent storage. setupPhoneApp runs once from main.ts; the
 // scenes listen for PHONE_EVENTS on window and call the functions below.
+import { localSaveStorage } from "@andornaut/game-kit/save/storage";
+
 import { chooseSoundFormat, type SoundFormat } from "../audio/soundFormat";
-import { browserStorage, lazyStorage } from "../save/storage";
 import {
   backCloseWatcher,
   type BackGuard,
@@ -125,7 +126,7 @@ export function setupPhoneApp(): Promise<void> {
     installFlow.state() === "installed",
     "storage" in navigator ? navigator.storage : undefined,
   );
-  installNudge = createInstallNudge(browserStorage(lazyStorage(() => globalThis.localStorage)));
+  installNudge = createInstallNudge(localSaveStorage());
   relayVisibilityEvents(window, document);
   showTurnUprightNotice();
   orientation = relayOrientationEvents(readViewport, window);
