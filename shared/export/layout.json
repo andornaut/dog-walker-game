@@ -1,10 +1,10 @@
 {
   "camera": {
-    "horizonY": -66,
-    "ratio": 0.7555555555555555,
+    "horizonY": -82,
+    "ratio": 0.7777777777777778,
     "centreX": 180,
     "farScale": 0.5,
-    "farY": 206,
+    "farY": 198,
     "focal": 720,
     "footY": 478,
     "secondsInView": 3.6,
@@ -225,7 +225,7 @@
   "join": [
     {
       "bandRow": 134,
-      "distance": 856.1770623742455,
+      "distance": 851.9298245614036,
       "laneCentres": [
         121,
         150,
@@ -243,12 +243,12 @@
         "first": 107,
         "last": 252
       },
-      "row": 182,
-      "scale": 0.4568014705882353
+      "row": 174,
+      "scale": 0.45803571428571427
     },
     {
       "bandRow": 135,
-      "distance": 849.8597194388778,
+      "distance": 845.8252427184466,
       "laneCentres": [
         121,
         150,
@@ -263,21 +263,21 @@
         224
       ],
       "road": {
-        "first": 107,
-        "last": 252
+        "first": 106,
+        "last": 253
       },
-      "row": 183,
-      "scale": 0.4586397058823529
+      "row": 175,
+      "scale": 0.45982142857142855
     },
     {
       "bandRow": 136,
-      "distance": 843.5928143712576,
+      "distance": 839.7678916827851,
       "laneCentres": [
-        121,
+        120,
         150,
         180,
         209,
-        238
+        239
       ],
       "laneDividers": [
         135,
@@ -289,12 +289,12 @@
         "first": 106,
         "last": 253
       },
-      "row": 184,
-      "scale": 0.46047794117647056
+      "row": 176,
+      "scale": 0.4616071428571429
     },
     {
       "bandRow": 137,
-      "distance": 837.375745526839,
+      "distance": 833.757225433526,
       "laneCentres": [
         120,
         150,
@@ -312,12 +312,12 @@
         "first": 106,
         "last": 253
       },
-      "row": 185,
-      "scale": 0.46231617647058826
+      "row": 177,
+      "scale": 0.46339285714285716
     },
     {
       "bandRow": 138,
-      "distance": 831.2079207920792,
+      "distance": 827.792706333973,
       "laneCentres": [
         120,
         150,
@@ -335,12 +335,12 @@
         "first": 106,
         "last": 253
       },
-      "row": 186,
-      "scale": 0.4641544117647059
+      "row": 178,
+      "scale": 0.46517857142857144
     },
     {
       "bandRow": 139,
-      "distance": 825.0887573964496,
+      "distance": 821.8738049713193,
       "laneCentres": [
         120,
         150,
@@ -358,35 +358,35 @@
         "first": 105,
         "last": 254
       },
-      "row": 187,
-      "scale": 0.46599264705882354
+      "row": 179,
+      "scale": 0.4669642857142857
     },
     {
       "bandRow": 140,
-      "distance": 819.0176817288802,
+      "distance": 816,
       "laneCentres": [
         120,
         150,
         180,
-        209,
-        239
+        210,
+        240
       ],
       "laneDividers": [
         135,
         165,
-        194,
-        224
+        195,
+        225
       ],
       "road": {
         "first": 105,
         "last": 254
       },
-      "row": 188,
-      "scale": 0.4678308823529412
+      "row": 180,
+      "scale": 0.46875
     },
     {
       "bandRow": 141,
-      "distance": 812.9941291585128,
+      "distance": 810.1707779886149,
       "laneCentres": [
         119,
         149,
@@ -404,12 +404,12 @@
         "first": 105,
         "last": 254
       },
-      "row": 189,
-      "scale": 0.4696691176470588
+      "row": 181,
+      "scale": 0.4705357142857143
     },
     {
       "bandRow": 142,
-      "distance": 807.0175438596491,
+      "distance": 804.3856332703215,
       "laneCentres": [
         119,
         149,
@@ -424,15 +424,15 @@
         225
       ],
       "road": {
-        "first": 105,
-        "last": 254
+        "first": 104,
+        "last": 255
       },
-      "row": 190,
-      "scale": 0.47150735294117646
+      "row": 182,
+      "scale": 0.47232142857142856
     },
     {
       "bandRow": 143,
-      "distance": 801.0873786407767,
+      "distance": 798.6440677966102,
       "laneCentres": [
         119,
         149,
@@ -450,12 +450,12 @@
         "first": 104,
         "last": 255
       },
-      "row": 191,
-      "scale": 0.4733455882352941
+      "row": 183,
+      "scale": 0.47410714285714284
     },
     {
       "bandRow": 144,
-      "distance": 795.2030947775629,
+      "distance": 792.9455909943715,
       "laneCentres": [
         119,
         149,
@@ -473,12 +473,12 @@
         "first": 104,
         "last": 255
       },
-      "row": 192,
-      "scale": 0.47518382352941174
+      "row": 184,
+      "scale": 0.4758928571428571
     },
     {
       "bandRow": 145,
-      "distance": 789.3641618497109,
+      "distance": 787.2897196261681,
       "laneCentres": [
         118,
         149,
@@ -496,12 +496,12 @@
         "first": 104,
         "last": 255
       },
-      "row": 193,
-      "scale": 0.47702205882352944
+      "row": 185,
+      "scale": 0.47767857142857145
     },
     {
       "bandRow": 146,
-      "distance": 783.5700575815738,
+      "distance": 781.6759776536312,
       "laneCentres": [
         118,
         149,
@@ -510,21 +510,21 @@
         241
       ],
       "laneDividers": [
-        134,
+        133,
         164,
         195,
-        225
+        226
       ],
       "road": {
         "first": 103,
         "last": 256
       },
-      "row": 194,
-      "scale": 0.4788602941176471
+      "row": 186,
+      "scale": 0.47946428571428573
     },
     {
       "bandRow": 147,
-      "distance": 777.8202676864244,
+      "distance": 776.103896103896,
       "laneCentres": [
         118,
         149,
@@ -542,12 +542,12 @@
         "first": 103,
         "last": 256
       },
-      "row": 195,
-      "scale": 0.4806985294117647
+      "row": 187,
+      "scale": 0.48125
     },
     {
       "bandRow": 148,
-      "distance": 772.1142857142856,
+      "distance": 770.5730129390017,
       "laneCentres": [
         118,
         149,
@@ -565,15 +565,15 @@
         "first": 103,
         "last": 256
       },
-      "row": 196,
-      "scale": 0.48253676470588236
+      "row": 188,
+      "scale": 0.4830357142857143
     },
     {
       "bandRow": 149,
-      "distance": 766.4516129032259,
+      "distance": 765.0828729281768,
       "laneCentres": [
-        118,
-        149,
+        117,
+        148,
         180,
         211,
         242
@@ -586,14 +586,14 @@
       ],
       "road": {
         "first": 102,
-        "last": 256
+        "last": 257
       },
-      "row": 197,
-      "scale": 0.484375
+      "row": 189,
+      "scale": 0.48482142857142857
     },
     {
       "bandRow": 150,
-      "distance": 760.8317580340265,
+      "distance": 759.6330275229359,
       "laneCentres": [
         117,
         148,
@@ -611,12 +611,12 @@
         "first": 102,
         "last": 257
       },
-      "row": 198,
-      "scale": 0.48621323529411764
+      "row": 190,
+      "scale": 0.48660714285714285
     },
     {
       "bandRow": 151,
-      "distance": 755.2542372881355,
+      "distance": 754.2230347349177,
       "laneCentres": [
         117,
         148,
@@ -634,12 +634,12 @@
         "first": 102,
         "last": 257
       },
-      "row": 199,
-      "scale": 0.4880514705882353
+      "row": 191,
+      "scale": 0.48839285714285713
     },
     {
       "bandRow": 152,
-      "distance": 749.7185741088181,
+      "distance": 748.8524590163936,
       "laneCentres": [
         117,
         148,
@@ -657,12 +657,12 @@
         "first": 102,
         "last": 257
       },
-      "row": 200,
-      "scale": 0.4898897058823529
+      "row": 192,
+      "scale": 0.4901785714285714
     },
     {
       "bandRow": 153,
-      "distance": 744.2242990654206,
+      "distance": 743.5208711433759,
       "laneCentres": [
         117,
         148,
@@ -680,12 +680,12 @@
         "first": 101,
         "last": 258
       },
-      "row": 201,
-      "scale": 0.49172794117647056
+      "row": 193,
+      "scale": 0.4919642857142857
     },
     {
       "bandRow": 154,
-      "distance": 738.7709497206704,
+      "distance": 738.2278481012659,
       "laneCentres": [
         116,
         148,
@@ -703,12 +703,12 @@
         "first": 101,
         "last": 258
       },
-      "row": 202,
-      "scale": 0.49356617647058826
+      "row": 194,
+      "scale": 0.49375
     },
     {
       "bandRow": 155,
-      "distance": 733.3580705009276,
+      "distance": 732.9729729729729,
       "laneCentres": [
         116,
         148,
@@ -726,12 +726,12 @@
         "first": 101,
         "last": 258
       },
-      "row": 203,
-      "scale": 0.4954044117647059
+      "row": 195,
+      "scale": 0.4955357142857143
     },
     {
       "bandRow": 156,
-      "distance": 727.985212569316,
+      "distance": 727.7558348294435,
       "laneCentres": [
         116,
         148,
@@ -749,12 +749,12 @@
         "first": 100,
         "last": 259
       },
-      "row": 204,
-      "scale": 0.49724264705882354
+      "row": 196,
+      "scale": 0.4973214285714286
     },
     {
       "bandRow": 157,
-      "distance": 722.6519337016575,
+      "distance": 722.5760286225402,
       "laneCentres": [
         116,
         148,
@@ -772,8 +772,8 @@
         "first": 100,
         "last": 259
       },
-      "row": 205,
-      "scale": 0.4990808823529412
+      "row": 197,
+      "scale": 0.49910714285714286
     }
   ],
   "lanes": {
@@ -796,18 +796,18 @@
   "messageStrip": {
     "icon": {
       "x": 14,
-      "y": 62
+      "y": 54
     },
     "panel": {
       "height": 52,
       "width": 344,
       "x": 8,
-      "y": 54
+      "y": 46
     },
     "room": 312,
     "rowTops": [
-      64,
-      84
+      56,
+      76
     ],
     "textX": 34,
     "inlineFace": {
@@ -822,16 +822,16 @@
       "nameGap": 2,
       "rise": 4,
       "strip": {
-        "bottom": 91,
+        "bottom": 83,
         "frame": {
           "height": 22,
           "width": 22,
           "x": 14,
-          "y": 60
+          "y": 52
         },
         "name": {
           "x": 25,
-          "y": 84
+          "y": 76
         },
         "room": 306,
         "textX": 40,
@@ -839,21 +839,21 @@
           "height": 45,
           "width": 344,
           "x": 8,
-          "y": 54
+          "y": 46
         }
       },
       "underBars": [
         {
-          "bottom": 103,
+          "bottom": 95,
           "frame": {
             "height": 22,
             "width": 22,
             "x": 14,
-            "y": 72
+            "y": 64
           },
           "name": {
             "x": 25,
-            "y": 96
+            "y": 88
           },
           "room": 306,
           "textX": 40,
@@ -861,20 +861,20 @@
             "height": 45,
             "width": 344,
             "x": 8,
-            "y": 66
+            "y": 58
           }
         },
         {
-          "bottom": 119,
+          "bottom": 111,
           "frame": {
             "height": 22,
             "width": 22,
             "x": 14,
-            "y": 88
+            "y": 80
           },
           "name": {
             "x": 25,
-            "y": 112
+            "y": 104
           },
           "room": 306,
           "textX": 40,
@@ -882,7 +882,7 @@
             "height": 45,
             "width": 344,
             "x": 8,
-            "y": 82
+            "y": 74
           }
         }
       ]
@@ -891,36 +891,36 @@
       {
         "icon": {
           "x": 14,
-          "y": 74
+          "y": 66
         },
         "panel": {
           "height": 52,
           "width": 344,
           "x": 8,
-          "y": 66
+          "y": 58
         },
         "room": 312,
         "rowTops": [
-          76,
-          96
+          68,
+          88
         ],
         "textX": 34
       },
       {
         "icon": {
           "x": 14,
-          "y": 90
+          "y": 82
         },
         "panel": {
           "height": 52,
           "width": 344,
           "x": 8,
-          "y": 82
+          "y": 74
         },
         "room": 312,
         "rowTops": [
-          92,
-          112
+          84,
+          104
         ],
         "textX": 34
       }
@@ -1062,13 +1062,13 @@
       "height": 19,
       "width": 360,
       "x": 0,
-      "y": 187
+      "y": 179
     },
     "backdrop": {
       "height": 158,
       "width": 360,
       "x": 0,
-      "y": 48
+      "y": 40
     },
     "dogRow": {
       "height": 74,
@@ -1100,25 +1100,25 @@
       "height": 5,
       "width": 360,
       "x": 0,
-      "y": 182
+      "y": 174
     },
     "rasterView": {
-      "height": 300,
+      "height": 308,
       "width": 360,
       "x": 0,
-      "y": 182
+      "y": 174
     },
     "road": {
-      "height": 276,
+      "height": 284,
       "width": 320,
       "x": 20,
-      "y": 206
+      "y": 198
     },
     "roadView": {
-      "height": 276,
+      "height": 284,
       "width": 360,
       "x": 0,
-      "y": 206
+      "y": 198
     },
     "screen": {
       "height": 560,
@@ -1127,16 +1127,16 @@
       "y": 0
     },
     "topBar": {
-      "height": 48,
+      "height": 40,
       "width": 360,
       "x": 0,
       "y": 0
     },
     "walkView": {
-      "height": 434,
+      "height": 442,
       "width": 360,
       "x": 0,
-      "y": 48
+      "y": 40
     },
     "zoneProgress": {
       "height": 4,
@@ -1230,7 +1230,7 @@
         "height": 280,
         "width": 166,
         "x": 97,
-        "y": 96
+        "y": 92
       },
       "rows": [
         [
@@ -1238,7 +1238,7 @@
             "height": 153,
             "width": 112,
             "x": 124,
-            "y": 148
+            "y": 142
           }
         ],
         [
@@ -1246,13 +1246,13 @@
             "height": 153,
             "width": 112,
             "x": 65,
-            "y": 148
+            "y": 142
           },
           {
             "height": 153,
             "width": 112,
             "x": 183,
-            "y": 148
+            "y": 142
           }
         ],
         [
@@ -1260,19 +1260,19 @@
             "height": 153,
             "width": 112,
             "x": 6,
-            "y": 148
+            "y": 142
           },
           {
             "height": 153,
             "width": 112,
             "x": 124,
-            "y": 148
+            "y": 142
           },
           {
             "height": 153,
             "width": 112,
             "x": 242,
-            "y": 148
+            "y": 142
           }
         ]
       ]
@@ -1283,46 +1283,46 @@
         "bits": 60,
         "fallMs": 2000,
         "fromX": 6,
-        "fromY": 48,
+        "fromY": 40,
         "sway": 4,
         "swayMs": 320,
         "toX": 348,
         "toY": 474
       },
       "dim": {
-        "height": 434,
+        "height": 442,
         "width": 360,
         "x": 0,
-        "y": 48
+        "y": 40
       },
       "newWalker": {
         "burst": {
           "x": 106,
-          "y": 172
+          "y": 164
         },
-        "feetY": 310,
-        "subtitleY": 156,
-        "titleY": 118,
+        "feetY": 302,
+        "subtitleY": 148,
+        "titleY": 110,
         "walker": {
           "x": 132,
-          "y": 166
+          "y": 158
         },
         "bubble": {
           "height": 97,
           "width": 312,
           "x": 24,
-          "y": 316
+          "y": 308
         },
         "button": {
           "height": 44,
           "width": 264,
           "x": 48,
-          "y": 421
+          "y": 413
         },
         "greeting": {
           "lines": 2,
           "maxWidth": 296,
-          "top": 320
+          "top": 312
         },
         "info": {
           "iconDrop": 1,
@@ -1330,23 +1330,23 @@
           "itemGap": 10,
           "maxWidth": 296,
           "y": [
-            367,
-            387
+            359,
+            379
           ]
         },
         "rule": {
           "fromX": 36,
           "step": 3,
           "toX": 323,
-          "y": 359
+          "y": 351
         },
         "tail": {
           "x": 176,
-          "y": 311
+          "y": 303
         }
       },
       "runIn": {
-        "burstY": 250,
+        "burstY": 242,
         "durationMs": 600,
         "fromX": 400
       },
@@ -1356,28 +1356,28 @@
       "zoneDone": {
         "burst": {
           "x": 106,
-          "y": 216
+          "y": 208
         },
-        "feetY": 354,
-        "subtitleY": 196,
-        "titleY": 158,
+        "feetY": 346,
+        "subtitleY": 188,
+        "titleY": 150,
         "walker": {
           "x": 132,
-          "y": 210
+          "y": 202
         },
         "button": {
           "height": 44,
           "width": 264,
           "x": 48,
-          "y": 404
+          "y": 396
         },
         "earningsInset": 8,
-        "earningsY": 371,
+        "earningsY": 363,
         "plate": {
           "height": 32,
           "width": 264,
           "x": 48,
-          "y": 364
+          "y": 356
         }
       }
     },
@@ -2189,25 +2189,25 @@
           "height": 40,
           "width": 200,
           "x": 80,
-          "y": 161
+          "y": 157
         },
         {
           "height": 40,
           "width": 200,
           "x": 80,
-          "y": 209
+          "y": 205
         },
         {
           "height": 40,
           "width": 200,
           "x": 80,
-          "y": 257
+          "y": 253
         },
         {
           "height": 40,
           "width": 200,
           "x": 80,
-          "y": 305
+          "y": 301
         }
       ],
       "hits": [
@@ -2215,40 +2215,40 @@
           "height": 44,
           "width": 200,
           "x": 80,
-          "y": 159
+          "y": 155
         },
         {
           "height": 44,
           "width": 200,
           "x": 80,
-          "y": 207
+          "y": 203
         },
         {
           "height": 44,
           "width": 200,
           "x": 80,
-          "y": 255
+          "y": 251
         },
         {
           "height": 44,
           "width": 200,
           "x": 80,
-          "y": 303
+          "y": 299
         }
       ],
       "notePlate": {
         "height": 44,
         "width": 200,
         "x": 80,
-        "y": 349
+        "y": 345
       },
       "panel": {
         "height": 289,
         "width": 232,
         "x": 64,
-        "y": 121
+        "y": 117
       },
-      "titleY": 137
+      "titleY": 133
     },
     "settings": {
       "band": {
@@ -2623,153 +2623,147 @@
         "id": "help",
         "face": {
           "x": 231,
-          "y": 14
+          "y": 9
         },
         "hit": {
-          "height": 48,
+          "height": 40,
           "width": 34,
           "x": 224,
           "y": 0
         },
         "icon": {
           "x": 233,
-          "y": 15
+          "y": 10
         }
       },
       {
         "id": "sound",
         "face": {
           "x": 265,
-          "y": 14
+          "y": 9
         },
         "hit": {
-          "height": 48,
+          "height": 40,
           "width": 34,
           "x": 258,
           "y": 0
         },
         "icon": {
           "x": 267,
-          "y": 15
+          "y": 10
         }
       },
       {
         "id": "settings",
         "face": {
           "x": 299,
-          "y": 14
+          "y": 9
         },
         "hit": {
-          "height": 48,
+          "height": 40,
           "width": 34,
           "x": 292,
           "y": 0
         },
         "icon": {
           "x": 301,
-          "y": 15
+          "y": 10
         }
       },
       {
         "id": "pause",
         "face": {
           "x": 333,
-          "y": 14
+          "y": 9
         },
         "hit": {
-          "height": 48,
+          "height": 40,
           "width": 34,
           "x": 326,
           "y": 0
         },
         "icon": {
           "x": 335,
-          "y": 15
+          "y": 10
         }
       }
     ],
     "effectHolds": [
       {
-        "height": 43,
+        "height": 40,
         "width": 25,
-        "x": 80,
-        "y": 5
+        "x": 81,
+        "y": 0
       },
       {
-        "height": 43,
+        "height": 40,
         "width": 24,
-        "x": 105,
-        "y": 5
+        "x": 106,
+        "y": 0
       },
       {
-        "height": 43,
+        "height": 40,
         "width": 24,
-        "x": 129,
-        "y": 5
+        "x": 130,
+        "y": 0
       },
       {
-        "height": 43,
+        "height": 40,
         "width": 24,
-        "x": 153,
-        "y": 5
+        "x": 154,
+        "y": 0
       },
       {
-        "height": 43,
+        "height": 40,
         "width": 24,
-        "x": 177,
-        "y": 5
+        "x": 178,
+        "y": 0
       },
       {
-        "height": 43,
-        "width": 23,
-        "x": 201,
-        "y": 5
+        "height": 40,
+        "width": 22,
+        "x": 202,
+        "y": 0
       }
     ],
     "effectWells": [
       {
-        "x": 81,
-        "y": 20,
+        "x": 82,
+        "y": 8,
         "height": 22,
         "width": 22
       },
       {
-        "x": 105,
-        "y": 20,
+        "x": 106,
+        "y": 8,
         "height": 22,
         "width": 22
       },
       {
-        "x": 129,
-        "y": 20,
+        "x": 130,
+        "y": 8,
         "height": 22,
         "width": 22
       },
       {
-        "x": 153,
-        "y": 20,
+        "x": 154,
+        "y": 8,
         "height": 22,
         "width": 22
       },
       {
-        "x": 177,
-        "y": 20,
+        "x": 178,
+        "y": 8,
         "height": 22,
         "width": 22
       },
       {
-        "x": 201,
-        "y": 20,
+        "x": 202,
+        "y": 8,
         "height": 22,
         "width": 22
       }
     ],
-    "zoneWell": {
-      "height": 12,
-      "width": 144,
-      "x": 81,
-      "y": 5
-    },
     "debuffBar": {
       "fill": {
         "height": 5,
@@ -2793,19 +2787,19 @@
         "height": 16,
         "width": 360,
         "x": 0,
-        "y": 48
+        "y": 40
       },
       {
         "height": 16,
         "width": 360,
         "x": 0,
-        "y": 64
+        "y": 56
       }
     ],
     "parts": {
       "buttonFace": {
         "size": 20,
-        "y": 14
+        "y": 9
       },
       "buttons": {
         "help": {
@@ -2830,7 +2824,7 @@
         }
       },
       "cash": {
-        "capsBottom": 30,
+        "capsY": 12,
         "ink": {
           "left": 5,
           "right": 73
@@ -2838,7 +2832,7 @@
         "room": 69,
         "scale": 3,
         "well": {
-          "height": 37,
+          "height": 29,
           "width": 70,
           "x": 5,
           "y": 5
@@ -2849,28 +2843,11 @@
         "icon": 1,
         "iconSize": 20,
         "size": 22,
-        "y": 20,
+        "y": 8,
         "pitch": 24,
-        "x": 81
+        "x": 82
       },
-      "minHitWidth": 34,
-      "zone": {
-        "name": {
-          "x": 90,
-          "y": 8
-        },
-        "progress": {
-          "right": 214,
-          "y": 8
-        },
-        "textGap": 4,
-        "well": {
-          "height": 12,
-          "width": 144,
-          "x": 81,
-          "y": 5
-        }
-      }
+      "minHitWidth": 34
     }
   },
   "zoneProgress": {
