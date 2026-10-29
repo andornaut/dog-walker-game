@@ -5514,6 +5514,87 @@
       }
     },
     {
+      "key": "flower-cart",
+      "png": "sprites/flower-cart.png",
+      "json": "sprites/flower-cart.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 100
+      }
+    },
+    {
+      "key": "flower-cart@50",
+      "png": "sprites/flower-cart@50.png",
+      "json": "sprites/flower-cart@50.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 50
+      }
+    },
+    {
+      "key": "flower-cart@56",
+      "png": "sprites/flower-cart@56.png",
+      "json": "sprites/flower-cart@56.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 56
+      }
+    },
+    {
+      "key": "flower-cart@62",
+      "png": "sprites/flower-cart@62.png",
+      "json": "sprites/flower-cart@62.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 63
+      }
+    },
+    {
+      "key": "flower-cart@69",
+      "png": "sprites/flower-cart@69.png",
+      "json": "sprites/flower-cart@69.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 69
+      }
+    },
+    {
+      "key": "flower-cart@75",
+      "png": "sprites/flower-cart@75.png",
+      "json": "sprites/flower-cart@75.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 75
+      }
+    },
+    {
+      "key": "flower-cart@81",
+      "png": "sprites/flower-cart@81.png",
+      "json": "sprites/flower-cart@81.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 81
+      }
+    },
+    {
+      "key": "flower-cart@88",
+      "png": "sprites/flower-cart@88.png",
+      "json": "sprites/flower-cart@88.json",
+      "anchor": {
+        "feetY": 57,
+        "opaqueWidth": 88
+      }
+    },
+    {
+      "key": "flower-cart@94",
+      "png": "sprites/flower-cart@94.png",
+      "json": "sprites/flower-cart@94.json",
+      "anchor": {
+        "feetY": 61,
+        "opaqueWidth": 93
+      }
+    },
+    {
       "key": "food-cart-vendor",
       "png": "sprites/food-cart-vendor.png",
       "json": "sprites/food-cart-vendor.json",
@@ -5673,6 +5754,87 @@
       "anchor": {
         "feetY": 65,
         "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "fruit-cart",
+      "png": "sprites/fruit-cart.png",
+      "json": "sprites/fruit-cart.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 100
+      }
+    },
+    {
+      "key": "fruit-cart@50",
+      "png": "sprites/fruit-cart@50.png",
+      "json": "sprites/fruit-cart@50.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 50
+      }
+    },
+    {
+      "key": "fruit-cart@56",
+      "png": "sprites/fruit-cart@56.png",
+      "json": "sprites/fruit-cart@56.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 56
+      }
+    },
+    {
+      "key": "fruit-cart@62",
+      "png": "sprites/fruit-cart@62.png",
+      "json": "sprites/fruit-cart@62.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 63
+      }
+    },
+    {
+      "key": "fruit-cart@69",
+      "png": "sprites/fruit-cart@69.png",
+      "json": "sprites/fruit-cart@69.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 69
+      }
+    },
+    {
+      "key": "fruit-cart@75",
+      "png": "sprites/fruit-cart@75.png",
+      "json": "sprites/fruit-cart@75.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 75
+      }
+    },
+    {
+      "key": "fruit-cart@81",
+      "png": "sprites/fruit-cart@81.png",
+      "json": "sprites/fruit-cart@81.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 81
+      }
+    },
+    {
+      "key": "fruit-cart@88",
+      "png": "sprites/fruit-cart@88.png",
+      "json": "sprites/fruit-cart@88.json",
+      "anchor": {
+        "feetY": 57,
+        "opaqueWidth": 88
+      }
+    },
+    {
+      "key": "fruit-cart@94",
+      "png": "sprites/fruit-cart@94.png",
+      "json": "sprites/fruit-cart@94.json",
+      "anchor": {
+        "feetY": 61,
+        "opaqueWidth": 93
       }
     },
     {
@@ -7954,6 +8116,87 @@
       "anchor": {
         "feetY": 42,
         "opaqueWidth": 45
+      }
+    },
+    {
+      "key": "newspaper-cart",
+      "png": "sprites/newspaper-cart.png",
+      "json": "sprites/newspaper-cart.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 100
+      }
+    },
+    {
+      "key": "newspaper-cart@50",
+      "png": "sprites/newspaper-cart@50.png",
+      "json": "sprites/newspaper-cart@50.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 50
+      }
+    },
+    {
+      "key": "newspaper-cart@56",
+      "png": "sprites/newspaper-cart@56.png",
+      "json": "sprites/newspaper-cart@56.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 56
+      }
+    },
+    {
+      "key": "newspaper-cart@62",
+      "png": "sprites/newspaper-cart@62.png",
+      "json": "sprites/newspaper-cart@62.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 63
+      }
+    },
+    {
+      "key": "newspaper-cart@69",
+      "png": "sprites/newspaper-cart@69.png",
+      "json": "sprites/newspaper-cart@69.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 69
+      }
+    },
+    {
+      "key": "newspaper-cart@75",
+      "png": "sprites/newspaper-cart@75.png",
+      "json": "sprites/newspaper-cart@75.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 75
+      }
+    },
+    {
+      "key": "newspaper-cart@81",
+      "png": "sprites/newspaper-cart@81.png",
+      "json": "sprites/newspaper-cart@81.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 81
+      }
+    },
+    {
+      "key": "newspaper-cart@88",
+      "png": "sprites/newspaper-cart@88.png",
+      "json": "sprites/newspaper-cart@88.json",
+      "anchor": {
+        "feetY": 57,
+        "opaqueWidth": 88
+      }
+    },
+    {
+      "key": "newspaper-cart@94",
+      "png": "sprites/newspaper-cart@94.png",
+      "json": "sprites/newspaper-cart@94.json",
+      "anchor": {
+        "feetY": 61,
+        "opaqueWidth": 93
       }
     },
     {

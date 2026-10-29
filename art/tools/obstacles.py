@@ -26,10 +26,19 @@ delivery-truck      56x54   1 lane by 3 rows of footprint, a brown box van from 
                             climb the tires and the body dips 1px onto them on frames 1 and 2
 hot-dog-cart        112x66  2 lanes, a stainless street meat cart side on under a striped umbrella;
                             idle (2 frames, 500ms): wavy steam wisps rising off the steam table
-ice-cream-cart      112x66  2 lanes, the hot dog cart's frame: a turquoise beach ice cream cart under a
-                            turquoise and white umbrella, a cone for its finial, scoop tubs on its counter
-                            and a double cone on its side; idle (2 frames, 500ms): a pistachio drip runs
-                            down the side cone
+flower-cart         112x66  2 lanes, a violet flower cart under a lilac and white umbrella, buckets of cut
+                            flowers on its counter and three tulips on its side; idle (2 frames, 500ms):
+                            the middle tulip nods 1px
+fruit-cart          112x66  2 lanes, a green fruit and vegetable cart under a moss and cream umbrella, two
+                            tilted bins heaped with produce on its counter and an apple on its side; idle
+                            (2 frames, 500ms): the apple on top of the left heap rocks 1px
+ice-cream-cart      112x66  2 lanes, a turquoise beach ice cream cart under a turquoise and white umbrella,
+                            a cone for its finial, scoop tubs on its counter and a double cone on its
+                            side; idle (2 frames, 500ms): a pistachio drip runs down the side cone
+newspaper-cart      112x66  2 lanes, an azure newspaper and magazine cart under a flat cobalt roof lettered
+                            NEWS with a front page standing on it, stacks of folded papers and magazines on
+                            its counter and a row of magazine covers on its side; idle (2 frames, 500ms):
+                            the top paper's corner lifts 1px
 streetcar           56x66   1 lane by 3 rows of footprint, a red TTC Flexity from behind, its pantograph
                             on the roof, drawn at the footprint's near edge; idle (4 frames, 400ms): a
                             spark at the pan head on frame 2. drive (4 frames, 100ms): tread lines climb
@@ -42,6 +51,9 @@ taxi                56x42   1 lane by 2 rows of footprint, Yonge Street's mover:
                             lit on frames 0, 1, 4 and 5. merge (4 frames, 100ms): angled right, changing
                             lanes, the right flank showing, the indicator lit on frames 2 and 3. The
                             game mirrors cue and merge for a merge left. No idle: it falls back to drive
+
+The five carts are skins of one street cart: one chassis (cart_wheels, cart_umbrella, cart_pole, cart_box),
+one frame and one silhouette, each skin in its own colour family.
 
 Every obstacle but the taxi, which only drives, has a looping idle, so nothing
 on the road is frozen. Each idle frame is one argument to the drawing function,
@@ -379,7 +391,9 @@ def delivery_truck(puff=0, roll=None):
 LETTERS = {"0": ("111", "101", "101", "101", "111"), "4": ("101", "101", "111", "001", "001"),
            "5": ("111", "100", "111", "001", "111"), "A": ("010", "101", "111", "101", "101"),
            "C": ("111", "100", "100", "100", "111"), "I": ("1", "1", "1", "1", "1"),
-           "T": ("111", "010", "010", "010", "010"), "X": ("101", "101", "010", "101", "101")}
+           "E": ("111", "100", "110", "100", "111"), "N": ("1001", "1101", "1011", "1001", "1001"),
+           "S": ("011", "100", "010", "001", "110"), "T": ("111", "010", "010", "010", "010"),
+           "W": ("10001", "10001", "10101", "10101", "01010"), "X": ("101", "101", "010", "101", "101")}
 # The streetcar's idle: a spark at the pantograph on frame 2.
 STREETCAR_IDLE = (False, False, True, False), 400
 # Its drive's sideways sway, in drawn pixels per frame, as the bogies roll under it.
@@ -733,6 +747,154 @@ def ice_cream_cart(drip=0, w=span(2)):
     return lit(g)
 
 
+# The flower cart's idle: the middle tulip nods a drawn pixel right on frame 1.
+FLOWER_CART_IDLE = (0, 1), 500
+# Cut flowers by colour and shade: pink, white, lilac, red.
+FLOWERS = (("pink", "mauve"), ("white", "lgrey"), ("lilac", "violet"), ("red", "dred"))
+
+
+def tulip(g, x, y, col, sh, nod=0):
+    """A tulip with its cup's top on row y: a cup of three points, its right side in sh, on a stem with a leaf
+    each side. nod moves the cup that many layout pixels right, the stem held still."""
+    g.rect(x - 0.5, y + 5, 1.5, 7, "canopy")
+    g.tri((x + 0.5, y + 11), (x + 4.5, y + 6.5), (x + 1, y + 11.5), "moss")
+    g.tri((x - 0.5, y + 11), (x - 4, y + 7.5), (x - 0.5, y + 10), "moss")
+    x += nod
+    g.cel(x, y + 3, 3.2, 2.6, col, sh, None)
+    g.rect(x - 3.2, y + 1, 6.4, 2, col)
+    g.tri((x - 3.2, y + 1), (x - 1.2, y + 1), (x - 3.2, y - 1.5), col)
+    g.tri((x - 1, y + 1), (x + 1, y + 1), (x, y - 1.5), col)
+    g.tri((x + 1.2, y + 1), (x + 3.2, y + 1), (x + 3.2, y - 1.5), sh)
+    g.rect(x + 1.6, y + 1, 1.6, 4, sh)
+
+
+def flower_cart(nod=0, w=span(2)):
+    """The street cart's Cabbagetown skin, laid out on span(2) x 55 and drawn at SCALE to 112x66: a violet box
+    under a lilac and white umbrella, six galvanised buckets along the counter each holding a bunch of three
+    blooms over its leaves, and a pink, a white and a red tulip on the box's side. nod (0 or 1) nods the
+    middle tulip a drawn pixel right."""
+    g = edged(Grid(w, 55), cart_edge)
+    c = w / 2
+    cart_wheels(g, w)
+    cart_umbrella(g, w, (("lilac", "white"), ("violet", "lgrey")))
+    g.rect(c - 1, 0, 2, 2, "grey")
+    g.p(c - 1, 0, "lgrey")
+    cart_pole(g, w, 17)
+    # the buckets, each bunch's blooms the next three colours along
+    for k, x in enumerate((13, 22, 31, w - 31, w - 22, w - 13)):
+        g.cel(x, 22.5, 3.4, 2.2, "canopy", "pine", "moss")
+        for (dx, dy), (col, sh) in zip(((-1.8, 20.6), (1.8, 20.6), (0, 18.8)), FLOWERS[k % 4:] + FLOWERS[:k % 4]):
+            g.cel(x + dx, dy, 1.8, 1.6, col, sh, None)
+        g.rect(x - 3, 24, 6, 4, "grey")
+        g.rect(x - 3, 24, 1, 4, "lgrey")
+        g.rect(x + 2, 24, 1, 4, "slate")
+    cart_box(g, w, "violet", "lilac", "purple")
+    u = unit(g)[0]
+    for x, (col, sh), n in zip((c - 12, c, c + 12), (FLOWERS[0], FLOWERS[1], FLOWERS[3]), (0, nod * u, 0)):
+        tulip(g, x, 32, col, sh, n)
+    g.rect(9, 44, w - 18, 1, "slate")
+    return lit(g)
+
+
+# The fruit cart's idle: the apple on top of the left heap rocks a drawn pixel right on frame 1.
+FRUIT_CART_IDLE = (0, 1), 500
+# Produce by colour, shade and light: apples, limes, cabbages, grapes, eggplants.
+APPLES = ("red", "dred", "pink")
+LIMES = ("lime", "green", None)
+CABBAGES = ("moss", "olive", "lime")
+GRAPES = ("lilac", "violet", None)
+EGGPLANTS = ("purple", "plum", "mauve")
+
+
+def fruit_cart(rock=0, w=span(2)):
+    """The street cart's Kensington Market skin, laid out on span(2) x 55 and drawn at SCALE to 112x66: a canopy
+    green box under a moss and cream umbrella, two pale bins tilted on the counter, heaped in two courses with
+    apples and limes on the left and cabbages, grapes and eggplants on the right, an apple perched on the left
+    heap, and a big red apple with a stalk and a leaf on the box's side. rock (0 or 1) rocks the perched apple
+    a drawn pixel right."""
+    g = edged(Grid(w, 55), cart_edge)
+    c = w / 2
+    cart_wheels(g, w)
+    cart_umbrella(g, w, (("moss", "cream"), ("olive", "driftwood")))
+    g.rect(c - 1, 0, 2, 2, "grey")
+    g.p(c - 1, 0, "lgrey")
+    cart_pole(g, w, 17)
+    u = unit(g)[0]
+    for x0, x1, kinds in ((10, c - 3, (APPLES, LIMES)), (c + 3, w - 10, (CABBAGES, GRAPES, EGGPLANTS))):
+        n = int((x1 - x0) // 4.2)
+        for row, y in enumerate((24, 21.4)):
+            for k in range(n - row):
+                col, sh, li = kinds[(k + row) % len(kinds)]
+                g.cel(x0 + 2.2 + row * 2.1 + k * 4.2, y, 2.2, 2, col, sh, li)
+        g.tri((x0, 24.5), (x1, 24.5), (x1, 28), "driftwood")
+        g.tri((x0, 24.5), (x0, 28), (x1, 28), "driftwood")
+        g.rect(x0, 24.5, x1 - x0, 1, "cream")
+    g.cel(22.5 + rock * u, 18.8, 2.2, 2, *APPLES)
+    cart_box(g, w, "canopy", "moss", "pine", ("cream", "driftwood"))
+    g.cel(c, 38, 5, 4.5, *APPLES)
+    g.rect(c - 0.5, 31.5, 1, 2.5, "bark")
+    g.cel(c + 2.5, 32.5, 2.2, 1.2, "moss", "olive", None)
+    g.rect(9, 44, w - 18, 1, "slate")
+    return lit(g)
+
+
+# The newspaper cart's idle: the top paper of the first stack lifts its right corner a drawn pixel on frame 1.
+NEWSPAPER_CART_IDLE = (0, 1), 500
+# The magazines' covers by colour and shade.
+COVERS = (("pink", "mauve"), ("white", "lgrey"), ("lime", "green"), ("lilac", "violet"), ("red", "dred"))
+
+
+def newspaper_cart(lift=0, w=span(2)):
+    """The street cart's Yonge Street skin, laid out on span(2) x 55 and drawn at SCALE to 112x66: an azure box
+    under a flat cobalt roof slab on the pole, NEWS in white on its fascia (a white bar under lettering's
+    scale) and a front page standing on it; three stacks of folded papers and three magazines on the counter, and a row of six magazine
+    covers on a wire shelf along the box's side, each with a masthead band. lift (0 or 1) lifts the first
+    stack's top paper's right corner a drawn pixel."""
+    g = edged(Grid(w, 55), cart_edge)
+    c = w / 2
+    cart_wheels(g, w)
+    # the front page standing on the roof: a headline bar over a photo and lines of text
+    g.rect(c - 10, 0, 20, 8, "white")
+    g.rect(c + 8, 0, 2, 8, "lgrey")
+    g.rect(c - 8, 1.5, 16, 2, "ink")
+    g.rect(c - 8, 4.5, 7, 3.5, "azure")
+    g.rect(c - 8, 4.5, 7, 1, "sky")
+    for y in (4.5, 6.5):
+        g.rect(c, y, 7, 0.8, "grey")
+    # the roof slab: lit along its top edge, shaded down its right
+    g.rect(6, 8, w - 12, 2, "azure")
+    g.rect(6, 10, w - 12, 7, "cobalt")
+    g.rect(w - 15, 10, 9, 7, "blue")
+    g.rect(6, 8, w - 12, 1, "white")
+    lettering(g, c, 11, "NEWS", "white", "white")
+    cart_pole(g, w, 17)
+    # the paper stacks, white with a grey fold line, three high
+    for x in (13, 23, 33):
+        for k in range(3):
+            g.rect(x - 4, 26 - k * 1.6, 8, 1.6, "white")
+            g.rect(x - 4, 27 - k * 1.6, 8, 0.6, "lgrey")
+    if lift:
+        px, edge = raster(g), pixel_edge(g)
+        px.p(edge(17) - 1, edge(26 - 3.2) - 1, "white")
+    for i, (col, sh) in enumerate((COVERS[0], COVERS[2], COVERS[3])):
+        x = w - 34 + i * 7
+        g.rect(x, 21, 5, 7, col)
+        g.rect(x, 21, 5, 1.5, "white")
+        g.rect(x + 4, 22.5, 1, 5.5, sh)
+        g.rect(x + 1, 24, 2, 2, sh)
+    cart_box(g, w, "azure", "white", "cobalt")
+    # the side rack: six covers, each with a masthead band (ink on a white cover) and a photo in its shade
+    for k, (col, sh) in enumerate(COVERS + COVERS[1:2]):
+        x = 13 + k * 11
+        g.rect(x, 32, 8, 10, col)
+        g.rect(x, 32, 8, 2.5, "white" if col != "white" else "ink")
+        g.rect(x + 7, 34.5, 1, 7.5, sh)
+        g.rect(x + 1.5, 36, 4, 3.5, sh)
+    g.rect(11, 42, w - 25, 1, "lgrey")
+    g.rect(9, 44, w - 18, 1, "slate")
+    return lit(g)
+
+
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     def idle(draw, spec, s=SCALE):
@@ -751,7 +913,10 @@ def sprites():
     yield "delivery-truck", idle(delivery_truck, DELIVERY_IDLE, CAR_SCALE) + [
         ("drive", [drawn(CAR_SCALE, delivery_truck, roll=f).outlined() for f in drive], drive_ms)]
     yield "hot-dog-cart", idle(lambda f: hot_dog_cart(steam=f), HOT_DOG_CART_IDLE)
+    yield "flower-cart", idle(lambda f: flower_cart(nod=f), FLOWER_CART_IDLE)
+    yield "fruit-cart", idle(lambda f: fruit_cart(rock=f), FRUIT_CART_IDLE)
     yield "ice-cream-cart", idle(lambda f: ice_cream_cart(drip=f), ICE_CREAM_CART_IDLE)
+    yield "newspaper-cart", idle(lambda f: newspaper_cart(lift=f), NEWSPAPER_CART_IDLE)
     yield "streetcar", idle(streetcar, STREETCAR_IDLE, CAR_SCALE) + [
         ("drive", [drawn(CAR_SCALE, streetcar, roll=f).outlined() for f in drive], drive_ms)]
     cue, cue_ms = TAXI_CUE

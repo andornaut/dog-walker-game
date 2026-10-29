@@ -1,0 +1,30 @@
+{ "frames": {
+   "fruit-cart@50 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 56, "h": 33 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 33 },
+    "sourceSize": { "w": 56, "h": 33 },
+    "duration": 500
+   },
+   "fruit-cart@50 1.aseprite": {
+    "frame": { "x": 56, "y": 0, "w": 56, "h": 33 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 33 },
+    "sourceSize": { "w": 56, "h": 33 },
+    "duration": 500
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "fruit-cart@50.png",
+  "format": "RGBA8888",
+  "size": { "w": 112, "h": 33 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+  ]
+ }
+}
