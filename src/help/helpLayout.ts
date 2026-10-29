@@ -27,7 +27,6 @@ export const HELP_LAYOUT = {
   screen: SCREEN,
   title: { scale: 2, x: 12, y: 310 },
   topBar: TOP_BAR,
-  topBarEdge: 2,
 } as const;
 
 // The art's rect grown about its centre to at least MIN_TAP_SIZE each way, then shifted back

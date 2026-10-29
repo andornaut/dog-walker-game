@@ -8,6 +8,7 @@ import { containsPoint, insetRect, type Point, type Rect } from "../lib/rect";
 import { walkLength } from "../rules/route";
 import { zoneLength } from "../runner/walk";
 import type { RunState } from "../state/runState";
+import { topBarWellRows } from "../ui/topBarTrim";
 import { maxEffects } from "./effectIcons";
 import { heartRows } from "./hudView";
 
@@ -41,7 +42,8 @@ export function evenGapLeft(left: number, right: number, width: number): number 
 // (ZONE_LINE.width) and the effect wells edge to edge, with NEIGHBOURHOOD_PADDING columns either
 // side; the neighbourhood well spans it, its text line centred in it. The effect wells run from
 // the column's left edge, the widest whole gap apart that keeps the last inside the column.
-const CASH_WELL = { height: 37, width: 70, x: 5, y: 5 } as const;
+const WELL_ROWS = topBarWellRows(SCREEN_CONFIG.topBarHeight);
+const CASH_WELL = { height: WELL_ROWS.height, width: 70, x: 5, y: WELL_ROWS.y } as const;
 const BUTTONS = {
   help: { faceX: 231, hitWidth: 34, hitX: 224 },
   pause: { faceX: 333, hitWidth: 34, hitX: 326 },
@@ -51,7 +53,7 @@ const BUTTONS = {
   Record<WalkBarButtonId, { faceX: number; hitWidth: number; hitX: number }>
 >;
 const EFFECT_ROW = { holdInset: 1, icon: 1, iconSize: 20, size: 22, y: 20 } as const;
-const ZONE_LINE = { height: 12, width: 132, y: 5 } as const;
+const ZONE_LINE = { height: 12, width: 132, y: WELL_ROWS.y } as const;
 const NEIGHBOURHOOD_PADDING = 6;
 const NEIGHBOURHOOD_WIDTH =
   Math.max(ZONE_LINE.width, EFFECT_WELLS * EFFECT_ROW.size) + 2 * NEIGHBOURHOOD_PADDING;

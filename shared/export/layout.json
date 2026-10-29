@@ -1611,8 +1611,7 @@
         "width": 360,
         "x": 0,
         "y": 0
-      },
-      "topBarEdge": 2
+      }
     },
     "home": {
       "bandText": {
@@ -1937,16 +1936,15 @@
       "tileSelectOutset": 1,
       "topBar": {
         "bank": {
-          "capsY": 11,
+          "capsY": 12,
           "pad": 3,
           "scale": 3
         },
         "faceSize": 20,
         "height": 40,
         "mid": 19,
-        "rule": 2,
         "well": {
-          "height": 28,
+          "height": 29,
           "lip": 1,
           "maxWidth": 220,
           "x": 5,

@@ -142,6 +142,7 @@ import {
 } from "../ui/phaser/pixelText";
 import { BUTTON_COLOURS, GREYED, pictureBox, type SelectLook } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
+import { topBarRects } from "../ui/topBarTrim";
 import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { addNamePills } from "./effectNameColours";
@@ -1322,13 +1323,8 @@ export class StartScene extends Scene {
     g: GameObjects.Graphics,
     save: SaveDocument,
   ): void {
-    fillRect(g, PALETTE.plum, { height: TOP_BAR.height, width: SCREEN.width, x: 0, y: 0 });
-    fillRect(g, PALETTE.darkBrown, {
-      height: TOP_BAR.rule,
-      width: SCREEN.width,
-      x: 0,
-      y: TOP_BAR.height - TOP_BAR.rule,
-    });
+    const bar = { height: TOP_BAR.height, width: SCREEN.width, x: 0, y: 0 };
+    topBarRects(bar).forEach(({ colour, rect }) => fillRect(g, PALETTE[colour], rect));
     // The bank in its well: the "$" and the amount at the bank's scale, one font advance apart,
     // in full where it fits and else in its short form, the well as wide as they need.
     const { bank, well, wellKeys } = TOP_BAR;

@@ -100,6 +100,7 @@ import {
   scalePixelText,
   setPixelText,
 } from "../ui/phaser/pixelText";
+import { topBarRects } from "../ui/topBarTrim";
 import { arcFlight } from "./arcFlight";
 import { addCharm, glintWell } from "./buffCharm";
 import { BumpBorder } from "./bumpBorder";
@@ -288,7 +289,7 @@ export class HudScene extends Scene {
     if (this.textures.exists("ui-walk-bar")) {
       this.add.image(topBar.x, topBar.y, "ui-walk-bar").setOrigin(0);
     } else {
-      fillRect(g, PALETTE.plum, topBar);
+      topBarRects(topBar).forEach(({ colour, rect }) => fillRect(g, PALETTE[colour], rect));
       [WALK_BAR.cash.well, BAR.zoneWell].forEach((well) => fillRect(g, PALETTE.ink, well));
     }
     WALK_BAR_BUTTONS.forEach((id) => this.addButton(TOP_BAR_BUTTONS[id]));

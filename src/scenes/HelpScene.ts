@@ -13,6 +13,7 @@ import { addFilledRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, wrapPixelText } from "../ui/phaser/pixelText";
 import { TEXT_SCALE } from "../ui/textFit";
+import { topBarRects } from "../ui/topBarTrim";
 import type { HelpPictureData } from "./HelpPictureScene";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
@@ -132,12 +133,9 @@ export class HelpScene extends Scene {
     const layout = HELP_LAYOUT;
 
     addFilledRect(this, PALETTE.darkBrown, layout.screen);
-    addFilledRect(this, PALETTE.plum, layout.topBar);
-    addFilledRect(this, PALETTE.darkBrown, {
-      ...layout.topBar,
-      height: layout.topBarEdge,
-      y: layout.topBar.y + layout.topBar.height - layout.topBarEdge,
-    });
+    topBarRects(layout.topBar).forEach(({ colour, rect }) =>
+      addFilledRect(this, PALETTE[colour], rect),
+    );
     addPixelText(this, layout.heading.x, layout.heading.y, words.heading, {
       colour: PALETTE.cream,
       font: "title",

@@ -276,8 +276,17 @@ describe("top bar", () => {
     expect(ends.at(-1)).toBe(SCREEN_CONFIG.width);
   });
 
-  it("centres the bank's well on the bar's middle row and ends the widest before the first face", () => {
-    expect(well.y + well.height / 2).toBe(mid);
+  // The bank's well is as clear of the bar's top and bottom as the walk bar's cash well is of its
+  // bar's, as tall as its art, and its widest ends before the first face.
+  const walkWell = WALK_BAR.cash.well;
+  it("sets the bank's well clear of the trim as the walk bar's cash well", () => {
+    expect(well.y).toBe(walkWell.y);
+    expect(topBar.height - (well.y + well.height)).toBe(
+      SCREEN_CONFIG.topBarHeight - (walkWell.y + walkWell.height),
+    );
+    expect(decodePng(readFileSync(`public/art/images/${topBar.wellKeys.mid}.png`)).height).toBe(
+      well.height,
+    );
     expect(well.x + well.maxWidth).toBeLessThan(logbook.face.x);
   });
 
@@ -351,7 +360,7 @@ describe("the top bar's bank", () => {
     right: pieceColours(wellKeys.right),
   };
   // The well's ink, the middle piece's colour on its middle row, not its lip's.
-  const fill = colours.mid[wellSpec.height / 2];
+  const fill = colours.mid[Math.floor(wellSpec.height / 2)];
   const pieces = {
     left: (row: number) => colours.left[row] === fill,
     mid: (row: number) => colours.mid[row] === fill,
@@ -365,14 +374,15 @@ describe("the top bar's bank", () => {
 
   // Each amount's ink as the font inks it, from bank.pad columns into its well and its capitals'
   // top on bank.capsY, as clear of the well's ink edges on the right as on the left, along the
-  // well's middle row, and below as above, down its middle column.
+  // well's middle row, and below as above, down its middle column, an odd row left over going
+  // above.
   it.each(amounts)(
     "sets %s as clear of its well's ink edges right as left and below as above",
     (text) => {
       const style = { scale: bank.scale };
       const columns = fontInk("font-title", style, text);
       const well = bankWell(columns.right - columns.left);
-      const middleRow = well.height / 2;
+      const middleRow = Math.floor(well.height / 2);
       const across = inkEdges(well.x, [
         pieces.left(middleRow),
         ...Array.from({ length: well.width - 2 }, () => pieces.mid(middleRow)),
@@ -393,7 +403,7 @@ describe("the top bar's bank", () => {
       expect(clear.left).toBeGreaterThan(0);
       expect(clear.right).toBe(clear.left);
       expect(clear.above).toBeGreaterThan(0);
-      expect(clear.below).toBe(clear.above);
+      expect(clear.above - clear.below).toBe((clear.above + clear.below) % 2);
     },
   );
 });
