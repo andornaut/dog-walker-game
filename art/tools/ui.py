@@ -317,20 +317,20 @@ def effects(ink, on):
 
 
 def motion(ink, on):
-    """The Settings Reduced motion row: a ball. on, it flies with three speed lines trailing
-    it; off, it rests on a still ground line with no speed lines. The Reduced motion switch
-    shows off while it is on."""
+    """The Settings Reduced motion row, its tag following the switch as every row's does: a ball.
+    on (motion reduced), it rests on a still ground line with no speed lines; off, it flies with
+    three speed lines trailing it."""
     face, shade, _ = ink
     g = Grid(16, 16)
-    cy = 7.5 if on else 10.5
+    cy = 10.5 if on else 7.5
     g.ell(11.5, cy, 3.6, 3.6, face, shade)
     if on:
+        g.rect(1, 14, 15, 1, face)
+        g.rect(1, 15, 15, 1, shade)
+    else:
         g.rect(3, 4, 4, 1, face)
         g.rect(0, 7, 7, 1, face)
         g.rect(2, 10, 5, 1, face)
-    else:
-        g.rect(1, 14, 15, 1, face)
-        g.rect(1, 15, 15, 1, shade)
     return g
 
 
