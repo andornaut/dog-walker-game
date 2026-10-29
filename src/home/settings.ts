@@ -135,8 +135,10 @@ export function noteDy(title: FontMetrics): number {
 }
 
 const PANEL = { width: 344 };
-// The rows start under the band; the panel ends this far under the last.
-const ROWS_TOP = 38;
+// The first row starts at the band's bottom edge, as each later row starts at its separator, so
+// its icon and label are as far under the band as a later row's are under its separator. The
+// panel ends PANEL_FOOT under the last row.
+const ROWS_TOP = HOME_LAYOUT.card.band.inset + HOME_LAYOUT.card.band.height;
 const PANEL_FOOT = 6;
 const SEPARATOR_INSET = 4;
 

@@ -194,8 +194,13 @@ describe("the settings card", () => {
     expect(inside(inner, outer)).toBe(true);
   });
 
-  it("starts the rows 8px under the band", () => {
-    expect(rows[0]?.rect.y).toBe(bandBottom + 8);
+  // Each row starts on the edge over it: the first at the band's bottom, each later one at its
+  // separator.
+  it("starts each row on the band or the separator over it", () => {
+    expect(rows.map(({ rect }) => rect.y)).toEqual([
+      bandBottom,
+      ...layout.separators.map(({ y }) => y),
+    ]);
   });
 
   it.each(SHIPPED_ROWS.map((row, i) => [row.label, i] as const))(
