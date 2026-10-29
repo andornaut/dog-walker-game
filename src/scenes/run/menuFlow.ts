@@ -28,7 +28,7 @@ interface MenuFlowHost {
   homeNote: () => readonly HomeNoteLine[];
   // Whether the walk is over or not yet started, when the menu stays shut.
   over: () => boolean;
-  // What the pause menu's note says Head home keeps.
+  // What the pause menu's note says Return home keeps.
   pauseNote: () => string;
 }
 

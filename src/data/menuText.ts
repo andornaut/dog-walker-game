@@ -41,7 +41,7 @@ export const MENU_TEXT = {
     previous: "Previous",
   },
   pause: {
-    headHome: "Head home",
+    headHome: "Return home",
     help: "Help",
     note: "Heading home keeps {kept} of {cash}.",
     noteAll: "Heading home keeps all {cash}.",
