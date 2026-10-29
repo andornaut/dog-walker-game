@@ -33,13 +33,6 @@ reads on them.
   in the sign letters at 2x, yellow, the letters centred on its face. The
   yard's right lot is left for ui-pet-shop. The scene holds no strong green, so
   the Pet shop's board and Start walk stand out.
-- screen-stats: evening indoors. A panelled den wall that leaves the top left
-  clear for the title (12,12 to 68,22); then, between the title and the close
-  button and above the tabs (y 56), a framed dog photo, a low window onto
-  the street's houses at night (backdrops.stats_street's rows 90 to 117, from STATS_VIEW_TOP, a
-  ramp step darker, the windows lit), and the leash hooks. Below the
-  tabs the wall is open for the stats panel and the badge wall (8,108 to
-  352,552).
 - screen-end: a Cabbagetown street at dusk. Between the logo (END_LOGO_AT
   107,2) and the summary panel (24,112 to 336,412), the front of the brick
   cottage the pack comes home to: the logo stands on its slate roof's ridge
@@ -750,102 +743,8 @@ def image_rows(img):
             for y in range(img.height)]
 
 
-# ---------- screen-stats ----------
-
 # The sky after dark, top to horizon: night falling over a last mauve glow, on screen-loading.
 NIGHT_SKY = ("navy", "purple", "mauve")
-# The first backdrop band row screen-stats' window shows, 25 rows over the far side's ground row: the
-# houses' lit walls, their doors and the ground row.
-STATS_VIEW_TOP = bd.BASE - 25
-
-
-def night(img):
-    """The street after dark: every colour a ramp step darker but the windows, their cyan glass lit
-    yellow and the white beside it amber."""
-    px = img.load()
-    w, h = img.size
-    out = img.copy()
-    po = out.load()
-    cyan, white = sn.rgb("cyan"), sn.rgb("white")
-    for y in range(h):
-        for x in range(w):
-            c = px[x, y]
-            if c == cyan:
-                po[x, y] = sn.rgb("yellow")
-            elif c == white and any(0 <= x + dx < w and px[x + dx, y] == cyan for dx in (-1, 1)):
-                po[x, y] = sn.rgb("amber")
-            else:
-                po[x, y] = sn.rgb(dk("%02x%02x%02x" % c))
-    return out
-
-
-def stats():
-    cv = sn.Canvas(W, H)
-    planks(cv, 0, 0, W, H, 20, vertical=True, seed=5)
-    # crown moulding and baseboard
-    cv.fill(0, 0, W, 6, "plum")
-    cv.fill(0, 6, W, 1, "brown")
-    cv.fill(0, 7, W, 1, "ink")
-    cv.fill(0, 548, W, 1, "brown")
-    cv.fill(0, 549, W, 10, "plum")
-    cv.fill(0, 559, W, 1, "ink")
-    # a low window onto the street at night, between the photo and the leash hooks, above the tabs: the
-    # houses across the street from STATS_VIEW_TOP, their windows lit, down past the far side's ground row
-    wx, wy, ww, wh = 140, 16, 100, 28
-    view = night(bd.stats_street().img.crop((120, STATS_VIEW_TOP, 120 + ww, STATS_VIEW_TOP + wh)))
-    cv.fill(wx - 6, wy - 6, ww + 12, wh + 12, "plum")
-    cv.fill(wx - 5, wy - 5, ww + 10, wh + 10, "tan")
-    cv.fill(wx - 5, wy - 5, ww + 10, 1, "cream")
-    cv.fill(wx - 1, wy - 1, ww + 2, wh + 2, "brown")
-    cv.img.paste(view, (wx, wy))
-    cv.fill(wx + ww // 2 - 1, wy, 3, wh, "tan")
-    cv.fill(wx, wy + wh // 2 - 1, ww, 3, "tan")
-    cv.fill(wx + ww // 2 + 1, wy, 1, wh, "brown")
-    cv.fill(wx, wy + wh // 2 + 1, ww, 1, "brown")
-    # the sill
-    cv.fill(wx - 10, wy + wh + 6, ww + 20, 3, "tan")
-    cv.fill(wx - 10, wy + wh + 6, ww + 20, 1, "cream")
-    cv.fill(wx - 8, wy + wh + 9, ww + 16, 1, "brown")
-    cv.fill(wx - 8, wy + wh + 10, ww + 16, 1, "plum")
-    # curtains, gathered at the sides
-    cv.fill(wx - 18, wy - 8, ww + 36, 2, "brown")
-    cv.fill(wx - 20, wy - 9, 3, 4, "amber")
-    cv.fill(wx + ww + 17, wy - 9, 3, 4, "amber")
-    for cx, d in ((wx - 14, 1), (wx + ww + 2, -1)):
-        for y in range(wy - 6, wy + wh + 6):
-            t = y - (wy - 6)
-            bulge = 12 if t < 14 else max(5, 12 - (t - 14) // 2) if t < 26 else min(10, 5 + (t - 26) // 2)
-            x0 = cx if d > 0 else cx + 12 - bulge
-            cv.fill(x0, y, bulge, 1, "red")
-            cv.fill(x0 + (2 if d > 0 else bulge - 4), y, 2, 1, "dred")
-            cv.fill(x0 + bulge // 2 + (1 if d > 0 else 0), y, 1, 1, "dred")
-        tie = cx + (2 if d > 0 else 4)
-        cv.fill(tie, wy + 22, 6, 2, "amber")
-    # a framed photo of Kilo, right of the title
-    fx, fy = 75, 14
-    cv.fill(fx, fy, 38, 38, "plum")
-    cv.fill(fx + 1, fy + 1, 36, 36, "amber")
-    cv.fill(fx + 1, fy + 36, 36, 1, "orange")
-    cv.fill(fx + 3, fy + 3, 32, 32, "sky")
-    cv.fill(fx + 3, fy + 27, 32, 8, "green")
-    cv.paste(sn.frame("face-dog-kilo", "happy"), fx + 3, fy + 3)
-    cv.fill(fx + 18, fy - 5, 2, 2, "amber")
-    cv.line(fx + 19, fy - 4, fx + 4, fy, "plum")
-    cv.line(fx + 19, fy - 4, fx + 34, fy, "plum")
-    # the leash hooks, left of the close button: a peg rail with three leashes
-    cv.fill(266, 12, 46, 5, "brown")
-    cv.fill(266, 12, 46, 1, "tan")
-    cv.fill(266, 17, 46, 1, "plum")
-    for i, col in enumerate(("dred", "blue", "dgreen")):
-        hx = 274 + i * 14
-        cv.fill(hx, 17, 2, 3, "amber")
-        cv.fill(hx - 3, 20, 2, 18 + i * 4, col)
-        cv.fill(hx + 2, 20, 2, 12 + i * 3, col)
-        cv.fill(hx - 3, 20, 7, 2, col)
-        bottom = 38 + i * 4
-        cv.fill(hx - 4, bottom, 4, 3, "lgrey")
-        cv.fill(hx - 3, bottom + 1, 1, 1, "grey")
-    return cv
 
 
 # ---------- screen-end ----------
@@ -1298,7 +1197,6 @@ def loading_track():
 SCREENS = {
     "logo": logo,
     "screen-home": home,
-    "screen-stats": stats,
     "screen-end": end,
     "screen-loading": loading,
     "ui-loading-track": loading_track,
@@ -1509,19 +1407,6 @@ def ui(cv, key):
         sn.text_c(cv, "PACK FEE $40 PER ZONE", 180, 502, "cream")
         cv.fill(4, 518, 352, 40, "orange")
         cv.fill(4, 514, 352, 40, "amber")
-    elif key == "screen-stats":
-        sn.text(cv, "STATS", 12, 12, "cream")
-        panel(332, 10, 20, 20, "tan")
-        for i in range(3):
-            panel(4 + i * 120, 56, 112, 44, "cream" if i == 2 else "tan")
-        sn.text(cv, "BADGES", 12, 112, "cream")
-        sn.text(cv, "7/15", 336, 112, "cream")
-        for i in range(15):
-            x, y = 8 + (i // 8) * 176, 132 + (i % 8) * 52
-            panel(x, y + 2, 32, 32, "amber")
-            sn.text(cv, "BADGE NAME", x + 36, y + 4, "amber", 2)
-            sn.text(cv, "THE GOAL", x + 36, y + 20, "lgrey", 2)
-            sn.text(cv, "SECOND LINE", x + 36, y + 36, "lgrey", 2)
     elif key == "screen-end":
         cv.paste(logo().img, *END_LOGO_AT)
         for x, foot in ((116, 110), (144, 110), (216, 110)):

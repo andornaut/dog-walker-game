@@ -547,37 +547,6 @@ def flat(road):
     return lambda px, py: road(0, 0, 99, px, py)
 
 
-def stats_street():
-    """The suburban street screen-stats' window shows (screens.STATS_VIEW_TOP down past the far side's
-    ground row): slim houses under steep roofs on a hill."""
-    cv = sn.Canvas(W, H)
-    hills(cv, BASE - 52, BASE, "dgreen", "green", 1.7, 10)
-    # the houses across the street, one at the end of the street and the outer two cut by the
-    # band's edges: slim, under steep roofs, trees and hedges in the gaps between them
-    homes = ((0, 44, 22, "lgrey", "slate", "dred", False), (60, 46, 24, "tan", "brown", "dgreen", True),
-             (120, 44, 22, "pink", "purple", "white", False), (180, 48, 24, "sky", "navy", "red", True),
-             (240, 44, 22, "cream", "dred", "sky", False), (300, 46, 24, "skin1", "dslate", "forest", True),
-             (360, 44, 22, "white", "brown", "blue", False))
-    for cx, r in ((30, 11), (150, 12), (270, 10)):
-        tree(cv, cx, BASE - 19 - 2 * r, r=r, base=BASE, girth=4)
-    for cx, w, wall_h, wall_c, roof, door, dormer in homes:
-        house(cv, cx - w // 2, w, wall_c, roof, door, top=BASE - 46, base=BASE, roof_h=46 - wall_h,
-              parts=SLIM, eave=2, rake=RAKE.get(roof), dormer=dormer)
-    yard(cv, BASE, FAR_WALK, grass())
-    for cx, w, *_ in homes:
-        x = cx - w // 2
-        path(cv, cx - 6, BASE, FAR_WALK)
-        fence(cv, FAR_WALK - 4, max(0, x - 6), cx - 10, h=9)
-        fence(cv, FAR_WALK - 4, cx + 10, x + w + 6, h=9)
-    for cx in (90, 210, 330):
-        bush(cv, cx - 5, BASE - 3, "dgreen", SHRUB)
-    flowers(cv, CX - 24, CX - 10, FAR_WALK - 4)
-    flowers(cv, CX + 12, CX + 26, FAR_WALK - 3)
-    for x in (CX - 134, CX - 46, CX + 128):
-        mailbox(cv, x, FAR_WALK)
-    return cv
-
-
 def sunburst(cv, cx, cy, n, a, b, y1, w=W, r=None):
     """Flat rays of a and b from cx, cy over rows 0 to y1: n of each round the half turn. With r,
     (rx, ry), the rays end on that ellipse round cx, cy and b fills the rest."""
