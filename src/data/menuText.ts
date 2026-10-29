@@ -14,7 +14,7 @@ export const MENU_TEXT = {
     title: "Something went wrong",
   },
   end: {
-    backHome: "Back home",
+    backHome: "Head home",
     earnings: {
       cardCosts: "Card costs",
       cashLost: "Cash lost",
