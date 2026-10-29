@@ -733,8 +733,6 @@ export class StartScene extends Scene {
     if (walker !== undefined) {
       return { kind: "walker", walker: itemAt(walkerIds(), walker) };
     }
-    // The top bar's buttons come before the update plate's, whose tap area reaches up under
-    // their hit areas.
     const update: readonly [Rect, Target][] = this.shownControls().update
       ? [[UPDATE_PLATE.hit, { kind: "update" }]]
       : [];

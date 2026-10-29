@@ -630,9 +630,22 @@ describe("the update plate", () => {
     expect(inside(rect, panel)).toBe(true);
   });
 
-  it("covers the button with a tap area at least 44 tall", () => {
-    expect(hit.height).toBeGreaterThanOrEqual(44);
+  // The one tap area under 44 tall: 42 game pixels, about 45 CSS pixels on a phone, is all the
+  // room between the top bar's hit areas and the Pet shop's board.
+  it("covers the button with a tap area at least 42 tall", () => {
+    expect(hit.height).toBeGreaterThanOrEqual(42);
     expect(inside(button, hit)).toBe(true);
+  });
+
+  it.each([
+    ["the Help button's", HOME_LAYOUT.help.hit],
+    ["the Logbook button's", HOME_LAYOUT.logbook.hit],
+    ["the Pet shop's", petShop],
+    ["the Pet shop board's", petShop.board],
+    ["the Settings button's", HOME_LAYOUT.settings.hit],
+    ["the Sound button's", HOME_LAYOUT.mute.hit],
+  ])("keeps the tap area clear of %s", (_, rect) => {
+    expect(rectsOverlap(hit, rect)).toBe(false);
   });
 
   it("leaves the title's room between the icon and the button", () => {

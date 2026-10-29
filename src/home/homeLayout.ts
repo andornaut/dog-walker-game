@@ -284,10 +284,11 @@ export const HOME_LAYOUT = {
   // titleColour, its ink starting at titleX, and the ui-button's go look at button with its
   // label, centred, at least labelPad inside either side. The label's capitals are centred on the
   // button's face (the button less its lip), the title's share their row, and the icon is
-  // centred on that row (updatePlateText). The tap area is hit.
+  // centred on that row (updatePlateText). The tap area is hit, 42 tall between the top bar's
+  // hit areas and the Pet shop's board, about 45 CSS pixels on a phone.
   updatePlate: {
     button: { height: 28, width: 128, x: 218, y: 49 },
-    hit: { height: 44, width: 128, x: 218, y: 41 },
+    hit: { height: 42, width: 128, x: 218, y: 44 },
     icon: { size: 16, x: 14 },
     iconKey: "icon-update",
     labelPad: 8,
