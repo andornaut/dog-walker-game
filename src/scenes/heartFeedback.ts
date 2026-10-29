@@ -9,7 +9,6 @@ import {
   heartPopBlocked,
   heartPopCovers,
   heartPopFrame,
-  heartPopText,
 } from "../hud/feedback";
 import type { ChangeLabel } from "../hud/hudView";
 import { arcControl } from "../hud/moments";
@@ -17,7 +16,7 @@ import { insetRect, type Point, type Rect } from "../lib/rect";
 import { slotIndexOf } from "../state/pack";
 import { CREAM_PANEL_COLOURS, drawFramedRect, drawRing } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import { addPixelText } from "../ui/phaser/pixelText";
+import { addPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
 import { arcFlight } from "./arcFlight";
 import { FEEDBACK_ART } from "./feedbackArt";
 import { HUD_DEPTH } from "./hudDepth";
@@ -196,23 +195,29 @@ export class HeartFeedback {
     active.land();
   }
 
-  // The pop's number in font-title at 1x on a cream chip, beside the heart, and the chip's
-  // rect on screen.
+  // The pop's number, its card label's text ("+1♥"), in font-title at 1x on a cream chip,
+  // beside the heart, and the chip's rect on screen. The ♥, inked above the capitals, grows the
+  // chip up to hold it.
   private addNumber(label: ChangeLabel, frame: Point): { chip: GameObjects.Container; rect: Rect } {
-    const text = addPixelText(this.scene, 0, 0, heartPopText(label.amount), {
+    const text = addPixelText(this.scene, 0, 0, label.text, {
       colour: label.amount < 0 ? PALETTE.darkRed : PALETTE.forest,
       font: "title",
     });
     const width = Math.ceil(text.width);
     const bottom = this.hooks.tabTop - CHIP_PAD - 1;
     const at = heartLabelAt({ bottom, screenWidth: SCREEN_CONFIG.width }, frame, width);
-    text.setPosition(CHIP_PAD, CHIP_PAD + text.y);
+    const { capTop } = pixelFontMetrics(this.scene, "title");
+    const tops = text
+      .getTextBounds(true)
+      .characters.flatMap((char) => (char.h > 0 ? [char.y] : []));
+    const above = Math.max(0, capTop - Math.min(capTop, ...tops));
+    text.setPosition(CHIP_PAD, CHIP_PAD + above + text.y);
     const box = this.scene.add.graphics();
     const rect = {
-      height: 5 + 2 * CHIP_PAD,
+      height: 5 + above + 2 * CHIP_PAD,
       width: width + 2 * CHIP_PAD,
       x: at.x - CHIP_PAD,
-      y: at.y - CHIP_PAD,
+      y: at.y - CHIP_PAD - above,
     };
     drawFramedRect(box, CREAM_PANEL_COLOURS, { ...rect, x: 0, y: 0 });
     const chip = this.scene.add.container(rect.x, rect.y, [box, text]).setDepth(HUD_DEPTH.heart);

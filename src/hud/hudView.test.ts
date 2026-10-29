@@ -93,6 +93,36 @@ describe("changeLabels", () => {
     expect(changeLabels(AT, [forgiven])).toEqual([]);
   });
 
+  // The heart pop over the dog and the label on its card both show the label's text; a loss
+  // forgiven whole has neither.
+  it.each([
+    [1, [{ amount: 1, kind: "treat" }], ["+1♥"]],
+    [-1, [{ amount: -1, kind: "bump" }], ["−1♥"]],
+    [-10, [{ amount: -10, kind: "bump" }], ["−10♥"]],
+    [
+      0,
+      [
+        { amount: -1, kind: "bump" },
+        {
+          amount: 1,
+          forgives: true,
+          kind: "modifier",
+          source: { kind: "walker", walker: "casey" },
+        },
+      ],
+      [],
+    ],
+  ] as const)("shows a heart change of %i as %j", (amount, causes, texts) => {
+    const change = {
+      after: clampHearts(20, 15 + amount),
+      before: clampHearts(20, 15),
+      causes,
+      dog: "kilo",
+      kind: "hearts",
+    } as const;
+    expect(changeLabels(AT, [change]).map((label) => label.text)).toEqual(texts);
+  });
+
   it.each([
     { by: { debuff: "stinky", kind: "debuff" }, zeroedBy: "stinky" },
     { by: { kind: "upgrade", upgrade: "bigTipper" }, zeroedBy: undefined },

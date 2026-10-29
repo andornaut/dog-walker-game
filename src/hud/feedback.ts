@@ -1,4 +1,3 @@
-import { signedText } from "../lib/lines";
 import { type Point, type Rect, rectsOverlap } from "../lib/rect";
 import { type Cents, cents } from "../lib/units";
 
@@ -19,11 +18,6 @@ export const FEEDBACK = {
   // The money counter counts to a new amount at msPerDollar a dollar, taking at most maxMs.
   moneyTick: { maxMs: 600, msPerDollar: 150 },
 } as const;
-
-// The number on a heart change's pop: "−1", "+2".
-export function heartPopText(amount: number): string {
-  return signedText(amount, String(Math.abs(amount)));
-}
 
 // What a heart pop covers on its way: its 32x32 frame, its number's chip, and the box its heart
 // flies through to land at to, its card's label band's top centre (the arc peaks peak pixels
