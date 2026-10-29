@@ -53,8 +53,13 @@ export const MENU_TEXT = {
     install: "Install",
     installButton: "Get",
     installNote: "Full screen, offline",
-    installSteps: "Tap Share, then Add to Home Screen.",
-    installStepsTitle: "Add to Home Screen",
+    installSteps: {
+      firefoxAndroid: {
+        steps: "Tap the menu, then Add to Home screen or Install.",
+        title: "Add to Home screen",
+      },
+      ios: { steps: "Tap Share, then Add to Home Screen.", title: "Add to Home Screen" },
+    },
     motion: "Reduced motion",
     motionNote: "Skips shakes, bobs, confetti, scenery",
     music: "Music",

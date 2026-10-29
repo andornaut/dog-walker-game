@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { fillLine } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import type { Rect } from "../lib/rect";
 import { DEFAULT_SETTINGS } from "../save/schema";
 import { fitInFont, fontFileMetrics, gameGlyphs, inkWidth, placedInk } from "../testing/fontInk";
@@ -272,49 +273,53 @@ describe("the settings card", () => {
   });
 });
 
-describe("the iOS install steps' card", () => {
-  const { installSteps, installStepsTitle } = gameData.menuText.settings;
-  const { room, styles } = INSTALL_STEPS_FIT;
-  const fitted = fitInFont("font-body", styles, room, installSteps);
-  const { band, card, close, icon, steps, title } = installStepsLayout(
-    SCREEN_CONFIG,
-    fitted.lines.length,
-  );
-  const capHeight = fontFileMetrics("font-title").capHeight * 2;
-  const body = fontFileMetrics("font-body");
-  // From the first line's capitals to the last line's lowest ink, at 2x.
-  const stepsHeight =
-    (fitted.lines.length - 1) * INSTALL_STEPS.linePitch + (body.inkBottom - body.capTop) * 2;
-  const titleWidth = inkWidth("font-title", { letterSpacing: 0, scale: 2 }, installStepsTitle);
-  const { size } = INSTALL_STEPS.icon;
-  const glyph: Rect = { height: size, width: size, ...icon };
+describe.each(keysOf(gameData.menuText.settings.installSteps))(
+  "the %s install steps' card",
+  (browser) => {
+    const { steps: installSteps, title: installStepsTitle } =
+      gameData.menuText.settings.installSteps[browser];
+    const { room, styles } = INSTALL_STEPS_FIT;
+    const fitted = fitInFont("font-body", styles, room, installSteps);
+    const { band, card, close, icon, steps, title } = installStepsLayout(
+      SCREEN_CONFIG,
+      fitted.lines.length,
+    );
+    const capHeight = fontFileMetrics("font-title").capHeight * 2;
+    const body = fontFileMetrics("font-body");
+    // From the first line's capitals to the last line's lowest ink, at 2x.
+    const stepsHeight =
+      (fitted.lines.length - 1) * INSTALL_STEPS.linePitch + (body.inkBottom - body.capTop) * 2;
+    const titleWidth = inkWidth("font-title", { letterSpacing: 0, scale: 2 }, installStepsTitle);
+    const { size } = INSTALL_STEPS.icon;
+    const glyph: Rect = { height: size, width: size, ...icon };
 
-  it("sets the steps at 2x within their lines and room", () => {
-    expect(fitted.style.scale).toBe(2);
-    expect(fitted.lines.length).toBeLessThanOrEqual(INSTALL_STEPS.lines);
-    expect(fitted.widest).toBeLessThanOrEqual(room);
-  });
+    it("sets the steps at 2x within their lines and room", () => {
+      expect(fitted.style.scale).toBe(2);
+      expect(fitted.lines.length).toBeLessThanOrEqual(INSTALL_STEPS.lines);
+      expect(fitted.widest).toBeLessThanOrEqual(room);
+    });
 
-  it.each<[string, Rect, Rect]>([
-    ["the card", card, screen],
-    ["the band", band, card],
-    ["the title's capitals", { height: capHeight, width: 0, x: title.x, y: title.y }, band],
-    ["the close control's face", closeFace(close), band],
-    ["the close control's hit area", close.hit, card],
-    ["the steps", { height: stepsHeight, width: room, x: steps.x, y: steps.y }, card],
-    ["the Share glyph", glyph, card],
-  ])("keeps %s inside its frame", (_, inner, outer) => {
-    expect(inside(inner, outer)).toBe(true);
-  });
+    it.each<[string, Rect, Rect]>([
+      ["the card", card, screen],
+      ["the band", band, card],
+      ["the title's capitals", { height: capHeight, width: 0, x: title.x, y: title.y }, band],
+      ["the close control's face", closeFace(close), band],
+      ["the close control's hit area", close.hit, card],
+      ["the steps", { height: stepsHeight, width: room, x: steps.x, y: steps.y }, card],
+      ["the button glyph", glyph, card],
+    ])("keeps %s inside its frame", (_, inner, outer) => {
+      expect(inside(inner, outer)).toBe(true);
+    });
 
-  it("keeps the centred title clear of the close control, and the steps under the band", () => {
-    expect(title.x + titleWidth / 2).toBeLessThan(closeFace(close).x);
-    expect(steps.y).toBeGreaterThan(band.y + band.height);
-  });
+    it("keeps the centred title clear of the close control, and the steps under the band", () => {
+      expect(title.x + titleWidth / 2).toBeLessThan(closeFace(close).x);
+      expect(steps.y).toBeGreaterThan(band.y + band.height);
+    });
 
-  it("centres the Share glyph on the first line's capitals, left of the steps", () => {
-    expect(2 * (icon.y - steps.y) + size).toBe(body.capHeight * 2);
-    expect(icon.x + size).toBeLessThan(steps.x);
-    expect(glyph.y).toBeGreaterThan(band.y + band.height);
-  });
-});
+    it("centres the button glyph on the first line's capitals, left of the steps", () => {
+      expect(2 * (icon.y - steps.y) + size).toBe(body.capHeight * 2);
+      expect(icon.x + size).toBeLessThan(steps.x);
+      expect(glyph.y).toBeGreaterThan(band.y + band.height);
+    });
+  },
+);

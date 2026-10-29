@@ -211,10 +211,10 @@ export function settingsLayout(
   };
 }
 
-// The iOS install steps: a detail card, wide enough for its title clear of the close control,
-// centred on the screen, with its title band and close control, and under the band the 16x16
-// icon-share, centred on the first line's capitals (icon.dy from their top), then the steps in
-// body text, wrapped to up to lines lines a linePitch apart.
+// The install steps for a browser's own menu: a detail card, wide enough for its title clear of
+// the close control, centred on the screen, with its title band and close control, and under the
+// band the 16x16 glyph of the browser's button, centred on the first line's capitals (icon.dy
+// from their top), then the steps in body text, wrapped to up to lines lines a linePitch apart.
 export const INSTALL_STEPS = {
   foot: 14,
   icon: { dy: -2, gap: 6, size: 16 },
@@ -236,7 +236,7 @@ export interface InstallStepsLayout {
   band: Rect;
   card: Rect;
   close: CloseControl;
-  // icon-share's top-left corner.
+  // The button glyph's top-left corner.
   icon: { x: number; y: number };
   // The steps' first line's left edge and capitals' top.
   steps: { x: number; y: number };

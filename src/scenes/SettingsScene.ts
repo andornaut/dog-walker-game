@@ -31,7 +31,14 @@ import { screenArea } from "../input/outsideTap";
 import { itemAt } from "../lib/arrays";
 import { fillLine } from "../lib/lines";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
-import { installApp, installState, offersInstall, onInstallStateChange } from "../pwa";
+import {
+  installApp,
+  installState,
+  menuBrowser,
+  type MenuInstallBrowser,
+  offersInstall,
+  onInstallStateChange,
+} from "../pwa";
 import type { Settings } from "../save/schema";
 import { closeFace } from "../ui/closeControl";
 import { PLAIN_ITEM, tileState } from "../ui/interaction";
@@ -73,7 +80,9 @@ import {
 export const SETTINGS_CLOSED_EVENT = "settings-closed";
 
 type SwitchKey = "muted" | "reducedMotion";
-type SettingsWord = Exclude<keyof MenuText["settings"], "volume">;
+type SettingsWord = Exclude<keyof MenuText["settings"], "installSteps" | "volume">;
+// The open install steps' card, with the browser whose steps it shows.
+type OpenSteps = InstallStepsLayout & { readonly browser: MenuInstallBrowser };
 
 // Each row carries a 16x16 -panel icon with on and off tags, and the menuText.settings keys
 // of its label, its note and its button's label.
@@ -124,8 +133,12 @@ const INSTALL_ROW: Row = {
   label: "install",
   note: "installNote",
 };
-// iOS's Share glyph, before the install steps.
-const SHARE_ICON = "icon-share";
+// The button each browser's install steps start from, drawn before them: Safari's Share, or
+// Firefox's menu.
+const STEPS_ICONS: Readonly<Record<MenuInstallBrowser, string>> = {
+  firefoxAndroid: "icon-browser-menu",
+  ios: "icon-share",
+};
 const { icon: ICON, label: LABEL, note: NOTE } = SETTINGS_ROW;
 const KNOB_HEIGHT = 16;
 // The ring stays inside the panel's 8px margin.
@@ -135,7 +148,7 @@ function settingsRows(installable: boolean): readonly Row[] {
   return installable ? [...SETTING_ROWS, INSTALL_ROW] : SETTING_ROWS;
 }
 
-// How many lines the iOS steps wrap onto in their card.
+// How many lines a browser's install steps wrap onto in their card.
 function stepsLines(scene: Scene, steps: string): number {
   return withProbe(scene, BODY_TEXT, (probe) => {
     setPixelText(probe, steps);
@@ -185,8 +198,8 @@ function switchOn(key: SwitchKey, settings: Settings): boolean {
 // where it can be, Install, reachable from the home screen and the pause menu. Every change
 // is saved and applied at once. A switch row is normal and shows its setting in its switch; a
 // tap dips the row, then flips it. A tap anywhere on the Install row, its Get button included,
-// dips it, then opens the browser's install prompt or, on iOS, a card with the Share, then Add
-// to Home Screen steps over the settings. Up and
+// dips it, then opens the browser's install prompt or, in a browser that installs only from its
+// own menu (iOS, Firefox for Android), a card with that browser's steps over the settings. Up and
 // Down move the keyboard's focus through the rows and the close control; Enter or Space presses
 // the focused row, and on a slider the left and right keys, Home and End set the volume.
 export class SettingsScene extends Scene {
@@ -197,8 +210,8 @@ export class SettingsScene extends Scene {
   private pressed: Target | undefined;
   private resumeKey: SceneKey | undefined;
   private rows: readonly Row[] = SETTING_ROWS;
-  // The iOS install steps' card, while it is open.
-  private steps: InstallStepsLayout | undefined;
+  // The install steps' card and the browser whose steps it shows, while it is open.
+  private steps: OpenSteps | undefined;
 
   constructor() {
     super(SCENE_KEYS.settings);
@@ -344,20 +357,21 @@ export class SettingsScene extends Scene {
   }
 
   // The browser's install prompt, asked for while the tap still counts as the player's
-  // gesture, or the iOS steps.
+  // gesture, or the steps for the browser's own menu.
   private install(): void {
     this.pressed = undefined;
     this.render();
     void installApp().then((outcome) => {
-      if (outcome === "iosSteps" && this.scene.isActive()) {
-        this.openSteps();
+      const browser = menuBrowser();
+      if (outcome === "menuSteps" && browser !== undefined && this.scene.isActive()) {
+        this.openSteps(browser);
       }
     });
   }
 
-  private openSteps(): void {
-    const lines = stepsLines(this, gameData.menuText.settings.installSteps);
-    this.steps = installStepsLayout(SCREEN_CONFIG, lines);
+  private openSteps(browser: MenuInstallBrowser): void {
+    const lines = stepsLines(this, gameData.menuText.settings.installSteps[browser].steps);
+    this.steps = { ...installStepsLayout(SCREEN_CONFIG, lines), browser };
     this.render();
   }
 
@@ -471,22 +485,23 @@ export class SettingsScene extends Scene {
     }
   }
 
-  // The iOS install steps' card over the dimmed settings: its title in the band, its close
-  // control, and the Share glyph and steps under the band, the glyph left out while missing.
-  private drawSteps(steps: InstallStepsLayout): void {
-    const words = gameData.menuText.settings;
+  // The install steps' card over the dimmed settings: its title in the band, its close control,
+  // and the browser's button glyph and steps under the band, the glyph left out while missing.
+  private drawSteps(steps: OpenSteps): void {
+    const words = gameData.menuText.settings.installSteps[steps.browser];
+    const icon = STEPS_ICONS[steps.browser];
     addDim(this, SCREEN_LAYOUT.screen);
     addDetailCard(this, this.add.container(0, 0), steps.card, steps.band);
-    addPixelText(this, steps.title.x, steps.title.y, words.installStepsTitle, {
+    addPixelText(this, steps.title.x, steps.title.y, words.title, {
       colour: PALETTE.white,
       font: "title",
       originX: 0.5,
       scale: TEXT_SCALE,
     });
-    if (this.textures.exists(SHARE_ICON)) {
-      this.add.image(steps.icon.x, steps.icon.y, SHARE_ICON).setOrigin(0);
+    if (this.textures.exists(icon)) {
+      this.add.image(steps.icon.x, steps.icon.y, icon).setOrigin(0);
     }
-    const text = addBodyText(this, undefined, steps.steps, words.installSteps);
+    const text = addBodyText(this, undefined, steps.steps, words.steps);
     fitPixelText(text, INSTALL_STEPS_FIT, steps.steps.x, steps.steps.y);
     addCloseButton(
       this,

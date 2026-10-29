@@ -206,7 +206,8 @@
           0 0 0 2px var(--cream),
           0 2px 0 2px var(--tan);
       }
-      /* The iOS install steps: a highlight's chrome and band over the dimmed page. */
+      /* The install steps for the browser's own menu (iOS, Firefox for Android), one browser's
+         shown: a highlight's chrome and band over the dimmed page. */
       .steps {
         width: min(320px, calc(100vw - 32px));
         padding: 0;
@@ -562,10 +563,16 @@
       </section>
     </main>
 
-    <dialog class="steps" id="install-steps" aria-labelledby="install-steps-title">
+    <dialog class="steps" id="install-steps" aria-labelledby="install-steps-ios">
       <div class="steps-body">
-        <h2 id="install-steps-title">Add to Home Screen</h2>
-        <p>Tap Share, then Add to Home Screen.</p>
+        <div data-browser="firefoxAndroid" hidden>
+          <h2 id="install-steps-firefoxAndroid">Add to Home screen</h2>
+          <p>Tap the menu, then Add to Home screen or Install.</p>
+        </div>
+        <div data-browser="ios" hidden>
+          <h2 id="install-steps-ios">Add to Home Screen</h2>
+          <p>Tap Share, then Add to Home Screen.</p>
+        </div>
         <button class="steps-close" type="button">Close</button>
       </div>
     </dialog>

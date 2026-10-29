@@ -957,6 +957,10 @@ export interface RunText {
   };
 }
 
+// A browser that installs the game only from its own menu, with no install prompt: iOS, from
+// Share, and Firefox for Android, from its menu.
+export type MenuInstallBrowser = "firefoxAndroid" | "ios";
+
 // The text of the menus and pages over the game: Settings, Stats, Help, the End screen, the
 // pause menu, the badge celebration and the crash screen. A {name} in a line is filled by
 // code, and each line may use only the names src/home/menuText.ts lists for it.
@@ -1018,9 +1022,11 @@ export interface MenuText {
     readonly install: string;
     readonly installButton: string;
     readonly installNote: string;
-    // The panel the row opens on iOS, where the browser has no install prompt.
-    readonly installSteps: string;
-    readonly installStepsTitle: string;
+    // The card the row opens in a browser that installs only from its own menu, with no install
+    // prompt: each such browser's title and steps.
+    readonly installSteps: Readonly<
+      Record<MenuInstallBrowser, { readonly steps: string; readonly title: string }>
+    >;
     readonly motion: string;
     readonly motionNote: string;
     readonly music: string;

@@ -7,9 +7,10 @@ import {
   type MediaQueryLike,
   watchInstall,
 } from "./installFlow";
-import type { InstallState } from "./installState";
+import type { InstallState, MenuInstallBrowser } from "./installState";
 
 const ANDROID = "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Chrome/140.0";
+const FIREFOX_ANDROID = "Mozilla/5.0 (Android 15; Mobile; rv:144.0) Gecko/144.0 Firefox/144.0";
 const IPHONE = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15";
 
 class FakeMediaQuery extends EventTarget implements MediaQueryLike {
@@ -65,7 +66,8 @@ describe("watchInstall", () => {
       new FakeHost(ANDROID),
       "unsupported",
     ],
-    ["offers the steps on iOS", new FakeHost(IPHONE), "iosSteps"],
+    ["offers the menu steps on iOS", new FakeHost(IPHONE), "menuSteps"],
+    ["offers the menu steps in Firefox for Android", new FakeHost(FIREFOX_ANDROID), "menuSteps"],
     ["is installed when opened from the iOS Home Screen", new FakeHost(IPHONE, true), "installed"],
   ])("%s", (_, host, expected) => {
     expect(watchInstall(host).state()).toBe(expected);
@@ -103,11 +105,28 @@ describe("watchInstall", () => {
     expect(seen).toEqual(["prompt", after]);
   });
 
-  it.each<[string, string, InstallOutcome]>([
-    ["tells iOS to show the steps", IPHONE, "iosSteps"],
-    ["has nothing to install with and no prompt held", ANDROID, "unavailable"],
-  ])("%s", async (_, userAgent, outcome) => {
-    expect(await watchInstall(new FakeHost(userAgent)).install()).toBe(outcome);
+  it.each<[string, string, InstallOutcome, MenuInstallBrowser | undefined]>([
+    ["tells iOS to show its menu steps", IPHONE, "menuSteps", "ios"],
+    [
+      "tells Firefox for Android to show its menu steps",
+      FIREFOX_ANDROID,
+      "menuSteps",
+      "firefoxAndroid",
+    ],
+    ["has nothing to install with and no prompt held", ANDROID, "unavailable", undefined],
+  ])("%s", async (_, userAgent, outcome, browser) => {
+    const flow = watchInstall(new FakeHost(userAgent));
+    expect({ browser: flow.menuBrowser, outcome: await flow.install() }).toEqual({
+      browser,
+      outcome,
+    });
+  });
+
+  it("is installed when Firefox for Android opens the installed page standalone", () => {
+    const host = new FakeHost(FIREFOX_ANDROID);
+    const { flow, seen } = watched(host);
+    host.display.set(true);
+    expect([flow.state(), seen]).toEqual(["installed", ["installed"]]);
   });
 
   it("switches to installed on appinstalled and on an installed display mode", () => {

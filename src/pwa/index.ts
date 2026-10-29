@@ -8,7 +8,7 @@ import { guardBackNavigation } from "./backNavigation";
 import { PHONE_EVENTS } from "./events";
 import { type InstallFlow, type InstallOutcome, watchInstall } from "./installFlow";
 import { createInstallNudge, type InstallNudge } from "./installNudge";
-import type { InstallState } from "./installState";
+import type { InstallState, MenuInstallBrowser } from "./installState";
 import { type OrientationRelay, relayOrientationEvents, type Viewport } from "./orientation";
 import { serviceWorkerUrl } from "./serviceWorkerUrl";
 import { requestPersistentStorage, type StoragePersistence } from "./storagePersistence";
@@ -19,7 +19,7 @@ import { createScreenWakeLock, type ScreenWakeLock } from "./wakeLock";
 export { AUDIO_UNLOCK_EVENTS, unlockAudioOnFirstGesture } from "./audioUnlock";
 export { PHONE_EVENTS } from "./events";
 export type { InstallOutcome } from "./installFlow";
-export { type InstallState, offersInstall } from "./installState";
+export { type InstallState, type MenuInstallBrowser, offersInstall } from "./installState";
 export type { StoragePersistence } from "./storagePersistence";
 
 const SERVICE_WORKER_URL = "/sw.js";
@@ -194,10 +194,15 @@ export function onInstallStateChange(listener: (state: InstallState) => void): (
   return installFlow?.onChange(listener) ?? (() => undefined);
 }
 
-// Shows the browser's install prompt, or tells the caller to show the iOS steps. Call it from
-// the player's tap: the browser shows its prompt only during a gesture.
+// Shows the browser's install prompt, or tells the caller to show menuBrowser's steps. Call it
+// from the player's tap: the browser shows its prompt only during a gesture.
 export function installApp(): Promise<InstallOutcome> {
   return installFlow?.install() ?? Promise.resolve("unavailable");
+}
+
+// The browser that installs only from its own menu, whose steps installApp's menuSteps calls for.
+export function menuBrowser(): MenuInstallBrowser | undefined {
+  return installFlow?.menuBrowser;
 }
 
 // Whether the start screen should suggest installing now: once per device, while the state

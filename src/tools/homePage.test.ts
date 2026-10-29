@@ -102,6 +102,18 @@ describe("the home page's roster", () => {
     );
   });
 
+  it("gives every menu-installing browser its install steps as the data has them", async () => {
+    const html = await readFile(HOME_PAGE, "utf8");
+    const shown = Object.fromEntries(
+      [
+        ...html.matchAll(
+          /<div data-browser="(\w+)" hidden>\s*<h2 id="install-steps-\1">([^<]*)<\/h2>\s*<p>([^<]*)<\/p>/gu,
+        ),
+      ].map(([, browser, title, steps]) => [browser, { steps, title }]),
+    );
+    expect(shown).toEqual(gameData.menuText.settings.installSteps);
+  });
+
   it.each(pageFacts())("states %s as the data has it", async (_fact, sentence) => {
     const html = (await readFile(HOME_PAGE, "utf8")).replaceAll(/\s+/gu, " ");
     expect(html).toContain(sentence);
