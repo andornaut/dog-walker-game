@@ -9,10 +9,10 @@ import {
   outsidePressMove,
   outsideTapped,
 } from "../input/outsideTap";
-import { gamePoint, onBarePage } from "../input/pageTap";
 import { PHONE_EVENTS } from "../pwa";
 import { read } from "../rules/units";
 import { listenOnePress } from "./onePress";
+import { listenPagePresses } from "./pagePresses";
 import type { SceneKey } from "./sceneKeys";
 
 // Emitted on game.events, with whether sound is now muted, when a top bar's Sound button is
@@ -139,55 +139,39 @@ export function listenOutsideTap(
   });
 }
 
-// Calls onTap on a tap on the bare page beside the game's canvas (onBarePage) while scene is
-// running, takes input and open says a panel is open, so an overlay paused under another, or
-// holding its input off (guardScreenInput), never takes it. The page's listeners go when the
-// scene shuts down.
+// Calls onTap on a tap on the bare page beside the game's canvas (listenPagePresses) while scene
+// is running, takes input and open says a panel is open, so an overlay paused under another, or
+// holding its input off (guardScreenInput), never takes it.
 function listenPageTap(
   scene: Scene,
   tapMaxDistance: number,
   open: () => boolean,
   onTap: () => void,
 ): void {
-  const { canvas } = scene.game;
-  const bare = [document.documentElement, document.body, canvas.parentElement];
-  const toGame = (event: PointerEvent) =>
-    gamePoint(canvas.getBoundingClientRect(), scene.scale.width, {
-      x: event.clientX,
-      y: event.clientY,
-    });
-  const counts = (event: PointerEvent) =>
-    scene.sys.isActive() && scene.input.enabled && open() && onBarePage(bare, event.target);
+  const counts = () => scene.sys.isActive() && scene.input.enabled && open();
   let press: OutsidePress | undefined;
-  const down = (event: PointerEvent) => {
-    press = counts(event) ? { start: toGame(event), tapping: true } : undefined;
-  };
-  const move = (event: PointerEvent) => {
-    if (press !== undefined) {
-      press = outsidePressMove(tapMaxDistance, toGame(event), press);
-    }
-  };
-  const up = (event: PointerEvent) => {
-    const tapped =
-      press !== undefined &&
-      counts(event) &&
-      outsidePressMove(tapMaxDistance, toGame(event), press).tapping;
-    press = undefined;
-    if (tapped) {
-      onTap();
-    }
-  };
-  const cancel = () => {
-    press = undefined;
-  };
-  document.addEventListener("pointerdown", down);
-  document.addEventListener("pointermove", move);
-  document.addEventListener("pointerup", up);
-  document.addEventListener("pointercancel", cancel);
-  scene.events.once("shutdown", () => {
-    document.removeEventListener("pointerdown", down);
-    document.removeEventListener("pointermove", move);
-    document.removeEventListener("pointerup", up);
-    document.removeEventListener("pointercancel", cancel);
+  listenPagePresses(scene, {
+    cancel: () => {
+      press = undefined;
+    },
+    down: (_press, point) => {
+      press = counts() ? { start: point, tapping: true } : undefined;
+    },
+    move: (_press, point) => {
+      if (press !== undefined) {
+        press = outsidePressMove(tapMaxDistance, point, press);
+      }
+    },
+    up: (_press, point, onBare) => {
+      const tapped =
+        press !== undefined &&
+        onBare &&
+        counts() &&
+        outsidePressMove(tapMaxDistance, point, press).tapping;
+      press = undefined;
+      if (tapped) {
+        onTap();
+      }
+    },
   });
 }

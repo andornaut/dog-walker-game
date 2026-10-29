@@ -14,10 +14,13 @@ import {
 import type { GestureAction } from "../../input/gestures";
 import { holdRule } from "../../input/hold";
 import { walkKeyAction } from "../../input/keyBindings";
+import { clampInto, walkPagePoint } from "../../input/pageTap";
 import {
   idleTrack,
+  type PointerPhase,
   type PointerSample,
   type PointerTrack,
+  type Press,
   type PressMode,
   tickTrack,
   type TrackContext,
@@ -27,6 +30,7 @@ import type { LaneDirection } from "../../layout/lanes";
 import { read } from "../../rules/units";
 import type { SessionInput } from "../../runner/session";
 import { steerWalk, type Walk } from "../../runner/walk";
+import { listenPagePresses } from "../pagePresses";
 import { addTapBurst } from "../uiKit";
 import { leadWalk } from "./interpolate";
 import { LAYOUT } from "./stage";
@@ -54,6 +58,9 @@ export class RunInput {
     this.host = host;
   }
 
+  // A press on the page beside the canvas acts as one at the nearest point of the screen
+  // (walkPagePoint), so the margins below the dog cards and beside the road steer too; one
+  // beside or above the walk bar does nothing, and its moves and release then match no press.
   listen(): void {
     const { input } = this.scene;
     input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event));
@@ -61,6 +68,18 @@ export class RunInput {
     input.on("pointermove", (pointer: Input.Pointer) => this.onPointer("move", pointer));
     input.on("pointerup", (pointer: Input.Pointer) => this.onPointer("up", pointer));
     input.on("pointerupoutside", (pointer: Input.Pointer) => this.onPointer("up", pointer));
+    const onScreen = (point: Point) => clampInto(LAYOUT.screen, point);
+    listenPagePresses(this.scene, {
+      cancel: (press, point) => this.onPress("cancel", press, onScreen(point), false),
+      down: (press, point) => {
+        const landed = walkPagePoint(LAYOUT, point);
+        if (landed !== undefined) {
+          this.onPress("down", press, landed, false);
+        }
+      },
+      move: (press, point) => this.onPress("move", press, onScreen(point), false),
+      up: (press, point) => this.onPress("up", press, onScreen(point), false),
+    });
   }
 
   // The lane moves queued for the next step, which the pack's drawing leads with.
@@ -110,15 +129,22 @@ export class RunInput {
     return going ? walkPresses(this.host.runPause()) : "none";
   }
 
-  // Phaser reports a cancelled touch as a release with wasCanceled set. The run scene keeps
-  // running while a card, the zone celebration or the pause menu covers the walk, and the press
-  // is theirs then, but for what explains itself in what they leave in view. A press on what
-  // opens on a tap bursts as it lands, as a button's does, and its tap opens the explanation at
-  // once, the burst playing on over it.
+  // Phaser reports a cancelled touch as a release with wasCanceled set.
   private onPointer(phase: "down" | "move" | "up", pointer: Input.Pointer): void {
+    const press = { downTime: pointer.downTime, id: pointer.id };
+    const point = { x: pointer.x, y: pointer.y };
+    const onButton = phase === "down" && topBarButtonAt(point.x, point.y) !== undefined;
+    this.onPress(phase === "up" && pointer.wasCanceled ? "cancel" : phase, press, point, onButton);
+  }
+
+  // A press on the canvas or on the page beside it, at point in game pixels. onButton: it went
+  // down on a walk-bar button. The run scene keeps running while a card, the zone celebration or
+  // the pause menu covers the walk, and the press is theirs then, but for what explains itself
+  // in what they leave in view. A press on what opens on a tap bursts as it lands, as a button's
+  // does, and its tap opens the explanation at once, the burst playing on over it.
+  private onPress(phase: PointerPhase, press: Press, point: Point, onButton: boolean): void {
     const presses = this.presses();
     const context = this.context(presses);
-    const point = { x: pointer.x, y: pointer.y };
     if (phase === "down" && presses !== "none" && this.pointers.open === undefined) {
       const target = context.explainAt(point);
       if (target !== undefined && context.opensOnTap(target)) {
@@ -126,10 +152,10 @@ export class RunInput {
       }
     }
     const sample: PointerSample = {
-      onButton: phase === "down" && topBarButtonAt(pointer.x, pointer.y) !== undefined,
-      phase: phase === "up" && pointer.wasCanceled ? "cancel" : phase,
+      onButton,
+      phase,
       point,
-      press: { downTime: pointer.downTime, id: pointer.id },
+      press,
       timeMs: this.scene.game.loop.time,
     };
     const result = trackPointer(context, presses, sample, this.pointers);
