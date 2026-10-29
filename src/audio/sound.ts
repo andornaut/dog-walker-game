@@ -6,7 +6,16 @@ import type { Encounter, EncounterId } from "../data/types";
 import { clamp01 } from "../lib/numbers";
 
 export type BaseCue =
-  "badge" | "bark" | "bump" | "cardOpen" | "fired" | "newBest" | "tip" | "treat";
+  | "badge"
+  | "bark"
+  | "bump"
+  | "cardOpen"
+  | "dodge"
+  | "fired"
+  | "gearFound"
+  | "newBest"
+  | "tip"
+  | "treat";
 // An encounter's hit moment, played with its own sound: an obstacle's or a lucky find's.
 type HitCue = `hit:${EncounterId}` | `luckyHit:${EncounterId}`;
 export type SoundCue = BaseCue | HitCue;
@@ -19,10 +28,22 @@ export const SOUND_KEYS: Readonly<Record<BaseCue, string>> = {
   bark: "sfx-bark",
   bump: "sfx-bump",
   cardOpen: "sfx-card",
+  dodge: "sfx-dodge",
   fired: "sfx-fired",
+  gearFound: "sfx-gear-found",
   newBest: "sfx-new-best",
   tip: "sfx-tip",
   treat: "sfx-treat",
+};
+
+// CLEANUP (added 2026-10-28): the sounds a cue names that art has yet to draw, each with the
+// shipped sound that plays in its place. Remove an entry once its key is in
+// public/art/manifest.json; a test fails until it is removed.
+export const STAND_IN_SOUNDS: Readonly<Record<string, string>> = {
+  "sfx-dodge": "sfx-bark",
+  "sfx-gear-found": "sfx-badge",
+  "sfx-lost-wallet": "sfx-tip",
+  "sfx-petting-neighbour": "sfx-treat",
 };
 
 // The cues the home screen and the menus it opens play: Settings' volume preview and a
@@ -33,9 +54,17 @@ export function hitCue(kind: Encounter["kind"], encounter: EncounterId): HitCue 
   return kind === "lucky" ? `${LUCKY_HIT_PREFIX}${encounter}` : `${HIT_PREFIX}${encounter}`;
 }
 
-// The keys a cue may play, in preference order: an obstacle hit's own sfx-hit-<encounter>,
-// then the bump; a lucky hit's own sfx-<encounter>, with nothing in its place.
+// The keys a cue may play, in preference order: a cue's own sound, an obstacle hit's own
+// sfx-hit-<encounter> then the bump, a lucky hit's own sfx-<encounter>; each key art has yet to
+// draw followed by its stand-in (STAND_IN_SOUNDS).
 export function soundKeysOf(cue: SoundCue): readonly string[] {
+  return ownKeysOf(cue).flatMap((key) => {
+    const standIn = STAND_IN_SOUNDS[key];
+    return standIn === undefined ? [key] : [key, standIn];
+  });
+}
+
+function ownKeysOf(cue: SoundCue): readonly string[] {
   if (isBaseCue(cue)) {
     return [SOUND_KEYS[cue]];
   }

@@ -33,7 +33,7 @@ import {
   ZONE_PIPS_KEY,
 } from "../assets/spriteKeys";
 import { musicKeysOf } from "../audio/music";
-import { hitCue, SOUND_KEYS, soundKeysOf } from "../audio/sound";
+import { hitCue, SOUND_KEYS, soundKeyFor, soundKeysOf, STAND_IN_SOUNDS } from "../audio/sound";
 import { gameData } from "../data";
 import type { CardSource, EncounterId, ZoneId } from "../data/types";
 import { helpPicture, TOUCH_DRAG } from "../help/helpPictures";
@@ -585,8 +585,16 @@ describe("depth variants", () => {
 describe("sound art", () => {
   const sounds = new Map(manifest.sounds.map((sound) => [sound.key, sound]));
 
-  it("names a manifest sound for every cue", () => {
-    expect(Object.values(SOUND_KEYS).filter((key) => !sounds.has(key))).toEqual([]);
+  it("plays a manifest sound for every cue", () => {
+    const loaded = (key: string) => sounds.has(key);
+    expect(keysOf(SOUND_KEYS).filter((cue) => soundKeyFor(loaded, cue) === undefined)).toEqual([]);
+  });
+
+  // A stand-in plays only until art draws the sound it stands in for, then its entry goes.
+  it("stands in a shipped sound only for a sound art has yet to draw", () => {
+    const entries = Object.entries(STAND_IN_SOUNDS);
+    expect(entries.filter(([wanted]) => sounds.has(wanted)).map(([wanted]) => wanted)).toEqual([]);
+    expect(entries.filter(([, standIn]) => !sounds.has(standIn))).toEqual([]);
   });
 
   it("plays a looping music in every zone", () => {

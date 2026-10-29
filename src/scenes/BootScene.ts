@@ -23,7 +23,7 @@ import {
   ownerFaceKey,
   ROAD_SPRITE_SIZE,
 } from "../assets/spriteKeys";
-import { HOME_CUES, SOUND_KEYS } from "../audio/sound";
+import { HOME_CUES, soundKeysOf } from "../audio/sound";
 import { gameData } from "../data";
 import type { EncounterId } from "../data/types";
 import { devRunLoadout, namesRunSetup } from "../dev/devStart";
@@ -54,7 +54,7 @@ import { ensurePlaceholder, measureSprite, playTag } from "./sprites";
 const FRAME_BUDGET_MS = 8;
 const BEHIND_FRAME_BUDGET_MS = 4;
 
-const HOME_SOUND_KEYS: ReadonlySet<string> = new Set(HOME_CUES.map((cue) => SOUND_KEYS[cue]));
+const HOME_SOUND_KEYS: ReadonlySet<string> = new Set(HOME_CUES.flatMap((cue) => soundKeysOf(cue)));
 const loadsSoundFirst = (key: string): boolean => HOME_SOUND_KEYS.has(key);
 const always = () => true;
 

@@ -1,6 +1,6 @@
 import type { Scene } from "phaser";
 
-import { hitCue } from "../../audio/sound";
+import { stepCues } from "../../audio/stepCues";
 import { gameData } from "../../data";
 import type { DogId, HintId, HintTrigger } from "../../data/types";
 import { type BuffPop, leashPops, popsOf, stepValues, walkStartMarks } from "../../hud/buffMarks";
@@ -273,15 +273,15 @@ export class RunMoments {
     }
   }
 
-  // Sounds, bursts, labels, hints and strip lines for what happened in a step, around the pack
+  // Sounds (stepCues), bursts, labels, hints and strip lines for what happened in a step, around the pack
   // at pack.
   walked(step: WalkStep, pack: Point): void {
     this.pack = pack;
     this.popBuffs(popsOf(gameData, stepValues(step)));
     this.deps.items.strike(step);
     const sound = soundboardOf(this.scene);
+    stepCues(gameData, step).forEach((cue) => sound.play(cue));
     if (step.tips.length > 0) {
-      sound.play("tip");
       this.hint({ kind: "tip" });
     }
     // A tip's label pops by the cash, wherever its pickup (changeLabels).
@@ -291,7 +291,6 @@ export class RunMoments {
     for (const item of step.collected) {
       playEffect(this.scene, "fx-sparkle", "play", overPack(pack), DEPTH.fx);
       if (item.kind === "treat") {
-        sound.play("treat");
         this.hint({ kind: "treat" });
       }
     }
@@ -324,7 +323,6 @@ export class RunMoments {
         continue;
       }
       this.playBumpHit(bump, step, pack);
-      sound.play("bump");
       this.addChanges(
         overPack(pack),
         [bump.change, bump.cash].flatMap((change) => (change === null ? [] : [change])),
@@ -339,7 +337,6 @@ export class RunMoments {
     for (const { dog, encounter, outcome } of step.contacts) {
       const still = this.deps.still();
       const { kind } = gameData.encounters[encounter];
-      sound.play(hitCue(kind, encounter));
       const feet = this.deps.pack.dogFeet(dog);
       if (feet !== undefined) {
         const moment = { depth: DEPTH.fx, holdMs: stopMs(step) };
@@ -377,7 +374,6 @@ export class RunMoments {
     }
     for (const hit of step.encounterHits) {
       const { kind } = gameData.encounters[hit.encounter];
-      sound.play(hitCue(kind, hit.encounter));
       this.deps.pack.stumble(this.deps.still(), DOG_REACTIONS.hit);
       this.playHit(hit, step, pack);
       if (kind === "obstacle") {
@@ -399,13 +395,14 @@ export class RunMoments {
     this.fired(outcome.fired, outcome.state);
   }
 
-  // A spare treat given back: its strip line, and the treat flying from its gear's well to the
+  // A spare treat given back: its strip line, the treat sound, and the treat flying from its gear's well to the
   // dog's card, where it plays as a treat grabbed (SpareTreatCue).
   private spareTreatSpent(change: HeartChange | null, run: RunState): void {
     if (change === null) {
       return;
     }
     this.changes.push(change);
+    soundboardOf(this.scene).play("treat");
     this.say(spareTreatUsedLine(gameData, change));
     const cue: SpareTreatCue = {
       dog: change.dog,
