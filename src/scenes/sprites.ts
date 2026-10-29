@@ -24,13 +24,18 @@ const ANIMATION_STOP = "animationstop";
 
 const measured = new Map<string, SpriteMetrics>();
 const tops = new Map<string, number>();
+const tagTops = new Map<string, number>();
 let scanCanvas: HTMLCanvasElement | undefined;
 
-// The opaque bounds of a loaded sprite's first frame, from one read of its pixels, in the
-// whole frame: a trimmed frame's pixels are drawn at their offset in it.
-function firstFrameBounds(scene: Scene, key: string): PixelBounds | undefined {
+// The opaque bounds of a loaded sprite's frame, its first by default, from one read of its
+// pixels, in the whole frame: a trimmed frame's pixels are drawn at their offset in it.
+function firstFrameBounds(
+  scene: Scene,
+  key: string,
+  name: string | number | undefined = undefined,
+): PixelBounds | undefined {
   const texture = scene.textures.get(key);
-  const frame = texture.get(texture.getFrameNames()[0] ?? "__BASE");
+  const frame = texture.get(name ?? texture.getFrameNames()[0] ?? "__BASE");
   const { cutHeight, cutWidth, cutX, cutY, realHeight: height, realWidth: width } = frame;
   scanCanvas ??= document.createElement("canvas");
   scanCanvas.width = width;
@@ -73,6 +78,22 @@ export function spriteTopY(scene: Scene, key: string): number {
     key,
     () => (scene.textures.exists(key) ? (firstFrameBounds(scene, key)?.top ?? 0) : 0),
     tops,
+  );
+}
+
+// A loaded sprite's top opaque row across its tag's frames, read from their pixels on first use
+// and kept; 0 while the art or the tag is missing.
+export function tagTopY(scene: Scene, key: string, tag: string): number {
+  return getOrInsertComputed(
+    animationKey(key, tag),
+    () => {
+      const frames = scene.anims.get(animationKey(key, tag))?.frames ?? [];
+      const rows = frames.flatMap(
+        ({ textureFrame }) => firstFrameBounds(scene, key, textureFrame)?.top ?? [],
+      );
+      return rows.length === 0 ? 0 : Math.min(...rows);
+    },
+    tagTops,
   );
 }
 

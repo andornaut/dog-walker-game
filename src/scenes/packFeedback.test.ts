@@ -77,7 +77,7 @@ describe("a floating label over the road", () => {
     },
     {
       name: "the forgiven label",
-      play: (scene: Scene) => playForgiven(scene, STILL, { popped: false, top: TOP }),
+      play: (scene: Scene) => playForgiven(scene, STILL, { pop: null, top: TOP }),
       text: gameData.runText.forgiven,
     },
     {

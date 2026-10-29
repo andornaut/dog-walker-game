@@ -68,6 +68,23 @@ export function heartPopFrame(dogTop: Point): Point {
   return { x: dogTop.x - 16, y: dogTop.y + 4 - 31 };
 }
 
+// A floating chip, or a buff's charm with its value's chip, over a dog whose heart pops in the
+// same walk step stacks over the pop: its bottom POP_STACK.gap rows over the pop's top opaque
+// row, inkTop rows into its frame, both centred on the dog. A pop the walk draws (clampTop
+// given) moves down when the stack would rise past clampTop, the walk view's top, keeping the
+// gap; the HUD's pops keep their place.
+export const POP_STACK = { gap: 2 } as const;
+
+export function stackOverPop(
+  pop: { frame: Point; inkTop: number },
+  height: number,
+  clampTop: number | null = null,
+): { bottom: number; frame: Point } {
+  const bottom = pop.frame.y + pop.inkTop - POP_STACK.gap;
+  const down = clampTop === null ? 0 : Math.max(0, clampTop - (bottom - height));
+  return { bottom: bottom + down, frame: { x: pop.frame.x, y: pop.frame.y + down } };
+}
+
 // The heart pop's number, by the top-left of its capitals (5 rows at 1x): from the frame's
 // x 31 with its capitals centred on row 16, or ending at the frame's x 1 when that would run
 // off the screen; raised to end above bounds.bottom when it would reach that far down.

@@ -3,7 +3,7 @@ import type { GameObjects, Scene } from "phaser";
 import { animationKey } from "../assets/asepriteAnimations";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import { chipLeft, FEEDBACK, heartPopFrame, type LabelAnchor } from "../hud/feedback";
+import { chipLeft, FEEDBACK, type LabelAnchor, stackOverPop } from "../hud/feedback";
 import { changeChipAt } from "../hud/hudLanes";
 import { COMIC_WORDS } from "../layout/comicWords";
 import type { Point } from "../lib/rect";
@@ -42,17 +42,32 @@ export function playDodge(scene: Scene, moment: PackMoment, dog: GameObjects.Spr
 }
 
 // A loss the walker's perk forgave: the forgiven label rising over the dog, from its top
-// opaque row, or from over the heart pop when part of the loss still costs a heart.
+// opaque row, or stacked over the heart pop over it (stackOverPop), pop's frame placed by the
+// caller, centred on the pop.
 export function playForgiven(
   scene: Scene,
   moment: PackMoment,
-  dog: { readonly popped: boolean; readonly top: Point },
+  dog: { readonly pop: HeartPopPlace | null; readonly top: Point },
 ): void {
-  const { popped, top } = dog;
-  const lineBottom = (popped ? heartPopFrame(top).y : top.y) - 2;
-  const anchor = { centreX: top.x, lineBottom };
+  const { pop, top } = dog;
+  const anchor =
+    pop === null
+      ? { centreX: top.x, lineBottom: top.y - 2 }
+      : { centreX: pop.frame.x + 16, lineBottom: stackOverPop(pop, 0).bottom };
   const { forgiven } = FEEDBACK;
   floatLabel(scene, moment, anchor, gameData.runText.forgiven, PALETTE.forest, forgiven);
+}
+
+// A heart pop's 32x32 frame's top-left, and its top opaque row in it.
+export interface HeartPopPlace {
+  readonly frame: Point;
+  readonly inkTop: number;
+}
+
+// The height of a floating label's chip, its text on one line.
+export function floatChipHeight(scene: Scene): number {
+  const shown = { lines: 1, scale: TEXT_SCALE, width: 0 };
+  return changeChipAt(pixelFontMetrics(scene, "body"), { x: 0, y: 0 }, shown).chip.height;
 }
 
 // Body text at 2x on a cream chip, as a change label's (CHANGE_CHIP), centred on the anchor

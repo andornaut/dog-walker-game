@@ -1,7 +1,7 @@
 import type { CharmEffect, DogId, Effect, GameData } from "../data/types";
 import { fillLine, fillNames } from "../lib/lines";
-import { amountText } from "../rules/causes";
-import type { CardView, OptionView } from "../rules/choices";
+import { amountText, changeAmount } from "../rules/causes";
+import { type CardView, type OptionView, outcomeChanges } from "../rules/choices";
 import { packSizeRaise, placeInPack, SIZE_AGILITY } from "../rules/dogs";
 import { laneSpeedText } from "../rules/effectText";
 import type { ModifiedSubject, ModifiedValue } from "../rules/modified";
@@ -352,6 +352,20 @@ export function stepValues(
       null;
     return { bump: bump !== undefined, dog, item, value };
   });
+}
+
+// The dogs whose heart pops over them in a walk step: each whose hearts a bump, a treat or a
+// contact changed.
+export function heartPopDogs(step: Pick<WalkStep, "bumps" | "contacts" | "treats">): DogId[] {
+  const changes = [
+    ...step.bumps.flatMap(({ change, dodged }) => (dodged || change === null ? [] : [change])),
+    ...step.treats.flatMap(({ change }) => (change === null ? [] : [change])),
+    ...step.contacts.flatMap(({ outcome }) => outcomeChanges(outcome)),
+  ];
+  const dogs = changes.flatMap((change) =>
+    change.kind === "hearts" && changeAmount(change) !== 0 ? [change.dog] : [],
+  );
+  return [...new Set(dogs)];
 }
 
 // Good leash's pop over a dog that would have strained toward a squirrel: one per squirrel.

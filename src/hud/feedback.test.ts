@@ -4,10 +4,13 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
+import { CHARM } from "../layout/buffLayout";
 import { cents } from "../lib/units";
+import { fontFileMetrics } from "../testing/fontInk";
 import { decodePng } from "../tools/atlas/atlasBuild";
 import { readBitmapFont } from "../tools/fontFile";
 import { plainMarks } from "../ui/pixelFont";
+import { TEXT_SCALE } from "../ui/textFit";
 import {
   chipLeft,
   FEEDBACK,
@@ -19,10 +22,11 @@ import {
   type MoneyTick,
   reachIconBeside,
   retarget,
+  stackOverPop,
   tickMs,
   tickShown,
 } from "./feedback";
-import { REACH_ICON } from "./hudLanes";
+import { changeChipAt, REACH_ICON } from "./hudLanes";
 
 describe("heartLabelAt", () => {
   it("sets the number right of the heart, left of it at the screen's edge, and out of the lane below", () => {
@@ -159,4 +163,61 @@ describe("the small heart a reached treat flies", () => {
     expect(heartInkLeft - (icon.x + size)).toBe(gap);
     expect(icon.y + size / 2).toBe(heart.y);
   });
+});
+
+describe("a chip stacked over a dog's heart pop", () => {
+  // The top opaque row of a heart sprite's pop tag, across its frames, read from the art.
+  const popInkTop = (key: string): number => {
+    const sheet = JSON.parse(readFileSync(`public/art/sprites/${key}.json`, "utf8")) as {
+      frames: Record<string, { frame: { h: number; w: number; x: number; y: number } }>;
+      meta: { frameTags: { from: number; name: string; to: number }[] };
+    };
+    const image = decodePng(readFileSync(`public/art/sprites/${key}.png`));
+    const pop = sheet.meta.frameTags.find(({ name }) => name === "pop");
+    const frames = Object.values(sheet.frames).slice(pop?.from ?? 0, (pop?.to ?? -1) + 1);
+    return Math.min(
+      ...frames.map(({ frame }) =>
+        Array.from({ length: frame.h }, (_, y) => y).findIndex((y) =>
+          Array.from({ length: frame.w }, (_, x) => x).some(
+            (x) => (image.data[((frame.y + y) * image.width + frame.x + x) * 4 + 3] ?? 0) > 0,
+          ),
+        ),
+      ),
+    );
+  };
+  const chip = changeChipAt(
+    fontFileMetrics("font-body"),
+    { x: 0, y: 0 },
+    { lines: 1, scale: TEXT_SCALE, width: 0 },
+  ).chip.height;
+  const DOG = { x: 180, y: 300 };
+  const WALK_TOP = 40;
+  const cases = [
+    { block: chip, kind: "the forgiven label" },
+    { block: CHARM.size, kind: "a buff's charm under its value" },
+  ].flatMap(({ block, kind }) =>
+    ["fx-heart-gain", "fx-heart-loss"].map((art) => ({ art, block, kind })),
+  );
+
+  it.each(cases)("sets $kind's bottom 2 rows over $art's top opaque row", ({ art, block }) => {
+    const inkTop = popInkTop(art);
+    const frame = heartPopFrame(DOG);
+    const placed = stackOverPop({ frame, inkTop }, block, WALK_TOP);
+    expect(placed.frame).toEqual(frame);
+    expect(frame.y + inkTop - placed.bottom).toBe(2);
+    expect(placed.bottom - block).toBeGreaterThanOrEqual(WALK_TOP);
+  });
+
+  it.each(cases)(
+    "moves $art's walk pop down, keeping the gap, when $kind would rise past the walk view",
+    ({ art, block }) => {
+      const inkTop = popInkTop(art);
+      const frame = heartPopFrame({ x: DOG.x, y: WALK_TOP });
+      const placed = stackOverPop({ frame, inkTop }, block, WALK_TOP);
+      expect(placed.bottom - block).toBe(WALK_TOP);
+      expect(placed.frame.x).toBe(frame.x);
+      expect(placed.frame.y + inkTop - placed.bottom).toBe(2);
+      expect(stackOverPop({ frame, inkTop }, block).frame).toEqual(frame);
+    },
+  );
 });

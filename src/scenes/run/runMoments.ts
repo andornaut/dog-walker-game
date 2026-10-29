@@ -5,6 +5,7 @@ import { gameData } from "../../data";
 import type { DogId, HintId, HintTrigger } from "../../data/types";
 import {
   type BuffPop,
+  heartPopDogs,
   leashPops,
   reachIcons,
   type ReachLine,
@@ -14,7 +15,7 @@ import {
   walkStartMarks,
 } from "../../hud/buffMarks";
 import { type EffectItem, effectItems, gearWell } from "../../hud/effectIcons";
-import { heartPopFrame } from "../../hud/feedback";
+import { heartPopFrame, stackOverPop } from "../../hud/feedback";
 import { changeLabels, reachedLabels, totalLabel } from "../../hud/hudView";
 import type { MessageLine } from "../../hud/messageStrip";
 import {
@@ -63,7 +64,6 @@ import type { Random } from "../../lib/random";
 import type { Point, Rect } from "../../lib/rect";
 import {
   type Change,
-  changeAmount,
   type HeartChange,
   heartsForgiven,
   type MoneyChange,
@@ -92,12 +92,12 @@ import { floatValue, popCharm } from "../buffCharm";
 import { FEEDBACK_ART } from "../feedbackArt";
 import { hitLabelOf, hitLook, playEdgeFlash, playHitMoment } from "../hitMoment";
 import { sayMessage } from "../messageStripView";
-import { playDodge, playForgiven } from "../packFeedback";
+import { floatChipHeight, type HeartPopPlace, playDodge, playForgiven } from "../packFeedback";
 import { earnedIfBanked, shownHints } from "../profileStore";
 import { dogTop } from "../pullSignals";
 import { SCENE_KEYS } from "../sceneKeys";
 import { soundboardOf } from "../soundboard";
-import { playEffect } from "../sprites";
+import { playEffect, tagTopY } from "../sprites";
 import { flashWhite, moveObstacle, playHitEffects, shakeRoad } from "./hitFx";
 import type { ItemViews } from "./itemViews";
 import type { PackView } from "./packView";
@@ -192,6 +192,9 @@ export class RunMoments {
   private endMoments = { ...NO_END_MOMENTS };
   // The pack's point on the last step walked, for pops away from a dog or an item.
   private pack: Point | undefined;
+  // The heart pops over dogs in the step being walked, which its charms and forgiven labels
+  // stack over (stackOverPop).
+  private heartPops = new Map<DogId, HeartPopPlace>();
   private readonly scene: Scene;
   // Where the current zone's changes start in changes.
   private zoneStart = 0;
@@ -244,11 +247,12 @@ export class RunMoments {
   }
 
   private forgiven(change: HeartChange, atMs: number): void {
+    const pop = this.heartPops.get(change.dog);
     const label = () => {
       const top = this.deps.pack.dogPoint(change.dog);
       if (top !== undefined) {
         const moment = { depth: DEPTH.fx, still: this.deps.still() };
-        playForgiven(this.scene, moment, { popped: changeAmount(change) !== 0, top });
+        playForgiven(this.scene, moment, { pop: pop ?? null, top });
       }
     };
     if (atMs > 0) {
@@ -293,6 +297,7 @@ export class RunMoments {
   // around the pack at pack.
   walked(step: WalkStep, pack: Point): void {
     this.pack = pack;
+    this.heartPops = this.hudHeartPops(step);
     const marks = roadMarks(gameData, stepValues(step));
     this.markRoad(marks);
     const reached = reachIcons(marks.reaches);
@@ -405,6 +410,25 @@ export class RunMoments {
         this.flashBump({ encounter: hit.encounter, kind: "encounter" });
       }
     }
+    this.heartPops = new Map();
+  }
+
+  // The HUD's heart pop over each dog whose hearts the step changes, where heartFeedback.ts
+  // plays it.
+  private hudHeartPops(step: WalkStep): Map<DogId, HeartPopPlace> {
+    const inkTop = this.popInkTop();
+    return new Map(
+      heartPopDogs(step).flatMap((dog): [DogId, HeartPopPlace][] => {
+        const top = this.deps.pack.dogPoint(dog);
+        return top === undefined ? [] : [[dog, { frame: heartPopFrame(top), inkTop }]];
+      }),
+    );
+  }
+
+  // The heart pops' top opaque row, fx-heart-gain's and fx-heart-loss's pop tags alike.
+  private popInkTop(): number {
+    const { heartGain, heartLoss } = FEEDBACK_ART;
+    return Math.min(...[heartGain, heartLoss].map(({ key, pop }) => tagTopY(this.scene, key, pop)));
   }
 
   // The debuffs that started and ended between two run states, on the message strip.
@@ -587,6 +611,13 @@ export class RunMoments {
       case "walker":
         return charmByWalkerRect(dogTop(this.deps.pack.walkerSprite()));
       case "dog": {
+        const under = this.heartPops.get(pop.at.dog);
+        if (under !== undefined) {
+          const { size } = CHARM;
+          const { bottom } = stackOverPop(under, size);
+          const x = Math.round(under.frame.x + 16 - size / 2);
+          return { height: size, width: size, x, y: bottom - size };
+        }
         const top = this.deps.pack.dogPoint(pop.at.dog);
         return top === undefined ? overPackRect() : charmOverRect(top.x, top.y);
       }
@@ -624,13 +655,21 @@ export class RunMoments {
   }
 
   // A forgiven bump's heart over its dog: the loss pop (the HUD plays it for a loss forgiven in
-  // part), turning to the gain pop at switchMs.
+  // part), turning to the gain pop at switchMs, moved down when its forgiven label stacked over
+  // it would rise past the walk view's top (stackOverPop).
   private forgivenHeart(forgiven: NonNullable<BuffPop["forgiven"]>): void {
     const top = this.deps.pack.dogPoint(forgiven.dog);
     if (top === undefined) {
       return;
     }
-    const frame = heartPopFrame(top);
+    const inkTop = this.popInkTop();
+    const height = floatChipHeight(this.scene);
+    const { frame } = stackOverPop(
+      { frame: heartPopFrame(top), inkTop },
+      height,
+      LAYOUT.walkView.y,
+    );
+    this.heartPops.set(forgiven.dog, { frame, inkTop });
     const centre = { x: frame.x + 16, y: frame.y + 16 };
     const pop = (art: { key: string; pop: string }) =>
       playEffect(this.scene, art.key, art.pop, centre, DEPTH.fx);
