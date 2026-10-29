@@ -71,7 +71,7 @@ Every piece is very readable, clean and not busy, judged at the size it's shown:
 - Character shading is cel: per material a light, a base and a shade, the shade a crescent along the lower-right rim that follows the form (`Grid.cel`), never a diagonal plane or per-pixel texture. Markings are a few flat patches. A face seen from the front stays clean: flat skin with a 1px shadow down its near (right) edge beside the eyes, never across the jaw or mouth (`face_disc`).
 - Effects (`fx-`) take a fixed 1px rim: plum, navy for water (`fx-splash`). `fx-heart-gain` and `fx-heart-loss` take `ui-fires`' 1px ink line inside a 1px white rim; `fx-dust` and `fx-tap` have no rim. Hazard warnings are outlined in ink.
 - Ground decals have no outline and no shadow.
-- Icons come in two kinds. Chrome glyphs on `ui-icon-button` (`icon-close`, `icon-help`, `icon-home`, `icon-logbook`, `icon-pause`, `icon-play`, `icon-settings`, `icon-sound`) are two flat tones with no outline. Content icons (`icon-gear-*`, `icon-trait-*`, `icon-zone-*`, `item-*`, the badges' rings and the like) take `icon_edge`: two ramp steps darker, then on down the ramp until the outline holds 3:1 on cream and tan. A picture that fills its frame keeps a 1px clear ring for the outline.
+- Icons come in two kinds. Chrome glyphs on `ui-icon-button` (`icon-close`, `icon-exit`, `icon-help`, `icon-home`, `icon-logbook`, `icon-pause`, `icon-play`, `icon-settings`, `icon-sound`) are two flat tones with no outline. Content icons (`icon-gear-*`, `icon-trait-*`, `icon-zone-*`, `item-*`, the badges' rings and the like) take `icon_edge`: two ramp steps darker, then on down the ramp until the outline holds 3:1 on cream and tan. A picture that fills its frame keeps a 1px clear ring for the outline.
 - A gear item drawn at several sizes (`item-<gear>` at 32, `icon-gear-<gear>` at 16, `icon-gear-<gear>-20` at 20) keeps the same colours at each.
 - Sprites carry no shadow; the game draws one in the road's darker ramp colour. The bouncing ball carries its own.
 
@@ -170,6 +170,7 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 ### Icon buttons and top bars
 
 - Each `ui-icon-button` face holds its 16×16 icon at +2,+1 (+2,+3 pressed), centred in a hit of at least 34×44. Positions are `walkBar.buttons` and `scenes.home` in `shared/export/layout.json`.
+- `icon-settings` (a cog), `icon-exit` (a doorway with an arrow leaving it to the right) and `icon-home` (a house) keep the shapes the sibling duck-platformer game uses for the same buttons; each game colours them in its own palette.
 - `icon-sound`: `on` is a speaker with two waves, `off` the same speaker with a pink X. Settings rows lead with their `-panel` icon (`off` adds a dred X).
 - Every top bar (the start screen's, the walk bar, `ui-walk-bar`, and Help's) is 360×40 of flat plum with one trim: a dbrown line on row 1 and its last three rows brown, dbrown and ink. Its wells and buttons sit 3 rows clear of the trim, or are centred between it. The start screen's top bar and the walk bar show the bank in an ink well with no coin: an amber "$" (9.71:1 on ink) then the amount in cream (12.44:1). Their icon buttons line up: the start screen's Logbook, Help, Sound and Settings sit over the walk bar's Help, Sound, Settings and Pause.
 

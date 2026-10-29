@@ -13936,6 +13936,10 @@
       "png": "images/icon-dog-slot.png"
     },
     {
+      "key": "icon-exit",
+      "png": "images/icon-exit.png"
+    },
+    {
       "key": "icon-fired",
       "png": "images/icon-fired.png"
     },

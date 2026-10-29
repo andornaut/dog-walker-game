@@ -2,7 +2,7 @@
 """Draw the UI kit: icons, nine-slice panels and buttons, the hint bubble and badges.
 
 Images (16x16 icons unless noted): icon-pause, icon-play, icon-home, icon-help, icon-close,
-icon-logbook, icon-settings, icon-share (Safari's Share button, on the iOS install steps card),
+icon-logbook, icon-settings, icon-exit, icon-share (Safari's Share button, on the iOS install steps card),
 icon-browser-menu (the browser menu button's three dots, on the Firefox for Android install steps
 card), icon-update (a green down arrow into a tray, on the home screen's update notice), icon-lock,
 icon-bill (a green dollar bill with a white $, on an item for sale the bank covers), icon-treat
@@ -133,8 +133,8 @@ def plate(face, lit, shade, w=24, h=24):
 
 
 # ---------- icons ----------
-# icon-pause, icon-play, icon-home, icon-help, icon-close, icon-logbook, icon-settings and icon-sound
-# sit on ui-icon-button's navy face, so they have no outline: cream holds 9.6:1 there, tan 6.6:1,
+# icon-pause, icon-play, icon-home, icon-help, icon-close, icon-logbook, icon-settings, icon-exit and
+# icon-sound sit on ui-icon-button's navy face, so they have no outline: cream holds 9.6:1 there, tan 6.6:1,
 # amber 7.5:1, orange 5.0:1 and pink 5.1:1. The -panel icons sit on the Settings panel's cream, and icon-share
 # and icon-browser-menu on the install steps card's: dbrown holds 5.85:1 there, plum 9.42:1 and dred 5.07:1.
 
@@ -415,21 +415,31 @@ def logbook_icon():
 
 
 def settings_icon():
-    """A cog: eight square teeth around a ring with a round hole, cream with tan on the
-    lower-right edges like the other navy-face glyphs."""
-    import math
-
+    """A cog: eight teeth around a ring with an eight-sided hole, the shape the sibling
+    duck-platformer game's Settings button shares, cream with tan on the lower-right edges like
+    the other navy-face glyphs."""
     g = Grid(16, 16)
-    cx = cy = 7.5
-    for y in range(16):
-        for x in range(16):
-            dx, dy = x + 0.5 - cx - 0.5, y + 0.5 - cy - 0.5
-            r = math.hypot(dx, dy)
-            a = (math.degrees(math.atan2(dy, dx)) + 22.5) % 45
-            tooth = 11 <= a <= 34 and r <= 7.2
-            if (r <= 5.2 or tooth) and r > 2.2:
-                edge = r > 4.4 if not tooth else r > 6.3
-                g.p(x, y, "tan" if edge and dx + dy > 0 else "cream")
+    for y, row in enumerate(["......ccct......", "......ccct......", "..ct..ccct..ct..", "..tcccccccccct..",
+                             "...ccccttccct...", "...ccct..tcct...", "ccccct....tcccct", "cccct......cccct",
+                             "cccct......cccct", "tttcct....cccttt", "...ccct..ccct...", "...ccccccccct...",
+                             "..ccttccccttct..", "..tt..ccct..tt..", "......ccct......", "......tttt......"]):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                g.p(x, y, "cream" if ch == "c" else "tan")
+    return g
+
+
+def exit_icon():
+    """The home top bar's Exit button: a doorway with an arrow leaving it to the right, the shape
+    the sibling duck-platformer game's shares, cream with tan on the lower-right edges like the
+    other navy-face glyphs."""
+    g = Grid(16, 16)
+    for y, row in enumerate([".cccccccct......", ".cctttttct......", ".ct.....ct..t...", ".ct.....tt..ct..",
+                             ".ct.........cct.", ".ct...ccccccccct", ".ct...ttttttccct", ".ct.........cct.",
+                             ".ct.....ct..ct..", ".ct.....ct..t...", ".cccccccct......", ".ttttttttt......"]):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                g.p(x, 2 + y, "cream" if ch == "c" else "tan")
     return g
 
 
@@ -1601,6 +1611,7 @@ IMAGES = {
     "icon-close": lambda: to_image(close().outlined(False)),
     "icon-logbook": lambda: to_image(logbook_icon().outlined(False)),
     "icon-settings": lambda: to_image(settings_icon().outlined(False)),
+    "icon-exit": lambda: to_image(exit_icon().outlined(False)),
     "icon-share": lambda: to_image(share_icon().outlined(False)),
     "icon-browser-menu": lambda: to_image(browser_menu_icon().outlined(False)),
     "icon-update": lambda: to_image(update_icon().outlined()),
