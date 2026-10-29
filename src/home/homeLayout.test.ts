@@ -40,6 +40,7 @@ import {
   CARD_TEXT_ROOM,
   cardBand,
   detailCardLayout,
+  detailCardRect,
   detailOwner,
   detailOwnerHeight,
   type DetailRow,
@@ -484,6 +485,50 @@ describe("a detail card", () => {
       fitsScreen(detailCardLayout(BODY, rowsOf(kind, card)).height);
     },
   );
+
+  // Every card's status or price is its last row, under the well at the text margin: the well's
+  // left edge, 42 across the screen.
+  it("sets the status at the text margin, the well's left edge", () => {
+    expect(pad).toBe(well.x);
+    expect(detailCardRect(SCREEN_CONFIG, 0).x + pad).toBe(42);
+  });
+
+  // A dog's or walker's status sits a paragraph's 28 rows under its last line's capitals.
+  it.each(
+    cards.flatMap(([kind, card]) => (kind === "gear" ? [] : [[card.title, kind, card] as const])),
+  )("sets %s's %s card's status 28 rows under its last line", (_, kind, card) => {
+    const rows = rowsOf(kind, card);
+    const { below } = detailCardLayout(BODY, rows);
+    const last = below.length - 1;
+    const lines = rows.below[last - 1];
+    const lastLineTop = (below[last - 1] ?? 0) + ((lines as number) - 1) * BODY.lineHeight * 2;
+    expect((below[last] ?? 0) - lastLineTop).toBe(28);
+  });
+
+  // An owned card is as tall as the same item's card for sale.
+  it.each([
+    ...dogs.map(
+      (dog) =>
+        [
+          dog,
+          dogDetail(gameData, all, cents(0), dog),
+          dogDetail(gameData, none, cents(0), dog),
+          "dog",
+        ] as const,
+    ),
+    ...gear.map(
+      (item) =>
+        [
+          item,
+          gearDetail(gameData, all, cents(0), loadout, item),
+          gearDetail(gameData, none, cents(0), loadout, item),
+          "gear",
+        ] as const,
+    ),
+  ])("makes %s's owned card as tall as its card for sale", (_, ownedCard, saleCard, kind) => {
+    const height = (card: DetailCard) => detailCardLayout(BODY, rowsOf(kind, card)).height;
+    expect(height(ownedCard)).toBe(height(saleCard));
+  });
 
   // The columns a line inks in the body font at scale.
   const inkRight = (scale: number, line: string) =>

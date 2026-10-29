@@ -122,17 +122,17 @@ export const HOME_LAYOUT = {
   // with its top rise above the text's capitals.
   bonus: { countGap: 14, gap: 4, heartInk: 7, rise: 1, scale: 2 },
   // The detail card that opens over the screen, centred and as tall as what it shows, in card
-  // pixels: the paper starts 2px in, the band runs across its top 6px in with the title's caps
-  // 7px below the band's top, and the well sits under the band, on a dog's card with its bottom
-  // row level with the owner's photo's. Rows of 2x body text, each wrapped within the card less
-  // pad, rowGap between rows: a detail card's subtitle and status beside the well from besideX,
-  // besideDy under well.y, and a price last under the well. A dog's card puts its owner's photo,
-  // name and role under its subtitle (detailOwner): their face-owner-<art> face (owner.face
-  // square) in the walk card's photo mat and frame, then owner.gap right of the photo their name
-  // in 2x body text and under it their role in 2x body text, wrapped, its capitals
-  // LABEL_HELP_GAP clear rows under the body font's lowest ink (helpCapDy). The name is in
-  // owner.nameColour: plum, where the walk card's name is tan, because this card's paper is cream
-  // and the walk card's is navy; the role is in owner.roleColour.
+  // pixels: the paper starts 2px in, the band runs across its top 6px in with the title's caps 7px
+  // below the band's top, and the well sits under the band, on a dog's card with its bottom row
+  // level with the owner's photo's. Rows of 2x body text, each wrapped within the card less pad,
+  // rowGap between rows: a detail card's subtitle beside the well from besideX, besideDy under
+  // well.y, and its status or price last under the well, at pad. A dog's card puts its owner's
+  // photo, name and role under its subtitle (detailOwner): their face-owner-<art> face (owner.face
+  // square) in the walk card's photo mat and frame, then owner.gap right of the photo their name in
+  // 2x body text and under it their role in 2x body text, wrapped, its capitals LABEL_HELP_GAP
+  // clear rows under the body font's lowest ink (helpCapDy). The name is in owner.nameColour: plum,
+  // where the walk card's name is tan, because this card's paper is cream and the walk card's is
+  // navy; the role is in owner.roleColour.
   card: {
     band: { height: 24, inset: 6, titleY: 7 },
     besideDy: 4,

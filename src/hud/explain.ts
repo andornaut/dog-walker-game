@@ -94,7 +94,6 @@ export function explainDetail(
               item.found === true
                 ? {
                     ...card,
-                    forSale: false,
                     status: text.foundStatus,
                     title: effectName(data, item),
                   }
@@ -117,7 +116,6 @@ export function explainDetail(
           const { effect, name } = data.upgrades[item.upgrade];
           return {
             card: {
-              forSale: false,
               lines: [effect],
               locked: false,
               status: text.upgradeStatus,
@@ -141,7 +139,6 @@ export function explainDetail(
       const fields = debuffFields(data, target.debuff, Math.ceil(active.secondsLeft));
       return {
         card: {
-          forSale: false,
           lines: [capitalize(fillNames(stake, fields))],
           locked: false,
           status: text.debuffStatus,
@@ -164,7 +161,6 @@ export function explainDetail(
       return {
         card: {
           ...home,
-          forSale: false,
           lines: [...home.lines, ...extraHearts(data, run, target.dog)],
           locked: false,
           status: hearts,
