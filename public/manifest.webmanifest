@@ -8,8 +8,8 @@
   "display": "fullscreen",
   "display_override": ["fullscreen", "standalone"],
   "orientation": "portrait",
-  "theme_color": "#3e2731",
-  "background_color": "#3e2731",
+  "theme_color": "#181425",
+  "background_color": "#181425",
   "icons": [
     {
       "src": "/icons/icon-192.png",

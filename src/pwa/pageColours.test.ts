@@ -15,7 +15,7 @@ async function manifest(): Promise<Record<string, unknown>> {
 
 // Everything that colours the space around the game's canvas: the letterbox bands, the status
 // bar, the installed app's launch screen and the canvas's own clear colour before any scene
-// draws. Each takes art's plum (shared/palette.json), the top bars' colour.
+// draws. Each takes art's ink (shared/palette.json), set apart from the top bars' plum.
 const AROUND_THE_GAME: [string, () => Promise<unknown>][] = [
   [
     "the page's background",
@@ -39,7 +39,7 @@ const AROUND_THE_GAME: [string, () => Promise<unknown>][] = [
 ];
 
 describe("the space around the game", () => {
-  it.each(AROUND_THE_GAME)("takes the top bars' plum in %s", async (_place, colour) => {
-    expect(await colour()).toBe(`#${palette.plum.hex}`);
+  it.each(AROUND_THE_GAME)("takes the palette's ink in %s", async (_place, colour) => {
+    expect(await colour()).toBe(`#${palette.ink.hex}`);
   });
 });
