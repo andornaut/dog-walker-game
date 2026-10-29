@@ -1138,7 +1138,7 @@ def walk_bar():
     return g
 
 
-# The start screen top bar's bank well, in screen pixels: the walk bar's cash well's width and
+# The start screen top bar's bank well, in screen pixels at its narrowest: the walk bar's cash well's width and
 # left edge, 5 rows from the bar's top and from its rule.
 HOME_CASH_WELL = (5, 5, 70, 28)
 
