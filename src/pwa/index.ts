@@ -130,6 +130,7 @@ export function setupPhoneApp(): Promise<void> {
   showTurnUprightNotice();
   orientation = relayOrientationEvents(readViewport, window);
   // Firefox for Android's installed app keeps its own back.
+  // WORKAROUND: https://bugzilla.mozilla.org/show_bug.cgi?id=2079243 (see isFirefoxAndroidApp).
   if (!isFirefoxAndroidApp(navigator.userAgent, (query) => matchMedia(query).matches)) {
     backGuard = guardBackNavigation(
       window,

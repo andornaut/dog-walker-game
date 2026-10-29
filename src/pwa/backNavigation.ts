@@ -68,9 +68,11 @@ export const INSTALLED_APP_DISPLAY_QUERY =
   "(display-mode: fullscreen), (display-mode: standalone), (display-mode: minimal-ui)";
 
 // Whether the page runs as Firefox for Android's installed app, where the game leaves back to the
-// browser: no close watcher, no guard entry and so no Quit?, since the app ignores a script's
-// close and its back with nothing to go back to shows a blank screen before it closes, which the
-// page cannot skip. displayModeMatches answers a media query.
+// browser: no close watcher, no guard entry and so no Quit?. displayModeMatches answers a media
+// query.
+// WORKAROUND: https://bugzilla.mozilla.org/show_bug.cgi?id=2079243 Firefox for Android's
+// installed app shows a blank page on back with no history and ignores window.close(), so the
+// game leaves back to it. Remove this exception once the bug is fixed.
 export function isFirefoxAndroidApp(
   userAgent: string,
   displayModeMatches: (query: string) => boolean,
