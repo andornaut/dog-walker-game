@@ -3,37 +3,33 @@
 // unlock, the install offer and persistent storage. setupPhoneApp runs once from main.ts; the
 // scenes listen for PHONE_EVENTS on window and call the functions below.
 import {
+  backCloseWatcher,
+  type BackGuard,
+  browserCloseWatcher,
+  guardBackNavigation,
+  isFirefoxAndroidApp,
+} from "@andornaut/game-kit/pwa/backNavigation";
+import {
   type InstallFlow,
   type InstallOutcome,
   watchInstall,
 } from "@andornaut/game-kit/pwa/installFlow";
 import type { InstallState, MenuInstallBrowser } from "@andornaut/game-kit/pwa/installState";
+import { browserOfflinePage, startOfflinePlay } from "@andornaut/game-kit/pwa/offlinePlay";
 import { serviceWorkerUrl } from "@andornaut/game-kit/pwa/serviceWorkerUrl";
 import {
   requestPersistentStorage,
   type StoragePersistence,
 } from "@andornaut/game-kit/pwa/storagePersistence";
-import {
-  createUpdateFlow,
-  registerWhenDue,
-  type UpdateFlow,
-} from "@andornaut/game-kit/pwa/updateReady";
+import type { UpdateFlow } from "@andornaut/game-kit/pwa/updateReady";
+import { watchVisibility } from "@andornaut/game-kit/pwa/visibility";
 import { createScreenWakeLock, type ScreenWakeLock } from "@andornaut/game-kit/pwa/wakeLock";
 import { localSaveStorage } from "@andornaut/game-kit/save/storage";
 
 import { chooseSoundFormat, type SoundFormat } from "../audio/soundFormat";
-import {
-  backCloseWatcher,
-  type BackGuard,
-  type CloseWatcherFactory,
-  type CloseWatcherLike,
-  guardBackNavigation,
-  isFirefoxAndroidApp,
-} from "./backNavigation";
 import { dispatchPhoneEvent, PHONE_EVENTS } from "./events";
 import { createInstallNudge, type InstallNudge } from "./installNudge";
 import { type OrientationRelay, relayOrientationEvents, type Viewport } from "./orientation";
-import { relayVisibilityEvents } from "./visibility";
 
 export { AUDIO_UNLOCK_EVENTS, unlockAudioOnFirstGesture } from "./audioUnlock";
 export { PHONE_EVENTS } from "./events";
@@ -64,7 +60,7 @@ let screenWakeLock: ScreenWakeLock | undefined;
 let updateFlow: UpdateFlow | undefined;
 // Resolves once the game may show its first screen and write its save (UpdateFlow.bootable).
 let ready: Promise<void> = Promise.resolve();
-// Called on each change of whether the home screen is in front (registerWhenDue).
+// Called on each change of whether the home screen is in front (OfflinePlay.setOnHome).
 let homeHook: (onHome: boolean) => void = () => undefined;
 // Whether the home screen shows the update plate.
 let updateShown = false;
@@ -74,46 +70,33 @@ let updateShown = false;
 // meanwhile. A slower install switches once it lands, or, after the player has interacted, offers
 // the update plate on the home screen.
 const BOOT_WAIT_MS = 4000;
-// Input that counts as the player interacting, after which the page never reloads on its own.
-const INTERACTION_EVENTS = ["keydown", "pointerdown"] as const;
+// The history state key of the entry that keeps back on the game (the kit's guardBackNavigation).
+const BACK_GUARD_STATE_KEY = "dogWalkerBackGuard";
 
 // The production build only: the dev server has no sw.js, and a worker would serve stale
-// modules over hot reloads. A page a version controls registers now, so its update check runs
-// while the game loads; a first visit registers once the home screen shows, so the precache does
-// not compete with the game's own downloads.
+// modules over hot reloads. The kit's offline play: a page a version controls registers now, so
+// its update check runs while the game loads; a first visit registers once the home screen shows,
+// so the precache does not compete with the game's own downloads. The page coming back into view
+// on the home screen checks for a newer version (an installed app resumed without relaunching).
 function registerServiceWorker(): void {
-  if (!import.meta.env.PROD || !("serviceWorker" in navigator)) {
+  const page = import.meta.env.PROD ? browserOfflinePage() : undefined;
+  if (page === undefined) {
     return;
   }
-  const container = navigator.serviceWorker;
-  const flow = createUpdateFlow(
-    container,
-    () => Date.now(),
-    () => navigator.onLine,
-    () => location.reload(),
-    (visible) => {
-      updateShown = visible;
-      dispatchPhoneEvent(window, PHONE_EVENTS.updatePlate);
+  const play = startOfflinePlay(
+    {
+      bootWaitMs: BOOT_WAIT_MS,
+      onUpdateShown: (shown) => {
+        updateShown = shown;
+        dispatchPhoneEvent(window, PHONE_EVENTS.updatePlate);
+      },
+      serviceWorkerUrl: serviceWorkerUrl(SERVICE_WORKER_URL, browserSoundFormat()),
     },
+    page,
   );
-  updateFlow = flow;
-  for (const type of INTERACTION_EVENTS) {
-    window.addEventListener(type, () => flow.noteInteraction(), { capture: true, passive: true });
-  }
-  // An installed app resumed from the background without relaunching checks here, on the home
-  // screen. relayVisibilityEvents sends these, a return from the back-forward cache included.
-  window.addEventListener(PHONE_EVENTS.appHidden, () => flow.setVisible(false));
-  window.addEventListener(PHONE_EVENTS.appVisible, () => flow.setVisible(true));
-  setTimeout(() => flow.endBootWait(), BOOT_WAIT_MS);
-  homeHook = registerWhenDue(container, flow, () =>
-    container
-      .register(serviceWorkerUrl(SERVICE_WORKER_URL, browserSoundFormat()), { scope: "/" })
-      .catch((error: unknown) => {
-        console.warn("Service worker registration failed; the game will not work offline.", error);
-        throw error;
-      }),
-  );
-  ready = flow.bootable;
+  updateFlow = play.flow;
+  homeHook = play.setOnHome;
+  ready = play.bootable;
 }
 
 function readViewport(): Viewport {
@@ -150,16 +133,26 @@ export function setupPhoneApp(): void {
     "storage" in navigator ? navigator.storage : undefined,
   );
   installNudge = createInstallNudge(localSaveStorage());
-  relayVisibilityEvents(window, document);
+  watchVisibility(
+    (visible) =>
+      dispatchPhoneEvent(window, visible ? PHONE_EVENTS.appVisible : PHONE_EVENTS.appHidden),
+    window,
+    document,
+  );
   showTurnUprightNotice();
   orientation = relayOrientationEvents(readViewport, window);
   // Firefox for Android's installed app keeps its own back.
   // WORKAROUND: https://bugzilla.mozilla.org/show_bug.cgi?id=2079243 (see isFirefoxAndroidApp).
   if (!isFirefoxAndroidApp(navigator.userAgent, (query) => matchMedia(query).matches)) {
+    // Each back the guard keeps opens the pause menu or Quit?, as the scenes decide.
     backGuard = guardBackNavigation(
+      {
+        onBack: () => dispatchPhoneEvent(window, PHONE_EVENTS.backPressed),
+        stateKey: BACK_GUARD_STATE_KEY,
+      },
       window,
       window,
-      backCloseWatcher(navigator.userAgent, closeWatcherFactory()),
+      backCloseWatcher(navigator.userAgent, browserCloseWatcher()),
       history,
     );
   }
@@ -175,12 +168,6 @@ export function setupPhoneApp(): void {
 // that reloads into one first).
 export function launchReady(): Promise<void> {
   return ready;
-}
-
-// The browser's CloseWatcher, where it has one (Chrome 120 and later, Firefox 149 and later).
-function closeWatcherFactory(): CloseWatcherFactory | undefined {
-  const CloseWatcher = (globalThis as { CloseWatcher?: new () => CloseWatcherLike }).CloseWatcher;
-  return CloseWatcher === undefined ? undefined : () => new CloseWatcher();
 }
 
 // Closes the game's window, or leaves the game for the previous page (BackGuard.leave).
