@@ -63,24 +63,26 @@ describe("simulateRun", { timeout: 30_000 }, () => {
     expect(other).not.toEqual(first);
   });
 
-  it("walks different zones from the first zone, taking the route policy's path at each fork", () => {
-    const order = gameData.world.zones.map(({ id }) => id);
-    const routeOf = (route: SimConfig["route"]) =>
-      itemAt(runs(1, { policy: "alwaysPay", route, skill: IDEAL_SKILL }), 0).route;
-    const [left, right, random] = [routeOf("left"), routeOf("right"), routeOf("random")];
-    for (const route of [left, right, random]) {
-      expect(route.length).toBeLessThanOrEqual(gameData.world.walkLength);
-      expect(route[0]).toBe(gameData.world.firstZone);
-      expect(new Set(route).size).toBe(route.length);
-    }
-    // A fork offers 3 of the zones left after the first zone: the easiest offered is one of the 3
-    // easiest left, and the hardest one of the 3 hardest. The ideal player reaches the first fork.
-    const after = order
-      .filter((zone) => zone !== gameData.world.firstZone)
-      .map((zone) => order.indexOf(zone));
-    expect(after.slice(0, 3)).toContain(order.indexOf(defined(left[1])));
-    expect(after.slice(-3)).toContain(order.indexOf(defined(right[1])));
-  });
+  // A fork offers 3 of the zones left after the first zone, easiest first: the left path is one of
+  // the 3 easiest left, the right one of the 3 hardest, and a random one any of them. The ideal
+  // player reaches the first fork. A walk each, so each test plans one walk's zones.
+  const afterFirst = gameData.world.zones
+    .map(({ id }) => id)
+    .filter((zone) => zone !== gameData.world.firstZone);
+  it.each([
+    { offered: afterFirst.slice(0, 3), route: "left" },
+    { offered: afterFirst.slice(-3), route: "right" },
+    { offered: afterFirst, route: "random" },
+  ] as const)(
+    "walks different zones from the first zone, taking the $route path at each fork",
+    ({ offered, route }) => {
+      const walked = itemAt(runs(1, { policy: "alwaysPay", route, skill: IDEAL_SKILL }), 0).route;
+      expect(walked.length).toBeLessThanOrEqual(gameData.world.walkLength);
+      expect(walked[0]).toBe(gameData.world.firstZone);
+      expect(new Set(walked).size).toBe(walked.length);
+      expect(offered).toContain(defined(walked[1]));
+    },
+  );
 
   it("never pays money with the alwaysHearts policy", () => {
     const choices = runs(2, { pack: RISKY, policy: "alwaysHearts", skill: BLIND }).flatMap(
