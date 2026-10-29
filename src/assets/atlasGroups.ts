@@ -17,7 +17,7 @@ const LINEAR_GROUPS: ReadonlySet<AtlasGroup> = new Set(["road"]);
 
 const LOADING_KEYS: ReadonlySet<string> = new Set(Object.values(LOADING_ART));
 const GROUP_PREFIXES: readonly (readonly [KeyGroup, readonly string[]])[] = [
-  ["ui", ["badge-", "face-", "icon-", "item-", "logo", "portrait-", "screen-", "ui-"]],
+  ["ui", ["badge-", "face-", "font-", "icon-", "item-", "logo", "portrait-", "screen-", "ui-"]],
 ];
 
 // Road art the home screen and its menus draw too: each dog, owner and walker at full size
@@ -35,8 +35,8 @@ const isHomeArt = (key: string): boolean =>
   HOME_KEYS.has(key) ||
   (HOME_PREFIXES.some((prefix) => key.startsWith(prefix)) && splitDepthKey(key).base === key);
 
-// boot is the loading screen; ui the home screen, menus, HUD and icons; home the road art the
-// home screen draws too; run the choice cards and everything else on the road.
+// boot is the loading screen; ui the home screen, menus, HUD, icons and fonts; home the road art
+// the home screen draws too; run the choice cards and everything else on the road.
 export function atlasGroupOf(key: string): KeyGroup {
   if (LOADING_KEYS.has(key)) {
     return "boot";

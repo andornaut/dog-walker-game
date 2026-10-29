@@ -35,7 +35,8 @@ describe("contentHash", () => {
 });
 
 // The files the game loads for each manifest entry, by path under /art/, as BootScene queues
-// them: an atlased image or sprite's page, else its own files.
+// them: an atlased image or sprite's page, else its own files; a font's .fnt, and its PNG's page
+// or else its PNG.
 function loadedPaths(atlas: AtlasManifest, kind: keyof AssetManifest): Map<string, string[]> {
   const pageOf = new Map(
     atlas.textures.map(({ key, page }) => [key, atlas.pages[page]?.png ?? `page ${page}`]),
@@ -45,7 +46,9 @@ function loadedPaths(atlas: AtlasManifest, kind: keyof AssetManifest): Map<strin
     return page === undefined ? own : [page];
   };
   const entries = {
-    fonts: manifest.fonts.map(({ fnt, key, png }) => [key, [fnt, png]] as const),
+    fonts: manifest.fonts.map(
+      ({ fnt, key, png }) => [key, [fnt, ...atlasedOr(key, [png])]] as const,
+    ),
     images: manifest.images.map(({ key, png }) => [key, atlasedOr(key, [png])] as const),
     sounds: manifest.sounds.map(({ key, m4a, ogg }) => [key, [m4a, ogg]] as const),
     sprites: manifest.sprites.map(

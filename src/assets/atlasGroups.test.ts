@@ -13,6 +13,7 @@ describe("atlasGroupOf", () => {
       ["screen-home", "ui"],
       ["icon-lock", "ui"],
       ["logo", "ui"],
+      ["font-body", "ui"],
       ["dog-kilo", "home"],
       ["owner-kilo", "home"],
       ["walker-ada", "home"],

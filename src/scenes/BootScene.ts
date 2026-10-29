@@ -1,16 +1,18 @@
 import { itemAt } from "@andornaut/game-kit/arrays";
 import { keysOf } from "@andornaut/game-kit/records";
-import { type GameObjects, type Loader, Scene, Sound } from "phaser";
+import { GameObjects, type Loader, Scene, Sound } from "phaser";
 
 import { animationSpecs, type AsepriteSheet } from "../assets/asepriteAnimations";
 import { loadsFirst } from "../assets/atlasGroups";
 import { type AssetManifest, parseManifest, type SpriteAsset } from "../assets/manifest";
 import {
+  addAtlasFonts,
   addAtlasTextures,
   artUrl,
   atlasPageBytes,
   loadManifest,
   MANIFEST_CACHE_KEY,
+  queueFonts,
   queueManifestArt,
   smoothDepthArt,
 } from "../assets/phaser/manifestArt";
@@ -145,9 +147,7 @@ export class BootScene extends Scene {
     const walkNow = namesRunSetup(pageSearch());
     const first = walkNow ? always : loadsFirst;
     queueManifestArt(this, this.manifest, first);
-    for (const { fnt, key, png } of this.manifest.fonts) {
-      this.load.bitmapFont(key, artUrl(png), artUrl(fnt));
-    }
+    queueFonts(this, this.manifest);
     if (this.manifest.sounds.length > 0 && browserSoundFormat() === undefined) {
       console.warn("This browser plays neither Ogg nor AAC, so the game is silent.");
     }
@@ -226,6 +226,7 @@ export class BootScene extends Scene {
   ): void {
     const steps: (() => void)[] = [
       () => addAtlasTextures(this),
+      () => addAtlasFonts(this, GameObjects.BitmapText.ParseFromAtlas, this.manifest),
       () => smoothDepthArt(this, this.manifest),
     ];
     for (const sprite of this.manifest.sprites) {

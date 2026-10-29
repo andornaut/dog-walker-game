@@ -17,8 +17,8 @@ const HASHED_ART_DIR = "assets/art";
 const HASH_LENGTH = 8;
 
 // Every file under /art/ a build's game loads: the art manifest, the atlas manifest and its
-// pages, both files of each font and each sound (the page plays one format), and the files of
-// the images and sprites the atlas leaves out. Sorted, each once.
+// pages, each font's .fnt, both files of each sound (the page plays one format), and the files
+// of the fonts, images and sprites the atlas leaves out. Sorted, each once.
 function gameArtPaths(manifest: AssetManifest, atlas: AtlasManifest): string[] {
   const atlased = new Set(atlas.textures.map(({ key }) => key));
   const own = ({ key }: { key: string }) => !atlased.has(key);
@@ -26,7 +26,7 @@ function gameArtPaths(manifest: AssetManifest, atlas: AtlasManifest): string[] {
     ART_MANIFEST,
     ATLAS_MANIFEST_PATH,
     ...atlas.pages.map(({ png }) => png),
-    ...manifest.fonts.flatMap(({ fnt, png }) => [fnt, png]),
+    ...manifest.fonts.flatMap((font) => (own(font) ? [font.fnt, font.png] : [font.fnt])),
     ...manifest.images.filter(own).map(({ png }) => png),
     ...manifest.sounds.flatMap(({ m4a, ogg }) => [m4a, ogg]),
     ...manifest.sprites.filter(own).flatMap(({ json, png }) => [json, png]),

@@ -93,6 +93,19 @@ export function atlasPageBytes(scene: Scene): Map<string, number> {
   return new Map(pages.map(({ bytes }, page) => [atlasPageKey(page), bytes]));
 }
 
+// Queues an atlas page's file, unless its texture is loaded.
+function queuePage(scene: Scene, atlas: AtlasManifest, page: number): void {
+  const key = atlasPageKey(page);
+  if (!scene.textures.exists(key)) {
+    scene.load.image(key, artUrl(itemAt(atlas.pages, page).png));
+  }
+}
+
+// Each atlased texture of the build's atlas manifest, by key.
+function atlasedTextures(atlas: AtlasManifest | undefined): Map<string, AtlasTexture> {
+  return new Map(atlas?.textures.map((texture) => [texture.key, texture]));
+}
+
 // Queues the manifest's images and sprites that are not loaded yet, and that include accepts:
 // the atlas page each is on, or else its own files. An image or sprite that fails to load
 // leaves its key missing, which a scene draws as a placeholder box.
@@ -102,28 +115,73 @@ export function queueManifestArt(
   include: (key: string) => boolean = () => true,
 ): void {
   const atlas = atlasManifest(scene);
-  const atlased = new Map(atlas?.textures.map((texture) => [texture.key, texture]));
+  const atlased = atlasedTextures(atlas);
   const wanted = ({ key }: { key: string }) => include(key) && !scene.textures.exists(key);
-  const queuePage = (page: number) => {
-    const key = atlasPageKey(page);
-    if (atlas !== undefined && !scene.textures.exists(key)) {
-      scene.load.image(key, artUrl(itemAt(atlas.pages, page).png));
-    }
-  };
   for (const { key, png } of images.filter(wanted)) {
     const texture = atlased.get(key);
-    if (texture === undefined) {
+    if (atlas === undefined || texture === undefined) {
       scene.load.image(key, artUrl(png));
     } else {
-      queuePage(texture.page);
+      queuePage(scene, atlas, texture.page);
     }
   }
   for (const { json, key, png } of sprites.filter(wanted)) {
     const texture = atlased.get(key);
-    if (texture === undefined) {
+    if (atlas === undefined || texture === undefined) {
       scene.load.aseprite(key, artUrl(png), artUrl(json));
     } else {
-      queuePage(texture.page);
+      queuePage(scene, atlas, texture.page);
+    }
+  }
+}
+
+// The XML cache key an atlased font's .fnt loads under.
+const fontXmlKey = (key: string): string => `${key}:fnt`;
+
+// Queues the manifest's fonts that are not loaded yet: an atlased font's .fnt and the atlas page
+// its PNG is on, which addAtlasFonts makes the font from, or else its own two files.
+export function queueFonts(scene: Scene, { fonts }: AssetManifest): void {
+  const atlas = atlasManifest(scene);
+  const atlased = atlasedTextures(atlas);
+  for (const { fnt, key, png } of fonts) {
+    if (scene.cache.bitmapFont.exists(key)) {
+      continue;
+    }
+    const texture = atlased.get(key);
+    if (atlas === undefined || texture === undefined) {
+      scene.load.bitmapFont(key, artUrl(png), artUrl(fnt));
+    } else {
+      queuePage(scene, atlas, texture.page);
+      scene.load.xml(fontXmlKey(key), artUrl(fnt));
+    }
+  }
+}
+
+// Phaser's BitmapText.ParseFromAtlas, passed in so this module imports Phaser's types only.
+type ParseFromAtlas = (
+  scene: Scene,
+  fontName: string,
+  textureKey: string,
+  frameKey: string,
+  xmlKey: string,
+) => boolean;
+
+// Makes each atlased font whose .fnt and texture have loaded and that is not made yet, from the
+// .fnt and the font PNG's frame on its atlas page. Its glyphs, kerning and line height are the
+// .fnt's, as the font's own files give them, and draw the same pixels from the page.
+export function addAtlasFonts(
+  scene: Scene,
+  parseFromAtlas: ParseFromAtlas,
+  { fonts }: AssetManifest,
+): void {
+  for (const { key } of fonts) {
+    const xml = fontXmlKey(key);
+    if (
+      !scene.cache.bitmapFont.exists(key) &&
+      scene.cache.xml.exists(xml) &&
+      scene.textures.exists(key)
+    ) {
+      parseFromAtlas(scene, key, key, BASE_FRAME, xml);
     }
   }
 }

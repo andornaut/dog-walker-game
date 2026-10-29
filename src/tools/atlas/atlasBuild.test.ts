@@ -96,7 +96,7 @@ describe("the shipped art's atlases", () => {
     );
     const decoder = new TextDecoder();
     await Promise.all([
-      ...[...manifest.images, ...manifest.sprites].map(async ({ key, png }) => {
+      ...[...manifest.fonts, ...manifest.images, ...manifest.sprites].map(async ({ key, png }) => {
         sources.set(key, decodePng(await readArt(png)));
       }),
       ...manifest.sprites.map(async ({ json, key }) => {
@@ -105,7 +105,7 @@ describe("the shipped art's atlases", () => {
     ]);
   }, 60_000);
 
-  it("packs every image and sprite with no warnings, on pages that fit a phone GPU", () => {
+  it("packs every image, font and sprite with no warnings, on pages that fit a phone GPU", () => {
     expect(build.warnings).toEqual([]);
     expect(build.manifest.pages.length).toBeLessThanOrEqual(8);
     for (const { height, width } of build.manifest.pages) {
@@ -138,7 +138,7 @@ describe("the shipped art's atlases", () => {
 
   it("maps every manifest key, and every frame of each sprite in export order", () => {
     const textures = new Map(build.manifest.textures.map((texture) => [texture.key, texture]));
-    for (const { key } of manifest.images) {
+    for (const { key } of [...manifest.fonts, ...manifest.images]) {
       expect(textures.get(key)?.frames.map(({ name }) => name)).toEqual([BASE_FRAME]);
     }
     for (const [key, { frames, meta }] of sheets) {
@@ -148,7 +148,9 @@ describe("the shipped art's atlases", () => {
       );
       expect(texture?.tags).toEqual(meta.frameTags ?? []);
     }
-    expect(textures.size).toBe(manifest.images.length + manifest.sprites.length);
+    expect(textures.size).toBe(
+      manifest.fonts.length + manifest.images.length + manifest.sprites.length,
+    );
   });
 
   // A trimmed frame's rect holds its pixels at its trim offset, and the rest of the whole frame

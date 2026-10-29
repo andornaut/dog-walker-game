@@ -98,7 +98,7 @@ interface AtlasInputs {
   manifest?: AssetManifest;
 }
 
-// Packs every image and sprite frame of the art manifest into atlas pages, reading each file
+// Packs every image, font PNG and sprite frame of the art manifest into atlas pages, reading each file
 // by its path relative to the art directory. A key whose files cannot be read or parsed, or
 // with a frame too large for a page, is left out with a warning.
 export async function buildAtlases(
@@ -127,7 +127,7 @@ export async function buildAtlases(
     }
   };
   const sources = await Promise.all([
-    ...manifest.images.map(({ key, png }) =>
+    ...[...manifest.images, ...manifest.fonts].map(({ key, png }) =>
       sourceOf(key, async () => {
         const { height, width } = await readPng(png);
         return imageSource(png, width, height, key);
