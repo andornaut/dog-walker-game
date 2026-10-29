@@ -284,7 +284,7 @@ describe("a firing's hold", { timeout: 60_000 }, () => {
   const STEP_MS = STEP_SECONDS * 1000;
   const streams = runStreams(1);
   // The walk with nothing to come, Kilo's owner on their last heart and the walker's
-  // forgiveness used, so Kilo's next lost heart fires you while Biscuit walks on.
+  // forgiveness used, so Kilo's next lost heart fires you while Lady walks on.
   const lastHeart = (): Session => {
     const session = emptyRoad(STARTED);
     const run = {

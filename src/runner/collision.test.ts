@@ -101,7 +101,7 @@ describe("a one-dog pack", () => {
   });
 });
 
-// Kilo leads in the centre, out front; Biscuit and Buddy walk front-left and front-right a
+// Kilo leads in the centre, out front; Lady and Buddy walk front-left and front-right a
 // little behind, a gap between them under Kilo; the walker below. Pickups touch the outline
 // around them all; obstacles touch the parts.
 const chevron = packOf({ bottom: 100, left: -10, right: 10, top: 50 }, [
