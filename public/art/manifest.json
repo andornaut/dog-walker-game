@@ -14410,6 +14410,10 @@
     {
       "key": "ui-zone-banner",
       "png": "images/ui-zone-banner.png"
+    },
+    {
+      "key": "ui-zone-pill",
+      "png": "images/ui-zone-pill.png"
     }
   ],
   "sounds": [

@@ -21,7 +21,7 @@ ui-strip-well (24x24 nine-slice, the band behind a card row's subtitle), ui-quip
 starburst behind the walker in the zone celebration), ui-zone-banner (248x48); the start screen top
 bar's bank well, drawn at (5, 5) in three pieces that stretch it to the bank's width,
 ui-home-cash-well-left, ui-home-cash-well-mid (repeated across) and ui-home-cash-well-right (1x29 each); the walk HUD's ui-walk-bar (360x40),
-ui-effect-well (22x22), ui-dog-card-band (360x76, drawn at (0, 480)), ui-lead-tag (27x11, LEAD baked
+ui-effect-well (22x22), ui-zone-pill (13x13 three-slice, 4px ends), ui-dog-card-band (360x76, drawn at (0, 480)), ui-lead-tag (27x11, LEAD baked
 in with font-title) and ui-owner-tab (36x36).
 
 Sprites: ui-dog-card (120x70, one of three cards in the walk's card row; a tag per dog key and
@@ -1156,6 +1156,27 @@ def effect_well():
     return g
 
 
+# The neighbourhood pill on the walk: 13 rows, its ends 4 columns each with two corner steps, so
+# the game stretches it as a three-slice to the label's width.
+PILL = (13, 13)
+
+
+def zone_pill():
+    """13x13 three-slice (4px ends), ui-zone-pill: the walk's neighbourhood label, centred just under
+    the walk bar, where the message strip may cover it. A navy face with a lighter top row in a 1px ink line, its corners
+    stepped two pixels, so it reads on every backdrop. The game sets the name in cream and "n of N"
+    in lgrey, font-body at 1x, their capitals on row 4, 6 columns in from each end."""
+    w, h = PILL
+    g = Grid(w, h)
+    g.rect(2, 0, w - 4, h, "ink")
+    g.rect(1, 1, w - 2, h - 2, "ink")
+    g.rect(0, 2, w, h - 4, "ink")
+    g.rect(2, 1, w - 4, h - 2, "navy")
+    g.rect(1, 2, w - 2, h - 4, "navy")
+    g.rect(2, 1, w - 4, 1, "dslate")
+    return g
+
+
 # The dog card: 120x70 in its slot, the chrome on x 1 to 118 and rows 0 to 69, so a 1px gap runs
 # down each side and the card's foot sits on the band's last row, over the neighbourhood progress
 # line. The cards are navy, as a neutral ui-section, so the eye stays on the road and the dogs'
@@ -1601,6 +1622,7 @@ IMAGES = {
     "ui-zone-banner": lambda: to_image(zone_banner().outlined(False)),
     "ui-walk-bar": lambda: to_image(walk_bar().outlined(False)),
     "ui-effect-well": lambda: to_image(effect_well().outlined(False)),
+    "ui-zone-pill": lambda: to_image(zone_pill().outlined(False)),
     **{f"ui-home-cash-well-{p}": (lambda p=p: to_image(home_cash_well_piece(p).outlined(False)))
        for p in HOME_CASH_WELL_PIECES},
     "ui-dog-card-band": lambda: to_image(dog_card_band().outlined(False)),
