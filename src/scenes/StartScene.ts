@@ -170,6 +170,7 @@ import {
   openOverlay,
   type OverlayData,
 } from "./overlay";
+import { afterMsUnderOverlay } from "./overlayClock";
 import { addOwnerFigure } from "./ownerFigure";
 import {
   currentSettings,
@@ -613,18 +614,30 @@ export class StartScene extends Scene {
     onWindowEvent(this, PHONE_EVENTS.updatePlate, () => this.render());
     // A tap made while another tap's act opened help, settings or stats over this screen is
     // dropped, so it cannot act once the screen resumes, as is a press waiting for the art and
-    // a press still down, whose release lands on the overlay.
+    // a press still down, whose release lands on the overlay. The dip of the tap that opened
+    // the page plays on under it, on a clock that runs while this screen is paused.
     onSceneEvent(this, this.events, "pause", () => {
       this.pending.forEach((timer) => timer.remove());
       this.pending.clear();
       this.artWait = undefined;
       const lifted = this.closePressed();
+      const dipping = this.press?.held === false ? this.press : undefined;
       this.hold = undefined;
       this.overlayPress = undefined;
-      this.press = undefined;
+      this.press = dipping;
       this.pressedTarget = undefined;
       if (lifted) {
         this.render();
+      }
+      if (dipping !== undefined) {
+        // Drawn now, for a tap too quick for a frame to have shown it.
+        this.place(this.time.now);
+        afterMsUnderOverlay(this, settleDelay(this.time.now, dipping.startedMs), () => {
+          if (this.press === dipping) {
+            this.press = undefined;
+            this.place(this.time.now);
+          }
+        });
       }
     });
   }
@@ -827,11 +840,12 @@ export class StartScene extends Scene {
     this.quips.set(dog, partingSpeech(gameData, Math.random, dog));
   }
 
-  // A tap's result, such as the selected state, shows once its press has dipped.
+  // A tap's result, such as the selected state, shows once its press has dipped. A tap that
+  // opens a page opens it at once, its dip playing on under the page.
   private actAfterDip(target: Target): void {
     const press = this.press;
     const delay = press === undefined ? 0 : settleDelay(this.time.now, press.startedMs);
-    if (delay === 0) {
+    if (delay === 0 || this.opensPage(target)) {
       this.act(target);
       return;
     }
@@ -840,6 +854,36 @@ export class StartScene extends Scene {
       this.act(target);
     });
     this.pending.add(timer);
+  }
+
+  // Whether act opens a page for target: help, the Logbook, the settings or the Pet shop, which
+  // a dog or gear not yet bought opens too.
+  private opensPage(target: Target): boolean {
+    switch (target.kind) {
+      case "dog":
+      case "gear": {
+        const { owned } = this.save();
+        const tap =
+          target.kind === "dog"
+            ? tapDog(gameData, owned, target.dog, this.loadout)
+            : tapGear(owned, target.gear, this.loadout);
+        return tap.kind === "shop";
+      }
+      case "help":
+      case "logbook":
+      case "petShop":
+      case "settings":
+      case "slotSign":
+        return true;
+      case "mute":
+      case "start":
+      case "update":
+      case "walker":
+        return false;
+      default:
+        target satisfies never;
+        return false;
+    }
   }
 
   private act(target: Target): void {
@@ -1020,6 +1064,11 @@ export class StartScene extends Scene {
         this.openDetail(this.pressedTarget);
       }
     }
+    this.place(now);
+  }
+
+  // Moves what dips, bobs, shakes, hops and pops to where it is at now.
+  private place(now: number): void {
     const reduced = currentSettings(this).reducedMotion;
     const pressed = this.press;
     const dip = (id: string) =>

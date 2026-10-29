@@ -115,7 +115,11 @@ describe("a drag on a list", () => {
   });
 
   // A press on a row that lifts over the same row taps it, unless the drag took it.
-  const tapRule: TargetPressRule<string> = { dipMs: () => 0, same: (a, b) => a === b };
+  const tapRule: TargetPressRule<string> = {
+    dipMs: () => 0,
+    opens: () => false,
+    same: (a, b) => a === b,
+  };
   it.each<[string, readonly (readonly [number, number])[], string]>([
     ["a still press taps its row", [], "tap"],
     ["a press that wobbles within the slop taps its row", [[308, 40]], "tap"],

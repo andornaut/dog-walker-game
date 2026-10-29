@@ -220,8 +220,9 @@ export class ShopScene extends Scene {
     this.render();
     this.showFocus();
 
-    // A tap acts once its dip ends; holding a dog or gear row opens its detail card, and the
-    // hold takes the press. With a card open, a tap anywhere closes it, as on the Logbook.
+    // A tap acts once its dip ends, but a row's tap that opens the confirm acts as it lifts;
+    // holding a dog or gear row opens its detail card, and the hold takes the press. With a card
+    // open, a tap anywhere closes it, as on the Logbook.
     this.presses = listenTargetPress<Target>(this, {
       dipMs: (target) => (target.kind === "dismiss" ? 0 : FEEDBACK.pressDipMs),
       onDown: (pointer, target) => {
@@ -247,6 +248,7 @@ export class ShopScene extends Scene {
         this.render();
       },
       onTap: (target) => this.act(target),
+      opens: (target) => this.opensConfirm(target),
       same: sameByValue,
       targetAt: (x, y) => {
         const choice = this.confirmChoiceAt(x, y);
@@ -426,15 +428,35 @@ export class ShopScene extends Scene {
     }
   }
 
-  // A key presses the tab or row: it dips, then acts, as a tap does.
+  // A key presses the tab or row: it dips, then acts, as a tap does, and a row that opens the
+  // confirm opens it at once, its dip playing on under it.
   private actAfterDip(target: Target): void {
     this.pressed = target;
     this.render();
+    const opens = this.opensConfirm(target);
+    if (opens) {
+      this.act(target);
+    }
     this.time.delayedCall(FEEDBACK.pressDipMs, () => {
       this.pressed = undefined;
       this.render();
-      this.act(target);
+      if (!opens) {
+        this.act(target);
+      }
     });
+  }
+
+  // Whether a tap on target opens the purchase confirm: a row not owned that the bank covers.
+  private opensConfirm(target: Target): boolean {
+    const row = target.kind === "row" ? this.rowById(target.id) : undefined;
+    if (row === undefined) {
+      return false;
+    }
+    const save = this.save();
+    return (
+      shopRowLook(gameData, save.owned, save.bankCents, row) !== "owned" &&
+      requestPurchase(gameData, save, row.name, row.purchase).kind === "confirm"
+    );
   }
 
   private close(): void {

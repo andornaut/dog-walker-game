@@ -249,8 +249,9 @@ export class SettingsScene extends Scene {
     const stopWatching = onInstallStateChange(() => this.scene.restart(data));
     this.events.once(Scenes.Events.SHUTDOWN, stopWatching);
 
-    // The close control, the switch rows and the install row, which dip before they act, and
-    // the steps' card's close control.
+    // The close control, the switch rows, which dip before they act, the install row, which
+    // dips as it opens the browser's prompt or the steps' card, and the steps' card's close
+    // control.
     listenTargetPress<Target>(this, {
       dipMs: (target) =>
         target.kind === "switch" || target.kind === "install" ? FEEDBACK.pressDipMs : 0,
@@ -259,6 +260,7 @@ export class SettingsScene extends Scene {
         this.render();
       },
       onTap: (target) => this.tap(target),
+      opens: (target) => target.kind === "install",
       same: sameByValue,
       targetAt: (x, y) => this.targetAt(x, y),
     });
@@ -360,9 +362,14 @@ export class SettingsScene extends Scene {
     if (focusedRow?.kind === "switch") {
       this.flipAfterDip(focusedRow.key);
     } else if (focusedRow?.kind === "button") {
+      // Install opens at once, its dip playing on.
       this.pressed = { kind: "install" };
       this.render();
-      this.time.delayedCall(FEEDBACK.pressDipMs, () => this.install());
+      this.install();
+      this.time.delayedCall(FEEDBACK.pressDipMs, () => {
+        this.pressed = undefined;
+        this.render();
+      });
     } else if (focusedRow === undefined) {
       this.close();
     }
@@ -387,8 +394,6 @@ export class SettingsScene extends Scene {
   // The browser's install prompt, asked for while the tap still counts as the player's
   // gesture, or the steps for the browser's own menu.
   private install(): void {
-    this.pressed = undefined;
-    this.render();
     void installApp().then((outcome) => {
       const browser = menuBrowser();
       if (outcome === "menuSteps" && browser !== undefined && this.scene.isActive()) {
