@@ -1,6 +1,5 @@
 // The install offer on a page: holds the browser's install prompt, follows the install state and
-// installs on request. The game's Settings row and the home page's Install button share it. It
-// imports nothing that the home page would not otherwise load.
+// installs on request. It imports only installState.ts, so a site's other pages can load it.
 import {
   type InstallState,
   installState,
@@ -45,7 +44,7 @@ export interface InstallFlow {
   state(): InstallState;
 }
 
-// The display modes the manifest asks for, as public/nav.js checks them.
+// The display modes a web app manifest asks for to run as an app.
 export const INSTALLED_DISPLAY_QUERY = "(display-mode: fullscreen), (display-mode: standalone)";
 
 // Whether the page runs as the installed app now, read as watchInstall reads it.

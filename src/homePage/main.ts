@@ -2,8 +2,8 @@
 // prompt where it gives one, the steps for the browser's own menu where it installs only from
 // there (iOS, Firefox for Android), and hidden once installed or where neither works. Its words
 // are in pages/index.html.
-import { watchInstall } from "../pwa/installFlow";
-import { offersInstall } from "../pwa/installState";
+import { watchInstall } from "@andornaut/game-kit/pwa/installFlow";
+import { offersInstall } from "@andornaut/game-kit/pwa/installState";
 
 // Elements in pages/index.html. The steps dialog holds one section per browser, each marked
 // data-browser with its MenuInstallBrowser and titled by its h2.

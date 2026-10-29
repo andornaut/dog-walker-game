@@ -2,6 +2,14 @@
 // lock, the back gesture, visibility and orientation events, the turn-upright notice, audio
 // unlock, the install offer and persistent storage. setupPhoneApp runs once from main.ts; the
 // scenes listen for PHONE_EVENTS on window and call the functions below.
+import {
+  type InstallFlow,
+  type InstallOutcome,
+  watchInstall,
+} from "@andornaut/game-kit/pwa/installFlow";
+import type { InstallState, MenuInstallBrowser } from "@andornaut/game-kit/pwa/installState";
+import { serviceWorkerUrl } from "@andornaut/game-kit/pwa/serviceWorkerUrl";
+import { createUpdateFlow, type UpdateFlow } from "@andornaut/game-kit/pwa/updateReady";
 import { localSaveStorage } from "@andornaut/game-kit/save/storage";
 
 import { chooseSoundFormat, type SoundFormat } from "../audio/soundFormat";
@@ -14,21 +22,21 @@ import {
   isFirefoxAndroidApp,
 } from "./backNavigation";
 import { dispatchPhoneEvent, PHONE_EVENTS } from "./events";
-import { type InstallFlow, type InstallOutcome, watchInstall } from "./installFlow";
 import { createInstallNudge, type InstallNudge } from "./installNudge";
-import type { InstallState, MenuInstallBrowser } from "./installState";
 import { type OrientationRelay, relayOrientationEvents, type Viewport } from "./orientation";
-import { serviceWorkerUrl } from "./serviceWorkerUrl";
 import { requestPersistentStorage, type StoragePersistence } from "./storagePersistence";
-import { createUpdateFlow, type UpdateFlow } from "./updateReady";
 import { relayVisibilityEvents } from "./visibility";
 import { createScreenWakeLock, type ScreenWakeLock } from "./wakeLock";
 
 export { AUDIO_UNLOCK_EVENTS, unlockAudioOnFirstGesture } from "./audioUnlock";
 export { PHONE_EVENTS } from "./events";
-export type { InstallOutcome } from "./installFlow";
-export { type InstallState, type MenuInstallBrowser, offersInstall } from "./installState";
 export type { StoragePersistence } from "./storagePersistence";
+export type { InstallOutcome } from "@andornaut/game-kit/pwa/installFlow";
+export {
+  type InstallState,
+  type MenuInstallBrowser,
+  offersInstall,
+} from "@andornaut/game-kit/pwa/installState";
 
 const SERVICE_WORKER_URL = "/sw.js";
 // An element in pages/play/index.html.

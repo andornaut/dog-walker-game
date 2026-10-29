@@ -1,3 +1,5 @@
+import type { MenuInstallBrowser } from "@andornaut/game-kit/pwa/installState";
+
 import type { ACHIEVEMENTS } from "./achievements";
 import type { DEBUFFS } from "./debuffs";
 import type { DOGS } from "./dogs";
@@ -979,10 +981,6 @@ export interface RunText {
     readonly title: string;
   };
 }
-
-// A browser that installs the game only from its own menu, with no install prompt: iOS, from
-// Share, and Firefox for Android, from its menu.
-export type MenuInstallBrowser = "firefoxAndroid" | "ios";
 
 // The text of the menus and pages over the game: Settings, Stats, Help, the End screen, the
 // pause menu, the badge celebration and the crash screen. A {name} in a line is filled by

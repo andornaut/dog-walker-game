@@ -1,17 +1,14 @@
+import {
+  cacheNameFor,
+  precacheFetchOptions,
+  strategyFor,
+} from "@andornaut/game-kit/pwa/cachePolicy";
 import { describe, expect, it } from "vitest";
 
 import { contentHash, hashedArtFileName } from "../tools/atlas/hashedArt";
-import {
-  cachedUrlsOf,
-  cacheKeyFor,
-  cacheNameFor,
-  installUrls,
-  precacheFetchOptions,
-  staleCacheNames,
-  strategyFor,
-} from "./cachePolicy";
-import type { PrecacheManifest } from "./precacheList";
+import { CACHE_POLICY } from "./cachePolicy";
 
+// The kit tests the strategies; these test the game's policy on its own files.
 const precached = new Set([
   "/play/",
   "/nav.css",
@@ -19,116 +16,25 @@ const precached = new Set([
   "/art/manifest.json",
   "/art/sprites/dog.png",
 ]);
-const fetchOf = (pathname: string) => strategyFor(precached, { isNavigation: false, pathname });
-const navigationTo = (pathname: string) => strategyFor(precached, { isNavigation: true, pathname });
+const fetchOf = (pathname: string) =>
+  strategyFor(CACHE_POLICY, precached, { isNavigation: false, pathname });
 
-describe("strategyFor", () => {
-  it("navigates by the strategy for each page", () => {
-    for (const { expected, pathname } of [
-      { expected: "network-first", name: "the game page", pathname: "/play/" },
-      {
-        expected: "network-first",
-        name: "the game page's other path",
-        pathname: "/play/index.html",
-      },
-      { expected: "network-only", name: "the home page, left to the browser", pathname: "/" },
-      { expected: "network-only", name: "another page, left to the browser", pathname: "/art/" },
-    ]) {
-      expect(navigationTo(pathname)).toBe(expected);
-    }
+describe("the game's cache policy", () => {
+  it.each([
+    ["the art manifest", "/art/manifest.json", "network-first"],
+    ["the web app manifest", "/manifest.webmanifest", "network-first"],
+    ["hashed build output, precached or not", "/assets/play-abc.js", "cache-first"],
+    ["the precached site nav script", "/nav.js", "network-first"],
+    ["the precached site nav stylesheet", "/nav.css", "network-first"],
+    ["another precached file", "/art/sprites/dog.png", "cache-first"],
+    ["a file outside the precache", "/art/notes/index.json", "network-only"],
+    ["the service worker", "/sw.js", "network-only"],
+  ])("fetches %s by its strategy", (_name, pathname, expected) => {
+    expect(fetchOf(pathname)).toBe(expected);
   });
 
-  it("fetches each file by its strategy", () => {
-    for (const { expected, pathname } of [
-      { expected: "network-first", name: "the art manifest", pathname: "/art/manifest.json" },
-      {
-        expected: "network-first",
-        name: "the web app manifest",
-        pathname: "/manifest.webmanifest",
-      },
-      {
-        expected: "cache-first",
-        name: "hashed build output, precached or not",
-        pathname: "/assets/play-abc.js",
-      },
-      { expected: "network-first", name: "the precached site nav script", pathname: "/nav.js" },
-      {
-        expected: "network-first",
-        name: "the precached site nav stylesheet",
-        pathname: "/nav.css",
-      },
-      { expected: "cache-first", name: "another precached file", pathname: "/art/sprites/dog.png" },
-      {
-        expected: "network-only",
-        name: "a file outside the precache",
-        pathname: "/art/notes/index.json",
-      },
-      { expected: "network-only", name: "the service worker", pathname: "/sw.js" },
-    ]) {
-      expect(fetchOf(pathname)).toBe(expected);
-    }
-  });
-});
-
-describe("precacheFetchOptions", () => {
-  // The HTTP cache answers for hashed build output; the server revalidates the rest.
-  it("fetches each precached file with its cache mode", () => {
-    for (const [pathname, cache] of [
-      ["/assets/play-abc.js", "default"],
-      ["/assets/play-abc.css", "default"],
-      ["/play/", "no-cache"],
-      ["/art/manifest.json", "no-cache"],
-      ["/manifest.webmanifest", "no-cache"],
-      ["/art/sprites/dog.png", "no-cache"],
-      ["/icons/icon-192.png", "no-cache"],
-      ["/nav.js", "no-cache"],
-    ] as const) {
-      expect(precacheFetchOptions(pathname)).toEqual({ cache });
-    }
-  });
-});
-
-describe("cacheKeyFor", () => {
-  it("files each URL under its cache key", () => {
-    for (const [pathname, key] of [
-      ["/play/index.html", "/play/"],
-      ["/play/", "/play/"],
-      ["/art/sprites/dog.png", "/art/sprites/dog.png"],
-    ] as const) {
-      expect(cacheKeyFor(pathname)).toBe(key);
-    }
-  });
-});
-
-describe("the sound files", () => {
-  const manifest: PrecacheManifest = {
-    sounds: { m4a: ["/art/sounds/a.m4a"], ogg: ["/art/sounds/a.ogg"] },
-    urls: ["/play/", "/art/sprites/dog.png"],
-    version: "v1",
-  };
-
-  // The format the page named and no other; no sounds for a missing or unknown format.
-  it("installs the sounds for each format", () => {
-    for (const [format, sounds] of [
-      ["ogg", ["/art/sounds/a.ogg"]],
-      ["m4a", ["/art/sounds/a.m4a"]],
-      [null, []],
-      ["mp3", []],
-      ["toString", []],
-    ] as const) {
-      expect(installUrls(manifest, format)).toEqual([...manifest.urls, ...sounds]);
-    }
-  });
-
-  it("serves either format from the cache, storing one the install left out", () => {
-    const cached = cachedUrlsOf(manifest);
-    expect(strategyFor(cached, { isNavigation: false, pathname: "/art/sounds/a.ogg" })).toBe(
-      "cache-first",
-    );
-    expect(strategyFor(cached, { isNavigation: false, pathname: "/art/sounds/a.m4a" })).toBe(
-      "cache-first",
-    );
-    expect(strategyFor(cached, { isNavigation: true, pathname: "/play/" })).toBe("network-first");
+  it("names its caches for this game", () => {
+    expect(cacheNameFor(CACHE_POLICY, "v1")).toBe("dog-walker-v1");
   });
 });
 
@@ -151,8 +57,10 @@ describe("the game's art", () => {
     "serves %s cache-first, precached or not, and lets the HTTP cache answer its precache fetch",
     (pathname) => {
       expect(fetchOf(pathname)).toBe("cache-first");
-      expect(strategyFor(new Set(), { isNavigation: false, pathname })).toBe("cache-first");
-      expect(precacheFetchOptions(pathname)).toEqual({ cache: "default" });
+      expect(strategyFor(CACHE_POLICY, new Set(), { isNavigation: false, pathname })).toBe(
+        "cache-first",
+      );
+      expect(precacheFetchOptions(CACHE_POLICY, pathname)).toEqual({ cache: "default" });
     },
   );
 
@@ -163,13 +71,5 @@ describe("the game's art", () => {
     ["/art/atlas/run-0.png", "network-only"],
   ] as const)("serves the unhashed %s as it serves any other file: %s", (pathname, strategy) => {
     expect(fetchOf(pathname)).toBe(strategy);
-  });
-});
-
-describe("staleCacheNames", () => {
-  it("names this game's other versions and nothing else", () => {
-    const current = cacheNameFor("new");
-    const names = [cacheNameFor("old"), current, "someone-else", cacheNameFor("older")];
-    expect(staleCacheNames(current, names)).toEqual([cacheNameFor("old"), cacheNameFor("older")]);
   });
 });

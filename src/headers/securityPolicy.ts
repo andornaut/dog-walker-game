@@ -1,43 +1,15 @@
 // The security headers the build writes to dist/_headers, which Cloudflare serves with every
 // static asset. securityHeadersPlugin adds the hashes of each page's inline <script> and
 // <style> blocks to its rule's policy, so this module names only the sources a page loads.
-
-// Rendered in this order.
-export const DIRECTIVE_NAMES = [
-  "default-src",
-  "script-src",
-  "style-src",
-  "style-src-attr",
-  "font-src",
-  "img-src",
-  "media-src",
-  "connect-src",
-  "worker-src",
-  "manifest-src",
-  "object-src",
-  "base-uri",
-  "form-action",
-  "frame-ancestors",
-] as const;
-
-export type DirectiveName = (typeof DIRECTIVE_NAMES)[number];
-
-export type Directives = Readonly<Partial<Record<DirectiveName, readonly string[]>>>;
+import type {
+  Directives,
+  HeaderList,
+  HtmlPage,
+  PageRule,
+} from "@andornaut/game-kit/headers/securityHeaders";
 
 // Where the build writes its content-hashed files, as a _headers path pattern.
 export const HASHED_ASSET_PATH = "/assets/*";
-
-export type HeaderList = readonly (readonly [name: string, value: string])[];
-
-// A group of pages that share one Content-Security-Policy.
-export interface PageRule {
-  // Written above the rule in _headers.
-  readonly comment: string;
-  // Sources added to BASE_DIRECTIVES for these pages.
-  readonly directives: Directives;
-  // A Cloudflare _headers path pattern: * matches any run of characters, including none.
-  readonly path: string;
-}
 
 // On every response. No Cache-Control: every file but FILE_RULES' hashed build output keeps the
 // platform default (max-age=0, must-revalidate), which the service worker relies on to see a
@@ -114,3 +86,19 @@ export const PAGE_RULES: readonly PageRule[] = [
     path: "/art/*",
   },
 ];
+
+const NAV_SCRIPT_PATTERN = /<script\b[^>]*\ssrc\s*=\s*["']?\/nav\.js["'\s>]/i;
+const NAV_STYLESHEET_PATTERN = /<link\b[^>]*\shref\s*=\s*["']?\/nav\.css["'\s>]/i;
+
+// Whether a page loads /nav.js without linking /nav.css. The script builds the site nav bar but
+// leaves its CSS to the page, since the CSP has no hash for a <style> a script injects.
+export function navWithoutStylesheet(html: string): boolean {
+  return NAV_SCRIPT_PATTERN.test(html) && !NAV_STYLESHEET_PATTERN.test(html);
+}
+
+// Why the build must fail for a page, or undefined when it need not.
+export function pageProblem({ fileName, html }: HtmlPage): string | undefined {
+  return navWithoutStylesheet(html)
+    ? `${fileName} loads /nav.js but does not link /nav.css, so its nav bar would be unstyled`
+    : undefined;
+}

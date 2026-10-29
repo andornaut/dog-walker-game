@@ -1,11 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { contentHash, hashedArtFileName } from "../tools/atlas/hashedArt";
-import { isHashedAssetUrl } from "./cachePolicy";
+import type { CachePolicy } from "./cachePolicy";
 import {
   bundleDependencies,
   type BundleFile,
-  hashedArtUrls,
   precacheFingerprint,
   rootRelativeUrls,
   webManifestIconUrls,
@@ -75,49 +73,6 @@ describe("bundleDependencies", () => {
   });
 });
 
-describe("hashedArtUrls", () => {
-  const manifest = {
-    fonts: [{ fnt: "fonts/font-body.fnt", key: "font-body", png: "fonts/font-body.png" }],
-    images: [],
-    sounds: [{ key: "sfx-tip", m4a: "sounds/sfx-tip.m4a", ogg: "sounds/sfx-tip.ogg" }],
-    sprites: [],
-  };
-  const others = [
-    "manifest.json",
-    "atlas/boot-0.png",
-    "fonts/font-body.fnt",
-    "fonts/font-body.png",
-  ];
-  const sounds = { m4a: ["sounds/sfx-tip.m4a"], ogg: ["sounds/sfx-tip.ogg"] };
-  const artFiles = new Map(
-    [...others, ...sounds.m4a, ...sounds.ogg].map((path) => [
-      path,
-      hashedArtFileName(path, contentHash(new TextEncoder().encode(path))),
-    ]),
-  );
-  const urlOf = (path: string) => `/${artFiles.get(path) ?? ""}`;
-  const listed = hashedArtUrls(artFiles, manifest);
-
-  it.each(Object.entries(sounds))("lists the %s sound files apart", (format, paths) => {
-    expect(listed.sounds[format as keyof typeof sounds]).toEqual(paths.map(urlOf));
-  });
-
-  it("lists every other file in the map by its hashed name", () => {
-    expect(listed.urls).toEqual(others.map(urlOf));
-  });
-
-  it("lists only URLs the worker serves as hashed", () => {
-    const all = [...listed.urls, ...listed.sounds.m4a, ...listed.sounds.ogg];
-    expect(all.filter((url) => !isHashedAssetUrl(url))).toEqual([]);
-  });
-
-  it("rejects a malformed manifest, as the game does", () => {
-    expect(() => hashedArtUrls(artFiles, { fonts: [], images: [], sounds: [] })).toThrow(
-      "manifest.sprites",
-    );
-  });
-});
-
 describe("webManifestIconUrls", () => {
   it("lists each case's URLs", () => {
     for (const { expected, manifest } of [
@@ -135,6 +90,14 @@ describe("webManifestIconUrls", () => {
 });
 
 describe("precacheFingerprint", () => {
+  const policy: CachePolicy = {
+    cacheNamePrefix: "game-",
+    hashedAssetPrefix: "/assets/",
+    revalidatedUrls: [],
+  };
+  const fingerprint = (contentHashes: ReadonlyMap<string, string>) =>
+    precacheFingerprint(policy, contentHashes);
+
   it("is independent of insertion order", () => {
     const first = new Map([
       ["/play/", "aa"],
@@ -144,17 +107,17 @@ describe("precacheFingerprint", () => {
       ["/nav.js", "bb"],
       ["/play/", "aa"],
     ]);
-    expect(precacheFingerprint(first)).toBe(precacheFingerprint(second));
+    expect(fingerprint(first)).toBe(fingerprint(second));
   });
 
   it("changes when an unhashed file's content changes", () => {
-    const before = precacheFingerprint(new Map([["/art/dog.png", "aa"]]));
-    expect(precacheFingerprint(new Map([["/art/dog.png", "bb"]]))).not.toBe(before);
+    const before = fingerprint(new Map([["/art/sprite.png", "aa"]]));
+    expect(fingerprint(new Map([["/art/sprite.png", "bb"]]))).not.toBe(before);
   });
 
   it("follows a hashed asset by its name alone", () => {
-    const before = precacheFingerprint(new Map([["/assets/play-abc.js", "aa"]]));
-    expect(precacheFingerprint(new Map([["/assets/play-abc.js", "bb"]]))).toBe(before);
-    expect(precacheFingerprint(new Map([["/assets/play-def.js", "aa"]]))).not.toBe(before);
+    const before = fingerprint(new Map([["/assets/play-abc.js", "aa"]]));
+    expect(fingerprint(new Map([["/assets/play-abc.js", "bb"]]))).toBe(before);
+    expect(fingerprint(new Map([["/assets/play-def.js", "aa"]]))).not.toBe(before);
   });
 });

@@ -1,5 +1,8 @@
+// Updating to a newer version of a game the service worker (serviceWorker.ts) precached. The
+// game has a home screen, where it may show an update plate whose button switches versions.
+
 // The message a page posts to a waiting service worker to make it take over now.
-// serviceWorker.ts imports only its type, so the worker still builds with no imports.
+// serviceWorker.ts imports only its type, so the built worker holds nothing else.
 export const SKIP_WAITING_MESSAGE = "skip-waiting";
 export type SkipWaitingMessage = typeof SKIP_WAITING_MESSAGE;
 
@@ -24,10 +27,10 @@ export interface ContainerLike extends EventTarget {
 type NewerVersion = "none" | "pending" | "waiting";
 
 export interface UpdateState {
-  // A key, touch or click, or a walk, since the page loaded.
+  // A key, touch or click, or play started, since the page loaded.
   interacted: boolean;
   newer: NewerVersion;
-  // The home screen is in front, never mid-walk or in a menu over it.
+  // The home screen is in front, never mid-game or in a menu over it.
   onHome: boolean;
   // navigator.onLine: false means there is no network to check for a newer version on.
   online: boolean;
@@ -83,7 +86,7 @@ export interface ResumeState {
 
 // Whether the page coming back into view checks for a newer version. An installed app usually
 // resumes without relaunching, so the launch's check can be long past, and a player resuming on
-// the home screen never arrives there to check. Mid-walk or in a menu, the next arrival home
+// the home screen never arrives there to check. Mid-game or in a menu, the next arrival home
 // checks instead.
 export function resumeCheckDue({ lastCheck, now, onHome, online, visible }: ResumeState): boolean {
   return (
@@ -124,9 +127,9 @@ export function activateWaitingWorker(
 }
 
 export interface UpdateFlow {
-  // The plate's Update now button: switch to the waiting version, or with none waiting reload,
-  // so the browser fetches the newer version (a newer version's save shows the plate with none
-  // waiting). Does nothing while a switch is reloading.
+  // The plate's button: switch to the waiting version, or with none waiting reload, so the
+  // browser fetches the newer version (a game may show the plate with none waiting, such as for
+  // a save a newer version wrote). Does nothing while a switch is reloading.
   accept(): void;
   // Resolves once the game may boot. It never resolves for a page that reloads first.
   readonly bootable: Promise<void>;

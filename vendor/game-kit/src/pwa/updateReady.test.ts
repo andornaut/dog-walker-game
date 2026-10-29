@@ -117,7 +117,7 @@ describe("updateAction", () => {
       name: "a waiting version, after input, home",
       state: { ...playing, onHome: true },
     },
-    { expected: "run", name: "a waiting version, after input, mid-walk", state: playing },
+    { expected: "run", name: "a waiting version, after input, mid-game", state: playing },
     {
       expected: "run",
       name: "a pending version after input",
@@ -153,7 +153,7 @@ describe("resumeCheckDue", () => {
     { expected: true, name: "visible on the home screen", state: home },
     { expected: true, name: "never checked", state: { ...home, lastCheck: undefined, now: 0 } },
     { expected: false, name: "hidden", state: { ...home, visible: false } },
-    { expected: false, name: "mid-walk or in a menu", state: { ...home, onHome: false } },
+    { expected: false, name: "mid-game or in a menu", state: { ...home, onHome: false } },
     { expected: false, name: "offline", state: { ...home, online: false } },
     { expected: false, name: "within the throttle", state: { ...home, now: RESUME_CHECK_MS - 1 } },
     { expected: true, name: "after the throttle", state: { ...home, now: RESUME_CHECK_MS * 2 } },

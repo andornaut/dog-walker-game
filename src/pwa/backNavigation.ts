@@ -1,5 +1,6 @@
+import { isFirefoxAndroid } from "@andornaut/game-kit/pwa/installState";
+
 import { dispatchPhoneEvent, PHONE_EVENTS } from "./events";
-import { isFirefoxAndroid } from "./installState";
 
 export interface HistoryLike {
   go(delta: number): void;

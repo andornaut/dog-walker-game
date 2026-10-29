@@ -1,16 +1,19 @@
-import type { ArtFileMap } from "../assets/artUrl";
-import { parseManifest } from "../assets/manifest";
-import type { SoundFormat } from "../audio/soundFormat";
-import { isHashedAssetUrl } from "./cachePolicy";
+import { type CachePolicy, isHashedAssetUrl } from "./cachePolicy";
 
 // The service worker's precache: every URL the game needs to boot offline, each sound file by
-// format (the worker stores the one format the page plays), and a version that changes whenever
-// any of their contents change, so a deploy installs a new worker.
+// format (the worker stores the one format the page plays, named on its URL by
+// serviceWorkerUrl), and a version that changes whenever any of their contents change, so a
+// deploy installs a new worker.
 export interface PrecacheManifest {
-  sounds: Record<SoundFormat, string[]>;
+  sounds: Record<string, string[]>;
   urls: string[];
   version: string;
 }
+
+// The identifier a worker entry declares (declare const GAME_KIT_PRECACHE_MANIFEST:
+// PrecacheManifest) and passes to serviceWorker.ts's runServiceWorker; vite/precachePlugin
+// replaces it with the manifest's JSON.
+export const PRECACHE_MANIFEST_PLACEHOLDER = "GAME_KIT_PRECACHE_MANIFEST";
 
 // The build output, reduced to what the precache walk reads. Vite records the CSS and assets a
 // chunk imports under viteMetadata.
@@ -55,26 +58,6 @@ export function bundleDependencies(
   return [...found].sort();
 }
 
-// The art the game loads, as the URLs of its hashed files: the sound files by format, for the
-// worker to store the one the page plays, and every other file. Only the map's files are listed,
-// so no unhashed art is precached.
-export function hashedArtUrls(
-  artFiles: ArtFileMap,
-  manifestJson: unknown,
-): { sounds: Record<SoundFormat, string[]>; urls: string[] } {
-  const { sounds } = parseManifest(manifestJson);
-  const url = (fileName: string) => `/${fileName}`;
-  const soundUrls = (format: SoundFormat) =>
-    sounds.flatMap((sound) => artFiles.get(sound[format]) ?? []).map(url);
-  const soundPaths = new Set(sounds.flatMap(({ m4a, ogg }) => [m4a, ogg]));
-  return {
-    sounds: { m4a: soundUrls("m4a"), ogg: soundUrls("ogg") },
-    urls: [...artFiles]
-      .filter(([path]) => !soundPaths.has(path))
-      .map(([, fileName]) => url(fileName)),
-  };
-}
-
 // The icons a web app manifest names.
 export function webManifestIconUrls(manifestJson: unknown): string[] {
   const icons = (manifestJson as { icons?: unknown } | null)?.icons;
@@ -88,9 +71,12 @@ export function webManifestIconUrls(manifestJson: unknown): string[] {
 
 // The text a version hash is computed over: each URL with its content hash, in URL order.
 // Hashed assets need no content hash because their name already changes with their content.
-export function precacheFingerprint(contentHashes: ReadonlyMap<string, string>): string {
+export function precacheFingerprint(
+  policy: CachePolicy,
+  contentHashes: ReadonlyMap<string, string>,
+): string {
   return [...contentHashes.keys()]
     .sort()
-    .map((url) => `${url} ${isHashedAssetUrl(url) ? "" : (contentHashes.get(url) ?? "")}`)
+    .map((url) => `${url} ${isHashedAssetUrl(policy, url) ? "" : (contentHashes.get(url) ?? "")}`)
     .join("\n");
 }

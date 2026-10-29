@@ -1,8 +1,9 @@
-// Whether and how the game can be installed as an app on this device. Pure, so the game and the
-// home page share it: installFlow.ts reads the facts from the browser.
-import type { MenuInstallBrowser } from "../data/types";
+// Whether and how the game can be installed as an app on this device. Pure, so a game and its
+// site's pages share it: installFlow.ts reads the facts from the browser.
 
-export type { MenuInstallBrowser } from "../data/types";
+// A browser that installs the page only from its own menu: iOS, from Share, or Firefox for
+// Android, from its menu.
+export type MenuInstallBrowser = "firefoxAndroid" | "ios";
 
 // installed: running as the installed app, or installed during this visit. prompt: the browser
 // handed over its install prompt (Android and desktop Chromium). menuSteps: a browser that
@@ -42,8 +43,7 @@ export function installState(facts: InstallFacts): InstallState {
   return facts.menuBrowser === undefined ? "unsupported" : "menuSteps";
 }
 
-// Whether the state offers a way to install: the Settings row, the home page's button and the
-// one-time suggestion show only then.
+// Whether the state offers a way to install, so the game shows its install offer.
 export function offersInstall(state: InstallState): boolean {
   return state === "prompt" || state === "menuSteps";
 }

@@ -1,13 +1,39 @@
-// The pure parts of securityHeadersPlugin: finding inline blocks, hashing them, and rendering
-// the _headers file from securityPolicy.ts.
-import {
-  DIRECTIVE_NAMES,
-  type DirectiveName,
-  type Directives,
-  HASHED_ASSET_PATH,
-  type HeaderList,
-  type PageRule,
-} from "./securityPolicy";
+// The pure parts of vite/securityHeadersPlugin: finding a page's inline blocks, hashing them,
+// and rendering a Cloudflare _headers file with a Content-Security-Policy per page rule.
+
+// Rendered in this order.
+export const DIRECTIVE_NAMES = [
+  "default-src",
+  "script-src",
+  "style-src",
+  "style-src-attr",
+  "font-src",
+  "img-src",
+  "media-src",
+  "connect-src",
+  "worker-src",
+  "manifest-src",
+  "object-src",
+  "base-uri",
+  "form-action",
+  "frame-ancestors",
+] as const;
+
+export type DirectiveName = (typeof DIRECTIVE_NAMES)[number];
+
+export type Directives = Readonly<Partial<Record<DirectiveName, readonly string[]>>>;
+
+export type HeaderList = readonly (readonly [name: string, value: string])[];
+
+// A group of pages that share one Content-Security-Policy.
+export interface PageRule {
+  // Written above the rule in _headers.
+  readonly comment: string;
+  // Sources added to the base directives for these pages.
+  readonly directives: Directives;
+  // A Cloudflare _headers path pattern: * matches any run of characters, including none.
+  readonly path: string;
+}
 
 // An HTML page as the build emits it.
 export interface HtmlPage {
@@ -48,15 +74,6 @@ export function inlineBlocks(html: string): { scripts: string[]; styles: string[
   return { scripts, styles };
 }
 
-const NAV_SCRIPT_PATTERN = /<script\b[^>]*\ssrc\s*=\s*["']?\/nav\.js["'\s>]/i;
-const NAV_STYLESHEET_PATTERN = /<link\b[^>]*\shref\s*=\s*["']?\/nav\.css["'\s>]/i;
-
-// Whether a page loads /nav.js without linking /nav.css. The script builds the site nav bar but
-// leaves its CSS to the page, since the CSP has no hash for a <style> a script injects.
-export function navWithoutStylesheet(html: string): boolean {
-  return NAV_SCRIPT_PATTERN.test(html) && !NAV_STYLESHEET_PATTERN.test(html);
-}
-
 // The path a page is served at: Cloudflare serves /dir/index.html at /dir/ and /x.html at /x.
 export function servedPath(fileName: string): string {
   return `/${fileName.replace(/(^|\/)index\.html$/, "$1").replace(/\.html$/, "")}`;
@@ -74,11 +91,11 @@ export function pathMatches(pattern: string, path: string): boolean {
 // A Vite output name: the source's name, a dash and an 8-character content hash.
 const HASHED_NAME = /-[\w-]{8}\.\w+$/;
 
-// The build's files under the hashed asset path whose names carry no content hash, so a long
-// cache lifetime would keep a stale copy.
-export function unhashedAssets(fileNames: readonly string[]): string[] {
+// The build's files under hashedAssetPath (a _headers path pattern) whose names carry no content
+// hash, so a long cache lifetime would keep a stale copy.
+export function unhashedAssets(hashedAssetPath: string, fileNames: readonly string[]): string[] {
   return fileNames.filter(
-    (fileName) => pathMatches(HASHED_ASSET_PATH, `/${fileName}`) && !HASHED_NAME.test(fileName),
+    (fileName) => pathMatches(hashedAssetPath, `/${fileName}`) && !HASHED_NAME.test(fileName),
   );
 }
 
