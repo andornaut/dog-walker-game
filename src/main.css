@@ -1,5 +1,5 @@
-/* The game page's layout: the nav bar (absent in the installed app), the game and the dev panel
-   stacked in one screen. */
+/* The game page's layout: the nav bar, the game and the dev panel stacked in one screen. The
+   installed app shows neither the nav bar nor the dev panel. */
 
 :root {
   --dev-bar-height: 24px;
@@ -46,6 +46,16 @@ body {
   flex: none;
   height: var(--dev-bar-height);
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* The page starts the panel hidden and only a browser tab mounts it. Without it, #game takes
+   the bottom safe-area inset. */
+#dev-panel[hidden] {
+  display: none;
+}
+
+body:has(#dev-panel[hidden]) #game {
+  margin-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* With the sheet open, body scrolls down to it. Drags on the game still steer. */

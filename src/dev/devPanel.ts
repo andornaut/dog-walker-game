@@ -274,5 +274,7 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     persistence,
   );
   container.append(bar, sheet);
+  // The page starts it hidden, for the installed app, which mounts no panel.
+  container.hidden = false;
   setOpen(sessionRead(DEV_PANEL_OPEN_KEY) === "1");
 }

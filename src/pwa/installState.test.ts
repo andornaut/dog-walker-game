@@ -7,6 +7,7 @@ import {
   type MenuInstallBrowser,
   menuInstallBrowser,
   offersInstall,
+  runsAsApp,
 } from "./installState";
 
 const NONE: InstallFacts = {
@@ -49,6 +50,17 @@ describe("installState", () => {
     ["offers nothing elsewhere", {}, "unsupported"],
   ])("%s", (_, facts, expected) => {
     expect(installState({ ...NONE, ...facts })).toBe(expected);
+  });
+});
+
+describe("runsAsApp", () => {
+  it.each<[string, Partial<InstallFacts>, boolean]>([
+    ["runs as the app in a fullscreen or standalone window", { displayModeInstalled: true }, true],
+    ["runs as the app when opened from the iOS Home Screen", { iosStandalone: true }, true],
+    ["runs in a browser tab", {}, false],
+    ["runs in a browser tab after installing during the visit", { appInstalled: true }, false],
+  ])("%s", (_, facts, expected) => {
+    expect(runsAsApp({ ...NONE, ...facts })).toBe(expected);
   });
 });
 

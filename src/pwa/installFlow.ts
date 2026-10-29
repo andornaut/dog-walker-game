@@ -6,6 +6,7 @@ import {
   installState,
   type MenuInstallBrowser,
   menuInstallBrowser,
+  runsAsApp,
 } from "./installState";
 
 // Chromium's beforeinstallprompt event, which no TypeScript lib types.
@@ -46,6 +47,14 @@ export interface InstallFlow {
 
 // The display modes the manifest asks for, as public/nav.js checks them.
 export const INSTALLED_DISPLAY_QUERY = "(display-mode: fullscreen), (display-mode: standalone)";
+
+// Whether the page runs as the installed app now, read as watchInstall reads it.
+export function pageRunsAsApp(host: Pick<InstallHost, "matchMedia" | "navigator">): boolean {
+  return runsAsApp({
+    displayModeInstalled: host.matchMedia(INSTALLED_DISPLAY_QUERY).matches,
+    iosStandalone: host.navigator.standalone === true,
+  });
+}
 
 // Shows the prompt and reads the player's choice. prompt is called before any await, while the
 // tap that asked for it still counts as the player's gesture.

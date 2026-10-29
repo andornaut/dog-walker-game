@@ -3,6 +3,7 @@ import type { Game } from "phaser";
 import { gameData } from "../../data";
 import { DEV_STATE_EVENT, type DevState } from "../../dev/devOverlay";
 import { DEV_LAST_LOG_KEY, DEV_REPLAY_KEY } from "../../dev/devPanelModel";
+import { devToolsOn } from "../../dev/devTools";
 import {
   type CardChoice,
   decodeInputLog,
@@ -29,9 +30,10 @@ export interface RunStart {
 }
 
 // A replay log waiting in the session starts the next run from its setup and drives its inputs;
-// otherwise the page's URL sets the run up. Reading the log clears it.
+// otherwise the page's URL sets the run up. Reading the log clears it. The installed app reads
+// no log.
 export function nextRunStart(): RunStart {
-  const raw = sessionRead(DEV_REPLAY_KEY);
+  const raw = devToolsOn() ? sessionRead(DEV_REPLAY_KEY) : null;
   if (raw !== null) {
     sessionRemove(DEV_REPLAY_KEY);
     const decoded = decodeInputLog(runSetupLimitsFor(gameData), raw);

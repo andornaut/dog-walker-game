@@ -8,6 +8,7 @@ import { stopGameOnCrash } from "./crash/crashScreen";
 import { SCREEN_CONFIG } from "./data/screen";
 import { applyPendingSaveEdits, type DevPanelHost, mountDevPanel } from "./dev/devPanel";
 import { DEV_CHEATS_KEY } from "./dev/devPanelModel";
+import { devToolsOn } from "./dev/devTools";
 import { pageRunSetup } from "./dev/pageRunSetup";
 import { noteKeyPress } from "./input/keyNumbers";
 import { lostTouches } from "./input/touches";
@@ -112,7 +113,10 @@ function bootGame(): Game {
     game.sound.pauseAll();
   });
   fitWholePixels(game);
-  mountDevPanel(devPanelHost(game), document.getElementById("dev-panel"));
+  // The installed app has no dev panel, so its #dev-panel stays hidden and no cheat is set.
+  if (devToolsOn()) {
+    mountDevPanel(devPanelHost(game), document.getElementById("dev-panel"));
+  }
 
   // Captured before the scenes see it, so the key that opens a menu already shows its numbers.
   window.addEventListener("keydown", noteKeyPress, { capture: true });
@@ -149,5 +153,7 @@ function bootGame(): Game {
 
 // The game boots once the service worker has had the chance to switch a fresh load to a newer
 // version, so it never draws the old one first, and once the dev panel's queued save edits are
-// written, so the game loads the edited save.
-void setupPhoneApp().then(applyPendingSaveEdits).then(bootGame);
+// written, so the game loads the edited save. The installed app writes none.
+void setupPhoneApp()
+  .then(() => (devToolsOn() ? applyPendingSaveEdits() : undefined))
+  .then(bootGame);

@@ -4,6 +4,7 @@ import { keysOf } from "../lib/records";
 import { walkLength } from "../rules/route";
 import { MAX_RUN_DOGS } from "../save/schema";
 import { homeRunSetup, stripDevParams } from "./devStart";
+import { pageSearch } from "./devTools";
 import { type ParsedRunSetup, parseRunSetup, randomSeed, type RunSetupLimits } from "./runSetup";
 
 const SPEED_LIMITS = { max: 10, min: 0.1 };
@@ -25,10 +26,11 @@ export function runSetupLimitsFor(
 let parsed: ParsedRunSetup<DogId, GearId, WalkerId> | undefined;
 
 // The setup in this page's URL, parsed on first use and kept for the page's life, so every
-// scene sees the same random seed when the URL has none. Warnings go to the console.
+// scene sees the same random seed when the URL has none. Warnings go to the console. The
+// installed app reads no setup from its URL.
 export function pageRunSetup(): ParsedRunSetup<DogId, GearId, WalkerId> {
   if (parsed === undefined) {
-    parsed = parseRunSetup(runSetupLimitsFor(gameData), randomSeed, globalThis.location.search);
+    parsed = parseRunSetup(runSetupLimitsFor(gameData), randomSeed, pageSearch());
     parsed.warnings.forEach((warning) => console.warn(`Run setup: ${warning}`));
   }
   return parsed;

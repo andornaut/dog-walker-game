@@ -27,6 +27,7 @@ import { HOME_CUES, soundKeysOf } from "../audio/sound";
 import { gameData } from "../data";
 import type { EncounterId } from "../data/types";
 import { devRunLoadout, namesRunSetup } from "../dev/devStart";
+import { pageSearch } from "../dev/devTools";
 import { pageRunSetup } from "../dev/pageRunSetup";
 import {
   bootProgress,
@@ -139,7 +140,7 @@ export class BootScene extends Scene {
     addAtlasTextures(this);
     this.showLoadingScreen();
 
-    const walkNow = namesRunSetup(globalThis.location.search);
+    const walkNow = namesRunSetup(pageSearch());
     const first = walkNow ? always : loadsFirst;
     queueManifestArt(this, this.manifest, first);
     for (const { fnt, key, png } of this.manifest.fonts) {

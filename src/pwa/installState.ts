@@ -24,8 +24,16 @@ export interface InstallFacts {
   readonly menuBrowser: MenuInstallBrowser | undefined;
 }
 
+// Whether the page runs as the installed app: in its own window, not a browser tab. An install
+// during this visit leaves the page in its tab, so appInstalled does not count.
+export function runsAsApp(
+  facts: Pick<InstallFacts, "displayModeInstalled" | "iosStandalone">,
+): boolean {
+  return facts.displayModeInstalled || facts.iosStandalone;
+}
+
 export function installState(facts: InstallFacts): InstallState {
-  if (facts.appInstalled || facts.displayModeInstalled || facts.iosStandalone) {
+  if (facts.appInstalled || runsAsApp(facts)) {
     return "installed";
   }
   if (facts.hasPrompt) {
