@@ -24,9 +24,11 @@ export const BACK_GUARD_GESTURES = ["keydown", "pointerdown", "pointerup"] as co
 export const LEAVE_WAIT_MS = 500;
 
 export interface BackGuard {
-  // Leaves the game: back past the guard entry and the game's own entry, to the previous page.
-  // With none (an installed app, or a tab opened on the game), it closes the window where the
-  // browser allows; where it doesn't, the game stays as it was, guard and all.
+  // Leaves the game: back over the guard entry, without pushing it again, then back past the
+  // game's own entry to the previous page. With none (an installed app's launch, or a tab opened
+  // on the game), it closes the window where the browser allows; where it doesn't, the game stays
+  // on its own entry with no guard, so the next back is the browser's (an installed app closes)
+  // unless the player's input first pushes the guard again.
   leave(): void;
 }
 
@@ -46,12 +48,20 @@ export function guardBackNavigation(
   host: LeaveHost,
   history: HistoryLike,
 ): BackGuard {
+  // Whether leave has stepped back over the guard and goes on past the game's own entry once it
+  // lands there.
+  let leaving = false;
   const pushGuard = () => {
     if (!isBackGuardState(history.state)) {
       history.pushState(BACK_GUARD_STATE, "");
     }
   };
   const onPopState = () => {
+    if (leaving) {
+      leaving = false;
+      history.go(-1);
+      return;
+    }
     // Forward onto the guard entry is not a back press.
     if (isBackGuardState(history.state)) {
       return;
@@ -71,7 +81,8 @@ export function guardBackNavigation(
         hidden = true;
       };
       eventTarget.addEventListener("pagehide", onPageHide, { once: true });
-      history.go(isBackGuardState(history.state) ? -2 : -1);
+      leaving = isBackGuardState(history.state);
+      history.go(-1);
       host.setTimeout(() => {
         eventTarget.removeEventListener("pagehide", onPageHide);
         if (!hidden) {

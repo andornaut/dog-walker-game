@@ -125,8 +125,10 @@ describe("createScreenWakeLock", () => {
 
 // The page's session history: the previous page's entry, if the game was opened from one, then
 // the game's own entries. Going back past the game's first entry leaves the page, which hides it;
-// going further than the history reaches does nothing.
+// going further than the history reaches does nothing, and the user's back there is the
+// browser's own (an installed app closes), which systemBacks counts.
 class FakeHistory extends EventTarget implements HistoryLike {
+  systemBacks = 0;
   private readonly entries: { page: "game" | "previous"; state: unknown }[];
   private index: number;
 
@@ -149,7 +151,12 @@ class FakeHistory extends EventTarget implements HistoryLike {
     return this.entries[this.index]?.state;
   }
 
+  // The user's back: the browser's own where the history reaches no further.
   back(): void {
+    if (this.index === 0) {
+      this.systemBacks += 1;
+      return;
+    }
     this.go(-1);
   }
 
@@ -211,8 +218,8 @@ describe("guardBackNavigation", () => {
     },
   );
 
-  // Back past the guard and the game's own entry, or with nothing before them, a close the
-  // browser may refuse, the guard left in place for the next back.
+  // Back over the guard and past the game's own entry, or with nothing before them, a close the
+  // browser may refuse, the game left on its own entry with no guard.
   it.each([
     { closes: 0, left: true, previous: true },
     { closes: 1, left: false, previous: false },
@@ -220,20 +227,31 @@ describe("guardBackNavigation", () => {
     const { guard, history, host, seen } = guarded(row.previous);
     guard.leave();
     host.wait();
-    expect({ closes: host.closes, left: history.left, seen }).toEqual({
+    expect({ closes: host.closes, left: history.left, seen, state: history.state }).toEqual({
       closes: row.closes,
       left: row.left,
       seen: [],
+      state: null,
     });
   });
 
-  it("keeps back on the game after leaving finds no page to go to", () => {
+  // An installed app's launch: the next back is the system's, which closes the app, unless an
+  // input first pushes the guard again.
+  it.each([
+    { input: false, presses: [], systemBacks: 1 },
+    { input: true, presses: [PHONE_EVENTS.backPressed], systemBacks: 0 },
+  ])("after leaving finds no page, with input $input before the next back", (row) => {
     const { guard, history, host, seen } = guarded(false);
     guard.leave();
     host.wait();
+    if (row.input) {
+      history.dispatchEvent(new Event(BACK_GUARD_GESTURES[0]));
+    }
     history.back();
-    expect(seen).toEqual([PHONE_EVENTS.backPressed]);
-    expect(history.state).toEqual(BACK_GUARD_STATE);
+    expect({ seen, systemBacks: history.systemBacks }).toEqual({
+      seen: row.presses,
+      systemBacks: row.systemBacks,
+    });
   });
 
   it("pushes no guard before the player's first input", () => {
