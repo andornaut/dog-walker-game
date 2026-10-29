@@ -2,12 +2,10 @@ import { type GameObjects, type Input, Scene } from "phaser";
 
 import { dogFaceKey, gearIconKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
 import { dogDetail, gearDetail } from "../home/detail";
 import { FEEDBACK, shakeOffset } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
 import { dollarText, type Purchase } from "../home/home";
-import { cardBand } from "../home/homeLayout";
 import { type HomeAction, messageLine } from "../home/homeLines";
 import {
   answerPurchase,
@@ -39,7 +37,6 @@ import {
   shopMessageCapTop,
   shopRowTextTops,
   shopScrollbar,
-  shopTabFace,
   shopTabRects,
 } from "../home/shopLayout";
 import {
@@ -70,7 +67,7 @@ import { PALETTE } from "../ui/phaser/palette";
 import { fitPixelText, pixelFontMetrics, placePixelText } from "../ui/phaser/pixelText";
 import { GREYED, pictureBox, type PlateKind } from "../ui/selection";
 import type { CelebrationSceneData } from "./CelebrationScene";
-import { addCardTitle, addDetailCard, drawDetailCard } from "./homePanels";
+import { drawDetailCard } from "./homePanels";
 import {
   addPlate,
   addTileBadge,
@@ -91,15 +88,14 @@ import {
   placeScrollbar,
   type ScrollbarView,
 } from "./scrollView";
+import { addShopPage, addShopTabs } from "./shopPage";
 import { listenTargetPress, sameByValue, type TargetPressListener } from "./targetPress";
 import {
   addBodyText,
-  addCloseButton,
   addGraphicsIn,
   addPanel,
   addSelectFrame,
   addSelectTile,
-  addTab,
   addTagImage,
   addTapBurst,
   clearScene,
@@ -136,7 +132,7 @@ type Target =
 
 const LAYOUT = SHOP_LAYOUT;
 const PANEL: Rect = LAYOUT.panel;
-const TAB_RECTS: readonly Rect[] = shopTabRects();
+const TAB_RECTS: readonly Rect[] = shopTabRects(SHOP_TABS.length);
 const ROW = LAYOUT.row;
 const OWNED_DX = ROW.ownedDx;
 const LIST: Rect = LAYOUT.list.rect;
@@ -222,7 +218,7 @@ export class ShopScene extends Scene {
     this.showFocus();
 
     // A tap acts once its dip ends; holding a dog or gear row opens its detail card, and the
-    // hold takes the press. With a card open, a tap anywhere closes it, as on Stats.
+    // hold takes the press. With a card open, a tap anywhere closes it, as on the Logbook.
     this.presses = listenTargetPress<Target>(this, {
       dipMs: (target) => (target.kind === "dismiss" ? 0 : FEEDBACK.pressDipMs),
       onDown: (pointer, target) => {
@@ -603,15 +599,18 @@ export class ShopScene extends Scene {
     this.placed = [];
     const save = this.save();
     const root = this.add.container(0, 0);
-    // The wood under the card, from the top bar down; the home screen's bar shows above it.
-    fillRect(addGraphicsIn(this, root), PALETTE.darkBrown, {
-      height: SCREEN_CONFIG.height - PANEL.y + 4,
-      width: SCREEN_CONFIG.width,
-      x: 0,
-      y: PANEL.y - 4,
-    });
-    this.drawCard(root);
-    this.drawTabs(root);
+    const words = gameData.homeText.shop;
+    addShopPage(this, root, this.pressed?.kind === "close", words.title);
+    addShopTabs(
+      this,
+      root,
+      currentSettings(this).reducedMotion,
+      SHOP_TABS.map((tab) => ({
+        label: words.tabs[tab],
+        open: tab === this.tab,
+        pressed: sameByValue({ kind: "tab", tab }, this.pressed),
+      })),
+    );
     // A bought dog leaves its list, so the list may now be shorter.
     this.scroll = resizeScroll(scrollMax(LIST, this.listBottom(save)), this.scroll);
     this.frame = shopListFrame(this.scroll.max > 0);
@@ -660,29 +659,6 @@ export class ShopScene extends Scene {
     });
     const { style } = fitPixelText(label, SHOP_MESSAGE_FIT, x, PLATE.y);
     placePixelText(label, x, shopMessageCapTop(pixelFontMetrics(this, "body"), style.scale));
-  }
-
-  // The card, its title band and its close control.
-  private drawCard(root: GameObjects.Container): void {
-    addDetailCard(this, root, PANEL, cardBand(PANEL));
-    root.add(addCardTitle(this, PANEL, gameData.homeText.shop.title));
-    addCloseButton(this, root, LAYOUT.close, this.pressed?.kind === "close");
-  }
-
-  // The open tab is selected and the other normal.
-  private drawTabs(root: GameObjects.Container): void {
-    const { reducedMotion } = currentSettings(this);
-    SHOP_TABS.forEach((tab, i) => {
-      const hit = TAB_RECTS[i];
-      if (hit === undefined) {
-        return;
-      }
-      addTab(this, root, shopTabFace(hit), gameData.homeText.shop.tabs[tab], {
-        open: tab === this.tab,
-        pressed: sameByValue({ kind: "tab", tab }, this.pressed),
-        reducedMotion,
-      });
-    });
   }
 
   private heading(root: GameObjects.Container, y: number, title: string, note?: string): void {

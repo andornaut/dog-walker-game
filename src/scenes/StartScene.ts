@@ -886,7 +886,7 @@ export class StartScene extends Scene {
         this.afterArt("help", () => openHelp(this, SCENE_KEYS.start));
         return;
       case "logbook":
-        // The logbook is the Stats page, on its first tab.
+        // The Logbook opens on its first tab, Badges.
         openOverlay(this, SCENE_KEYS.stats, { resume: SCENE_KEYS.start });
         return;
       case "settings": {

@@ -15,6 +15,7 @@ import { plainMarks } from "../ui/pixelFont";
 import { TEXT_SCALE } from "../ui/textFit";
 import { BADGE_STRIP, badgeProgress, badgeWall, wallCell, wallRects } from "./badgesView";
 import { MENU_TEXT_FIELDS } from "./menuText";
+import { shopScrollbar } from "./shopLayout";
 import {
   badgesBottom,
   DETAIL_TEXT_WIDTH,
@@ -223,15 +224,14 @@ describe("the scrollbar", () => {
     expect(right).toBeLessThanOrEqual(BAR_LEFT);
   });
 
-  it("sits at the view's right edge, as tall as the view", () => {
+  it("sits where the shop's does, beside the view and as tall as it", () => {
     const bar = statsScrollbar(100, 0);
-    expect(bar?.track).toEqual({
-      height: view.height,
-      width: scrollbar.trackWidth,
-      x: view.x + view.width - scrollbar.trackWidth,
-      y: view.y,
-    });
-    expect(view.x + view.width).toBeLessThanOrEqual(panel.x + panel.width - 2);
+    expect(bar).toEqual(shopScrollbar(100, 0));
+    expect(bar?.track).toMatchObject({ height: view.height, y: view.y });
+    expect(view.x + view.width).toBeLessThanOrEqual(bar?.track.x ?? 0);
+    expect((bar?.track.x ?? 0) + scrollbar.trackWidth).toBeLessThanOrEqual(
+      panel.x + panel.width - 2,
+    );
   });
 });
 

@@ -4,12 +4,12 @@ import { closeControl } from "../ui/closeControl";
 import { type FontMetrics, helpCapDy, inkRowsFromCapTop } from "../ui/fontMetrics";
 import { type ScrollbarRects, scrollbarRects } from "../ui/scrollbar";
 import { TEXT_STYLE } from "../ui/textFit";
-import { SHOP_TABS } from "./shop";
 
 // The Pet shop page under the home screen's top bar, which stays in view with the bank:
 // a card with its title band and close control, the Dogs and Gear tabs, and each tab's
 // lists. Rows are hit areas at least 44 tall; tabs draw 28 tall in a 44-tall hit area. The
 // lists scroll in the list area under the tabs, laid out here as they sit scrolled to the top.
+// The Logbook wears the same page (src/home/statsLayout.ts).
 const PANEL = { height: 512, width: 352, x: 4, y: 44 };
 const ROW_X = PANEL.x + 12;
 // Rows run to the tabs' right edge, or with a scrollbar stop 6px short of its track.
@@ -23,7 +23,9 @@ const LIST_UNSCROLLED = { ...LIST, width: PANEL.width - 16 };
 // ROWS_TO_HEADING under the last slot row, so the dogs follow however many slots there are.
 const HEADING_TO_ROWS = 16;
 const ROWS_TO_HEADING = 12;
-const SLOT_HEADING_Y = 123;
+// Each tab's first heading, its capitals 6px under the list area's top.
+const FIRST_HEADING_Y = LIST.y + 6;
+const SLOT_HEADING_Y = FIRST_HEADING_Y;
 const SLOT_ROWS = { height: 48, pitch: 54, y: SLOT_HEADING_Y + HEADING_TO_ROWS };
 const DOG_HEADING_Y =
   SLOT_ROWS.y + (DOG_SLOTS.length - 1) * SLOT_ROWS.pitch + SLOT_ROWS.height + ROWS_TO_HEADING;
@@ -39,7 +41,7 @@ export const SHOP_LAYOUT = {
   },
   // The Gear tab: its heading and rows.
   gear: {
-    headingY: 123,
+    headingY: FIRST_HEADING_Y,
     rows: { height: 50, pitch: 60, y: 141 },
   },
   // Headings sit on the card at the rows' left, a note right-aligned at their right.
@@ -47,7 +49,14 @@ export const SHOP_LAYOUT = {
   // The headings and rows scroll in rect, masked to it, with padBottom of card under the last
   // row when scrolled to the bottom; a list with no scrollbar is masked to unscrolledRect. A
   // page key moves the list its height less pageOverlap, keeping the row at the edge in view.
-  list: { padBottom: 8, pageOverlap: 48, rect: LIST, unscrolledRect: LIST_UNSCROLLED },
+  // firstHeadingY is where each tab's first heading puts its capitals.
+  list: {
+    firstHeadingY: FIRST_HEADING_Y,
+    padBottom: 8,
+    pageOverlap: 48,
+    rect: LIST,
+    unscrolledRect: LIST_UNSCROLLED,
+  },
   // The last tap's message: one line on the ui-hint plate across the list's top, over the rows,
   // from textDx inside the plate's left and right edges, its capitals centred on the plate.
   // The plate's frame is frame pixels thick.
@@ -77,7 +86,9 @@ export const SHOP_LAYOUT = {
   // and in it a thumbWidth-wide thumb thumbInset inside the track's edges, at least thumbMin
   // tall.
   scrollbar: { thumbInset: 1, thumbMin: 16, thumbWidth: 6, trackWidth: 8, x: 336 },
-  tab: { drawHeight: 28, drawY: 85, gap: 8, height: 44, width: 160, x: ROW_X, y: 77 },
+  // The tabs split span, the rows' width from x, evenly with gap between them, each a hit
+  // area height tall at y with its face drawHeight tall at drawY.
+  tab: { drawHeight: 28, drawY: 85, gap: 8, height: 44, span: ROW_WIDTH, x: ROW_X, y: 77 },
 } as const;
 
 // The message at 2x on one line inside its plate.
@@ -122,10 +133,15 @@ export function shopListFrame(scrolls: boolean): {
   };
 }
 
-// A tab's hit area; its face is drawHeight tall at drawY inside it.
-export function shopTabRects(): Rect[] {
-  const { gap, height, width, x, y } = SHOP_LAYOUT.tab;
-  return SHOP_TABS.map((_, i) => ({ height, width, x: x + i * (width + gap), y }));
+// The hit areas of count tabs, left to right, splitting the tab span evenly; the last takes
+// any odd pixels. Each one's face is drawHeight tall at drawY inside it.
+export function shopTabRects(count: number): Rect[] {
+  const { gap, height, span, x, y } = SHOP_LAYOUT.tab;
+  const width = Math.floor((span - (count - 1) * gap) / count);
+  return Array.from({ length: count }, (_, i) => {
+    const left = x + i * (width + gap);
+    return { height, width: i === count - 1 ? x + span - left : width, x: left, y };
+  });
 }
 
 export function shopTabFace(hit: Rect): Rect {

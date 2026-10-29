@@ -2,7 +2,6 @@ import { type GameObjects, Scene } from "phaser";
 
 import { dogFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { SCREEN_LAYOUT } from "../data/screen";
 import {
   BADGE_TEXT_COLOURS,
   badgeProgress,
@@ -68,19 +67,9 @@ import {
   placeScrollbar,
   type ScrollbarView,
 } from "./scrollView";
+import { addShopPage, addShopTabs } from "./shopPage";
 import { listenTargetPress, sameByValue, type TargetPressListener } from "./targetPress";
-import {
-  addBodyText,
-  addCloseButton,
-  addPanel,
-  addScreenBackdrop,
-  addTab,
-  addTagImage,
-  addTapBurst,
-  BODY_TEXT,
-  clearScene,
-  tagFrame,
-} from "./uiKit";
+import { addBodyText, addTagImage, addTapBurst, BODY_TEXT, clearScene, tagFrame } from "./uiKit";
 
 type Tab = StatsTab;
 type Target = "close" | { badge: number } | { tab: number };
@@ -102,13 +91,15 @@ const VIEW: Rect = STATS_LAYOUT.view;
 const SCROLL = STATS_LAYOUT.scroll;
 // A screen-sized texture, white over the view: the mask that clips each tab's content to it.
 const VIEW_MASK_KEY = "stats-view-mask";
-const SCREEN = SCREEN_LAYOUT.screen;
+// The tab the Logbook opens on, its first.
+const OPEN_TAB: Tab = "badges";
 
-// The Logbook, which the home screen's Logbook button opens, in three tabs on the cream
-// panel: overall figures and walks by outcome; a block per dog with its walks, zones and
-// firings; and the badge wall, a badge per row, where tapping a badge opens its name, goal and
-// line. A tab taller than the panel scrolls in it by a drag, the wheel, the arrow keys or the
-// page keys, with a scrollbar at the panel's right edge; a drag taps nothing.
+// The Logbook, which the home screen's Logbook button opens, on the Pet shop's page under the
+// home screen's top bar (addShopPage), in three tabs: the badge wall, a badge per row, where
+// tapping a badge opens its name, goal and line; a block per dog with its walks, zones and
+// firings; and overall figures and walks by outcome. A tab longer than the shop's list area
+// scrolls in it by a drag, the wheel, the arrow keys or the page keys, with the shop's
+// scrollbar beside it; a drag taps nothing.
 export class StatsScene extends Scene {
   private burst = false;
   // The open tab's content, clipped to the view and moved up by the scroll.
@@ -121,7 +112,7 @@ export class StatsScene extends Scene {
   private resumeKey: SceneKey | undefined;
   private scroll: ListScroll = listScroll(0);
   private scrollbar: ScrollbarView | undefined;
-  private tab: Tab = "runs";
+  private tab: Tab = OPEN_TAB;
   // The badge wall's rows as last drawn, each badge's tap target.
   private wallRows: Rect[] = [];
 
@@ -134,10 +125,11 @@ export class StatsScene extends Scene {
     this.pressed = undefined;
     this.detail = undefined;
     this.scroll = listScroll(0);
-    this.tab = "runs";
+    this.tab = OPEN_TAB;
     this.render();
 
-    // A pressed tab dips, then opens. With a badge's detail open, a tap anywhere closes it.
+    // A pressed tab dips, then opens. With a badge's detail open, a tap on the page's card
+    // closes the detail, and one off the card closes the page, as on the shop.
     this.presses = listenTargetPress<Press>(this, {
       dipMs: (target) => (typeof target === "object" && "tab" in target ? FEEDBACK.pressDipMs : 0),
       onDown: (pointer) => addTapBurst(this, pointer.x, pointer.y),
@@ -160,7 +152,12 @@ export class StatsScene extends Scene {
         this.render();
       },
       same: sameByValue,
-      targetAt: (x, y) => (this.detail === undefined ? this.targetAt(x, y) : "dismiss"),
+      targetAt: (x, y) => {
+        if (this.detail === undefined) {
+          return this.targetAt(x, y);
+        }
+        return containsPoint(PANEL, x, y) ? "dismiss" : undefined;
+      },
     });
     listenListScroll(this, {
       active: () => this.detail === undefined,
@@ -204,10 +201,11 @@ export class StatsScene extends Scene {
         }
       }
     });
-    // Back closes an open badge first, as Escape does.
+    // The top bar and the margins around the card close the page, as on the shop. Back closes
+    // an open badge first, as Escape does.
     listenDismiss(
       this,
-      [SCREEN],
+      [PANEL],
       () => this.close(),
       () => this.back(),
     );
@@ -294,28 +292,21 @@ export class StatsScene extends Scene {
 
   private render(): void {
     clearScene(this);
-    addScreenBackdrop(this, "screen-stats");
     this.content = undefined;
     this.drawingInto = undefined;
     const words = gameData.menuText.stats;
-    this.text(12, 14, words.title, { colour: PALETTE.cream, font: "title" });
-    addCloseButton(this, this.add.container(0, 0), CLOSE, this.pressed === "close");
-    // The open tab is selected and the others normal.
-    const tabs = this.add.container(0, 0);
-    const { reducedMotion } = currentSettings(this);
-    TABS.forEach((tab, i) => {
-      const rect = TAB_RECTS[i];
-      if (rect === undefined) {
-        return;
-      }
-      addTab(this, tabs, rect, words.tabs[tab], {
+    const root = this.add.container(0, 0);
+    addShopPage(this, root, this.pressed === "close", words.title);
+    addShopTabs(
+      this,
+      root,
+      currentSettings(this).reducedMotion,
+      TABS.map((tab, i) => ({
+        label: words.tabs[tab],
         open: tab === this.tab,
         pressed: sameByValue({ tab: i }, this.pressed),
-        reducedMotion,
-      });
-    });
-    addPanel(this, PANEL);
-    const root = this.add.container(0, 0);
+      })),
+    );
     const content = this.add.container(0, 0);
     root.add(content);
     maskToRect(this, VIEW_MASK_KEY, VIEW, content);

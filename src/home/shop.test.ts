@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId, LiveTuning } from "../data/types";
 import { scrollMax } from "../input/listScroll";
+import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { fillNames } from "../lib/lines";
 import { keysOf } from "../lib/records";
 import { cents } from "../lib/units";
@@ -22,6 +23,7 @@ import {
   gearRows,
   ownedCountNote,
   SHOP_ROW_VIEWS,
+  SHOP_TABS,
   shopAffordable,
   shopOpenTab,
   type ShopRow,
@@ -41,6 +43,7 @@ import {
   shopScrollbar,
   shopTabRects,
 } from "./shopLayout";
+import { STATS_TABS } from "./statsLayout";
 
 const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
@@ -315,7 +318,9 @@ describe("the shop's message", () => {
   // The plate sits at the top of the list area, under the tabs, across the list's width.
   it("lies across the list's top, under the tabs", () => {
     const { rect } = SHOP_LAYOUT.list;
-    const tabsBottom = Math.max(...shopTabRects().map(({ height, y }) => y + height));
+    const tabsBottom = Math.max(
+      ...shopTabRects(SHOP_TABS.length).map(({ height, y }) => y + height),
+    );
     expect(plate).toMatchObject({ width: rect.width, x: rect.x, y: rect.y });
     expect(plate.y + plate.height).toBeGreaterThan(tabsBottom);
     expect(SHOP_LAYOUT.tab.drawY + SHOP_LAYOUT.tab.drawHeight).toBeLessThanOrEqual(plate.y);
@@ -329,6 +334,27 @@ describe("the shop's tabs", () => {
     const band = cardBand(panel);
     const bandBottom = band.y + band.height;
     expect(tab.drawY - FEEDBACK.liftPx - SELECT_OUTSET - bandBottom).toBeGreaterThanOrEqual(6);
+  });
+
+  // The shop's tabs and the Logbook's split the same span, gap apart, each a full tap target.
+  it.each([
+    ["Pet shop", SHOP_TABS.length],
+    ["Logbook", STATS_TABS.length],
+  ])("%s: split the tab span evenly", (_, count) => {
+    const { gap, span, x } = SHOP_LAYOUT.tab;
+    const tabs = shopTabRects(count);
+    expect(tabs).toHaveLength(count);
+    expect(tabs[0]?.x).toBe(x);
+    const last = tabs.at(-1);
+    expect((last?.x ?? 0) + (last?.width ?? 0)).toBe(x + span);
+    tabs.slice(1).forEach((tab, i) => {
+      const before = tabs[i];
+      expect(tab.x - (before?.x ?? 0) - (before?.width ?? 0)).toBe(gap);
+      expect(Math.abs(tab.width - (before?.width ?? 0))).toBeLessThan(count);
+    });
+    for (const tab of tabs) {
+      expect(Math.min(tab.width, tab.height)).toBeGreaterThanOrEqual(MIN_TAP_SIZE);
+    }
   });
 });
 
@@ -388,7 +414,7 @@ describe("the shop's list", () => {
   it.each(lists)("%s: runs its rows to the right edge it is allowed", (_, spec, count) => {
     const scrolls = scrollMax(rect, shopListBottom(spec, count)) > 0;
     const frame = shopListFrame(scrolls);
-    const tabsRight = Math.max(...shopTabRects().map(({ width, x }) => x + width));
+    const tabsRight = Math.max(...shopTabRects(SHOP_TABS.length).map(({ width, x }) => x + width));
     const track = shopScrollbar(scrolls ? 1 : 0, 0)?.track;
     const { panel } = SHOP_LAYOUT;
     for (const row of rowRects(frame.rowWidth, spec, count)) {

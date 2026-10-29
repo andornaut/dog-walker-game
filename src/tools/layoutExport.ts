@@ -12,6 +12,7 @@ import { dotRects, HELP_LAYOUT } from "../help/helpLayout";
 import { END_LAYOUT } from "../home/endLayout";
 import { HOME_LAYOUT, updatePlateText } from "../home/homeLayout";
 import { settingsLayout, type SettingsRowShape } from "../home/settings";
+import { SHOP_TABS } from "../home/shop";
 import { SHOP_LAYOUT, shopTabRects } from "../home/shopLayout";
 import { STATS_LAYOUT, statsTabRects } from "../home/statsLayout";
 import { CELEBRATION_LAYOUT } from "../hud/celebrationLayout";
@@ -252,7 +253,7 @@ export function layoutExport(
         SCREEN_CONFIG,
         SETTINGS_EXPORT_ROWS,
       ),
-      shop: { ...SHOP_LAYOUT, tabRects: shopTabRects() },
+      shop: { ...SHOP_LAYOUT, tabRects: shopTabRects(SHOP_TABS.length) },
       stats: { ...STATS_LAYOUT, tabRects: statsTabRects() },
     },
     screen: regions.screen,
