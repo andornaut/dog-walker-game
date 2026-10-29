@@ -55,8 +55,8 @@ export const MENU_TEXT = {
     installNote: "Full screen, offline",
     installSteps: {
       firefoxAndroid: {
-        steps: "Tap the menu, then Add to Home screen or Install.",
-        title: "Add to Home screen",
+        steps: "Tap the menu, then More, then Add app to Home screen.",
+        title: "Add app to Home screen",
       },
       ios: { steps: "Tap Share, then Add to Home Screen.", title: "Add to Home Screen" },
     },
