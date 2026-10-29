@@ -34,10 +34,12 @@ const encounter = (id: EncounterId, affected: readonly DogId[]): CardSource => (
   kind: "encounter",
 });
 
-// A card's hearts text: the change by each owner's dog's name.
+// A card's hearts text: the change said once for several dogs, or by the one dog's name.
 function heartsText(dogs: readonly DogId[], amount: number): string {
-  const change = `${amount < 0 ? "−" : "+"}${Math.abs(amount)}♥`;
-  return dogs.map((dog) => `${change} ${gameData.dogs[dog].name}`).join(", ");
+  const hearts = `${amount < 0 ? "−" : "+"}${Math.abs(amount)}`;
+  return dogs.length > 1
+    ? fillNames(gameData.runText.card.heartsEach, { hearts })
+    : dogs.map((dog) => `${hearts}♥ ${gameData.dogs[dog].name}`).join(", ");
 }
 
 function option(source: CardSource, label: string) {
@@ -56,7 +58,7 @@ describe("a card's text for the dogs it catches", () => {
         id: "thief",
         label: grabBack,
         text: heartsText(["duchess", "kilo"], -1),
-        why: "names each dog it reaches, in pack order",
+        why: "says a change the dogs it reaches share once",
       },
       {
         affected: ["kilo", "duchess"],
@@ -138,14 +140,14 @@ describe("a card's text for the dogs it catches", () => {
       },
       {
         cardsThisZone: 1,
-        large: `−$${encounterHigh} ${groom}`,
+        large: `−$${encounterHigh}`,
         modifiers: [sweetTalker],
         text: `−$${encounterHigh}`,
         why: "a cost once the zone's free card is used says its price",
       },
       {
         cardsThisZone: 0,
-        large: `−$${encounterHigh} ${groom}`,
+        large: `−$${encounterHigh}`,
         modifiers: [],
         text: `−$${encounterHigh}`,
         why: "a cost without Sweet talker says its price",
