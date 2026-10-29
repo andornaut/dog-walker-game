@@ -134,8 +134,8 @@ PERSON = road.SCALE
 OBSTACLE = ob.SCALE
 # The cheese crate's key, which its hit burst's and option pictures' keys extend.
 CHEESE = "cheese-crates"
-# The green bin's key, which its hit burst's and option pictures' keys extend.
-BIN = "green-bin-spill"
+# The green bin spill's key, which its hit burst's and option pictures' keys extend.
+GREEN_BIN_SPILL = "green-bin-spill"
 # The wedding photo shoot's design width: two lanes, 112px at PERSON.
 SHOOT_W = 224 / 3
 
@@ -1043,7 +1043,7 @@ def road_sprites(s=1):
     args, ms = SCULPTURE_IDLE
     yield "art-sculpture", [("idle", frames(o, art_sculpture, [dict(glint=a) for a in args]), ms)]
     args, ms = BIN_IDLE
-    yield BIN, [("idle", frames(p, green_bin_spill, [dict(rock=a) for a in args]), ms)]
+    yield GREEN_BIN_SPILL, [("idle", frames(p, green_bin_spill, [dict(rock=a) for a in args]), ms)]
     args, ms = CHEESE_IDLE
     yield CHEESE, [("idle", frames(p, cheese_crates, [dict(phase=a) for a in args]), ms)]
     args, ms = PRODUCE_IDLE
@@ -1203,7 +1203,7 @@ def hit_green_bin_spill(step):
 
 
 HIT_BURSTS = {"fx-hit-wedding-photo-shoot": (hit_wedding_photo_shoot, 8),
-              f"fx-hit-{CHEESE}": (hit_cheese_crates, 8), f"fx-hit-{BIN}": (hit_green_bin_spill, 8)}
+              f"fx-hit-{CHEESE}": (hit_cheese_crates, 8), f"fx-hit-{GREEN_BIN_SPILL}": (hit_green_bin_spill, 8)}
 
 
 def burst_sprites():
@@ -1530,9 +1530,9 @@ CARDS = {
     f"card-{CHEESE}-sniff": card_cheese_sniff,
     f"card-{CHEESE}-buy": card_cheese_buy,
     f"card-{CHEESE}-hurry-on": card_cheese_hurry_on,
-    f"card-{BIN}-hurry-past": card_bin_hurry_past,
-    f"card-{BIN}-pay": card_bin_pay,
-    f"card-{BIN}-wade-through": card_bin_wade_through,
+    f"card-{GREEN_BIN_SPILL}-hurry-past": card_bin_hurry_past,
+    f"card-{GREEN_BIN_SPILL}-pay": card_bin_pay,
+    f"card-{GREEN_BIN_SPILL}-wade-through": card_bin_wade_through,
 }
 
 
@@ -1587,7 +1587,7 @@ EFFECTS = {
     ],
     # the bin's hollow plastic thunk, its lid clattering down in three shrinking knocks, then a soft squelch
     # and a gloop as the scraps settle
-    f"sfx-hit-{BIN}": [
+    f"sfx-hit-{GREEN_BIN_SPILL}": [
         ("square", 0.12, (340, 160), 0, dict(vol=0.6, low=1000, attack=0.003, release=0.8, shape="h")),
         ("triangle", 0.12, (340, 140), 0, dict(vol=0.35, attack=0.003, release=0.85)),
         ("pinknoise", 0.04, None, 0, dict(vol=0.25, low=2500, high=600, attack=0.001, release=0.8,
