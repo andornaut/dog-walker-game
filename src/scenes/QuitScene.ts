@@ -4,16 +4,16 @@ import { gameData } from "../data";
 import { overlayRegion, regionOutside } from "../home/homeBar";
 import { homeQuestionLayout, QUIT_QUESTION_ANSWERS } from "../hud/pauseMenu";
 import { isPauseKey, menuKeyActs } from "../input/keyBindings";
-import { exitShown, leaveGame } from "../pwa";
+import { exitShown } from "../pwa";
 import { addRampDim } from "../ui/phaser/rampDim";
-import { listenHomeBar } from "./homeBarPress";
+import { exitGame, listenHomeBar } from "./homeBarPress";
 import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
 import { addQuestionPanel } from "./questionPanel";
 import { SCENE_KEYS } from "./sceneKeys";
 
 // Quit? over the dimmed home screen, which back asks with nothing open, laid out as the Home
 // question: Keep playing closes it, as back, Escape, P and a tap outside do; Quit leaves the game
-// (leaveGame). The top bar keeps its buttons.
+// as the top bar's Exit does (exitGame). The top bar keeps its buttons.
 export class QuitScene extends Scene {
   constructor() {
     super(SCENE_KEYS.quit);
@@ -27,7 +27,7 @@ export class QuitScene extends Scene {
     // Closed first, so a page kept for back-forward caching comes back to the bare home screen.
     const quit = () => {
       keepPlaying();
-      leaveGame();
+      exitGame();
     };
     const covered = addQuestionPanel(this, area, {
       entries: QUIT_QUESTION_ANSWERS.map((answer) => ({

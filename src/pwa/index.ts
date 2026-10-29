@@ -4,7 +4,6 @@
 // scenes listen for PHONE_EVENTS on window and call the functions below.
 import {
   backCloseWatcher,
-  type BackGuard,
   browserCloseWatcher,
   guardBackNavigation,
   isFirefoxAndroidApp,
@@ -51,7 +50,6 @@ export function browserSoundFormat(): SoundFormat | undefined {
   return chooseSoundFormat((mimeType) => audio.canPlayType(mimeType));
 }
 
-let backGuard: BackGuard | undefined;
 let installFlow: InstallFlow | undefined;
 let installNudge: InstallNudge | undefined;
 let orientation: OrientationRelay | undefined;
@@ -145,7 +143,7 @@ export function setupPhoneApp(): void {
   // WORKAROUND: https://bugzilla.mozilla.org/show_bug.cgi?id=2079243 (see isFirefoxAndroidApp).
   if (!isFirefoxAndroidApp(navigator.userAgent, (query) => matchMedia(query).matches)) {
     // Each back the guard keeps opens the pause menu or Quit?, as the scenes decide.
-    backGuard = guardBackNavigation(
+    guardBackNavigation(
       {
         onBack: () => dispatchPhoneEvent(window, PHONE_EVENTS.backPressed),
         stateKey: BACK_GUARD_STATE_KEY,
@@ -168,11 +166,6 @@ export function setupPhoneApp(): void {
 // that reloads into one first).
 export function launchReady(): Promise<void> {
   return ready;
-}
-
-// Closes the game's window, or leaves the game for the previous page (BackGuard.leave).
-export function leaveGame(): void {
-  backGuard?.leave();
 }
 
 // Whether the home top bar shows Exit: everywhere but Firefox for Android's installed app,
