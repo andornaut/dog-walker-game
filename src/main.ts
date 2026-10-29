@@ -23,6 +23,7 @@ import { HelpPictureScene } from "./scenes/HelpPictureScene";
 import { HelpScene } from "./scenes/HelpScene";
 import { watchHomeScreen } from "./scenes/homeScreen";
 import { HudScene } from "./scenes/HudScene";
+import { capMenuFrameRate } from "./scenes/menuFrameCap";
 import { PauseScene } from "./scenes/PauseScene";
 import { QuitScene } from "./scenes/QuitScene";
 import { RunScene } from "./scenes/RunScene";
@@ -106,6 +107,7 @@ function bootGame(): Game {
   // At the top in portrait, so the spare height sits under the dog cards, where the walk
   // steers from the page too; centred in landscape.
   fitWholePixels("topInPortrait", SCREEN_CONFIG, game);
+  capMenuFrameRate(game);
   // The installed app has no dev panel, so its #dev-panel stays hidden and no cheat is set.
   if (devToolsOn()) {
     mountDevPanel(devPanelHost(game), document.getElementById("dev-panel"));
