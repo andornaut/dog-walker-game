@@ -274,6 +274,17 @@ describe("rosterRows", () => {
       expect(dogs.slice(first, first + starters.length)).toEqual(starters);
     },
   );
+
+  it.each([
+    ["today's prices", TEST_TUNING],
+    ["every dog for sale at one price", onePrice],
+  ] as const)("puts the starting dog in the grid's centre cell at %s", (_, tuning) => {
+    const rows = rosterRows({ dogs: DOGS, tuning });
+    const middle = rows[Math.floor(rows.length / 2)] ?? [];
+    expect(middle[Math.floor(middle.length / 2)]).toBe(
+      dataOrder.find((dog) => DOGS[dog].unlock === "start"),
+    );
+  });
 });
 
 describe("purchasePrice", () => {
