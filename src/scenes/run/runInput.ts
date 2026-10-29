@@ -1,4 +1,4 @@
-import type { Point } from "@andornaut/game-kit/rect";
+import { clampInto, type Point } from "@andornaut/game-kit/rect";
 import type { Input, Scene } from "phaser";
 
 import { gameData } from "../../data";
@@ -14,7 +14,7 @@ import {
 import type { GestureAction } from "../../input/gestures";
 import { holdRule } from "../../input/hold";
 import { walkKeyAction } from "../../input/keyBindings";
-import { clampInto, walkPagePoint } from "../../input/pageTap";
+import { walkPagePoint } from "../../input/pageTap";
 import {
   idleTrack,
   type PointerPhase,
