@@ -25,7 +25,7 @@ export const HOME_TEXT = {
     gearSubtitle: "Gear",
     ownerRole: "{role}",
     priceBuy: "Price {price}",
-    priceLocked: "Price {price}: save up for it",
+    priceLocked: "Price {price}. Save up for it!",
     walkerAgility: "{agility} lane change speed",
     walkerPerk: "{perk}: {effect}",
     walkerStatus: "Your walker",

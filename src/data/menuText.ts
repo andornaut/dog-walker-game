@@ -75,7 +75,6 @@ export const MENU_TEXT = {
     badgeLine: '"{line}"',
     badgeLocked: "Locked",
     badgeProgress: "{have}/{need}",
-    badges: "Badges",
     dogColumns: {
       fired: "Fired",
       walks: "Walks",
@@ -99,7 +98,7 @@ export const MENU_TEXT = {
     },
     sections: {
       overall: "Overall",
-      runs: "Walks",
+      runs: "How walks ended",
     },
     tabs: {
       badges: "Badges",
