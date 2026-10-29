@@ -44,3 +44,24 @@ export function topBarWellRows(height: number): { height: number; y: number } {
   const { clearance } = TOP_BAR_TRIM;
   return { height: bottom - top - 2 * clearance, y: top + clearance };
 }
+
+// Every top bar's height: the start screen's, the walk bar and Help's.
+export const TOP_BAR_HEIGHT = 40;
+
+// The top bar's content rows, between its trim's line and edge, and their middle row, which each
+// button's 20-row ui-icon-button face is centred on, the upper half of the face above it.
+const TOP_BAR_ROWS = topBarContentRows(TOP_BAR_HEIGHT);
+export const TOP_BAR_MID =
+  TOP_BAR_ROWS.top + Math.floor((TOP_BAR_ROWS.bottom - TOP_BAR_ROWS.top) / 2);
+export const TOP_BAR_FACE = { size: 20, y: TOP_BAR_MID - 10 } as const;
+
+// The well at a top bar's left that shows the money (the start screen's bank, the walk's cash):
+// clear of the trim, x columns in from the bar's left, ink on all but its lip's last row.
+export const TOP_BAR_WELL = { ...topBarWellRows(TOP_BAR_HEIGHT), lip: 1, x: 5 } as const;
+
+// The top row of text capRows tall set in the well: centred on its ink rows (the well less its
+// lip's row), a half row lower where their parities differ.
+export function wellCapsTop(capRows: number): number {
+  const { height, lip, y } = TOP_BAR_WELL;
+  return y + Math.ceil((height - lip - capRows) / 2);
+}

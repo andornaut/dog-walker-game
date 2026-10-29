@@ -1,11 +1,11 @@
 import type { DogId } from "../data/types";
-import { ownerPhotoRect, TITLE_CAP_ROWS, WALK_BAR, type WalkBarButtonId } from "../hud/walkHud";
+import { ownerPhotoRect, WALK_BAR, type WalkBarButtonId } from "../hud/walkHud";
 import type { PackPlacement } from "../layout/packFormation";
 import type { Point, Rect } from "../lib/rect";
 import { type FontMetrics, helpCapDy, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import type { GridSpec } from "../ui/grid";
 import { BUTTON_LIP_PX } from "../ui/selection";
-import { topBarContentRows, topBarWellRows } from "../ui/topBarTrim";
+import { TOP_BAR_FACE, TOP_BAR_HEIGHT, TOP_BAR_MID, TOP_BAR_WELL } from "../ui/topBarTrim";
 import type { SectionId } from "./sections";
 
 // Every tappable thing is at least 44 game pixels (48 CSS pixels on a 390px-wide phone) on
@@ -14,30 +14,14 @@ import type { SectionId } from "./sections";
 const GAP = 8;
 // The gate scene in the screen-home art: the street, the yard and the path to the gate.
 const GATE = { height: 156, y: 40 };
-// The top bar's content lies between its trim's line and edge, and each button's 20-row
-// ui-icon-button face is centred on that span's middle row, the upper half of the face above it.
-const TOP_BAR_HEIGHT = 40;
-const TOP_BAR_ROWS = topBarContentRows(TOP_BAR_HEIGHT);
-const TOP_BAR_MID = TOP_BAR_ROWS.top + Math.floor((TOP_BAR_ROWS.bottom - TOP_BAR_ROWS.top) / 2);
-const TOP_BAR_FACE = 20;
-const TOP_BAR_FACE_Y = TOP_BAR_MID - TOP_BAR_FACE / 2;
 // The top bar's button in the walk bar's walkId column, its hit area from the bar's top.
 function topBarButton(walkId: WalkBarButtonId) {
   const { faceX, hitWidth, hitX } = WALK_BAR.buttons[walkId];
   return {
-    face: { x: faceX, y: TOP_BAR_FACE_Y },
+    face: { x: faceX, y: TOP_BAR_FACE.y },
     hit: { height: 44, width: hitWidth, x: hitX, y: 0 },
   } as const;
 }
-
-// The bank's well, clear of the trim as the walk bar's wells are, and the title font's capitals
-// centred on its ink rows (the well less its lip's row), a half row lower where their parities
-// differ.
-const BANK_WELL_ROWS = topBarWellRows(TOP_BAR_HEIGHT);
-const BANK_WELL_LIP = 1;
-const BANK_CAPS_Y =
-  BANK_WELL_ROWS.y +
-  Math.ceil((BANK_WELL_ROWS.height - BANK_WELL_LIP - TITLE_CAP_ROWS * WALK_BAR.cash.scale) / 2);
 
 // The update plate joins the top bar's bottom edge, its button centred down it.
 const UPDATE_PANEL = { height: 42, width: 352, x: 4, y: TOP_BAR_HEIGHT };
@@ -283,16 +267,16 @@ export const HOME_LAYOUT = {
   // separated (bankAmountText), its ink bank.pad columns in from the well's left, its capitals'
   // top at bank.capsY.
   topBar: {
-    bank: { capsY: BANK_CAPS_Y, pad: 3, scale: WALK_BAR.cash.scale },
-    faceSize: TOP_BAR_FACE,
+    bank: { capsY: WALK_BAR.cash.capsY, pad: 3, scale: WALK_BAR.cash.scale },
+    faceSize: TOP_BAR_FACE.size,
     height: TOP_BAR_HEIGHT,
     mid: TOP_BAR_MID,
     well: {
-      height: BANK_WELL_ROWS.height,
-      lip: BANK_WELL_LIP,
+      height: TOP_BAR_WELL.height,
+      lip: TOP_BAR_WELL.lip,
       maxWidth: 220,
-      x: 5,
-      y: BANK_WELL_ROWS.y,
+      x: TOP_BAR_WELL.x,
+      y: TOP_BAR_WELL.y,
     },
     wellKeys: {
       left: "ui-home-cash-well-left",

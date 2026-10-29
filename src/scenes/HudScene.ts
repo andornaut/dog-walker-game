@@ -52,7 +52,6 @@ import {
   type BarButton,
   cardHearts,
   cashLeft,
-  cashTop,
   DEBUFF_BAR,
   debuffBarRects,
   debuffFillWidth,
@@ -68,7 +67,6 @@ import {
   walkBarLayout,
   ZONE_PROGRESS,
   zoneProgressLayout,
-  zoneProgressText,
   zoneShare,
 } from "../hud/walkHud";
 import type { Point, Rect } from "../lib/rect";
@@ -76,7 +74,6 @@ import { type Cents, cents } from "../lib/units";
 import { ownerMaxHearts } from "../rules/dogs";
 import { debuffLasting } from "../rules/durations";
 import { hintFor, hintJumpsQueue } from "../rules/hints";
-import { currentZone } from "../rules/route";
 import { walkEarnings } from "../rules/run";
 import { faceMood } from "../rules/treats";
 import { read } from "../rules/units";
@@ -241,8 +238,6 @@ export class HudScene extends Scene {
   private tip: ShowingTip | undefined;
   private zoneFill: GameObjects.Graphics | undefined;
   private zoneFillWidth: number | undefined;
-  private zoneLabel: GameObjects.BitmapText | undefined;
-  private zoneProgress: GameObjects.BitmapText | undefined;
 
   // key names a second HUD, such as the help's picture of one.
   constructor(key: string = SCENE_KEYS.hud) {
@@ -290,7 +285,7 @@ export class HudScene extends Scene {
       this.add.image(topBar.x, topBar.y, "ui-walk-bar").setOrigin(0);
     } else {
       topBarRects(topBar).forEach(({ colour, rect }) => fillRect(g, PALETTE[colour], rect));
-      [WALK_BAR.cash.well, BAR.zoneWell].forEach((well) => fillRect(g, PALETTE.ink, well));
+      fillRect(g, PALETTE.ink, WALK_BAR.cash.well);
     }
     WALK_BAR_BUTTONS.forEach((id) => this.addButton(TOP_BAR_BUTTONS[id]));
     // A container holds the icon's place in the draw order while it is swapped.
@@ -306,18 +301,9 @@ export class HudScene extends Scene {
     this.pauseIcon = this.add.image(pauseIcon.x, pauseIcon.y, "__DEFAULT").setOrigin(0);
     this.pauseGlyph = this.add.graphics();
 
-    const { zone } = WALK_BAR;
     const title = { font: "title" } as const;
     this.dollar = addPixelText(this, 0, 0, "$", { colour: PALETTE.amber, ...title });
     this.money = addPixelText(this, 0, 0, "", { colour: PALETTE.cream, ...title });
-    this.zoneLabel = addPixelText(this, topBar.x + zone.name.x, topBar.y + zone.name.y, "", {
-      colour: PALETTE.cream,
-    });
-    const progressRight = topBar.x + zone.progress.right + 1;
-    this.zoneProgress = addPixelText(this, progressRight, topBar.y + zone.progress.y, "", {
-      colour: PALETTE.grey,
-      originX: 1,
-    });
     this.dynamic = this.add.graphics();
     this.debuffFills = this.add.graphics().setDepth(HUD_DEPTH.overPart);
     this.cards = dogSlots.map((rect) => this.createCard(rect));
@@ -591,7 +577,8 @@ export class HudScene extends Scene {
     const { topBar } = LAYOUT;
     setDollarAmount(dollar, money, amount, (inkWidth) => {
       const { scale } = WALK_BAR.cash;
-      return { left: topBar.x + cashLeft(inkWidth * scale), scale, top: topBar.y + cashTop() };
+      const top = topBar.y + WALK_BAR.cash.capsY;
+      return { left: topBar.x + cashLeft(inkWidth * scale), scale, top };
     });
   }
 
@@ -726,13 +713,6 @@ export class HudScene extends Scene {
     const { run } = view;
     g.clear();
     this.showMoney(dollarAmountText(this.shownMoney(run)));
-    const zone = currentZone(gameData, run);
-    if (this.zoneLabel !== undefined) {
-      setPixelText(this.zoneLabel, zone.name);
-    }
-    if (this.zoneProgress !== undefined) {
-      setPixelText(this.zoneProgress, zoneProgressText(gameData, run.zoneIndex));
-    }
     const ownedSlots = profileSave(this).owned.dogSlots.length;
     const lead = leadSlot(run.pack.map((slot) => slot.status === "walking"));
     LAYOUT.dogSlots.forEach((rect, i) => {
@@ -942,13 +922,14 @@ export class HudScene extends Scene {
 
   // A money change pops on its chip where place puts it and holds as a heart's pop does; then it
   // goes into the cash (sendMoneyLabel), calling left once it has left its place. Reduced motion
-  // keeps the pop and fades it at once.
+  // keeps the pop and fades it at once. depth: the chip's, as addChangeChip draws it.
   private showMoneyLabel(
     label: ChangeLabel,
     place: (shown: { lines: number; scale: number; width: number }) => { chip: Rect; text: Point },
     left: () => void = () => undefined,
+    depth = 0,
   ): void {
-    const chip = this.addChangeChip(label, MONEY_LABEL.room, place);
+    const chip = this.addChangeChip(label, MONEY_LABEL.room, place, depth);
     const held = this.holdOffCounter(label.amount);
     if (this.walk().reducedMotion()) {
       this.sendMoneyLabel(chip, held, left);
@@ -968,6 +949,7 @@ export class HudScene extends Scene {
       label,
       (shown) => cashChipPlace(body, slot, shown),
       () => this.cashSlots.delete(slot),
+      HUD_DEPTH.cashChip,
     );
   }
 
@@ -989,8 +971,11 @@ export class HudScene extends Scene {
     const tipLabel = merged ?? label;
     const slot = merged === undefined || showing === undefined ? this.takeCashSlot() : showing.slot;
     const body = pixelFontMetrics(this, "body");
-    const chip = this.addChangeChip(tipLabel, MONEY_LABEL.room, (shown) =>
-      cashChipPlace(body, slot, shown),
+    const chip = this.addChangeChip(
+      tipLabel,
+      MONEY_LABEL.room,
+      (shown) => cashChipPlace(body, slot, shown),
+      HUD_DEPTH.cashChip,
     );
     const before = merged === undefined ? 0 : (showing?.held ?? 0);
     const held = before + this.holdOffCounter(label.amount);
@@ -1010,8 +995,11 @@ export class HudScene extends Scene {
   private showPayTotal(label: ChangeLabel, timing: { fadeMs: number; holdMs: number }): void {
     const body = pixelFontMetrics(this, "body");
     const slot = this.takeCashSlot();
-    const chip = this.addChangeChip(label, MONEY_LABEL.room, (shown) =>
-      cashChipPlace(body, slot, shown),
+    const chip = this.addChangeChip(
+      label,
+      MONEY_LABEL.room,
+      (shown) => cashChipPlace(body, slot, shown),
+      HUD_DEPTH.cashChip,
     );
     this.labels.after(this, timing.holdMs, () => {
       const fade = { ms: timing.fadeMs, rise: 0 };
@@ -1075,11 +1063,13 @@ export class HudScene extends Scene {
   }
 
   // A change on a cream chip in its changeLabelColour, so it reads over anything; set within
-  // room in CHANGE_LABEL_STYLE, and placed by place. Its parts, and its chip's rect.
+  // room in CHANGE_LABEL_STYLE, placed by place, at depth (its text a depth over it). Its parts,
+  // and its chip's rect.
   private addChangeChip(
     label: ChangeLabel,
     room: number,
     place: (shown: { lines: number; scale: number; width: number }) => { chip: Rect; text: Point },
+    depth = 0,
   ): ChangeChip {
     const colour = changeLabelColour(label);
     const text = addPixelText(this, 0, 0, label.text, { colour, scale: 2 });
@@ -1087,9 +1077,9 @@ export class HudScene extends Scene {
     const ink = inkSpan(text);
     const placed = place({ lines: lines.length, scale: style.scale, width: ink.right - ink.left });
     placePixelText(text, placed.text.x - ink.left, placed.text.y);
-    const chip = this.add.graphics();
+    const chip = this.add.graphics().setDepth(depth);
     drawFramedRect(chip, CREAM_PANEL_COLOURS, placed.chip);
-    text.setDepth(HUD_DEPTH.overPart);
+    text.setDepth(depth + HUD_DEPTH.overPart);
     return { parts: [chip, text], rect: placed.chip };
   }
 

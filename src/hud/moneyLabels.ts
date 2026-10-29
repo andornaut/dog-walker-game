@@ -1,3 +1,4 @@
+import { SCREEN_LAYOUT } from "../data/screen";
 import type { Point, Rect } from "../lib/rect";
 import { type Cents, cents } from "../lib/units";
 import { amountText } from "../rules/causes";
@@ -5,9 +6,10 @@ import type { FontMetrics } from "../ui/fontMetrics";
 import { FEEDBACK, tickMs } from "./feedback";
 import { CHANGE_LABEL_STYLE, changeChipAt, changeLabelRoom } from "./hudLanes";
 import type { ChangeLabel } from "./hudView";
-import { messagePanel } from "./messageStrip";
 import { arcControl, TOP_BAR_POINTS } from "./moments";
 import { WALK_BAR } from "./walkHud";
+
+const WALK_BAR_RECT = SCREEN_LAYOUT.topBar;
 
 // A money gain's label, a tip's included, and the cash lost with the last firing pop by the cash
 // total (cashChipPlace), in the first slot of the cash's column no label showing there holds; a
@@ -82,22 +84,21 @@ export function freeCashSlot(taken: ReadonlySet<number>): number {
 }
 
 // A money gain's label chip by the cash in slot of the cash's column, and where its ink's left
-// edge and capitals' top go, for text on lines lines at scale, its ink width wide: centred on the
-// cash total, under the cash well's ink columns and clear of the bar's other wells. The first
-// slot's top is gap rows under the cash's capitals, or higher for a chip that would otherwise
-// reach the message strip; each later slot's is the tallest chip and gap rows under the slot
-// before it, so chips of any style in neighbouring slots never overlap.
+// edge and capitals' top go, for text on lines lines at scale, its ink width wide: centred under
+// the cash well, hanging from the walk bar. The first slot's top is gap rows under the bar's
+// bottom, over the message strip, the debuff bars and the neighbourhood pill; each later slot's
+// is the tallest chip and gap rows under the slot before it, so chips of any style in
+// neighbouring slots never overlap.
 export function cashChipPlace(
   body: FontMetrics,
   slot: number,
   text: { lines: number; scale: number; width: number },
 ): { chip: Rect; text: Point } {
   const { gap, gutter } = MONEY_LABEL;
-  const { bank } = TOP_BAR_POINTS;
-  const { height, width } = changeChipAt(body, { x: 0, y: 0 }, text).chip;
-  const x = Math.max(gutter, Math.round(bank.x - width / 2));
-  const stripTop = messagePanel(body, 1).y;
-  const first = Math.min(WALK_BAR.cash.capsBottom + 1 + gap, stripTop - height);
+  const { width } = changeChipAt(body, { x: 0, y: 0 }, text).chip;
+  const { well } = WALK_BAR.cash;
+  const x = Math.max(gutter, Math.round(WALK_BAR_RECT.x + well.x + (well.width - width) / 2));
+  const first = WALK_BAR_RECT.y + WALK_BAR_RECT.height + gap;
   return changeChipAt(body, { x, y: first + slot * (tallestChip(body) + gap) }, text);
 }
 

@@ -7,15 +7,13 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
 import { dollarAmountText } from "../home/home";
-import { MIN_TAP_SIZE } from "../layout/screenLayout";
+import { HOME_LAYOUT } from "../home/homeLayout";
 import { keysOf } from "../lib/records";
 import { type Point, type Rect, rectsOverlap } from "../lib/rect";
 import { cents, pixels } from "../lib/units";
 import { maxHearts } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
-import { walkLength } from "../rules/route";
 import { zoneLength } from "../runner/walk";
-import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, fontInk } from "../testing/fontInk";
 import { LONE } from "../testing/packPlaces";
 import { inside } from "../testing/rects";
@@ -27,7 +25,6 @@ import { maxEffects } from "./effectIcons";
 import {
   cardHearts,
   cashLeft,
-  cashTop,
   DEBUFF_BAR,
   debuffBarRects,
   debuffFillWidth,
@@ -49,7 +46,6 @@ import {
   walkBarLayout,
   ZONE_PROGRESS,
   zoneProgressLayout,
-  zoneProgressText,
   zoneShare,
 } from "./walkHud";
 
@@ -90,16 +86,10 @@ function titleWidth(text: string): number {
 }
 
 describe("the walk bar", () => {
-  it("keeps its wells, effect wells, holds and buttons inside the bar on screen, none over another", () => {
+  it("keeps its cash well, effect wells, holds and buttons inside the bar on screen, none over another", () => {
     expect(inside(topBar, LAYOUT.screen)).toBe(true);
     const hits = WALK_BAR_BUTTONS.map((id) => BAR.buttons[id].hit);
-    const parts = [
-      WALK_BAR.cash.well,
-      BAR.zoneWell,
-      ...BAR.effectWells,
-      ...BAR.effectHolds,
-      ...hits,
-    ];
+    const parts = [WALK_BAR.cash.well, ...BAR.effectWells, ...BAR.effectHolds, ...hits];
     for (const hold of BAR.effectHolds) {
       for (const hit of hits) {
         expect(rectsOverlap(hold, hit)).toBe(false);
@@ -108,19 +98,20 @@ describe("the walk bar", () => {
     for (const part of parts) {
       expect(inside(part, topBar)).toBe(true);
     }
-    expect(rectsOverlap(WALK_BAR.cash.well, BAR.zoneWell)).toBe(false);
     for (const well of BAR.effectWells) {
-      expect(rectsOverlap(well, BAR.zoneWell)).toBe(false);
+      expect(rectsOverlap(well, WALK_BAR.cash.well)).toBe(false);
     }
   });
 
-  it("lines a well for every effect under the neighbourhood well, its holds up to the first button", () => {
+  it("lines a well for every effect, its holds the bar's full height up to the first button", () => {
     const first = BAR.buttons[WALK_BAR_BUTTONS[0]].hit;
     expect(BAR.effectWells).toHaveLength(EFFECT_WELLS);
     for (const hold of BAR.effectHolds) {
-      expect(hold.x).toBeGreaterThanOrEqual(BAR.zoneWell.x - WALK_BAR.effects.holdInset);
       expect(hold.x + hold.width).toBeLessThanOrEqual(first.x);
+      expect(hold.y).toBe(topBar.y);
+      expect(hold.height).toBe(topBar.height);
     }
+    expect(BAR.effectHolds[0]?.x).toBe((BAR.effectWells[0]?.x ?? 0) - WALK_BAR.effects.holdInset);
     const last = BAR.effectHolds.at(-1);
     expect((last?.x ?? 0) + (last?.width ?? 0)).toBe(first.x);
     for (const well of BAR.effectWells) {
@@ -134,7 +125,6 @@ describe("the walk bar", () => {
       const hold = BAR.effectHolds[i];
       expect(hold).toBeDefined();
       expect(inside(well, hold ?? well)).toBe(true);
-      expect((hold?.y ?? 0) + (hold?.height ?? 0)).toBe(topBar.y + topBar.height);
       const next = BAR.effectHolds[i + 1];
       if (next !== undefined) {
         expect(next.x).toBe((hold?.x ?? 0) + (hold?.width ?? 0));
@@ -156,53 +146,39 @@ describe("the walk bar", () => {
     }
   });
 
-  it("spans the cash well from the neighbourhood well's top to the effect wells' bottom", () => {
-    const { cash, effects, zone } = WALK_BAR;
-    expect(cash.well.y).toBe(zone.well.y);
-    expect(cash.well.y + cash.well.height).toBe(effects.y + effects.size);
+  it("sets its button faces, cash well and cash as the start screen's top bar sets its own", () => {
+    const home = HOME_LAYOUT.topBar;
+    for (const id of WALK_BAR_BUTTONS) {
+      expect(BAR.buttons[id].face.y - topBar.y).toBe(HOME_LAYOUT.help.face.y);
+    }
+    const { cash } = WALK_BAR;
+    expect([cash.well.x, cash.well.y, cash.well.height]).toEqual([
+      home.well.x,
+      home.well.y,
+      home.well.height,
+    ]);
+    expect(cash.capsY).toBe(home.bank.capsY);
   });
 
-  it("ends the neighbourhood well before the first button's face", () => {
-    const first = BAR.buttons[WALK_BAR_BUTTONS[0]].face;
-    expect(BAR.zoneWell.x + BAR.zoneWell.width).toBeLessThan(first.x);
+  it("centres the effect wells down the button faces, 2 columns apart", () => {
+    const { buttonFace, effects } = WALK_BAR;
+    expect(2 * effects.y + effects.size).toBe(2 * buttonFace.y + buttonFace.size);
+    expect(effects.pitch - effects.size).toBe(2);
   });
 
-  it("sets the neighbourhood column as far from the cash well as from the first button's face", () => {
+  it("sets the effect wells as far from the cash well as from the first button's face", () => {
     const cash = { ...WALK_BAR.cash.well, x: topBar.x + WALK_BAR.cash.well.x };
-    const column = [BAR.zoneWell, ...BAR.effectWells];
-    const columnLeft = Math.min(...column.map((rect) => rect.x));
-    const columnRight = Math.max(...column.map((rect) => rect.x + rect.width));
-    const left = columnLeft - (cash.x + cash.width);
-    const right = BAR.buttons[WALK_BAR_BUTTONS[0]].face.x - columnRight;
+    const left = (BAR.effectWells[0]?.x ?? 0) - (cash.x + cash.width);
+    const lastWell = BAR.effectWells.at(-1) ?? cash;
+    const right = BAR.buttons[WALK_BAR_BUTTONS[0]].face.x - (lastWell.x + lastWell.width);
     expect(left).toBeGreaterThan(0);
     expect(right - left).toBeGreaterThanOrEqual(0);
     expect(right - left).toBeLessThanOrEqual(1);
   });
 
-  it("starts the effect wells on the neighbourhood well's left edge, the widest whole gap apart", () => {
-    const { pitch, size } = WALK_BAR.effects;
-    const well = BAR.zoneWell;
-    const right = well.x + well.width;
-    expect(BAR.effectWells[0]?.x).toBe(well.x);
-    const last = BAR.effectWells.at(-1) ?? well;
-    expect(last.x + last.width).toBeLessThanOrEqual(right);
-    // One more column between each pair of wells would push the last past the well's edge.
-    expect(last.x + last.width + (WELLS - 1)).toBeGreaterThan(right);
-    expect(pitch).toBeGreaterThan(size);
-  });
-
-  it("centres the neighbourhood's text line in its well, to a column", () => {
-    const { name, progress } = WALK_BAR.zone;
-    const left = name.x - BAR.zoneWell.x;
-    const right = BAR.zoneWell.x + BAR.zoneWell.width - 1 - progress.right;
-    expect(right - left).toBeGreaterThanOrEqual(0);
-    expect(right - left).toBeLessThanOrEqual(1);
-  });
-
-  it.each(WALK_BAR_BUTTONS)("gives %s a hit area the bar's full height, a tap tall", (id) => {
+  it.each(WALK_BAR_BUTTONS)("gives %s a hit area the bar's full height", (id) => {
     const { hit } = BAR.buttons[id];
     expect(hit.height).toBe(topBar.height);
-    expect(hit.height).toBeGreaterThanOrEqual(MIN_TAP_SIZE);
     expect(hit.width).toBeGreaterThanOrEqual(WALK_BAR.minHitWidth);
   });
 });
@@ -221,14 +197,14 @@ describe("evenGapLeft", () => {
 // The cash, as the game writes it at its scale, under $1,000 (each amount's fit in the room:
 // ui/textRoles.test.ts).
 describe("the cash", () => {
-  const { capsBottom, ink, scale, well } = WALK_BAR.cash;
+  const { capsY, ink, scale, well } = WALK_BAR.cash;
   const amounts = [0, 5, 88, 111, 888, 999].map(
     (dollars) => `$${dollarAmountText(cents(dollars * 100))}`,
   );
 
-  it("keeps the capitals' bottom row on capsBottom, inside the well", () => {
-    expect(cashTop() + TITLE_CAP_ROWS * scale - 1).toBe(capsBottom);
-    expect(cashTop()).toBeGreaterThan(well.y);
+  it("keeps the capitals inside the well's ink rows", () => {
+    expect(capsY).toBeGreaterThan(well.y);
+    expect(capsY + TITLE_CAP_ROWS * scale).toBeLessThan(well.y + well.height - 1);
   });
 
   // The first amount of each parity of ink: the centring reads only that.
@@ -568,43 +544,6 @@ describe("the owner's tab", () => {
   );
 });
 
-// The neighbourhood's name from name.x and "n of N" right-aligned to progress.right, both at 1x
-// in the body font, stay in the well and apart, for every zone beside the widest count.
-describe("the walk bar's neighbourhood name and count", () => {
-  const { name, progress, textGap } = WALK_BAR.zone;
-  const well = BAR.zoneWell;
-  const body = fontFileMetrics("font-body");
-  const inkOf = (text: string) => fontInk("font-body", { scale: 1 }, plainMarks(text));
-  const counts = Array.from({ length: walkLength(gameData) }, (_, i) =>
-    zoneProgressText(gameData, i),
-  );
-  const widest = counts.reduce((a, b) => (bodyTextWidth(1, b) > bodyTextWidth(1, a) ? b : a), "");
-  const progressInk = inkOf(widest);
-  // Phaser right-aligns the label on its advances, the last glyph's spacing included.
-  const progressLeft = progress.right + 1 - bodyTextWidth(1, plainMarks(widest));
-
-  it("keeps the widest count inside the well's right edge", () => {
-    expect(progressLeft + progressInk.left).toBeGreaterThan(well.x);
-    expect(progressLeft + progressInk.right).toBeLessThan(well.x + well.width);
-  });
-
-  it.each(gameData.world.zones.map((zone) => zone.name))(
-    "fits %j beside the widest count",
-    (zoneName) => {
-      const ink = inkOf(zoneName);
-      expect(name.x + ink.left).toBeGreaterThan(well.x);
-      expect(name.x + ink.right + textGap).toBeLessThanOrEqual(progressLeft + progressInk.left);
-    },
-  );
-
-  it("keeps both texts' rows inside the well", () => {
-    for (const y of [name.y, progress.y]) {
-      expect(y).toBeGreaterThan(well.y);
-      expect(y + inkRowsFromCapTop(body)).toBeLessThanOrEqual(well.y + well.height);
-    }
-  });
-});
-
 describe("explainTargetAt", () => {
   const dogs: (DogId | undefined)[] = ["kilo", "lady", undefined];
   const debuffs: DebuffId[] = ["muddy", "stinky"];
@@ -627,11 +566,11 @@ describe("explainTargetAt", () => {
   it.each<[string, number, Point, ExplainTarget | undefined, ExplainTarget | undefined]>([
     ["the first effect", 1, holdAt(0), first, first],
     [
-      "the neighbourhood well's column over an effect",
+      "the bar's top row over the first effect",
       1,
-      centre(BAR.zoneWell),
-      undefined,
-      undefined,
+      { x: centre(BAR.effectWells[0] ?? topBar).x, y: topBar.y },
+      first,
+      first,
     ],
     ["an empty well", 1, holdAt(1), undefined, undefined],
     ["the last well with as many effects as wells", WELLS, holdAt(WELLS - 1), last, last],

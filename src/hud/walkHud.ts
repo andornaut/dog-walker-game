@@ -8,7 +8,7 @@ import { containsPoint, insetRect, type Point, type Rect } from "../lib/rect";
 import { walkLength } from "../rules/route";
 import { zoneLength } from "../runner/walk";
 import type { RunState } from "../state/runState";
-import { topBarWellRows } from "../ui/topBarTrim";
+import { TOP_BAR_FACE, TOP_BAR_WELL, wellCapsTop } from "../ui/topBarTrim";
 import { type EffectItem, maxEffects } from "./effectIcons";
 import { heartRows } from "./hudView";
 
@@ -24,6 +24,12 @@ export type WalkBarButtonId = (typeof WALK_BAR_BUTTONS)[number];
 // The cash well's ink columns, which the home top bar's bank well shares.
 const CASH_INK = { left: 5, right: 73 } as const;
 
+// The title font's capitals are this many rows tall at 1x.
+export const TITLE_CAP_ROWS = 5;
+
+// The cash and the home top bar's bank are set at this scale.
+const CASH_SCALE = 3;
+
 // The most effects a walk can have, one well each: the walker's perk, the Pocket's gear, the
 // found gear and an upgrade from each fork.
 export const EFFECT_WELLS = maxEffects(gameData);
@@ -35,15 +41,16 @@ export function evenGapLeft(left: number, right: number, width: number): number 
   return left + Math.floor((right - left - width) / 2);
 }
 
-// The walk bar's three sections, left to right: the cash well, the neighbourhood column (its
-// well over the effect wells) and the buttons. The cash well and the buttons keep their places
-// at the bar's ends, and the neighbourhood column sits evenly between the cash well's right
-// edge and the first button's face. The column is the wider of the neighbourhood's text line
-// (ZONE_LINE.width) and the effect wells edge to edge, with NEIGHBOURHOOD_PADDING columns either
-// side; the neighbourhood well spans it, its text line centred in it. The effect wells run from
-// the column's left edge, the widest whole gap apart that keeps the last inside the column.
-const WELL_ROWS = topBarWellRows(SCREEN_CONFIG.topBarHeight);
-const CASH_WELL = { height: WELL_ROWS.height, width: 70, x: 5, y: WELL_ROWS.y } as const;
+// The walk bar's three sections, left to right: the cash well, the effect wells and the
+// buttons. The cash well and the buttons keep their places at the bar's ends, and the effect
+// wells sit evenly between the cash well's right edge and the first button's face, gap apart,
+// centred down the button faces' rows.
+const CASH_WELL = {
+  height: TOP_BAR_WELL.height,
+  width: CASH_INK.right + 1 + TOP_BAR_WELL.lip - TOP_BAR_WELL.x,
+  x: TOP_BAR_WELL.x,
+  y: TOP_BAR_WELL.y,
+} as const;
 const BUTTONS = {
   help: { faceX: 231, hitWidth: 34, hitX: 224 },
   pause: { faceX: 333, hitWidth: 34, hitX: 326 },
@@ -52,59 +59,46 @@ const BUTTONS = {
 } as const satisfies Readonly<
   Record<WalkBarButtonId, { faceX: number; hitWidth: number; hitX: number }>
 >;
-const EFFECT_ROW = { holdInset: 1, icon: 1, iconSize: 20, size: 22, y: 20 } as const;
-const ZONE_LINE = { height: 12, width: 132, y: WELL_ROWS.y } as const;
-const NEIGHBOURHOOD_PADDING = 6;
-const NEIGHBOURHOOD_WIDTH =
-  Math.max(ZONE_LINE.width, EFFECT_WELLS * EFFECT_ROW.size) + 2 * NEIGHBOURHOOD_PADDING;
-const EFFECT_GAP =
-  EFFECT_WELLS > 1
-    ? Math.floor((NEIGHBOURHOOD_WIDTH - EFFECT_WELLS * EFFECT_ROW.size) / (EFFECT_WELLS - 1))
-    : 0;
-const NEIGHBOURHOOD_X = evenGapLeft(
+const EFFECT_SIZE = 22;
+const EFFECT_GAP = 2;
+const EFFECT_SPAN = EFFECT_WELLS * EFFECT_SIZE + (EFFECT_WELLS - 1) * EFFECT_GAP;
+const EFFECT_ROW = {
+  holdInset: 1,
+  icon: 1,
+  iconSize: 20,
+  size: EFFECT_SIZE,
+  y: TOP_BAR_FACE.y - (EFFECT_SIZE - TOP_BAR_FACE.size) / 2,
+} as const;
+const EFFECTS_X = evenGapLeft(
   CASH_WELL.x + CASH_WELL.width,
   BUTTONS[WALK_BAR_BUTTONS[0]].faceX,
-  NEIGHBOURHOOD_WIDTH,
+  EFFECT_SPAN,
 );
 
 // The walk bar as ui-walk-bar draws it, in bar pixels; every position the HUD uses comes from
 // this table. buttons: each button's face x and its hit area's x and width, the hit areas the
 // bar's full height and minHitWidth wide or more (narrower than a 44px square, so four fit beside
 // six effect wells), side by side to the bar's right edge, each face buttonFace.size square on
-// row buttonFace.y, centred in its hit area. cash:
-// the "$" and the amount at scale, no wider than room (a walk's cash stays under $1,000),
-// centred across the well's ink columns (ink.left to ink.right), their capitals' bottom on
-// capsBottom. zone: the
-// neighbourhood well on one text line, the name from name.x and "n of N" right-aligned to end on
-// column progress.right, at least textGap apart.
-// effects: a well of size at pitch from x along y for every effect a walk can have
-// (EFFECT_WELLS), each icon iconSize at icon,icon in its well; the holds run side by side from
-// holdInset left of the first well up to the first button, each from its well's left edge, down
-// to the bar's bottom, a gap between wells going to the hold on its left. The name starts 3
-// columns into the text line, and the count ends 5 columns before its right edge.
+// row buttonFace.y, as the start screen's top bar sets its faces, centred in its hit area. cash:
+// the start screen's bank well, the "$" and the amount at scale, no wider than room (a walk's
+// cash stays under $1,000), centred across the well's ink columns (ink.left to ink.right), their
+// capitals' top on capsY, as the start screen sets its bank (wellCapsTop). effects: a well of
+// size at pitch from x along y for every effect a walk can have (EFFECT_WELLS), each icon
+// iconSize at icon,icon in its well; the holds run side by side from holdInset left of the first
+// well up to the first button, each from its well's left edge, the bar's full height, a gap
+// between wells going to the hold on its left.
 export const WALK_BAR = {
-  buttonFace: { size: 20, y: 14 },
+  buttonFace: TOP_BAR_FACE,
   buttons: BUTTONS,
   cash: {
-    capsBottom: 30,
+    capsY: wellCapsTop(TITLE_CAP_ROWS * CASH_SCALE),
     ink: CASH_INK,
     room: 69,
-    scale: 3,
+    scale: CASH_SCALE,
     well: CASH_WELL,
   },
-  effects: { ...EFFECT_ROW, pitch: EFFECT_ROW.size + EFFECT_GAP, x: NEIGHBOURHOOD_X },
+  effects: { ...EFFECT_ROW, pitch: EFFECT_SIZE + EFFECT_GAP, x: EFFECTS_X },
   minHitWidth: 34,
-  zone: {
-    name: { x: NEIGHBOURHOOD_X + NEIGHBOURHOOD_PADDING + 3, y: 8 },
-    progress: { right: NEIGHBOURHOOD_X + NEIGHBOURHOOD_WIDTH - NEIGHBOURHOOD_PADDING - 5, y: 8 },
-    textGap: 4,
-    well: {
-      height: ZONE_LINE.height,
-      width: NEIGHBOURHOOD_WIDTH,
-      x: NEIGHBOURHOOD_X,
-      y: ZONE_LINE.y,
-    },
-  },
 } as const;
 
 // A spare treat held shows as the road's smallest treat, size square, in the bottom-right
@@ -126,9 +120,6 @@ export function zoneProgressText(
   return fillNames(data.runText.zoneProgress, { n: String(zoneIndex + 1), total });
 }
 
-// The title font's capitals are this many rows tall at 1x.
-export const TITLE_CAP_ROWS = 5;
-
 // A button's face and its hit area.
 export interface BarButton {
   face: Point;
@@ -138,15 +129,14 @@ export interface BarButton {
 interface WalkBarLayout {
   buttons: Readonly<Record<WalkBarButtonId, BarButton>>;
   // Each effect well, left to right, and the press area that holds it: the well's column of
-  // the bar, from the neighbourhood well's top to the bar's bottom.
+  // the bar, the bar's full height.
   effectHolds: Rect[];
   effectWells: Rect[];
-  zoneWell: Rect;
 }
 
 // The walk bar's parts on screen, for the bar at bar with wells effect wells.
 export function walkBarLayout(bar: Rect, wells = EFFECT_WELLS): WalkBarLayout {
-  const { buttonFace, effects, zone } = WALK_BAR;
+  const { buttonFace, effects } = WALK_BAR;
   const at = (point: Point): Point => ({ x: bar.x + point.x, y: bar.y + point.y });
   const buttons = Object.fromEntries(
     WALK_BAR_BUTTONS.map((id) => {
@@ -155,7 +145,6 @@ export function walkBarLayout(bar: Rect, wells = EFFECT_WELLS): WalkBarLayout {
       return [id, { face: at({ x: faceX, y: buttonFace.y }), hit }];
     }),
   ) as Record<WalkBarButtonId, BarButton>;
-  const zoneWell = { ...zone.well, ...at(zone.well) };
   const effectWells = Array.from({ length: wells }, (_, i) => ({
     ...at({ x: effects.x + i * effects.pitch, y: effects.y }),
     height: effects.size,
@@ -164,24 +153,18 @@ export function walkBarLayout(bar: Rect, wells = EFFECT_WELLS): WalkBarLayout {
   const firstHit = buttons[WALK_BAR_BUTTONS[0]].hit;
   const starts = effectWells.map((well, i) => (i === 0 ? well.x - effects.holdInset : well.x));
   const effectHolds = starts.map((x, i) => ({
-    height: bar.y + bar.height - zoneWell.y,
+    height: bar.height,
     width: (starts[i + 1] ?? firstHit.x) - x,
     x,
-    y: zoneWell.y,
+    y: bar.y,
   }));
-  return { buttons, effectHolds, effectWells, zoneWell };
+  return { buttons, effectHolds, effectWells };
 }
 
 // The first ink column of the cash, or the home top bar's bank, for ink inkWidth wide on
 // screen: centred across the well's ink, a half pixel rounded left.
 export function cashLeft(inkWidth: number): number {
   return Math.floor((CASH_INK.left + CASH_INK.right) / 2 - (inkWidth - 1) / 2);
-}
-
-// The top of the cash's capitals, their bottom row on capsBottom.
-export function cashTop(): number {
-  const { capsBottom, scale } = WALK_BAR.cash;
-  return capsBottom + 1 - TITLE_CAP_ROWS * scale;
 }
 
 // A debuff bar (ui-debuff-bar, 360x16): its icon, its name up to name.room wide, and the fill

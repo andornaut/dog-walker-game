@@ -1,5 +1,6 @@
 import { roadCameraFor } from "../layout/projection";
 import { type ScreenConfig, screenLayout, walkerFootY } from "../layout/screenLayout";
+import { TOP_BAR_HEIGHT } from "../ui/topBarTrim";
 import { TUNING } from "./tuning";
 
 // Internal render resolution: portrait, scaled to the window without smoothing.
@@ -19,7 +20,7 @@ export const SCREEN_CONFIG: ScreenConfig = {
   junctionRows: 5,
   roadIntoBand: 19,
   roadWidth: 320,
-  topBarHeight: 48,
+  topBarHeight: TOP_BAR_HEIGHT,
   width: 360,
   zoneProgressHeight: 4,
 };

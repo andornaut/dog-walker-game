@@ -9,7 +9,7 @@ import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontM
 import { TEXT_STYLE, type TextFitStyle } from "../ui/textFit";
 import { type FaceBox, type FaceText, fillFaceText, ownerFaceText } from "./faceText";
 import type { ChangeLabel } from "./hudView";
-import { cashTop, DOG_CARD, OWNER_TAB, TITLE_CAP_ROWS, WALK_BAR } from "./walkHud";
+import { DOG_CARD, OWNER_TAB, TITLE_CAP_ROWS, WALK_BAR } from "./walkHud";
 
 // The in-run feedback moments RunScene hands the HUD on its events: an owner firing you, a
 // heart forgiven, a zone's pay banked, and a treat grabbed.
@@ -82,7 +82,7 @@ const { ink } = WALK_BAR.cash;
 export const TOP_BAR_POINTS = {
   bank: {
     x: Math.floor((ink.left + ink.right) / 2),
-    y: Math.floor(cashTop() + (TITLE_CAP_ROWS * WALK_BAR.cash.scale) / 2),
+    y: Math.floor(WALK_BAR.cash.capsY + (TITLE_CAP_ROWS * WALK_BAR.cash.scale) / 2),
   },
 } as const;
 

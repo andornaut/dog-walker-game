@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
-import { rectsOverlap } from "../lib/rect";
 import { cents } from "../lib/units";
 import { amountText } from "../rules/causes";
 import { fontFileMetrics } from "../testing/fontInk";
@@ -9,7 +8,6 @@ import { inkRowsOfLines } from "../ui/fontMetrics";
 import { FEEDBACK } from "./feedback";
 import { CHANGE_CHIP, CHANGE_LABEL_STYLE } from "./hudLanes";
 import { type ChangeLabel, changeLabels } from "./hudView";
-import { MESSAGE_STRIP } from "./messageStrip";
 import { curvePoint, TOP_BAR_POINTS } from "./moments";
 import {
   cashChipPlace,
@@ -22,7 +20,7 @@ import {
   moneyFlightPath,
   stackOrders,
 } from "./moneyLabels";
-import { WALK_BAR, walkBarLayout } from "./walkHud";
+import { WALK_BAR } from "./walkHud";
 
 const BODY = fontFileMetrics("font-body");
 const { width: SCREEN_WIDTH } = SCREEN_CONFIG;
@@ -70,24 +68,17 @@ describe("moneyChipPlace", () => {
 });
 
 describe("cashChipPlace", () => {
-  const { bank } = TOP_BAR_POINTS;
-  const bar = walkBarLayout(TOP_BAR);
-  const otherParts = [
-    bar.zoneWell,
-    ...bar.effectWells,
-    ...Object.values(bar.buttons).map(({ hit }) => hit),
-  ];
-  const stripTop = TOP_BAR.y + TOP_BAR.height + MESSAGE_STRIP.gap;
+  const { well } = WALK_BAR.cash;
+  const wellCentre = TOP_BAR.x + well.x + well.width / 2;
+  const barBottom = TOP_BAR.y + TOP_BAR.height;
   // A money label says its amount on one line (every amount fits it: ui/textRoles.test.ts).
   const chips = [{ lines: 1, scale: CHANGE_LABEL_STYLE.scale, width: MONEY_LABEL.room }];
   it.each(chips)(
-    "pops the widest $lines-line chip at $scale x under the cash, clear of the bar's wells and the strip",
+    "hangs the widest $lines-line chip at $scale x gap rows under the bar, centred under the cash well",
     (text) => {
       const { chip } = cashChipPlace(BODY, 0, text);
-      expect(Math.abs(chip.x + chip.width / 2 - bank.x)).toBeLessThanOrEqual(1);
-      expect(chip.y).toBeGreaterThan(WALK_BAR.cash.capsBottom);
-      expect(chip.y + chip.height).toBeLessThanOrEqual(stripTop);
-      expect(otherParts.filter((part) => rectsOverlap(part, chip))).toEqual([]);
+      expect(Math.abs(chip.x + chip.width / 2 - wellCentre)).toBeLessThanOrEqual(1);
+      expect(chip.y).toBe(barBottom + MONEY_LABEL.gap);
     },
   );
 
@@ -100,7 +91,7 @@ describe("cashChipPlace", () => {
         const above = cashChipPlace(BODY, slot, upper).chip;
         const below = cashChipPlace(BODY, slot + 1, lower).chip;
         expect(below.y).toBeGreaterThanOrEqual(above.y + above.height + MONEY_LABEL.gap);
-        expect(Math.abs(below.x + below.width / 2 - bank.x)).toBeLessThanOrEqual(1);
+        expect(Math.abs(below.x + below.width / 2 - wellCentre)).toBeLessThanOrEqual(1);
       }
     },
   );

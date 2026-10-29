@@ -173,7 +173,6 @@ describe("the walk bar's buttons", () => {
       for (const well of [...bar.effectWells, ...bar.effectHolds]) {
         expect(well.x + well.width).toBeLessThanOrEqual(hit.x);
       }
-      expect(bar.zoneWell.x + bar.zoneWell.width).toBeLessThanOrEqual(face.x);
     }
   });
 });
