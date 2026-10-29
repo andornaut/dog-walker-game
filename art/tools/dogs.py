@@ -5,7 +5,7 @@ Each dog gets two sprites in Endesga 32: a road sprite with coloured outlines an
 
 - dog-<name>: the road sprite, seen from above and behind, its frame by size class (DOG_CLASS,
   SIZE_CLASS): large 54x54 (Kilo the Alaskan Malamute, Sequoia the Great Pyrenees, Penny the golden
-  retriever mix), medium 48x48 (Archie, Biscuit, Pepe the miniature poodle) and small 38x38 (Buddy,
+  retriever mix), medium 48x48 (Archie, Lady, Pepe the miniature poodle) and small 38x38 (Buddy,
   Duchess, Reggie), the large dogs drawn DOG_ZOOM narrower and the small dogs DOG_ZOOM larger (more down
   than across). Its drawing functions take 32-unit design coordinates and run on a minis.Mini at
   road_scale(name) (the side / 32), which keeps 1px lines and single pixels 1px; features drawn pixel by
@@ -187,7 +187,7 @@ def kilo_face(mood):
     return g
 
 
-# ---------- Biscuit: beagle, medium, tricolour, long ears, green collar ----------
+# ---------- Lady (biscuit): beagle, medium, tricolour, long ears, green collar ----------
 
 def biscuit_road(q):
     g, q = edged(Grid()), pose(q)
@@ -479,7 +479,7 @@ def archie_road(q):
                     (19, 25, q["br"])):
         g.rect(x, y + d, 3 if y > 20 else 2, 4, "white")
         g.rect(x, y + d, 3 if y > 20 else 2, 1, "ochre")
-    # a solid brown coat, as wide as Biscuit and longer in the coat
+    # a solid brown coat, as wide as Lady and longer in the coat
     bx = 16 + sw
     g.cel(bx, 21.5 + b, 7, 6, *COAT)
     # the fluffy bobtail held up over the rump: a tuft of two locks over a third, the white tip on top, set off from

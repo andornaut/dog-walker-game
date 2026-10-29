@@ -94,17 +94,17 @@ frame; the game plays it every few seconds while idle, with a bob of at most
 row 82). An affordable item in the shop takes ui-afford 2px outside the frame
 (232,84 124x112).
 
-ui-loading-track: a 316x8 image, the sidewalk being walked: Biscuit's paw
+ui-loading-track: a 316x8 image, the sidewalk being walked: Lady's paw
 prints in dslate, staggered on two rows from Casey's heel to the Pet shop's door.
 The game draws it at TRACK_AT (16,456).
-ui-loading: a 98x84 sprite, tag walk (4 frames, 160ms): Casey and Biscuit side
+ui-loading: a 98x84 sprite, tag walk (4 frames, 160ms): Casey and Lady side
 on, walking right on a plum leash, at 1.75x, larger than on the road (Casey 84
-rows tall, Biscuit 56), cel shaded with the road outline,
+rows tall, Lady 56), cel shaded with the road outline,
 Casey's face flat skin. Frames 0 and 2 plant the feet apart, 1 and 3 pass
-with the body 1px higher, a foot lifted, and Biscuit's diagonal pairs swap.
+with the body 1px higher, a foot lifted, and Lady's diagonal pairs swap.
 The game draws it at PAIR_AT (6,379) plus round(228 * progress) to the right,
 its feet on row 460, so Casey's heel starts on the first paw print and
-Biscuit's nose ends at the Pet shop's door pane.
+Lady's nose ends at the Pet shop's door pane.
 
 Usage:
   screens.py preview OUT.png   the logo, the ui-loading frames, then every screen,
@@ -980,17 +980,17 @@ SHOP_WINDOW = (9, 47, 67, 96)
 SHOP_DOOR_PANE = (82, 54, 100, 68)
 # The display window's and door pane's day glass, lamplit at night; the door's cream paw turns clay on it
 SHOP_GLOW = {K["sky"]: "gold", K["cyan"]: "yellow", K["blue"]: "ochre"}
-TRACK_END = 332  # the track's end and Biscuit's last nose column, at the Pet shop's door pane (318 to 335)
+TRACK_END = 332  # the track's end and Lady's last nose column, at the Pet shop's door pane (318 to 335)
 LAMP_X = 227
 MOON = (40, 42)
 PAIR_W, PAIR_H = 98, 84
 PAIR_FEET = 81  # the pair's bottom opaque row (the shoes' and paws' outline) in its frame
 WALK_FOOT = 460  # the screen row the pair's feet stand on
-PAIR_HEEL, PAIR_NOSE = 10, 97  # Casey's rear heel on the contact frames and Biscuit's nose, opaque columns
+PAIR_HEEL, PAIR_NOSE = 10, 97  # Casey's rear heel on the contact frames and Lady's nose, opaque columns
 TRACK_AT = (16, WALK_FOOT - 4)
 TRACK_W, TRACK_H = TRACK_END - TRACK_AT[0], 8
 # Where the game draws ui-loading (origin top left) at progress 0, and how far right it walks by 1: Casey's
-# heel starts on the first paw print and Biscuit's nose ends at the Pet shop's door. Its feet stand on WALK_FOOT.
+# heel starts on the first paw print and Lady's nose ends at the Pet shop's door. Its feet stand on WALK_FOOT.
 PAIR_AT = (TRACK_AT[0] - PAIR_HEEL, WALK_FOOT - PAIR_FEET)
 PAIR_TRAVEL = TRACK_AT[0] + TRACK_W - PAIR_NOSE - 1 - PAIR_AT[0]
 
@@ -1283,7 +1283,7 @@ def loading():
 
 
 def loading_track():
-    """The sidewalk being walked: Biscuit's paw prints in dslate (3.39:1 on the night sidewalk's grey),
+    """The sidewalk being walked: Lady's paw prints in dslate (3.39:1 on the night sidewalk's grey),
     left and right paws 8px apart, staggered on two rows, from Casey's heel to the Pet shop's door."""
     cv = clear(TRACK_W, TRACK_H)
     for n, x in enumerate(range(0, TRACK_W - 4, 8)):
@@ -1306,13 +1306,13 @@ SCREENS = {
 
 
 # ui-loading is drawn on a PAIR_DESIGN design grid at PAIR_SCALE on a minis.Mini that keeps 1px lines and
-# single pixels 1px, so Casey stands 84 rows tall and Biscuit 56.
+# single pixels 1px, so Casey stands 84 rows tall and Lady 56.
 PAIR_DESIGN = (56, 48)
 PAIR_SCALE = 1.75
 # The pair's stride, one dict per frame: Casey's near and far feet (forward of the hip, in design px) and which
-# is lifted, the body's bob, Biscuit's near front and hind paws, his bob and his tail's wag. Contact frames (0, 2)
+# is lifted, the body's bob, Lady's near front and hind paws, its bob and its tail's wag. Contact frames (0, 2)
 # plant both feet apart; on the passing frames (1, 3) the swinging foot lifts 1px under the hip as the body
-# rises 1px, as the walkers' stride has it, and Biscuit's diagonal pairs swap with his ears lagging.
+# rises 1px, as the walkers' stride has it, and Lady's diagonal pairs swap with its ears lagging.
 PAIR_WALK = [
     dict(near=4, far=-4, lift=None, bob=0, front=2, hind=-2, dbob=0, wag=-1, flop=0),
     dict(near=0, far=0, lift="far", bob=-1, front=0, hind=0, dbob=-1, wag=0, flop=1),
@@ -1320,7 +1320,7 @@ PAIR_WALK = [
     dict(near=0, far=0, lift="near", bob=-1, front=0, hind=0, dbob=-1, wag=0, flop=1),
 ]
 PAIR_WALK_MS = 160
-# Casey's hand and Biscuit's collar on the design grid, before the bob: the leash's two ends.
+# Casey's hand and Lady's collar on the design grid, before the bob: the leash's two ends.
 HAND = (21, 28)
 COLLAR = (44, 28)
 
@@ -1340,7 +1340,7 @@ def leg(g, hip, foot, lift, trouser, shade, shoe, sole):
 
 
 def dog_leg(g, hip, paw, upper, sock, sock_shade):
-    """One of Biscuit's legs, from the hip or shoulder to its paw on row 45: the coat colour above a white
+    """One of Lady's legs, from the hip or shoulder to its paw on row 45: the coat colour above a white
     sock 3 rows deep."""
     (hx, hy), px = hip, paw
     n = max(1, 43 - hy)
@@ -1352,7 +1352,7 @@ def dog_leg(g, hip, paw, upper, sock, sock_shade):
 
 
 def pair_design(near=0, far=0, lift=None, bob=0, front=0, hind=0, dbob=0, wag=0, flop=0):
-    """One frame of ui-loading on the PAIR_DESIGN grid: Casey side on, walking right, and Biscuit trotting
+    """One frame of ui-loading on the PAIR_DESIGN grid: Casey side on, walking right, and Lady trotting
     ahead of her, cel shaded with the road outline and the lit rim, as the road sprites."""
     g = edged(Grid(*PAIR_DESIGN))
     b = bob
@@ -1391,7 +1391,7 @@ def pair_design(near=0, far=0, lift=None, bob=0, front=0, hind=0, dbob=0, wag=0,
     g.rect(12, 27 + b, 7, 1, "blue")
     g.rect(HAND[0] - 2, HAND[1] - 2 + b, 3, 3, "skin1")
     g.p(HAND[0], HAND[1] + b, "skin2")
-    # Biscuit: far legs a shade darker, the tail flagged up with its white tip, then the tan body under the
+    # Lady: far legs a shade darker, the tail flagged up with its white tip, then the tan body under the
     # black saddle, white belly and chest, the near legs, and the head with a long rust ear
     d = dbob
     dog_leg(g, (33, 36 + d), 33 - hind, "rust", "lgrey", "grey")
@@ -1420,7 +1420,7 @@ def pair_design(near=0, far=0, lift=None, bob=0, front=0, hind=0, dbob=0, wag=0,
 
 def pair(step):
     """PAIR_W x PAIR_H, one frame of the walk: pair_design at PAIR_SCALE, outlined, then the leash sagging 1px
-    wide from Casey's hand to Biscuit's collar, over the outline: plum, as on Cabbagetown's grey road, since
+    wide from Casey's hand to Lady's collar, over the outline: plum, as on Cabbagetown's grey road, since
     the night sidewalk is grey (4.84:1)."""
     q = PAIR_WALK[step]
     g = minis.small(sys.modules[__name__], PAIR_SCALE, pair_design, **q)
