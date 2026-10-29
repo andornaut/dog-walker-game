@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 
+import { encodeLosslessWebp } from "@andornaut/game-kit/art/webp";
 import { getOrInsertComputed } from "@andornaut/game-kit/maps";
 import { PNG } from "pngjs";
 
@@ -110,6 +111,9 @@ export interface PageFormat {
 }
 
 export const PNG_PAGES: PageFormat = { encode: encodePng, extension: "png" };
+
+// Pages as lossless WebPs (the kit's art/webp), as a build ships them.
+export const WEBP_PAGES: PageFormat = { encode: encodeLosslessWebp, extension: "webp" };
 
 // What a caller has already read: the art manifest, else read from manifest.json, and PNGs
 // decoded by their paths. Pages are PNGs unless pages names another format.

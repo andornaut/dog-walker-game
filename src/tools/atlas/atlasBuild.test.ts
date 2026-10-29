@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 
+import { webpDecodesTo } from "@andornaut/game-kit/art/webp";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import shippedManifest from "../../../public/art/manifest.json";
@@ -17,11 +18,11 @@ import {
   decodePng,
   encodePng,
   trimsFrames,
+  WEBP_PAGES,
 } from "./atlasBuild";
 import { ATLAS_MAX_SIZE } from "./atlasLayout";
 import type { RgbaImage } from "./atlasPixels";
 import { COLOUR_TYPE_INDEXED } from "./indexedPng";
-import { decodeWebp, WEBP_PAGES } from "./webp";
 
 const ART_DIR = new URL("../../../public/art/", import.meta.url);
 const readArt = async (path: string) => new Uint8Array(await readFile(new URL(path, ART_DIR)));
@@ -151,20 +152,15 @@ describe("the shipped art's atlases", () => {
 
   // A build ships the pages as WebPs, so each must decode to exactly the pixels its PNG holds.
   it("encodes every page as a lossless WebP that decodes to its PNG's pixels", async () => {
-    const decoded = await Promise.all(
-      drawn.map(async (page) => decodeWebp(await WEBP_PAGES.encode(page))),
+    const differing = await Promise.all(
+      drawn.map(async (page, index) => {
+        const png = pages[index];
+        const same = png !== undefined && (await webpDecodesTo(png, await WEBP_PAGES.encode(page)));
+        return same ? [] : [build.manifest.pages[index]?.file ?? `page ${index}`];
+      }),
     );
-    const differing = decoded.flatMap((webp, index) => {
-      const png = pages[index];
-      const same =
-        png !== undefined &&
-        webp.width === png.width &&
-        webp.height === png.height &&
-        Buffer.compare(webp.data, png.data) === 0;
-      return same ? [] : [build.manifest.pages[index]?.file ?? `page ${index}`];
-    });
-    expect(decoded.length).toBe(build.manifest.pages.length);
-    expect(differing).toEqual([]);
+    expect(drawn.length).toBe(build.manifest.pages.length);
+    expect(differing.flat()).toEqual([]);
   });
 
   it("writes a manifest the runtime parses", () => {

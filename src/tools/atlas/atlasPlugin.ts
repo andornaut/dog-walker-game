@@ -3,10 +3,9 @@ import type { Plugin } from "vite";
 import type { ArtFileMap } from "../../assets/artUrl";
 import { ART_DIR, ART_MANIFEST, artManifestText, generateArtManifest } from "../artManifest";
 import { nodeArtFiles, writeIfChanged } from "../files";
-import { buildAtlases } from "./atlasBuild";
+import { buildAtlases, WEBP_PAGES } from "./atlasBuild";
 import type { RgbaImage } from "./atlasPixels";
 import { ART_FILES_MODULE, hashGameArt } from "./hashedArt";
-import { WEBP_PAGES } from "./webp";
 
 // Vite's prefix for a module id that names no file.
 const RESOLVED_ART_FILES_MODULE = `\0${ART_FILES_MODULE}`;
