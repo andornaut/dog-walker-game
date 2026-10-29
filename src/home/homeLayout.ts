@@ -39,6 +39,10 @@ const BANK_CAPS_Y =
   BANK_WELL_ROWS.y +
   Math.ceil((BANK_WELL_ROWS.height - BANK_WELL_LIP - TITLE_CAP_ROWS * WALK_BAR.cash.scale) / 2);
 
+// The update plate joins the top bar's bottom edge, its button centred down it.
+const UPDATE_PANEL = { height: 42, width: 352, x: 4, y: TOP_BAR_HEIGHT };
+const UPDATE_BUTTON = { height: 28, width: 128, x: 218 };
+
 // The separator bar under the gate scene: 3 rows (the gate scene's last row is 195).
 const GATE_BAR = { height: 3, y: GATE.y + GATE.height };
 // Every gap between the bar, the three sections, Start walk and the screen's bottom.
@@ -297,8 +301,9 @@ export const HOME_LAYOUT = {
     },
   },
   // The update plate under the top bar while a newer version waits or wrote the save (gateTop's
-  // modes, one at a time): a ui-panel across the gate scene's top, over the street sign and
-  // clear of the Pet shop's board, in place of the walker's bubble. On one row: iconKey's 16x16
+  // modes, one at a time): a ui-panel across the gate scene's top, joining the top bar with no
+  // street showing between them, over the street sign and clear of the Pet shop's board, in
+  // place of the walker's bubble, with the button centred down it. On one row: iconKey's 16x16
   // icon at icon.x, the title in 2x title text in titleColour, its ink starting at titleX, and
   // the ui-button's go look at button with its label, centred, at least labelPad inside either
   // side. The label's capitals are centred on the button's face (the button less its lip), the
@@ -306,12 +311,15 @@ export const HOME_LAYOUT = {
   // is hit, 42 tall between the top bar's hit areas and the Pet shop's board, about 45 CSS
   // pixels on a phone.
   updatePlate: {
-    button: { height: 28, width: 128, x: 218, y: 49 },
+    button: {
+      ...UPDATE_BUTTON,
+      y: UPDATE_PANEL.y + (UPDATE_PANEL.height - UPDATE_BUTTON.height) / 2,
+    },
     hit: { height: 42, width: 128, x: 218, y: 44 },
     icon: { size: 16, x: 14 },
     iconKey: "icon-update",
     labelPad: 8,
-    panel: { height: 44, width: 352, x: 4, y: 41 },
+    panel: UPDATE_PANEL,
     titleColour: "plum",
     titleX: 36,
   },

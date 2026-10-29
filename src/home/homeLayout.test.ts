@@ -708,12 +708,17 @@ describe("the update plate", () => {
   const TITLE = fontFileMetrics("font-title");
   const { capY, iconY } = updatePlateText(TITLE);
 
-  it("lies inside the screen, under the top bar and clear of the Pet shop's board", () => {
+  it("lies inside the screen, joining the top bar and clear of the Pet shop's board", () => {
     expect(
       inside(panel, { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 }),
     ).toBe(true);
-    expect(panel.y).toBeGreaterThanOrEqual(topBar.height);
+    expect(panel.y).toBe(topBar.height);
     expect(rectsOverlap(panel, petShop.board)).toBe(false);
+  });
+
+  it("centres the button down the plate", () => {
+    const above = button.y - panel.y;
+    expect(panel.y + panel.height - (button.y + button.height)).toBe(above);
   });
 
   it.each([
