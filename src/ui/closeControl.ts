@@ -35,11 +35,6 @@ export function pageCloseControl(screen: Rect, top: number = PAGE_FACE.top): Clo
   return placeClose(screen, PAGE_FACE.right, top);
 }
 
-// The top that centres the face on a bar.
-export function closeTopOnBar(bar: Rect): number {
-  return bar.y + Math.round((bar.height - FACE_SIZE) / 2);
-}
-
 // The face's own rect, for a focus ring.
 export function closeFace(control: CloseControl): Rect {
   return { height: FACE_SIZE, width: FACE_SIZE, x: control.x, y: control.y };

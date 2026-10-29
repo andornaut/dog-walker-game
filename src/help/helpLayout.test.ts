@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import { HOME_LAYOUT } from "../home/homeLayout";
+import { TITLE_CAP_ROWS } from "../hud/walkHud";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { wrapWords } from "../lib/lines";
 import { rectsOverlap } from "../lib/rect";
@@ -9,9 +11,38 @@ import { fontFileMetrics, placedInk } from "../testing/fontInk";
 import { inside } from "../testing/rects";
 import { closeFace } from "../ui/closeControl";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
+import { TEXT_SCALE } from "../ui/textFit";
+import { topBarContentRows, topBarRects } from "../ui/topBarTrim";
 import { helpBody } from "./helpBody";
 import { CLOSE_HIT_RECT, dotRects, HELP_LAYOUT, helpActionAt, tapRect } from "./helpLayout";
 import type { HelpAction } from "./helpPaging";
+
+// Help's top bar is the home pages': as tall, trimmed alike, its heading's capitals and close
+// face centred down the rows between the trim's line and edge as the home bar's button faces
+// are, the close face where the home bar's Settings face is.
+describe("help's top bar", () => {
+  const { close, heading, topBar } = HELP_LAYOUT;
+  const home = HOME_LAYOUT.topBar;
+  const homeBar = { height: home.height, width: topBar.width, x: 0, y: 0 };
+  const rows = topBarContentRows(topBar.height);
+  const capRows = TITLE_CAP_ROWS * TEXT_SCALE;
+  const homeFace = { ...HOME_LAYOUT.settings.face, height: home.faceSize, width: home.faceSize };
+  // How many more rows a part leaves below it than above it, between the trim's line and edge.
+  const offCentre = (top: number, size: number) => rows.bottom - (top + size) - (top - rows.top);
+
+  it.each([
+    ["the bar's rect", topBar, homeBar],
+    ["the bar's trim", topBarRects(topBar), topBarRects(homeBar)],
+    ["the close face", closeFace(close), homeFace],
+    [
+      "the heading's centring",
+      offCentre(heading.y, capRows),
+      offCentre(homeFace.y, homeFace.height),
+    ],
+  ] as const)("matches the home bar's in %s", (_, help, homeValue) => {
+    expect(help).toEqual(homeValue);
+  });
+});
 
 describe("tapRect", () => {
   it("grows small art about its centre to the minimum, keeps a larger side and stays on screen", () => {

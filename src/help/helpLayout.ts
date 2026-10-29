@@ -1,31 +1,44 @@
 import { SCREEN_LAYOUT } from "../data/screen";
+import { HOME_LAYOUT } from "../home/homeLayout";
+import { TITLE_CAP_ROWS } from "../hud/walkHud";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { containsPoint, type Point, type Rect } from "../lib/rect";
-import { closeTopOnBar, pageCloseControl } from "../ui/closeControl";
+import { pageCloseControl } from "../ui/closeControl";
 import { rectIndexAt } from "../ui/grid";
+import { TEXT_SCALE } from "../ui/textFit";
 import type { HelpAction } from "./helpPaging";
 
-const { screen: SCREEN, topBar: TOP_BAR } = SCREEN_LAYOUT;
+const { screen: SCREEN } = SCREEN_LAYOUT;
 const { height, width } = SCREEN;
+
+// The home pages' top bar: its height, and the row its buttons' faces and the heading's capitals
+// centre on, the upper half of each above it.
+const HOME_BAR = HOME_LAYOUT.topBar;
+const TOP_BAR = { height: HOME_BAR.height, width, x: 0, y: 0 } as const;
+// The picture starts under the bar, its top rule on the bar's last trim row.
+const ILLUSTRATION = { height: 236, width, x: 0, y: TOP_BAR.height } as const;
+const TITLE_Y = ILLUSTRATION.y + ILLUSTRATION.height + 26;
 
 // The help screen's geometry at the render resolution. A text position is its first line's
 // left edge and capitals' top.
+// The top bar is the home pages' (HOME_LAYOUT.topBar), its heading's capitals centred on the
+// bar's mid row as the home bar's button faces are, and the close control's face where the home
+// bar's Settings face is, in its 44x44 target in the screen's top-right corner.
 // The body's lines, at most maxLines of them, are lineHeight apart, its capitals the label gap
 // under the lowest row the title's font inks (helpCapDy). The picture is the walk screen's
 // width, ruled off a row above and below.
 export const HELP_LAYOUT = {
-  body: { lineHeight: 18, maxLines: 6, scale: 2, width: 336, x: 12, y: 332 },
-  // The close control's face is centred on the top bar.
-  close: pageCloseControl(SCREEN, closeTopOnBar(TOP_BAR)),
+  body: { lineHeight: 18, maxLines: 6, scale: 2, width: 336, x: 12, y: TITLE_Y + 22 },
+  close: { ...pageCloseControl(SCREEN), ...HOME_LAYOUT.settings.face },
   // A tap target apart, so each dot's target is its own slot, ending above Previous's and
   // Next's.
   dots: { centreX: width / 2, size: 8, spacing: MIN_TAP_SIZE, y: height - 84 },
-  heading: { x: 12, y: 19 },
-  illustration: { height: 236, width, x: 0, y: 48 },
+  heading: { x: 12, y: HOME_BAR.mid - (TITLE_CAP_ROWS * TEXT_SCALE) / 2 },
+  illustration: ILLUSTRATION,
   next: { height: MIN_TAP_SIZE, width: 110, x: 242, y: height - 56 },
   previous: { height: MIN_TAP_SIZE, width: 110, x: 8, y: height - 56 },
   screen: SCREEN,
-  title: { scale: 2, x: 12, y: 310 },
+  title: { scale: 2, x: 12, y: TITLE_Y },
   topBar: TOP_BAR,
 } as const;
 
