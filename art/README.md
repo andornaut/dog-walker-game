@@ -15,9 +15,9 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 
 ## Method
 
-- `art/tools/<set>.py` draws every asset except the hand-drawn favicons and the home page's canvas grabs (`home-road`, `home-start`). Run `python3 art/tools/<set>.py build` (or `preview OUT.png`) from the repository root. Shared drawing tools are in `pixel.py` (whose only command is `palette`), and for pictures composed from exported art in `scene.py`.
+- `art/tools/<set>.py` draws every asset except the home page's canvas grabs (`home-road`, `home-start`). Run `python3 art/tools/<set>.py build` (or `preview OUT.png`) from the repository root. Shared drawing tools are in `pixel.py` (whose only command is `palette`), and for pictures composed from exported art in `scene.py`.
 - A build writes the set's Aseprite sources under `art/` and exports them to `public/art/` (`sprites/<key>.png` and `.json`, `images/<key>.png`, `fonts/<key>.png` and `.fnt`, `sounds/<key>.ogg` and `.m4a`). Each script's docstring names its folders. Exceptions:
-  - `appicons.py` writes `art/appicon.aseprite` and `public/icons/`; `share.py` writes `art/share/share-card.aseprite` and `public/og-image.png`.
+  - `appicons.py` writes `art/appicon.aseprite`, `art/favicon-32.aseprite` and `art/favicon-16.aseprite`, the app icons in `public/icons/` and the favicons `public/art/favicon.png` and `favicon-16.png`, drawn from Archie's exported portrait and face, so it runs after `portraits.py` and `dogs.py`; `share.py` writes `art/share/share-card.aseprite` and `public/og-image.png`.
   - `fonts.py` and `sounds.py` write no sources. `sounds.py preview` takes an output folder, not a PNG, and `sounds.py build` also writes the loop flags in `public/art/manifest.extra.json`.
   - Extra commands: `backdrops.py camera`, `backdrops.py verges` (with `--write`, to `shared/verges.json`), `depths.py compare DIR`, `hood_city.py cards OUT.png` and `sounds OUT_DIR`, `hood_markets.py cards OUT.png` and `sounds OUT_DIR`, `hood_parks.py sounds OUT_DIR`, `minis.py compare OUT.png`, `pixel.py palette` (to `shared/palette.json`), `roadside.py table` (with `--write`, to `shared/roadside.json`) and `screens.py shop-preview OUT.png`.
 - A build overwrites the `.aseprite` files: change the script, not the sources.
