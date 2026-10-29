@@ -5,13 +5,14 @@ low-pass filters, short envelopes, and every note fading to silence in its slot.
 
 sfx-tip            0.35s  coin chime: a square B5 hopping up to a ringing E6
 sfx-treat          0.40s  bubbly triangle arpeggio up C6 E6 G6 C7
-sfx-bump           0.30s  cushioned thud: a falling filtered square over a triangle, with a puff of low noise
+sfx-bump           0.26s  soft cushioned thud: a falling filtered square over a light triangle, with a puff of noise
 sfx-bark           0.20s  one "wuf": a falling square with a triangle body
 sfx-dodge          0.23s  near miss: a swell of filtered noise and two light rising triangle skips
 sfx-card           0.44s  paper swish, then a triangle chime G5 D6
 sfx-gear-found     0.55s  sparkle: a narrow-pulse glissando D5 up to D6 into a shimmering D major chord
 sfx-lost-wallet    0.45s  ka-ching: a drawer click, a shimmering C#7 E7 bell, then a jingle of two coins
 sfx-petting-neighbour 0.52s warm "aww": a triangle rising C5 to E5 with vibrato, then a soft G5 C6 chime
+sfx-heart-lost     0.32s  soft sigh: a triangle falling E5 to C5 over a muted square
 sfx-fired          1.80s  sad "wah wah wah waaah" down G4 F#4 F4 E4, muted square
 sfx-hit-skunk      0.50s  spray hiss: pink noise stepping down three bands over a falling "pfff"
 sfx-hit-puddle     0.50s  splash: a pink noise burst and low plop, then rising triangle bubbles
@@ -22,6 +23,7 @@ sfx-hit-squirrel   0.40s  chitter: seven quick falling square chirps near 2kHz, 
 sfx-hit-other-dog  0.40s  friendly woof: a soft low "boof", then a rising yip
 sfx-badge          1.00s  jingle: square D6 F#6 A6 up to a ringing D7, then a sparkle A7 F#7 D7 A7
 sfx-new-best       1.50s  fanfare: G4 C5 E5 G5, E5 G5 over a triangle bass, warm square
+sfx-zone-done      1.23s  arrival: square D6 D6 D6 then a held, shimmering G6 over B5, a pulse bass D5 to G4
 music-cabbagetown  31.28s 12 bars at about 92 BPM in F, loops seamlessly: triangle music-box
                           lead, fingerpicked pulse guitar, triangle walking bass, brushed tick
 music-distillery-district 35.53s 16 bars swung at about 108 BPM in F, loops seamlessly: muted
@@ -38,8 +40,10 @@ music-yonge-street 29.09s 16 bars at about 132 BPM in D dorian, loops seamlessly
                           with a dotted-eighth echo, octave square bass, offbeat stabs, kick and snare
 
 Each effect is levelled to the same loudness on a phone speaker (EFFECT_LUFS), with
-sfx-badge, sfx-fired and sfx-new-best 2 LU louder and sfx-dodge 3 LU quieter, and padded with silence at both
-ends; the times above are the sounding lengths. Each sound ships as mono 44.1kHz Ogg
+sfx-badge, sfx-fired, sfx-new-best and sfx-zone-done 2 LU louder, sfx-bump and sfx-dodge 3 LU quieter and
+sfx-heart-lost 1 LU quieter, and padded with silence at both ends; the times above are the sounding lengths. Each
+neighbourhood's loop is levelled to one phone loudness (MUSIC_LUFS); music-walk, the fallback loop, keeps its
+peak at PEAK_DB, since raising it to MUSIC_LUFS takes its AAC file over CEILING_DB. Each sound ships as mono 44.1kHz Ogg
 Vorbis plus AAC (.m4a), since iOS Safari cannot play Ogg, and a build stops if either
 file decodes to a peak at or over -1 dBFS.
 
@@ -73,9 +77,9 @@ STEP = 6608
 # 300 Hz, so a thud's low body does not count toward it. Every effect reaches its level at or under PEAK_DB.
 EFFECT_LUFS = -17
 # The walk's big moments sit this many LU above the other effects.
-LOUDER = {"sfx-badge": 2, "sfx-fired": 2, "sfx-new-best": 2}
-# A frequent, minor cue sits this many LU under the other effects.
-QUIETER = {"sfx-dodge": 3}
+LOUDER = {"sfx-badge": 2, "sfx-fired": 2, "sfx-new-best": 2, "sfx-zone-done": 2}
+# A frequent or minor cue sits this many LU under the other effects.
+QUIETER = {"sfx-bump": 3, "sfx-dodge": 3, "sfx-heart-lost": 1}
 # Silence before and after every effect, in samples: AAC overshoots an onset inside the file's first 1024-sample
 # frame, and the encoders' ringing dies out before the file ends.
 EFFECT_LEAD = 1024
@@ -83,6 +87,9 @@ EFFECT_TAIL = 882
 # An effect whose peak reaches PEAK_DB first may sit up to this many LU under its level.
 EFFECT_BAND = 1
 CEILING_DB = -1  # the highest peak a decoded file may reach
+# Neighbourhood loops are levelled by their integrated loudness on a phone speaker, after the same 300 Hz high-pass as the
+# effects, so switching neighbourhoods doesn't jump on a phone.
+MUSIC_LUFS = -19
 NOTES = {"C": -9, "D": -7, "E": -5, "F": -4, "G": -2, "A": 0, "B": 2}
 
 
@@ -162,10 +169,11 @@ EFFECTS = {
         ("triangle", 0.22, "C7", 0.18, dict(release=0.9)),
         ("square", 0.22, "C6", 0.18, dict(vol=0.15, duty=25, low=2500, release=0.9)),
     ],
+    # A minor bump: a soft thud with little low body, quieter than a card obstacle's hit.
     "sfx-bump": [
-        ("triangle", 0.3, (360, 110), 0, dict(vol=0.4, attack=0.006, release=0.85, shape="h")),
-        ("square", 0.26, (360, 150), 0, dict(low=1000, attack=0.008, release=0.75, shape="h")),
-        ("pinknoise", 0.1, None, 0, dict(vol=0.6, low=1400, high=250, attack=0.003, release=0.9, shape="h")),
+        ("triangle", 0.26, (360, 150), 0, dict(vol=0.2, attack=0.006, release=0.85, shape="h")),
+        ("square", 0.22, (360, 170), 0, dict(low=1000, attack=0.008, release=0.75, shape="h")),
+        ("pinknoise", 0.08, None, 0, dict(vol=0.6, low=1400, high=250, attack=0.003, release=0.9, shape="h")),
     ],
     "sfx-bark": [
         ("square", 0.18, (680, 300), 0.02, dict(duty=35, low=1800, attack=0.012, release=0.55, shape="h")),
@@ -205,6 +213,13 @@ EFFECTS = {
         ("square", 0.4, ("C5", "E5"), 0, dict(vol=0.25, duty=25, low=1800, attack=0.03, release=0.6, shape="h")),
         ("triangle", 0.22, "G5", 0.24, dict(vol=0.6, release=0.9)),
         ("triangle", 0.22, "C6", 0.3, dict(vol=0.35, release=0.9)),
+    ],
+    # A card choice costs a heart: two notes falling a third, soft at both ends.
+    "sfx-heart-lost": [
+        ("triangle", 0.13, "E5", 0, dict(attack=0.02, release=0.5, shape="h")),
+        ("triangle", 0.2, ("D5", "C5"), 0.12, dict(attack=0.02, release=0.8, shape="h")),
+        ("square", 0.13, "E5", 0, dict(vol=0.2, duty=25, low=1500, attack=0.02, release=0.5, shape="h")),
+        ("square", 0.2, ("D5", "C5"), 0.12, dict(vol=0.2, duty=25, low=1500, attack=0.02, release=0.8, shape="h")),
     ],
     "sfx-card": [
         ("pinknoise", 0.16, None, 0, dict(vol=0.3, low=3500, high=900, attack=0.07, release=0.55, shape="h")),
@@ -291,6 +306,17 @@ EFFECTS = {
         ("triangle", 0.06, "F#7", 0.58, dict(vol=0.3, low=4000, attack=0.002, release=0.8)),
         ("triangle", 0.06, "D7", 0.66, dict(vol=0.25, low=4000, attack=0.002, release=0.8)),
         ("triangle", 0.26, "A7", 0.74, dict(vol=0.2, low=4000, attack=0.002, release=0.9)),
+    ],
+    # A zone is done: three quick repeated notes and a long one, short-short-short-long, unlike the new best's arpeggio.
+    "sfx-zone-done": [
+        ("square", 0.09, "D6", 0, dict(vol=0.5, duty=25, low=3000, attack=0.004, release=0.4, fx=DARK)),
+        ("square", 0.09, "D6", 0.11, dict(vol=0.5, duty=25, low=3000, attack=0.004, release=0.4, fx=DARK)),
+        ("square", 0.09, "D6", 0.22, dict(vol=0.5, duty=25, low=3000, attack=0.004, release=0.4, fx=DARK)),
+        ("square", 0.9, "G6", 0.33, dict(vol=0.55, duty=25, low=3000, attack=0.004, release=0.6,
+                                         fx=("tremolo", "7", "25", *DARK))),
+        ("square", 0.9, "B5", 0.33, dict(vol=0.3, duty=25, low=2200, attack=0.004, release=0.6, fx=DARK)),
+        ("square", 0.3, "D5", 0, dict(vol=0.3, duty=25, low=1400, release=0.6)),
+        ("square", 0.9, "G4", 0.33, dict(vol=0.3, duty=25, low=1400, release=0.6)),
     ],
     "sfx-new-best": [
         ("square", 0.1, "G4", 0, dict(vol=0.5, low=2200, attack=0.008, release=0.4)),
@@ -400,6 +426,19 @@ def phone_loudness(path):
     return max(float(m) for m in re.findall(r" M:\s*(-?[\d.]+)", log))
 
 
+def music_phone_loudness(path):
+    """A loop's integrated loudness on a phone speaker, in LUFS (see MUSIC_LUFS)."""
+    log = subprocess.run(["ffmpeg", "-nostats", "-i", path, "-af", "highpass=f=300,ebur128", "-f", "null", "-"],
+                         capture_output=True, text=True, check=True).stderr
+    return float(re.findall(r"I:\s+(-?[\d.]+) LUFS", log)[-1])
+
+
+def level_music(path, out):
+    """Gain a rendered loop to MUSIC_LUFS. One gain over the whole loop keeps it seamless."""
+    gain = round(MUSIC_LUFS - music_phone_loudness(path), 2)
+    sox(path, "-e", "floating-point", "-b", "32", out, "gain", str(gain))
+
+
 def effect(tmp, key, notes, out):
     """Mix an effect's tone() calls, level it to its phone loudness and pad it with EFFECT_LEAD and EFFECT_TAIL of
     silence."""
@@ -460,7 +499,12 @@ def render(out_dir, keys=(*EFFECTS, *MUSIC)):
         for key in keys:
             if key in MUSIC:
                 wav = f"{tmp}/{key}.wav"
-                track(key)(tmp, wav)
+                if key == "music-walk":
+                    track(key)(tmp, wav)
+                else:
+                    raw = f"{tmp}/{key}-raw.wav"
+                    track(key)(tmp, raw)
+                    level_music(raw, wav)
                 encode(wav, out_dir, key)
     return list(keys)
 

@@ -14495,6 +14495,11 @@
       "m4a": "sounds/sfx-gear-found.m4a"
     },
     {
+      "key": "sfx-heart-lost",
+      "ogg": "sounds/sfx-heart-lost.ogg",
+      "m4a": "sounds/sfx-heart-lost.m4a"
+    },
+    {
       "key": "sfx-hit-capybara",
       "ogg": "sounds/sfx-hit-capybara.ogg",
       "m4a": "sounds/sfx-hit-capybara.m4a"
@@ -14583,6 +14588,11 @@
       "key": "sfx-treat",
       "ogg": "sounds/sfx-treat.ogg",
       "m4a": "sounds/sfx-treat.m4a"
+    },
+    {
+      "key": "sfx-zone-done",
+      "ogg": "sounds/sfx-zone-done.ogg",
+      "m4a": "sounds/sfx-zone-done.m4a"
     }
   ]
 }

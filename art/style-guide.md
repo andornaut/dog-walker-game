@@ -364,8 +364,8 @@ Backdrops are 360×158 on screen rows 48 to 205 (`art/tools/backdrops.py`); band
 ## Sound
 
 - Soft chiptune: square, triangle and pulse waves and filtered noise through gentle low-pass filters, short envelopes, nothing harsh. A bright voice takes a second low-pass, so little energy reaches above 4 kHz.
-- Hits and pickups under about 0.6s; `sfx-fired`, `sfx-badge` and `sfx-new-best` up to 2s.
+- Hits and pickups under about 0.6s; `sfx-fired`, `sfx-badge`, `sfx-new-best` and `sfx-zone-done` up to 2s.
 - Clear on phone speakers: nothing shrill above 4 kHz, short tails. Each effect says what happened and differs from the others.
-- Effects carry their energy above 300 Hz, where a phone speaker plays, and sit in one phone loudness band (`EFFECT_LUFS` in `sounds.py`), with `sfx-fired`, `sfx-badge` and `sfx-new-best` 2 LU louder and `sfx-dodge`, which repeats, 3 LU quieter.
-- Each neighbourhood has its own walk loop (`music-<zone>`), 24 to 36s of whole bars and whole 1024-sample AAC frames, seamless, at an RMS of about −16.2 dB and within 0.5 dB RMS of the others so switching neighbourhoods doesn't jump. A loop has a clear melody over at most 3 or 4 pitched voices at once, percussion no denser than eighths for long stretches, and no fatiguing hi-hat, so it stays pleasant over an 8-minute walk.
+- Effects carry their energy above 300 Hz, where a phone speaker plays, and sit in one phone loudness band (`EFFECT_LUFS` in `sounds.py`), with `sfx-fired`, `sfx-badge`, `sfx-new-best` and `sfx-zone-done` 2 LU louder, the minor `sfx-bump` and `sfx-dodge`, which repeat, 3 LU quieter, and `sfx-heart-lost` 1 LU quieter.
+- Each neighbourhood has its own walk loop (`music-<zone>`), 24 to 36s of whole bars and whole 1024-sample AAC frames, seamless, at one integrated phone loudness (`MUSIC_LUFS` in `sounds.py`, -19 LUFS after the effects' 300 Hz high-pass), so switching neighbourhoods doesn't jump on a phone. The fallback `music-walk` keeps its peak at `PEAK_DB` instead. A loop has a clear melody over at most 3 or 4 pitched voices at once, percussion no denser than eighths for long stretches, and no fatiguing hi-hat, so it stays pleasant over an 8-minute walk.
 - Files: effects under 50kB, music under 1MB, peaks below −1 dBFS after encoding, silence at both ends.
