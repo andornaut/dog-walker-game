@@ -70,6 +70,7 @@ import {
   addSelectTile,
   addTagImage,
   addTapBurst,
+  afterTapFx,
   BODY_TEXT,
   clearScene,
 } from "./uiKit";
@@ -377,9 +378,11 @@ export class SettingsScene extends Scene {
   }
 
   private openSteps(browser: MenuInstallBrowser): void {
-    const lines = stepsLines(this, gameData.menuText.settings.installSteps[browser].steps);
-    this.steps = { ...installStepsLayout(SCREEN_CONFIG, lines), browser };
-    this.render();
+    afterTapFx(this, () => {
+      const lines = stepsLines(this, gameData.menuText.settings.installSteps[browser].steps);
+      this.steps = { ...installStepsLayout(SCREEN_CONFIG, lines), browser };
+      this.render();
+    });
   }
 
   private closeSteps(): void {

@@ -93,6 +93,7 @@ import {
   addScreenBackdrop,
   addTagImage,
   addTapBurst,
+  afterTapFx,
   BODY_TEXT,
 } from "./uiKit";
 
@@ -359,9 +360,11 @@ export class EndScene extends Scene {
     if (badge === undefined) {
       return;
     }
-    this.closeCard();
-    this.card = this.add.container(0, 0).setDepth(CARD_DEPTH);
-    addBadgeDetail(this, this.card, this.reduced, true, badge);
+    afterTapFx(this, () => {
+      this.closeCard();
+      this.card = this.add.container(0, 0).setDepth(CARD_DEPTH);
+      addBadgeDetail(this, this.card, this.reduced, true, badge);
+    });
   }
 
   private closeCard(): void {

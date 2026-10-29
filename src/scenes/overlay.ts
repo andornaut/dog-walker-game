@@ -15,16 +15,20 @@ import { PHONE_EVENTS } from "../pwa";
 import { read } from "../rules/units";
 import { listenOnePress } from "./onePress";
 import type { SceneKey } from "./sceneKeys";
+import { afterTapFx } from "./uiKit";
 
 // What every overlay is launched with: the scene under it, which it resumes on close.
 export interface OverlayData {
   resume?: SceneKey;
 }
 
-// Pauses scene and launches the overlay key over it.
+// Pauses scene and launches the overlay key over it, once the tap burst that asked for it has
+// played out (afterTapFx), so the burst never freezes under the paused scene or the dim.
 export function openOverlay(scene: Scene, key: SceneKey, data: OverlayData): void {
-  scene.scene.pause();
-  scene.scene.launch(key, data);
+  afterTapFx(scene, () => {
+    scene.scene.pause();
+    scene.scene.launch(key, data);
+  });
 }
 
 // Resumes the scene under overlay, if it has one, and stops overlay.

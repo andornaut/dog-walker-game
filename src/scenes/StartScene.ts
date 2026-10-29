@@ -198,6 +198,7 @@ import {
   addTagImage,
   addTapBurst,
   addTileSprite,
+  afterTapFx,
   BODY_TEXT,
   BUTTON_PRESS_PX,
   buttonFaces,
@@ -698,8 +699,10 @@ export class StartScene extends Scene {
       return;
     }
     this.press = undefined;
-    this.overlay = { rect: undefined, target };
-    this.render();
+    afterTapFx(this, () => {
+      this.overlay = { rect: undefined, target };
+      this.render();
+    });
   }
 
   private closeOverlay(): void {
@@ -965,8 +968,11 @@ export class StartScene extends Scene {
       go();
       return;
     }
-    onceSceneEvent(this, this.game.events, HELP_CLOSED_EVENT, go);
-    openHelp(this, SCENE_KEYS.start);
+    // The listener is added as help opens, so an open afterTapFx drops leaves none behind.
+    afterTapFx(this, () => {
+      onceSceneEvent(this, this.game.events, HELP_CLOSED_EVENT, go);
+      openHelp(this, SCENE_KEYS.start);
+    });
   }
 
   // Runs action now if every asset has loaded, else once it has, in place of any press already
