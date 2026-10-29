@@ -1,5 +1,6 @@
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
 import { insetRect, type Point, type Rect, ringRects } from "@andornaut/game-kit/rect";
-import type { GameObjects, Scene } from "phaser";
+import type { GameObjects, Scene, Textures } from "phaser";
 
 import { pixelEllipseSpans, pixelLinePoints, shadowRadiusX } from "../pixelShapes";
 import { PALETTE } from "./palette";
@@ -68,30 +69,136 @@ export function drawShadow(
   }
 }
 
-// The shadow drawShadow draws, made once per colour, drawn sprite width and depth scale as a
-// texture: scale flattens it as the sprite shrinks with distance. Radii are kept to half
-// pixels, so a sprite scaled continuously reuses a few textures. anchor is the texture pixel
-// to place a pixel above the sprite's feet, at its x.
-export function shadowTexture(
+// A shadow's frame: its radii, kept to half pixels, its name, and the frame pixel placed a pixel
+// above the sprite's feet, at its x.
+interface ShadowSize {
+  anchor: Point;
+  name: string;
+  radii: Point;
+}
+
+function shadowSize(radiusX: number, radiusY: number): ShadowSize {
+  return {
+    anchor: { x: Math.ceil(radiusX) + 1, y: Math.ceil(radiusY) + 1 },
+    name: `${radiusX}x${radiusY}`,
+    radii: { x: radiusX, y: radiusY },
+  };
+}
+
+// The shadow pages of a game: how many there are, each frame's page key by name, the pages
+// drawn on since they were last uploaded, and where the next frame goes on the newest page (the
+// left of the free part of the current row, the row's top, and the height of its tallest frame).
+interface ShadowPages {
+  count: number;
+  dirty: Set<Textures.CanvasTexture>;
+  frames: Map<string, string>;
+  row: { height: number; x: number; y: number };
+}
+
+// Shadow frames are packed 1px apart onto canvas pages at least this large. A frame that does
+// not fit on the newest page starts a new one.
+const SHADOW_PAGE = { height: 512, width: 512 } as const;
+const SHADOW_GAP = 1;
+// Every size up to these radii is drawn when the first page is made, so the page uploads once:
+// the shadows of the widest road sprites at full size. A larger shadow adds its frame when it
+// is first placed.
+const PRESET_RADII = { x: 56, y: SHADOW_RADIUS_Y } as const;
+
+// The shadow pages of each game, by its texture manager.
+const shadowPages = new WeakMap<object, ShadowPages>();
+
+// Draws a white ellipse frame on the newest shadow page, starting a page when it does not fit,
+// and records the page's key, or nothing when the page cannot be made.
+function addShadowFrame(
+  textures: Textures.TextureManager,
+  pages: ShadowPages,
+  { anchor, name, radii }: ShadowSize,
+): void {
+  const width = 2 * anchor.x + 1;
+  const height = 2 * anchor.y + 1;
+  let { row } = pages;
+  if (row.x + width > SHADOW_PAGE.width) {
+    row = { height: 0, x: 0, y: row.y + row.height };
+  }
+  let key = `shadows-${pages.count - 1}`;
+  if (pages.count === 0 || row.y + height > SHADOW_PAGE.height) {
+    key = `shadows-${pages.count}`;
+    const size = {
+      height: Math.max(SHADOW_PAGE.height, height),
+      width: Math.max(SHADOW_PAGE.width, width),
+    };
+    if (textures.createCanvas(key, size.width, size.height) === null) {
+      return;
+    }
+    pages.count += 1;
+    row = { height: 0, x: 0, y: 0 };
+  }
+  const page = textures.get(key) as Textures.CanvasTexture;
+  const context = page.getContext();
+  context.fillStyle = "#ffffff";
+  for (const span of pixelEllipseSpans(row.x + anchor.x, row.y + anchor.y, radii.x, radii.y)) {
+    context.fillRect(span.x, span.y, span.width, 1);
+  }
+  page.add(name, 0, row.x, row.y, width, height);
+  pages.dirty.add(page);
+  pages.frames.set(name, key);
+  pages.row = {
+    height: Math.max(row.height, height + SHADOW_GAP),
+    x: row.x + width + SHADOW_GAP,
+    y: row.y,
+  };
+}
+
+// The game's shadow pages, the first made with every size up to PRESET_RADII on it.
+function shadowPagesOf(textures: Textures.TextureManager): ShadowPages {
+  return getOrInsertComputed(
+    textures,
+    () => {
+      const pages: ShadowPages = {
+        count: 0,
+        dirty: new Set(),
+        frames: new Map(),
+        row: { height: 0, x: 0, y: 0 },
+      };
+      for (let radiusY = 1; radiusY <= PRESET_RADII.y; radiusY += 0.5) {
+        for (let radiusX = 3; radiusX <= PRESET_RADII.x; radiusX += 0.5) {
+          addShadowFrame(textures, pages, shadowSize(radiusX, radiusY));
+        }
+      }
+      return pages;
+    },
+    shadowPages,
+  );
+}
+
+// Uploads the shadow pages drawn on since their last upload. Call once a frame's shadows are
+// placed, so a page uploads at most once a frame.
+export function uploadShadowFrames(scene: Scene): void {
+  const pages = shadowPages.get(scene.textures);
+  pages?.dirty.forEach((page) => page.refresh());
+  pages?.dirty.clear();
+}
+
+// The shadow drawShadow draws, as a white frame to tint to its colour, for a sprite drawn
+// spriteWidth wide at depth scale: scale flattens it as the sprite shrinks with distance. Radii
+// are kept to half pixels, so a sprite scaled continuously reuses a few frames, and every frame
+// is on the shared shadow pages, so the shadows draw from one texture. anchor is the frame
+// pixel to place a pixel above the sprite's feet, at its x. Undefined when no page can be made.
+export function shadowFrame(
   scene: Scene,
-  colour: number,
   spriteWidth: number,
   scale = 1,
-): { anchor: { x: number; y: number }; key: string } {
-  const radiusX = Math.round(shadowRadiusX(spriteWidth) * 2) / 2;
-  const radiusY = Math.max(1, Math.round(SHADOW_RADIUS_Y * scale * 2) / 2);
-  const anchor = { x: Math.ceil(radiusX) + 1, y: Math.ceil(radiusY) + 1 };
-  const key = `shadow-${colour.toString(16)}-${radiusX}-${radiusY}`;
-  if (!scene.textures.exists(key)) {
-    const graphics = scene.make.graphics({}, false);
-    graphics.fillStyle(colour);
-    for (const span of pixelEllipseSpans(anchor.x, anchor.y, radiusX, radiusY)) {
-      graphics.fillRect(span.x, span.y, span.width, 1);
-    }
-    graphics.generateTexture(key, 2 * anchor.x + 1, 2 * anchor.y + 1);
-    graphics.destroy();
+): { anchor: Point; frame: string; key: string } | undefined {
+  const size = shadowSize(
+    Math.round(shadowRadiusX(spriteWidth) * 2) / 2,
+    Math.max(1, Math.round(SHADOW_RADIUS_Y * scale * 2) / 2),
+  );
+  const pages = shadowPagesOf(scene.textures);
+  if (!pages.frames.has(size.name)) {
+    addShadowFrame(scene.textures, pages, size);
   }
-  return { anchor, key };
+  const key = pages.frames.get(size.name);
+  return key === undefined ? undefined : { anchor: size.anchor, frame: size.name, key };
 }
 
 // A 1px line with no smoothing, so it stays on the palette.

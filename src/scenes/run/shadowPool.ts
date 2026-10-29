@@ -1,6 +1,6 @@
 import type { GameObjects, Scene } from "phaser";
 
-import { shadowTexture } from "../../ui/phaser/draw";
+import { shadowFrame, uploadShadowFrames } from "../../ui/phaser/draw";
 import { spriteMetrics } from "../sprites";
 import { DEPTH, type Shadow } from "./stage";
 
@@ -44,13 +44,14 @@ export class ShadowPool {
   }
 
   hideUnused(): void {
+    uploadShadowFrames(this.scene);
     for (let i = this.used; i < this.images.length; i++) {
       this.images[i]?.setVisible(false);
     }
   }
 
-  // A shadow under a sprite, centred on its x a pixel above its feet, at opacity alpha. It is
-  // sized from the sprite's 1x art at its depth, whichever art step draws it.
+  // A shadow under a sprite, centred on its x a pixel above its feet, in colour at opacity
+  // alpha. It is sized from the sprite's 1x art at its depth, whichever art step draws it.
   private place(
     colour: number,
     alpha: number,
@@ -60,15 +61,20 @@ export class ShadowPool {
     footY: number,
   ): void {
     const width = spriteMetrics(key).opaqueWidth * depth;
-    const { anchor, key: texture } = shadowTexture(this.scene, colour, width, depth);
+    const shadow = shadowFrame(this.scene, width, depth);
+    if (shadow === undefined) {
+      return;
+    }
+    const { anchor, frame, key: texture } = shadow;
     let image = this.images[this.used];
     if (image === undefined) {
-      image = this.scene.add.image(0, 0, texture).setOrigin(0).setDepth(DEPTH.shadow);
+      image = this.scene.add.image(0, 0, texture, frame).setOrigin(0).setDepth(DEPTH.shadow);
       this.images.push(image);
     }
     this.used += 1;
     image
-      .setTexture(texture)
+      .setTexture(texture, frame)
+      .setTint(colour)
       .setPosition(Math.round(x) - anchor.x, Math.round(footY) - 1 - anchor.y)
       .setAlpha(alpha)
       .setVisible(true);
