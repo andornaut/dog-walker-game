@@ -350,10 +350,10 @@ export interface ExplainShown {
   effects: readonly EffectItem["kind"][];
 }
 
-// A gear icon opens its explanation on a tap, as a button does, and on a hold; everything else
-// that explains itself opens on a hold.
-export function opensOnTap(shown: ExplainShown, target: ExplainTarget): boolean {
-  return target.kind === "effect" && shown.effects[target.effect] === "gear";
+// Every icon in the walk bar's effect wells (perk, upgrade or gear) opens its explanation on a
+// tap, as a button does, and on a hold; everything else that explains itself opens on a hold.
+export function opensOnTap(target: ExplainTarget): boolean {
+  return target.kind === "effect";
 }
 
 // The element under point that explains itself, if any. dimmed: an overlay's dim covers

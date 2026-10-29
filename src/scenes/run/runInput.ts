@@ -205,7 +205,7 @@ function trackContext(
     explainAt: (point) => explainTargetAt(LAYOUT, shown, dimmed, point),
     hold: holdRule(gameData.tuning, swipeStartDistance),
     layout: LAYOUT,
-    opensOnTap: (target) => opensOnTap(shown, target),
+    opensOnTap,
     quietTaps: debuffBarRects(LAYOUT.topBar, shown.debuffs.length),
     stepMoves,
   };

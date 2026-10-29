@@ -17,22 +17,23 @@ const { dogSlots, topBar } = SCREEN_LAYOUT;
 const BAR = walkBarLayout(topBar);
 const at = (rect: Rect): Rect => ({ ...rect, x: topBar.x + rect.x, y: topBar.y + rect.y });
 
-// The walk shows the walker's perk and a gear item, and a dog in the first card.
+// The walk shows the walker's perk, an upgrade and a gear item, and a dog in the first card.
 const SHOWN: ExplainShown = {
   debuffs: [],
   dogs: ["kilo", undefined, undefined],
-  effects: ["perk", "gear"],
+  effects: ["perk", "upgrade", "gear"],
 };
 
 const WALK_TARGETS = {
   cashWell: centre(at(WALK_BAR.cash.well)),
   dogCard: centre(dogSlots[0] ?? topBar),
-  gearIcon: centre(BAR.effectWells[1] ?? topBar),
+  gearIcon: centre(BAR.effectWells[2] ?? topBar),
   help: centre(BAR.buttons.help.hit),
   pause: centre(BAR.buttons.pause.hit),
   perkIcon: centre(BAR.effectWells[0] ?? topBar),
   settings: centre(BAR.buttons.settings.hit),
   sound: centre(BAR.buttons.sound.hit),
+  upgradeIcon: centre(BAR.effectWells[1] ?? topBar),
 } as const;
 
 type WalkTarget = keyof typeof WALK_TARGETS;
@@ -53,7 +54,7 @@ function walkTargetAction(pause: RunPause, point: Point): string | undefined {
   if (target === undefined) {
     return undefined;
   }
-  return opensOnTap(SHOWN, target) ? "explainOnTap" : "explainOnHold";
+  return opensOnTap(target) ? "explainOnTap" : "explainOnHold";
 }
 
 const WALK_MODALS: readonly (readonly [string, RunPause])[] = [
@@ -74,9 +75,10 @@ const WALK_BASE: Readonly<Record<WalkTarget, string | undefined>> = {
   gearIcon: "explainOnTap",
   help: "openHelp",
   pause: "openMenu",
-  perkIcon: "explainOnHold",
+  perkIcon: "explainOnTap",
   settings: "openSettings",
   sound: "mute",
+  upgradeIcon: "explainOnTap",
 };
 
 const WALK_CHANGES: Readonly<Record<string, Partial<Record<WalkTarget, string | undefined>>>> = {
@@ -89,6 +91,7 @@ const WALK_CHANGES: Readonly<Record<string, Partial<Record<WalkTarget, string | 
     perkIcon: undefined,
     settings: undefined,
     sound: undefined,
+    upgradeIcon: undefined,
   },
   nothing: {},
   "the Home question over a card": { pause: "resume" },
