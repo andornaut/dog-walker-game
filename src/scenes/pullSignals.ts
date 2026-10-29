@@ -27,8 +27,9 @@ export interface DogSignal {
 // at (8,6) and the blocked mark at (21,1).
 const BUBBLE = { blocked: { x: 21, y: 1 }, height: 28, icon: { x: 8, y: 6 }, width: 32 };
 const ICON_SIZE = 16;
-// The pull line: 2x2 dots in a 1px rim, every 7px, ending in a 7x7 arrowhead in a rim.
-const LINE = { arrow: 7, dot: 2, spacing: 7 };
+// The pull line: 2x2 dots in a 1px rim, every 7px, ending in a 7x7 arrowhead in a rim whose
+// tip stops gap px short of the target's middle, clear of the animal it points at.
+const LINE = { arrow: 7, dot: 2, gap: 18, spacing: 7 };
 // The show tag's frames during which the bubble is too small to hold the icon.
 const SHOW_FRAMES_WITHOUT_ICON = 2;
 
@@ -177,16 +178,18 @@ export class PullSignals {
     );
   }
 
-  // Dots from outside the bubble to the arrowhead, which points at the target.
-  private dottedArrow(from: { x: number; y: number }, to: { x: number; y: number }): void {
-    const dx = to.x - from.x;
-    const dy = to.y - from.y;
-    const length = Math.hypot(dx, dy);
+  // Dots from outside the bubble to the arrowhead, which points at the target and stops short
+  // of it.
+  private dottedArrow(from: { x: number; y: number }, target: { x: number; y: number }): void {
+    const dx = target.x - from.x;
+    const dy = target.y - from.y;
+    const length = Math.hypot(dx, dy) - LINE.gap;
     if (length <= BUBBLE.width / 2 + LINE.arrow) {
       return;
     }
-    const ux = dx / length;
-    const uy = dy / length;
+    const ux = dx / (length + LINE.gap);
+    const uy = dy / (length + LINE.gap);
+    const to = { x: from.x + ux * length, y: from.y + uy * length };
     const g = this.lines;
     for (let at = BUBBLE.width / 2; at < length - LINE.arrow; at += LINE.spacing) {
       const x = Math.round(from.x + ux * at) - LINE.dot / 2;
