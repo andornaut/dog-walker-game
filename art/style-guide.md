@@ -342,6 +342,7 @@ Backdrops are 360×158 on screen rows 48 to 205 (`art/tools/backdrops.py`); band
 - Kensington Market's far side is a worn row of two-storey Victorians turned shops: paint a step darker and greyer than the brights (`WORN_WALL`, `WORN_ROOF`), no green wall or roof, sun-faded awnings, 2px soot streaks and a dirty band along each wall's foot, hydro poles with 2px wires, and throw-ups drawn in 2px strokes. Empty crates and vintage rails stand out front; no plants.
 - Kensington Market's laneway murals at the band's edges are painted a ramp step darker than `MURAL`, so they sit behind the shopfronts.
 - The approach rows carry no static scenery. The near corners and the stub's verges show only their ground (lawn, paving, sidewalk and curb, as the verge paints them): the game's road begins there and its items spawn over them, so no perch, ornament, tree, lamp, bench, sign or other prop stands there. Everything static stands at or beyond the cross street, and no static vehicle stands on it: the ambient traffic drives there, so a jam (Yonge Street's side street) stays beyond the far sidewalk.
+- A backdrop never shows its own neighbourhood's name: the walk's pill names it. Nor does its path card's art, whose label names it.
 
 ## Skies
 

@@ -942,6 +942,16 @@ def cabbagetown_view():
     return a
 
 
+# The zoo's llama at the card's scale, as backdrops.LLAMA: facing left, its far side driftwood.
+MINI_LLAMA = (".c....",
+              "cc....",
+              ".c....",
+              ".ccccc",
+              ".ccccs",
+              ".c..c.",
+              ".s..s.")
+
+
 def high_park_view():
     trail = flecked("tan", "brown", 23, "skin2")
     dark = tufted("pine")
@@ -962,15 +972,35 @@ def high_park_view():
             if u * u + v * v <= 1 and py < 9:
                 a.fill(px, py, 1, 1, "pine" if v > 0.3 else "olive" if u + v < -0.6 else "canopy")
     bd.tree(a, 4, 9, "pink", "mauve", r=6, base=18, girth=2)
-    for x in (11, 62):
-        a.fill(x, 1, 2, FAR_Y - 1, "bark")
-    a.fill(13, 2, 49, 17, "pine")
-    a.fill(13, 2, 49, 1, "canopy")
-    a.fill(13, 18, 49, 1, "fir")
-    bd.word(a, "HIGH", AW / 2, 3, "gold")
-    bd.word(a, "PARK", AW / 2, 10, "gold")
+    # the High Park Zoo's log arch at the trail's end, as the backdrop's: olive paddocks behind a rail
+    # fence, a llama in the right one, a closed plank gate between log posts under a log beam, and a
+    # plank sign hung from it reading ZOO (the card's label names the park)
+    a.fill(0, 12, AW, FAR_Y - 12, "olive")
+    bd.figure(a, 58, 16, MINI_LLAMA, bd.LLAMA_COLOURS)
+    for x0, x1 in ((0, 25), (50, AW)):
+        a.fill(x0, 16, x1 - x0, 1, "tan")
+        a.fill(x0, 17, x1 - x0, 1, "brown")
+        for x in range(x0 + 4, x1 - 1, 8):
+            a.fill(x, 15, 2, FAR_Y - 15, "bark")
+    a.fill(27, 14, 21, 7, "tan")
+    for x in range(29, 48, 3):
+        a.fill(x, 14, 1, 7, "brown")
+    a.fill(27, 15, 21, 1, "brown")
+    a.fill(27, 19, 21, 1, "brown")
+    a.fill(37, 14, 1, 7, "walnut")
+    for x in (24, 48):
+        a.fill(x, 3, 3, FAR_Y - 3, "bark")
+        a.fill(x + 2, 3, 1, FAR_Y - 3, "walnut")
+    a.fill(20, 0, 35, 3, "bark")
+    a.fill(20, 2, 35, 1, "walnut")
+    for x in (20, 53):
+        a.fill(x, 0, 2, 3, "tan")
+    a.fill(23, 3, 29, 11, "walnut")
+    a.fill(24, 4, 27, 9, "brown")
+    a.fill(24, 4, 27, 1, "tan")
+    bd.word(a, "ZOO", AW / 2, 5, "cream")
     a.street()
-    for py in range(19, CROSS_Y):
+    for py in range(FAR_Y, CROSS_Y):
         half = 7 + (py - 13) // 2
         for px in range(round(AW / 2) - half, round(AW / 2) + half):
             a.fill(px, py, 1, 1, trail(px, py))

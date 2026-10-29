@@ -924,7 +924,7 @@ def castle(cv, cx, base):
 
 
 def hot_dog_cart(cv, cx, base):
-    """A hot dog cart by the park gate, side on with its wheels on row base: a stainless box with a
+    """A hot dog cart by the zoo gate, side on with its wheels on row base: a stainless box with a
     counter, ketchup and mustard on it, under a red and yellow striped umbrella."""
     for k in range(4):
         for x in range(cx - 2 - 2 * k, cx + 3 + 2 * k):
@@ -992,6 +992,96 @@ def oak(cv, cx, top, w, base, seed, lit="canopy", shade="pine", hi="olive", trun
             cv.fill(px, py, 1, 1, c)
 
 
+# The zoo's animals, side on and facing left, as rows of fills: a bison (walnut forequarters and hump,
+# bark hindquarters, a cream horn) and a llama (cream, driftwood on its shaded right and underside and
+# its far legs).
+BISON = ("......wwww..........",
+         "....wwwwwwww........",
+         "...wwwwwwwwwwbbbbb..",
+         "..wwwwwwwwwwwbbbbbbb",
+         ".hwwwwwwwwwwwbbbbbbb",
+         "hwwwwwwwwwwwwbbbbbbd",
+         "wwwwwwwwwwwwwbbbbbbd",
+         "wwwww.wwwwwwwbbbbbd.",
+         ".www..wwwwwwwddddd..",
+         ".ww...ww.ww...dd.dd.",
+         "......ww.ww...dd.dd.",
+         "......ww.ww...dd.dd.")
+BISON_COLOURS = dict(w="walnut", b="bark", d="walnut", h="cream")
+LLAMA = (".c.c........",
+         ".ccc........",
+         "cccc........",
+         ".ccs........",
+         ".ccs........",
+         ".ccs........",
+         ".ccs........",
+         ".cccccccccc.",
+         "cccccccccccs",
+         ".ccccccccccs",
+         "..ssssssssss",
+         "..cs.....cs.",
+         "..cs.....cs.",
+         "..cs.....cs.")
+LLAMA_COLOURS = dict(c="cream", s="driftwood")
+
+
+def figure(cv, x, base, rows, cols):
+    """A figure drawn from rows of characters, its left column on x and its bottom row on row base: each
+    character a colour from cols, '.' left clear."""
+    for j, row in enumerate(rows):
+        for i, ch in enumerate(row):
+            if ch != ".":
+                cv.fill(x + i, base - len(rows) + j, 1, 1, cols[ch])
+
+
+def split_rail(cv, x0, x1, base, h=10, every=10):
+    """A split-rail paddock fence on row base, columns x0 to x1 - 1: bark posts h rows tall every every
+    columns and at the far end, two tan rails with brown under them."""
+    for y in (base - h + 2, base - h // 2 + 1):
+        cv.fill(x0, y, x1 - x0, 1, "tan")
+        cv.fill(x0, y + 1, x1 - x0, 1, "brown")
+    for x in list(range(x0, x1 - 1, every)) + [x1 - 2]:
+        cv.fill(x, base - h, 2, h, "bark")
+
+
+def zoo_gate(cv):
+    """The High Park Zoo's entrance at the trail's end, standing on row BASE + 6: grazed olive paddocks
+    behind split rails either side, a bison in the left one and a llama in the right; a closed plank
+    double gate, each leaf Z-braced, between two log posts under a log crossbeam with cut ends; and a
+    plank sign hung from the beam, HIGH PARK ZOO in cream."""
+    for py in range(BASE - 12, BASE + 6):
+        for px in range(118, 244):
+            cv.fill(px, py, 1, 1, "dolive" if noise(px, py) < 0.04 or noise(px, py - 1) < 0.04 else "olive")
+    split_rail(cv, 118, 244, BASE - 10, h=7, every=12)
+    figure(cv, 126, BASE - 1, BISON, BISON_COLOURS)
+    figure(cv, 216, BASE - 1, LLAMA, LLAMA_COLOURS)
+    for x0, x1 in ((118, CX - 30), (CX + 30, 244)):
+        split_rail(cv, x0, x1, BASE + 6)
+    for gx in (CX - 26, CX):
+        cv.fill(gx, BASE - 6, 26, 12, "tan")
+        for k in range(gx + 3, gx + 26, 4):
+            cv.fill(k, BASE - 6, 1, 12, "brown")
+        cv.fill(gx, BASE - 5, 26, 2, "brown")
+        cv.fill(gx, BASE + 2, 26, 2, "brown")
+        cv.line(gx + 1, BASE + 2, gx + 24, BASE - 4, "brown")
+    cv.fill(CX - 1, BASE - 6, 2, 12, "walnut")
+    for x in (CX - 31, CX + 27):
+        cv.fill(x, BASE - 34, 5, 40, "bark")
+        cv.fill(x + 4, BASE - 34, 1, 40, "walnut")
+        cv.fill(x, BASE - 34, 5, 1, "tan")
+    cv.fill(CX - 38, BASE - 38, 76, 4, "bark")
+    cv.fill(CX - 38, BASE - 35, 76, 1, "walnut")
+    for x in (CX - 38, CX + 35):
+        cv.fill(x, BASE - 38, 3, 4, "tan")
+        cv.fill(x + 1, BASE - 37, 1, 2, "skin2")
+    for x in (CX - 30, CX + 29):
+        cv.fill(x, BASE - 34, 1, 3, "walnut")
+    cv.fill(CX - 41, BASE - 31, 82, 12, "walnut")
+    cv.fill(CX - 40, BASE - 30, 80, 10, "brown")
+    cv.fill(CX - 40, BASE - 30, 80, 1, "tan")
+    word(cv, "HIGH PARK ZOO", CX, BASE - 29, "cream")
+
+
 def high_park():
     cv = sn.Canvas(W, H)
     # a deep clear blue, two white clouds high over the oaks
@@ -1045,13 +1135,8 @@ def high_park():
                                     (CX + 150, BASE - 30, 14, "canopy", "pine"),
                                     (-2, BASE - 24, 15, "olive", "dolive")):
         tree(cv, cx, top, leaf, shade, trunk="bark", r=r, base=BASE + 4)
-    # the park gate at the end of the trail, its sign facing the street
-    for x in (CX - 48, CX + 46):
-        cv.fill(x, BASE - 32, 3, 38, "bark")
-    cv.fill(CX - 58, BASE - 42, 116, 16, "pine")
-    cv.fill(CX - 58, BASE - 42, 116, 1, "canopy")
-    cv.fill(CX - 58, BASE - 27, 116, 1, "fir")
-    word(cv, "HIGH PARK", CX, BASE - 38, "gold")
+    # the High Park Zoo at the end of the trail, its sign facing the street, lamps either side
+    zoo_gate(cv)
     for x in (CX - 66, CX + 66):
         cv.fill(x, BASE - 18, 2, 24, "coal")
         cv.fill(x - 4, BASE - 24, 10, 7, "coal")
@@ -1075,8 +1160,8 @@ def high_park():
         lane = (x + ROAD) % 64 - 32
         return dirt(px, py, abs(lane) < 5 and noise(px // 3, py // 2) < 0.7)
 
-    # the trail on to the gate, its worn middle drifting, ragged brown edges
-    for py in range(BASE - 8, CROSS):
+    # the trail up to the zoo gate's foot, where it ends, its worn middle drifting, ragged brown edges
+    for py in range(BASE + 6, CROSS):
         half = 18 + (py - BASE + 8) // 3 + (1 if hashed(0, py, 3) else 0)
         cv.fill(CX - half, py, 2 * half, 1, "brown")
         for px in range(CX - half + 1, CX + half - 1):
@@ -1167,6 +1252,28 @@ def sign_board(cv, mid, y, text, board, letters):
     cv.fill(x - 1, y - 1, w + 2, 11, "coal")
     cv.fill(x, y, w, 9, board)
     word(cv, text, mid, y + 1, letters)
+
+
+# The chocolate shop's painted bar, as rows of fills: a milk chocolate bar of scored squares in a coal
+# outline, its foil peeled back at the right over a red wrapper with a cream band.
+CHOCOLATE_BAR = ("kkkkkkkkk...",
+                 "kbbbdbbbk...",
+                 "kbbbdbbbk...",
+                 "kbbbdbbbk...",
+                 "kdddddddk...",
+                 "kbbbdbbbk...",
+                 "kbbbdbbbk...",
+                 "kbbbdbbbk...",
+                 "kdddddddkk..",
+                 "kbbbdbbflk..",
+                 "kbbbdbffllk.",
+                 "kbbbdfflllkk",
+                 "krrrrrrkkk..",
+                 "kcccccccck..",
+                 "krrrrrrrk...",
+                 "krrrrrrrk...",
+                 "kkkkkkkkk...")
+CHOCOLATE_COLOURS = dict(k="coal", b="brown", d="dbrown", f="lgrey", l="white", r="red", c="cream")
 
 
 # The paintings hung in a gallery's windows: (sky or ground, lower field, a spot of colour).
@@ -1362,12 +1469,14 @@ def distillery():
     birds(cv, ((30, BASE - 64), (84, BASE - 60), (290, BASE - 76)))
     chimney(cv, CX - 121, 12)
     water_tower(cv, CX + 142, BASE - 46)
-    # round the square: the gallery and an old limestone mill on the left, the long low warehouse across
-    # it under the DISTILLERY sign, the theatre and another warehouse on the right
+    # round the square: the gallery and an old limestone mill on the left, the chocolate shop in the long
+    # low warehouse across it, its CHOCOLATE sign and a painted bar beside it, the theatre and another
+    # warehouse on the right
     gallery(cv, -10, 80, BASE - 44, BASE)
     warehouse(cv, 70, 56, BASE - 36, BASE, "driftwood", "dstone")
     warehouse(cv, CX - 54, 108, BASE - 36, BASE, "brick", "stone", rows=0)
-    sign_board(cv, CX, BASE - 30, "DISTILLERY", "dbrick", "cream")
+    sign_board(cv, CX, BASE - 30, "CHOCOLATE", "dbrick", "cream")
+    figure(cv, CX + 38, BASE - 14, CHOCOLATE_BAR, CHOCOLATE_COLOURS)
     theatre(cv, CX + 54, 80, BASE - 50, BASE)
     warehouse(cv, CX + 134, 56, BASE - 46, BASE, "brick", "stone", rows=3)
     # the square's paving, café tables under umbrellas, Still Dancing, the LOVE sign, lamps and passers-by
