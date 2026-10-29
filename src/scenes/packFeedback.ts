@@ -4,11 +4,12 @@ import { animationKey } from "../assets/asepriteAnimations";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { chipLeft, FEEDBACK, heartPopFrame, type LabelAnchor } from "../hud/feedback";
+import { changeChipAt } from "../hud/hudLanes";
 import { COMIC_WORDS } from "../layout/comicWords";
 import type { Point } from "../lib/rect";
 import { CREAM_PANEL_COLOURS, drawFramedRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import { addPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
+import { addPixelText, inkSpan, pixelFontMetrics, placePixelText } from "../ui/phaser/pixelText";
 import { TEXT_SCALE } from "../ui/textFit";
 import { letterEffect } from "./comicWord";
 import { playTagOnce } from "./sprites";
@@ -16,9 +17,6 @@ import { fadeAway } from "./uiKit";
 
 // A sidestep puff, 48x48, laid on the dog's frame and lettered with the dodge word.
 const DODGE_ART = { key: "fx-dodge", tag: "play" } as const;
-
-// A floating chip's text is font-title at TEXT_SCALE; the chip reaches 2px past the capitals.
-const CHIP_PAD = 2;
 
 interface PackMoment {
   depth: number;
@@ -57,8 +55,10 @@ export function playForgiven(
   floatLabel(scene, moment, anchor, gameData.runText.forgiven, PALETTE.forest, forgiven);
 }
 
-// font-title at 2x on a floating chip, held fully opaque for holdMs, then rising and fading out
-// over the rest of ms; with reduced motion it fades in place.
+// Body text at 2x on a cream chip, as a change label's (CHANGE_CHIP), centred on the anchor
+// (moved in to stay on screen) with its bottom on the anchor's line bottom; held fully opaque
+// for holdMs, then rising and fading out over the rest of ms; with reduced motion it fades in
+// place.
 export function floatLabel(
   scene: Scene,
   moment: PackMoment,
@@ -67,48 +67,20 @@ export function floatLabel(
   colour: number,
   timing: { holdMs: number; ms: number; rise: number },
 ): void {
-  const label = addPixelText(scene, 0, 0, text, { colour, font: "title", scale: TEXT_SCALE });
-  const title = pixelFontMetrics(scene, "title");
-  const width = Math.ceil(label.width) + 2 * CHIP_PAD;
-  // A glyph inked above the capitals, such as ♥, grows the chip up to hold it.
-  const tops = label.getTextBounds(true).characters.flatMap((char) => (char.h > 0 ? [char.y] : []));
-  const above = Math.max(0, title.capTop - Math.min(title.capTop, ...tops)) * TEXT_SCALE;
-  label.setPosition(CHIP_PAD, CHIP_PAD + above + label.y);
-  floatChip(
-    scene,
-    moment.depth,
-    anchor,
-    { above, parts: [label], width },
-    {
-      delayMs: timing.holdMs,
-      ms: timing.ms - timing.holdMs,
-      rise: moment.still ? 0 : timing.rise,
-    },
-  );
-}
-
-// A cream chip in a plum rim round parts, placed from its top-left: width wide, and CHIP_PAD
-// past the title font's capitals at TEXT_SCALE, above more over them. It is centred on the
-// anchor (moved in to stay on screen) with its line's bottom there, and fades away as fade says.
-function floatChip(
-  scene: Scene,
-  depth: number,
-  anchor: LabelAnchor,
-  content: { above: number; parts: GameObjects.GameObject[]; width: number },
-  fade: { delayMs: number; ms: number; rise: number },
-): void {
-  const { above, parts, width } = content;
-  const title = pixelFontMetrics(scene, "title");
-  const box = scene.add.graphics();
-  drawFramedRect(box, CREAM_PANEL_COLOURS, {
-    height: title.capHeight * TEXT_SCALE + above + 2 * CHIP_PAD,
-    width,
-    x: 0,
-    y: 0,
-  });
-  const capTop = anchor.lineBottom - (title.lineHeight - title.capTop) * TEXT_SCALE;
+  const body = pixelFontMetrics(scene, "body");
+  const label = addPixelText(scene, 0, 0, text, { colour, scale: TEXT_SCALE });
+  const ink = inkSpan(label);
+  const shown = { lines: 1, scale: TEXT_SCALE, width: ink.right - ink.left };
+  const { height, width } = changeChipAt(body, { x: 0, y: 0 }, shown).chip;
   const x = chipLeft(SCREEN_CONFIG.width, anchor.centreX, width);
-  const y = capTop - CHIP_PAD - above;
-  const chip = scene.add.container(x, y, [box, ...parts]).setDepth(depth);
-  fadeAway(scene, [chip], fade);
+  const placed = changeChipAt(body, { x, y: anchor.lineBottom - height }, shown);
+  placePixelText(label, placed.text.x - ink.left, placed.text.y);
+  const box = scene.add.graphics();
+  drawFramedRect(box, CREAM_PANEL_COLOURS, placed.chip);
+  const parts = [box.setDepth(moment.depth), label.setDepth(moment.depth)];
+  fadeAway(scene, parts, {
+    delayMs: timing.holdMs,
+    ms: timing.ms - timing.holdMs,
+    rise: moment.still ? 0 : timing.rise,
+  });
 }
