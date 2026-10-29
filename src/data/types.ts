@@ -1056,7 +1056,6 @@ export interface MenuText {
     readonly badgeLocked: string;
     // A locked badge's progress across walks, under its goal on the wall.
     readonly badgeProgress: string;
-    readonly badges: string;
     readonly dogColumns: {
       readonly fired: string;
       readonly walks: string;
