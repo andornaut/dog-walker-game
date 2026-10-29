@@ -13,7 +13,14 @@ import { veteranSave } from "../testing/saves";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { TEXT_SCALE } from "../ui/textFit";
-import { BADGE_STRIP, badgeProgress, badgeWall, wallCell, wallRects } from "./badgesView";
+import {
+  BADGE_STRIP,
+  badgeProgress,
+  badgeWall,
+  earnedText,
+  wallCell,
+  wallRects,
+} from "./badgesView";
 import { MENU_TEXT_FIELDS } from "./menuText";
 import { shopScrollbar } from "./shopLayout";
 import {
@@ -222,6 +229,17 @@ describe("the rows' right edge", () => {
     ["beside the scrollbar", true, rows.right],
   ])("%s", (_, scrolls, right) => {
     expect(statsListFrame(scrolls).right).toBe(right);
+  });
+});
+
+// The earned count with every badge earned, ending at the list's right text edge beside the
+// scrollbar, starts inside the rows.
+describe("the earned count", () => {
+  it("fits between the rows' edges", () => {
+    const all = badgeWall(gameData, { achievements: BADGES.map(({ id }) => id) });
+    const text = earnedText(gameData, all);
+    const left = statsListFrame(true).right - inkWidth("font-body", STYLE, text);
+    expect(left).toBeGreaterThanOrEqual(rows.left);
   });
 });
 

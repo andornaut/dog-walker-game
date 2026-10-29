@@ -53,7 +53,6 @@ import {
   type FontRole,
   inkSpan,
   pixelFontMetrics,
-  placePixelText,
   setPixelText,
   withProbe,
 } from "../ui/phaser/pixelText";
@@ -69,7 +68,7 @@ import {
   placeScrollbar,
   type ScrollbarView,
 } from "./scrollView";
-import { addShopPage, addShopTabs } from "./shopPage";
+import { addCountNote, addShopPage, addShopTabs, placeInkRight } from "./shopPage";
 import { listenTargetPress, sameByValue, type TargetPressListener } from "./targetPress";
 import { addBodyText, addTagImage, addTapBurst, BODY_TEXT, clearScene, tagFrame } from "./uiKit";
 
@@ -291,8 +290,7 @@ export class StatsScene extends Scene {
     rows.forEach(({ label, value }, i) => {
       const top = y + i * PITCH;
       this.text(LEFT, top, label, { colour: PALETTE.darkBrown });
-      const shown = this.text(0, top, value);
-      placePixelText(shown, this.frame.right - inkSpan(shown).right, top);
+      placeInkRight(this.text(0, top, value), this.frame.right, top);
     });
   }
 
@@ -408,13 +406,19 @@ export class StatsScene extends Scene {
     return dogsBottom(dogs.length);
   }
 
-  // The earned count at the rows' left, then a badge per row: earned ones in colour with a green name
+  // The earned count at the rows' right, then a badge per row: earned ones in colour with a green name
   // on a gold band, ticked, locked ones greyed; each with its goal, or its short goal where the
   // full one does not fit, and a locked one that counts across walks with its progress.
   private drawBadges(): number {
     const save = profileSave(this);
     const badges = this.badges();
-    this.text(LEFT, WALL.headingY, earnedText(gameData, badges));
+    addCountNote(
+      this,
+      this.drawingInto,
+      this.frame.right,
+      WALL.headingY,
+      earnedText(gameData, badges),
+    );
     const cells = withProbe(this, BODY_TEXT, (probe) => {
       const inkWidth = (line: string) => {
         setPixelText(probe, line);

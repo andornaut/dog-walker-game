@@ -88,7 +88,7 @@ import {
   placeScrollbar,
   type ScrollbarView,
 } from "./scrollView";
-import { addShopPage, addShopTabs } from "./shopPage";
+import { addCountNote, addShopPage, addShopTabs } from "./shopPage";
 import { listenTargetPress, sameByValue, type TargetPressListener } from "./targetPress";
 import {
   addBodyText,
@@ -663,10 +663,7 @@ export class ShopScene extends Scene {
   private heading(root: GameObjects.Container, y: number, title: string, note?: string): void {
     addBodyText(this, root, { x: LAYOUT.headingX, y }, title, { font: "title" });
     if (note !== undefined) {
-      addBodyText(this, root, { x: this.frame.headingRight, y }, note, {
-        colour: PALETTE.darkBrown,
-        originX: 1,
-      });
+      addCountNote(this, root, this.frame.headingRight, y, note);
     }
   }
 

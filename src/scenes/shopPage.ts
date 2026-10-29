@@ -5,8 +5,9 @@ import { cardBand } from "../home/homeLayout";
 import { SHOP_LAYOUT, shopTabFace, shopTabRects } from "../home/shopLayout";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
+import { inkSpan, placePixelText } from "../ui/phaser/pixelText";
 import { addCardTitle, addDetailCard } from "./homePanels";
-import { addCloseButton, addGraphicsIn, addTab } from "./uiKit";
+import { addBodyText, addCloseButton, addGraphicsIn, addTab } from "./uiKit";
 
 // The page the Pet shop and the Logbook share, under the home screen's top bar.
 
@@ -36,6 +37,26 @@ export function addShopPage(
   addDetailCard(scene, parent, PANEL, cardBand(PANEL));
   parent.add(addCardTitle(scene, PANEL, title));
   addCloseButton(scene, parent, SHOP_LAYOUT.close, closePressed);
+}
+
+// Moves a label so its ink ends at right, its capitals' top at y.
+export function placeInkRight(label: GameObjects.BitmapText, right: number, y: number): void {
+  placePixelText(label, right - inkSpan(label).right, y);
+}
+
+// A list's count, such as the shop's owned counts and the Logbook's earned count: body text in
+// dark brown, its ink ending at the list's right text edge, right, and its capitals' top at y,
+// level with a heading's when one sits beside it.
+export function addCountNote(
+  scene: Scene,
+  parent: GameObjects.Container | undefined,
+  right: number,
+  y: number,
+  text: string,
+): GameObjects.BitmapText {
+  const label = addBodyText(scene, parent, { x: 0, y }, text, { colour: PALETTE.darkBrown });
+  placeInkRight(label, right, y);
+  return label;
 }
 
 // The page's tabs, left to right across the tab span (shopTabRects), each drawn on its face:
