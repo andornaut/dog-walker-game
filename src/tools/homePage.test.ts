@@ -30,6 +30,9 @@ function pageFacts(): [string, string][] {
   const sizes = ["small", "medium", "large"] as const;
   const debuffSeconds = Object.values(debuffs).map(({ seconds }) => tuning.seconds[seconds]);
   const [shortest, longest] = [Math.min(...debuffSeconds), Math.max(...debuffSeconds)];
+  const debuffNames = Object.values(debuffs)
+    .map(({ name }) => name)
+    .sort();
   const perSize = sizes.map(
     (size) => `${count(Object.values(dogs).filter((dog) => dog.size === size).length)} ${size}`,
   );
@@ -59,9 +62,13 @@ function pageFacts(): [string, string][] {
     ],
     [
       "the debuffs and their durations, shortest to longest",
-      `leaves the pack ${debuffs.muddy.name}, and a cheap way out can bring ${debuffs.spotlight.name}, ` +
-        `${debuffs.stinky.name} or ${debuffs.zoomies.name}, each for ` +
+      `leaves the pack ${debuffs.muddy.name}, and a cheap way out can bring ` +
+        `${debuffNames.slice(0, -1).join(", ")} or ${debuffNames.at(-1)}, each for ` +
         `${shortest === longest ? shortest : `${shortest} to ${longest}`} seconds.`,
+    ],
+    [
+      "the treat's cash at full hearts",
+      `or pays ${helpBodyValues(gameData).treatCash} when every owner is already full.`,
     ],
     [
       "the Walk bonus",
