@@ -1,6 +1,8 @@
 import { WIDE_BUTTON } from "../layout/screenLayout";
+import type { Rect } from "../lib/rect";
 import { type FontMetrics, helpCapDy, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { TEXT_SCALE } from "../ui/textFit";
+import { badgeStripMinHeight, badgeStripRows } from "./badgesView";
 
 // The end screen's geometry, with every text at 2x.
 const PANEL = { height: 304, width: 312, x: 24, y: 112 };
@@ -176,18 +178,40 @@ export function endPanelLayout(
   return { panel: { ...PANEL, height: rowsBottom + PANEL_FOOT - PANEL.y }, rows };
 }
 
-// Whether a panel ends above the badges where badges show, or else within the badge strip's
-// area, which it then grows into.
-export function endPanelFits(badgesShown: boolean, panel: typeof PANEL): boolean {
+// The badge strip for rows rows of badges: badges, grown up into the panel's room as tall as
+// its rows need (badgeStripMinHeight), its bottom kept over the button.
+export function endBadgeStrip(rows: number): Rect {
   const { badges } = END_LAYOUT;
-  return panel.y + panel.height <= (badgesShown ? badges.y : badges.y + badges.height);
+  const height = Math.max(badges.height, badgeStripMinHeight(rows));
+  return { ...badges, height, y: badges.y + badges.height - height };
+}
+
+// Whether a panel ends above the badge strip while badgeRows rows of badges show, or else
+// within the strip's area, which it then grows into.
+export function endPanelFits(badgeRows: number, panel: typeof PANEL): boolean {
+  const strip = endBadgeStrip(badgeRows);
+  return panel.y + panel.height <= (badgeRows > 0 ? strip.y : strip.y + strip.height);
+}
+
+// The rows count badges take on the end screen (badgeStripRows), or one when the panel, every
+// owner's row on one line, would not end above more.
+export function endBadgeRows(
+  fonts: QuipFonts,
+  breakdownLines: number,
+  owners: readonly Pick<QuipRow, "fired">[],
+  count: number,
+): number {
+  const rows = badgeStripRows(count);
+  const oneLine = owners.map(({ fired }) => ({ fired, lines: 1 }));
+  const { panel } = endPanelLayout(fonts, breakdownLines, oneLine);
+  return rows <= 1 || endPanelFits(rows, panel) ? rows : 1;
 }
 
 // The lines each owner's row gets: the lines it wants, from the top row down, while the panel
 // still fits with every row after it on one line; one line once it would not.
 export function grantedQuipLines(
   fonts: QuipFonts,
-  badgesShown: boolean,
+  badgeRows: number,
   breakdownLines: number,
   wanted: readonly QuipRow[],
 ): number[] {
@@ -195,7 +219,7 @@ export function grantedQuipLines(
     const above = granted.map((lines, j) => ({ fired: wanted[j]?.fired ?? false, lines }));
     const rest = wanted.slice(i + 1).map(({ fired }) => ({ fired, lines: 1 }));
     const tried = endPanelLayout(fonts, breakdownLines, [...above, row, ...rest]);
-    return [...granted, endPanelFits(badgesShown, tried.panel) ? row.lines : 1];
+    return [...granted, endPanelFits(badgeRows, tried.panel) ? row.lines : 1];
   }, []);
 }
 

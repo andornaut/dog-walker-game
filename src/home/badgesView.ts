@@ -1,5 +1,6 @@
 import { badgeKey } from "../assets/spriteKeys";
 import type { AchievementCondition, AchievementId, GameData } from "../data/types";
+import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { fillLine, wrapWords } from "../lib/lines";
 import type { Rect } from "../lib/rect";
 import { dollarsToCents } from "../lib/units";
@@ -167,9 +168,78 @@ export function wallRects(spec: WallSpec, heights: readonly number[]): Rect[] {
   });
 }
 
+// A badge strip's rows from its panel's top: the title's capitals at titleY, the first row's
+// badgeSize squares from badgeTop and each later row's rowPitch under the row above, perRow
+// to a row and at most maxRows rows, and a badge's name's first capitals nameGap under the
+// badge, on up to nameLines lines namePitch apart. The slots share the panel's width less
+// inset each side, inside its frame, frame thick.
+export const BADGE_STRIP = {
+  badgeSize: 32,
+  badgeTop: 22,
+  frame: 2,
+  inset: 4,
+  maxNamed: 3,
+  maxRows: 2,
+  nameGap: 4,
+  nameLines: 2,
+  namePitch: 16,
+  perRow: 7,
+  rowPitch: 38,
+  titleY: 8,
+} as const;
+
+// The rows count badges take: one per perRow, at most maxRows.
+export function badgeStripRows(count: number): number {
+  const { maxRows, perRow } = BADGE_STRIP;
+  return Math.min(maxRows, Math.ceil(count / perRow));
+}
+
+// How many of count badges each of rows rows holds: as even as can be, the fuller rows first.
+export function badgeRowCounts(rows: number, count: number): number[] {
+  const shared = Math.max(1, rows);
+  return Array.from(
+    { length: shared },
+    (_, row) => Math.floor(count / shared) + (row < count % shared ? 1 : 0),
+  );
+}
+
+// How tall a strip of rows rows of badges must be from its panel's top: down to the first
+// row's badges' bottom, MIN_TAP_SIZE more for each later row's tap targets, and the frame.
+export function badgeStripMinHeight(rows: number): number {
+  const { badgeSize, badgeTop, frame } = BADGE_STRIP;
+  return badgeTop + badgeSize + Math.max(0, rows - 1) * MIN_TAP_SIZE + frame;
+}
+
+interface StripCell {
+  readonly left: number;
+  readonly right: number;
+  readonly row: number;
+}
+
+// Each of count badges' slot in rows rows across width (badgeRowCounts): every slot the
+// fullest row's share of width, each row centred, edge to edge with its neighbours.
+function stripCells(
+  layout: { readonly width: number; readonly x: number },
+  rows: number,
+  count: number,
+): StripCell[] {
+  const perRow = badgeRowCounts(rows, count);
+  const width = layout.width / Math.max(1, ...perRow);
+  return perRow.flatMap((inRow, row) => {
+    const start = layout.x + (layout.width - width * inRow) / 2;
+    return Array.from({ length: inRow }, (_, i) => ({
+      left: start + width * i,
+      right: start + width * (i + 1),
+      row,
+    }));
+  });
+}
+
 interface StripSlot {
   // The centre of the slot, where its badge sits.
   readonly centreX: number;
+  // The top of its badge, from the strip's panel's top.
+  readonly top: number;
   readonly width: number;
 }
 
@@ -179,57 +249,53 @@ interface BadgeStrip {
   readonly slots: readonly StripSlot[];
 }
 
-// Newly earned badges side by side across width, named while at most maxNamed share it.
+// Newly earned badges side by side across width in rows rows (stripCells), named while at
+// most maxNamed share the strip.
 export function badgeStrip(
   layout: { readonly maxNamed: number; readonly width: number; readonly x: number },
+  rows: number,
   count: number,
 ): BadgeStrip {
-  const width = layout.width / Math.max(1, count);
+  const { badgeTop, rowPitch } = BADGE_STRIP;
   return {
     named: count <= layout.maxNamed,
-    slots: Array.from({ length: count }, (_, i) => ({
-      centreX: Math.round(layout.x + width * (i + 0.5)),
-      width: Math.floor(width),
+    slots: stripCells(layout, rows, count).map(({ left, right, row }) => ({
+      centreX: Math.round((left + right) / 2),
+      top: badgeTop + row * rowPitch,
+      width: Math.floor(right - left),
     })),
   };
 }
 
-// A badge strip's rows from its panel's top: the title's capitals at titleY, each badge's
-// badgeSize square from badgeTop, and its name's first capitals nameGap under the badge, on up
-// to nameLines lines namePitch apart. The slots share the panel's width less inset each side,
-// and a badge's tap target is its slot from badgeTop down to the panel's frame, frame thick.
-export const BADGE_STRIP = {
-  badgeSize: 32,
-  badgeTop: 22,
-  frame: 2,
-  inset: 4,
-  maxNamed: 3,
-  nameGap: 4,
-  nameLines: 2,
-  namePitch: 16,
-  titleY: 8,
-} as const;
-
-// The strip of count badges across a panel at rect.
-export function panelBadgeStrip(rect: Rect, count: number): BadgeStrip {
+// The strip of count badges in rows rows across a panel at rect.
+export function panelBadgeStrip(rect: Rect, rows: number, count: number): BadgeStrip {
   const { inset, maxNamed } = BADGE_STRIP;
-  return badgeStrip({ maxNamed, width: rect.width - inset * 2, x: rect.x + inset }, count);
+  const layout = { maxNamed, width: rect.width - inset * 2, x: rect.x + inset };
+  return badgeStrip(layout, rows, count);
 }
 
-// Each of count badges' tap targets in a strip across a panel at rect: its slot, edge to edge
-// with its neighbours, from the badges' top down to the panel's frame.
-export function badgeStripHits(rect: Rect, count: number): Rect[] {
-  const { badgeTop, frame, inset } = BADGE_STRIP;
-  const width = (rect.width - inset * 2) / Math.max(1, count);
-  const edge = (i: number) => Math.round(rect.x + inset + width * i);
-  const y = rect.y + badgeTop;
-  const height = rect.y + rect.height - frame - y;
-  return Array.from({ length: count }, (_, i) => ({
-    height,
-    width: edge(i + 1) - edge(i),
-    x: edge(i),
-    y,
-  }));
+// Each of count badges' tap targets in rows rows across a panel at rect: its slot, edge to edge
+// with its row's neighbours. A lone row's run from the badges' top down to the panel's frame.
+// With more rows, each row's end at its badges' bottom, the first's starting MIN_TAP_SIZE
+// above that and each later row's where the row above's end, and the last's run down to the
+// frame.
+export function badgeStripHits(rect: Rect, rows: number, count: number): Rect[] {
+  const { badgeSize, badgeTop, frame, inset, rowPitch } = BADGE_STRIP;
+  const cells = stripCells({ width: rect.width - inset * 2, x: rect.x + inset }, rows, count);
+  const last = Math.max(0, rows - 1);
+  const end = (row: number) =>
+    row === last ? rect.y + rect.height - frame : rect.y + badgeTop + row * rowPitch + badgeSize;
+  const start = (row: number) => {
+    if (row > 0) {
+      return end(row - 1);
+    }
+    return last === 0 ? rect.y + badgeTop : end(0) - MIN_TAP_SIZE;
+  };
+  return cells.map(({ left, right, row }) => {
+    const x = Math.round(left);
+    const y = start(row);
+    return { height: end(row) - y, width: Math.round(right) - x, x, y };
+  });
 }
 
 // The panel of badges earned away from a walk's end, as tall as badgesHeight, then a row of

@@ -392,7 +392,7 @@ export function textRoleCases(): TextRoleCase[] {
     width: END_LAYOUT.badges.width - 8,
     x: END_LAYOUT.badges.x + 4,
   };
-  const badgeSlot = defined(badgeStrip(badgeLayout, BADGE_STRIP.maxNamed).slots[0]).width;
+  const badgeSlot = defined(badgeStrip(badgeLayout, 1, BADGE_STRIP.maxNamed).slots[0]).width;
   const { newWalker, zoneDone } = gameData.runText;
   const { settings } = gameData.menuText;
   return [

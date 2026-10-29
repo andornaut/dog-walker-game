@@ -6,6 +6,8 @@ import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { badgeStripHits, type BadgeView } from "../home/badgesView";
 import {
   END_LAYOUT,
+  endBadgeRows,
+  endBadgeStrip,
   endPanelLayout,
   grantedQuipLines,
   QUIP_LINES,
@@ -100,7 +102,6 @@ const TITLE_Y = END_LAYOUT.titleY;
 const BREAKDOWN = END_LAYOUT.breakdown;
 const SIDE = END_LAYOUT.side;
 const QUIPS = END_LAYOUT.quips;
-const BADGES: Rect = END_LAYOUT.badges;
 const BADGE_SOUND_AFTER_BEST_MS = 1200;
 const RETURN_HOME_SCENE = END_LAYOUT.returnHome;
 const BUTTON: Rect = END_LAYOUT.button;
@@ -182,8 +183,12 @@ export class EndScene extends Scene {
       addBodyText(this, undefined, { x, y }, value, { colour, font: "title", originX });
     const body = pixelFontMetrics(this, "body");
     const fonts = { body, title: pixelFontMetrics(this, "title") };
-    // A closing line wraps onto a second line at 2x while the panel has room for it, the panel
-    // growing into the badge strip's area when no badge shows.
+    // The badges wrap onto a second row past BADGE_STRIP.perRow while the panel, every closing
+    // line on one line, has room above it. A closing line wraps onto a second line at 2x while
+    // the panel has room for it, the panel growing into the badge strip's area when no badge
+    // shows.
+    const badgeRows = endBadgeRows(fonts, lines.length, closing, earned.length);
+    const strip = endBadgeStrip(badgeRows);
     const quipFit = (lines: number) => ({ room: QUIP_TEXT_ROOM, style: textOnLines(lines) });
     const wanted = closing.map((line) => {
       const { lines: shown } = withProbe(this, BODY_TEXT, (probe) => {
@@ -192,7 +197,7 @@ export class EndScene extends Scene {
       });
       return { fired: line.fired, lines: Math.min(QUIP_LINES, shown.length) };
     });
-    const quipLines = grantedQuipLines(fonts, earned.length > 0, lines.length, wanted);
+    const quipLines = grantedQuipLines(fonts, badgeRows, lines.length, wanted);
     const quipRows = closing.map(({ fired }, i) => ({ fired, lines: itemAt(quipLines, i) }));
     const { panel, rows } = endPanelLayout(fonts, lines.length, quipRows);
     addPanel(this, panel);
@@ -276,7 +281,7 @@ export class EndScene extends Scene {
     });
 
     if (celebrating) {
-      this.badges = addBadgeCelebration(this, reduced, BADGES, earned);
+      this.badges = addBadgeCelebration(this, reduced, strip, badgeRows, earned);
       // After a new best's fanfare, so the two do not play over each other.
       this.time.delayedCall(newBest ? BADGE_SOUND_AFTER_BEST_MS : 0, () =>
         soundboardOf(this).play("badge"),
@@ -284,7 +289,7 @@ export class EndScene extends Scene {
     }
 
     const button = addMenuButton(this, BUTTON, words.backHome, { available: true, primary: true });
-    const badgeHits = badgeStripHits(BADGES, this.badges.length);
+    const badgeHits = badgeStripHits(strip, badgeRows, this.badges.length);
     // Badges have no tap action of their own, so a tap opens a badge's card as a hold does.
     // With a card open, a tap anywhere closes it.
     this.presses = listenTargetPress<EndTarget>(this, {

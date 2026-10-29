@@ -13,8 +13,11 @@ import { inkWidth } from "../testing/fontInk";
 import { newPlayerSave } from "../testing/saves";
 import { TEXT_SCALE } from "../ui/textFit";
 import {
+  BADGE_STRIP,
   badgeProgress,
+  badgeRowCounts,
   badgeStrip,
+  badgeStripRows,
   badgeWall,
   earnedBadges,
   earnedText,
@@ -253,11 +256,49 @@ describe("wallRects", () => {
 });
 
 describe("badgeStrip", () => {
+  const { badgeTop, rowPitch } = BADGE_STRIP;
+  const layout = { maxNamed: 3, width: 300, x: 30 };
+
   it("shares the width, naming the badges only while few share it", () => {
-    const layout = { maxNamed: 3, width: 300, x: 30 };
-    expect(badgeStrip(layout, 1)).toEqual({ named: true, slots: [{ centreX: 180, width: 300 }] });
-    const four = badgeStrip(layout, 4);
+    expect(badgeStrip(layout, 1, 1)).toEqual({
+      named: true,
+      slots: [{ centreX: 180, top: badgeTop, width: 300 }],
+    });
+    const four = badgeStrip(layout, 1, 4);
     expect(four.named).toBe(false);
     expect(four.slots.map(({ centreX }) => centreX)).toEqual([68, 143, 218, 293]);
+  });
+
+  it("gives every row the fullest row's slot width, each row centred under the one above", () => {
+    const five = badgeStrip(layout, 2, 5);
+    expect(five.slots).toEqual([
+      ...[80, 180, 280].map((centreX) => ({ centreX, top: badgeTop, width: 100 })),
+      ...[130, 230].map((centreX) => ({ centreX, top: badgeTop + rowPitch, width: 100 })),
+    ]);
+  });
+});
+
+describe("badgeStripRows", () => {
+  const { maxRows, perRow } = BADGE_STRIP;
+  it.each([
+    [0, 0],
+    [1, 1],
+    [perRow, 1],
+    [perRow + 1, maxRows],
+    [perRow * maxRows + 1, maxRows],
+  ])("lays %i badges in %i rows", (count, rows) => {
+    expect(badgeStripRows(count)).toBe(rows);
+  });
+});
+
+describe("badgeRowCounts", () => {
+  it.each<[number, number, number[]]>([
+    [1, 3, [3]],
+    [2, 8, [4, 4]],
+    [2, 9, [5, 4]],
+    [2, 13, [7, 6]],
+    [2, 15, [8, 7]],
+  ])("splits %i rows of %i badges as evenly as can be, fuller rows first", (rows, count, split) => {
+    expect(badgeRowCounts(rows, count)).toEqual(split);
   });
 });

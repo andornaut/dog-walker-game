@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
-import { insetRect, type Rect } from "../lib/rect";
+import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
 import { defined } from "../testing/defined";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
@@ -12,11 +12,14 @@ import {
   BADGE_STRIP,
   badgeNameTops,
   badgeStripHits,
+  badgeStripRows,
   CELEBRATION_PANEL,
   panelBadgeStrip,
 } from "./badgesView";
 import {
   END_LAYOUT,
+  endBadgeRows,
+  endBadgeStrip,
   endPanelFits,
   endPanelLayout,
   grantedQuipLines,
@@ -26,6 +29,7 @@ import {
   quipTextY,
   sideTotalAmountY,
 } from "./endLayout";
+import { endTargetAt } from "./endView";
 
 const { badges, breakdown, panel: most, quips, side } = END_LAYOUT;
 const BODY = fontFileMetrics("font-body");
@@ -48,6 +52,11 @@ const cases = BREAKDOWN_LINES.flatMap((lines) =>
 const panelCases = cases.filter(([, rows]) => rows === 1 || rows === SCREEN_CONFIG.dogSlotCount);
 const quipRows = (count: number, fired: boolean, lines: readonly number[]): QuipRow[] =>
   Array.from({ length: count }, (_, i) => ({ fired, lines: lines[i] ?? 1 }));
+// Every count of badges a walk's strip lays out in full rows, from one.
+const BADGE_COUNTS = Array.from(
+  { length: BADGE_STRIP.perRow * BADGE_STRIP.maxRows },
+  (_, i) => i + 1,
+);
 
 describe("the side column's total row", () => {
   const amountY = sideTotalAmountY(BODY, TITLE);
@@ -78,7 +87,7 @@ describe("endPanelLayout", () => {
       expect(rule).toBeGreaterThan(above);
       expect(rule - above).toBeLessThanOrEqual(8);
       expect(panel.y + panel.height).toBe((last?.top ?? 0) + (last?.height ?? 0) + 8);
-      expect(endPanelFits(true, panel)).toBe(true);
+      expect(endPanelFits(1, panel)).toBe(true);
       const two = endPanelLayout(FONTS, lines, quipRows(rows, fired, [2, 2, 2])).rows;
       two.slice(1).forEach((row, i) => {
         const above = two[i];
@@ -93,10 +102,13 @@ describe("endPanelLayout", () => {
 });
 
 describe("grantedQuipLines", () => {
-  it.each(cases.flatMap((each) => [true, false].map((shown) => [...each, shown] as const)))(
-    "grants second lines from the top while the panel fits: %i lines, %i rows, fired %s, badges %s",
-    (lines, rows, fired, shown) => {
+  // No badges, one row of them and two rows (or one where two leave the panel no room).
+  const counts = [0, 1, BADGE_STRIP.perRow + 1];
+  it.each(cases.flatMap((each) => counts.map((count) => [...each, count] as const)))(
+    "grants second lines from the top while the panel fits: %i lines, %i rows, fired %s, %i badges",
+    (lines, rows, fired, count) => {
       const wanted = quipRows(rows, fired, [2, 2, 2]);
+      const shown = endBadgeRows(FONTS, lines, wanted, count);
       const granted = grantedQuipLines(FONTS, shown, lines, wanted);
       const layout = (given: readonly number[]) =>
         endPanelLayout(FONTS, lines, quipRows(rows, fired, given));
@@ -116,15 +128,46 @@ describe("grantedQuipLines", () => {
   it.each(cases)(
     "grants every row two lines with no badges: %i lines, %i rows, fired %s",
     (lines, rows, fired) => {
-      expect(grantedQuipLines(FONTS, false, lines, quipRows(rows, fired, [2, 2, 2]))).toEqual(
+      expect(grantedQuipLines(FONTS, 0, lines, quipRows(rows, fired, [2, 2, 2]))).toEqual(
         Array<number>(rows).fill(2),
       );
     },
   );
 
-  it("keeps the badge strip's area above the button", () => {
-    expect(badges.y + badges.height).toBeLessThanOrEqual(END_LAYOUT.button.y);
-  });
+  it.each([0, 1, BADGE_STRIP.maxRows])(
+    "keeps the badge strip's area above the button with %i rows of badges",
+    (rows) => {
+      const strip = endBadgeStrip(rows);
+      expect(strip.y + strip.height).toBeLessThanOrEqual(END_LAYOUT.button.y);
+    },
+  );
+});
+
+describe("endBadgeRows", () => {
+  const { maxRows, perRow } = BADGE_STRIP;
+  const counts = [1, perRow, perRow + 1, perRow * maxRows];
+  it.each(cases.flatMap((each) => counts.map((count) => [...each, count] as const)))(
+    "ends the panel above the strip: %i lines, %i owners' rows, fired %s, %i badges",
+    (lines, rows, fired, count) => {
+      const owners = quipRows(rows, fired, []);
+      const { panel } = endPanelLayout(FONTS, lines, owners);
+      const badgeRows = endBadgeRows(FONTS, lines, owners, count);
+      expect(endPanelFits(badgeRows, panel)).toBe(true);
+      // One row stands in for more only where more would not fit.
+      expect(badgeRows === badgeStripRows(count) || !endPanelFits(maxRows, panel)).toBe(true);
+    },
+  );
+
+  // A walk shows Start cash only when it starts with money, a dev start's while the start purse
+  // is 0, so a walk's breakdown has every line but that one at most.
+  const walkLines = EARNINGS_KINDS - (gameData.tuning.money.startPurse === 0 ? 2 : 1);
+  it.each(panelCases.filter(([lines]) => lines <= walkLines))(
+    "gives a walk's badges two rows under %i breakdown lines and %i owners' rows (fired: %s)",
+    (lines, rows, fired) => {
+      const owners = quipRows(rows, fired, []);
+      expect(endBadgeRows(FONTS, lines, owners, perRow + 1)).toBe(maxRows);
+    },
+  );
 });
 
 // An owner's row, mirrored: the bubble at the left, the face's well right of the bubble's
@@ -194,29 +237,41 @@ describe("a badge strip's names", () => {
     expect(nameInk).toBeLessThanOrEqual(height - 2);
   });
 
-  it("keeps the end screen's strip above its button", () => {
-    expect(badges.y + badges.height).toBeLessThanOrEqual(END_LAYOUT.button.y);
+  // The last of the most rows' badges keeps inside the frame, on the end screen and a
+  // celebration.
+  it.each([
+    ["the end screen", endBadgeStrip(BADGE_STRIP.maxRows).height],
+    ["a celebration", CELEBRATION_PANEL.badgesHeight],
+  ] as const)("keeps %s's last row of badges inside its panel", (_, height) => {
+    const { maxRows, perRow } = BADGE_STRIP;
+    const rect = { height, width: CELEBRATION_PANEL.width, x: 0, y: 0 };
+    const last = defined(panelBadgeStrip(rect, maxRows, perRow * maxRows).slots.at(-1));
+    expect(last.top + BADGE_STRIP.badgeSize).toBeLessThanOrEqual(height - BADGE_STRIP.frame);
   });
 });
 
 describe("a badge strip's tap targets", () => {
-  // As many badges as fit the strip with a target at least MIN_TAP_SIZE wide each.
-  const fullest = Math.floor((badges.width - BADGE_STRIP.inset * 2) / MIN_TAP_SIZE);
-  const counts = Array.from({ length: fullest }, (_, i) => i + 1);
+  const { badgeSize, frame, nameLines } = BADGE_STRIP;
+  const half = badgeSize / 2;
   const within = (outer: Rect, inner: Rect) =>
     inner.x >= outer.x &&
     inner.y >= outer.y &&
     inner.x + inner.width <= outer.x + outer.width &&
     inner.y + inner.height <= outer.y + outer.height;
-  const nameInkBottom =
-    defined(badgeNameTops(BADGE_STRIP.nameLines, badges.y).at(-1)) +
-    inkRowsFromCapTop(BODY) * TEXT_SCALE;
+  // The end screen's strip of count badges, in the rows they take.
+  const laid = (count: number) => {
+    const rows = badgeStripRows(count);
+    const rect = endBadgeStrip(rows);
+    const hits = badgeStripHits(rect, rows, count);
+    return { hits, rect, strip: panelBadgeStrip(rect, rows, count) };
+  };
 
-  it.each(counts)(
+  it.each(BADGE_COUNTS)(
     "gives each of %i badges a target at least the minimum, inside the panel's frame",
     (count) => {
-      const inner = insetRect(BADGE_STRIP.frame, badges);
-      for (const hit of badgeStripHits(badges, count)) {
+      const { hits, rect } = laid(count);
+      const inner = insetRect(frame, rect);
+      for (const hit of hits) {
         expect(hit.width).toBeGreaterThanOrEqual(MIN_TAP_SIZE);
         expect(hit.height).toBeGreaterThanOrEqual(MIN_TAP_SIZE);
         expect(within(inner, hit)).toBe(true);
@@ -224,26 +279,46 @@ describe("a badge strip's tap targets", () => {
     },
   );
 
-  it.each(counts)("covers each of %i badges and its name, edge to edge", (count) => {
-    const hits = badgeStripHits(badges, count);
-    const strip = panelBadgeStrip(badges, count);
-    const half = BADGE_STRIP.badgeSize / 2;
+  it.each(BADGE_COUNTS)("covers each of %i badges and its name, edge to edge", (count) => {
+    const { hits, rect, strip } = laid(count);
+    const nameInkBottom =
+      defined(badgeNameTops(nameLines, rect.y).at(-1)) + inkRowsFromCapTop(BODY) * TEXT_SCALE;
     hits.forEach((hit, i) => {
-      const { centreX } = defined(strip.slots[i]);
-      const badge = {
-        height: BADGE_STRIP.badgeSize,
-        width: BADGE_STRIP.badgeSize,
-        x: centreX - half,
-        y: badges.y + BADGE_STRIP.badgeTop,
-      };
+      const { centreX, top } = defined(strip.slots[i]);
+      const badge = { height: badgeSize, width: badgeSize, x: centreX - half, y: rect.y + top };
       expect(within(hit, badge)).toBe(true);
       if (strip.named) {
         expect(hit.y + hit.height).toBeGreaterThanOrEqual(nameInkBottom);
       }
+      // The next target is beside it in its row, or starts the row under it.
       const next = hits[i + 1];
       if (next !== undefined) {
-        expect(next.x).toBe(hit.x + hit.width);
+        expect(next.y === hit.y ? next.x : next.y).toBe(
+          next.y === hit.y ? hit.x + hit.width : hit.y + hit.height,
+        );
       }
+      hits.slice(i + 1).forEach((other) => {
+        expect(rectsOverlap(hit, other)).toBe(false);
+      });
+    });
+  });
+
+  it.each(BADGE_COUNTS)("centres each row of %i badges on the strip", (count) => {
+    const { hits, rect } = laid(count);
+    const centre = rect.x + rect.width / 2;
+    for (const top of new Set(hits.map(({ y }) => y))) {
+      const row = hits.filter(({ y }) => y === top);
+      const left = defined(row[0]).x;
+      const right = defined(row.at(-1)).x + defined(row.at(-1)).width;
+      expect(Math.abs(left + right - 2 * centre)).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it.each(BADGE_COUNTS)("opens each of %i badges' cards from its badge", (count) => {
+    const { hits, rect, strip } = laid(count);
+    const screen = { badgeHits: hits, button: END_LAYOUT.button, cardOpen: false };
+    strip.slots.forEach(({ centreX, top }, badge) => {
+      expect(endTargetAt(screen, centreX, rect.y + top + half)).toEqual({ badge });
     });
   });
 });

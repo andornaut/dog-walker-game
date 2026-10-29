@@ -3,7 +3,7 @@ import { Scene } from "phaser";
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
 import type { AchievementId, DogId } from "../data/types";
-import { CELEBRATION_PANEL } from "../home/badgesView";
+import { badgeStripRows, CELEBRATION_PANEL } from "../home/badgesView";
 import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { WIDE_BUTTON } from "../layout/screenLayout";
 import type { Rect } from "../lib/rect";
@@ -43,7 +43,7 @@ export class CelebrationScene extends Scene {
     const height = PANEL.badgesHeight + (cheering.length > 0 ? PANEL.facesHeight : 0);
     const top = Math.round((SCREEN.height - height - BUTTON.gap - BUTTON.height) / 2);
     const panel: Rect = { height, width: PANEL.width, x: PANEL.x, y: top };
-    addBadgeCelebration(this, reduced, panel, achievements);
+    addBadgeCelebration(this, reduced, panel, badgeStripRows(achievements.length), achievements);
     soundboardOf(this).play("badge");
     const left = SCREEN.width / 2 - ((cheering.length - 1) * FACES.pitch + FACES.size) / 2;
     const facesY = top + PANEL.badgesHeight + FACES.top;

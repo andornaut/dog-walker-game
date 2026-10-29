@@ -106,14 +106,15 @@ export function addConfetti(
   return addBurst(scene, reduced, CONFETTI, scale, centreX, centreY);
 }
 
-// Badges just earned, side by side in a panel with confetti behind each: they pop in one after
-// another, or with reduced motion are simply there over a still frame of confetti. Every name
-// under its badge is set in one style for the row (badgeRowNames), centred on its slot.
-// Returns the badges in their slots' order.
+// Badges just earned, side by side in rows rows of a panel with confetti behind each: they pop
+// in one after another, or with reduced motion are simply there over a still frame of confetti.
+// Every name under its badge is set in one style for the row (badgeRowNames), centred on its
+// slot. Returns the badges in their slots' order.
 export function addBadgeCelebration(
   scene: Scene,
   reduced: boolean,
   rect: Rect,
+  rows: number,
   ids: readonly AchievementId[],
 ): BadgeView[] {
   addPanel(scene, rect);
@@ -125,8 +126,7 @@ export function addBadgeCelebration(
     scale: TEXT_SCALE,
   });
   const badges = earnedBadges(gameData, ids);
-  const strip = panelBadgeStrip(rect, badges.length);
-  const badgeY = rect.y + BADGE_STRIP.badgeTop + BADGE_SIZE / 2;
+  const strip = panelBadgeStrip(rect, rows, badges.length);
   const style = { colour: PALETTE.plum, originX: 0.5, scale: TEXT_SCALE };
   const slotWidth = strip.slots[0]?.width ?? 0;
   const named = badges.map(({ name }) => name);
@@ -137,6 +137,7 @@ export function addBadgeCelebration(
       return;
     }
     const delay = i * POP.delayMs;
+    const badgeY = rect.y + slot.top + BADGE_SIZE / 2;
     const burst = () => addConfetti(scene, reduced, 1, slot.centreX, badgeY);
     const image = addBadge(scene, badge.art, true, slot.centreX, badgeY);
     if (names !== undefined) {
