@@ -124,7 +124,9 @@ export function activateWaitingWorker(
 }
 
 export interface UpdateFlow {
-  // The update plate's button: switch to the waiting version, if there is one.
+  // The plate's Update now button: switch to the waiting version, or with none waiting reload,
+  // so the browser fetches the newer version (a newer version's save shows the plate with none
+  // waiting). Does nothing while a switch is reloading.
   accept(): void;
   // Resolves once the game may boot. It never resolves for a page that reloads first.
   readonly bootable: Promise<void>;
@@ -193,10 +195,15 @@ export function createUpdateFlow(
   update({});
   return {
     accept() {
-      if (waitingWorker !== undefined && !state.reloading) {
-        switchVersion(waitingWorker);
-        update({});
+      if (state.reloading) {
+        return;
       }
+      if (waitingWorker === undefined) {
+        reload();
+        return;
+      }
+      switchVersion(waitingWorker);
+      update({});
     },
     bootable,
     endBootWait: () => update({ waitOver: true }),

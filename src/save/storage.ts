@@ -15,7 +15,7 @@ export type StorageLike = Pick<Storage, "getItem" | "setItem">;
 
 // "unavailable" means storage threw: the game plays on with this save in memory and
 // tells the player progress won't be saved. "newer" means a later version of the game wrote
-// the stored save: the game plays on with this save in memory and tells the player to reload.
+// the stored save: the game plays on with this save in memory and offers the newer version.
 export type StoreLoadResult =
   | { reason: string; save: SaveDocument; status: "corrupt" | "newer" | "unavailable" }
   | { save: SaveDocument; status: "loaded" | "new" };

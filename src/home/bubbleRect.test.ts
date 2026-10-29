@@ -90,7 +90,6 @@ describe("the walker's speech", () => {
   );
   const speeches = [...messages, ...parting].flatMap(({ owner, parts }) => [
     said(parts, owner),
-    said([text.newerSave, ...parts], owner),
     said([text.unsaved, ...parts], owner),
   ]);
   const width = (line: string) => bodyTextWidth(2, plainMarks(line));

@@ -156,9 +156,14 @@ export function updatePlateShown(): boolean {
   return updateShown;
 }
 
-// The update plate's button: switch to the waiting version and reload into it.
+// The plate's Update now button: switch to the waiting version and reload into it, or with none
+// waiting (or no service worker) reload, so the browser fetches the newer version.
 export function acceptUpdate(): void {
-  updateFlow?.accept();
+  if (updateFlow === undefined) {
+    location.reload();
+    return;
+  }
+  updateFlow.accept();
 }
 
 // A walk started, which counts as the player interacting even with no input (a dev walk URL).

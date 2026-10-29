@@ -226,7 +226,7 @@ describe("bubbleSpeech", () => {
 describe("storageNotice", () => {
   it.each<[StorageState, string[]]>([
     ["available", []],
-    ["newer", [gameData.homeText.newerSave]],
+    ["newer", []],
     ["unavailable", [gameData.homeText.unsaved]],
   ])("says for %s storage %j", (state, expected) => {
     expect(storageNotice(gameData.homeText, state)).toEqual(expected);
@@ -255,10 +255,17 @@ describe("packBonusLine", () => {
 });
 
 describe("gateTop", () => {
-  it.each<[boolean, ReturnType<typeof gateTop>]>([
-    [false, "bubble"],
-    [true, "updatePlate"],
-  ])("with a version waiting %s shows the %s, never both", (waiting, expected) => {
-    expect(gateTop(waiting)).toBe(expected);
-  });
+  it.each<[boolean, StorageState, ReturnType<typeof gateTop>]>([
+    [false, "available", "bubble"],
+    [false, "newer", "newerSave"],
+    [false, "unavailable", "bubble"],
+    [true, "available", "update"],
+    [true, "newer", "update"],
+    [true, "unavailable", "update"],
+  ])(
+    "with a version waiting %s and %s storage shows the %s, one at a time",
+    (waiting, storage, expected) => {
+      expect(gateTop(waiting, storage)).toBe(expected);
+    },
+  );
 });

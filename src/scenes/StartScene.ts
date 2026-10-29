@@ -65,6 +65,7 @@ import {
   gateTop,
   type HomeAction,
   packBonusLine,
+  type PlateMode,
   storageNotice,
   type WalkerLine,
   walkerLineKey,
@@ -332,15 +333,15 @@ interface Focusable {
   target: Target;
 }
 
-// The keyboard's rows, top to bottom as the screen shows them: the update plate's button while
-// it shows, the dog slot sign while it shows and the Pet shop, the walkers, the dog rows, the
-// Pocket and Start walk.
-function focusRows(shown: { sign: boolean; update: boolean }): Focusable[][] {
+// The keyboard's rows, top to bottom as the screen shows them: the plate's Update now button
+// while it shows, the dog slot sign while it shows and the Pet shop, the walkers, the dog rows,
+// the Pocket and Start walk.
+function focusRows(shown: { plate: boolean; sign: boolean }): Focusable[][] {
   const walkers = walkerTiles();
   const sign: Focusable = { rect: SLOT_SIGN.board, target: { kind: "slotSign" } };
   const update: Focusable = { rect: UPDATE_PLATE.button, target: { kind: "update" } };
   const rows: Focusable[][] = [
-    ...(shown.update ? [[update]] : []),
+    ...(shown.plate ? [[update]] : []),
     [...(shown.sign ? [sign] : []), { rect: PET_SHOP, target: { kind: "petShop" } }],
     walkerIds().map((walker, i): Focusable => ({
       rect: itemAt(walkers, i),
@@ -663,9 +664,14 @@ export class StartScene extends Scene {
     return slotSign(gameData, owned, bankCents) !== null;
   }
 
-  // The controls that come and go: the dog slot sign and the update plate.
-  private shownControls(): { sign: boolean; update: boolean } {
-    return { sign: this.signShown(), update: gateTop(updatePlateShown()) === "updatePlate" };
+  // What the gate scene's top shows: the plate in either mode, or the walker's bubble.
+  private gateTop(): ReturnType<typeof gateTop> {
+    return gateTop(updatePlateShown(), storageState(this));
+  }
+
+  // The controls that come and go: the dog slot sign and the plate under the top bar.
+  private shownControls(): { plate: boolean; sign: boolean } {
+    return { plate: this.gateTop() !== "bubble", sign: this.signShown() };
   }
 
   // A focused dog or gear item in words, so a keyboard player has what a hold shows, and a
@@ -733,7 +739,7 @@ export class StartScene extends Scene {
     if (walker !== undefined) {
       return { kind: "walker", walker: itemAt(walkerIds(), walker) };
     }
-    const update: readonly [Rect, Target][] = this.shownControls().update
+    const update: readonly [Rect, Target][] = this.shownControls().plate
       ? [[UPDATE_PLATE.hit, { kind: "update" }]]
       : [];
     const fixed: readonly [Rect, Target][] = [
@@ -1086,10 +1092,10 @@ export class StartScene extends Scene {
     this.drawTopBar(root, g, save);
     this.drawPetShop(root, save);
     this.drawSlotSign(root, save);
-    const updatePlate = gateTop(updatePlateShown()) === "updatePlate";
-    this.drawPackAtGate(root, g, save, !updatePlate);
-    if (updatePlate) {
-      this.drawUpdatePlate(root);
+    const top = this.gateTop();
+    this.drawPackAtGate(root, g, save, top === "bubble");
+    if (top !== "bubble") {
+      this.drawPlate(root, top);
     }
     const sections = this.sections(save);
     for (const id of SECTION_IDS) {
@@ -1520,12 +1526,12 @@ export class StartScene extends Scene {
     }
   }
 
-  // The update plate under the top bar while a newer version waits: the icon (none while its art
-  // is missing), the title, and the button, whose face sinks while pressed and which reloads
-  // into the new version.
-  private drawUpdatePlate(root: GameObjects.Container): void {
+  // The plate under the top bar while a newer version waits or wrote the save, in mode's text:
+  // the icon (none while its art is missing), the title, and the Update now button, whose face
+  // sinks while pressed and which takes the newer version (acceptUpdate).
+  private drawPlate(root: GameObjects.Container, mode: PlateMode): void {
     const { button, icon, iconKey, panel, titleColour, titleX } = UPDATE_PLATE;
-    const text = gameData.homeText.update;
+    const text = gameData.homeText[mode];
     root.add(addPanel(this, panel));
     const { capY, iconY } = updatePlateText(pixelFontMetrics(this, "title"));
     root.add(imageIcon(this, iconKey, icon.x, iconY));

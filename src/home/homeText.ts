@@ -39,7 +39,6 @@ export const HOME_TEXT_FIELDS = {
   },
   gateSign: [],
   gearBought: ["gear"],
-  newerSave: [],
   noticePackFull: [],
   noticeSoundOff: [],
   noticeSoundOn: [],

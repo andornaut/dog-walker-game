@@ -390,14 +390,15 @@ describe("createUpdateFlow", () => {
     expect(registration.updates).toBe(3);
   });
 
-  it("ignores Reload with no version waiting", () => {
-    const { container, flow, reload, shown } = setup();
+  // The newer version's save shows the plate with no version waiting: its button reloads, so
+  // the browser fetches the newer version.
+  it("reloads at once on Update now with no version waiting", () => {
+    const { flow, reload, shown } = setup();
     flow.watch(new FakeRegistration());
     flow.noteInteraction();
     flow.setOnHome(true);
     flow.accept();
-    container.takeOver();
     expect(shown).toEqual([]);
-    expect(reload).not.toHaveBeenCalled();
+    expect(reload).toHaveBeenCalledTimes(1);
   });
 });

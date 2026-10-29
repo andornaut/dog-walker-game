@@ -278,14 +278,15 @@ export const HOME_LAYOUT = {
       right: "ui-home-cash-well-right",
     },
   },
-  // The update plate under the top bar while a newer version waits: a ui-panel across the gate
-  // scene's top, over the street sign and clear of the Pet shop's board, in place of the
-  // walker's bubble. On one row: iconKey's 16x16 icon at icon.x, the title in 2x title text in
-  // titleColour, its ink starting at titleX, and the ui-button's go look at button with its
-  // label, centred, at least labelPad inside either side. The label's capitals are centred on the
-  // button's face (the button less its lip), the title's share their row, and the icon is
-  // centred on that row (updatePlateText). The tap area is hit, 42 tall between the top bar's
-  // hit areas and the Pet shop's board, about 45 CSS pixels on a phone.
+  // The update plate under the top bar while a newer version waits or wrote the save (gateTop's
+  // modes, one at a time): a ui-panel across the gate scene's top, over the street sign and
+  // clear of the Pet shop's board, in place of the walker's bubble. On one row: iconKey's 16x16
+  // icon at icon.x, the title in 2x title text in titleColour, its ink starting at titleX, and
+  // the ui-button's go look at button with its label, centred, at least labelPad inside either
+  // side. The label's capitals are centred on the button's face (the button less its lip), the
+  // title's share their row, and the icon is centred on that row (updatePlateText). The tap area
+  // is hit, 42 tall between the top bar's hit areas and the Pet shop's board, about 45 CSS
+  // pixels on a phone.
   updatePlate: {
     button: { height: 28, width: 128, x: 218, y: 49 },
     hit: { height: 42, width: 128, x: 218, y: 44 },

@@ -741,9 +741,12 @@ export interface HomeText {
   // The street sign on the gate art.
   readonly gateSign: string;
   readonly gearBought: string;
-  // Said first in the walker's bubble while a later version of the game holds the save: asks
-  // the player to reload.
-  readonly newerSave: string;
+  // The plate under the top bar while a later version of the game wrote the save on this device
+  // and no update waits: its title, and its button, which takes the newer version.
+  readonly newerSave: {
+    readonly button: string;
+    readonly title: string;
+  };
   // What the walker says after a tap that changes nothing: the pack is full, or sound
   // toggled.
   readonly noticePackFull: string;
@@ -796,7 +799,7 @@ export interface HomeText {
   // Said first in the walker's bubble while the browser keeps no save.
   readonly unsaved: string;
   // The plate under the top bar while a newer version of the game waits: its title, and its
-  // button, which reloads into that version.
+  // button, which reloads into that version. It shows in place of newerSave's.
   readonly update: {
     readonly button: string;
     readonly title: string;

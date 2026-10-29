@@ -22,7 +22,7 @@ import {
   HOME_LAYOUT,
   UPDATE_PLATE_ROOM,
 } from "../home/homeLayout";
-import { messageLine } from "../home/homeLines";
+import { messageLine, PLATE_MODES } from "../home/homeLines";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import { confirmLines } from "../home/purchaseConfirm";
 import { PURCHASE_CONFIRM_LAYOUT } from "../home/purchaseConfirmLayout";
@@ -453,13 +453,13 @@ export function textRoleCases(): TextRoleCase[] {
       "update plate's title",
       "font-title",
       { room: UPDATE_PLATE_ROOM.title, style: TEXT_STYLE },
-      [gameData.homeText.update.title],
+      PLATE_MODES.map((mode) => gameData.homeText[mode].title),
     ),
     ...plainRole(
       "update plate's button",
       "font-title",
       { room: UPDATE_PLATE_ROOM.label, style: TEXT_STYLE },
-      [gameData.homeText.update.button],
+      PLATE_MODES.map((mode) => gameData.homeText[mode].button),
     ),
     ...endRoles(),
     ...shopRoles(),
