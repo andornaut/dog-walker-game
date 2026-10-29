@@ -111,7 +111,7 @@ export const TUNING = {
     // The Big screen promo's Buy the merch.
     promoMerch: 20,
     // What a bump costs in cash while Spotlight lasts, on top of its hearts.
-    spotlightBump: 20,
+    spotlightBump: 10,
     // The cash every walk starts with, before gear.
     startPurse: 0,
     thiefLetGo: 20,
@@ -257,7 +257,7 @@ export const TUNING = {
     // A mover's cue shows this long before each move.
     moverWarningSeconds: 0.6,
     // How long the Muddy debuff lasts, in walking time.
-    muddySeconds: 30,
+    muddySeconds: 60,
     // Wherever the path changes lanes between two obstacles, the road between them also leaves
     // the pack this long to react, on top of the pack's height and the lane moves.
     pathReactionMargin: 0.5,
@@ -274,7 +274,7 @@ export const TUNING = {
     // move all fit in it, so it clears the pack's lane before the pack must react.
     shyHopNearSeconds: 1.65,
     // How long the Spotlight debuff lasts, in walking time.
-    spotlightSeconds: 30,
+    spotlightSeconds: 60,
     // How long the Stinky debuff lasts, in walking time.
     stinkySeconds: 60,
     // A message strip line still waiting its turn this long is dropped unseen, but for a hint or

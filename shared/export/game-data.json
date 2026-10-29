@@ -10,7 +10,7 @@
         "id": "bigScreenPromo",
         "kind": "encounter"
       },
-      "text": "Spotlight: bumps cost $20 for 30s",
+      "text": "Spotlight: bumps cost $10 for 60s",
       "title": "Big screen promo"
     },
     {
@@ -88,7 +88,7 @@
         "id": "droppedIceCream",
         "kind": "encounter"
       },
-      "text": "Muddy: slower for 30s",
+      "text": "Muddy: slower for 60s",
       "title": "Dropped ice cream"
     },
     {
@@ -127,7 +127,7 @@
         "id": "escapedCapybara",
         "kind": "encounter"
       },
-      "text": "Muddy: slower for 30s",
+      "text": "Muddy: slower for 60s",
       "title": "Escaped capybara"
     },
     {
@@ -166,7 +166,7 @@
         "id": "greenBinSpill",
         "kind": "encounter"
       },
-      "text": "Muddy: slower for 30s",
+      "text": "Muddy: slower for 60s",
       "title": "Green bin spill"
     },
     {
@@ -348,7 +348,7 @@
         "id": "weddingPhotoShoot",
         "kind": "encounter"
       },
-      "text": "Spotlight: bumps cost $20 for 30s",
+      "text": "Spotlight: bumps cost $10 for 60s",
       "title": "Wedding photo shoot"
     },
     {
@@ -3030,7 +3030,7 @@
         "whistle": 2500
       },
       "promoMerch": 20,
-      "spotlightBump": 20,
+      "spotlightBump": 10,
       "startPurse": 0,
       "thiefLetGo": 20,
       "tip": 1,
@@ -3101,13 +3101,13 @@
       "moverStepSeconds": 0.4,
       "moverTimingJitter": 0.6,
       "moverWarningSeconds": 0.6,
-      "muddySeconds": 30,
+      "muddySeconds": 60,
       "pathReactionMargin": 0.5,
       "pullReactionWindow": 0.6,
       "pullTell": 1,
       "screenTapGuard": 1,
       "shyHopNearSeconds": 1.65,
-      "spotlightSeconds": 30,
+      "spotlightSeconds": 60,
       "stinkySeconds": 60,
       "stripLineWaitSeconds": 3,
       "zoneAtBaseSpeed": 148,
