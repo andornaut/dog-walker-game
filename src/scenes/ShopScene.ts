@@ -63,8 +63,8 @@ import {
 import { screenArea } from "../input/outsideTap";
 import type { SaveDocument } from "../save/schema";
 import type { ArtLook } from "../ui/interaction";
+import { PALETTE } from "../ui/palette";
 import { fillRect } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import { fitPixelText, pixelFontMetrics, placePixelText } from "../ui/phaser/pixelText";
 import { GREYED, pictureBox, type PlateKind } from "../ui/selection";
 import { cents } from "../units";

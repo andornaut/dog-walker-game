@@ -14,6 +14,7 @@ import {
   tileState,
 } from "../ui/interaction";
 import { MARK_OFFSET } from "../ui/mark";
+import { PALETTE } from "../ui/palette";
 import {
   CREAM_PANEL_COLOURS,
   drawFramedRect,
@@ -23,7 +24,6 @@ import {
   fillRect,
 } from "../ui/phaser/draw";
 import { disabledTextureKey } from "../ui/phaser/greyTextures";
-import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   inkSpan,
@@ -640,10 +640,9 @@ export function addTab(
   );
 }
 
-// A picture's texture on a tile in its art look: grey is its grey copy, GREYED.copyDarker ramp
-// steps darker.
+// A picture's texture on a tile in its art look: grey is its disabled tile's grey copy.
 export function tileTextureKey(scene: Scene, art: ArtLook, key: string): string {
-  return art === "grey" ? disabledTextureKey(scene, GREYED.copyDarker, key) : key;
+  return art === "grey" ? disabledTextureKey(scene, key) : key;
 }
 
 // A sprite on a tile, placed by its top-left corner, playing tag, or holding its first frame

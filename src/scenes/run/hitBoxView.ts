@@ -6,7 +6,7 @@ import type { Box, ScaledBox } from "../../runner/collision";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import { obstacleHitBox, packBoxes, type Walk, walkItemBox } from "../../runner/walk";
 import { isObstacle } from "../../runner/walkItems";
-import { PALETTE } from "../../ui/phaser/palette";
+import { PALETTE } from "../../ui/palette";
 import { DEPTH, LAYOUT, PROJECTION } from "./stage";
 
 // Over every road sprite and burst, under the popups and banners.

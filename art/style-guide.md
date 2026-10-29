@@ -85,7 +85,7 @@ Every piece is very readable, clean and not busy, judged at the size it's shown:
 
 An effect's name beside its description sits on a pale pill in the effect's family, its name dark on it, so it reads the same on cream and on ink: 11px tall, the name inset 3px each side, the corners cut by 1px.
 
-Names are `PALETTE` names in `src/ui/phaser/palette.ts`, or `K` names for the neutral greys and any colour it leaves out; ratios are WCAG.
+Names are `PALETTE` names in `src/ui/palette.ts`, or `K` names for the neutral greys and any colour it leaves out; ratios are WCAG.
 
 | Pair                           | Ratio | Use                                                                                                                         |
 | ------------------------------ | ----- | --------------------------------------------------------------------------------------------------------------------------- |

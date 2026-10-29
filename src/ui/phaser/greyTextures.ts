@@ -1,19 +1,19 @@
 import type { Scene } from "phaser";
 
 import { remapToGrey } from "../../assets/greyRamp";
-import { NEUTRAL_RAMP } from "./palette";
+import { disabledArtKey, greyForDisabledTile } from "../disabledArt";
+import { NEUTRAL_RAMP } from "../palette";
 
-// A copy of a texture with remap applied to its pixels, made once and kept under
-// key-suffix, with the same frames. Returns the original key when the copy cannot be made.
+// A copy of a texture with remap applied to its pixels, made once and kept under copyKey,
+// with the same frames. Returns the original key when the copy cannot be made.
 // Only the region the texture's frames cover is copied, since in a build its source is a
 // shared atlas page. A trimmed frame keeps its trim.
 function remappedTextureKey(
   scene: Scene,
-  suffix: string,
+  copyKey: string,
   remap: (pixels: Uint8ClampedArray) => void,
   key: string,
 ): string {
-  const copyKey = `${key}-${suffix}`;
   if (scene.textures.exists(copyKey)) {
     return copyKey;
   }
@@ -50,16 +50,16 @@ function remappedTextureKey(
 
 // Every colour moved to the neutral ramp, as a disabled card draws.
 export function greyTextureKey(scene: Scene, key: string): string {
-  return remappedTextureKey(scene, "grey", (pixels) => remapToGrey(NEUTRAL_RAMP, 0, pixels), key);
-}
-
-// The grey copy steps further down the neutral ramp, as art inside a disabled tile draws. The
-// copy is kept per key, so a scene passes the same steps every time.
-export function disabledTextureKey(scene: Scene, steps: number, key: string): string {
   return remappedTextureKey(
     scene,
-    "disabled",
-    (pixels) => remapToGrey(NEUTRAL_RAMP, steps, pixels),
+    `${key}-grey`,
+    (pixels) => remapToGrey(NEUTRAL_RAMP, 0, pixels),
     key,
   );
+}
+
+// A disabled tile's grey copy of a texture (ui/disabledArt.ts). A build packs it on the atlas
+// page beside the art; the dev server makes it here, once per key.
+export function disabledTextureKey(scene: Scene, key: string): string {
+  return remappedTextureKey(scene, disabledArtKey(key), greyForDisabledTile, key);
 }

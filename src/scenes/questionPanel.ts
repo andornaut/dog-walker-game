@@ -7,8 +7,8 @@ import { NOTE_PLATE, notePartTops, PAUSE_NOTE_WIDTH, type pauseMenuLayout } from
 import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
 import { withKeyNumber } from "../input/keyNumbers";
 import { rectIndexAt } from "../ui/grid";
+import { PALETTE } from "../ui/palette";
 import { fillRect } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, pixelFontMetrics, wrapPixelText } from "../ui/phaser/pixelText";
 import { TEXT_SCALE } from "../ui/textFit";
 import { listenTargetPress } from "./targetPress";

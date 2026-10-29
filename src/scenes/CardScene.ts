@@ -41,10 +41,10 @@ import {
 import { cardHeader } from "../ui/cardRow";
 import { rectIndexAt } from "../ui/grid";
 import { PLAIN_ITEM, tileState } from "../ui/interaction";
+import { PALETTE } from "../ui/palette";
 import { addDisplayText, hasDisplayFont } from "../ui/phaser/displayText";
 import { drawRing, fillRect } from "../ui/phaser/draw";
 import { greyTextureKey } from "../ui/phaser/greyTextures";
-import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,

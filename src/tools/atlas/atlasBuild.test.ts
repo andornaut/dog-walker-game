@@ -4,8 +4,12 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import shippedManifest from "../../../public/art/manifest.json";
 import { BASE_FRAME, parseAtlasManifest } from "../../assets/atlasManifest";
+import { remapToGrey } from "../../assets/greyRamp";
 import { parseManifest } from "../../assets/manifest";
 import { sheetFromRows } from "../../testing/sheetImage";
+import { disabledArtKey, greysOnTile } from "../../ui/disabledArt";
+import { NEUTRAL_RAMP } from "../../ui/palette";
+import { GREYED } from "../../ui/selection";
 import {
   type AtlasBuild,
   buildAtlases,
@@ -80,7 +84,8 @@ describe("the shipped art's atlases", () => {
   let pages: RgbaImage[];
   // Each page's pixels as they went to the encoder, in page order.
   const drawn: RgbaImage[] = [];
-  // Each key's source PNG, decoded, and each sprite's Aseprite sheet.
+  // Each key's source PNG, decoded, and each sprite's Aseprite sheet. A disabled tile's grey
+  // copy has its key's sheet, and its PNG remapped as the game greyed it at runtime.
   const sources = new Map<string, RgbaImage>();
   const sheets = new Map<string, Sheet>();
   // Packing every page is the slow part, so it runs once, with room to spare on a loaded machine.
@@ -103,6 +108,15 @@ describe("the shipped art's atlases", () => {
         sheets.set(key, JSON.parse(decoder.decode(await readArt(json))) as Sheet);
       }),
     ]);
+    for (const [key, source] of [...sources].filter(([key]) => greysOnTile(key))) {
+      const pixels = new Uint8ClampedArray(source.data);
+      remapToGrey(NEUTRAL_RAMP, GREYED.copyDarker, pixels);
+      sources.set(disabledArtKey(key), { ...source, data: new Uint8Array(pixels.buffer) });
+      const sheet = sheets.get(key);
+      if (sheet !== undefined) {
+        sheets.set(disabledArtKey(key), sheet);
+      }
+    }
   }, 60_000);
 
   it("packs every image, font and sprite with no warnings, on pages that fit a phone GPU", () => {
@@ -148,9 +162,27 @@ describe("the shipped art's atlases", () => {
       );
       expect(texture?.tags).toEqual(meta.frameTags ?? []);
     }
-    expect(textures.size).toBe(
-      manifest.fonts.length + manifest.images.length + manifest.sprites.length,
-    );
+    const keys = [...manifest.fonts, ...manifest.images, ...manifest.sprites].map(({ key }) => key);
+    expect(textures.size).toBe(keys.length + keys.filter(greysOnTile).length);
+  });
+
+  // The game draws a disabled tile's picture from its grey copy, which the page beside its
+  // art holds, with every frame of the art.
+  it("packs a grey copy of each picture a disabled tile greys, on its art's page", () => {
+    const textures = new Map(build.manifest.textures.map((texture) => [texture.key, texture]));
+    const greyed = [...manifest.images, ...manifest.sprites].flatMap(({ key }) => {
+      const texture = textures.get(key);
+      return texture !== undefined && greysOnTile(key) ? [texture] : [];
+    });
+    expect(greyed.length).toBeGreaterThan(0);
+    const misfits = greyed.filter(({ frames, key, page }) => {
+      const copy = textures.get(disabledArtKey(key));
+      return (
+        copy?.page !== page ||
+        copy.frames.map(({ name }) => name).join() !== frames.map(({ name }) => name).join()
+      );
+    });
+    expect(misfits.map(({ key }) => key)).toEqual([]);
   });
 
   // A trimmed frame's rect holds its pixels at its trim offset, and the rest of the whole frame

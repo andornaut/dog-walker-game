@@ -1,5 +1,5 @@
 import type { ChangeLabel } from "../hud/hudView";
-import { PALETTE } from "../ui/phaser/palette";
+import { PALETTE } from "../ui/palette";
 
 // A change label's text colour on its cream chip, each at 4.5:1 or better: a gain in forest, and
 // a loss, or a plus amount a debuff zeroed (a Stinky tip's "+$0"), in dark red.

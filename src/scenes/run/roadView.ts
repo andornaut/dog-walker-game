@@ -17,7 +17,7 @@ import {
 } from "../../layout/roadRaster";
 import { previousZone } from "../../rules/route";
 import type { Walk } from "../../runner/walk";
-import { colourFromHex } from "../../ui/phaser/palette";
+import { colourFromHex } from "../../ui/palette";
 import { DEPTH, LAYOUT, PROJECTION } from "./stage";
 
 const ROAD_TEXTURE = "road-projected";

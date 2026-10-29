@@ -17,8 +17,8 @@ import {
 import { withNamePills } from "../hud/effectNames";
 import { barTitleLeft } from "../ui/barTitle";
 import { closeControl } from "../ui/closeControl";
+import { PALETTE } from "../ui/palette";
 import { addDim, drawFramedRect, drawRing } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   inkSpan,

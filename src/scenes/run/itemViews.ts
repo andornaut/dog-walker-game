@@ -28,7 +28,7 @@ import type { SpawnEvent } from "../../runner/spawning";
 import { type RoadGeometry, type Walk, type WalkStep } from "../../runner/walk";
 import { walkGeometry } from "../../runner/walkGeometry";
 import { itemCategory, type WalkItem, type WalkItemKind } from "../../runner/walkItems";
-import { PALETTE } from "../../ui/phaser/palette";
+import { PALETTE } from "../../ui/palette";
 import { addStandingSprite, ensurePlaceholder } from "../sprites";
 import { applyItemCue } from "./itemCueViews";
 import { drawMover, MOVER_CUE_PARTS, moverBodyKey } from "./moverView";

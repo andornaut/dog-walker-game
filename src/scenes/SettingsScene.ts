@@ -45,8 +45,8 @@ import {
 import type { Settings } from "../save/schema";
 import { closeFace } from "../ui/closeControl";
 import { PLAIN_ITEM, tileState } from "../ui/interaction";
+import { PALETTE } from "../ui/palette";
 import { addDim, drawFocusRing, fillRect } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,

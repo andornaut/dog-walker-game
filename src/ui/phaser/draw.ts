@@ -2,8 +2,8 @@ import { getOrInsertComputed } from "@andornaut/game-kit/maps";
 import { insetRect, type Point, type Rect, ringRects } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene, Textures } from "phaser";
 
+import { PALETTE } from "../palette";
 import { pixelEllipseSpans, pixelLinePoints, shadowRadiusX } from "../pixelShapes";
-import { PALETTE } from "./palette";
 
 export function addFilledRect(scene: Scene, colour: number, rect: Rect): GameObjects.Rectangle {
   return scene.add.rectangle(rect.x, rect.y, rect.width, rect.height, colour).setOrigin(0);

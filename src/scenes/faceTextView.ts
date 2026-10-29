@@ -12,8 +12,8 @@ import {
   type OwnerFace,
   styledFaceRows,
 } from "../hud/faceText";
+import { PALETTE } from "../ui/palette";
 import { drawFramedRect } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   pixelFontMetrics,

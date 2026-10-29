@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG } from "../data/screen";
 import { decodePng } from "../testing/png";
-import { PALETTE } from "../ui/phaser/palette";
+import { PALETTE } from "../ui/palette";
 import { TOP_BAR_TRIM, topBarRects } from "../ui/topBarTrim";
 
 // The walk bar's art, ui-walk-bar, is the one top bar art draws: its first column, clear of its

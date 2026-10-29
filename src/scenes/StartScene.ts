@@ -129,8 +129,8 @@ import {
   itemTile,
   itemTileLook,
 } from "../ui/interaction";
+import { PALETTE } from "../ui/palette";
 import { drawFocusRing, drawFramedRect, drawRing, drawShadow, fillRect } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   type FontRole,

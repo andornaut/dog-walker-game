@@ -7,8 +7,8 @@ import type { DepthDraw } from "../../layout/depthScale";
 import { PACK_DEPTH, tautLeashLine } from "../../layout/packFormation";
 import type { Shadow } from "../../scenes/run/stage";
 import { addStandingSprite, playTag, showAtDepth, spriteMetrics } from "../../scenes/sprites";
+import { PALETTE } from "../../ui/palette";
 import { drawPixelLine, drawShadow } from "../../ui/phaser/draw";
-import { PALETTE } from "../../ui/phaser/palette";
 import { type Feet, type LeashLine, leashLine, packLayers, type StandingDog } from "../packDraw";
 
 // The leashes' colour off the road, at the start screen's gate and on the end screen's walk

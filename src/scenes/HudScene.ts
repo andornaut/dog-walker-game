@@ -82,6 +82,7 @@ import { faceMood } from "../rules/treats";
 import { read } from "../rules/units";
 import { heartsOf, slotIndexOf } from "../state/pack";
 import type { PackSlot, RunState } from "../state/runState";
+import { PALETTE } from "../ui/palette";
 import {
   addFilledRect,
   CREAM_PANEL_COLOURS,
@@ -90,7 +91,6 @@ import {
   drawHeart,
   fillRect,
 } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,

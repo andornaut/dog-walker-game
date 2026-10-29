@@ -19,8 +19,8 @@ import {
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import { DETAIL_TEXT_WIDTH, detailPanel, detailTextTops, STATS_LAYOUT } from "../home/statsLayout";
 import { closeControl } from "../ui/closeControl";
+import { PALETTE } from "../ui/palette";
 import { addDim } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   labelInkWidth,

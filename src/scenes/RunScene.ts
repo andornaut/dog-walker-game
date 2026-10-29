@@ -53,7 +53,7 @@ import { startRoad, type Walk } from "../runner/walk";
 import { dogsFinishedWith } from "../save/checkpoint";
 import { checkpointOf, runResultOf } from "../save/runSlices";
 import { type Loadout, newRun, type RunState } from "../state/runState";
-import { colourFromHex, PALETTE } from "../ui/phaser/palette";
+import { colourFromHex, PALETTE } from "../ui/palette";
 import type { HudSceneData } from "./HudScene";
 import type { HudRun, RunHudView } from "./hudWalk";
 import { onWindowEvent } from "./overlay";

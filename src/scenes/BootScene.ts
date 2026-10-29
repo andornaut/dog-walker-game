@@ -41,8 +41,8 @@ import {
   stepFraction,
 } from "../layout/loadingScreen";
 import { browserSoundFormat, launchReady, startWakeLock, unlockAudioOnFirstGesture } from "../pwa";
+import { PALETTE } from "../ui/palette";
 import { addFilledRect } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import { addPillGlyphs, registerFallbackPixelFont } from "../ui/phaser/pixelText";
 import { markArtReady } from "./artReady";
 import { onLoadProgress } from "./loadProgress";

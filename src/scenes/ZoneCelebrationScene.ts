@@ -19,9 +19,9 @@ import {
 } from "../hud/zoneCelebration";
 import { cardNumberForKey, isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
+import { PALETTE } from "../ui/palette";
 import { addDisplayText } from "../ui/phaser/displayText";
 import { fillRect } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,

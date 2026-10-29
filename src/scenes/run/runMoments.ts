@@ -85,8 +85,8 @@ import {
 } from "../../save/achievementPreview";
 import type { RunResult } from "../../save/checkpoint";
 import type { EffectSource, EndReason, RunState } from "../../state/runState";
+import { PALETTE } from "../../ui/palette";
 import { fillRect } from "../../ui/phaser/draw";
-import { PALETTE } from "../../ui/phaser/palette";
 import { pixelLinePoints } from "../../ui/pixelShapes";
 import { floatValue, popCharm } from "../buffCharm";
 import { FEEDBACK_ART } from "../feedbackArt";

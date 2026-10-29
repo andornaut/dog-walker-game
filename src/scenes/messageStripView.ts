@@ -24,7 +24,7 @@ import {
   stepMessageStrip,
   stripLeadSlot,
 } from "../hud/messageStrip";
-import { PALETTE } from "../ui/phaser/palette";
+import { PALETTE } from "../ui/palette";
 import {
   addPixelText,
   inkSpan,

@@ -14,8 +14,8 @@ import {
   wheelScroll,
 } from "../input/listScroll";
 import { read } from "../rules/units";
+import { PALETTE } from "../ui/palette";
 import { fillRect } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import type { ScrollbarRects } from "../ui/scrollbar";
 import { listenOnePress } from "./onePress";
 import { currentSettings } from "./profileStore";

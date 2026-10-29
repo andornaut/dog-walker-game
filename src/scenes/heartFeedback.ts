@@ -15,8 +15,8 @@ import {
 import type { ChangeLabel } from "../hud/hudView";
 import { arcControl } from "../hud/moments";
 import { slotIndexOf } from "../state/pack";
+import { PALETTE } from "../ui/palette";
 import { CREAM_PANEL_COLOURS, drawFramedRect, drawRing } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
 import { arcFlight } from "./arcFlight";
 import { FEEDBACK_ART } from "./feedbackArt";

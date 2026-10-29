@@ -52,9 +52,9 @@ import { PackFigures } from "../pack/phaser/packFigures";
 import { stopWakeLock } from "../pwa";
 import { walkLength } from "../rules/route";
 import type { LastWalk } from "../save/schema";
+import { PALETTE } from "../ui/palette";
 import { addDisplayText } from "../ui/phaser/displayText";
 import { fillRect } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,

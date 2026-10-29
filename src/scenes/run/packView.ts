@@ -16,7 +16,7 @@ import { laneMotionX } from "../../runner/laneMotion";
 import { pullPose, type Pulls } from "../../runner/pulls";
 import type { Walk } from "../../runner/walk";
 import { packDogs } from "../../state/pack";
-import { colourFromHex } from "../../ui/phaser/palette";
+import { colourFromHex } from "../../ui/palette";
 import { playBarkWord } from "../comicWord";
 import { trotOffRoad } from "../feedbackMoments";
 import { type DogSignal, dogTop, iconArt, playPullFail, PullSignals } from "../pullSignals";

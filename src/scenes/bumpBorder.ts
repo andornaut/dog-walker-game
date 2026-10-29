@@ -2,8 +2,8 @@ import type { GameObjects, Scene, Time, Tweens } from "phaser";
 
 import { SCREEN_CONFIG } from "../data/screen";
 import { BUMP_FLASH, bumpBorder } from "../layout/bumpFlash";
+import { PALETTE } from "../ui/palette";
 import { fillRect } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import { HUD_DEPTH } from "./hudDepth";
 
 const SCREEN = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 };

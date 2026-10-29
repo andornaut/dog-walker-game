@@ -22,7 +22,7 @@ import { read } from "../rules/units";
 import { laneControlIn } from "../runner/laneControl";
 import { laneMotionX } from "../runner/laneMotion";
 import type { Walk } from "../runner/walk";
-import { colourFromHex } from "../ui/phaser/palette";
+import { colourFromHex } from "../ui/palette";
 import type { CardSceneData } from "./CardScene";
 import type { HudSceneData } from "./HudScene";
 import type { HudWalk } from "./hudWalk";

@@ -10,7 +10,7 @@ import {
   type PauseMenuItem,
   pauseMenuLayout,
 } from "../hud/pauseMenu";
-import { PALETTE } from "../ui/phaser/palette";
+import { PALETTE } from "../ui/palette";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";

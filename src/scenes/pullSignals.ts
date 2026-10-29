@@ -4,7 +4,7 @@ import { animationKey } from "../assets/asepriteAnimations";
 import { PULL_ART } from "../assets/spriteKeys";
 import type { DogId } from "../data/types";
 import { arrowheadPixels } from "../ui/arrowhead";
-import { PALETTE } from "../ui/phaser/palette";
+import { PALETTE } from "../ui/palette";
 import { playEffect, playTag, playTagOnce, spriteTopY } from "./sprites";
 
 // A frame of a texture: its first frame when frame is absent.

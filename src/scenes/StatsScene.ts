@@ -49,8 +49,8 @@ import {
 } from "../input/listScroll";
 import { screenArea } from "../input/outsideTap";
 import { rectIndexAt } from "../ui/grid";
+import { PALETTE } from "../ui/palette";
 import { fillRect } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import {
   type FontRole,
   inkSpan,

@@ -44,9 +44,9 @@ import { playerPaused, type RunPause, walkPaused } from "../hud/topBar";
 import { DOG_CARD } from "../hud/walkHud";
 import { slotIndexOf } from "../state/pack";
 import type { RunState } from "../state/runState";
+import { PALETTE } from "../ui/palette";
 import { addDisplayText } from "../ui/phaser/displayText";
 import { CREAM_PANEL_COLOURS, drawFramedRect, drawRing } from "../ui/phaser/draw";
-import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,

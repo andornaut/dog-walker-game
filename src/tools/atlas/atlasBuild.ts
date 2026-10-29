@@ -6,6 +6,7 @@ import { PNG } from "pngjs";
 import { atlasGroupOf } from "../../assets/atlasGroups";
 import type { AtlasManifest } from "../../assets/atlasManifest";
 import { type AssetManifest, parseManifest } from "../../assets/manifest";
+import { disabledArtKey, greyForDisabledTile, greysOnTile } from "../../ui/disabledArt";
 import {
   EXTRUDE,
   imageSource,
@@ -89,6 +90,19 @@ export function compactFrames(
   return { ...texture, frames };
 }
 
+// A disabled tile's grey copy of a texture: its frames, read from a grey copy of its PNG, which
+// is added to images.
+function disabledCopy(images: Map<string, RgbaImage>, texture: SourceTexture): SourceTexture {
+  const png = `${texture.png}#disabled`;
+  const image = images.get(texture.png);
+  if (image !== undefined && !images.has(png)) {
+    const pixels = new Uint8ClampedArray(image.data);
+    greyForDisabledTile(pixels);
+    images.set(png, { ...image, data: new Uint8Array(pixels.buffer) });
+  }
+  return { ...texture, key: disabledArtKey(texture.key), png };
+}
+
 // What a caller has already read: the art manifest, else read from manifest.json, and PNGs
 // decoded by their paths.
 interface AtlasInputs {
@@ -98,9 +112,10 @@ interface AtlasInputs {
   manifest?: AssetManifest;
 }
 
-// Packs every image, font PNG and sprite frame of the art manifest into atlas pages, reading each file
-// by its path relative to the art directory. A key whose files cannot be read or parsed, or
-// with a frame too large for a page, is left out with a warning.
+// Packs every image, font PNG and sprite frame of the art manifest into atlas pages, with a
+// disabled tile's grey copy of each picture one can grey, reading each file by its path
+// relative to the art directory. A key whose files cannot be read or parsed, or with a frame
+// too large for a page, is left out with a warning.
 export async function buildAtlases(
   readArt: (path: string) => Promise<Uint8Array>,
   inputs: AtlasInputs = {},
@@ -149,7 +164,11 @@ export async function buildAtlases(
     ),
   ]);
 
-  const layout = layoutAtlases(sources.flat());
+  const packed = sources.flat();
+  const disabled = packed
+    .filter(({ key }) => greysOnTile(key))
+    .map((texture) => disabledCopy(images, texture));
+  const layout = layoutAtlases([...packed, ...disabled]);
   warnings.push(...layout.skipped.map((key) => `${key} has a frame too large for an atlas page`));
   const build: AtlasBuild = {
     manifest: { pages: [], textures: layout.textures },
