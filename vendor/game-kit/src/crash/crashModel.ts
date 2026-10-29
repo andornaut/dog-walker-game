@@ -1,6 +1,5 @@
 // Which uncaught errors open the crash screen, and what it says. No DOM, so it runs in unit
-// tests; src/crash/crashScreen.ts draws it.
-import type { MenuText } from "../data/types";
+// tests; crashScreen.ts draws it.
 
 export interface CrashReport {
   readonly message: string;
@@ -16,8 +15,15 @@ interface ErrorEventLike {
   readonly message?: string;
 }
 
+// The crash screen's words, as the game words them.
+export interface CrashWords {
+  readonly body: string;
+  readonly reload: string;
+  readonly title: string;
+}
+
 // The crash screen's words, and the message and stack in dev builds only.
-type CrashView = MenuText["crash"] & { readonly details: string | undefined };
+export type CrashView = CrashWords & { readonly details: string | undefined };
 
 const EXTENSION_URL =
   /\b(?:chrome-extension|moz-extension|safari-extension|safari-web-extension|webkit-masked-url):\/\//;
@@ -99,6 +105,6 @@ function detailsOf(report: CrashReport): string {
   return stack.includes(message) ? stack : `${message}\n${stack}`;
 }
 
-export function crashView(text: MenuText["crash"], dev: boolean, report: CrashReport): CrashView {
-  return { ...text, details: dev ? detailsOf(report) : undefined };
+export function crashView(words: CrashWords, dev: boolean, report: CrashReport): CrashView {
+  return { ...words, details: dev ? detailsOf(report) : undefined };
 }

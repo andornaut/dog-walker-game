@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { gameData } from "../data";
 import {
   crashGate,
   type CrashReport,
@@ -10,7 +9,7 @@ import {
   reportFromRejection,
 } from "./crashModel";
 
-const APP_URL = "https://dogwalker.test/assets/play-abc123.js";
+const APP_URL = "https://game.test/assets/play-abc123.js";
 
 function thrownAt(url: string, message = "boom"): Error {
   const error = new Error(message);
@@ -119,7 +118,7 @@ describe("crashGate", () => {
 });
 
 describe("crashView", () => {
-  const text = gameData.menuText.crash;
+  const text = { body: "Your progress is kept.", reload: "Reload", title: "Something went wrong" };
 
   it("shows the crash text, without details outside dev builds", () => {
     expect(crashView(text, false, crash)).toEqual({ ...text, details: undefined });

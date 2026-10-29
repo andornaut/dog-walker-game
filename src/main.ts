@@ -5,7 +5,7 @@ import "./main.css";
 import { fitWholePixels } from "@andornaut/game-kit/view/phaser/fitWholePixels";
 import { AUTO, Core, Game, Scale } from "phaser";
 
-import { stopGameOnCrash } from "./crash/crashScreen";
+import { CRASH_SCREEN } from "./crash/crashScreen";
 import { SCREEN_CONFIG } from "./data/screen";
 import { applyPendingSaveEdits, type DevPanelHost, mountDevPanel } from "./dev/devPanel";
 import { DEV_CHEATS_KEY } from "./dev/devPanelModel";
@@ -98,7 +98,7 @@ function bootGame(): Game {
     width: SCREEN_CONFIG.width,
   });
 
-  stopGameOnCrash(() => {
+  CRASH_SCREEN.stopGameOnCrash(() => {
     game.pause();
     game.sound.pauseAll();
   });
