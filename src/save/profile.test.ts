@@ -1,8 +1,7 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it, vi } from "vitest";
 
 import { gameData } from "../data";
-import { keysOf } from "../lib/records";
-import { cents } from "../lib/units";
 import { packOf, runFactsFor, saveFor } from "../testing/achievements";
 import {
   memoryStorage,
@@ -11,6 +10,7 @@ import {
   testContext,
   veteranSave,
 } from "../testing/saves";
+import { cents } from "../units";
 import { earnedSince } from "./achievements";
 import { ProfileSession } from "./profile";
 import { DEFAULT_SETTINGS, SAVE_VERSION, type SaveDocument } from "./schema";

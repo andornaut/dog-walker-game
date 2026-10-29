@@ -1,3 +1,6 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { keysOf } from "@andornaut/game-kit/records";
+
 import { DOGS } from "../data/dogs";
 import type {
   AchievementCondition,
@@ -11,8 +14,6 @@ import type {
   ZoneId,
 } from "../data/types";
 import { DEFAULT_WALKER } from "../data/walkers";
-import { itemAt } from "../lib/arrays";
-import { keysOf } from "../lib/records";
 import {
   type AchievementData,
   conditionHolds,

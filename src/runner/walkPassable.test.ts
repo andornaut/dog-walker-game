@@ -1,10 +1,11 @@
+import { STEP_SECONDS } from "@andornaut/game-kit/clock/fixedStep";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it, vi } from "vitest";
 
 import { LANE_COUNT } from "../data/screen";
 import { TUNING } from "../data/tuning";
 import type { ZoneId } from "../data/types";
 import { WORLD } from "../data/world";
-import { keysOf } from "../lib/records";
 import { read } from "../rules/units";
 import { lanesReachedAtEnd, pathShortfalls } from "../testing/avoidable";
 import { type HopMovement, hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";
@@ -30,7 +31,6 @@ import {
   ZONE_IDS,
 } from "../testing/planner";
 import { mapZones } from "../testing/world";
-import { STEP_SECONDS } from "./fixedStep";
 import { onScreenOf, sweptLanes } from "./moverPlanning";
 import { crossSpan, hasLeftRoad, type MoverPath, moverPlace } from "./movers";
 import { moverOutcomes } from "./outcomes";
@@ -41,8 +41,8 @@ import { planZone } from "./zonePlan";
 // While set, the lane-balance bias is off: the planner's only weighted draws are its lane balance
 // (laneBalanceWeight), so even weights draw every place that fits alike.
 const unbiased = vi.hoisted(() => ({ on: false }));
-vi.mock("../lib/random", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../lib/random")>();
+vi.mock("@andornaut/game-kit/random", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@andornaut/game-kit/random")>();
   const weightedPick: typeof actual.weightedPick = (random, items, weights) =>
     actual.weightedPick(random, items, unbiased.on ? weights.map(() => 1) : weights);
   return { ...actual, weightedPick };

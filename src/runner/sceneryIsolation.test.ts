@@ -1,15 +1,15 @@
+import { STEP_SECONDS } from "@andornaut/game-kit/clock/fixedStep";
+import { randomStream } from "@andornaut/game-kit/random";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import { distanceAtY } from "../layout/projection";
-import { randomStream } from "../lib/random";
 import { startAmbient, stepAmbient } from "../road/ambient";
 import { newRoadsidePlaces, placeRoadside, ROADSIDE } from "../road/roadsideProps";
 import { type KeptScenery, struckBy, struckNow } from "../road/struckScenery";
 import { currentZone, currentZoneId, zoneAt } from "../rules/route";
 import { newRun } from "../state/runState";
-import { STEP_SECONDS } from "./fixedStep";
 import { screenRoadGeometry } from "./screenGeometry";
 import {
   chooseCard,

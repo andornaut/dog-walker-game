@@ -1,7 +1,7 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import type { Rect } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
-import { itemAt } from "../lib/arrays";
-import type { Rect } from "../lib/rect";
 import { cardHeader, cardRowRects } from "./cardRow";
 
 const area = { height: 450, width: 280, x: 80, y: 190 };

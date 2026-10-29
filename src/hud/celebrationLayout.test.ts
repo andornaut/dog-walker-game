@@ -1,11 +1,11 @@
 import { readFileSync } from "node:fs";
 
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
 import type { WalkerId } from "../data/types";
-import { keysOf } from "../lib/records";
 import { bodyRunWidth } from "../testing/bodyFont";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { decodePng } from "../testing/png";

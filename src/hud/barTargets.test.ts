@@ -1,9 +1,9 @@
+import type { Point, Rect } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
 import { SCREEN_LAYOUT } from "../data/screen";
 import { homeBarAction, homeBarButtonAt } from "../home/homeBar";
 import { HOME_LAYOUT } from "../home/homeLayout";
-import type { Point, Rect } from "../lib/rect";
 import { NOTHING_PAUSED, type RunPause, topBarAction, topBarButtonAt, walkPresses } from "./topBar";
 import { type ExplainShown, explainTargetAt, opensOnTap, WALK_BAR, walkBarLayout } from "./walkHud";
 

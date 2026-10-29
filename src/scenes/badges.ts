@@ -1,3 +1,5 @@
+import { fillLine } from "@andornaut/game-kit/lines";
+import type { Rect } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene } from "phaser";
 
 import { ownerFaceKey } from "../assets/spriteKeys";
@@ -16,8 +18,6 @@ import {
 } from "../home/badgesView";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import { DETAIL_TEXT_WIDTH, detailPanel, detailTextTops, STATS_LAYOUT } from "../home/statsLayout";
-import { fillLine } from "../lib/lines";
-import type { Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
 import { addDim } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";

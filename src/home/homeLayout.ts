@@ -1,7 +1,8 @@
+import type { Point, Rect } from "@andornaut/game-kit/rect";
+
 import type { DogId } from "../data/types";
 import { ownerPhotoRect, WALK_BAR, type WalkBarButtonId } from "../hud/walkHud";
 import type { PackPlacement } from "../layout/packFormation";
-import type { Point, Rect } from "../lib/rect";
 import { type FontMetrics, helpCapDy, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import type { GridSpec } from "../ui/grid";
 import { BUTTON_LIP_PX } from "../ui/selection";

@@ -1,3 +1,5 @@
+import { fillLine, fillNames } from "@andornaut/game-kit/lines";
+
 import { debuffIconKey } from "../assets/iconKeys";
 import { dogPortraitKey, gearIconKey, walkerPortraitKey } from "../assets/spriteKeys";
 import type { GameData } from "../data/types";
@@ -8,13 +10,12 @@ import {
   gearDetail,
   walkerDetail,
 } from "../home/detail";
-import { fillLine, fillNames } from "../lib/lines";
-import type { Cents } from "../lib/units";
 import { ownerMaxHearts } from "../rules/dogs";
 import { capitalize, debuffFields } from "../rules/effectText";
 import type { Owned, SaveStats } from "../save/schema";
 import { heartsOf } from "../state/pack";
 import type { RunState } from "../state/runState";
+import type { Cents } from "../units";
 import { extraHearts } from "./buffMarks";
 import { effectIconKey, effectItems, effectName } from "./effectIcons";
 import { RUN_TEXT_FIELDS } from "./runText";

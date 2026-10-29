@@ -1,12 +1,12 @@
+import { fillNames } from "@andornaut/game-kit/lines";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, LiveTuning, WalkerId } from "../data/types";
-import { fillNames } from "../lib/lines";
-import { cents } from "../lib/units";
 import type { StorageState } from "../save/profile";
 import type { LastWalk } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
+import { cents } from "../units";
 import type { HomeLoadout } from "./home";
 import {
   bubbleSpeech,

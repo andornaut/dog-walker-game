@@ -1,4 +1,4 @@
-import type { Rect } from "../lib/rect";
+import type { Rect } from "@andornaut/game-kit/rect";
 
 // Whether every pixel of inner lies in outer.
 export function inside(inner: Rect, outer: Rect): boolean {

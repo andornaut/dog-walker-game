@@ -1,3 +1,5 @@
+import type { Random } from "@andornaut/game-kit/random";
+import type { Point, Rect } from "@andornaut/game-kit/rect";
 import type { Scene } from "phaser";
 
 import { choiceCues, pullCues, stepCues } from "../../audio/stepCues";
@@ -60,8 +62,6 @@ import {
   tipSide,
   whiteFlash,
 } from "../../layout/hitEffects";
-import type { Random } from "../../lib/random";
-import type { Point, Rect } from "../../lib/rect";
 import {
   type Change,
   type HeartChange,

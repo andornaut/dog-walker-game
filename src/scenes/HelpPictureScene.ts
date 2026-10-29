@@ -1,3 +1,4 @@
+import type { Rect } from "@andornaut/game-kit/rect";
 import { Events, type GameObjects, Scene, Scenes } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
@@ -16,7 +17,6 @@ import {
 import { changeLabels } from "../hud/hudView";
 import { NOTHING_PAUSED } from "../hud/topBar";
 import { DOG_REACTIONS } from "../layout/hitEffects";
-import type { Rect } from "../lib/rect";
 import { currentZone } from "../rules/route";
 import { read } from "../rules/units";
 import { laneControlIn } from "../runner/laneControl";

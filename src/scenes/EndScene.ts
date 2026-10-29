@@ -1,3 +1,6 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { fillLine } from "@andornaut/game-kit/lines";
+import type { Rect } from "@andornaut/game-kit/rect";
 import { type GameObjects, Scene } from "phaser";
 
 import { ownerFaceKey, ZONE_PIPS_KEY } from "../assets/spriteKeys";
@@ -45,9 +48,6 @@ import {
 } from "../input/hold";
 import { isConfirmKey } from "../input/keyBindings";
 import { screenArea } from "../input/outsideTap";
-import { itemAt } from "../lib/arrays";
-import { fillLine } from "../lib/lines";
-import type { Rect } from "../lib/rect";
 import { PackFigures } from "../pack/phaser/packFigures";
 import { stopWakeLock } from "../pwa";
 import { walkLength } from "../rules/route";

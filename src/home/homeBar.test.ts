@@ -1,8 +1,8 @@
+import { containsPoint, type Rect } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
 import { SCREEN_LAYOUT } from "../data/screen";
 import { isOutside } from "../input/outsideTap";
-import { containsPoint, type Rect } from "../lib/rect";
 import {
   homeBackAction,
   type HomeBarAction,

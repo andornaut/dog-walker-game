@@ -1,8 +1,8 @@
+import { fillLine } from "@andornaut/game-kit/lines";
 import { describe, expect, it } from "vitest";
 
 import { DOGS } from "../data/dogs";
 import { MENU_TEXT } from "../data/menuText";
-import { fillLine } from "../lib/lines";
 import { newPlayerSave, veteranSave } from "../testing/saves";
 import { MENU_TEXT_FIELDS } from "./menuText";
 import { dogRows, overallRows } from "./statsView";

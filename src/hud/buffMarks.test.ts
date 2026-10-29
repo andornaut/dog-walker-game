@@ -1,10 +1,9 @@
+import { fillNames } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, Size } from "../data/types";
-import { fillNames } from "../lib/lines";
-import { keysOf } from "../lib/records";
-import { cents } from "../lib/units";
 import { gearSourceName } from "../rules/causes";
 import type { OptionView } from "../rules/choices";
 import { laneSpeedText } from "../rules/effectText";
@@ -14,6 +13,7 @@ import { read } from "../rules/units";
 import type { WalkItem } from "../runner/walkItems";
 import { packDogs } from "../state/pack";
 import { type ModifierSource, newRun } from "../state/runState";
+import { cents } from "../units";
 import {
   type BuffPop,
   extraHearts,

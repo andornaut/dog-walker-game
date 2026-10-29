@@ -1,5 +1,6 @@
+import { type FieldTable, fillNames } from "@andornaut/game-kit/lines";
+
 import type { HomeText } from "../data/types";
-import { type FieldTable, fillNames } from "../lib/lines";
 
 type LineKey = { [K in keyof HomeText]: HomeText[K] extends string ? K : never }[keyof HomeText];
 

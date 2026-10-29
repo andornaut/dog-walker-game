@@ -1,4 +1,5 @@
-import { getOrInsertComputed } from "../lib/maps";
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
+
 import { readBitmapFont } from "../tools/fontFile";
 import { type BitmapFontFile, type FontMetrics, fontMetrics, leftBearing } from "../ui/fontMetrics";
 import { inkWithPills, type LaidChar, pillGlyphAdvances } from "../ui/namePills";

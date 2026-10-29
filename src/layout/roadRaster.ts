@@ -1,6 +1,7 @@
+import type { Rect } from "@andornaut/game-kit/rect";
+
 import { SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
-import type { Rect } from "../lib/rect";
 import {
   dotColour,
   dottedBands,

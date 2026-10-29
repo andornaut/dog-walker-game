@@ -1,3 +1,4 @@
+import { containsPoint, type Rect } from "@andornaut/game-kit/rect";
 import type { GameObjects, Input, Scene } from "phaser";
 
 import { gameData } from "../data";
@@ -12,7 +13,6 @@ import {
   type ScrollRule,
   wheelScroll,
 } from "../input/listScroll";
-import { containsPoint, type Rect } from "../lib/rect";
 import { read } from "../rules/units";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";

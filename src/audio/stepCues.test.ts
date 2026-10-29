@@ -1,3 +1,5 @@
+import { seededRandom } from "@andornaut/game-kit/random";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import shippedManifest from "../../public/art/manifest.json";
@@ -8,15 +10,13 @@ import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
 import type { GearId, WalkerId } from "../data/types";
 import { WALKERS } from "../data/walkers";
-import { seededRandom } from "../lib/random";
-import { keysOf } from "../lib/records";
-import { cents, clampHearts } from "../lib/units";
 import type { HeartChange, MoneyChange } from "../rules/causes";
 import { NO_PULLS, type PullStep } from "../runner/pulls";
 import { startRoad, stepWalk, type Walk } from "../runner/walk";
 import type { WalkItem } from "../runner/walkItems";
 import { newRun, type PackDogs } from "../state/runState";
 import { atPack, data, geometry, tuning } from "../testing/walk";
+import { cents, clampHearts } from "../units";
 import { hitCue, type SoundCue, soundKeyFor } from "./sound";
 import { choiceCues, pullCues, stepCues } from "./stepCues";
 

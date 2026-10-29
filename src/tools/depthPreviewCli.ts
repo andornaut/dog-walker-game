@@ -7,6 +7,8 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { itemAt } from "@andornaut/game-kit/arrays";
+
 import type { AssetManifest } from "../assets/manifest";
 import { backdropKey, depthVariantKey, roadTileKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
@@ -23,7 +25,6 @@ import {
   solidStrip,
   STRIP,
 } from "../layout/roadRaster";
-import { itemAt } from "../lib/arrays";
 import { walkProjection } from "../runner/walkGeometry";
 import { GLYPH_HEIGHT } from "../ui/pixelFont";
 import { ART_DIR, ART_MANIFEST, generateArtManifest, measureAnchor } from "./artManifest";

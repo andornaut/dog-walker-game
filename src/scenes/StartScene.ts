@@ -1,3 +1,5 @@
+import { clampIndex, itemAt } from "@andornaut/game-kit/arrays";
+import { containsPoint, insetRect, type Rect } from "@andornaut/game-kit/rect";
 import { type GameObjects, Scene, type Time } from "phaser";
 
 import {
@@ -104,9 +106,6 @@ import {
 } from "../input/hold";
 import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import type { PackPlacement } from "../layout/packFormation";
-import { clampIndex, itemAt } from "../lib/arrays";
-import { containsPoint, insetRect, type Rect } from "../lib/rect";
-import type { Cents } from "../lib/units";
 import { addFigure, PackFigures } from "../pack/phaser/packFigures";
 import {
   acceptUpdate,
@@ -144,6 +143,7 @@ import {
 import { BUTTON_COLOURS, GREYED, pictureBox, type SelectLook } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
 import { topBarRects } from "../ui/topBarTrim";
+import type { Cents } from "../units";
 import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { addNamePills } from "./effectNameColours";

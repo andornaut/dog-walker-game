@@ -1,3 +1,8 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { keysOf } from "@andornaut/game-kit/records";
+import type { Point, Rect } from "@andornaut/game-kit/rect";
+import { pixels } from "@andornaut/game-kit/units";
+
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type {
   CardSource,
@@ -9,10 +14,6 @@ import type {
 } from "../data/types";
 import { cardRowIn } from "../layout/cardLayout";
 import { laneCentreXs } from "../layout/lanes";
-import { itemAt } from "../lib/arrays";
-import { keysOf } from "../lib/records";
-import type { Point, Rect } from "../lib/rect";
-import { addCents, cents, clampHearts, pixels } from "../lib/units";
 import type { Change } from "../rules/causes";
 import { cardFor, type CardView, forkCard, MAX_CARD_OPTIONS } from "../rules/choices";
 import { firstZoneId, forkPaths, middleZoneId } from "../rules/route";
@@ -29,6 +30,7 @@ import { type WalkItem, type WalkItemKind } from "../runner/walkItems";
 import { heartsOf, mapPack } from "../state/pack";
 import { newRun, type PackDogs, type PackSlot, type RunState } from "../state/runState";
 import { cardHeader } from "../ui/cardRow";
+import { addCents, cents, clampHearts } from "../units";
 import { HELP_LAYOUT } from "./helpLayout";
 
 // Each help page's picture: a moment of the walk screen, drawn by the game's own road, pack, HUD

@@ -1,10 +1,10 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { LANE_COUNT } from "../data/screen";
 import { SHOP_GEAR } from "../data/shop";
 import type { GearId } from "../data/types";
 import { WORLD } from "../data/world";
-import { keysOf } from "../lib/records";
 import { gearDropCount, gearInEffect } from "../rules/gearDrops";
 import { plannerStreams } from "../testing/movers";
 import { GAME_ROAD, inZone, REAL, realRun } from "../testing/planner";

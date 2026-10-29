@@ -1,5 +1,6 @@
+import { keysOf } from "@andornaut/game-kit/records";
+
 import type { DebuffId, GameData } from "../data/types";
-import { keysOf } from "../lib/records";
 import { inPill } from "../ui/namePills";
 import type { FaceText } from "./faceText";
 

@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 
+import { itemAt } from "@andornaut/game-kit/arrays";
 import { describe, expect, it } from "vitest";
 
 import manifest from "../../public/art/manifest.json";
@@ -7,7 +8,6 @@ import depthSteps from "../../shared/depth-steps.json";
 import lightTable from "../../shared/lights.json";
 import { paletteColour } from "../assets/housePalette";
 import { WORLD } from "../data/world";
-import { itemAt } from "../lib/arrays";
 import { decodePng } from "../testing/png";
 import { newAttachedLightPlaces, placeAttachedLights } from "./lightPlaces";
 import { bakeLight, LIGHT_ATTACHMENTS, type LightDef, LIGHTS, lightsFrom } from "./lights";

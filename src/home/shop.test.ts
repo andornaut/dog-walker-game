@@ -1,3 +1,5 @@
+import { fillNames } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -5,9 +7,6 @@ import type { DogId, LiveTuning } from "../data/types";
 import { TITLE_CAP_ROWS } from "../hud/walkHud";
 import { scrollMax } from "../input/listScroll";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
-import { fillNames } from "../lib/lines";
-import { keysOf } from "../lib/records";
-import { cents } from "../lib/units";
 import { sizeHearts } from "../rules/dogs";
 import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { startingDogSlots, unlockPrice } from "../rules/shop";
@@ -17,6 +16,7 @@ import { TEST_TUNING } from "../testing/tuning";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { GREYED, pictureBox, SELECT_OUTSET } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
+import { cents } from "../units";
 import { FEEDBACK } from "./feedback";
 import { gearByPrice, type Purchase } from "./home";
 import { cardBand } from "./homeLayout";

@@ -1,5 +1,6 @@
+import { fillLine, fillNames } from "@andornaut/game-kit/lines";
+
 import type { CharmEffect, DogId, Effect, GameData } from "../data/types";
-import { fillLine, fillNames } from "../lib/lines";
 import { amountText, changeAmount } from "../rules/causes";
 import { type CardView, type OptionView, outcomeChanges } from "../rules/choices";
 import { packSizeRaise, placeInPack, SIZE_AGILITY } from "../rules/dogs";

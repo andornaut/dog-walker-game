@@ -1,5 +1,6 @@
+import type { Rect } from "@andornaut/game-kit/rect";
+
 import { SCREEN_CONFIG } from "../data/screen";
-import type { Rect } from "../lib/rect";
 import { type FontMetrics, helpCapDy } from "../ui/fontMetrics";
 import { overlayRegion } from "./homeBar";
 import { cardBand, HOME_LAYOUT } from "./homeLayout";

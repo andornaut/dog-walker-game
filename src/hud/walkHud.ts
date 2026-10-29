@@ -1,10 +1,11 @@
+import { fillNames } from "@andornaut/game-kit/lines";
+import { clamp01 } from "@andornaut/game-kit/numbers";
+import { containsPoint, insetRect, type Point, type Rect } from "@andornaut/game-kit/rect";
+
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DebuffId, DogId, GameData } from "../data/types";
 import type { ScreenLayout } from "../layout/screenLayout";
-import { fillNames } from "../lib/lines";
-import { clamp01 } from "../lib/numbers";
-import { containsPoint, insetRect, type Point, type Rect } from "../lib/rect";
 import { walkLength } from "../rules/route";
 import { zoneLength } from "../runner/walk";
 import type { RunState } from "../state/runState";

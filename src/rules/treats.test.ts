@@ -1,10 +1,10 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { DOGS } from "../data/dogs";
 import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
 import type { DogId, Modifier, Size } from "../data/types";
-import { keysOf } from "../lib/records";
 import { PACK_PLACES, placeName } from "../testing/packPlaces";
 import { testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";

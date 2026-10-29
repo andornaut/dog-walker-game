@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
-import { cents } from "../lib/units";
 import { amountText } from "../rules/causes";
 import { fontFileMetrics } from "../testing/fontInk";
 import { inkRowsOfLines } from "../ui/fontMetrics";
+import { cents } from "../units";
 import { perkIconKey } from "./effectIcons";
 import { FEEDBACK } from "./feedback";
 import { CHANGE_CHIP, CHANGE_LABEL_STYLE } from "./hudLanes";

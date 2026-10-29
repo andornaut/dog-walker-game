@@ -1,7 +1,7 @@
+import { placeholders } from "@andornaut/game-kit/lines";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { placeholders } from "../lib/lines";
 import { HELP_BODY_FIELDS, helpBody, helpBodyValues } from "./helpBody";
 
 const { tuning } = gameData;

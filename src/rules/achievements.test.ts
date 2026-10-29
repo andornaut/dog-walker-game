@@ -1,15 +1,15 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { AchievementCondition, DogId, TallyId, ZoneId } from "../data/types";
-import { keysOf } from "../lib/records";
-import { cents, dollarsToCents } from "../lib/units";
 import { type SaveDocument } from "../save/schema";
 import type { RunState } from "../state/runState";
 import { runFactsFor, saveFor } from "../testing/achievements";
 import { defined } from "../testing/defined";
 import { testState } from "../testing/runState";
 import { newPlayerSave, veteranSave } from "../testing/saves";
+import { cents, dollarsToCents } from "../units";
 import {
   achievementConditionText,
   conditionHolds,

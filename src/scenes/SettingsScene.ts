@@ -1,6 +1,9 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { BUILD_LABEL } from "@andornaut/game-kit/build/buildLabel";
+import { fillLine } from "@andornaut/game-kit/lines";
+import { containsPoint, insetRect, type Rect } from "@andornaut/game-kit/rect";
 import { type GameObjects, Scene, Scenes } from "phaser";
 
-import { BUILD_LABEL } from "../buildLabel";
 import { gameData } from "../data";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { MenuText } from "../data/types";
@@ -30,9 +33,6 @@ import {
   volumeSteps,
 } from "../home/settings";
 import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
-import { itemAt } from "../lib/arrays";
-import { fillLine } from "../lib/lines";
-import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import {
   installApp,
   installState,

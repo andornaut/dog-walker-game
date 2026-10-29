@@ -1,5 +1,5 @@
-import { clamp01 } from "../lib/numbers";
-import type { Point, Rect } from "../lib/rect";
+import { clamp01 } from "@andornaut/game-kit/numbers";
+import type { Point, Rect } from "@andornaut/game-kit/rect";
 
 // The loading screen's art (LOADING_ART) is placed as art/tools/screens.py draws it, in screen
 // pixels.

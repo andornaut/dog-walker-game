@@ -1,11 +1,11 @@
+import { fillNames } from "@andornaut/game-kit/lines";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { CardSource, DogId, EncounterId } from "../data/types";
 import { largeBodyText } from "../hud/cardText";
-import { fillNames } from "../lib/lines";
-import { cents, dollarsToCents } from "../lib/units";
 import { activeModifier, testState } from "../testing/runState";
+import { cents, dollarsToCents } from "../units";
 import { cardFor } from "./choices";
 import { read } from "./units";
 

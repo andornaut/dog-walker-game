@@ -1,5 +1,6 @@
+import { randomStream, seededRandom } from "@andornaut/game-kit/random";
+
 import type { GameData, Movement, World } from "../data/types";
-import { randomStream, seededRandom } from "../lib/random";
 import type { PlannerStreams } from "../runner/moverPlanning";
 import { mapZones } from "./world";
 

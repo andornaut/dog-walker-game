@@ -1,12 +1,13 @@
+import type { Point, Rect } from "@andornaut/game-kit/rect";
+
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, GameData } from "../data/types";
-import type { Point, Rect } from "../lib/rect";
-import type { Cents } from "../lib/units";
 import { type FaceMood, faceMood } from "../rules/treats";
 import { slotIndexOf } from "../state/pack";
 import type { Pack, PackSlot } from "../state/runState";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { TEXT_STYLE, type TextFitStyle } from "../ui/textFit";
+import type { Cents } from "../units";
 import { type FaceBox, type FaceText, fillFaceText, ownerFaceText } from "./faceText";
 import type { ChangeLabel } from "./hudView";
 import { DOG_CARD, OWNER_TAB, TITLE_CAP_ROWS, WALK_BAR } from "./walkHud";

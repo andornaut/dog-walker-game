@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { cents } from "../lib/units";
 import { unlockPrice } from "../rules/shop";
 import type { LastWalk, Owned } from "../save/schema";
 import { STARTER_DOGS } from "../testing/saves";
 import { TEST_TUNING } from "../testing/tuning";
+import { cents } from "../units";
 import { bankAtLastVisit, newlyAffordable } from "./afford";
 import { isAffordable, type Purchase } from "./home";
 

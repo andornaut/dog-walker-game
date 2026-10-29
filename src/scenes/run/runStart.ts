@@ -1,7 +1,8 @@
+import { type Random, randomStream } from "@andornaut/game-kit/random";
+
 import type { DogId } from "../../data/types";
 import type { RunSetup } from "../../dev/runSetup";
 import { loadoutFor } from "../../dev/setupRun";
-import { type Random, randomStream } from "../../lib/random";
 import type { Loadout } from "../../state/runState";
 import type { RunSceneData } from "../RunScene";
 import type { RunStart } from "./runRecorder";

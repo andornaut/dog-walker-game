@@ -1,5 +1,6 @@
+import type { Point } from "@andornaut/game-kit/rect";
+
 import type { LiveTuning } from "../data/types";
-import type { Point } from "../lib/rect";
 import { read } from "../rules/units";
 import { exceedsTapDistance } from "./gestures";
 

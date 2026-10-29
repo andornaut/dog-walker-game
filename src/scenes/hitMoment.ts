@@ -1,3 +1,4 @@
+import { type Point, type Rect, rectAboveIn } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene } from "phaser";
 
 import { kebabCase } from "../assets/spriteKeys";
@@ -5,7 +6,6 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { Encounter, EncounterId } from "../data/types";
 import { encounterFlashColour } from "../layout/bumpFlash";
 import { burstWordPlace, COMIC_WORDS } from "../layout/comicWords";
-import { type Point, type Rect, rectAboveIn } from "../lib/rect";
 import { addDisplayText } from "../ui/phaser/displayText";
 import { PALETTE } from "../ui/phaser/palette";
 import { letterEffect, loadedComicWordWidth } from "./comicWord";

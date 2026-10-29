@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { SCREEN_CONFIG } from "../data/screen";
 import { integerZoom } from "./integerZoom";
 
-const GAME = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width };
+// A portrait game. Each space below is measured in game sizes, so any size gives the same zooms.
+const GAME = { height: 560, width: 360 };
 // A space this many game sizes across and down, in CSS pixels.
 const games = (across: number, down: number) => ({
   height: GAME.height * down,

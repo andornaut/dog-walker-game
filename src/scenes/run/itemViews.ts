@@ -1,3 +1,6 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
+import { keysOf } from "@andornaut/game-kit/records";
 import type { GameObjects, Scene } from "phaser";
 
 import {
@@ -16,9 +19,6 @@ import { LANE_COUNT } from "../../data/screen";
 import type { EncounterId, GearId, HintTrigger, MinorObstacleId } from "../../data/types";
 import { moverHintTriggers } from "../../hud/hintTriggers";
 import { obstacleParts } from "../../layout/obstacleArt";
-import { itemAt } from "../../lib/arrays";
-import { getOrInsertComputed } from "../../lib/maps";
-import { keysOf } from "../../lib/records";
 import { herringNow } from "../../road/herrings";
 import { type KeptScenery, struckBy, struckNow } from "../../road/struckScenery";
 import { goesToVerge, vergeNow } from "../../road/vergeScenery";

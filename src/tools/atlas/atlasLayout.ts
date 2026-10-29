@@ -1,3 +1,6 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
+import type { Point, Rect } from "@andornaut/game-kit/rect";
 import * as v from "valibot";
 
 import { ATLAS_GROUPS, type AtlasGroup, pageGroupOf, steppedBases } from "../../assets/atlasGroups";
@@ -9,9 +12,6 @@ import {
   type FrameTrim,
 } from "../../assets/atlasManifest";
 import { isPlainObject, parseOrThrow, record } from "../../assets/jsonSchema";
-import { itemAt } from "../../lib/arrays";
-import { getOrInsertComputed } from "../../lib/maps";
-import type { Point, Rect } from "../../lib/rect";
 
 // Mobile GPUs guarantee textures up to 2048 pixels a side.
 export const ATLAS_MAX_SIZE = 2048;

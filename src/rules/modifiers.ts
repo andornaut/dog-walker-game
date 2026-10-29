@@ -1,5 +1,6 @@
+import { assertNever } from "@andornaut/game-kit/assertNever";
+
 import type { Effect, LiveTuning, Modifier, ModifierEffect, Stat } from "../data/types";
-import { assertNever } from "../lib/assertNever";
 import { read } from "./units";
 
 // An "add" value is in its stat's unit (cents for money stats); a "multiply" value is a factor.

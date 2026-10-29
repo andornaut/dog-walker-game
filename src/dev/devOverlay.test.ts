@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cents } from "../lib/units";
+import { cents } from "../units";
 import { devOverlayLines, type DevState } from "./devOverlay";
 import type { RunSetup } from "./runSetup";
 

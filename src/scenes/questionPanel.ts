@@ -1,11 +1,11 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { sentences } from "@andornaut/game-kit/lines";
+import { insetRect, type Rect } from "@andornaut/game-kit/rect";
 import type { Scene } from "phaser";
 
 import { NOTE_PLATE, notePartTops, PAUSE_NOTE_WIDTH, type pauseMenuLayout } from "../hud/pauseMenu";
 import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
 import { withKeyNumber } from "../input/keyNumbers";
-import { itemAt } from "../lib/arrays";
-import { sentences } from "../lib/lines";
-import { insetRect, type Rect } from "../lib/rect";
 import { rectIndexAt } from "../ui/grid";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";

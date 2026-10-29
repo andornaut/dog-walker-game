@@ -1,6 +1,6 @@
+import { wrapWords } from "@andornaut/game-kit/lines";
 import { describe, expect, it } from "vitest";
 
-import { wrapWords } from "../lib/lines";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontInk, laidChars } from "../testing/fontInk";
 import {

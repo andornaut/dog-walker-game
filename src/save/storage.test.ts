@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { cents } from "../lib/units";
 import {
   memoryStorage,
   newPlayerSave,
@@ -8,6 +7,7 @@ import {
   testContext,
   veteranSave,
 } from "../testing/saves";
+import { cents } from "../units";
 import { SAVE_VERSION, storedSave } from "./schema";
 import {
   browserStorage,

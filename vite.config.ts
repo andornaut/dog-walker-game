@@ -1,19 +1,34 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { runnerImport } from "vite";
 import { defineConfig } from "vitest/config";
 
-import { securityHeadersPlugin } from "./src/headers/securityHeadersPlugin";
-import { precachePlugin } from "./src/pwa/precachePlugin";
-import { atlasPlugin } from "./src/tools/atlas/atlasPlugin";
-import { gitHead, shortCommit } from "./src/tools/buildVersion";
-import { generatedFilesPlugin } from "./src/tools/generatedFilesPlugin";
+import type * as ConfigModules from "./src/tools/viteConfigModules.ts";
 
 // An absolute path in this repository. Vite resolves relative paths against root, which is
 // pages/, so every path below goes through here instead.
 function repoPath(path: string): string {
   return resolve(import.meta.dirname, path);
 }
+
+// @andornaut/game-kit/<path> is the kit's module at <path>, as in tsconfig.json's paths.
+const KIT_ALIAS = { "@andornaut/game-kit": repoPath("packages/game-kit/src") };
+
+// Vite bundles this file without its own resolve.alias, so the repository's code, which imports
+// the kit by its alias, loads through a module runner given the alias.
+const {
+  module: {
+    atlasPlugin,
+    generatedFilesPlugin,
+    gitHead,
+    precachePlugin,
+    securityHeadersPlugin,
+    shortCommit,
+  },
+} = await runnerImport<typeof ConfigModules>(repoPath("src/tools/viteConfigModules.ts"), {
+  resolve: { alias: KIT_ALIAS },
+});
 
 const packageVersion: string = JSON.parse(readFileSync(repoPath("package.json"), "utf8")).version;
 
@@ -45,8 +60,8 @@ export default defineConfig({
     // Set just above it so that growth in Phaser or game code still warns.
     chunkSizeWarningLimit: 1600,
   },
-  // The version and commit the dev bar shows, typed in src/buildInfo.d.ts. Fixed per commit, so
-  // two builds of one commit match.
+  // The version and commit the dev bar shows, typed in packages/game-kit/src/build/buildInfo.d.ts.
+  // Fixed per commit, so two builds of one commit match.
   define: {
     __APP_VERSION__: JSON.stringify(packageVersion),
     __COMMIT__: JSON.stringify(shortCommit(() => gitHead(repoPath(".")), process.env)),
@@ -77,7 +92,7 @@ export default defineConfig({
   // The pages load their modules as /src/..., which names the repository's src/ rather than
   // pages/src/.
   resolve: {
-    alias: { "/src": repoPath("src") },
+    alias: { "/src": repoPath("src"), ...KIT_ALIAS },
   },
   root: repoPath("pages"),
   server: {
@@ -87,7 +102,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["src/**/*.test.ts"],
+    include: ["packages/game-kit/src/**/*.test.ts", "src/**/*.test.ts"],
     root: repoPath("."),
     // Whole-walk tests run several seconds alone and several times that on a loaded host or a
     // CI runner, so the default 5 s is too tight; the slowest blocks set their own, longer limit.

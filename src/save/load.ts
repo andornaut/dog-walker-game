@@ -1,3 +1,5 @@
+import { clamp01 } from "@andornaut/game-kit/numbers";
+import { keysOf } from "@andornaut/game-kit/records";
 import * as v from "valibot";
 
 import type {
@@ -14,8 +16,6 @@ import type {
   WalkerId,
   ZoneId,
 } from "../data/types";
-import { clamp01 } from "../lib/numbers";
-import { keysOf } from "../lib/records";
 import { startingDogSlots } from "../rules/shop";
 import {
   createDefaultSave,

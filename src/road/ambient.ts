@@ -1,8 +1,9 @@
+import { type Random, randomInt } from "@andornaut/game-kit/random";
+
 import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import type { AmbientGait, AmbientMover, ZoneId } from "../data/types";
 import { CROSS_STREET } from "../layout/crossStreet";
 import { project, type RoadProjection, scaleAt, scaleAtY } from "../layout/projection";
-import { type Random, randomInt } from "../lib/random";
 import { noise, sidewalkTo, type Verge, VERGES, walkFrom } from "./roadside";
 
 // The ambient movers: cars, bikes, people, animals and planes moving across the backdrop's cross

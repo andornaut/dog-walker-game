@@ -1,16 +1,16 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { fillNames, sentences, wrapWords } from "@andornaut/game-kit/lines";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
 import { dollarText } from "../home/home";
 import { overlayRegion } from "../home/homeBar";
-import { itemAt } from "../lib/arrays";
-import { fillNames, sentences, wrapWords } from "../lib/lines";
-import { cents } from "../lib/units";
 import { walkLength } from "../rules/route";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics } from "../testing/fontInk";
 import { inkRowsOfLines } from "../ui/fontMetrics";
+import { cents } from "../units";
 import {
   homeQuestionLayout,
   NOTE_PLATE,

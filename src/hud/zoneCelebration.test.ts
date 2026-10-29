@@ -1,13 +1,13 @@
+import { fillNames } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { WalkerId } from "../data/types";
-import { fillNames } from "../lib/lines";
-import { keysOf } from "../lib/records";
-import { cents, type Hearts } from "../lib/units";
 import type { Change, MoneyChange } from "../rules/causes";
 import { agilityPercent } from "../rules/effectText";
 import { walkerGoal, walkerOrder } from "../rules/walkers";
+import { cents, type Hearts } from "../units";
 import { perkIconKey } from "./effectIcons";
 import {
   celebrationText,

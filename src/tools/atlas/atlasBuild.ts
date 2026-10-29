@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
 
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
 import { PNG } from "pngjs";
 
 import { atlasGroupOf } from "../../assets/atlasGroups";
 import type { AtlasManifest } from "../../assets/atlasManifest";
 import { type AssetManifest, parseManifest } from "../../assets/manifest";
-import { getOrInsertComputed } from "../../lib/maps";
 import {
   EXTRUDE,
   imageSource,

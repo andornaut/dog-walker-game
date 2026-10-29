@@ -1,3 +1,9 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { assertNever } from "@andornaut/game-kit/assertNever";
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
+import { chance, type Random } from "@andornaut/game-kit/random";
+import { type Pixels, pixels } from "@andornaut/game-kit/units";
+
 import { IDLE_TAG, MOVING_TAGS } from "../assets/spriteKeys";
 import type {
   CardSource,
@@ -11,11 +17,6 @@ import type {
 import type { LaneDirection } from "../layout/lanes";
 import { hasObstacleArt, obstacleParts, obstacleSilhouette } from "../layout/obstacleArt";
 import { formationOrder, PART_INSET } from "../layout/packFormation";
-import { itemAt } from "../lib/arrays";
-import { assertNever } from "../lib/assertNever";
-import { getOrInsertComputed } from "../lib/maps";
-import { chance, type Random } from "../lib/random";
-import { addCents, type Pixels, pixels } from "../lib/units";
 import { countBump, countLandedBump, countTally } from "../rules/achievements";
 import { type HeartChange, modifierCauses, type MoneyChange, negatedCauses } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
@@ -48,6 +49,7 @@ import { packAgility } from "../rules/walkers";
 import { zoneScrollSpeed } from "../rules/zones";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
+import { addCents } from "../units";
 import {
   approachChoices,
   type ApproachPath,

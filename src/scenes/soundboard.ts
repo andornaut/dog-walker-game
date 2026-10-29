@@ -1,3 +1,4 @@
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
 import { Core, type Game, type Scene, Sound } from "phaser";
 
 import {
@@ -21,7 +22,6 @@ import {
   soundKeysOf,
   type Volumes,
 } from "../audio/sound";
-import { getOrInsertComputed } from "../lib/maps";
 import { AUDIO_UNLOCK_EVENTS, PHONE_EVENTS } from "../pwa";
 
 // Every concrete sound class (Web Audio, HTML5 audio, no audio) has setVolume; BaseSound does not.

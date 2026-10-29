@@ -1,3 +1,4 @@
+import type { Rect } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene } from "phaser";
 
 import { ownerCardFaceKey } from "../assets/spriteKeys";
@@ -10,7 +11,6 @@ import {
   type OwnerFace,
   styledFaceRows,
 } from "../hud/faceText";
-import type { Rect } from "../lib/rect";
 import { drawFramedRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import {

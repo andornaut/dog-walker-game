@@ -1,8 +1,8 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { ENCOUNTERS } from "../data/encounters";
 import type { DogId, EncounterId } from "../data/types";
-import { keysOf } from "../lib/records";
 import type { RunState } from "../state/runState";
 import { testState } from "../testing/runState";
 import { affectedDogs, hitLabel, opensCard } from "./encounters";

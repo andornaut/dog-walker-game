@@ -1,8 +1,8 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { EncounterId, MinorObstacleId, MovementKind, ZoneId } from "../data/types";
-import { keysOf } from "../lib/records";
 import type { WalkItemKind } from "../runner/walkItems";
 import { defined } from "../testing/defined";
 import {

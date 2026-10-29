@@ -1,9 +1,9 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
 import { describe, expect, it, vi } from "vitest";
 
 import { gameData } from "../data";
 import { DOGS } from "../data/dogs";
 import type { DogId, ZoneId } from "../data/types";
-import { itemAt } from "../lib/arrays";
 import type { PackDogs } from "../state/runState";
 import { POLICY_IDS } from "./policies";
 import {
@@ -27,10 +27,10 @@ import { SKILL_PRESET_IDS } from "./skills";
 // replaces it: like the real one, it draws only from its seed, so a seed fixes its result.
 vi.mock("./simulate", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./simulate")>();
-  const { cents } = await import("../lib/units");
+  const { cents } = await import("../units");
   const { newRun } = await import("../state/runState");
   const { runCountersOf } = await import("../rules/achievements");
-  const { seededRandom } = await import("../lib/random");
+  const { seededRandom } = await import("@andornaut/game-kit/random");
   const { SKILL_PRESETS } = await import("./skills");
   const { zoneDelivery } = await import("./delivery");
   const simulateRun: typeof actual.simulateRun = (data, seed, config) => {

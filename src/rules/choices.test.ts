@@ -1,3 +1,4 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { DEBUFFS } from "../data/debuffs";
@@ -9,13 +10,12 @@ import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
 import type { CardOption, CardSource, DogId, Effect, EncounterId, UpgradeId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
-import { keysOf } from "../lib/records";
-import { cents } from "../lib/units";
 import { newRun, type RunState } from "../state/runState";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
 import { TEST_WORLD } from "../testing/world";
+import { cents } from "../units";
 import {
   applyInstantEncounter,
   cardFor,

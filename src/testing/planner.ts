@@ -1,5 +1,8 @@
 // The walk tests' view of the spawn planner on the game's road: the real data, the game's
 // road and pack, and each lane-blocking spawn's spans and contact with the pack.
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { keysOf } from "@andornaut/game-kit/records";
+
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import { TUNING } from "../data/tuning";
@@ -7,8 +10,6 @@ import type { WalkerId, World, Zone, ZoneId } from "../data/types";
 import { DEFAULT_WALKER, WALKERS } from "../data/walkers";
 import { WORLD } from "../data/world";
 import { type PackSprites, PART_INSET } from "../layout/packFormation";
-import { itemAt } from "../lib/arrays";
-import { keysOf } from "../lib/records";
 import { read } from "../rules/units";
 import { slowestDebuffedAgility, slowestPackAgility } from "../rules/walkers";
 import { approachOutcomes } from "../runner/approach";

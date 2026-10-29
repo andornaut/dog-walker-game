@@ -1,7 +1,7 @@
+import { seededRandom } from "@andornaut/game-kit/random";
 import { describe, expect, it } from "vitest";
 
 import { WORLD } from "../data/world";
-import { seededRandom } from "../lib/random";
 import {
   currentZone,
   defaultRoute,

@@ -1,4 +1,5 @@
-import type { Rect } from "../lib/rect";
+import type { Rect } from "@andornaut/game-kit/rect";
+
 import type { CloseControl } from "./closeControl";
 
 // A title on a bar with the close control at its right end. It is centred between the bar's

@@ -1,5 +1,6 @@
+import { containsPoint, type Point, type Rect } from "@andornaut/game-kit/rect";
+
 import { SCREEN_LAYOUT } from "../data/screen";
-import { containsPoint, type Point, type Rect } from "../lib/rect";
 import { exceedsTapDistance } from "./gestures";
 
 // Where a tap outside an overlay's panel counts: inside the dimmed area, off the panel and

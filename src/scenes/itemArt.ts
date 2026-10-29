@@ -1,10 +1,10 @@
+import type { Rect } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene } from "phaser";
 
 import { dogPortraitKey, gearIconKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import type { DetailPicture } from "../home/detail";
 import type { Purchase } from "../home/home";
-import type { Rect } from "../lib/rect";
 import type { Badge } from "../ui/interaction";
 import { fillCutRect, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";

@@ -8,9 +8,15 @@ import ts from "typescript-eslint";
 
 import { plugins, sourceRules, toolingRules } from "./eslint.config.base.mjs";
 
-const SOURCE_FILES = ["src/**/*.ts"];
-const PHASER_FILES = ["src/main.ts", "src/scenes/**", "src/**/phaser/**"];
-const TEST_FILES = ["src/**/*.test.ts"];
+const KIT_FILES = ["packages/game-kit/src/**/*.ts"];
+const SOURCE_FILES = [...KIT_FILES, "src/**/*.ts"];
+const PHASER_FILES = [
+  "packages/game-kit/src/**/phaser/**",
+  "src/main.ts",
+  "src/scenes/**",
+  "src/**/phaser/**",
+];
+const TEST_FILES = ["packages/game-kit/src/**/*.test.ts", "src/**/*.test.ts"];
 
 // The import boundaries, one row each: the files outside `except` may not import what `forbid`
 // names. Logic, layout and data stay free of Phaser and the scenes, so they run in unit tests
@@ -38,8 +44,7 @@ const BOUNDARIES = [
 // by moving the module into a context or the importer out of one. The boundaries above govern
 // src/testing/.
 const CONTEXTS = {
-  assets: ["data", "lib"],
-  lib: [],
+  assets: ["data"],
   road: [
     "assets",
     "data",
@@ -48,13 +53,12 @@ const CONTEXTS = {
     "layout/projection",
     "layout/roadRaster",
     "layout/screenLayout",
-    "lib",
     "rules/route",
     "rules/units",
     "runner",
     "state/runState",
   ],
-  ui: ["assets", "lib"],
+  ui: ["assets"],
 };
 
 const SRC_FOLDERS = folders("src").filter((folder) => folder !== "testing");

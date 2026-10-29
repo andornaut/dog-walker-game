@@ -1,11 +1,11 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { type Random, seededRandom } from "@andornaut/game-kit/random";
 import { describe, expect, it } from "vitest";
 
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { TUNING } from "../data/tuning";
 import type { StopLanes } from "../data/types";
 import { laneMask } from "../layout/lanes";
-import { itemAt } from "../lib/arrays";
-import { type Random, seededRandom } from "../lib/random";
 import { read } from "../rules/units";
 import { defined } from "../testing/defined";
 import { plannerStreams } from "../testing/movers";

@@ -1,4 +1,4 @@
-import type { Rect } from "../lib/rect";
+import type { Rect } from "@andornaut/game-kit/rect";
 
 // The smallest tap target each way, in game pixels: 48 CSS pixels on a 390px-wide phone.
 export const MIN_TAP_SIZE = 44;

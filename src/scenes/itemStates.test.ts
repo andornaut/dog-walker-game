@@ -1,5 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
 
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -7,12 +8,11 @@ import type { DogId } from "../data/types";
 import { dollarText, isAffordable, type Purchase, purchasePrice } from "../home/home";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { walkerTile } from "../home/walkers";
-import { keysOf } from "../lib/records";
-import { cents } from "../lib/units";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics } from "../testing/fontInk";
 import { type ItemLook, itemTile, itemTileLook } from "../ui/interaction";
+import { cents } from "../units";
 import { PLATE_PAD } from "./itemArt";
 
 const OWNED: Owned = { dogSlots: [1], dogs: [], gear: [], walkers: [] };

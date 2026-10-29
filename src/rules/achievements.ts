@@ -1,3 +1,5 @@
+import { assertNever } from "@andornaut/game-kit/assertNever";
+
 import type {
   Achievement,
   AchievementCondition,
@@ -10,11 +12,10 @@ import type {
   TallyId,
   Threshold,
 } from "../data/types";
-import { assertNever } from "../lib/assertNever";
-import { type Cents, dollarsToCents } from "../lib/units";
 import type { SaveDocument, SaveStats } from "../save/schema";
 import { lifetimeEarnedNet, timesFired, walksFinished, walksPlayed } from "../save/stats";
 import type { RunState } from "../state/runState";
+import { type Cents, dollarsToCents } from "../units";
 import { walkLength } from "./route";
 
 export type AchievementData = Pick<

@@ -1,4 +1,4 @@
-import type { Rect } from "../lib/rect";
+import type { Rect } from "@andornaut/game-kit/rect";
 
 // Every page's and overlay's close control: the 20x20 ui-icon-button face in its frame's
 // top-right corner, tapped anywhere in the 44x44 square in that corner. On a card or panel the

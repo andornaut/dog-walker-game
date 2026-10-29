@@ -1,4 +1,5 @@
-import { itemAt } from "../lib/arrays";
+import { itemAt } from "@andornaut/game-kit/arrays";
+
 import { LIGHTS } from "../road/lights";
 
 // A light art sets out, whichever it is, so the fixture follows renames.

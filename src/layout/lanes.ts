@@ -1,5 +1,5 @@
-import { clampIndex } from "../lib/arrays";
-import type { Rect } from "../lib/rect";
+import { clampIndex } from "@andornaut/game-kit/arrays";
+import type { Rect } from "@andornaut/game-kit/rect";
 
 export type LaneDirection = -1 | 1;
 

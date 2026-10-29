@@ -1,11 +1,12 @@
+import { fillLine } from "@andornaut/game-kit/lines";
+
 import type { DogId, GameData, HomeText, WalkerId } from "../data/types";
-import { fillLine } from "../lib/lines";
-import type { Cents } from "../lib/units";
 import { packPlace, packSizeRaise } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import type { StorageState } from "../save/profile";
 import { type LastWalk, MAX_RUN_DOGS, type Owned } from "../save/schema";
 import { packOrder } from "../state/pack";
+import type { Cents } from "../units";
 import { dollarText, type HomeLoadout, packCapacity, type Purchase } from "./home";
 import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
 

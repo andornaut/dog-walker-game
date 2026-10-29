@@ -1,5 +1,6 @@
-import { wrapWords } from "../lib/lines";
-import type { Rect } from "../lib/rect";
+import { wrapWords } from "@andornaut/game-kit/lines";
+import type { Rect } from "@andornaut/game-kit/rect";
+
 import type { FontMetrics } from "../ui/fontMetrics";
 import { HOME_LAYOUT, SPEECH_ROOM, speechBubbleHeight } from "./homeLayout";
 

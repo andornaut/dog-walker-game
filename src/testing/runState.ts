@@ -1,5 +1,4 @@
 import type { DogId, Modifier } from "../data/types";
-import { clampHearts } from "../lib/units";
 import {
   type ActiveModifier,
   blankRun,
@@ -8,6 +7,7 @@ import {
   type PackSlot,
   type RunState,
 } from "../state/runState";
+import { clampHearts } from "../units";
 
 // A run state for tests: one pack slot per entry, walking at the given hearts or fired
 // in zone 0, the default walker without its effects, and everything else empty.

@@ -1,7 +1,7 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
-import { itemAt } from "../lib/arrays";
-import { keysOf } from "../lib/records";
 import { type Contact, lanesReachedAtEnd, pathShortfalls } from "../testing/avoidable";
 import { plannerStreams } from "../testing/movers";
 import { type MoverSpec, sweptLanes } from "./moverPlanning";

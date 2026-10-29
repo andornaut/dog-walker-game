@@ -1,7 +1,7 @@
+import { assertNever } from "@andornaut/game-kit/assertNever";
 import * as v from "valibot";
 
 import type { LaneDirection } from "../layout/lanes";
-import { assertNever } from "../lib/assertNever";
 import { parseRunSetup, type RunSetup, type RunSetupLimits, runSetupToQuery } from "./runSetup";
 
 // A log of any other version is rejected.

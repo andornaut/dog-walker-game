@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
 
+import { STEP_SECONDS } from "@andornaut/game-kit/clock/fixedStep";
+import { randomStream } from "@andornaut/game-kit/random";
 import { describe, expect, it } from "vitest";
 
 import shippedManifest from "../../public/art/manifest.json";
@@ -8,10 +10,8 @@ import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import type { MinorObstacleId } from "../data/types";
 import { laneCentreXs } from "../layout/lanes";
-import { randomStream } from "../lib/random";
 import { currentZone } from "../rules/route";
 import { read } from "../rules/units";
-import { STEP_SECONDS } from "../runner/fixedStep";
 import { DART_VERGE_LANES } from "../runner/moverPlanning";
 import { moverPlace } from "../runner/movers";
 import { screenRoadGeometry } from "../runner/screenGeometry";

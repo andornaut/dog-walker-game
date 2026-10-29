@@ -1,7 +1,7 @@
 import type { DogId, GameData } from "../data/types";
-import { addCents } from "../lib/units";
 import { heartsOf, packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
+import { addCents } from "../units";
 import type { HeartChange, MoneyChange } from "./causes";
 import { ownerMaxHearts } from "./dogs";
 import { changeHearts } from "./effects";

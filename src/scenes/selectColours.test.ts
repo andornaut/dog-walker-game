@@ -1,3 +1,4 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { greyFor } from "../assets/greyRamp";
@@ -8,14 +9,13 @@ import { SETTINGS_BUILD_LABEL } from "../home/settings";
 import { STATS_LAYOUT } from "../home/statsLayout";
 import type { EffectNameKind } from "../hud/effectNames";
 import { changeLabels } from "../hud/hudView";
-import { keysOf } from "../lib/records";
-import { cents } from "../lib/units";
 import type { Change } from "../rules/causes";
 import { tipValue } from "../rules/run";
 import { testState } from "../testing/runState";
 import { CREAM_PANEL_COLOURS } from "../ui/phaser/draw";
 import { NEUTRAL_RAMP, PALETTE } from "../ui/phaser/palette";
 import { BUTTON_COLOURS, GREYED, pictureBox, PLATE_LOOKS, selectLook } from "../ui/selection";
+import { cents } from "../units";
 import { CHANGE_COLOURS, changeLabelColour } from "./changeLabelColours";
 import { DEBUFF_COLOURS } from "./debuffColours";
 import { EFFECT_PILLS, pillColours } from "./effectNameColours";

@@ -1,6 +1,7 @@
+import type { Rect } from "@andornaut/game-kit/rect";
+
 import { DOG_SLOTS } from "../data/dogSlots";
 import { TITLE_CAP_ROWS } from "../hud/walkHud";
-import type { Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
 import { type FontMetrics, helpCapDy, inkRowsFromCapTop } from "../ui/fontMetrics";
 import { type ScrollbarRects, scrollbarRects } from "../ui/scrollbar";

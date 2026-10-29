@@ -4,9 +4,10 @@
 // module needs no Phaser.
 import "./devPanel.css";
 
-import { BUILD_LABEL } from "../buildLabel";
+import { BUILD_LABEL } from "@andornaut/game-kit/build/buildLabel";
+import { sessionRead, sessionRemove, sessionWrite } from "@andornaut/game-kit/sessionStore";
+
 import { gameData } from "../data";
-import { sessionRead, sessionRemove, sessionWrite } from "../lib/sessionStore";
 import type { StoragePersistence } from "../pwa/storagePersistence";
 import { saveContextFrom } from "../save/load";
 import { loadedSave, newPlayerOnDevice } from "../save/profile";

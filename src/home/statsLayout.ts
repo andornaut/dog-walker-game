@@ -1,4 +1,5 @@
-import type { Rect } from "../lib/rect";
+import type { Rect } from "@andornaut/game-kit/rect";
+
 import { type FontMetrics, helpCapDy, inkRowsOfLines } from "../ui/fontMetrics";
 import { type ScrollbarRects, scrollbarRects } from "../ui/scrollbar";
 import { BADGE_STRIP, type WallCellLines } from "./badgesView";

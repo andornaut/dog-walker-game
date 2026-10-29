@@ -1,7 +1,7 @@
+import type { Point } from "@andornaut/game-kit/rect";
 import type { Types } from "phaser";
 
 import { curvePoint } from "../hud/moments";
-import type { Point } from "../lib/rect";
 
 // A tween's config that moves along the quadratic curve from path.from to path.to, pulled toward
 // path.control, over tween.duration: place gets each update's point, rounded to whole pixels.

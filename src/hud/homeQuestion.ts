@@ -1,11 +1,12 @@
+import { fillLine } from "@andornaut/game-kit/lines";
+
 import type { GameData } from "../data/types";
 import { dollarText } from "../home/home";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
-import { fillLine } from "../lib/lines";
-import { addCents, type Cents } from "../lib/units";
 import { currentZone, walkLength } from "../rules/route";
 import { payZone, walkEarnings } from "../rules/run";
 import type { RunState } from "../state/runState";
+import { addCents, type Cents } from "../units";
 import { RUN_TEXT_FIELDS } from "./runText";
 
 // One line of the Home question's note, by what it says: lose (drawn red) or zonesLeft.

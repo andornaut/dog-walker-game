@@ -1,5 +1,7 @@
 import "./main.css";
 
+import { keysOf } from "@andornaut/game-kit/records";
+
 import { badgeKey } from "../assets/spriteKeys";
 import { gameData, onGameDataChange } from "../data";
 import type {
@@ -11,7 +13,6 @@ import type {
   Unlock,
   Zone,
 } from "../data/types";
-import { keysOf } from "../lib/records";
 import { achievementConditionText } from "../rules/achievements";
 import { maxHearts, sizeHearts } from "../rules/dogs";
 import {

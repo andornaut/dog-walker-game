@@ -5,12 +5,12 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { CHARM } from "../layout/buffLayout";
-import { cents } from "../lib/units";
 import { fontFileMetrics } from "../testing/fontInk";
 import { decodePng } from "../tools/atlas/atlasBuild";
 import { readBitmapFont } from "../tools/fontFile";
 import { plainMarks } from "../ui/pixelFont";
 import { TEXT_SCALE } from "../ui/textFit";
+import { cents } from "../units";
 import {
   chipLeft,
   FEEDBACK,

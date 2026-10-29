@@ -1,6 +1,6 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
 import { describe, expect, it } from "vitest";
 
-import { itemAt } from "../lib/arrays";
 import { animationSpecs } from "./asepriteAnimations";
 
 function sheet(durations: number[], frameTags: unknown[] | undefined) {

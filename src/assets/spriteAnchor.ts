@@ -1,4 +1,5 @@
-import type { PixelBounds } from "../lib/opaqueBounds";
+import type { PixelBounds } from "@andornaut/game-kit/opaqueBounds";
+
 import type { SpriteAnchor } from "./manifest";
 
 // Where a ground sprite stands, from the opaque bounds of its frame 0: feetY is its last

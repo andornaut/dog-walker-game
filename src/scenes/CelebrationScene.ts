@@ -1,3 +1,4 @@
+import type { Rect } from "@andornaut/game-kit/rect";
 import { Scene } from "phaser";
 
 import { gameData } from "../data";
@@ -7,7 +8,6 @@ import { badgeStripRows, CELEBRATION_PANEL } from "../home/badgesView";
 import { overlayRegion, regionOutside } from "../home/homeBar";
 import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { WIDE_BUTTON } from "../layout/screenLayout";
-import type { Rect } from "../lib/rect";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { addBadgeCelebration, addCheeringFace } from "./badges";
 import { listenHomeBar } from "./homeBarPress";

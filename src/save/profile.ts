@@ -1,7 +1,7 @@
 import type { AchievementId, HintId } from "../data/types";
-import type { Cents } from "../lib/units";
 import { newlyEarned } from "../rules/achievements";
 import type { Change } from "../rules/causes";
+import type { Cents } from "../units";
 import { earnedIfBanked } from "./achievementPreview";
 import { awardAchievements, type AwardContext, earnedSince } from "./achievements";
 import { bankCheckpoint, recordCheckpoint, recordRunEnd, type RunResult } from "./checkpoint";

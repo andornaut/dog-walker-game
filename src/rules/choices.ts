@@ -1,3 +1,7 @@
+import { fillNames } from "@andornaut/game-kit/lines";
+import { type Random, randomInt, randomPick } from "@andornaut/game-kit/random";
+import { keysOf } from "@andornaut/game-kit/records";
+
 import { cardZoneKey } from "../assets/spriteKeys";
 import type {
   CardOption,
@@ -12,12 +16,9 @@ import type {
   UpgradeId,
   ZoneId,
 } from "../data/types";
-import { fillNames } from "../lib/lines";
-import { type Random, randomInt, randomPick } from "../lib/random";
-import { keysOf } from "../lib/records";
-import { type Cents, cents, type Hearts } from "../lib/units";
 import { packDogs, walkingAmong } from "../state/pack";
 import type { EffectSource, RunState } from "../state/runState";
+import { type Cents, cents, type Hearts } from "../units";
 import { countOptionPick } from "./achievements";
 import {
   amountText,

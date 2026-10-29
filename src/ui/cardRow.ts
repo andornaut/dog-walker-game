@@ -1,4 +1,4 @@
-import type { Rect } from "../lib/rect";
+import type { Rect } from "@andornaut/game-kit/rect";
 
 export interface CardRowSpec {
   cardHeight: number;

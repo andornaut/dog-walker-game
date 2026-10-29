@@ -1,3 +1,5 @@
+import { fillLine, wrapWords } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -6,15 +8,13 @@ import type { DogId, GearId, WalkerId } from "../data/types";
 import { HELP_LAYOUT } from "../help/helpLayout";
 import { GREETING_FIT, greetingLineTops, infoItems, newWalkerRows } from "../hud/celebrationLayout";
 import { celebrationText } from "../hud/zoneCelebration";
-import { fillLine, wrapWords } from "../lib/lines";
-import { keysOf } from "../lib/records";
-import { cents } from "../lib/units";
 import type { Owned } from "../save/schema";
 import { fontFileMetrics, gameGlyphs, inkWidth } from "../testing/fontInk";
 import { veteranSave } from "../testing/saves";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { fittingText, TEXT_SCALE, type TextFitStyle } from "../ui/textFit";
+import { cents } from "../units";
 import { badgeProgress, badgeWall, wallCell } from "./badgesView";
 import {
   type DetailCard,

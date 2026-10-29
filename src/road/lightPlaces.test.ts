@@ -1,10 +1,10 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
 import { describe, expect, it, vi } from "vitest";
 
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
 import { project, roadProjection } from "../layout/projection";
 import { screenLayout, walkerFootY } from "../layout/screenLayout";
-import { itemAt } from "../lib/arrays";
 import {
   distanceBehind,
   type LightPlace,

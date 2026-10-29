@@ -1,5 +1,5 @@
-import { clampIndex } from "../lib/arrays";
-import { assertNever } from "../lib/assertNever";
+import { clampIndex } from "@andornaut/game-kit/arrays";
+import { assertNever } from "@andornaut/game-kit/assertNever";
 
 // "next" and "previous" turn one page and hold at the first and last pages, so a held
 // arrow key cannot close the help. "advance" is the Next button: on the last page it is

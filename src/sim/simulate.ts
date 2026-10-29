@@ -1,3 +1,7 @@
+import { STEP_SECONDS } from "@andornaut/game-kit/clock/fixedStep";
+import { type Random, randomStream } from "@andornaut/game-kit/random";
+import { keysOf } from "@andornaut/game-kit/records";
+
 import { LANE_COUNT } from "../data/screen";
 import type {
   AchievementId,
@@ -9,9 +13,6 @@ import type {
   ZoneId,
 } from "../data/types";
 import type { InputEvent } from "../dev/inputLog";
-import { type Random, randomStream } from "../lib/random";
-import { keysOf } from "../lib/records";
-import { addCents, type Cents, cents } from "../lib/units";
 import {
   earnedByRun,
   lastHeartOwnersOf,
@@ -21,7 +22,6 @@ import {
 import { type CardView, type Choice, type ChoiceData } from "../rules/choices";
 import { currentZoneId } from "../rules/route";
 import { endReasonOf, walkEarnings } from "../rules/run";
-import { STEP_SECONDS } from "../runner/fixedStep";
 import { advanceLaneControl, pullLane } from "../runner/laneControl";
 import { destinationLane } from "../runner/laneMotion";
 import { hasLeftRoad, moverPlace, moverY } from "../runner/movers";
@@ -48,6 +48,7 @@ import {
 import { blocksLane, type WalkItemKind } from "../runner/walkItems";
 import { packDogs } from "../state/pack";
 import { newRun, type PackDogs, type RunState } from "../state/runState";
+import { addCents, type Cents, cents } from "../units";
 import {
   actBot,
   type BotRoad,

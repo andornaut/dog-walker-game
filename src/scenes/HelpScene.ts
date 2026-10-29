@@ -1,3 +1,5 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { insetRect, type Point, type Rect } from "@andornaut/game-kit/rect";
 import { Scene, Scenes } from "phaser";
 
 import { gameData } from "../data";
@@ -8,8 +10,6 @@ import { dotRects, HELP_LAYOUT, helpActionAt } from "../help/helpLayout";
 import { applyHelpAction, clampPage, type HelpAction, helpButtons } from "../help/helpPaging";
 import { closeHelp } from "../help/helpSeen";
 import { screenArea } from "../input/outsideTap";
-import { itemAt } from "../lib/arrays";
-import { insetRect, type Point, type Rect } from "../lib/rect";
 import { addFilledRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, wrapPixelText } from "../ui/phaser/pixelText";

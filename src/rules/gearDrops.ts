@@ -1,9 +1,10 @@
+import { chanceRound, type Random, weightedPick } from "@andornaut/game-kit/random";
+import { keysOf } from "@andornaut/game-kit/records";
+
 import type { GameData, GearId, LiveTuning } from "../data/types";
-import { chanceRound, type Random, weightedPick } from "../lib/random";
-import { keysOf } from "../lib/records";
-import { clampHearts } from "../lib/units";
 import { mapPack } from "../state/pack";
 import type { EffectSource, ModifierSource, RunState } from "../state/runState";
+import { clampHearts } from "../units";
 import { ownerMaxHearts } from "./dogs";
 import { resolveEffects } from "./effects";
 import type { ModifiedValue } from "./modified";

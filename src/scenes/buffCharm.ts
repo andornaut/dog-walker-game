@@ -1,3 +1,4 @@
+import { insetRect, type Point, type Rect } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene } from "phaser";
 
 import { gameData } from "../data";
@@ -5,7 +6,6 @@ import type { CardCharm } from "../hud/buffMarks";
 import { effectIconFallback, type EffectItem, walkBarIconKey } from "../hud/effectIcons";
 import type { LabelAnchor } from "../hud/feedback";
 import { BUFF_POP, cardCharmWidth, CHARM, sparkleAt } from "../layout/buffLayout";
-import { insetRect, type Point, type Rect } from "../lib/rect";
 import { addFilledRect, drawRing } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, inkSpan } from "../ui/phaser/pixelText";

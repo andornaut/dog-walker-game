@@ -1,4 +1,4 @@
-import { wrapWords } from "../lib/lines";
+import { wrapWords } from "@andornaut/game-kit/lines";
 
 // Every text role has one fixed size: text never shrinks to fit its room. Text that would not
 // fit wraps onto more lines, its box grows, or its words are shortened in the data.

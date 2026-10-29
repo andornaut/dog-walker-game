@@ -1,3 +1,4 @@
+import { type Point, rectAboveIn } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene } from "phaser";
 
 import { gearIconKey } from "../../assets/spriteKeys";
@@ -5,7 +6,6 @@ import { gameData } from "../../data";
 import { SCREEN_CONFIG } from "../../data/screen";
 import type { EncounterId, GearId } from "../../data/types";
 import { zoneBannerHeading } from "../../hud/zoneCelebration";
-import { type Point, rectAboveIn } from "../../lib/rect";
 import { currentZone } from "../../rules/route";
 import type { RunState } from "../../state/runState";
 import { addDisplayText } from "../../ui/phaser/displayText";

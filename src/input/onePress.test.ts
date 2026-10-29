@@ -1,6 +1,6 @@
+import { chance, randomInt, seededRandom } from "@andornaut/game-kit/random";
 import { describe, expect, it } from "vitest";
 
-import { chance, randomInt, seededRandom } from "../lib/random";
 import { followOnePress, type OnePressStep } from "./onePress";
 import type { PointerPhase } from "./pointerTracking";
 

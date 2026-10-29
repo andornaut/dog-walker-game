@@ -1,3 +1,4 @@
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
 import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../../assets/asepriteAnimations";
@@ -5,7 +6,6 @@ import { IDLE_TAG } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import type { DepthDraw } from "../../layout/depthScale";
 import { distanceAtY } from "../../layout/projection";
-import { getOrInsertComputed } from "../../lib/maps";
 import { CARRIED_LIGHT_UP, carriedLightReach, distanceBehind } from "../../road/lightPlaces";
 import {
   idleFrame,

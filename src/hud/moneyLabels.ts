@@ -1,8 +1,9 @@
+import type { Point, Rect } from "@andornaut/game-kit/rect";
+
 import { SCREEN_LAYOUT } from "../data/screen";
-import type { Point, Rect } from "../lib/rect";
-import { type Cents, cents } from "../lib/units";
 import { amountText } from "../rules/causes";
 import type { FontMetrics } from "../ui/fontMetrics";
+import { type Cents, cents } from "../units";
 import { FEEDBACK, tickMs } from "./feedback";
 import { CHANGE_LABEL_STYLE, changeChipAt, changeLabelRoom } from "./hudLanes";
 import type { ChangeLabel } from "./hudView";

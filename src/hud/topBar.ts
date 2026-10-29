@@ -1,7 +1,8 @@
+import { containsPoint, type Point } from "@andornaut/game-kit/rect";
+
 import { SCREEN_LAYOUT } from "../data/screen";
 import { isMuteKey, isPauseKey } from "../input/keyBindings";
 import type { PressMode } from "../input/pointerTracking";
-import { containsPoint, type Point } from "../lib/rect";
 import { type BarButton, WALK_BAR_BUTTONS, type WalkBarButtonId, walkBarLayout } from "./walkHud";
 
 // The walk bar's buttons (walkHud.ts), left to right. A press in a button's hit area is that

@@ -1,7 +1,7 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { keysOf } from "../lib/records";
 import { bobOffset, itemBobs } from "./itemCues";
 
 describe("itemBobs", () => {

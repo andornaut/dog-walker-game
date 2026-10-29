@@ -1,6 +1,7 @@
+import type { Point } from "@andornaut/game-kit/rect";
+
 import { zonePipTag } from "../assets/spriteKeys";
 import type { DebuffId, DogId, GameData, ZoneId } from "../data/types";
-import type { Point } from "../lib/rect";
 import { amountText, type Change, changeAmount, type MoneyChange } from "../rules/causes";
 import { zoneById } from "../rules/route";
 

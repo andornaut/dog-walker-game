@@ -1,3 +1,4 @@
+import type { Point } from "@andornaut/game-kit/rect";
 import type { Input, Scene } from "phaser";
 
 import { gameData } from "../../data";
@@ -23,7 +24,6 @@ import {
   trackPointer,
 } from "../../input/pointerTracking";
 import type { LaneDirection } from "../../layout/lanes";
-import type { Point } from "../../lib/rect";
 import { read } from "../../rules/units";
 import type { SessionInput } from "../../runner/session";
 import { steerWalk, type Walk } from "../../runner/walk";

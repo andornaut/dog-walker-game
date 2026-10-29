@@ -1,11 +1,12 @@
+import { fillLine } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
+
 import type { GameData } from "../data/types";
-import { fillLine } from "../lib/lines";
-import { keysOf } from "../lib/records";
-import type { Cents } from "../lib/units";
 import { capitalize, gearShort } from "../rules/effectText";
 import { unlockPrice } from "../rules/shop";
 import type { Owned } from "../save/schema";
 import type { ItemLook } from "../ui/interaction";
+import type { Cents } from "../units";
 import { purchases } from "./afford";
 import {
   cheapestFirst,

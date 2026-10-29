@@ -1,3 +1,5 @@
+import { seededRandom } from "@andornaut/game-kit/random";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
@@ -12,8 +14,6 @@ import type {
   ZoneId,
 } from "../data/types";
 import { WORLD } from "../data/world";
-import { seededRandom } from "../lib/random";
-import { keysOf } from "../lib/records";
 import { read } from "../rules/units";
 import { newRun, type PackDogs } from "../state/runState";
 import { type HopMovement, hoppingInstead, plannerStreams, sharedWorld } from "../testing/movers";

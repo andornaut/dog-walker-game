@@ -1,5 +1,6 @@
-import { type Point, type Rect, rectsOverlap } from "../lib/rect";
-import { type Cents, cents } from "../lib/units";
+import { type Point, type Rect, rectsOverlap } from "@andornaut/game-kit/rect";
+
+import { type Cents, cents } from "../units";
 import { REACH_ICON } from "./hudLanes";
 
 // The dodge label shows for ms: fully opaque for holdMs, so it can be read, then rising rise

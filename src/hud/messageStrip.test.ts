@@ -1,12 +1,12 @@
 import { readFileSync } from "node:fs";
 
+import { keysOf } from "@andornaut/game-kit/records";
+import { type Rect } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
 import type { QuipMoment } from "../data/types";
-import { keysOf } from "../lib/records";
-import { type Rect } from "../lib/rect";
 import { bodyRunWidth } from "../testing/bodyFont";
 import { defined } from "../testing/defined";
 import { everyStripLine } from "../testing/everyStripLine";

@@ -1,17 +1,17 @@
+import { wrapWords } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
+import { insetRect, rectsOverlap } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
 import { withNamePills } from "../hud/effectNames";
-import { wrapWords } from "../lib/lines";
-import { keysOf } from "../lib/records";
-import { insetRect, rectsOverlap } from "../lib/rect";
-import { cents } from "../lib/units";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
+import { cents } from "../units";
 import {
   bubbleLines,
   bubbleRect,

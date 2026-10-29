@@ -1,4 +1,4 @@
-import type { Point } from "../lib/rect";
+import type { Point } from "@andornaut/game-kit/rect";
 
 // The compass step nearest a direction, one of 8: each coordinate -1, 0 or 1.
 export function compassStep(dx: number, dy: number): Point {

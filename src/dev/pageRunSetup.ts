@@ -1,6 +1,7 @@
+import { keysOf } from "@andornaut/game-kit/records";
+
 import { gameData } from "../data";
 import type { DogId, GameData, GearId, WalkerId } from "../data/types";
-import { keysOf } from "../lib/records";
 import { walkLength } from "../rules/route";
 import { MAX_RUN_DOGS } from "../save/schema";
 import { homeRunSetup, stripDevParams } from "./devStart";

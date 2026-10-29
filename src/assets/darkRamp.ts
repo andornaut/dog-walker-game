@@ -1,4 +1,5 @@
-import { remapRgb } from "../lib/rgba";
+import { remapRgb } from "@andornaut/game-kit/rgba";
+
 import { ONE_STEP_DARKER } from "./housePalette";
 
 function distance(a: number, b: number): number {

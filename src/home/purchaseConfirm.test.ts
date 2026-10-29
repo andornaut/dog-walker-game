@@ -1,14 +1,14 @@
 import { readdirSync, readFileSync } from "node:fs";
 
+import { fillNames } from "@andornaut/game-kit/lines";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { fillNames } from "../lib/lines";
-import { cents } from "../lib/units";
 import type { SaveDocument } from "../save/schema";
 import { defined } from "../testing/defined";
 import { newPlayerSave } from "../testing/saves";
 import { TEST_TUNING } from "../testing/tuning";
+import { cents } from "../units";
 import { dollarText, type Purchase, purchasePrice } from "./home";
 import { answerPurchase, confirmLines, keyAnswer, requestPurchase } from "./purchaseConfirm";
 import { dogRows, gearRows, slotRows } from "./shop";

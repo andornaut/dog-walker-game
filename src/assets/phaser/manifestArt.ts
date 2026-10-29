@@ -1,7 +1,7 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
 import type { Loader, Scene, Textures } from "phaser";
 import artFiles from "virtual:art-files";
 
-import { itemAt } from "../../lib/arrays";
 import { artFileUrl } from "../artUrl";
 import { filtersLinear, steppedBases } from "../atlasGroups";
 import {

@@ -1,9 +1,10 @@
 // Game events, the manifest sound keys they play, and the mixing rules. No Phaser here: the
 // soundboard in src/scenes/ applies these to the sound manager.
 
+import { clamp01 } from "@andornaut/game-kit/numbers";
+
 import { kebabCase } from "../assets/spriteKeys";
 import type { Encounter, EncounterId } from "../data/types";
-import { clamp01 } from "../lib/numbers";
 
 export type BaseCue =
   | "badge"

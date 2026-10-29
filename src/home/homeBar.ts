@@ -1,6 +1,7 @@
+import { containsPoint, type Rect } from "@andornaut/game-kit/rect";
+
 import { SCREEN_LAYOUT } from "../data/screen";
 import type { OutsideArea } from "../input/outsideTap";
-import { containsPoint, type Rect } from "../lib/rect";
 import { HOME_LAYOUT } from "./homeLayout";
 
 // Where an overlay sits: on a home page (the start screen, the Pet shop, the Logbook), or on a

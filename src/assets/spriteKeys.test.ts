@@ -1,10 +1,10 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import manifest from "../../public/art/manifest.json";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { SHOP_GEAR } from "../data/shop";
 import { WORLD } from "../data/world";
-import { keysOf } from "../lib/records";
 import { animationKey, animationSpecs } from "./asepriteAnimations";
 import {
   backdropKey,

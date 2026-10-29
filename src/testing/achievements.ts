@@ -1,14 +1,15 @@
+import { assertNever } from "@andornaut/game-kit/assertNever";
+import { keysOf } from "@andornaut/game-kit/records";
+
 import { ACHIEVEMENTS } from "../data/achievements";
 import type { AchievementCondition, AchievementId, DogId, Threshold, ZoneId } from "../data/types";
-import { assertNever } from "../lib/assertNever";
-import { keysOf } from "../lib/records";
-import { type Cents, cents, dollarsToCents } from "../lib/units";
 import { type AchievementData, needed, picksOf, type RunFacts } from "../rules/achievements";
 import { walkLength } from "../rules/route";
 import type { SaveDocument } from "../save/schema";
 import { timesFired, walksFinished, walksPlayed, ZERO_DOG_STATS } from "../save/stats";
 import { packDogsOf } from "../state/pack";
 import type { PackDogs } from "../state/runState";
+import { type Cents, cents, dollarsToCents } from "../units";
 
 // What an achievement's earnings condition asks one walk to earn, read from the data.
 export function earningsGoal(id: AchievementId): Cents {

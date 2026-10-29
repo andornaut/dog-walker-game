@@ -1,3 +1,4 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { DEBUFFS } from "../data/debuffs";
@@ -9,14 +10,13 @@ import { QUIPS } from "../data/quips";
 import { SHOP_GEAR } from "../data/shop";
 import type { DogId, GearId, LiveTuning } from "../data/types";
 import { WORLD } from "../data/world";
-import { keysOf } from "../lib/records";
-import { cents } from "../lib/units";
 import { price, unlockPrice } from "../rules/shop";
 import { read, readTable } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { defined } from "../testing/defined";
 import { newPlayerSave, STARTER_DOGS } from "../testing/saves";
 import { TEST_TUNING } from "../testing/tuning";
+import { cents } from "../units";
 import {
   buy,
   type BuyResult,

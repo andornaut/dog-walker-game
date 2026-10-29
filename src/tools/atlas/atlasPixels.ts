@@ -1,5 +1,5 @@
-import { clampIndex } from "../../lib/arrays";
-import type { Point, Rect } from "../../lib/rect";
+import { clampIndex } from "@andornaut/game-kit/arrays";
+import type { Point, Rect } from "@andornaut/game-kit/rect";
 
 // Pixels as RGBA bytes, row by row from the top-left.
 export interface RgbaImage {

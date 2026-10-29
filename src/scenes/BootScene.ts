@@ -1,3 +1,5 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { keysOf } from "@andornaut/game-kit/records";
 import { type GameObjects, type Loader, Scene, Sound } from "phaser";
 
 import { animationSpecs, type AsepriteSheet } from "../assets/asepriteAnimations";
@@ -36,8 +38,6 @@ import {
   loadingWalkerAt,
   stepFraction,
 } from "../layout/loadingScreen";
-import { itemAt } from "../lib/arrays";
-import { keysOf } from "../lib/records";
 import { browserSoundFormat, startWakeLock, unlockAudioOnFirstGesture } from "../pwa";
 import { addFilledRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";

@@ -1,5 +1,8 @@
 import { readFileSync } from "node:fs";
 
+import { wrapWords } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
+import { insetRect, type Rect, rectsOverlap } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
 import { ownerFaceKey } from "../assets/spriteKeys";
@@ -7,10 +10,6 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { WalkerId } from "../data/types";
 import { ownerPhotoRect, WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
-import { wrapWords } from "../lib/lines";
-import { keysOf } from "../lib/records";
-import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
-import { cents } from "../lib/units";
 import { unlockPrice } from "../rules/shop";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
@@ -23,6 +22,7 @@ import { MARK_OFFSET } from "../ui/mark";
 import { plainMarks } from "../ui/pixelFont";
 import { AFFORD_OUTSET } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
+import { cents } from "../units";
 import {
   type DetailCard,
   type DetailPart,

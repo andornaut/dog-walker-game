@@ -1,6 +1,7 @@
+import type { Rect } from "@andornaut/game-kit/rect";
+
 import { type DepthArt, type DepthDraw, depthDraw } from "../layout/depthScale";
 import { project, type RoadProjection } from "../layout/projection";
-import type { Rect } from "../lib/rect";
 import { glyphAdvance, normalizePixelText, PIXEL_GLYPHS } from "../ui/pixelFont";
 import { blankImage, type RgbaImage } from "./atlas/atlasPixels";
 

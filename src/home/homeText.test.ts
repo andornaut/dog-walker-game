@@ -1,8 +1,8 @@
+import { placeholders } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { placeholders } from "../lib/lines";
-import { keysOf } from "../lib/records";
 import { HOME_TEXT_FIELDS } from "./homeText";
 
 describe("the home text", () => {

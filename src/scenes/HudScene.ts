@@ -1,3 +1,4 @@
+import type { Point, Rect } from "@andornaut/game-kit/rect";
 import { type GameObjects, Scene } from "phaser";
 
 import { debuffIconKey } from "../assets/iconKeys";
@@ -72,8 +73,6 @@ import {
   zoneShare,
 } from "../hud/walkHud";
 import { zonePillLayout } from "../hud/zonePill";
-import type { Point, Rect } from "../lib/rect";
-import { type Cents, cents } from "../lib/units";
 import { ownerMaxHearts } from "../rules/dogs";
 import { debuffLasting } from "../rules/durations";
 import { hintFor, hintJumpsQueue } from "../rules/hints";
@@ -102,6 +101,7 @@ import {
   setPixelText,
 } from "../ui/phaser/pixelText";
 import { topBarRects } from "../ui/topBarTrim";
+import { type Cents, cents } from "../units";
 import { arcFlight } from "./arcFlight";
 import { addCharm, glintWell } from "./buffCharm";
 import { BumpBorder } from "./bumpBorder";

@@ -1,9 +1,15 @@
+import { clampIndex } from "@andornaut/game-kit/arrays";
+import {
+  chance,
+  type Random,
+  randomInt,
+  randomPick,
+  seededRandom,
+} from "@andornaut/game-kit/random";
 import { describe, expect, it } from "vitest";
 
 import { walkPaused } from "../hud/topBar";
 import { type ScreenConfig, screenLayout } from "../layout/screenLayout";
-import { clampIndex } from "../lib/arrays";
-import { chance, type Random, randomInt, randomPick, seededRandom } from "../lib/random";
 import {
   advanceLaneControl,
   type LaneControl,

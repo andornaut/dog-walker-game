@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 
+import { type Point, type Rect, rectsOverlap } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
-import { type Point, type Rect, rectsOverlap } from "../lib/rect";
 import { fontFileMetrics } from "../testing/fontInk";
 import { inkRowsOfLines } from "../ui/fontMetrics";
 import { perkIconKey } from "./effectIcons";

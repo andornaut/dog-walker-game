@@ -8,8 +8,8 @@ import type {
   PackSize,
   Size,
 } from "../data/types";
-import { clampHearts, type Hearts } from "../lib/units";
 import type { RunState } from "../state/runState";
+import { clampHearts, type Hearts } from "../units";
 import { modifiedStat } from "./modifiers";
 import { read, readTable } from "./units";
 

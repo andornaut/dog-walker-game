@@ -1,3 +1,4 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { DEBUFFS } from "../data/debuffs";
@@ -18,7 +19,6 @@ import type {
   WalkerPerkId,
 } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
-import { keysOf } from "../lib/records";
 import { type EffectSource, type ModifierSource, newRun, type RunState } from "../state/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";

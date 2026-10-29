@@ -1,3 +1,11 @@
+import {
+  type FixedStepLimits,
+  frameSteps,
+  holdStepClock,
+  startStepClock,
+  STEP_SECONDS,
+  type StepClock,
+} from "@andornaut/game-kit/clock/fixedStep";
 import { Scene } from "phaser";
 
 import { musicKey } from "../audio/music";
@@ -28,14 +36,6 @@ import {
 import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
 import { type CardView, type Choice, outcomeChanges } from "../rules/choices";
 import { currentZone, currentZoneId, previousZone, previousZoneId } from "../rules/route";
-import {
-  type FixedStepLimits,
-  frameSteps,
-  holdStepClock,
-  startStepClock,
-  STEP_SECONDS,
-  type StepClock,
-} from "../runner/fixedStep";
 import { screenRoadGeometry } from "../runner/screenGeometry";
 import {
   chooseShownCard,

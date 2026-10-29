@@ -1,3 +1,5 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { insetRect, type Rect } from "@andornaut/game-kit/rect";
 import { type GameObjects, Scene } from "phaser";
 
 import { SKIP_CARD_ART } from "../assets/cardArt";
@@ -27,8 +29,6 @@ import {
   largeCardRect,
   plaqueRoom,
 } from "../layout/cardLayout";
-import { itemAt } from "../lib/arrays";
-import { insetRect, type Rect } from "../lib/rect";
 import {
   type CardView,
   type Choice,

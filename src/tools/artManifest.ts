@@ -1,3 +1,4 @@
+import { opaqueBoundsOfRgba } from "@andornaut/game-kit/opaqueBounds";
 import * as v from "valibot";
 
 import { isPlainObject, parseOrThrow } from "../assets/jsonSchema";
@@ -12,7 +13,6 @@ import {
 } from "../assets/manifest";
 import { spriteAnchor } from "../assets/spriteAnchor";
 import { standsOnGround } from "../assets/spriteKeys";
-import { opaqueBoundsOfRgba } from "../lib/opaqueBounds";
 import { decodePng } from "./atlas/atlasBuild";
 import { spriteSource } from "./atlas/atlasLayout";
 import type { RgbaImage } from "./atlas/atlasPixels";

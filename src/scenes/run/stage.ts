@@ -1,11 +1,11 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import type { Point } from "@andornaut/game-kit/rect";
 import type { GameObjects } from "phaser";
 
 import { gameData } from "../../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../../data/screen";
 import { laneCentreXs } from "../../layout/lanes";
 import { walkerFootY } from "../../layout/screenLayout";
-import { itemAt } from "../../lib/arrays";
-import type { Point } from "../../lib/rect";
 import { fadeIn, rowsHidden } from "../../road/roadClip";
 import { read } from "../../rules/units";
 import { laneMotionX } from "../../runner/laneMotion";

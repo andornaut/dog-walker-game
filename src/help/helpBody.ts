@@ -1,5 +1,6 @@
+import { fillNames } from "@andornaut/game-kit/lines";
+
 import type { GameData, HelpPage } from "../data/types";
-import { fillNames } from "../lib/lines";
 import { dodgeInText, formatDollars } from "../rules/effectText";
 import { read, readTable } from "../rules/units";
 

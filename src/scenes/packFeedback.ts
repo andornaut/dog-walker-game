@@ -1,3 +1,4 @@
+import type { Point } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
@@ -6,7 +7,6 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { chipLeft, FEEDBACK, type LabelAnchor, stackOverPop } from "../hud/feedback";
 import { changeChipAt } from "../hud/hudLanes";
 import { COMIC_WORDS } from "../layout/comicWords";
-import type { Point } from "../lib/rect";
 import { CREAM_PANEL_COLOURS, drawFramedRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, inkSpan, pixelFontMetrics, placePixelText } from "../ui/phaser/pixelText";

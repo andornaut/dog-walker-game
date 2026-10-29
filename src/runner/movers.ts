@@ -1,6 +1,7 @@
+import { clamp01 } from "@andornaut/game-kit/numbers";
+
 import type { MovementKind } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
-import { clamp01 } from "../lib/numbers";
 import type { RoadItem } from "./roadItems";
 
 // Moving hazards. Everything here is measured in road scroll rather than time, so a mover

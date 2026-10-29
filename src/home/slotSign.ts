@@ -1,7 +1,7 @@
 import type { GameData } from "../data/types";
-import type { Cents } from "../lib/units";
 import { cheapestDogSlot } from "../rules/shop";
 import type { Owned } from "../save/schema";
+import type { Cents } from "../units";
 import { dollarText, isAffordable, type Purchase, purchasePrice } from "./home";
 
 type SignData = Pick<GameData, "dogSlots" | "dogs" | "homeText" | "shopGear" | "tuning">;

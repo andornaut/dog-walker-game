@@ -1,8 +1,9 @@
+import { clamp01 } from "@andornaut/game-kit/numbers";
+import { type Random, weightedPick } from "@andornaut/game-kit/random";
+import { keysOf } from "@andornaut/game-kit/records";
+
 import { minorObstacleSpriteKey } from "../assets/spriteKeys";
 import type { DistractionPattern, GameData, MinorObstacleId, Zone } from "../data/types";
-import { clamp01 } from "../lib/numbers";
-import { type Random, weightedPick } from "../lib/random";
-import { keysOf } from "../lib/records";
 import { read, readTable } from "../rules/units";
 import { type Box, overlaps } from "../runner/collision";
 import { DART_VERGE_LANES, stopsOnVerge } from "../runner/moverPlanning";

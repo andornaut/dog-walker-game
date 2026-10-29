@@ -1,5 +1,6 @@
+import { assertNever } from "@andornaut/game-kit/assertNever";
+
 import type { Duration, LiveTuning, SecondsKey } from "../data/types";
-import { assertNever } from "../lib/assertNever";
 import type { ActiveDebuff, RunState } from "../state/runState";
 import { modifiedStat } from "./modifiers";
 import { read } from "./units";

@@ -1,6 +1,6 @@
+import type { Rect } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
-import type { Rect } from "../../lib/rect";
 import { sheetFromRows } from "../../testing/sheetImage";
 import { blankImage, blitExtruded, opaqueRect, type RgbaImage } from "./atlasPixels";
 

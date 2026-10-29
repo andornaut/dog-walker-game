@@ -2,6 +2,7 @@
 import "./crash/install";
 import "./main.css";
 
+import { fitWholePixels } from "@andornaut/game-kit/view/phaser/fitWholePixels";
 import { AUTO, Core, Game, Scale } from "phaser";
 
 import { stopGameOnCrash } from "./crash/crashScreen";
@@ -12,7 +13,6 @@ import { devToolsOn } from "./dev/devTools";
 import { pageRunSetup } from "./dev/pageRunSetup";
 import { noteKeyPress } from "./input/keyNumbers";
 import { lostTouches } from "./input/touches";
-import { integerZoom } from "./layout/integerZoom";
 import { noteWalkStarted, setOnHomeScreen, setupPhoneApp, storagePersistence } from "./pwa";
 import { BootScene } from "./scenes/BootScene";
 import { CardScene } from "./scenes/CardScene";
@@ -42,24 +42,6 @@ function devPanelHost(game: Game): DevPanelHost {
       game.registry.set(DEV_CHEATS_KEY, cheats);
     },
   };
-}
-
-// Keeps the canvas at the integer zoom for #game's size and the screen's pixel ratio, centred
-// in it with the page's background around it. Phaser measures #game and emits a resize on
-// each change, a change of pixel ratio included, since that resizes the window.
-function fitWholePixels(game: Game): void {
-  const fit = () => {
-    const { height, width } = game.scale.parentSize;
-    if (width <= 0 || height <= 0) {
-      return;
-    }
-    const zoom = integerZoom(SCREEN_CONFIG, window.devicePixelRatio || 1, { height, width });
-    if (zoom !== game.scale.zoom) {
-      game.scale.setZoom(zoom);
-    }
-  };
-  game.scale.on(Scale.Events.RESIZE, fit);
-  game.events.once(Core.Events.READY, fit);
 }
 
 // Reports the first walk, which counts as the player interacting, then stops watching.
@@ -120,7 +102,7 @@ function bootGame(): Game {
     game.pause();
     game.sound.pauseAll();
   });
-  fitWholePixels(game);
+  fitWholePixels(SCREEN_CONFIG, game);
   // The installed app has no dev panel, so its #dev-panel stays hidden and no cheat is set.
   if (devToolsOn()) {
     mountDevPanel(devPanelHost(game), document.getElementById("dev-panel"));

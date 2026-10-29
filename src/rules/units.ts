@@ -1,7 +1,4 @@
-import type { LiveTuning, NumberKeys, UnitGroup } from "../data/types";
 import {
-  type Cents,
-  dollarsToCents,
   type Multiplier,
   multiplier,
   type Pixels,
@@ -10,7 +7,10 @@ import {
   probability,
   type Seconds,
   seconds,
-} from "../lib/units";
+} from "@andornaut/game-kit/units";
+
+import type { LiveTuning, NumberKeys, UnitGroup } from "../data/types";
+import { type Cents, dollarsToCents } from "../units";
 
 // What reading a value from each tuning group gives. Hearts values in the tuning are
 // amounts and caps, not meters, so they stay plain numbers until clampHearts.

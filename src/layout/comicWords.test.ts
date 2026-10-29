@@ -1,3 +1,4 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import comicFont from "../../public/art/fonts/font-comic.fnt?raw";
@@ -5,7 +6,6 @@ import shippedManifest from "../../public/art/manifest.json";
 import { kebabCase } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import type { EncounterId } from "../data/types";
-import { keysOf } from "../lib/records";
 import { hitWord } from "../rules/encounters";
 import { burstWordPlace, COMIC_WORDS, type ComicGlyph, comicWordWidth } from "./comicWords";
 

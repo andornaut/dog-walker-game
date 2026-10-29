@@ -1,5 +1,5 @@
 import type { GameData, LiveTuning, PriceKey, Unlock } from "../data/types";
-import { type Cents, cents } from "../lib/units";
+import { type Cents, cents } from "../units";
 import { readTable } from "./units";
 
 export function price(tuning: LiveTuning, key: PriceKey): Cents {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cents } from "../lib/units";
+import { cents } from "../units";
 import {
   type ArtLook,
   type ButtonState,

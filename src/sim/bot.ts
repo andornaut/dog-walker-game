@@ -1,10 +1,11 @@
+import { STEP_SECONDS } from "@andornaut/game-kit/clock/fixedStep";
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
+import { chance, type Random } from "@andornaut/game-kit/random";
+
 import type { DebuffId, DogId } from "../data/types";
 import { type LaneDirection, laneMask } from "../layout/lanes";
 import { type RoadProjection, screenXAt } from "../layout/projection";
-import { getOrInsertComputed } from "../lib/maps";
-import { chance, type Random } from "../lib/random";
 import type { LanedBox, ScaledBox } from "../runner/collision";
-import { STEP_SECONDS } from "../runner/fixedStep";
 import { type LaneControl, steerLane } from "../runner/laneControl";
 import { hasLeftRoad, laneAt, type MoverPath, moverPlace, moverY } from "../runner/movers";
 import { moverOutcomes } from "../runner/outcomes";

@@ -1,4 +1,4 @@
-import type { Rect } from "../lib/rect";
+import type { Rect } from "@andornaut/game-kit/rect";
 
 // Every top bar (the start screen's, the walk bar, Help's) is flat fill with one trim: line's
 // colour across its row, and the bar's last rows in edge's colours, top to bottom. Its wells sit

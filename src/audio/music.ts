@@ -1,8 +1,9 @@
 // The walk's music: which loop each neighbourhood plays, and the fades between loops. No Phaser
 // here: the soundboard in src/scenes/ applies these to the sound manager.
 
+import { assertNever } from "@andornaut/game-kit/assertNever";
+
 import type { Zone } from "../data/types";
-import { assertNever } from "../lib/assertNever";
 import { effectiveVolumes, type Mix } from "./sound";
 
 // A fade between silence and full volume as a walk starts or ends.

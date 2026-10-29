@@ -1,11 +1,11 @@
+import { wrapWords } from "@andornaut/game-kit/lines";
+import { rectsOverlap } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { TITLE_CAP_ROWS } from "../hud/walkHud";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
-import { wrapWords } from "../lib/lines";
-import { rectsOverlap } from "../lib/rect";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, placedInk } from "../testing/fontInk";
 import { inside } from "../testing/rects";

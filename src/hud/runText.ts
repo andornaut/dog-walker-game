@@ -1,4 +1,4 @@
-import type { FieldTable } from "../lib/lines";
+import type { FieldTable } from "@andornaut/game-kit/lines";
 
 // The message strip's single lines, filled with stripLine (src/hud/stripLines.ts); its debuff lines
 // are filled by debuff id.

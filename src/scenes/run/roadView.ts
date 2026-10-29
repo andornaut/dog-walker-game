@@ -1,3 +1,5 @@
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
+import type { Rect } from "@andornaut/game-kit/rect";
 import { type Scene, type Textures, WEBGL } from "phaser";
 
 import { backdropKey, roadStartKey, roadTileKey } from "../../assets/spriteKeys";
@@ -13,8 +15,6 @@ import {
   solidStrip,
   STRIP,
 } from "../../layout/roadRaster";
-import { getOrInsertComputed } from "../../lib/maps";
-import type { Rect } from "../../lib/rect";
 import { previousZone } from "../../rules/route";
 import type { Walk } from "../../runner/walk";
 import { colourFromHex } from "../../ui/phaser/palette";

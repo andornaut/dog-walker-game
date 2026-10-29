@@ -1,6 +1,7 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { type Random, randomPick } from "@andornaut/game-kit/random";
+
 import type { GameData, Zone, ZoneId } from "../data/types";
-import { itemAt } from "../lib/arrays";
-import { type Random, randomPick } from "../lib/random";
 import type { RunState } from "../state/runState";
 
 export type RouteData = Pick<GameData, "world">;

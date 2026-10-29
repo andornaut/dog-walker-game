@@ -1,6 +1,6 @@
+import type { Point } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
-import type { Point } from "../lib/rect";
 import { arrowheadPixels, compassStep } from "./arrowhead";
 
 const key = ({ x, y }: Point) => `${x},${y}`;

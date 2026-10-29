@@ -1,16 +1,17 @@
+import { STEP_SECONDS } from "@andornaut/game-kit/clock/fixedStep";
+import { pixels } from "@andornaut/game-kit/units";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { CardSource, WalkerId } from "../data/types";
 import { firingTimeline } from "../hud/moments";
 import type { LaneDirection } from "../layout/lanes";
-import { clampHearts, pixels } from "../lib/units";
 import { cardFor, openCard } from "../rules/choices";
 import { read } from "../rules/units";
 import { mapPack } from "../state/pack";
 import { newRun, type PackDogs } from "../state/runState";
 import { TEST_ROAD_GEOMETRY } from "../testing/packGeometry";
-import { STEP_SECONDS } from "./fixedStep";
+import { clampHearts } from "../units";
 import { laneControlIn } from "./laneControl";
 import { stillInLane } from "./laneMotion";
 import { NO_PULLS, type Strain } from "./pulls";

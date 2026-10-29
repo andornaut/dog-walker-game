@@ -1,5 +1,6 @@
+import { clampIndex, partitionPoint } from "@andornaut/game-kit/arrays";
+
 import type { LaneDirection } from "../layout/lanes";
-import { clampIndex, partitionPoint } from "../lib/arrays";
 
 // Times are seconds of walking from now, and lanes are lane masks: bit n set means lane n.
 // A hazard is hit by a pack that occupies one of its lanes during the open interval

@@ -1,5 +1,6 @@
+import { keysOf } from "@andornaut/game-kit/records";
+
 import type { DogId, GameData } from "../data/types";
-import { keysOf } from "../lib/records";
 import type { SaveStats } from "../save/schema";
 
 // A starter owner waiting at the gate, and whether their dog still waits with them: a dog

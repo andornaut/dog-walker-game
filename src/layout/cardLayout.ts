@@ -1,4 +1,5 @@
-import type { Rect } from "../lib/rect";
+import type { Rect } from "@andornaut/game-kit/rect";
+
 import { CARD_HEADER, cardRowRects, type CardRowSpec } from "../ui/cardRow";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { TEXT_SCALE, type TextFitStyle } from "../ui/textFit";

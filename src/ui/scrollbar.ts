@@ -1,5 +1,5 @@
-import { clamp01 } from "../lib/numbers";
-import type { Rect } from "../lib/rect";
+import { clamp01 } from "@andornaut/game-kit/numbers";
+import type { Rect } from "@andornaut/game-kit/rect";
 
 // Beside a list longer than its view: a trackWidth-wide track at x, as tall as the view, and in
 // it a thumbWidth-wide thumb thumbInset inside the track's edges, at least thumbMin tall.

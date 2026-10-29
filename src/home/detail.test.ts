@@ -1,10 +1,9 @@
+import { fillNames } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, Size, WalkerId } from "../data/types";
-import { fillNames } from "../lib/lines";
-import { keysOf } from "../lib/records";
-import { cents } from "../lib/units";
 import { sizeHearts } from "../rules/dogs";
 import {
   capitalize,
@@ -17,6 +16,7 @@ import { walkerGoal } from "../rules/walkers";
 import type { Owned } from "../save/schema";
 import { STARTER_DOGS } from "../testing/saves";
 import { TEST_TUNING } from "../testing/tuning";
+import { cents } from "../units";
 import { type DetailCard, detailParts, dogDetail, gearDetail, walkerDetail } from "./detail";
 import { dollarText, purchasePrice } from "./home";
 import { homeLine } from "./homeText";

@@ -1,12 +1,12 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
+import type { Random } from "@andornaut/game-kit/random";
 import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../../assets/asepriteAnimations";
 import { IDLE_TAG } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import { project } from "../../layout/projection";
-import { itemAt } from "../../lib/arrays";
-import { getOrInsertComputed } from "../../lib/maps";
-import type { Random } from "../../lib/random";
 import {
   type Distraction,
   type DistractionDeps,

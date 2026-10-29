@@ -1,8 +1,9 @@
+import { type Seconds } from "@andornaut/game-kit/units";
 import { describe, expect, expectTypeOf, it } from "vitest";
 
-import { type Cents, type Hearts, type Seconds } from "../lib/units";
 import { read } from "../rules/units";
 import type { Pack } from "../state/runState";
+import { type Cents, type Hearts } from "../units";
 import { TUNING } from "./tuning";
 import type {
   AchievementCondition,

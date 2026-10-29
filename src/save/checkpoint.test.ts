@@ -1,13 +1,13 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, WalkerId, ZoneId } from "../data/types";
-import { keysOf } from "../lib/records";
-import { cents } from "../lib/units";
 import { walkerGoal } from "../rules/walkers";
 import type { EndReason } from "../state/runState";
 import { packOf, runFactsFor } from "../testing/achievements";
 import { newPlayerSave, quietCounters, testAwards, veteranSave } from "../testing/saves";
+import { cents } from "../units";
 import {
   bankCheckpoint,
   isNewBestWalk,

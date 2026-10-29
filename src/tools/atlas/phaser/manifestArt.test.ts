@@ -1,12 +1,12 @@
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 
+import { keysOf } from "@andornaut/game-kit/records";
 import type { Scene, Textures } from "phaser";
 import { describe, expect, it } from "vitest";
 
 import type { AssetManifest } from "../../../assets/manifest";
 import { addAtlasFrame, smoothDepthArt } from "../../../assets/phaser/manifestArt";
-import { keysOf } from "../../../lib/records";
 import { sheetFromRows } from "../../../testing/sheetImage";
 import { compactFrames, drawPage } from "../atlasBuild";
 import { layoutAtlases } from "../atlasLayout";

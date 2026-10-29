@@ -1,3 +1,5 @@
+import { clampIndex } from "@andornaut/game-kit/arrays";
+import { containsPoint, type Rect } from "@andornaut/game-kit/rect";
 import { type GameObjects, type Input, Scene } from "phaser";
 
 import { dogFaceKey, gearIconKey } from "../assets/spriteKeys";
@@ -59,15 +61,13 @@ import {
   stepScroll,
 } from "../input/listScroll";
 import { screenArea } from "../input/outsideTap";
-import { clampIndex } from "../lib/arrays";
-import { containsPoint, type Rect } from "../lib/rect";
-import { cents } from "../lib/units";
 import type { SaveDocument } from "../save/schema";
 import type { ArtLook } from "../ui/interaction";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { fitPixelText, pixelFontMetrics, placePixelText } from "../ui/phaser/pixelText";
 import { GREYED, pictureBox, type PlateKind } from "../ui/selection";
+import { cents } from "../units";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { listenHomeBar } from "./homeBarPress";
 import { drawDetailCard } from "./homePanels";

@@ -1,9 +1,9 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
-import { keysOf } from "../lib/records";
 import { applyEffects } from "../rules/effects";
 import { read } from "../rules/units";
 import type { ActiveDebuff, RunState } from "../state/runState";

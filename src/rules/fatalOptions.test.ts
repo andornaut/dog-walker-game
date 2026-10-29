@@ -1,8 +1,8 @@
+import { fillNames } from "@andornaut/game-kit/lines";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { CardSource, DogId } from "../data/types";
-import { fillNames } from "../lib/lines";
 import { testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { firedByText } from "./causes";

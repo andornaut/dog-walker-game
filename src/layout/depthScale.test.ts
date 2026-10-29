@@ -1,3 +1,5 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import shippedManifest from "../../public/art/manifest.json";
@@ -6,8 +8,6 @@ import { parseManifest } from "../assets/manifest";
 import { depthVariantKey, dogSpriteKey, standsOnGround } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
-import { itemAt } from "../lib/arrays";
-import { keysOf } from "../lib/records";
 import { walkProjection } from "../runner/walkGeometry";
 import { type DepthArt, depthDraw } from "./depthScale";
 import { PACK_DEPTH } from "./packFormation";

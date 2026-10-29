@@ -1,12 +1,12 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { keysOf } from "@andornaut/game-kit/records";
+import { insetRect, type Rect, rectsOverlap } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
 import { charmEffects } from "../hud/buffMarks";
 import { type EffectItem, effectName } from "../hud/effectIcons";
-import { itemAt } from "../lib/arrays";
-import { keysOf } from "../lib/records";
-import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
 import { MAX_CARD_OPTIONS } from "../rules/choices";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { inside } from "../testing/rects";

@@ -3,7 +3,8 @@
 // already saved, and the next launch banks it.
 import "./crash.css";
 
-import { BUILD_LABEL } from "../buildLabel";
+import { BUILD_LABEL } from "@andornaut/game-kit/build/buildLabel";
+
 import { MENU_TEXT } from "../data/menuText";
 import {
   crashGate,

@@ -1,13 +1,13 @@
 import { readFileSync } from "node:fs";
 
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { roadTileKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { ZoneId } from "../data/types";
-import { itemAt } from "../lib/arrays";
-import { keysOf } from "../lib/records";
 import {
   crossesLine,
   dotColour,

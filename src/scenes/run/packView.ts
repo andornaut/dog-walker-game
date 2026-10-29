@@ -1,3 +1,4 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
 import type { GameObjects, Scene, Tweens } from "phaser";
 
 import { SQUIRREL_ICON_KEY } from "../../assets/iconKeys";
@@ -7,7 +8,6 @@ import type { DogId } from "../../data/types";
 import { graceAlpha } from "../../layout/graceBlink";
 import { formationOrder, packDogOf, packPlacements } from "../../layout/packFormation";
 import { distanceAtY, project } from "../../layout/projection";
-import { itemAt } from "../../lib/arrays";
 import type { StandingDog } from "../../pack/packDraw";
 import { type Figure, PackFigures } from "../../pack/phaser/packFigures";
 import { currentZone } from "../../rules/route";

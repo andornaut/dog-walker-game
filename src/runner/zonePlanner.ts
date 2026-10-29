@@ -1,6 +1,7 @@
+import { itemAt, removeItem } from "@andornaut/game-kit/arrays";
+import { randomPick, weightedPick } from "@andornaut/game-kit/random";
+
 import { laneMask } from "../layout/lanes";
-import { itemAt, removeItem } from "../lib/arrays";
-import { randomPick, weightedPick } from "../lib/random";
 import { approachOutcomes } from "./approach";
 import {
   laneBalanceWeight,

@@ -1,3 +1,4 @@
+import { insetRect, type Point, type Rect } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene, Tweens } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
@@ -13,7 +14,6 @@ import {
 } from "../hud/feedback";
 import type { ChangeLabel } from "../hud/hudView";
 import { arcControl } from "../hud/moments";
-import { insetRect, type Point, type Rect } from "../lib/rect";
 import { slotIndexOf } from "../state/pack";
 import { CREAM_PANEL_COLOURS, drawFramedRect, drawRing } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";

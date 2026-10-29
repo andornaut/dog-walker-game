@@ -4,11 +4,11 @@ import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import type { ZoneId } from "../data/types";
 import { WORLD } from "../data/world";
-import { cents } from "../lib/units";
 import type { EndReason, RunState } from "../state/runState";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WORLD } from "../testing/world";
+import { cents } from "../units";
 import {
   endReasonOf,
   fireOwnersAtZero,

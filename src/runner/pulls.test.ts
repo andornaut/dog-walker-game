@@ -1,3 +1,5 @@
+import { seededRandom } from "@andornaut/game-kit/random";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { DEBUFFS } from "../data/debuffs";
@@ -12,8 +14,6 @@ import { UPGRADES } from "../data/upgrades";
 import { WORLD } from "../data/world";
 import { recordInput, replayInputs, startInputLog } from "../dev/inputLog";
 import type { LaneDirection } from "../layout/lanes";
-import { seededRandom } from "../lib/random";
-import { keysOf } from "../lib/records";
 import { mapPack } from "../state/pack";
 import { newRun, type PackDogs } from "../state/runState";
 import { plannerStreams } from "../testing/movers";

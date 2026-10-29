@@ -1,6 +1,6 @@
+import { insetRect, type Point, type Rect, ringRects } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene } from "phaser";
 
-import { insetRect, type Point, type Rect, ringRects } from "../../lib/rect";
 import { pixelEllipseSpans, pixelLinePoints, shadowRadiusX } from "../pixelShapes";
 import { PALETTE } from "./palette";
 

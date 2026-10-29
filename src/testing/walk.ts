@@ -1,4 +1,6 @@
 // The walk tests' data, road and helpers that build and step a walk.
+import { seededRandom } from "@andornaut/game-kit/random";
+
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
@@ -8,13 +10,12 @@ import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
 import { UPGRADES } from "../data/upgrades";
-import { seededRandom } from "../lib/random";
-import { clampHearts } from "../lib/units";
 import { stillInLane } from "../runner/laneMotion";
 import { startRoad, stepWalk, type Walk } from "../runner/walk";
 import { type WalkItem } from "../runner/walkItems";
 import { mapPack } from "../state/pack";
 import { newRun, type PackDogs } from "../state/runState";
+import { clampHearts } from "../units";
 import { TEST_ROAD_GEOMETRY } from "./packGeometry";
 import { TEST_TUNING } from "./tuning";
 import { TEST_WALKER_DATA } from "./walkers";

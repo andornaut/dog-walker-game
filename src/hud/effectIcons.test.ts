@@ -1,8 +1,8 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import manifest from "../../public/art/manifest.json";
 import { gameData } from "../data";
-import { keysOf } from "../lib/records";
 import { modifiersOf } from "../rules/modifiers";
 import { activeModifier, testState } from "../testing/runState";
 import {

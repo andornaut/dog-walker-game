@@ -1,7 +1,8 @@
+import type { Point } from "@andornaut/game-kit/rect";
+
 import { gameData } from "../data";
 import { exceedsTapDistance, swipeDirection } from "../input/gestures";
 import { isConfirmKey, isPauseKey, laneDirectionForKey } from "../input/keyBindings";
-import type { Point } from "../lib/rect";
 import { read } from "../rules/units";
 import { helpActionAt } from "./helpLayout";
 import type { HelpAction } from "./helpPaging";

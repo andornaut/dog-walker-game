@@ -1,6 +1,7 @@
+import { SECONDS_EPSILON } from "@andornaut/game-kit/clock/fixedStep";
+
 import type { LaneDirection } from "../layout/lanes";
 import { read } from "../rules/units";
-import { SECONDS_EPSILON } from "./fixedStep";
 import { laneBlockedForPull, type PullData, type PullGeometry } from "./pulls";
 import { steerWalk, type Walk } from "./walk";
 

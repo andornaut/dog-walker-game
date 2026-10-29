@@ -1,9 +1,9 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import manifestJson from "../../public/art/manifest.json";
 import { parseManifest } from "../assets/manifest";
 import { badgeKey, kebabCase } from "../assets/spriteKeys";
-import { keysOf } from "../lib/records";
 import { maxHearts, startHearts } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import { forkPaths } from "../rules/route";

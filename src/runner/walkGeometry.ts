@@ -1,3 +1,5 @@
+import type { Rect } from "@andornaut/game-kit/rect";
+
 import { ROAD_HIT_SIZE } from "../assets/spriteKeys";
 import {
   packOnRoad,
@@ -9,7 +11,6 @@ import {
 } from "../layout/packFormation";
 import { type RoadCamera, type RoadProjection, roadProjection } from "../layout/projection";
 import { walkerFootY } from "../layout/screenLayout";
-import type { Rect } from "../lib/rect";
 import type { RoadGeometry } from "./walk";
 
 // A pickup's, lucky find's or gear drop's hit box is its lanes less the inset at each side, a

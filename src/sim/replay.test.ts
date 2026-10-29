@@ -1,3 +1,4 @@
+import { STEP_SECONDS } from "@andornaut/game-kit/clock/fixedStep";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -13,7 +14,6 @@ import {
 } from "../dev/inputLog";
 import { runSetupLimitsFor } from "../dev/pageRunSetup";
 import { loadoutFor, withSetupStart } from "../dev/setupRun";
-import { STEP_SECONDS } from "../runner/fixedStep";
 import { screenRoadGeometry } from "../runner/screenGeometry";
 import { chooseCard, runStreams, startSession, stepSession } from "../runner/session";
 import { startRoad } from "../runner/walk";

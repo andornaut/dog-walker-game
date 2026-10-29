@@ -1,6 +1,7 @@
+import { fillLine } from "@andornaut/game-kit/lines";
+
 import type { GameData } from "../data/types";
 import { boxStyle, CARD_LAYOUT, cardEffectBox, FIRES_FIT } from "../layout/cardLayout";
-import { fillLine } from "../lib/lines";
 import { firesText, type OptionView } from "../rules/choices";
 import { formatDollars } from "../rules/effectText";
 import type { FontMetrics } from "../ui/fontMetrics";

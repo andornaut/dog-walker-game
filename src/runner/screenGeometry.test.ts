@@ -1,3 +1,4 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -5,7 +6,6 @@ import { ENCOUNTERS } from "../data/encounters";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { ROAD_CAMERA, SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { screenYAt } from "../layout/projection";
-import { keysOf } from "../lib/records";
 import { testState } from "../testing/runState";
 import { hitDog, itemBox, pickupDog } from "./collision";
 import { stillInLane } from "./laneMotion";

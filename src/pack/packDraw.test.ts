@@ -1,3 +1,4 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
 import { describe, expect, it } from "vitest";
 
 import { ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
@@ -5,7 +6,6 @@ import type { DogId } from "../data/types";
 import { END_LAYOUT } from "../home/endLayout";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { everyPack, formationOrder, packDogOf, packPlacements } from "../layout/packFormation";
-import { itemAt } from "../lib/arrays";
 import { walkProjection } from "../runner/walkGeometry";
 import { type Feet, packLayers, type StandingDog } from "./packDraw";
 

@@ -1,4 +1,4 @@
-import { remapRgb } from "../lib/rgba";
+import { remapRgb } from "@andornaut/game-kit/rgba";
 
 // A grey copy's colours come from a ramp of greys, lightest first.
 

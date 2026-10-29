@@ -1,7 +1,14 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import {
+  type Random,
+  randomInt,
+  randomPick,
+  seededRandom,
+  weightedPick,
+} from "@andornaut/game-kit/random";
+
 import type { MoveCount, MovementKind, StopLanes } from "../data/types";
 import { type LaneDirection, laneMask } from "../layout/lanes";
-import { itemAt } from "../lib/arrays";
-import { type Random, randomInt, randomPick, seededRandom, weightedPick } from "../lib/random";
 import {
   type ApproachTiming,
   crossingScroll,

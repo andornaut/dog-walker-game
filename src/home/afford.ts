@@ -1,7 +1,8 @@
+import { keysOf } from "@andornaut/game-kit/records";
+
 import type { GameData } from "../data/types";
-import { keysOf } from "../lib/records";
-import { type Cents, cents } from "../lib/units";
 import type { LastWalk, Owned } from "../save/schema";
+import { type Cents, cents } from "../units";
 import { isAffordable, type Purchase } from "./home";
 
 type ShopData = Pick<GameData, "dogSlots" | "dogs" | "shopGear" | "tuning">;

@@ -1,8 +1,8 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
-import { keysOf } from "../lib/records";
 import { fontInk } from "../testing/fontInk";
 import { inside } from "../testing/rects";
 import { debuffBarRects, zoneProgressText } from "./walkHud";

@@ -1,5 +1,8 @@
 import { readFileSync } from "node:fs";
 
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { depthVariantKey } from "../assets/spriteKeys";
@@ -10,9 +13,6 @@ import { type DepthArt, depthDraw } from "../layout/depthScale";
 import { obstacleParts } from "../layout/obstacleArt";
 import { everyPack, PART_INSET } from "../layout/packFormation";
 import { project, SCALE_STEPS, screenYAt } from "../layout/projection";
-import { itemAt } from "../lib/arrays";
-import { getOrInsertComputed } from "../lib/maps";
-import { keysOf } from "../lib/records";
 import { testState } from "../testing/runState";
 import { decodePng } from "../tools/atlas/atlasBuild";
 import { spriteSource } from "../tools/atlas/atlasLayout";

@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
 
+import { randomStream } from "@andornaut/game-kit/random";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import shippedManifest from "../../public/art/manifest.json";
@@ -10,8 +12,6 @@ import { ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import type { AmbientMover, ZoneId } from "../data/types";
 import { CROSS_STREET } from "../layout/crossStreet";
 import { scaleAtY } from "../layout/projection";
-import { randomStream } from "../lib/random";
-import { keysOf } from "../lib/records";
 import { walkProjection } from "../runner/walkGeometry";
 import {
   AMBIENT_LIMIT,

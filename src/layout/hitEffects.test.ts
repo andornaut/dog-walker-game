@@ -1,8 +1,8 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { MinorObstacleId } from "../data/types";
-import { keysOf } from "../lib/records";
 import {
   dogReaction,
   type FlashCue,

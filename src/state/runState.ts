@@ -1,3 +1,5 @@
+import { type Pixels, pixels } from "@andornaut/game-kit/units";
+
 import type {
   CardSource,
   DebuffId,
@@ -15,13 +17,13 @@ import type {
   WalkerId,
   ZoneId,
 } from "../data/types";
-import { type Cents, cents, type Hearts, type Pixels, pixels } from "../lib/units";
 import { packPlace, startHearts } from "../rules/dogs";
 import type { Lasting } from "../rules/durations";
 import { applyEffects } from "../rules/effects";
 import { firstZoneId } from "../rules/route";
 import { read } from "../rules/units";
 import { walkerEffects } from "../rules/walkers";
+import { type Cents, cents, type Hearts } from "../units";
 import { packFor, packOrder } from "./pack";
 
 // A run in progress. Plain JSON throughout: arrays for sets, records for maps, numbers for

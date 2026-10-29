@@ -1,10 +1,10 @@
+import { containsPoint, insetRect, type Point, type Rect } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene, Tweens } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
 import { SCREEN_LAYOUT } from "../data/screen";
 import { FEEDBACK, loopFrame } from "../home/feedback";
 import { type TapBurstWatch, type TapGate, tapGate } from "../input/afterTap";
-import { containsPoint, insetRect, type Point, type Rect } from "../lib/rect";
 import type { CloseControl } from "../ui/closeControl";
 import {
   type ArtLook,

@@ -1,5 +1,6 @@
+import { itemAt, partitionPoint, removeItem } from "@andornaut/game-kit/arrays";
+
 import { laneMask } from "../layout/lanes";
-import { itemAt, partitionPoint, removeItem } from "../lib/arrays";
 import type { LaneSpan, MoverPath } from "./movers";
 import {
   addLanes,

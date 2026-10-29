@@ -1,4 +1,5 @@
-import type { Point } from "../lib/rect";
+import type { Point } from "@andornaut/game-kit/rect";
+
 import {
   type GestureAction,
   type GestureContext,

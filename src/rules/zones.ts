@@ -1,5 +1,6 @@
+import { type Pixels, pixels, type Seconds, seconds } from "@andornaut/game-kit/units";
+
 import type { LiveTuning, LuckyEncounterId, Zone } from "../data/types";
-import { type Pixels, pixels, type Seconds, seconds } from "../lib/units";
 import { read } from "./units";
 
 interface ZoneStats {

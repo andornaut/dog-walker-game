@@ -1,12 +1,12 @@
+import { type Random, seededRandom } from "@andornaut/game-kit/random";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { CardOptions, CardSource, EncounterId } from "../data/types";
-import { type Random, seededRandom } from "../lib/random";
-import { cents } from "../lib/units";
 import { cardFor } from "../rules/choices";
 import type { RunState } from "../state/runState";
 import { testState } from "../testing/runState";
+import { cents } from "../units";
 import {
   chooseCardOption,
   choosePath,

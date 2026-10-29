@@ -1,8 +1,9 @@
+import { assertNever } from "@andornaut/game-kit/assertNever";
+import { fillNames, signedText } from "@andornaut/game-kit/lines";
+
 import type { DogId, GameData, GearId } from "../data/types";
-import { assertNever } from "../lib/assertNever";
-import { fillNames, signedText } from "../lib/lines";
-import { type Cents, type Hearts, roundDollars } from "../lib/units";
 import type { ActiveModifier, EffectSource, ModifierSource } from "../state/runState";
+import { type Cents, type Hearts, roundDollars } from "../units";
 import { heartsChangeText } from "./effectText";
 import type { Contribution } from "./modifiers";
 

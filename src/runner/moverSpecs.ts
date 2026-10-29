@@ -1,7 +1,8 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { assertNever } from "@andornaut/game-kit/assertNever";
+import { chance, type Random, randomPick } from "@andornaut/game-kit/random";
+
 import type { GameData, MoveCount, Movement } from "../data/types";
-import { itemAt } from "../lib/arrays";
-import { assertNever } from "../lib/assertNever";
-import { chance, type Random, randomPick } from "../lib/random";
 import { read } from "../rules/units";
 import {
   hopSequences,

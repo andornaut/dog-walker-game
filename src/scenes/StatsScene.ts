@@ -1,3 +1,5 @@
+import { clampIndex } from "@andornaut/game-kit/arrays";
+import { containsPoint, insetRect, type Rect } from "@andornaut/game-kit/rect";
 import { type GameObjects, Scene } from "phaser";
 
 import { dogFaceKey } from "../assets/spriteKeys";
@@ -46,8 +48,6 @@ import {
   stepScroll,
 } from "../input/listScroll";
 import { screenArea } from "../input/outsideTap";
-import { clampIndex } from "../lib/arrays";
-import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import { rectIndexAt } from "../ui/grid";
 import { fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";

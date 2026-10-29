@@ -1,5 +1,6 @@
+import { keysOf } from "@andornaut/game-kit/records";
+
 import type { Effect, GameData, Modifier, Walker, WalkerId } from "../data/types";
-import { keysOf } from "../lib/records";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { dogAgility } from "./dogs";

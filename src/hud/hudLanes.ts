@@ -1,5 +1,6 @@
+import type { Point, Rect } from "@andornaut/game-kit/rect";
+
 import type { ScreenLayout } from "../layout/screenLayout";
-import type { Point, Rect } from "../lib/rect";
 import { type FontMetrics, inkRowsOfLines } from "../ui/fontMetrics";
 import { TEXT_STYLE } from "../ui/textFit";
 import { OWNER_TAB } from "./walkHud";

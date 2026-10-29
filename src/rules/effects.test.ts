@@ -5,11 +5,11 @@ import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { TUNING } from "../data/tuning";
 import type { DogId, Effect } from "../data/types";
-import { cents } from "../lib/units";
 import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
 import { LONE } from "../testing/packPlaces";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
+import { cents } from "../units";
 import { maxHearts, ownerMaxHearts } from "./dogs";
 import {
   applyEffects,

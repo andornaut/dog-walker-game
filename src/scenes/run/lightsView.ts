@@ -1,9 +1,9 @@
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
 import { BlendModes, GameObjects, type Scene } from "phaser";
 
 import { gameData } from "../../data";
 import type { ZoneId } from "../../data/types";
 import { distanceAtY } from "../../layout/projection";
-import { getOrInsertComputed } from "../../lib/maps";
 import {
   anchorSprite,
   distanceBehind,

@@ -1,7 +1,7 @@
+import type { Rect } from "@andornaut/game-kit/rect";
 import { Core, type GameObjects, type Scene, Scenes } from "phaser";
 
 import { remapDarker } from "../../assets/darkRamp";
-import type { Rect } from "../../lib/rect";
 import { addDim } from "./draw";
 
 // What an overlay dims is redrawn this many steps down each colour's ramp.

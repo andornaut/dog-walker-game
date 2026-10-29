@@ -6,7 +6,7 @@
 // nearer, from the juncture to the road's far edge, so a tall prop does not blink in whole
 // over the cross street.
 
-import { clamp01 } from "../lib/numbers";
+import { clamp01 } from "@andornaut/game-kit/numbers";
 
 // A drawn sprite: its frame's top row on screen, its frame height in its own pixels and its
 // scale.

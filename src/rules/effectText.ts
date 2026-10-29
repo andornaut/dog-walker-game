@@ -1,3 +1,6 @@
+import { assertNever } from "@andornaut/game-kit/assertNever";
+import { fillLine, fillNames, signedText } from "@andornaut/game-kit/lines";
+
 import type {
   Debuff,
   DebuffId,
@@ -21,9 +24,7 @@ import type {
   WalkerPerk,
 } from "../data/types";
 import { HOME_TEXT_FIELDS, homeLine } from "../home/homeText";
-import { assertNever } from "../lib/assertNever";
-import { fillLine, fillNames, signedText } from "../lib/lines";
-import { type Cents, cents } from "../lib/units";
+import { type Cents, cents } from "../units";
 import type { ModifiedValue } from "./modified";
 import { modifiersOf, modifierValue } from "./modifiers";
 import { read } from "./units";

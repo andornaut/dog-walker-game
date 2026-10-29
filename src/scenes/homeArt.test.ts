@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import shippedManifest from "../../public/art/manifest.json";
@@ -8,7 +9,6 @@ import { parseManifest } from "../assets/manifest";
 import * as spriteKeys from "../assets/spriteKeys";
 import { type BaseCue, HOME_CUES, SOUND_KEYS } from "../audio/sound";
 import { gameData } from "../data";
-import { keysOf } from "../lib/records";
 import { ownerSpriteKey } from "./ownerFigure";
 
 // Boot loads only the loadsFirst art and the HOME_CUES sounds before the home screen shows.

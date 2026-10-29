@@ -1,8 +1,9 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { keysOf } from "@andornaut/game-kit/records";
+
 import { DOGS } from "../data/dogs";
 import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
 import type { DogId, Size, WalkerId } from "../data/types";
-import { itemAt } from "../lib/arrays";
-import { keysOf } from "../lib/records";
 import { packOrder } from "../state/pack";
 import { distanceAtY, type RoadProjection, scaleAt } from "./projection";
 

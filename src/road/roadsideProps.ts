@@ -1,8 +1,9 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
+
 import table from "../../shared/roadside.json";
 import { project, type RoadProjection } from "../layout/projection";
 import { STRIP } from "../layout/roadRaster";
-import { itemAt } from "../lib/arrays";
-import { getOrInsertComputed } from "../lib/maps";
 
 // The roadside props: houses, fences, trees and yard props standing on the lawns beyond the
 // sidewalks, and curb props (hydrants, bins, planters, bike racks, newspaper boxes) standing on

@@ -1,3 +1,4 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -5,7 +6,6 @@ import { ROAD_CAMERA, SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { HelpPictureId } from "../data/types";
 import { cardRowIn } from "../layout/cardLayout";
 import { screenYAt } from "../layout/projection";
-import { itemAt } from "../lib/arrays";
 import { currentZoneId, forkPaths } from "../rules/route";
 import { walkProjection } from "../runner/walkGeometry";
 import { cardHeader } from "../ui/cardRow";

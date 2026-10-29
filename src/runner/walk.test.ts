@@ -1,3 +1,8 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { STEP_SECONDS } from "@andornaut/game-kit/clock/fixedStep";
+import { seededRandom } from "@andornaut/game-kit/random";
+import { keysOf } from "@andornaut/game-kit/records";
+import { pixels } from "@andornaut/game-kit/units";
 import { describe, expect, it } from "vitest";
 
 import { ACHIEVEMENTS } from "../data/achievements";
@@ -31,10 +36,6 @@ import {
   takeDueInputs,
 } from "../dev/inputLog";
 import type { LaneDirection } from "../layout/lanes";
-import { itemAt } from "../lib/arrays";
-import { seededRandom } from "../lib/random";
-import { keysOf } from "../lib/records";
-import { cents, clampHearts, pixels } from "../lib/units";
 import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices";
 import { modifiersOf, modifierValue } from "../rules/modifiers";
@@ -86,8 +87,8 @@ import {
   withHearts,
 } from "../testing/walk";
 import { TEST_WORLD } from "../testing/world";
+import { cents, clampHearts } from "../units";
 import { approachOutcomes } from "./approach";
-import { STEP_SECONDS } from "./fixedStep";
 import { stillInLane } from "./laneMotion";
 import { hasLeftRoad, laneAt, type MoverPath, moverPlace } from "./movers";
 import { shyOutcomes } from "./shy";

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { cents } from "../lib/units";
 import type { Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
+import { cents } from "../units";
 import { dogDetail, gearDetail } from "./detail";
 
 const data = { ...gameData, tuning: TEST_TUNING };

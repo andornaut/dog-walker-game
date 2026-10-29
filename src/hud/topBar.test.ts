@@ -1,8 +1,8 @@
+import { containsPoint } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
 import { SCREEN_LAYOUT } from "../data/screen";
 import type { PressMode } from "../input/pointerTracking";
-import { containsPoint } from "../lib/rect";
 import {
   gameplayAllowed,
   NOTHING_PAUSED,

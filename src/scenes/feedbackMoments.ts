@@ -1,3 +1,4 @@
+import type { Point, Rect } from "@andornaut/game-kit/rect";
 import type { Animations, GameObjects, Scene, Tweens, Types } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
@@ -41,8 +42,6 @@ import {
 } from "../hud/moments";
 import { playerPaused, type RunPause, walkPaused } from "../hud/topBar";
 import { DOG_CARD } from "../hud/walkHud";
-import type { Point, Rect } from "../lib/rect";
-import { type Cents, cents } from "../lib/units";
 import { slotIndexOf } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { addDisplayText } from "../ui/phaser/displayText";
@@ -54,6 +53,7 @@ import {
   pixelFontMetrics,
   placePixelText,
 } from "../ui/phaser/pixelText";
+import { type Cents, cents } from "../units";
 import { arcFlight } from "./arcFlight";
 import { addFaceRows, fitFaceRows } from "./faceTextView";
 import { HUD_DEPTH } from "./hudDepth";

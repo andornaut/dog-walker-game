@@ -1,4 +1,5 @@
-import type { Rect } from "../lib/rect";
+import type { Rect } from "@andornaut/game-kit/rect";
+
 import { debuffBarRects } from "./walkHud";
 
 // The neighbourhood pill (ui-zone-pill, a three-slice with 4px ends): the zone's name and its

@@ -1,8 +1,8 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, GearId, WalkerId } from "../data/types";
-import { keysOf } from "../lib/records";
 import type { Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
 import { tapDog, tapGear, togglePick } from "./home";

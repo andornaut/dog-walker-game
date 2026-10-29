@@ -1,3 +1,5 @@
+import { fillNames, placeholders } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -7,10 +9,8 @@ import { HOME_TEXT } from "../data/homeText";
 import { TUNING } from "../data/tuning";
 import type { Effect, GearId, MoneyKey, MultiplierKey, WalkerPerk } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
-import { fillNames, placeholders } from "../lib/lines";
-import { keysOf } from "../lib/records";
-import { cents } from "../lib/units";
 import { TEST_TUNING } from "../testing/tuning";
+import { cents } from "../units";
 import {
   agilityPercent,
   capitalize,

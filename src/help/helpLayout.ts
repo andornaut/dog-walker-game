@@ -1,8 +1,9 @@
+import { containsPoint, type Point, type Rect } from "@andornaut/game-kit/rect";
+
 import { SCREEN_LAYOUT } from "../data/screen";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { TITLE_CAP_ROWS } from "../hud/walkHud";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
-import { containsPoint, type Point, type Rect } from "../lib/rect";
 import { pageCloseControl } from "../ui/closeControl";
 import { rectIndexAt } from "../ui/grid";
 import { TEXT_SCALE } from "../ui/textFit";

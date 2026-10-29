@@ -1,5 +1,8 @@
 import { readFileSync } from "node:fs";
 
+import { keysOf } from "@andornaut/game-kit/records";
+import { type Point, type Rect, rectsOverlap } from "@andornaut/game-kit/rect";
+import { pixels } from "@andornaut/game-kit/units";
 import { describe, expect, it } from "vitest";
 
 import { dogFaceKey, ownerCardFaceKey } from "../assets/spriteKeys";
@@ -8,9 +11,6 @@ import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
 import { dollarAmountText } from "../home/home";
 import { HOME_LAYOUT } from "../home/homeLayout";
-import { keysOf } from "../lib/records";
-import { type Point, type Rect, rectsOverlap } from "../lib/rect";
-import { cents, pixels } from "../lib/units";
 import { maxHearts } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import { zoneLength } from "../runner/walk";
@@ -21,6 +21,7 @@ import { decodePng } from "../tools/atlas/atlasBuild";
 import { opaqueRect } from "../tools/atlas/atlasPixels";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
+import { cents } from "../units";
 import { maxEffects } from "./effectIcons";
 import {
   cardHearts,

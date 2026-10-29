@@ -1,15 +1,15 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { STEP_SECONDS } from "@andornaut/game-kit/clock/fixedStep";
+import { seededRandom } from "@andornaut/game-kit/random";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { GameData, Movement, ZoneId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { PART_INSET } from "../layout/packFormation";
-import { itemAt } from "../lib/arrays";
-import { seededRandom } from "../lib/random";
-import { keysOf } from "../lib/records";
 import { read } from "../rules/units";
 import { hitDog } from "../runner/collision";
-import { STEP_SECONDS } from "../runner/fixedStep";
 import { type LaneMotion, stillInLane } from "../runner/laneMotion";
 import {
   DART_LIFTS,

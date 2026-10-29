@@ -1,5 +1,6 @@
+import { fillLine } from "@andornaut/game-kit/lines";
+
 import type { GameData, WalkerId } from "../data/types";
-import { fillLine } from "../lib/lines";
 import { agilityPercent, perkEffect } from "../rules/effectText";
 import { walkerGoal } from "../rules/walkers";
 import type { Owned, SaveDocument } from "../save/schema";

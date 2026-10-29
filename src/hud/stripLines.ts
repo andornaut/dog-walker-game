@@ -1,5 +1,6 @@
+import { fillLine, fillNames } from "@andornaut/game-kit/lines";
+
 import type { DebuffId, DogId, EncounterId, GameData, GearId } from "../data/types";
-import { fillLine, fillNames } from "../lib/lines";
 import { type Change, type HeartChange, heartsForgiven, type MoneyChange } from "../rules/causes";
 import { debuffFields, formatDollars } from "../rules/effectText";
 import { spareTreatGiver, spareTreatSource } from "../rules/spareTreats";

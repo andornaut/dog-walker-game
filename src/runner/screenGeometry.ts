@@ -1,6 +1,7 @@
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
+
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import { formationOrder } from "../layout/packFormation";
-import { getOrInsertComputed } from "../lib/maps";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
 import type { RoadGeometry } from "./walk";

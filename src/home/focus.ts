@@ -1,7 +1,7 @@
 // Keyboard focus on the home screen: rows of items (the dog rows, gear, Start walk, walkers),
 // moved through with the arrow keys.
 
-import { clampIndex } from "../lib/arrays";
+import { clampIndex } from "@andornaut/game-kit/arrays";
 
 export interface Focus {
   readonly column: number;

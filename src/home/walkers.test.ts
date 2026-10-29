@@ -1,9 +1,9 @@
+import { fillNames } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { WalkerId } from "../data/types";
-import { fillNames } from "../lib/lines";
-import { keysOf } from "../lib/records";
 import { agilityPercent, perkEffect } from "../rules/effectText";
 import { newPlayerSave } from "../testing/saves";
 import { type ItemTile, itemTileLook, type TileState } from "../ui/interaction";

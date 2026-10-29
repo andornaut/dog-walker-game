@@ -1,6 +1,6 @@
+import { fillLine } from "@andornaut/game-kit/lines";
+
 import type { DogId, GameData, GearId, WalkerId } from "../data/types";
-import { fillLine } from "../lib/lines";
-import type { Cents } from "../lib/units";
 import { SIZE_AGILITY, sizeHearts } from "../rules/dogs";
 import {
   capitalize,
@@ -10,6 +10,7 @@ import {
   SIZE_NAMES,
 } from "../rules/effectText";
 import type { Owned } from "../save/schema";
+import type { Cents } from "../units";
 import { dollarText, type HomeLoadout, isAffordable, type Purchase, purchasePrice } from "./home";
 import { HOME_TEXT_FIELDS } from "./homeText";
 import { walkerDetailLines, walkerLockedLine } from "./walkers";

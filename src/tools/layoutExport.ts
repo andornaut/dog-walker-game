@@ -1,3 +1,5 @@
+import type { Rect } from "@andornaut/game-kit/rect";
+
 import { DEPTH_STEPS } from "../assets/depthSteps";
 import { LOADING_ART, ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import {
@@ -64,7 +66,6 @@ import {
   rowScale,
 } from "../layout/projection";
 import { walkerFootY } from "../layout/screenLayout";
-import type { Rect } from "../lib/rect";
 import { MAX_CARD_OPTIONS } from "../rules/choices";
 import { read } from "../rules/units";
 import { walkProjection } from "../runner/walkGeometry";

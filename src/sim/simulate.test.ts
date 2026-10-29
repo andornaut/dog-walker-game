@@ -1,10 +1,9 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { keysOf } from "@andornaut/game-kit/records";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DebuffId } from "../data/types";
-import { itemAt } from "../lib/arrays";
-import { keysOf } from "../lib/records";
-import { cents } from "../lib/units";
 import { currentZoneId } from "../rules/route";
 import { bumpCash, tipValue } from "../rules/run";
 import type { WalkStep } from "../runner/walk";
@@ -14,6 +13,7 @@ import type { PackDogs, RunState } from "../state/runState";
 import { defined } from "../testing/defined";
 import { testState } from "../testing/runState";
 import { IDEAL_SKILL, simConfig } from "../testing/sim";
+import { cents } from "../units";
 import { badgeCounters } from "./report";
 import {
   type DebuffCosts,

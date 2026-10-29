@@ -1,3 +1,4 @@
+import { insetRect, type Point, type Rect } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene } from "phaser";
 
 import { ownerFaceKey } from "../assets/spriteKeys";
@@ -14,7 +15,6 @@ import {
   HOME_LAYOUT,
 } from "../home/homeLayout";
 import { withNamePills } from "../hud/effectNames";
-import { insetRect, type Point, type Rect } from "../lib/rect";
 import { barTitleLeft } from "../ui/barTitle";
 import { closeControl } from "../ui/closeControl";
 import { addDim, drawFramedRect, drawRing } from "../ui/phaser/draw";

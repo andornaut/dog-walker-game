@@ -1,9 +1,9 @@
+import { keysOf } from "@andornaut/game-kit/records";
+import type { Rect } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import { keysOf } from "../lib/records";
-import type { Rect } from "../lib/rect";
 import { BUMP_FLASH, bumpBorder, bumpFlash, type BumpSource, FLASH_COLOURS } from "./bumpFlash";
 
 const MINOR_OBSTACLES = keysOf(gameData.minorObstacles);

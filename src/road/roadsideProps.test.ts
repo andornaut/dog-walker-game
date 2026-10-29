@@ -1,6 +1,8 @@
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
+import { itemAt } from "@andornaut/game-kit/arrays";
+import type { Point } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
 import shippedManifest from "../../public/art/manifest.json";
@@ -10,8 +12,6 @@ import { ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import type { ZoneId } from "../data/types";
 import { WORLD } from "../data/world";
 import { distanceAtY, project } from "../layout/projection";
-import { itemAt } from "../lib/arrays";
-import type { Point } from "../lib/rect";
 import { walkProjection } from "../runner/walkGeometry";
 import {
   CARRIED_LIGHT_UP,

@@ -1,6 +1,6 @@
+import type { Rect } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
-import type { Rect } from "../lib/rect";
 import { inkWidth } from "../testing/fontInk";
 import { cardTitles } from "../testing/textRoles";
 import { BAR_TITLE, barTitleLeft } from "../ui/barTitle";

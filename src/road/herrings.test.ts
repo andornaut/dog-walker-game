@@ -1,11 +1,11 @@
+import { STEP_SECONDS } from "@andornaut/game-kit/clock/fixedStep";
+import { seededRandom } from "@andornaut/game-kit/random";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { LANE_COUNT } from "../data/screen";
 import type { MinorObstacleId, ZoneId } from "../data/types";
-import { seededRandom } from "../lib/random";
-import { keysOf } from "../lib/records";
 import { read } from "../rules/units";
-import { STEP_SECONDS } from "../runner/fixedStep";
 import { moverPlace, moverTell } from "../runner/movers";
 import { startRoad, stepWalk, type Walk, zoneLength } from "../runner/walk";
 import { planZone } from "../runner/zonePlan";

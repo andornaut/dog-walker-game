@@ -1,8 +1,8 @@
 import type { DogId, EncounterId, OptionPicks, WalkerId, ZoneId } from "../data/types";
-import { addCents, type Cents, cents } from "../lib/units";
 import { type RunCounters, type RunFacts, walkedFromTheStart } from "../rules/achievements";
 import { newWalkers } from "../rules/walkers";
 import type { EndReason } from "../state/runState";
+import { addCents, type Cents, cents } from "../units";
 import { awardAchievements, type AwardContext } from "./achievements";
 import type { Checkpoint, DogRun, DogStats, LastWalk, SaveDocument, SaveStats } from "./schema";
 import { bestWalkCents, ZERO_DOG_STATS } from "./stats";

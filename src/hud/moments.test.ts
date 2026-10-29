@@ -1,10 +1,9 @@
+import { keysOf } from "@andornaut/game-kit/records";
+import type { Rect } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
-import { keysOf } from "../lib/records";
-import type { Rect } from "../lib/rect";
-import { cents, clampHearts } from "../lib/units";
 import { maxHearts } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import { faceMood } from "../rules/treats";
@@ -16,6 +15,7 @@ import { PACK_PLACES } from "../testing/packPlaces";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import type { TextFitStyle } from "../ui/textFit";
+import { cents, clampHearts } from "../units";
 import { inlineFaceBox, styledFaceRows } from "./faceText";
 import { linePanels } from "./messageStrip";
 import {

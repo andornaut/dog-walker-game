@@ -1,5 +1,6 @@
+import type { Rect } from "@andornaut/game-kit/rect";
+
 import { WIDE_BUTTON } from "../layout/screenLayout";
-import type { Rect } from "../lib/rect";
 import { type FontMetrics, helpCapDy, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { TEXT_SCALE } from "../ui/textFit";
 import { badgeStripMinHeight, badgeStripRows } from "./badgesView";

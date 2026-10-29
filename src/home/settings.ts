@@ -1,6 +1,7 @@
+import { clamp01 } from "@andornaut/game-kit/numbers";
+import type { Rect } from "@andornaut/game-kit/rect";
+
 import { laneDirectionForKey } from "../input/keyBindings";
-import { clamp01 } from "../lib/numbers";
-import type { Rect } from "../lib/rect";
 import type { Settings } from "../save/schema";
 import { type CloseControl, closeControl } from "../ui/closeControl";
 import { type FontMetrics, helpCapDy, inkRowsOfLines, LABEL_HELP_GAP } from "../ui/fontMetrics";

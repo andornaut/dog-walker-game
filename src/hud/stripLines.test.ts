@@ -1,14 +1,14 @@
+import { fillNames } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { Debuff, DebuffId, GearId } from "../data/types";
-import { fillNames } from "../lib/lines";
-import { keysOf } from "../lib/records";
-import { cents, clampHearts } from "../lib/units";
 import type { HeartChange, MoneyChange } from "../rules/causes";
 import { formatDollars } from "../rules/effectText";
 import { read } from "../rules/units";
 import { defined } from "../testing/defined";
+import { cents, clampHearts } from "../units";
 import {
   bumpLines,
   debuffChanges,

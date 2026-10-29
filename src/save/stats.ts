@@ -1,6 +1,6 @@
 import type { DogId } from "../data/types";
-import { type Cents, cents } from "../lib/units";
 import type { EndReason } from "../state/runState";
+import { type Cents, cents } from "../units";
 import type { DogStats, SaveStats } from "./schema";
 
 // A dog's stats before its first walk.

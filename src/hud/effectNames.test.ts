@@ -1,10 +1,10 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { keysOf } from "../lib/records";
-import { cents } from "../lib/units";
 import { cardEffectText, type CardTextContext } from "../rules/effectText";
 import { PILL_CLOSE, PILL_SPACE, pillIndex } from "../ui/namePills";
+import { cents } from "../units";
 import {
   debuffNameMarks,
   effectNameMarks,

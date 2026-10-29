@@ -1,5 +1,6 @@
+import { SECONDS_EPSILON } from "@andornaut/game-kit/clock/fixedStep";
+
 import type { CardSource } from "../data/types";
-import { SECONDS_EPSILON } from "./fixedStep";
 
 // What a hit stop holds back until it ends: the cards met on the step of the hit, and
 // whether that step reached the end of the zone.

@@ -1,4 +1,9 @@
-import { buildLabel } from "../buildLabel";
+import { buildLabel } from "@andornaut/game-kit/build/buildLabel";
+import { UNKNOWN_COMMIT } from "@andornaut/game-kit/build/buildVersion";
+import { fillLine, fillNames } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
+import type { Rect } from "@andornaut/game-kit/rect";
+
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
 import { BADGE_NAME_STYLE, BADGE_STRIP, badgeStrip } from "../home/badgesView";
@@ -67,22 +72,18 @@ import {
   largeBodyBox,
   largeBodyStyle,
 } from "../layout/cardLayout";
-import { fillLine, fillNames } from "../lib/lines";
-import { keysOf } from "../lib/records";
-import type { Rect } from "../lib/rect";
-import { cents } from "../lib/units";
 import { amountText } from "../rules/causes";
 import { firesText } from "../rules/choices";
 import { payFor } from "../rules/run";
 import { startingDogSlots } from "../rules/shop";
 import { read } from "../rules/units";
 import type { Owned } from "../save/schema";
-import { UNKNOWN_COMMIT } from "../tools/buildVersion";
 import { readBitmapFont } from "../tools/fontFile";
 import { barTitleRoom } from "../ui/barTitle";
 import { closeControl } from "../ui/closeControl";
 import { plainMarks } from "../ui/pixelFont";
 import { TEXT_SCALE, TEXT_STYLE, type TextFitStyle, textOnLines } from "../ui/textFit";
+import { cents } from "../units";
 import { bodyRunWidth } from "./bodyFont";
 import { defined } from "./defined";
 import { everyCardOption } from "./everyCardOption";

@@ -1,6 +1,7 @@
+import type { Rect } from "@andornaut/game-kit/rect";
+
 import type { ZoneId } from "../data/types";
 import { project, type RoadProjection } from "../layout/projection";
-import type { Rect } from "../lib/rect";
 import {
   LIGHT_ATTACHMENTS,
   type LightAttachment,

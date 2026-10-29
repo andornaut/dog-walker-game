@@ -1,6 +1,5 @@
+import type { Rect } from "@andornaut/game-kit/rect";
 import type { Textures } from "phaser";
-
-import type { Rect } from "../lib/rect";
 
 // The rect each mask texture was last painted with.
 const PAINTED = new WeakMap<Textures.CanvasTexture, Rect>();

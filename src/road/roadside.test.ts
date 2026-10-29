@@ -1,8 +1,8 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
 import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG } from "../data/screen";
 import { WORLD } from "../data/world";
-import { itemAt } from "../lib/arrays";
 import { PAVED_VERGE } from "../testing/verges";
 import {
   curbBand,

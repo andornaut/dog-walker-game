@@ -1,13 +1,13 @@
 import { readFileSync } from "node:fs";
 
+import { itemAt } from "@andornaut/game-kit/arrays";
+import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { dogSpriteKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
 import type { DogId, Size, WalkerId } from "../data/types";
-import { itemAt } from "../lib/arrays";
-import { keysOf } from "../lib/records";
 import { walkProjection } from "../runner/walkGeometry";
 import { decodePng } from "../tools/atlas/atlasBuild";
 import { spriteSource } from "../tools/atlas/atlasLayout";

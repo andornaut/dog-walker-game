@@ -1,7 +1,7 @@
+import type { Rect } from "@andornaut/game-kit/rect";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ZoneId } from "../data/types";
-import type { Rect } from "../lib/rect";
 import {
   anchorSprite,
   type LightAnchor,

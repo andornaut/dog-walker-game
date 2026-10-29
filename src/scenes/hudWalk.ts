@@ -1,9 +1,9 @@
+import type { Point } from "@andornaut/game-kit/rect";
 import type { Events } from "phaser";
 
 import type { DogId } from "../data/types";
 import type { RunPause } from "../hud/topBar";
 import type { ExplainTarget } from "../hud/walkHud";
-import type { Point } from "../lib/rect";
 import type { RunState } from "../state/runState";
 import type { PauseSceneData } from "./PauseScene";
 

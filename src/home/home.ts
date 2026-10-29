@@ -1,13 +1,14 @@
+import { fillLine, signedText } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
+
 import type { DogId, GameData, GearId, Size } from "../data/types";
-import { fillLine, signedText } from "../lib/lines";
-import { keysOf } from "../lib/records";
-import { type Cents, cents } from "../lib/units";
 import { quipLine } from "../rules/choices";
 import { sizeHearts } from "../rules/dogs";
 import { effectClause, SIZE_NAMES } from "../rules/effectText";
 import { price, unlockPrice } from "../rules/shop";
 import { read } from "../rules/units";
 import type { Owned, SaveDocument } from "../save/schema";
+import { type Cents, cents } from "../units";
 import { HOME_TEXT_FIELDS } from "./homeText";
 
 // The pack being picked, in the order picked, and the gear to take.

@@ -1,8 +1,9 @@
-import { chance, type Random, randomInt } from "../lib/random";
-import type { Cents } from "../lib/units";
+import { chance, type Random, randomInt } from "@andornaut/game-kit/random";
+
 import { heartsForgiven } from "../rules/causes";
 import { type CardView, type Choice, type ChoiceData, chooseOption } from "../rules/choices";
 import type { RunState } from "../state/runState";
+import type { Cents } from "../units";
 
 // heartsUnlessLow: take hearts unless an owner whose meter falls would end at LOW_HEARTS or
 // less, then pay the cheapest affordable money option. alwaysHearts: always a free option.

@@ -1,10 +1,11 @@
+import { containsPoint, type Rect } from "@andornaut/game-kit/rect";
+
 import type { DogId, GameData } from "../data/types";
-import { containsPoint, type Rect } from "../lib/rect";
-import { type Cents, cents } from "../lib/units";
 import type { Change, MoneyChange } from "../rules/causes";
 import { quipLine } from "../rules/choices";
 import type { LastWalk } from "../save/schema";
 import { rectIndexAt } from "../ui/grid";
+import { type Cents, cents } from "../units";
 
 type EarningsKind =
   "cardCosts" | "cashLost" | "fees" | "fullPack" | "luckyFinds" | "start" | "tips";

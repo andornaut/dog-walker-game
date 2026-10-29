@@ -1,5 +1,6 @@
+import { itemAt, partitionPoint } from "@andornaut/game-kit/arrays";
+
 import { laneMask } from "../layout/lanes";
-import { itemAt, partitionPoint } from "../lib/arrays";
 import { approachOutcomes } from "./approach";
 import { type MoverCaps, type MoverSpec, type PlannerStreams, stopsOnVerge } from "./moverPlanning";
 import { crossingScroll, laneAt, type MoverPath, moverPlace, type MoverStep } from "./movers";

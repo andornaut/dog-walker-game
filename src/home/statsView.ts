@@ -1,6 +1,7 @@
+import { fillLine } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
+
 import type { DogId, GameData } from "../data/types";
-import { fillLine } from "../lib/lines";
-import { keysOf } from "../lib/records";
 import type { DogStats, Owned, SaveStats } from "../save/schema";
 import { statsPage, ZERO_DOG_STATS } from "../save/stats";
 import { dollarText } from "./home";

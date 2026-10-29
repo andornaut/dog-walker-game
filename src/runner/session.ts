@@ -1,6 +1,7 @@
+import { type Random, randomStream } from "@andornaut/game-kit/random";
+
 import type { CardSource, DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
-import { type Random, randomStream } from "../lib/random";
 import type { MoneyChange } from "../rules/causes";
 import {
   type CardData,

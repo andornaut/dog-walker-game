@@ -1,7 +1,8 @@
+import { clamp01 } from "@andornaut/game-kit/numbers";
+import type { Point, Rect } from "@andornaut/game-kit/rect";
+
 import { SCREEN_LAYOUT } from "../data/screen";
 import type { DogId, GameData } from "../data/types";
-import { clamp01 } from "../lib/numbers";
-import type { Point, Rect } from "../lib/rect";
 import { read } from "../rules/units";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { effectIconKey, type EffectItem } from "./effectIcons";

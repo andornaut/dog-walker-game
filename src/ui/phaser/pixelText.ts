@@ -1,8 +1,8 @@
+import { wrapWords } from "@andornaut/game-kit/lines";
+import { getOrInsertComputed } from "@andornaut/game-kit/maps";
+import type { Rect } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene, Types } from "phaser";
 
-import { wrapWords } from "../../lib/lines";
-import { getOrInsertComputed } from "../../lib/maps";
-import type { Rect } from "../../lib/rect";
 import { type FontMetrics, fontMetrics, leftBearing } from "../fontMetrics";
 import { inkWithPills, type LaidChar, laidPills, pillGlyphAdvances, pillRows } from "../namePills";
 import {

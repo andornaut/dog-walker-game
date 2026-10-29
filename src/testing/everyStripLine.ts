@@ -1,3 +1,6 @@
+import { fillNames } from "@andornaut/game-kit/lines";
+import { keysOf } from "@andornaut/game-kit/records";
+
 import { gameData } from "../data";
 import { SIZE_STRIP_LINES } from "../hud/buffMarks";
 import { effectLine } from "../hud/effectIcons";
@@ -5,8 +8,6 @@ import { type FaceText, fillFaceText, ownerFaceText } from "../hud/faceText";
 import type { MessageLine } from "../hud/messageStrip";
 import { STRIP_LINE_FIELDS } from "../hud/runText";
 import { debuffLines } from "../hud/stripLines";
-import { fillNames } from "../lib/lines";
-import { keysOf } from "../lib/records";
 
 // Every line the strip can say: each hint and badge, and each of the walk's lines for every dog,
 // owner and obstacle as each neighbourhood names it, with two-digit counts and the largest
