@@ -8,7 +8,7 @@ export const UPGRADES = {
   bellyRubs: {
     art: "card-belly-rubs",
     duration: "now",
-    effect: "+1♥ for every owner",
+    effect: "+1♥ each",
     effects: [{ amount: 1, kind: "hearts", target: { kind: "all" } }],
     kind: "boost",
     name: "Belly rubs",
@@ -32,7 +32,7 @@ export const UPGRADES = {
   goodLeash: {
     art: "card-good-leash",
     duration: "run",
-    effect: "No squirrel pulls",
+    effect: "No pulls",
     effects: [
       {
         by: "goodLeashSquirrelPull",

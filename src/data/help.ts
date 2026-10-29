@@ -11,8 +11,8 @@ export const HELP_PAGES = [
     art: "lanes",
     body:
       "Drag anywhere: a short drag moves the pack a lane, and each lane-width more moves one more. " +
-      "A tap moves one lane toward that side. Keys: arrows, A/D or H/L. " +
-      "Some obstacles move: an arrow shows where, and every arrow is real.",
+      "A tap moves one lane toward the side you tap. Keys: arrows, A/D or H/L. " +
+      "Some obstacles move: an arrow shows where each will go.",
     title: "Switch lanes",
   },
   {
@@ -30,7 +30,7 @@ export const HELP_PAGES = [
       "Skunks, thieves, dogs and more open cards. " +
       "Each option costs cash, hearts or a debuff, and at least one is free of cash. " +
       "Puddles and potholes make the pack Muddy. Debuffs wear off in time. " +
-      "Hold a card, icon or bar for details.",
+      "Hold anything for details.",
     title: "Some obstacles bring cards",
   },
   {
@@ -57,7 +57,7 @@ export const HELP_PAGES = [
       "Walk {walkLength} neighbourhoods of {world}; at a fork, each path brings an upgrade. " +
       "Bring every dog home for the {walkBonus} Walk bonus. " +
       "If every owner fires you, you keep only your pay: " +
-      "head home from the pause menu to keep your cash.",
+      "head home from the pause menu or a fork to keep your cash.",
     title: "Neighbourhoods",
   },
 ] as const satisfies readonly [HelpPage, ...HelpPage[]];

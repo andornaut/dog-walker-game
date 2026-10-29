@@ -1614,7 +1614,7 @@
   "help": [
     {
       "art": "lanes",
-      "body": "Drag anywhere: a short drag moves the pack a lane, and each lane-width more moves one more. A tap moves one lane toward that side. Keys: arrows, A/D or H/L. Some obstacles move: an arrow shows where, and every arrow is real.",
+      "body": "Drag anywhere: a short drag moves the pack a lane, and each lane-width more moves one more. A tap moves one lane toward the side you tap. Keys: arrows, A/D or H/L. Some obstacles move: an arrow shows where each will go.",
       "title": "Switch lanes"
     },
     {
@@ -1624,7 +1624,7 @@
     },
     {
       "art": "cards",
-      "body": "Skunks, thieves, dogs and more open cards. Each option costs cash, hearts or a debuff, and at least one is free of cash. Puddles and potholes make the pack Muddy. Debuffs wear off in time. Hold a card, icon or bar for details.",
+      "body": "Skunks, thieves, dogs and more open cards. Each option costs cash, hearts or a debuff, and at least one is free of cash. Puddles and potholes make the pack Muddy. Debuffs wear off in time. Hold anything for details.",
       "title": "Some obstacles bring cards"
     },
     {
@@ -1639,7 +1639,7 @@
     },
     {
       "art": "zones",
-      "body": "Walk {walkLength} neighbourhoods of {world}; at a fork, each path brings an upgrade. Bring every dog home for the {walkBonus} Walk bonus. If every owner fires you, you keep only your pay: head home from the pause menu to keep your cash.",
+      "body": "Walk {walkLength} neighbourhoods of {world}; at a fork, each path brings an upgrade. Bring every dog home for the {walkBonus} Walk bonus. If every owner fires you, you keep only your pay: head home from the pause menu or a fork to keep your cash.",
       "title": "Neighbourhoods"
     }
   ],
@@ -3119,7 +3119,7 @@
       "id": "bellyRubs",
       "art": "card-belly-rubs",
       "duration": "now",
-      "effect": "+1♥ for every owner",
+      "effect": "+1♥ each",
       "effects": [
         {
           "amount": 1,
@@ -3153,7 +3153,7 @@
       "id": "goodLeash",
       "art": "card-good-leash",
       "duration": "run",
-      "effect": "No squirrel pulls",
+      "effect": "No pulls",
       "effects": [
         {
           "by": "goodLeashSquirrelPull",

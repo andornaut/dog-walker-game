@@ -21,7 +21,7 @@ export const RUN_TEXT = {
     skip: "Skip (Hall pass)",
     skipEffect: "Skip this card for free.",
     skipHeld: "Skip this card: nothing happens.",
-    upgradeDuration: { nextZone: "Next neighbourhood", now: "Now", run: "Rest of walk" },
+    upgradeDuration: { nextZone: "Next", now: "Now", run: "All walk" },
     upgradeDurationShort: { nextZone: "Next", now: "Now", run: "All walk" },
   },
   causes: {
