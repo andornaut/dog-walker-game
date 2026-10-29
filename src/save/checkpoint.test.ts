@@ -15,6 +15,7 @@ import {
   zonesFinishedBy,
 } from "./checkpoint";
 import { type Checkpoint, type SaveDocument } from "./schema";
+import { bestWalkCents, timesFired } from "./stats";
 
 // veteranSave: bank 12,345, best walk 9,000 over 4 zones, lifetime 30,000 of which 2,000 starting
 // cash, best zone 4, runs
@@ -25,9 +26,9 @@ import { type Checkpoint, type SaveDocument } from "./schema";
 const checkpoint: Checkpoint = {
   counters: quietCounters(),
   dogs: [
-    { fired: false, id: "kilo", zonesFinished: 2 },
-    { fired: false, id: "duchess", zonesFinished: 2 },
-    { fired: true, id: "penny", zonesFinished: 1 },
+    { firedInZone: null, id: "kilo" },
+    { firedInZone: null, id: "duchess" },
+    { firedInZone: 2, id: "penny" },
   ],
   earnedCents: cents(4_250),
   route: ["street", "snoozeCrescent"],
@@ -64,10 +65,11 @@ const unlockedBy = (finished: readonly ZoneId[]) =>
 const runResult = (changes: Partial<RunResult> = {}): RunResult => ({
   counters: quietCounters(),
   dogs: [
-    { fired: false, id: "kilo", zonesFinished: 4 },
-    { fired: true, id: "biscuit", zonesFinished: 1 },
+    { firedInZone: null, id: "kilo" },
+    { firedInZone: 2, id: "biscuit" },
   ],
   earnedCents: cents(6_000),
+  lastHeartOwners: 0,
   lostCents: cents(0),
   outcome: "finished",
   route: ROUTE,
@@ -121,14 +123,14 @@ describe("bankCheckpoint", () => {
       kilo: { timesFired: 1, walks: 6, zonesFinished: 14 },
       penny: { timesFired: 1, walks: 1, zonesFinished: 1 },
     });
-    expect(banked.stats.timesFired).toBe(2);
+    expect(timesFired(banked.stats)).toBe(2);
   });
 
   it("records the last walk with the zone that just ended", () => {
     expect(banked.stats.lastWalk).toEqual({
       dogs: ["kilo", "duchess", "penny"],
       earnedCents: 4_250,
-      firings: [{ dog: "penny", zone: 2 }],
+      firings: ["penny"],
       outcome: "wentHome",
       route: ["street", "snoozeCrescent"],
       zonesFinished: 2,
@@ -204,17 +206,14 @@ describe("recordRunEnd", () => {
     expect(low.stats.lastWalk).toEqual({
       dogs: ["kilo", "biscuit"],
       earnedCents: 100,
-      firings: [{ dog: "biscuit", zone: 2 }],
+      firings: ["biscuit"],
       outcome: "finished",
       route: ROUTE,
       zonesFinished: 1,
     });
     const high = recordRunEnd(testAwards, veteranSave(), runResult({ earnedCents: cents(9_999) }));
-    expect(high.stats.bestWalk).toEqual({
-      dogs: ["kilo", "biscuit"],
-      earnedCents: 9_999,
-      zonesFinished: 4,
-    });
+    expect(high.stats.bestWalk).toEqual({ dogs: ["kilo", "biscuit"], zonesFinished: 4 });
+    expect(bestWalkCents(high.stats)).toBe(9_999);
   });
 
   it("clears the run's checkpoint so it is not banked again", () => {
@@ -229,23 +228,16 @@ describe("achievements at banking", () => {
   const cleanPaws = runFactsFor(gameData, ["cleanPaws"]);
   const cleanPawsWalk = (bumpsByZone: number[]): Checkpoint => ({
     counters: { ...quietCounters(), bumpsByZone },
-    dogs: packOf(gameData, cleanPaws.packSize).map((id) => ({
-      fired: false,
-      id,
-      zonesFinished: cleanPaws.zonesFinished,
-    })),
+    dogs: packOf(gameData, cleanPaws.packSize).map((id) => ({ firedInZone: null, id })),
     earnedCents: cleanPaws.earnedCents,
     route: ROUTE.slice(0, cleanPaws.zonesFinished),
     zonesFinished: cleanPaws.zonesFinished,
   });
 
-  it("awards what a run earned, stamped with the time, and keeps those earned before", () => {
+  it("awards what a run earned after those earned before", () => {
     const before = veteranSave();
     const banked = bankCheckpoint(testAwards, recordCheckpoint(before, cleanPawsWalk([])));
-    expect(banked.achievements).toMatchObject({
-      ...before.achievements,
-      cleanPaws: testAwards.now,
-    });
+    expect(banked.achievements).toEqual([...before.achievements, "cleanPaws"]);
   });
 
   // veteranSave is 2 finished walks into a streak with no firing, and biscuit finished one.
@@ -254,8 +246,8 @@ describe("achievements at banking", () => {
       "a finished walk with no firing adds to the streak, with the dogs that finished it",
       {
         dogs: [
-          { fired: false, id: "kilo", zonesFinished: 4 },
-          { fired: false, id: "penny", zonesFinished: 4 },
+          { firedInZone: null, id: "kilo" },
+          { firedInZone: null, id: "penny" },
         ],
       },
       3,
@@ -264,7 +256,7 @@ describe("achievements at banking", () => {
     ["a finished walk with a firing resets the streak", {}, 0, ["biscuit", "kilo"]],
     [
       "a walk headed home early with no firing leaves the streak",
-      { dogs: [{ fired: false, id: "penny", zonesFinished: 2 }], outcome: "wentHome", zone: 3 },
+      { dogs: [{ firedInZone: null, id: "penny" }], outcome: "wentHome", zone: 3 },
       2,
       ["biscuit"],
     ],
@@ -272,8 +264,8 @@ describe("achievements at banking", () => {
       "a walk headed home early with a firing resets the streak",
       {
         dogs: [
-          { fired: false, id: "penny", zonesFinished: 2 },
-          { fired: true, id: "kilo", zonesFinished: 1 },
+          { firedInZone: null, id: "penny" },
+          { firedInZone: 2, id: "kilo" },
         ],
         outcome: "wentHome",
         zone: 3,
@@ -283,7 +275,7 @@ describe("achievements at banking", () => {
     ],
     [
       "a walk that ran out of dogs resets the streak",
-      { dogs: [{ fired: true, id: "penny", zonesFinished: 1 }], outcome: "noDogs", zone: 2 },
+      { dogs: [{ firedInZone: 2, id: "penny" }], outcome: "noDogs", zone: 2 },
       0,
       ["biscuit"],
     ],
@@ -309,11 +301,11 @@ describe("achievements at banking", () => {
         ...newPlayerSave,
         stats: { ...newPlayerSave.stats, noFiringStreak: count - 1 },
       };
-      const dogs = [{ fired: false, id: "kilo", zonesFinished: 4 }] as const;
+      const dogs = [{ firedInZone: null, id: "kilo" }] as const;
       const finished = recordRunEnd(testAwards, before, runResult({ dogs: [...dogs] }));
-      expect(finished.achievements[id]).toBe(testAwards.now);
+      expect(finished.achievements).toContain(id);
       const home = runResult({ dogs: [...dogs], outcome: "wentHome", zone: 3 });
-      expect(recordRunEnd(testAwards, before, home).achievements[id]).toBeUndefined();
+      expect(recordRunEnd(testAwards, before, home).achievements).not.toContain(id);
     },
   );
 
@@ -337,14 +329,14 @@ describe("achievements at banking", () => {
     const counters = { ...quietCounters(), firstZone: 2 };
     const clean = runResult({
       counters,
-      dogs: [{ fired: false, id: "penny", zonesFinished: 4 }],
+      dogs: [{ firedInZone: null, id: "penny" }],
     });
     const save = recordRunEnd(testAwards, newPlayerSave, clean);
     expect(save.stats.noFiringStreak).toBe(0);
     expect(save.stats.dogsFinishedWith).toEqual([]);
     expect(save.stats.zonesEverFinished).toEqual([]);
-    expect(save.achievements.notAScratch).toBeUndefined();
-    expect(save.achievements.roundTrip).toBeUndefined();
+    expect(save.achievements).not.toContain("notAScratch");
+    expect(save.achievements).not.toContain("roundTrip");
   });
 
   // Each row starts from a save that has finished the first zone of ROUTE.
@@ -430,7 +422,7 @@ describe("achievements at banking", () => {
     (_name, bumpsByZone, earned) => {
       const walked = cleanPawsWalk(bumpsByZone);
       const banked = bankCheckpoint(testAwards, recordCheckpoint(newPlayerSave, walked));
-      expect(banked.achievements.cleanPaws).toBe(earned ? testAwards.now : undefined);
+      expect(banked.achievements.includes("cleanPaws")).toBe(earned);
     },
   );
 });
@@ -461,7 +453,7 @@ describe("bests by pack size", () => {
     ["raises the best for its size when beaten", { earnedCents: cents(9_999) }, { 2: 9_999 }],
     [
       "adds a best for a size walked the first time",
-      { dogs: [{ fired: false, id: "kilo", zonesFinished: 4 }], earnedCents: cents(100) },
+      { dogs: [{ firedInZone: null, id: "kilo" }], earnedCents: cents(100) },
       { 1: 100, 2: 9_000 },
     ],
   ];

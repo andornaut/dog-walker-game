@@ -13,7 +13,7 @@ import type {
 import { assertNever } from "../lib/assertNever";
 import { type Cents, dollarsToCents } from "../lib/units";
 import type { SaveDocument, SaveStats } from "../save/schema";
-import { lifetimeEarnedNet, walksFinished, walksPlayed } from "../save/stats";
+import { lifetimeEarnedNet, timesFired, walksFinished, walksPlayed } from "../save/stats";
 import type { RunState } from "../state/runState";
 import { walkLength } from "./route";
 
@@ -24,25 +24,25 @@ export type AchievementData = Pick<
 
 // The counters a run keeps for its achievements, copied out of the run state for the save.
 // Zones before firstZone were skipped by a dev start: they are neither finished nor clean.
-// lastHeartOwners is how many walking owners are on their last heart. startCents is the money
-// the run began with, which a money goal leaves out. bumpsByKind, optionPicks and tallies are
-// this run's share of the lifetime ones.
+// startCents is the money the run began with, which a money goal leaves out. bumpsByKind,
+// optionPicks and tallies are this run's share of the lifetime ones.
 export interface RunCounters {
   bumpsByKind: Partial<Record<MinorObstacleId, number>>;
   bumpsByZone: number[];
   debuffsGot: Partial<Record<DebuffId, number>>;
   firstZone: number;
-  lastHeartOwners: number;
   optionPicks: OptionPicks;
   startCents: Cents;
   tallies: Partial<Record<TallyId, number>>;
 }
 
 // What the run conditions judge: the run's counters, what it banked (starting money
-// included), how many dogs set out and got home unfired, and how many zones it finished.
+// included), how many dogs set out and got home unfired, how many walking owners ended it on
+// their last heart, and how many zones it finished.
 export interface RunFacts extends RunCounters {
   readonly dogsHome: number;
   readonly earnedCents: Cents;
+  readonly lastHeartOwners: number;
   readonly packSize: number;
   readonly zonesFinished: number;
 }
@@ -55,31 +55,25 @@ export function runCountersOf(
     | "debuffsGot"
     | "firstZone"
     | "optionPicks"
-    | "pack"
     | "startMoney"
     | "tallies"
   >,
 ): RunCounters {
-  const {
-    bumpsByKind,
-    bumpsByZone,
-    debuffsGot,
-    firstZone,
-    optionPicks,
-    pack,
-    startMoney,
-    tallies,
-  } = run;
+  const { bumpsByKind, bumpsByZone, debuffsGot, firstZone, optionPicks, startMoney, tallies } = run;
   return {
     bumpsByKind: { ...bumpsByKind },
     bumpsByZone: [...bumpsByZone],
     debuffsGot: { ...debuffsGot },
     firstZone,
-    lastHeartOwners: pack.filter((slot) => slot.status === "walking" && slot.hearts === 1).length,
     optionPicks: { ...optionPicks },
     startCents: startMoney,
     tallies: { ...tallies },
   };
+}
+
+// How many walking owners are on their last heart.
+export function lastHeartOwnersOf(run: Pick<RunState, "pack">): number {
+  return run.pack.filter((slot) => slot.status === "walking" && slot.hearts === 1).length;
 }
 
 // A money goal counts what the walk banked net of its starting money.
@@ -279,7 +273,7 @@ function acrossWalksProgress(
     case "tally":
       return progress(stats.tallies[condition.tally] ?? 0, condition.count);
     case "timesFired":
-      return progress(stats.timesFired, condition.count);
+      return progress(timesFired(stats), condition.count);
     case "walkersFinishedWith":
       return progress(
         stats.walkersFinishedWith.length,
@@ -332,7 +326,7 @@ export function newlyEarned(
   return data.achievements
     .filter(
       ({ conditions, id }) =>
-        before.achievements[id] === undefined &&
+        !before.achievements.includes(id) &&
         conditions.every((condition) => conditionHolds(data, after, runFacts, condition)),
     )
     .map(({ id }) => id);

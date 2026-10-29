@@ -18,13 +18,13 @@ describe("homecomers", () => {
         name: "brings home the dogs still walking, in pack order, without the fired ones",
         walk: {
           dogs: ["kilo", "reggie", "biscuit"],
-          firings: [{ dog: "reggie", zone: 2 }],
+          firings: ["reggie"],
         },
       },
       {
         expected: [],
         name: "brings nobody home when every owner fired you",
-        walk: { dogs: ["kilo"], firings: [{ dog: "kilo", zone: 1 }] },
+        walk: { dogs: ["kilo"], firings: ["kilo"] },
       },
     ];
     for (const { expected, walk } of cases) {

@@ -41,6 +41,16 @@ export function lifetimeEarnedNet(
   return stats.lifetimeCents - stats.lifetimeStartCents;
 }
 
+// Every firing over every walk: each dog's added up.
+export function timesFired(stats: Pick<SaveStats, "dogs">): number {
+  return Object.values(stats.dogs).reduce((total, dog) => total + dog.timesFired, 0);
+}
+
+// What the best walk banked: the most of any pack size, or 0 before the first walk.
+export function bestWalkCents(stats: Pick<SaveStats, "bestCentsByPackSize">): Cents {
+  return cents(Math.max(0, ...Object.values(stats.bestCentsByPackSize)));
+}
+
 // Every dog's walks added up: a run with 3 dogs walks 3.
 function dogsWalked(stats: Pick<SaveStats, "dogs">): number {
   return Object.values(stats.dogs).reduce((total, { walks }) => total + walks, 0);
@@ -50,14 +60,14 @@ export function statsPage(stats: SaveStats): StatsPage {
   const dogs = Object.entries(stats.dogs) as [DogId, NonNullable<SaveStats["dogs"][DogId]>][];
   let mostFiredBy: DogId | null = null;
   let mostFirings = 0;
-  for (const [dog, { timesFired }] of dogs) {
-    if (timesFired > mostFirings) {
+  for (const [dog, { timesFired: firings }] of dogs) {
+    if (firings > mostFirings) {
       mostFiredBy = dog;
-      mostFirings = timesFired;
+      mostFirings = firings;
     }
   }
   return {
-    bestRunCents: stats.bestWalk?.earnedCents ?? cents(0),
+    bestRunCents: bestWalkCents(stats),
     bestRunDogs: stats.bestWalk?.dogs ?? [],
     bestRunZones: stats.bestWalk?.zonesFinished ?? 0,
     bestZoneFinished: stats.bestZoneFinished,
@@ -66,6 +76,6 @@ export function statsPage(stats: SaveStats): StatsPage {
     mostFiredBy,
     runs: stats.runs,
     runsPlayed: walksPlayed(stats),
-    timesFired: stats.timesFired,
+    timesFired: timesFired(stats),
   };
 }

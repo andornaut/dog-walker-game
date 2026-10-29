@@ -150,7 +150,7 @@ describe("previewAchievements", () => {
     const toasted = preview(preview(NOTHING_PREVIEWED, start).preview, zone1).preview.shown;
     // The save mid-walk holds only the checkpoint, as the run scene writes it.
     const midWalk = recordCheckpoint(newPlayerSave, checkpointOf(gameData, zone1));
-    expect(midWalk.achievements).toEqual({});
+    expect(midWalk.achievements).toEqual([]);
     const ended = recordRunEnd(testAwards, midWalk, runResultOf(gameData, headHome(zone1)));
     const celebrated: AchievementId[] = earnedSince(gameData, midWalk, ended);
     expect(celebrated).toEqual(expect.arrayContaining([...toasted]));

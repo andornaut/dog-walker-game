@@ -123,7 +123,7 @@ describe("closingLines", () => {
   it("has each owner say a happier line, or their fired line if they fired you", () => {
     const walk = {
       dogs: ["kilo", "biscuit"] as const,
-      firings: [{ dog: "biscuit" as const, zone: 2 }],
+      firings: ["biscuit" as const],
     };
     expect(closingLines({ quips: QUIPS }, () => 0, { ...walk, dogs: [...walk.dogs] })).toEqual([
       { dog: "kilo", fired: false, text: QUIPS.kilo.happier[0] },

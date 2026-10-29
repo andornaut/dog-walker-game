@@ -27,7 +27,6 @@ import {
   saveSchema,
   type StoredSave,
   TALLY_IDS,
-  type Walk,
 } from "./schema";
 
 // The content ids the game currently has.
@@ -164,15 +163,15 @@ function keepKnownPicks(
 function keepKnownWalk<W extends { dogs: string[] }>(
   known: KnownIds,
   walk: W,
-): Omit<W, "dogs"> & Pick<Walk, "dogs"> {
+): Omit<W, "dogs"> & { dogs: DogId[] } {
   return { ...walk, dogs: keepKnown(known.dogs, walk.dogs) };
 }
 
-// Drops ids the game no longer has, and loadout picks the player does not own. The free dogs
-// and walkers are always owned, and a walker not owned becomes the default. The starting dog
-// slots are always owned, and a slot number the game has no slot for is dropped. Volumes are
-// clamped to 0 to 1, and a best for a pack size outside 1 to MAX_RUN_DOGS is dropped. A
-// loadout keeps at most one dog per slot owned, and may be empty.
+// Drops ids the game no longer has, and loadout picks the player does not own. Adds back the
+// starting dog slots and the free dogs and walkers, which the store leaves out (storedSave). A
+// walker not owned becomes the default, and a slot number the game has no slot for is dropped.
+// Volumes are clamped to 0 to 1, and a best for a pack size outside 1 to MAX_RUN_DOGS is
+// dropped. A loadout keeps at most one dog per slot owned, and may be empty.
 function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
   const { defaults, known } = context;
   const owned: Owned = {
@@ -191,7 +190,7 @@ function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
   const { checkpoint, settings, stats } = save;
   return {
     ...save,
-    achievements: keepKnownEntries(known.achievements, save.achievements),
+    achievements: keepKnown(known.achievements, save.achievements),
     checkpoint:
       checkpoint === null
         ? null
@@ -231,9 +230,7 @@ function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
           ? null
           : {
               ...keepKnownWalk(known, stats.lastWalk),
-              firings: stats.lastWalk.firings.flatMap(({ dog, zone }) =>
-                isKnown(known.dogs, dog) ? [{ dog, zone }] : [],
-              ),
+              firings: keepKnown(known.dogs, stats.lastWalk.firings),
               route: keepKnown(known.zones, stats.lastWalk.route),
             },
       optionPicks: keepKnownPicks(known, stats.optionPicks),

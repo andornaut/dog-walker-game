@@ -5,15 +5,17 @@ import { newWalkers } from "../rules/walkers";
 import type { EndReason } from "../state/runState";
 import { awardAchievements, type AwardContext } from "./achievements";
 import type { Checkpoint, DogRun, DogStats, LastWalk, SaveDocument, SaveStats } from "./schema";
-import { ZERO_DOG_STATS } from "./stats";
+import { bestWalkCents, ZERO_DOG_STATS } from "./stats";
 
 // A finished run. earnedCents is what the run banks, and lostCents the cash it carried and lost
-// when every owner fired you (walkEarnings). zone is the zone in progress when the run ended,
-// counting from 1; between zones it is the next one. A finished run ends in its last zone.
+// when every owner fired you (walkEarnings). lastHeartOwners is how many walking owners ended it
+// on their last heart. zone is the zone in progress when the run ended, counting from 1; between
+// zones it is the next one. A finished run ends in its last zone.
 export interface RunResult {
   counters: RunCounters;
   dogs: DogRun[];
   earnedCents: Cents;
+  lastHeartOwners: number;
   lostCents: Cents;
   outcome: EndReason;
   // The zones the run walked, in order, the one it ended in included.
@@ -71,8 +73,11 @@ export function isNewBestWalk(
 }
 
 // Whether a run banking earnedCents beats the best walk the logbook shows, whatever its dogs.
-function beatsBestWalk(stats: Pick<SaveStats, "bestWalk">, earnedCents: Cents): boolean {
-  return stats.bestWalk === null || earnedCents > stats.bestWalk.earnedCents;
+function beatsBestWalk(
+  stats: Pick<SaveStats, "bestCentsByPackSize" | "bestWalk">,
+  earnedCents: Cents,
+): boolean {
+  return stats.bestWalk === null || earnedCents > bestWalkCents(stats);
 }
 
 // walker is null for a checkpoint, which banks as heading home and so finishes no walk.
@@ -80,6 +85,7 @@ type BankedRun = Pick<
   Checkpoint,
   "counters" | "dogs" | "earnedCents" | "route" | "zonesFinished"
 > & {
+  lastHeartOwners: number;
   outcome: EndReason;
   walker: WalkerId | null;
 };
@@ -93,22 +99,21 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
   const { stats } = save;
   const walked = walkedFromTheStart(run.counters);
   const walkedOf = (zones: number) => Math.max(0, zones - run.counters.firstZone);
+  const { earnedCents, outcome, zonesFinished } = run;
   const dogs: Partial<Record<DogId, DogStats>> = { ...stats.dogs };
-  for (const { fired, id, zonesFinished } of run.dogs) {
+  for (const { firedInZone, id } of run.dogs) {
     const current = dogs[id] ?? ZERO_DOG_STATS;
+    // A dog fired in a zone was paid for the zones before it.
+    const paid = firedInZone === null ? zonesFinished : firedInZone - 1;
     dogs[id] = {
-      timesFired: current.timesFired + (fired ? 1 : 0),
+      timesFired: current.timesFired + (firedInZone === null ? 0 : 1),
       walks: current.walks + 1,
-      zonesFinished: current.zonesFinished + walkedOf(zonesFinished),
+      zonesFinished: current.zonesFinished + walkedOf(paid),
     };
   }
 
-  const { earnedCents, outcome, zonesFinished } = run;
   const walkDogs = run.dogs.map(({ id }) => id);
-  // A dog fired in a zone was paid for the zones before it.
-  const firedBy = run.dogs.flatMap(({ fired, id, zonesFinished: paid }) =>
-    fired ? [{ dog: id, zone: paid + 1 }] : [],
-  );
+  const firedBy = run.dogs.flatMap(({ firedInZone, id }) => (firedInZone === null ? [] : [id]));
   const lastWalk: LastWalk = {
     dogs: walkDogs,
     earnedCents,
@@ -121,7 +126,7 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
   // headed home otherwise.
   const finished = outcome === "finished" && walked;
   const counted: EndReason = outcome === "finished" && !walked ? "wentHome" : outcome;
-  const stayed = run.dogs.flatMap(({ fired, id }) => (fired ? [] : [id]));
+  const stayed = run.dogs.flatMap(({ firedInZone, id }) => (firedInZone === null ? [id] : []));
   const banks = walked ? earnedCents : cents(0);
   const { owned } = save;
   const banked: SaveDocument = {
@@ -147,7 +152,7 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
           : stats.bestCentsByPackSize,
       bestWalk:
         walked && beatsBestWalk(stats, earnedCents)
-          ? { dogs: walkDogs, earnedCents, zonesFinished }
+          ? { dogs: walkDogs, zonesFinished }
           : stats.bestWalk,
       bestZoneFinished: Math.max(stats.bestZoneFinished, walkedOf(zonesFinished)),
       bumpsByKind: addCounts(stats.bumpsByKind, run.counters.bumpsByKind),
@@ -164,7 +169,6 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
       optionPicks: addPicks(stats.optionPicks, run.counters.optionPicks),
       runs: { ...stats.runs, [counted]: stats.runs[counted] + 1 },
       tallies: addCounts(stats.tallies, run.counters.tallies),
-      timesFired: stats.timesFired + firedBy.length,
       walkersFinishedWith:
         finished && run.walker !== null
           ? [...new Set([...stats.walkersFinishedWith, run.walker])]
@@ -178,6 +182,7 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
     ...run.counters,
     dogsHome: stayed.length,
     earnedCents,
+    lastHeartOwners: run.lastHeartOwners,
     packSize: run.dogs.length,
     zonesFinished,
   };
@@ -188,13 +193,19 @@ export function recordCheckpoint(save: SaveDocument, slice: Checkpoint): SaveDoc
   return { ...save, checkpoint: slice };
 }
 
-// Banks an unfinished run as if the player had headed home after the checkpoint's zone.
+// Banks an unfinished run as if the player had headed home after the checkpoint's zone. Only a
+// finished walk counts the owners on their last heart, and a checkpoint never is one: the walk's
+// last zone ends the run, which then saves no checkpoint.
 export function bankCheckpoint(context: AwardContext, save: SaveDocument): SaveDocument {
   const { checkpoint } = save;
   if (checkpoint === null) {
     return save;
   }
-  return bankRun(context, { ...checkpoint, outcome: "wentHome", walker: null }, save);
+  return bankRun(
+    context,
+    { ...checkpoint, lastHeartOwners: 0, outcome: "wentHome", walker: null },
+    save,
+  );
 }
 
 // Banks a run that ended.
@@ -209,6 +220,7 @@ export function recordRunEnd(
       counters: result.counters,
       dogs: result.dogs,
       earnedCents: result.earnedCents,
+      lastHeartOwners: result.lastHeartOwners,
       outcome: result.outcome,
       route: result.route,
       walker: result.walker,

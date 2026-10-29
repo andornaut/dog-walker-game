@@ -53,7 +53,7 @@ export function applySound(scene: Scene, settings: Settings): void {
 export async function openProfile(scene: Scene): Promise<StoreLoadResult> {
   const { load, session: opened } = await ProfileSession.open(
     saveContextFrom(gameData),
-    { data: gameData, now: () => Date.now() },
+    { data: gameData },
     pageSaveStore(),
     newPlayerOnDevice,
   );

@@ -97,7 +97,7 @@ export async function applyPendingSaveEdits(): Promise<void> {
       (save, edit) => applySaveEdit(gameData, newPlayer, edit, save),
       loadedSave(loaded, newPlayerOnDevice),
     );
-    const saved = await store.save(edited);
+    const saved = await store.save(context, edited);
     if (saved.status !== "saved") {
       console.warn(`Dev panel: save edits not applied: ${saved.reason}`);
     }

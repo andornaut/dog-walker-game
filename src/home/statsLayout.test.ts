@@ -38,7 +38,7 @@ import { overallRows } from "./statsView";
 
 const BODY = fontFileMetrics("font-body");
 const TITLE = fontFileMetrics("font-title");
-const BADGES = badgeWall(gameData, { achievements: {} });
+const BADGES = badgeWall(gameData, { achievements: [] });
 const words = gameData.menuText.stats;
 
 // The tabs span the panel's columns, side by side, over its top; each label fits its tab.
@@ -187,8 +187,11 @@ describe("the Dogs tab's blocks", () => {
 // under the previous section's last row's pitch.
 describe("the Walks tab's sections", () => {
   const fullPack = keysOf(gameData.dogs).slice(0, read(gameData.tuning, "counts", "packSizeMax"));
-  const bestWalk = { dogs: fullPack, earnedCents: cents(999_900), zonesFinished: 4 };
-  const { outcomes, overall } = overallRows(gameData, { ...save.stats, bestWalk });
+  const { outcomes, overall } = overallRows(gameData, {
+    ...save.stats,
+    bestCentsByPackSize: { [fullPack.length]: cents(999_900) },
+    bestWalk: { dogs: fullPack, zonesFinished: 4 },
+  });
   const sections = [
     { heading: words.sections.overall, rows: overall.length },
     { heading: words.sections.runs, rows: outcomes.length },
@@ -243,8 +246,11 @@ describe("each tab's scroll", () => {
   const lastTop =
     lastCell === undefined ? wallText.y : (wallLineTops(BODY, lastCell).at(-1) ?? wallText.y);
   const fullPack = dogIds.slice(0, read(gameData.tuning, "counts", "packSizeMax"));
-  const bestWalk = { dogs: fullPack, earnedCents: cents(999_900), zonesFinished: 4 };
-  const { outcomes, overall } = overallRows(gameData, { ...save.stats, bestWalk });
+  const { outcomes, overall } = overallRows(gameData, {
+    ...save.stats,
+    bestCentsByPackSize: { [fullPack.length]: cents(999_900) },
+    bestWalk: { dogs: fullPack, zonesFinished: 4 },
+  });
   const walks = [overall.length, outcomes.length];
   const lastHeading = walksHeadingTops(walks).at(-1) ?? 0;
   const walksLastRow = lastHeading + STATS_LAYOUT.walks.rowsY + (outcomes.length - 1) * rows.pitch;
@@ -271,7 +277,7 @@ describe("each tab's scroll", () => {
 // height and the last row cover the wall.
 describe("an earned row", () => {
   const ids = gameData.achievements.map(({ id }) => id);
-  const earnedSave = { achievements: Object.fromEntries(ids.map((id) => [id, 1])) };
+  const earnedSave = { achievements: ids };
   const earned = badgeWall(gameData, earnedSave);
   const earnedRows = wallRects(
     wall,

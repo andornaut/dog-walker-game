@@ -1,7 +1,7 @@
 import * as v from "valibot";
 
 import { loadSave, type SaveContext } from "./load";
-import { createDefaultSave, type SaveDocument, saveSchema } from "./schema";
+import { createDefaultSave, type SaveDocument, saveSchema, storedSave } from "./schema";
 
 export const SAVE_KEY = "dog-walker-game:save";
 export const SAVE_BACKUP_KEY = "dog-walker-game:save-backup";
@@ -24,7 +24,7 @@ type StoreSaveResult = { reason: string; status: "invalid" | "unavailable" } | {
 
 export interface SaveStore {
   load(context: SaveContext): Promise<StoreLoadResult>;
-  save(document: SaveDocument): Promise<StoreSaveResult>;
+  save(context: SaveContext, document: SaveDocument): Promise<StoreSaveResult>;
 }
 
 // The only code that touches browser storage. A throwing getItem or setItem (private
@@ -97,11 +97,11 @@ export function saveStore(storage: SaveStorage): SaveStore {
       return { reason: result.reason, save: result.save, status: "corrupt" };
     },
 
-    async save(document) {
+    async save(context, document) {
       if (writesBlocked !== null) {
         return { reason: writesBlocked, status: "unavailable" };
       }
-      const validated = v.safeParse(saveSchema, document);
+      const validated = v.safeParse(saveSchema, storedSave(context.defaults, document));
       if (!validated.success) {
         return { reason: v.summarize(validated.issues), status: "invalid" };
       }

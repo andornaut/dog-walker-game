@@ -100,7 +100,7 @@ export function closingLines(
   walk: Pick<LastWalk, "dogs" | "firings">,
 ): ClosingLine[] {
   return walk.dogs.map((dog) => {
-    const fired = walk.firings.some((firing) => firing.dog === dog);
+    const fired = walk.firings.includes(dog);
     return {
       dog,
       fired,

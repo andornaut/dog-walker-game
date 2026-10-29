@@ -16,7 +16,7 @@ export const RETURN_HOME = {
 // Who comes home and who waits: the dogs still walking, in pack order, and their owners.
 // Fired dogs went home on their own, and their owners do not wave.
 export function homecomers(walk: Pick<LastWalk, "dogs" | "firings">): DogId[] {
-  return walk.dogs.filter((dog) => !walk.firings.some((firing) => firing.dog === dog));
+  return walk.dogs.filter((dog) => !walk.firings.includes(dog));
 }
 
 // How far below its place the walker and pack are elapsedMs into the walk: easing out to 0.

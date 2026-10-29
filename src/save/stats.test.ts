@@ -4,7 +4,7 @@ import { newPlayerSave, veteranSave } from "../testing/saves";
 import { statsPage } from "./stats";
 
 describe("statsPage", () => {
-  it("sums the runs and dog walks, and names the owner who fired you most", () => {
+  it("sums the runs, dog walks and firings, and names the owner who fired you most", () => {
     const { stats } = veteranSave();
     expect(statsPage(stats)).toEqual({
       bestRunCents: 9_000,
@@ -29,7 +29,7 @@ describe("statsPage", () => {
         kilo: { timesFired: 2, walks: 5, zonesFinished: 12 },
       },
     };
-    expect(statsPage(tied).mostFiredBy).toBe("biscuit");
+    expect(statsPage(tied)).toMatchObject({ mostFiredBy: "biscuit", timesFired: 4 });
     expect(statsPage(newPlayerSave.stats)).toMatchObject({
       bestRunCents: 0,
       bestRunDogs: [],

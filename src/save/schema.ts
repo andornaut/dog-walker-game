@@ -16,7 +16,7 @@ import { type Cents, cents as toCents } from "../lib/units";
 import type { RunCounters } from "../rules/achievements";
 import type { EndReason } from "../state/runState";
 
-export const SAVE_VERSION = 19;
+export const SAVE_VERSION = 20;
 
 // Every tally the save keeps; a stored key outside it is dropped on load. A record, so a new
 // TallyId fails to compile until it is listed here.
@@ -53,11 +53,12 @@ const dogStatsSchema = v.object({
   zonesFinished: count,
 });
 
-// zonesFinished counts the zones the dog was paid for.
+// A dog on a run. firedInZone is the zone its owner fired you in, counting from 1, or null while
+// they have not: the dog was paid for the zones before it, and an unfired dog for every zone the
+// run finished.
 const dogRunSchema = v.object({
-  fired: v.boolean(),
+  firedInZone: v.nullable(zoneNumber),
   id: contentId,
-  zonesFinished: count,
 });
 
 // Card option picks, keyed by encounter id, then by option id.
@@ -70,7 +71,6 @@ const runCountersSchema = v.object({
   bumpsByZone: v.array(count),
   debuffsGot: v.record(contentId, count),
   firstZone: count,
-  lastHeartOwners: count,
   optionPicks: optionPicksSchema,
   startCents: cents,
   // Keyed by TallyId.
@@ -94,22 +94,19 @@ const loadoutSchema = v.object({
   gear: v.nullable(contentId),
 });
 
-// One walk for the logbook: what it banked, how many zones it finished, and its dogs. Keys
-// stay in alphabetical order, as the stored JSON writes them.
-const walkSchema = v.object({
+// The walk that banked the most: its dogs and how many zones it finished. What it banked is the
+// largest of the bests by pack size (bestWalkCents).
+const bestWalkSchema = v.object({
   dogs: ids,
-  earnedCents: cents,
   zonesFinished: count,
 });
-// An owner who fired you, and the zone they did it in, counting from 1.
-const firingSchema = v.object({
-  dog: contentId,
-  zone: zoneNumber,
-});
+// The logbook's last walk: its dogs, what it banked, the dogs whose owners fired you, how it
+// ended, its route and how many zones it finished. Keys stay in alphabetical order, as the
+// stored JSON writes them.
 const lastWalkSchema = v.object({
   dogs: ids,
   earnedCents: cents,
-  firings: v.array(firingSchema),
+  firings: ids,
   outcome: v.picklist(END_REASONS),
   // The zones walked, in order, by id.
   route: ids,
@@ -121,7 +118,7 @@ const statsSchema = v.object({
   // walked has none. Pack sizes outside 1 to MAX_RUN_DOGS are dropped on load.
   bestCentsByPackSize: v.record(v.string(), cents),
   // The walk that banked the most; null until the first run ends.
-  bestWalk: v.nullable(walkSchema),
+  bestWalk: v.nullable(bestWalkSchema),
   // The most zones one run finished. Heading home mid-zone does not count that zone.
   bestZoneFinished: count,
   // Plain hits that cost their owner a heart over every run, keyed by minor obstacle id.
@@ -148,7 +145,6 @@ const statsSchema = v.object({
   }),
   // Each tally over every run, keyed by TallyId.
   tallies: v.record(contentId, count),
-  timesFired: count,
   // Every walker who finished a walk from the first zone, each once.
   walkersFinishedWith: ids,
   // Every zone a walk from the first zone finished, each once.
@@ -156,20 +152,21 @@ const statsSchema = v.object({
 });
 
 export const saveSchema = v.object({
-  // Each earned achievement and when, in milliseconds since the Unix epoch.
-  achievements: v.record(contentId, count),
+  // The achievements earned, each once, in the order earned.
+  achievements: ids,
   bankCents: cents,
   checkpoint: v.nullable(checkpointSchema),
   // Whether the player has seen the help screen, so it opens by itself only once.
   helpSeen: v.boolean(),
   lastLoadout: loadoutSchema,
+  // What the player bought or unlocked, each once. The starting dog slots and the free dogs and
+  // walkers are left out: every load adds them back.
   owned: v.object({
-    // The dog slots owned by number, each once, bought in any order. A run takes one dog per
-    // slot owned; the loadout never holds more.
+    // The dog slots by number, bought in any order. A run takes one dog per slot owned; the
+    // loadout never holds more.
     dogSlots: slotNumbers,
     dogs: ids,
     gear: ids,
-    // The walkers unlocked, each once.
     walkers: ids,
   }),
   settings: v.object({
@@ -219,16 +216,16 @@ export interface Owned {
   walkers: WalkerId[];
 }
 
-export interface Walk extends Omit<v.InferOutput<typeof walkSchema>, "dogs"> {
+export interface BestWalk extends Omit<v.InferOutput<typeof bestWalkSchema>, "dogs"> {
   dogs: DogId[];
 }
 
-export interface Firing extends Omit<v.InferOutput<typeof firingSchema>, "dog"> {
-  dog: DogId;
-}
-
-export interface LastWalk extends Walk {
-  firings: Firing[];
+export interface LastWalk extends Omit<
+  v.InferOutput<typeof lastWalkSchema>,
+  "dogs" | "firings" | "outcome" | "route"
+> {
+  dogs: DogId[];
+  firings: DogId[];
   outcome: EndReason;
   route: ZoneId[];
 }
@@ -248,7 +245,7 @@ export interface SaveStats extends Omit<
   | "zonesEverFinished"
 > {
   bestCentsByPackSize: Record<number, Cents>;
-  bestWalk: Walk | null;
+  bestWalk: BestWalk | null;
   bumpsByKind: Partial<Record<MinorObstacleId, number>>;
   dogs: Partial<Record<DogId, DogStats>>;
   dogsFinishedWith: DogId[];
@@ -264,7 +261,7 @@ export interface SaveDocument extends Omit<
   StoredSave,
   "achievements" | "checkpoint" | "lastLoadout" | "owned" | "shownHints" | "stats" | "walker"
 > {
-  achievements: Partial<Record<AchievementId, number>>;
+  achievements: AchievementId[];
   checkpoint: Checkpoint | null;
   lastLoadout: Loadout;
   owned: Owned;
@@ -273,8 +270,8 @@ export interface SaveDocument extends Omit<
   walker: WalkerId | null;
 }
 
-// What a new player starts with. The free dogs and walkers stay owned on every load, and
-// walker replaces a walker not owned.
+// What a new player starts with. The starting dog slots and the free dogs and walkers stay
+// owned on every load, and walker replaces a walker not owned.
 export interface SaveDefaults {
   dogSlots: readonly number[];
   freeDogs: readonly DogId[];
@@ -296,7 +293,7 @@ export const DEFAULT_SETTINGS: Settings = {
 export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
   const zero = toCents(0);
   return {
-    achievements: {},
+    achievements: [],
     bankCents: zero,
     checkpoint: null,
     helpSeen: false,
@@ -323,11 +320,26 @@ export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
       optionPicks: {},
       runs: { finished: 0, noDogs: 0, wentHome: 0 },
       tallies: {},
-      timesFired: 0,
       walkersFinishedWith: [],
       zonesEverFinished: [],
     },
     version: SAVE_VERSION,
     walker: defaults.walker,
+  };
+}
+
+// The save as the store writes it: owned leaves out what every load adds back.
+export function storedSave(defaults: SaveDefaults, save: SaveDocument): SaveDocument {
+  const { owned } = save;
+  const without = <Id>(given: readonly Id[], ids: readonly Id[]) =>
+    ids.filter((id) => !given.includes(id));
+  return {
+    ...save,
+    owned: {
+      dogSlots: without(defaults.dogSlots, owned.dogSlots),
+      dogs: without(defaults.freeDogs, owned.dogs),
+      gear: owned.gear,
+      walkers: without(defaults.freeWalkers, owned.walkers),
+    },
   };
 }

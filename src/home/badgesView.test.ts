@@ -123,8 +123,10 @@ function counted(condition: Counted, n: number): SaveDocument {
     }
     case "tally":
       return { ...newPlayerSave, stats: { ...stats, tallies: { [condition.tally]: n } } };
-    case "timesFired":
-      return { ...newPlayerSave, stats: { ...stats, timesFired: n } };
+    case "timesFired": {
+      const dogs = { kilo: { timesFired: n, walks: n, zonesFinished: 0 } };
+      return { ...newPlayerSave, stats: { ...stats, dogs } };
+    }
     case "zonesEverFinished":
       return { ...newPlayerSave, stats: { ...stats, zonesEverFinished: ALL_ZONES.slice(0, n) } };
     default:
@@ -150,7 +152,7 @@ const progressText = (kind: Counted["kind"], have: number, need: number) =>
 describe("badgeWall", () => {
   it("lists every badge in wall order, earned by the save or locked", () => {
     const [first] = gameData.achievements;
-    const wall = badgeWall(gameData, { achievements: { [first.id]: 1, squirrel: 2 } });
+    const wall = badgeWall(gameData, { achievements: ["squirrel", first.id] });
     expect(wall).toHaveLength(gameData.achievements.length);
     expect(wall[0]).toMatchObject({ art: badgeKey(first.id), earned: true, name: first.name });
     expect(wall.filter(({ earned }) => earned).map(({ id }) => id)).toEqual([first.id, "squirrel"]);

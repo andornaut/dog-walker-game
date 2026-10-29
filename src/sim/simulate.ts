@@ -12,7 +12,12 @@ import type { InputEvent } from "../dev/inputLog";
 import { type Random, randomStream } from "../lib/random";
 import { keysOf } from "../lib/records";
 import { addCents, type Cents, cents } from "../lib/units";
-import { earnedByRun, runCountersOf, type RunFacts } from "../rules/achievements";
+import {
+  earnedByRun,
+  lastHeartOwnersOf,
+  runCountersOf,
+  type RunFacts,
+} from "../rules/achievements";
 import { type CardView, type Choice, type ChoiceData } from "../rules/choices";
 import { currentZoneId } from "../rules/route";
 import { walkEarnings } from "../rules/run";
@@ -572,6 +577,7 @@ export function simulateRun(data: SimData, seed: number, config: SimConfig): Run
     ...runCountersOf(tally.run),
     dogsHome: packDogs(tally.run).length,
     earnedCents: banked,
+    lastHeartOwners: lastHeartOwnersOf(tally.run),
     packSize: config.pack.length,
     zonesFinished: tally.zones.length,
   };

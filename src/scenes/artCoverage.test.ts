@@ -281,7 +281,7 @@ describe("icon art", () => {
   });
 
   it("names a badge with earned and locked for every achievement", () => {
-    const badges = badgeWall(gameData, { achievements: {} });
+    const badges = badgeWall(gameData, { achievements: [] });
     expect(badges).toHaveLength(Object.keys(gameData.achievements).length);
     expect(badges.flatMap(({ art }) => missingTags(art, ["earned", "locked"]))).toEqual([]);
   });

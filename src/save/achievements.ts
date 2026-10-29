@@ -2,15 +2,13 @@ import type { AchievementId } from "../data/types";
 import { type AchievementData, newlyEarned, type RunFacts } from "../rules/achievements";
 import type { SaveDocument } from "./schema";
 
-// What awarding needs: the achievements and the content their "all" counts, and the time to
-// stamp them with, in milliseconds since the Unix epoch.
+// What awarding needs: the achievements and the content their "all" counts.
 export interface AwardContext {
   readonly data: AchievementData;
-  readonly now: number;
 }
 
 // after with every achievement that before had not earned and after (with runFacts for a run)
-// now meets, stamped with the context's time.
+// now meets, added in wall order.
 export function awardAchievements(
   context: AwardContext,
   runFacts: RunFacts | null,
@@ -21,11 +19,7 @@ export function awardAchievements(
   if (earned.length === 0) {
     return after;
   }
-  const achievements = { ...after.achievements };
-  for (const id of earned) {
-    achievements[id] = context.now;
-  }
-  return { ...after, achievements };
+  return { ...after, achievements: [...after.achievements, ...earned] };
 }
 
 // The achievements after has that before had not, in wall order.
@@ -35,8 +29,6 @@ export function earnedSince(
   after: Pick<SaveDocument, "achievements">,
 ): AchievementId[] {
   return data.achievements
-    .filter(
-      ({ id }) => before.achievements[id] === undefined && after.achievements[id] !== undefined,
-    )
+    .filter(({ id }) => !before.achievements.includes(id) && after.achievements.includes(id))
     .map(({ id }) => id);
 }

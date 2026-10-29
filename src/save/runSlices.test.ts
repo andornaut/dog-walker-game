@@ -39,12 +39,12 @@ if (walking.status !== "walking") {
 }
 
 describe("checkpointOf", () => {
-  it("records the zones paid, the money and each dog's zones", () => {
+  it("records the zones paid, the money and the zone each owner fired you in", () => {
     expect(checkpointOf(data, midRun)).toEqual({
       counters: { ...quietCounters(), startCents: start.startMoney },
       dogs: [
-        { fired: false, id: "kilo", zonesFinished: 2 },
-        { fired: true, id: "duchess", zonesFinished: 1 },
+        { firedInZone: null, id: "kilo" },
+        { firedInZone: 2, id: "duchess" },
       ],
       earnedCents: 4_250,
       route: ["street", "pawsPromenade", "park"],
@@ -59,10 +59,6 @@ describe("checkpointOf", () => {
       bumpsByZone: [0, 2],
       debuffsGot: { stinky: 1 },
       optionPicks: { capybara: { help: 2 } },
-      pack: [
-        { ...walking, hearts: clampHearts(5, 1) },
-        { dog: "duchess", status: "fired", zoneIndex: 1 },
-      ],
       startMoney: cents(500),
       tallies: { squirrelPulls: 3 },
     };
@@ -71,7 +67,6 @@ describe("checkpointOf", () => {
       bumpsByZone: [0, 2],
       debuffsGot: { stinky: 1 },
       firstZone: 0,
-      lastHeartOwners: 1,
       optionPicks: { capybara: { help: 2 } },
       startCents: 500,
       tallies: { squirrelPulls: 3 },
@@ -90,16 +85,25 @@ describe("runResultOf", () => {
     expect(runResultOf(data, finished)).toEqual({
       counters: { ...quietCounters(), startCents: start.startMoney },
       dogs: [
-        { fired: false, id: "kilo", zonesFinished: 4 },
-        { fired: true, id: "duchess", zonesFinished: 1 },
+        { firedInZone: null, id: "kilo" },
+        { firedInZone: 2, id: "duchess" },
       ],
       earnedCents: 4_250,
+      lastHeartOwners: 0,
       lostCents: 0,
       outcome: "finished",
       route: ["street", "pawsPromenade", "park"],
       walker: start.walker,
       zone: 4,
     });
+  });
+
+  it("counts the walking owners on their last heart", () => {
+    const run: RunState = { ...midRun, pack: [{ ...walking, hearts: clampHearts(5, 1) }] };
+    expect([runResultOf(data, midRun), runResultOf(data, run)]).toMatchObject([
+      { lastHeartOwners: 0 },
+      { lastHeartOwners: 1 },
+    ]);
   });
 
   it("ends each slice as heading home, in the zone it was in", () => {

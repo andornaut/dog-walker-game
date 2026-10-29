@@ -80,6 +80,7 @@ vi.mock("./simulate", async (importOriginal) => {
         ...runCountersOf(run),
         dogsHome: config.pack.length,
         earnedCents: run.money,
+        lastHeartOwners: 0,
         packSize: config.pack.length,
         zonesFinished: 0,
       },

@@ -1,5 +1,5 @@
 import type { GameData } from "../data/types";
-import { runCountersOf } from "../rules/achievements";
+import { lastHeartOwnersOf, runCountersOf } from "../rules/achievements";
 import { walkLength } from "../rules/route";
 import { walkEarnings } from "../rules/run";
 import type { RunState } from "../state/runState";
@@ -14,14 +14,12 @@ function zonesDone(data: RunSliceData, run: RunState): number {
     : run.zoneIndex;
 }
 
-// A dog fired in a zone was paid for the zones before it; the others for every zone done.
-function dogRuns(data: RunSliceData, run: RunState): DogRun[] {
-  const done = zonesDone(data, run);
-  return run.pack.map((slot) =>
-    slot.status === "fired"
-      ? { fired: true, id: slot.dog, zonesFinished: slot.zoneIndex }
-      : { fired: false, id: slot.dog, zonesFinished: done },
-  );
+// Each dog, with the zone its owner fired you in, counting from 1.
+function dogRuns(run: RunState): DogRun[] {
+  return run.pack.map((slot) => ({
+    firedInZone: slot.status === "fired" ? slot.zoneIndex + 1 : null,
+    id: slot.dog,
+  }));
 }
 
 // The run so far, for the save after a zone's pay is banked (finishZone has moved zoneIndex on
@@ -30,7 +28,7 @@ function dogRuns(data: RunSliceData, run: RunState): DogRun[] {
 export function checkpointOf(data: RunSliceData, run: RunState): Checkpoint {
   return {
     counters: runCountersOf(run),
-    dogs: dogRuns(data, run),
+    dogs: dogRuns(run),
     earnedCents: walkEarnings(run).banked,
     route: [...run.route],
     zonesFinished: zonesDone(data, run),
@@ -43,8 +41,9 @@ export function runResultOf(data: RunSliceData, run: RunState): RunResult {
   const { banked, lost } = walkEarnings(run);
   return {
     counters: runCountersOf(run),
-    dogs: dogRuns(data, run),
+    dogs: dogRuns(run),
     earnedCents: banked,
+    lastHeartOwners: lastHeartOwnersOf(run),
     lostCents: lost,
     outcome,
     route: [...run.route],

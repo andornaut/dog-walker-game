@@ -12,11 +12,11 @@ import {
   veteranSave,
 } from "../testing/saves";
 import { earnedSince } from "./achievements";
-import { type Awards, ProfileSession } from "./profile";
+import { ProfileSession } from "./profile";
 import { DEFAULT_SETTINGS, SAVE_VERSION, type SaveDocument } from "./schema";
 import { SAVE_KEY, type SaveStorage, saveStore } from "./storage";
 
-const awards: Awards = { data: testAwards.data, now: () => testAwards.now };
+const awards = testAwards;
 
 function stored(entries: Map<string, string>): SaveDocument {
   return JSON.parse(entries.get(SAVE_KEY) ?? "null") as SaveDocument;
@@ -68,7 +68,7 @@ describe("ProfileSession.open", () => {
   it("banks a run left at a checkpoint as headed home and writes it back", async () => {
     const checkpoint = {
       counters: quietCounters(),
-      dogs: [{ fired: false, id: "kilo" as const, zonesFinished: 2 }],
+      dogs: [{ firedInZone: null, id: "kilo" as const }],
       earnedCents: cents(1_000),
       route: ["street" as const, "park" as const],
       zonesFinished: 2,
@@ -93,8 +93,8 @@ describe("achievements away from a run", () => {
   it("awards on launch what the save already meets, and celebrates it once", async () => {
     const fired = saveFor(gameData, ["youreFired"], veteranSave());
     const { entries, session } = await opened(fired);
-    expect(session.save.achievements.youreFired).toBe(testAwards.now);
-    expect(stored(entries).achievements.youreFired).toBe(testAwards.now);
+    expect(session.save.achievements).toContain("youreFired");
+    expect(stored(entries).achievements).toContain("youreFired");
     expect(session.takeCelebrations()).toEqual(["youreFired"]);
     expect(session.takeCelebrations()).toEqual([]);
   });
@@ -103,7 +103,7 @@ describe("achievements away from a run", () => {
     const { session } = await opened(veteranSave());
     const allGear = keysOf(gameData.shopGear);
     await session.purchase((save) => ({ ...save, owned: { ...save.owned, gear: [...allGear] } }));
-    expect(session.save.achievements.kittedOut).toBe(testAwards.now);
+    expect(session.save.achievements).toContain("kittedOut");
     expect(session.takeCelebrations()).toEqual(["kittedOut"]);
   });
 
@@ -195,8 +195,9 @@ describe("hints", () => {
 
 const result = {
   counters: quietCounters(),
-  dogs: [{ fired: false, id: "kilo" as const, zonesFinished: 4 }],
+  dogs: [{ firedInZone: null, id: "kilo" as const }],
   earnedCents: cents(9_500),
+  lastHeartOwners: 0,
   lostCents: cents(0),
   outcome: "finished" as const,
   route: ["street" as const, "park" as const, "shops" as const, "homeStretch" as const],
@@ -225,11 +226,7 @@ describe("runs", () => {
     const goal = runFactsFor(gameData, ["notAScratch"]);
     const walk = {
       ...result,
-      dogs: packOf(gameData, goal.packSize).map((id) => ({
-        fired: false,
-        id,
-        zonesFinished: result.zone,
-      })),
+      dogs: packOf(gameData, goal.packSize).map((id) => ({ firedInZone: null, id })),
       earnedCents: goal.earnedCents,
     };
     const { session } = await opened(veteranSave());
@@ -237,9 +234,7 @@ describe("runs", () => {
     const earned = earnedSince(gameData, veteranSave(), session.save);
     expect(earned).toContain("notAScratch");
     expect(session.lastRunEnd?.achievements).toEqual(earned);
-    expect(earned.map((id) => session.save.achievements[id])).toEqual(
-      earned.map(() => testAwards.now),
-    );
+    expect(session.save.achievements).toEqual([...veteranSave().achievements, ...earned]);
     expect(session.takeCelebrations()).toEqual([]);
   });
 

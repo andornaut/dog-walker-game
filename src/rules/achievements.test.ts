@@ -50,6 +50,9 @@ function withStats(stats: Partial<SaveDocument["stats"]>): SaveDocument {
   return { ...newPlayerSave, stats: { ...newPlayerSave.stats, ...stats } };
 }
 
+// A dog's stats after its owner fired you count times.
+const firedTimes = (count: number) => ({ timesFired: count, walks: count, zonesFinished: 0 });
+
 function withOwned(owned: Partial<SaveDocument["owned"]>): SaveDocument {
   return { ...newPlayerSave, owned: { ...newPlayerSave.owned, ...owned } };
 }
@@ -232,7 +235,12 @@ describe("profile conditions", () => {
       withStats({ optionPicks: { cheeseCrates: { sniff: 10 } } }),
       false,
     ],
-    ["timesFired at the count", count("timesFired", 10), withStats({ timesFired: 10 }), true],
+    [
+      "timesFired at the count, over every owner",
+      count("timesFired", 10),
+      withStats({ dogs: { biscuit: firedTimes(4), kilo: firedTimes(6) } }),
+      true,
+    ],
     ["tally below", tally("dodges", 5), withStats({ tallies: { dodges: 4 } }), false],
     ["tally at", tally("dodges", 5), withStats({ tallies: { dodges: 5 } }), true],
     [
@@ -423,7 +431,7 @@ describe("newlyEarned", () => {
     const after = saveFor(gameData, [id], newPlayerSave);
     const run = runFactsFor(gameData, [id]);
     expect(newlyEarned(gameData, newPlayerSave, after, run)).toContain(id);
-    const earned = { ...newPlayerSave, achievements: { [id]: 1 } };
+    const earned = { ...newPlayerSave, achievements: [id] };
     expect(newlyEarned(gameData, earned, after, run)).not.toContain(id);
   });
 

@@ -1,6 +1,6 @@
 import type { AchievementId, HintId } from "../data/types";
 import type { Cents } from "../lib/units";
-import { type AchievementData, newlyEarned } from "../rules/achievements";
+import { newlyEarned } from "../rules/achievements";
 import type { Change } from "../rules/causes";
 import { earnedIfBanked } from "./achievementPreview";
 import { awardAchievements, type AwardContext, earnedSince } from "./achievements";
@@ -25,12 +25,6 @@ export interface RunEnd {
   readonly changes: readonly Change[];
   readonly lostCents: Cents;
   readonly newBestWalk: boolean;
-}
-
-// The achievements and a clock, read each time something is awarded.
-export interface Awards {
-  readonly data: AchievementData;
-  readonly now: () => number;
 }
 
 type SettingsListener = (settings: Settings) => void;
@@ -73,7 +67,8 @@ export class ProfileSession {
   private writes: Promise<void> = Promise.resolve();
 
   private constructor(
-    private readonly awards: Awards,
+    private readonly context: SaveContext,
+    private readonly awards: AwardContext,
     private readonly store: SaveStore,
     document: SaveDocument,
     state: StorageState,
@@ -88,7 +83,7 @@ export class ProfileSession {
   // (such as one from before they existed) are awarded and wait to be celebrated.
   static async open(
     context: SaveContext,
-    awards: Awards,
+    awards: AwardContext,
     store: SaveStore,
     newPlayer: (save: SaveDocument) => SaveDocument = (save) => save,
   ): Promise<OpenedProfile> {
@@ -96,20 +91,16 @@ export class ProfileSession {
     const state =
       load.status === "newer" || load.status === "unavailable" ? load.status : "available";
     const loaded = loadedSave(load, newPlayer);
-    const session = new ProfileSession(awards, store, loaded, state);
+    const session = new ProfileSession(context, awards, store, loaded, state);
     if (loaded.checkpoint !== null) {
-      await session.update((save) => bankCheckpoint(session.awardContext(), save));
+      await session.update((save) => bankCheckpoint(session.awards, save));
     }
     const banked = session.save;
     if (newlyEarned(awards.data, banked, banked, null).length > 0) {
-      await session.update((save) => awardAchievements(session.awardContext(), null, save, save));
+      await session.update((save) => awardAchievements(session.awards, null, save, save));
     }
     session.celebrations = earnedSince(awards.data, loaded, session.save);
     return { load, session };
-  }
-
-  private awardContext(): AwardContext {
-    return { data: this.awards.data, now: this.awards.now() };
   }
 
   get save(): SaveDocument {
@@ -134,7 +125,7 @@ export class ProfileSession {
     }
     const document = this.document;
     this.writes = this.writes.then(async () => {
-      const result = await this.store.save(document);
+      const result = await this.store.save(this.context, document);
       if (result.status === "invalid") {
         console.error(`The save was not written: ${result.reason}`);
       } else {
@@ -171,7 +162,7 @@ export class ProfileSession {
 
   // What banking result now would newly earn, for a mid-run preview; nothing is written.
   earnedIfBanked(result: RunResult): AchievementId[] {
-    return earnedIfBanked(this.awardContext(), this.document, result);
+    return earnedIfBanked(this.awards, this.document, result);
   }
 
   checkpointRun(slice: Checkpoint): Promise<void> {
@@ -180,7 +171,7 @@ export class ProfileSession {
 
   finishRun(result: RunResult, changes: readonly Change[]): Promise<void> {
     const before = this.document;
-    const written = this.update((save) => recordRunEnd(this.awardContext(), save, result));
+    const written = this.update((save) => recordRunEnd(this.awards, save, result));
     // Banking raised the best for the walk's pack size, which a dev start past zone 1 never does.
     const size = result.dogs.length;
     this.ended = {
@@ -197,9 +188,7 @@ export class ProfileSession {
   // meets are awarded and wait to be celebrated.
   purchase(change: (save: SaveDocument) => SaveDocument): Promise<void> {
     const before = this.document;
-    const written = this.update((save) =>
-      awardAchievements(this.awardContext(), null, save, change(save)),
-    );
+    const written = this.update((save) => awardAchievements(this.awards, null, save, change(save)));
     this.celebrations.push(...earnedSince(this.awards.data, before, this.document));
     return written;
   }

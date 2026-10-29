@@ -6,7 +6,7 @@ import { type Cents, cents, dollarsToCents } from "../lib/units";
 import { type AchievementData, needed, picksOf, type RunFacts } from "../rules/achievements";
 import { walkLength } from "../rules/route";
 import type { SaveDocument } from "../save/schema";
-import { walksFinished, walksPlayed, ZERO_DOG_STATS } from "../save/stats";
+import { timesFired, walksFinished, walksPlayed, ZERO_DOG_STATS } from "../save/stats";
 import { packDogsOf } from "../state/pack";
 import type { PackDogs } from "../state/runState";
 
@@ -258,11 +258,18 @@ function raiseSave(
           },
         },
       };
-    case "timesFired":
+    case "timesFired": {
+      const [first] = packOf(data, 1);
+      const current = stats.dogs[first] ?? ZERO_DOG_STATS;
+      const short = Math.max(0, condition.count - timesFired(stats));
       return {
         ...save,
-        stats: { ...stats, timesFired: Math.max(stats.timesFired, condition.count) },
+        stats: {
+          ...stats,
+          dogs: { ...stats.dogs, [first]: { ...current, timesFired: current.timesFired + short } },
+        },
       };
+    }
     case "walkersUnlocked":
       return {
         ...save,
@@ -298,8 +305,9 @@ function raiseSave(
 
 // save raised to meet every profile condition of these achievements, read from their goals:
 // the lifetime counts, option picks, streak, dollars and walks played or finished each asks
-// for (bumps all by the first kind it names), and the first dogs, gear items, walkers, owners
-// who fired you and finished zones in data order where it holds too few.
+// for (bumps all by the first kind it names, firings all by the first dog's owner), and the
+// first dogs, gear items, walkers, owners who fired you and finished zones in data order where
+// it holds too few.
 export function saveFor(
   data: AchievementData,
   ids: readonly AchievementId[],

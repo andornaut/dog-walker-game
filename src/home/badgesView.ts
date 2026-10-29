@@ -38,7 +38,7 @@ export function badgeWall(
   return data.achievements.map((achievement) => ({
     art: badgeKey(achievement.id),
     badgeLine: achievement.badgeLine,
-    earned: save.achievements[achievement.id] !== undefined,
+    earned: save.achievements.includes(achievement.id),
     goal: achievement.goal,
     id: achievement.id,
     name: achievement.name,
@@ -51,7 +51,7 @@ export function earnedBadges(
   data: Pick<GameData, "achievements">,
   ids: readonly AchievementId[],
 ): BadgeView[] {
-  return badgeWall(data, { achievements: {} })
+  return badgeWall(data, { achievements: [] })
     .filter(({ id }) => ids.includes(id))
     .map((badge) => ({ ...badge, earned: true }));
 }

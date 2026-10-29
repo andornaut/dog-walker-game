@@ -33,7 +33,7 @@ const text = {
   slotBought: "{slot} open.",
 };
 const dollars = (amount: number) => cents(amount * 100);
-const firing = { dog: "kilo", zone: 2 } as const;
+const firing = "kilo" as const;
 
 describe("walkerLineKey", () => {
   const later = HOW_TO_WALKS + 1;

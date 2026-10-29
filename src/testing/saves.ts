@@ -45,8 +45,8 @@ export const testContext: SaveContext = {
   },
 };
 
-// Awards from the live game data, stamped at a fixed time.
-export const testAwards: AwardContext = { data: gameData, now: 1_800_000_000_000 };
+// Awards from the live game data.
+export const testAwards: AwardContext = { data: gameData };
 
 // A run with no bumps, debuffs, option picks, tallies or starting money.
 export const quietCounters = (): RunCounters => ({
@@ -54,7 +54,6 @@ export const quietCounters = (): RunCounters => ({
   bumpsByZone: [],
   debuffsGot: {},
   firstZone: 0,
-  lastHeartOwners: 0,
   optionPicks: {},
   startCents: cents(0),
   tallies: {},
@@ -67,10 +66,7 @@ export const newPlayerSave: SaveDocument = createDefaultSave(testContext.default
 // so it holds the badge for that.
 export function veteranSave(): SaveDocument {
   return {
-    achievements: {
-      squirrel: 1_700_000_100_000,
-      wholeCity: 1_700_000_000_000,
-    },
+    achievements: ["wholeCity", "squirrel"],
     bankCents: cents(12_345),
     checkpoint: null,
     helpSeen: true,
@@ -87,7 +83,7 @@ export function veteranSave(): SaveDocument {
     shownHints: ["card", "tip"],
     stats: {
       bestCentsByPackSize: { 2: cents(9_000) },
-      bestWalk: { dogs: ["kilo", "penny"], earnedCents: cents(9_000), zonesFinished: 4 },
+      bestWalk: { dogs: ["kilo", "penny"], zonesFinished: 4 },
       bestZoneFinished: 4,
       bumpsByKind: { pigeons: 3 },
       dogs: {
@@ -98,7 +94,7 @@ export function veteranSave(): SaveDocument {
       lastWalk: {
         dogs: ["kilo"],
         earnedCents: cents(2_500),
-        firings: [{ dog: "kilo", zone: 2 }],
+        firings: ["kilo"],
         outcome: "wentHome",
         route: ["street", "park"],
         zonesFinished: 2,
@@ -109,7 +105,6 @@ export function veteranSave(): SaveDocument {
       optionPicks: { capybara: { help: 2 } },
       runs: { finished: 2, noDogs: 1, wentHome: 2 },
       tallies: { squirrelPulls: 5 },
-      timesFired: 1,
       walkersFinishedWith: ["casey"],
       zonesEverFinished: [
         "homeStretch",
