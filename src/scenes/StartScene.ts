@@ -149,7 +149,7 @@ import type { CelebrationSceneData } from "./CelebrationScene";
 import { addNamePills } from "./effectNameColours";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
-import { HOME_MUTED_EVENT, HOME_PAGE_OPENING_EVENT, openHomePage } from "./homeBarPress";
+import { HOME_PAGE_OPENING_EVENT, openHomePage } from "./homeBarPress";
 import { addAffordFrame, drawDetailCard } from "./homePanels";
 import {
   addPlate,
@@ -161,6 +161,7 @@ import {
 } from "./itemArt";
 import { listenOnePress } from "./onePress";
 import {
+  BAR_MUTED_EVENT,
   listenOutsideTap,
   onBackPressed,
   onceSceneEvent,
@@ -589,7 +590,7 @@ export class StartScene extends Scene {
     // Settings can change reduced motion or mute, so the screen is drawn again.
     onSceneEvent(this, this.game.events, SETTINGS_CLOSED_EVENT, () => this.render());
     // Sound on the top bar, tapped over an overlay, which takes the press.
-    onSceneEvent(this, this.game.events, HOME_MUTED_EVENT, (muted: boolean) =>
+    onSceneEvent(this, this.game.events, BAR_MUTED_EVENT, (muted: boolean) =>
       this.showMuted(muted),
     );
     // A page the top bar opens closes the detail card first.

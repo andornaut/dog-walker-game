@@ -358,7 +358,7 @@ export class RunScene extends Scene implements HudRun {
       return;
     }
     this.world?.input.tick(this.game.loop.time);
-    this.world?.menus.coverMenu(this.world.input.explanation() !== undefined);
+    this.world?.menus.coverOverlay(this.world.input.explanation() !== undefined);
     const timeScale = timeScaleOf(this.applyCheats());
     this.time.timeScale = timeScale;
     this.tweens.timeScale = timeScale;
@@ -527,7 +527,6 @@ export class RunScene extends Scene implements HudRun {
         celebration,
         onDone: () => play(rest),
         openPause: () => this.openPause(),
-        resume: SCENE_KEYS.run,
       });
     };
     menus.holdForCelebration();
@@ -625,6 +624,11 @@ export class RunScene extends Scene implements HudRun {
 
   closePause(): void {
     this.world?.menus.closePause();
+  }
+
+  // The walk bar's Settings button over the settings.
+  closeSettings(): void {
+    this.world?.menus.closeSettings();
   }
 
   // Saves the walk and its input log, then shows the end screen, once a final firing or

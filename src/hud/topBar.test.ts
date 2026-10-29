@@ -56,8 +56,9 @@ describe("the walk bar in each pause state", () => {
     settings: "openSettings",
     sound: "mute",
   } as const;
-  const card = { ...walking, paused: true, presses: "none" } as const;
-  // The menu and the Home question dim the walk only: a hold on the bar's wells explains.
+  // A card, the menu and the Home question dim the walk view only: a hold on the bar's wells
+  // explains.
+  const card = { ...walking, paused: true, presses: "explain" } as const;
   const menu = {
     ...walking,
     icon: "icon-play",
@@ -109,9 +110,9 @@ describe("the walk bar in each pause state", () => {
       ],
       ["under help, which mutes on M", { ...NOTHING_PAUSED, menu: "help" }, cover],
       [
-        "under settings, which leaves M to its own sound switch",
+        "under settings, which leave the bar lit and take P and M themselves",
         { ...NOTHING_PAUSED, menu: "settings" },
-        { ...cover, mute: undefined },
+        { ...menu, mute: undefined, pauseKey: undefined, settings: "closeSettings" },
       ],
     ];
     for (const [name, pause, expected] of cases) {

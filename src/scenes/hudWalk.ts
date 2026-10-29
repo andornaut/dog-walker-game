@@ -31,6 +31,7 @@ export interface HudWalk {
 // the bar opens over it.
 export interface HudRun extends HudWalk {
   closePause(): void;
+  closeSettings(): void;
   openFromBar(open: "help" | "settings"): void;
   openPause(mode?: PauseSceneData["mode"]): void;
 }

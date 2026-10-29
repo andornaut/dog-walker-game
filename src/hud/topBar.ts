@@ -33,9 +33,9 @@ export function topBarButtonForKey(repeat: boolean, key: string): WalkBarButtonI
 }
 
 // What holds the walk still. card: a card or the zone celebration, which can sit under the pause
-// menu or the Home question, as the hit stop can. hold: a press held on the HUD opened the detail
-// card that explains it. Help and settings cover the whole screen, walk bar included. page: the tab
-// is hidden or the window has lost focus.
+// menu or the Home question, as the hit stop can. hold: a press on the HUD opened the detail card
+// that explains it. menu: the pause menu, the Home question, or help or the settings opened with
+// or over the menu. page: the tab is hidden or the window has lost focus.
 export interface RunPause {
   card: boolean;
   hitStop: boolean;
@@ -67,15 +67,16 @@ export function playerPaused(pause: Pick<RunPause, "menu">): boolean {
   return pause.menu !== "closed";
 }
 
-// What the walk's presses do. The pause menu and the Home question dim only the walk, so a hold
-// on the walk bar's wells or a dog card still explains it over them; a card, help and the
-// settings take every press. A hit stop covers nothing, and an explanation's detail card takes
-// its presses itself: the walk's input closes it on the next tap.
+// What the walk's presses do. A card, the zone celebration, the pause menu, the Home question and
+// the settings dim only the walk view, so what explains itself outside it, on the walk bar and
+// the dog cards, still opens its explanation over them; help covers the whole screen and takes
+// every press. A hit stop covers nothing, and an explanation's detail card takes its presses
+// itself: the walk's input closes it on the next tap.
 export function walkPresses(pause: RunPause): PressMode {
-  if (pause.menu === "open" || pause.menu === "confirmHome") {
-    return "explain";
+  if (pause.menu === "help") {
+    return "none";
   }
-  return pause.card || pause.menu !== "closed" ? "none" : "steer";
+  return pause.card || pause.menu !== "closed" ? "explain" : "steer";
 }
 
 // Lane moves act only while nothing pauses the walk or holds it in a hit stop.
@@ -83,14 +84,17 @@ export function gameplayAllowed(pause: RunPause): boolean {
   return !walkPaused(pause) && !pause.hitStop;
 }
 
-export type TopBarAction = "mute" | "openHelp" | "openMenu" | "openSettings" | "resume";
+export type TopBarAction =
+  "closeSettings" | "mute" | "openHelp" | "openMenu" | "openSettings" | "resume";
 
 // What a walk-bar button does, pressed by a tap or by its key. Every button works whenever the
-// bar is in view: sound and M mute or unmute, Help and Settings open help and the settings,
-// and pause opens the menu, or resumes while the menu or the question is up. Help and settings
-// cover the bar, so a tap there is theirs, and so are P and Escape, which close them. M still
-// mutes under help; settings flips its own sound switch on M. A tap while an explanation's
-// detail card is up only closes it, so it presses no button.
+// bar is in view, under every card and overlay that leaves it lit: sound and M mute or unmute,
+// Help and Settings open help and the settings, and pause opens the menu, or resumes while the
+// menu, the question or the settings are up. Over the settings, Help opens help in their place
+// and Settings closes them, as a home page's own top bar button does. Help covers the bar, so a
+// tap there is its, and so are P and Escape, which close it; M still mutes under it. The
+// settings take P, Escape and M themselves. A tap while an explanation's detail card is up only
+// closes it, so it presses no button.
 export function topBarAction(
   pause: RunPause,
   via: "key" | "tap",
@@ -99,9 +103,11 @@ export function topBarAction(
   if (pause.hold && via === "tap") {
     return undefined;
   }
-  if (pause.menu === "help" || pause.menu === "settings") {
-    const mutes = pause.menu === "help" && via === "key" && button === "sound";
-    return mutes ? "mute" : undefined;
+  if (pause.menu === "help") {
+    return via === "key" && button === "sound" ? "mute" : undefined;
+  }
+  if (pause.menu === "settings" && via === "key") {
+    return undefined;
   }
   switch (button) {
     case "sound":
@@ -109,7 +115,7 @@ export function topBarAction(
     case "help":
       return "openHelp";
     case "settings":
-      return "openSettings";
+      return pause.menu === "settings" ? "closeSettings" : "openSettings";
     case "pause":
       return pause.menu === "closed" ? "openMenu" : "resume";
     default:

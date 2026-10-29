@@ -367,8 +367,8 @@ export interface ExplainShown {
   effects: number;
 }
 
-// The element under point that explains itself, if any. dimmed: the pause menu's dim covers
-// walkView, debuff bars included, and a press there is the menu's.
+// The element under point that explains itself, if any. dimmed: an overlay's dim covers
+// walkView, debuff bars included, and a press there is the overlay's.
 export function explainTargetAt(
   layout: Pick<ScreenLayout, "dogSlots" | "topBar" | "walkView">,
   shown: ExplainShown,

@@ -66,7 +66,7 @@ interface MenuEntry {
 // button's question, keep walking or head home. The HUD keeps running under it, so the top
 // bar's buttons and their keys (P, Escape and M) stay with it, and a hold on a walk-bar well or
 // a dog card opens its explanation over the panel, with this scene paused until it closes
-// (MenuFlow.coverMenu).
+// (MenuFlow.coverOverlay).
 export class PauseScene extends Scene {
   private buttons: MenuButton[] = [];
   private entries: MenuEntry[] = [];

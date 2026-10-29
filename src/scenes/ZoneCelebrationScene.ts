@@ -42,7 +42,7 @@ import { addMenuButton, addPanel, BODY_TEXT, listenButtonTap } from "./uiKit";
 
 export interface ZoneCelebrationSceneData extends OverlayData {
   celebration: ZoneCelebration;
-  // Called once the celebration has closed and the run scene is resumed.
+  // Called once the celebration has closed.
   onDone: () => void;
   // Opens the pause menu over the celebration, which pauses it, as P and Escape do; the run
   // scene opens it on the phone's back button.

@@ -59,10 +59,11 @@ import {
 import { addRampDim } from "../ui/phaser/rampDim";
 import { GREYED } from "../ui/selection";
 import { fittingText, TEXT_SCALE } from "../ui/textFit";
-import { HOME_MUTED_EVENT, listenHomeBar } from "./homeBarPress";
+import { listenHomeBar } from "./homeBarPress";
 import { addCardTitle, addDetailCard } from "./homePanels";
 import { listenOnePress } from "./onePress";
 import {
+  BAR_MUTED_EVENT,
   closeOverlay,
   listenOutsideTap,
   onBackPressed,
@@ -304,11 +305,12 @@ export class SettingsScene extends Scene {
           : regionOutside(data.region, [this.steps.card]),
       () => this.back(),
     );
+    // Over the walk, the HUD takes the walk bar's presses (topBarAction).
     if (data.region === "home") {
       listenHomeBar(this, () => this.close());
-      // Sound on the top bar flips the sound switch here too.
-      onSceneEvent(this, this.game.events, HOME_MUTED_EVENT, () => this.render());
     }
+    // Sound on the top bar flips the sound switch here too.
+    onSceneEvent(this, this.game.events, BAR_MUTED_EVENT, () => this.render());
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (menuKeyActs(event.repeat, event.key)) {
         this.onKey(event.key);
@@ -471,7 +473,9 @@ export class SettingsScene extends Scene {
     this.render();
   }
 
-  private close(): void {
+  // Closes the settings, as their close control does, and as the walk bar's Settings button
+  // does over them (MenuFlow.closeSettings).
+  close(): void {
     closeOverlay(this.resumeKey, this);
     this.game.events.emit(SETTINGS_CLOSED_EVENT);
   }

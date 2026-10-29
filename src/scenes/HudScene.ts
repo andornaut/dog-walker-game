@@ -114,7 +114,7 @@ import { HUD_DEPTH } from "./hudDepth";
 import type { HudRun, HudWalk, RunHudView } from "./hudWalk";
 import { MESSAGE_EVENT, MessageStrip } from "./messageStripView";
 import { listenOnePress } from "./onePress";
-import { onSceneEvent } from "./overlay";
+import { BAR_MUTED_EVENT, onSceneEvent } from "./overlay";
 import { OwnerTabs } from "./ownerTabs";
 import { isMuted, markHintShown, profileSave, shownHints, toggleMuted } from "./profileStore";
 import {
@@ -373,12 +373,18 @@ export class HudScene extends Scene {
     });
   }
 
-  // The topmost overlay over the walk, the pause menu or the card, else the HUD itself. A
-  // picture of the HUD has none. The menu counts while paused, under an explanation or a page
-  // it opened; a card is paused only under the menu.
+  // The topmost overlay over the walk that leaves the walk bar in view (the settings, the pause
+  // menu, the card or the zone celebration), else the HUD itself. A picture of the HUD has none.
+  // Each counts while paused, under an explanation or an overlay over it.
   private overlayScene(): Scene {
     const shown = (key: SceneKey) => this.scene.isActive(key) || this.scene.isPaused(key);
-    const key = [SCENE_KEYS.pause, SCENE_KEYS.card].find(shown);
+    const overlays = [
+      SCENE_KEYS.settings,
+      SCENE_KEYS.pause,
+      SCENE_KEYS.card,
+      SCENE_KEYS.zoneCelebration,
+    ] as const;
+    const key = overlays.find(shown);
     return key === undefined || this.picture !== undefined ? this : this.scene.get(key);
   }
 
@@ -397,8 +403,11 @@ export class HudScene extends Scene {
       return;
     }
     switch (topBarAction(run.runPause(), via, button)) {
+      case "closeSettings":
+        run.closeSettings();
+        break;
       case "mute":
-        toggleMuted(this);
+        this.game.events.emit(BAR_MUTED_EVENT, toggleMuted(this));
         break;
       case "openMenu":
         run.openPause();

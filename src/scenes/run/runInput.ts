@@ -99,16 +99,17 @@ export class RunInput {
     }
   }
 
-  // What the walk's presses do now: nothing once the walk is over or before it starts.
+  // What the walk's presses do now: nothing once the walk is over or before it starts. A card
+  // open is part of the walk.
   private presses(): PressMode {
     const walk = this.host.walk();
-    const walking = walk !== undefined && walk.run.phase.kind === "walking";
-    return walking ? walkPresses(this.host.runPause()) : "none";
+    const going = walk !== undefined && walk.run.phase.kind !== "ended";
+    return going ? walkPresses(this.host.runPause()) : "none";
   }
 
   // Phaser reports a cancelled touch as a release with wasCanceled set. The run scene keeps
-  // running while a card or the pause menu covers the walk, and the press is theirs then, but
-  // for a hold on what the menu leaves in view.
+  // running while a card, the zone celebration or the pause menu covers the walk, and the press
+  // is theirs then, but for a hold on what they leave in view.
   private onPointer(phase: "down" | "move" | "up", pointer: Input.Pointer): void {
     const presses = this.presses();
     const sample: PointerSample = {
@@ -161,7 +162,7 @@ export class RunInput {
 
 // A tap on a debuff bar does nothing, and a press on anything that explains itself opens its
 // explanation once still for holdSeconds within swipeStartDistance, the drag's first
-// step. dimmed: the pause menu's dim takes the presses on the walk.
+// step. dimmed: an overlay's dim takes the presses on the walk view.
 function trackContext(
   dimmed: boolean,
   shown: ExplainShown,

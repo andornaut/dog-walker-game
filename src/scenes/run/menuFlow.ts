@@ -4,11 +4,20 @@ import type { HomeNoteLine } from "../../hud/homeQuestion";
 import { playerPaused, type RunPause } from "../../hud/topBar";
 import type { CardView, Choice } from "../../rules/choices";
 import type { CardSceneData } from "../CardScene";
-import { openOverlay } from "../overlay";
 import type { PauseOverlay, PauseSceneData } from "../PauseScene";
-import { SCENE_KEYS } from "../sceneKeys";
+import { SCENE_KEYS, type SceneKey } from "../sceneKeys";
+import type { SettingsScene } from "../SettingsScene";
 import { soundboardOf } from "../soundboard";
 import type { ZoneCelebrationSceneData } from "../ZoneCelebrationScene";
+
+// The overlays over the walk that leave the walk bar and the dog cards in view, topmost first:
+// each opens over the ones after it.
+const COVERABLE: readonly SceneKey[] = [
+  SCENE_KEYS.settings,
+  SCENE_KEYS.pause,
+  SCENE_KEYS.card,
+  SCENE_KEYS.zoneCelebration,
+];
 
 // What the menus need of the run.
 interface MenuFlowHost {
@@ -34,8 +43,8 @@ export class MenuFlow {
   private blurred = false;
   private cardView: CardView | undefined;
   private celebrating = false;
-  // Whether an explanation's detail card covers the pause menu, which is paused under it.
-  private covered = false;
+  // The overlay an explanation's detail card covers, paused under it, if any.
+  private covered: SceneKey | undefined;
   // Whether the player's pause holds the run scene's tweens and timers and ducks the music.
   private held = false;
   private hidden = false;
@@ -44,6 +53,9 @@ export class MenuFlow {
   private pauseOpen = false;
   // Help or the settings, which the walk bar's button opens with the menu, once.
   private pauseOverlay: PauseOverlay | undefined;
+  // Whether the page the menu last opened from the walk bar opened alone, so closing it resumes
+  // the walk.
+  private pageAlone = false;
   private readonly scene: Scene;
 
   // A walk starts unheld, as held does. The scene's clock keeps its paused flag across a
@@ -73,7 +85,8 @@ export class MenuFlow {
     this.celebrating = true;
   }
 
-  // The celebration over the paused run scene; onDone runs once it has closed.
+  // The celebration over the walk, which it holds as a card does, the run scene running under it
+  // so the walk bar's and the dog cards' presses work; onDone runs once it has closed.
   showCelebration(data: ZoneCelebrationSceneData): void {
     const launched: ZoneCelebrationSceneData = {
       ...data,
@@ -82,7 +95,7 @@ export class MenuFlow {
         data.onDone();
       },
     };
-    openOverlay(this.scene, SCENE_KEYS.zoneCelebration, launched);
+    this.scene.scene.launch(SCENE_KEYS.zoneCelebration, launched);
   }
 
   // The card holds the walk from now; a replayed choice closes it before it shows.
@@ -163,14 +176,17 @@ export class MenuFlow {
 
   // The walk bar's Help and Settings buttons: help or the settings over the pause menu, the walk
   // paused under them. Opened from the walk, closing them resumes it; opened over the menu or
-  // the question, closing them shows the menu.
+  // the question, closing them shows the menu. Over the settings, help opens in their place,
+  // closing as they would have.
   openFromBar(open: PauseOverlay["open"]): void {
     if (this.host.over()) {
       return;
     }
     if (this.pauseOpen) {
+      // The menu restarts with the new page over it, so the settings stop unheard.
+      const replaced = this.stopSettings();
       this.pauseMode = "menu";
-      this.pauseOverlay = { alone: false, open };
+      this.pauseOverlay = { alone: replaced && this.pageAlone, open };
       this.restartPause();
       return;
     }
@@ -178,27 +194,45 @@ export class MenuFlow {
     this.openPause("menu");
   }
 
-  // An explanation's detail card opened over the pause menu or the Home question takes every
-  // press until a tap closes it, so the menu pauses under it and shows again, the walk still
-  // paused, once it closes. Called each frame with whether one is open.
-  coverMenu(explaining: boolean): void {
+  // The walk bar's Settings button over the settings closes them, as their close control does.
+  closeSettings(): void {
     const { scene } = this.scene;
-    if (explaining && !this.covered && scene.isActive(SCENE_KEYS.pause)) {
-      this.covered = true;
-      scene.pause(SCENE_KEYS.pause);
-    } else if (!explaining && this.covered) {
-      this.covered = false;
-      scene.resume(SCENE_KEYS.pause);
+    if (scene.isActive(SCENE_KEYS.settings)) {
+      (scene.get(SCENE_KEYS.settings) as SettingsScene).close();
     }
   }
 
+  // An explanation's detail card takes every press until a tap closes it, so the overlay it opens
+  // over (the settings, the pause menu or the Home question, a card or the zone celebration)
+  // pauses under it and goes on as it was, the walk still paused, once it closes, unless another
+  // overlay has opened over it meanwhile. Called each frame with whether one is open.
+  coverOverlay(explaining: boolean): void {
+    const { scene } = this.scene;
+    if (explaining && this.covered === undefined) {
+      this.covered = COVERABLE.find((key) => scene.isActive(key));
+      if (this.covered !== undefined) {
+        scene.pause(this.covered);
+      }
+    } else if (!explaining && this.covered !== undefined) {
+      const covered = this.covered;
+      this.covered = undefined;
+      const top = COVERABLE.find((key) => scene.isActive(key) || scene.isPaused(key));
+      if (top === covered) {
+        scene.resume(covered);
+      }
+    }
+  }
+
+  // Resumes the walk from the menu, the question or a page over them; the settings, over the walk
+  // bar that resumed, close with them. Help covers the bar, so nothing resumes from under it.
   closePause(): void {
     if (!this.pauseOpen) {
       return;
     }
     const { scene } = this;
+    this.stopSettings();
     scene.scene.stop(SCENE_KEYS.pause);
-    this.covered = false;
+    this.covered = undefined;
     this.pauseOpen = false;
     this.hold();
     if (this.cardView !== undefined) {
@@ -228,9 +262,22 @@ export class MenuFlow {
     scene.time.paused = held;
   }
 
-  // The menu shown afresh, running: coverMenu pauses it again while an explanation is open.
+  // Stops the settings, if they are open, without their close: nothing hears them close.
+  // Returns whether they were open.
+  private stopSettings(): boolean {
+    const { scene } = this.scene;
+    const open = scene.isActive(SCENE_KEYS.settings) || scene.isPaused(SCENE_KEYS.settings);
+    if (open) {
+      scene.stop(SCENE_KEYS.settings);
+    }
+    return open;
+  }
+
+  // The menu shown afresh, running: coverOverlay pauses it again while an explanation is open.
   private restartPause(): void {
-    this.covered = false;
+    if (this.covered === SCENE_KEYS.pause) {
+      this.covered = undefined;
+    }
     this.scene.scene.get(SCENE_KEYS.pause).scene.restart(this.pauseData());
   }
 
@@ -244,6 +291,7 @@ export class MenuFlow {
     };
     const overlay = this.pauseOverlay;
     this.pauseOverlay = undefined;
+    this.pageAlone = overlay?.alone ?? false;
     if (this.pauseMode === "homeQuestion") {
       return { ...answers, mode: "homeQuestion", note: this.host.homeNote() };
     }

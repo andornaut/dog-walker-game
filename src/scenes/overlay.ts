@@ -15,6 +15,11 @@ import { listenOnePress } from "./onePress";
 import type { SceneKey } from "./sceneKeys";
 import { afterTapFx } from "./uiKit";
 
+// Emitted on game.events, with whether sound is now muted, when a top bar's Sound button is
+// tapped over an overlay (the home top bar's, or the walk bar's), so the screen under it and the
+// settings redraw and say so.
+export const BAR_MUTED_EVENT = "bar-muted";
+
 // What every overlay is launched with: the scene under it, which it resumes on close.
 export interface OverlayData {
   resume?: SceneKey;

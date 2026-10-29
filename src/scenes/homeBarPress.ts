@@ -3,16 +3,12 @@ import type { Scene } from "phaser";
 import { homeBarAction, type HomeBarButton, homeBarButtonAt } from "../home/homeBar";
 import { whenArtReady } from "./artReady";
 import { openHelp } from "./helpScreen";
-import { onSceneEvent, openOverlay } from "./overlay";
+import { BAR_MUTED_EVENT, onSceneEvent, openOverlay } from "./overlay";
 import { toggleMuted } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import type { SettingsData } from "./SettingsScene";
 import { listenTargetPress } from "./targetPress";
 import { afterTapFx } from "./uiKit";
-
-// Emitted on game.events, with whether sound is now muted, when the top bar's Sound button is
-// tapped over an overlay, so the start screen redraws its bar and says so.
-export const HOME_MUTED_EVENT = "home-muted";
 
 // Emitted on game.events as the top bar opens help, the Logbook or the settings: the Logbook,
 // the settings and the badge celebration close, and the start screen and the Pet shop close any
@@ -70,7 +66,7 @@ function pressHomeBar(scene: Scene, close: () => void, button: HomeBarButton): v
       close();
       return;
     case "mute":
-      scene.game.events.emit(HOME_MUTED_EVENT, toggleMuted(scene));
+      scene.game.events.emit(BAR_MUTED_EVENT, toggleMuted(scene));
       return;
     case "openHelp":
       openHomePage(scene, "help");
