@@ -245,11 +245,11 @@ Each mover draws how many times it moves when it comes on, within its kind's ran
 
 ### Neighbourhood celebration
 
-After each of neighbourhoods 1 to 3, before the fork, a short celebration plays over the paused road. After neighbourhood 4 the end screen takes its place, preceded by a New walker celebration when finishing it unlocks a walker.
+After each of neighbourhoods 1 to 3, before the fork, a short celebration plays over the paused road. After neighbourhood 4 the end screen takes its place, preceded by a New walker celebration for each walker finishing the walk unlocks.
 
 - **Neighbourhood banner:** each neighbourhood opens with a banner over the road naming the world, the neighbourhood's number and its name; the player never sees the word "zone"
 - **Neighbourhood done:** the walker you're walking with cheers, under a big title and the neighbourhood's name, with the pay it banks and its tips, leaving out a part that is $0. It waits for its Onward! button, a tap anywhere else, or key 1
-- **New walker:** the first time you finish the neighbourhood that unlocks a walker, that walker runs in to join, with their greeting, agility and perk, and waits for a tap on its button (key 1). This replaces Neighbourhood done for that neighbourhood
+- **New walker:** the first time you finish a walk that unlocks a walker (see Walkers), that walker runs in to join before the end screen, with their greeting, agility and perk, and waits for a tap on its button (key 1). When one walk unlocks several walkers, each joins in turn, in unlock order
 - Confetti plays in both; with reduced motion it doesn't
 
 ### Upgrade cards
@@ -265,7 +265,7 @@ Walk-only boosts, one on each fork path, from a pool of 6. Each fork draws one p
 
 ### Walkers
 
-Four walkers. You start with Casey; each other walker unlocks the first time you finish their neighbourhood (see New walker): Mr. B Cabbagetown, Ada The Beaches and Trista Yonge Street. Every walker walks the same road at the same speed, and a walker's effects stack with the Pocket item and upgrade cards.
+Four walkers. You start with Casey; each other walker unlocks the first time you finish a walk with at least so many dogs still walking at the end (see New walker): Mr. B 1, Ada 2 and Trista 3, so a walk finished with 3 dogs unlocks all three. Every walker walks the same road at the same speed, and a walker's effects stack with the Pocket item and upgrade cards.
 
 **Agility** sets how fast the pack changes lanes, as a multiple of the base lane-change speed. Walkers spread from 1.0 to 1.4, Running shoes add 1.0, each small dog in the pack adds 0.1 and each large dog takes 0.1 off, never below 0.9. Players never see the word agility, and see it only as a percentage against the base: walker cards say "+40% lane change speed" (Ada) or "+10% lane change speed" (Casey), and a walker at the default speed (Mr. B) shows no lane-change line at all, Running shoes "+100% lane change speed", a small dog "+10% lane change speed" and a large dog "−10% lane change speed", in the same words, amount first. The slowest pack's lane move (the 0.9 floor) sets the row spacing.
 
