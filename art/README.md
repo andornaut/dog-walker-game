@@ -4,12 +4,12 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 
 | Doc                                | What it holds                                                       |
 | ---------------------------------- | ------------------------------------------------------------------- |
-| [`inventory.md`](inventory.md)     | Every asset: key, kind, size, tags, priority                        |
+| [`inventory.md`](inventory.md)     | Every asset: key, type, size, tags                                  |
 | [`style-guide.md`](style-guide.md) | The rules: layout, palette, contrast, proportions, animation, sound |
 
 ## Scope
 
-- `art/`: the generator scripts in `art/tools/`, the Aseprite sources they write and these docs.
+- `art/`: the generator scripts in `art/tools/`, the Aseprite sources they write, the source fonts in `art/fonts/` and these docs.
 - `public/art/`: the exported sprites, images, fonts and sounds, `manifest.extra.json` and the `/art/` gallery. Mocks for decisions are shown in the chat, not committed. The game build generates `manifest.json` beside them.
 - Also drawn here: the site's icons, `public/og-image.png` and the art on the home page.
 
@@ -18,8 +18,8 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 - `art/tools/<set>.py` draws every asset except the home page's canvas grabs (`home-road`, `home-start`). Run `python3 art/tools/<set>.py build` (or `preview OUT.png`) from the repository root. Shared drawing tools are in `pixel.py` (whose only command is `palette`), and for pictures composed from exported art in `scene.py`.
 - A build writes the set's Aseprite sources under `art/` and exports them to `public/art/` (`sprites/<key>.png` and `.json`, `images/<key>.png`, `fonts/<key>.png` and `.fnt`, `sounds/<key>.ogg` and `.m4a`). Each script's docstring names its folders. Exceptions:
   - `appicons.py` writes `art/appicon.aseprite`, `art/favicon-32.aseprite` and `art/favicon-16.aseprite`, the app icons in `public/icons/` and the favicons `public/art/favicon.png` and `favicon-16.png`, drawn from Archie's exported portrait and his face in `dogs.py`, so it runs after `portraits.py`; `share.py` writes `art/share/share-card.aseprite` and `public/og-image.png`.
-  - `fonts.py` and `sounds.py` write no sources. `sounds.py preview` takes an output folder, not a PNG, and `sounds.py build` also writes the loop flags in `public/art/manifest.extra.json`.
-  - Extra commands: `backdrops.py camera`, `backdrops.py verges` (with `--write`, to `shared/verges.json`), `depths.py compare DIR`, `hood_city.py cards OUT.png` and `sounds OUT_DIR`, `hood_markets.py cards OUT.png` and `sounds OUT_DIR`, `hood_parks.py sounds OUT_DIR`, `minis.py compare OUT.png`, `pixel.py palette` (to `shared/palette.json`), `roadside.py table` (with `--write`, to `shared/roadside.json`) and `screens.py shop-preview OUT.png`.
+  - `fonts.py` and `sounds.py` write no sources. `hood_parks.py preview` and `sounds.py preview` take an output folder, not a PNG, and `sounds.py build` also writes the loop flags in `public/art/manifest.extra.json`.
+  - Extra commands: `backdrops.py camera`, `backdrops.py verges` (with `--write`, to `shared/verges.json`), `depths.py compare DIR`, `hood_city.py cards OUT.png` and `sounds OUT_DIR`, `hood_markets.py cards OUT.png` and `sounds OUT_DIR`, `hood_parks.py sounds OUT_DIR`, `minis.py compare OUT.png`, `pixel.py palette` (to `shared/palette.json`), `roadside.py table` (with `--write`, to `shared/roadside.json`), `screens.py shop-preview OUT.png` and `sounds.py one KEY OUT_DIR`.
 - A build overwrites the `.aseprite` files: change the script, not the sources.
 - Each script's docstring holds its assets' sizes, tags, timings and placement coordinates.
 - Game data and layout come from the game's export in `shared/export/`, never from `src/`. Only `scene.py` reads it (`game-data.json` and `layout.json`); `backdrops.py`, `cards.py`, `screens.py`, and `share.py` take the zones, the layout and the pack's hands and collars from `scene.py`. `pixel.py` reads the depth steps from `shared/depth-steps.json`. Every other script holds its sizes and positions as constants (`ui.py`'s top bar buttons, `screens.py`'s Pet shop at 234,86, `roadside.py`'s sidewalk edge), so a layout change in the game needs the matching change in the script.
@@ -31,7 +31,7 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 - The kebab-case manifest key is the file name: `art/<set>/<key>.aseprite` exports to `public/art/sprites/<key>.png` and `.json`, `public/art/images/<key>.png` or `public/art/fonts/<key>.png` and `.fnt`.
 - A key starts with its kind's prefix, as in `inventory.md` (`dog-`, `fx-`, `ui-`); road objects, moving hazards and `logo` use a plain name.
 - A depth variant appends its step (`dog-kilo@50`).
-- Zone keys use the zone's art id, the neighbourhood's name in kebab case: `cabbagetown`, `high-park`, `distillery-district`, `kensington-market`, `the-beaches`, `yonge-street` (easiest to hardest).
+- Zone keys use the zone's art id, the neighbourhood's name in kebab case: `high-park`, `cabbagetown`, `kensington-market`, `the-beaches`, `distillery-district`, `yonge-street` (easiest to hardest).
 
 ### Consistency checks
 
