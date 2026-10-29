@@ -10,7 +10,9 @@ body {
   margin: 0;
   height: 100%;
   overflow: hidden;
-  background: #1d1d1d;
+  /* The top bars' plum around the game, so the top bar runs on into the status bar. The
+     manifest and the theme-color meta match it (src/pwa/pageColours.test.ts). */
+  background: #3e2731;
   touch-action: none;
   overscroll-behavior: none;
   -webkit-user-select: none;
