@@ -29,10 +29,12 @@ type DetailData = Pick<
 >;
 
 // What a held dog, walker or gear tile's detail card says, owned or not: a title, a line under
-// it, rows of text, and a status row (the fee or price, owned or equipped, or the goal). locked
-// is true while the item costs more than the bank holds, or the walker is not owned. A dog's
-// card has its owner: the dog, for their photo, and their name and role.
+// it, rows of text, and a status row (the price, owned or equipped, or the goal). forSale is
+// true while the item is for sale, its status its price. locked is true while the item costs
+// more than the bank holds, or the walker is not owned. A dog's card has its owner: the dog,
+// for their photo, and their name and role.
 export interface DetailCard {
+  readonly forSale: boolean;
   readonly lines: readonly string[];
   readonly locked: boolean;
   readonly owner?: { readonly dog: DogId; readonly name: string; readonly role: string };
@@ -99,6 +101,7 @@ export function dogDetail(data: DetailData, owned: Owned, bank: Cents, dog: DogI
   const purchase: Purchase = { dog, kind: "dog" };
   const text = data.homeText.detail;
   return {
+    forSale: purchasePrice(data, owned, purchase) !== null,
     lines: [
       fillLine(FIELDS, text, "dogKind", {
         hearts: String(sizeHearts(data.tuning, data.dogs[dog])),
@@ -131,6 +134,7 @@ export function gearDetail(
   const text = data.homeText.detail;
   const status = loadout.gear === gear ? text.gearEquipped : text.gearOwned;
   return {
+    forSale: purchasePrice(data, owned, purchase) !== null,
     lines: [`${capitalize(effectText(data, item.effects))}.`],
     locked: isLocked(data, owned, bank, purchase),
     status: priceLine(data, owned, bank, purchase) ?? status,
@@ -150,10 +154,38 @@ export function walkerDetail(
   const text = data.homeText;
   const has = owned.walkers.includes(walker);
   return {
+    forSale: false,
     lines: walkerDetailLines(data, walker),
     locked: !has,
     status: has ? text.detail.walkerStatus : walkerLockedLine(data, walker),
     subtitle: text.detail.walkerSubtitle,
     title: name,
+  };
+}
+
+// A detail card's row: text in its tone, or a dog's owner.
+export type DetailPart =
+  | { readonly owner: NonNullable<DetailCard["owner"]> }
+  | { readonly text: string; readonly tone: "line" | "status" | "subtitle" };
+
+// A detail card's rows beside its well and under it, top down. A dog's or walker's card puts its
+// subtitle, a dog's owner and its status beside the well and its lines under it; a gear card
+// puts its lines and status beside the well. A card for sale puts its status, the price, last
+// under the well instead.
+export function detailParts(
+  kind: "dog" | "gear" | "walker",
+  card: DetailCard,
+): { below: DetailPart[]; beside: DetailPart[] } {
+  const lines = card.lines.map((text) => ({ text, tone: "line" }) as const);
+  const status = [{ text: card.status, tone: "status" } as const];
+  const besideStatus = card.forSale ? [] : status;
+  const belowStatus = card.forSale ? status : [];
+  if (kind === "gear") {
+    return { below: belowStatus, beside: [...lines, ...besideStatus] };
+  }
+  const owner = card.owner === undefined ? [] : [{ owner: card.owner }];
+  return {
+    below: [...lines, ...belowStatus],
+    beside: [{ text: card.subtitle, tone: "subtitle" }, ...owner, ...besideStatus],
   };
 }

@@ -23,7 +23,14 @@ import { MARK_OFFSET } from "../ui/mark";
 import { plainMarks } from "../ui/pixelFont";
 import { AFFORD_OUTSET } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
-import { type DetailCard, dogDetail, gearDetail, walkerDetail } from "./detail";
+import {
+  type DetailCard,
+  type DetailPart,
+  detailParts,
+  dogDetail,
+  gearDetail,
+  walkerDetail,
+} from "./detail";
 import { FEEDBACK } from "./feedback";
 import { dollarAmountText, dollarText, shortDollarAmountText } from "./home";
 import {
@@ -448,17 +455,17 @@ describe("a detail card", () => {
   // The card's rows as the panel lays them out: each row of text's line count, the owner's row
   // on a dog's card.
   const rowsOf = (kind: "dog" | "gear" | "walker", card: DetailCard) => {
-    const text = (room: number) => (row: string) => cardLines(room, row);
-    const beside: DetailRow[] =
-      kind === "gear"
-        ? [...card.lines, card.status].map(text(CARD_TEXT_ROOM.beside))
-        : [
-            text(CARD_TEXT_ROOM.beside)(card.subtitle),
-            ...(card.owner === undefined ? [] : [{ roleLines: roleLines(card.owner.role).length }]),
-            text(CARD_TEXT_ROOM.beside)(card.status),
-          ];
-    const below = kind === "gear" ? [] : card.lines.map(text(CARD_TEXT_ROOM.full));
-    return { below, beside };
+    const counts = (parts: readonly DetailPart[], room: number): DetailRow[] =>
+      parts.map((part) =>
+        "owner" in part
+          ? { roleLines: roleLines(part.owner.role).length }
+          : cardLines(room, part.text),
+      );
+    const parts = detailParts(kind, card);
+    return {
+      below: counts(parts.below, CARD_TEXT_ROOM.full),
+      beside: counts(parts.beside, CARD_TEXT_ROOM.beside),
+    };
   };
 
   it.each(cards.map(([kind, card]) => [card.title, kind, card] as const))(
@@ -514,7 +521,7 @@ describe("a detail card", () => {
         );
       const others: Rect[] = [
         band,
-        { height: well.size, width: well.size, x: well.x, y: well.y },
+        { height: well.size, width: well.size, x: well.x, y: layout.wellY },
         ...textRows(besideX, CARD_TEXT_ROOM.beside, rows.beside, layout.beside),
         ...textRows(pad, CARD_TEXT_ROOM.full, rows.below, layout.below),
       ];
@@ -529,6 +536,26 @@ describe("a detail card", () => {
       );
     },
   );
+
+  it.each(dogCards)(
+    "sets the well's bottom row level with %s's owner's photo's",
+    (_title, _name, role, card) => {
+      const rows = rowsOf("dog", card);
+      const layout = detailCardLayout(BODY, rows);
+      const ownerIndex = rows.beside.findIndex((row) => typeof row !== "number");
+      const at = { x: besideX, y: layout.beside[ownerIndex] ?? 0 };
+      const { photo } = detailOwner(BODY, at, roleLines(role).length);
+      expect(layout.wellY + well.size).toBe(photo.y + photo.height);
+    },
+  );
+
+  it.each(
+    cards.flatMap(([kind, card]) =>
+      card.owner === undefined ? [[card.title, kind, card] as const] : [],
+    ),
+  )("sets %s's well at well.y, with no owner to line up with", (_, kind, card) => {
+    expect(detailCardLayout(BODY, rowsOf(kind, card)).wellY).toBe(well.y);
+  });
 
   const { face } = HOME_LAYOUT.card.owner;
   it.each(dogs)("has a %s owner face the photo's size", (dog) => {

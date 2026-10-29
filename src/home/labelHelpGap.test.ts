@@ -16,7 +16,14 @@ import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { fittingText, TEXT_SCALE, type TextFitStyle } from "../ui/textFit";
 import { badgeProgress, badgeWall, wallCell } from "./badgesView";
-import { type DetailCard, dogDetail, gearDetail, walkerDetail } from "./detail";
+import {
+  type DetailCard,
+  type DetailPart,
+  detailParts,
+  dogDetail,
+  gearDetail,
+  walkerDetail,
+} from "./detail";
 import { END_LAYOUT, quipRowHeight, quipTextY } from "./endLayout";
 import { dollarText } from "./home";
 import { CARD_TEXT_ROOM, detailCardLayout, detailOwner, type DetailRow } from "./homeLayout";
@@ -120,16 +127,13 @@ function cardRows(rows: readonly CardRow[], tops: readonly number[], where: stri
   });
 }
 function detailPairs(kind: "dog" | "gear" | "walker", card: DetailCard): Pair[] {
-  const text = (room: number) => (value: string) => ({ lines: cardLinesOf(room, value) });
-  const beside: CardRow[] =
-    kind === "gear"
-      ? [...card.lines, card.status].map(text(CARD_TEXT_ROOM.beside))
-      : [
-          text(CARD_TEXT_ROOM.beside)(card.subtitle),
-          ...(card.owner === undefined ? [] : [{ owner: card.owner }]),
-          text(CARD_TEXT_ROOM.beside)(card.status),
-        ];
-  const below: CardRow[] = kind === "gear" ? [] : card.lines.map(text(CARD_TEXT_ROOM.full));
+  const rowsIn = (parts: readonly DetailPart[], room: number): CardRow[] =>
+    parts.map((part) =>
+      "owner" in part ? { owner: part.owner } : { lines: cardLinesOf(room, part.text) },
+    );
+  const parts = detailParts(kind, card);
+  const beside = rowsIn(parts.beside, CARD_TEXT_ROOM.beside);
+  const below = rowsIn(parts.below, CARD_TEXT_ROOM.full);
   const counts = (rows: readonly CardRow[]): DetailRow[] =>
     rows.map((row) => ("owner" in row ? ownerOf(row) : row.lines.length));
   const layout = detailCardLayout(BODY, { below: counts(below), beside: counts(beside) });

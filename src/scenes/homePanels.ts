@@ -3,7 +3,7 @@ import type { GameObjects, Scene } from "phaser";
 import { ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
-import type { DetailCard, DetailPicture } from "../home/detail";
+import { type DetailCard, type DetailPart, detailParts, type DetailPicture } from "../home/detail";
 import {
   CARD_TEXT_ROOM,
   cardBand,
@@ -186,10 +186,8 @@ function addDetailOwner(
 }
 
 // A held dog's, walker's or gear item's detail card over a dim layer, as tall as what it
-// shows. A dog's or walker's card puts its breed and status beside the portrait and its rows
-// below, a dog's with its owner's photo and name between its breed and status; a gear card
-// puts its effect and status beside the icon. Returns the card's rect, so a tap outside it or
-// on its close control closes it.
+// shows, its rows beside the well and under it as detailParts places them. Returns the card's
+// rect, so a tap outside it or on its close control closes it.
 export function drawDetailCard(
   scene: Scene,
   parent: GameObjects.Container,
@@ -200,62 +198,55 @@ export function drawDetailCard(
 ): Rect {
   // The content is laid out first, so the card is as tall as it needs.
   const content = scene.add.container(0, 0);
+  const parts = detailParts(kind, card);
+  // Each row of text's value: each effect's name a line leads with, as a perk's "Second
+  // chance: …", in its pill.
+  const valueOf = (part: Extract<DetailPart, { text: string }>) =>
+    part.tone === "line" ? withNamePills(gameData, part.text) : part.text;
+  const counts = (rows: readonly DetailPart[], room: number): DetailRow[] =>
+    rows.map((row) =>
+      "owner" in row
+        ? { roleLines: roleLines(scene, row.owner.role).length }
+        : wrapPixelText(scene, BODY_TEXT, room, valueOf(row)).length,
+    );
+  const layout = detailCardLayout(pixelFontMetrics(scene, "body"), {
+    below: counts(parts.below, CARD_TEXT_ROOM.full),
+    beside: counts(parts.beside, CARD_TEXT_ROOM.beside),
+  });
   const { well } = CARD;
-  addDetailWell(scene, content, { height: well.size, width: well.size, x: well.x, y: well.y });
+  const wellRect = { height: well.size, width: well.size, x: well.x, y: layout.wellY };
+  addDetailWell(scene, content, wellRect);
   if (scene.textures.exists(picture.key)) {
-    const inner = { x: well.x + well.picture, y: well.y + well.picture };
+    const inner = { x: wellRect.x + well.picture, y: wellRect.y + well.picture };
     content.add(
       scene.add.image(inner.x, inner.y, picture.key).setOrigin(0).setScale(picture.scale),
     );
   } else if (picture.fallback !== undefined && scene.textures.exists(picture.fallback)) {
-    const centre = { x: well.x + well.size / 2, y: well.y + well.size / 2 };
+    const centre = { x: wellRect.x + well.size / 2, y: wellRect.y + well.size / 2 };
     content.add(scene.add.image(centre.x, centre.y, picture.fallback));
   }
-  // Rows of text at the tops the card's layout gives them, each wrapped on the font within its
+  const colours = {
+    line: PALETTE.plum,
+    status: card.locked ? PALETTE.darkRed : PALETTE.forest,
+    subtitle: PALETTE.darkBrown,
+  } as const;
+  // Each row at the top the card's layout gives it, its text wrapped on the font within its
   // room at 2x.
-  type Row = { colour: number; value: string };
-  const lineCount = (row: Row, room: number) =>
-    wrapPixelText(scene, BODY_TEXT, room, row.value).length;
-  const draw = (rows: readonly Row[], x: number, room: number, tops: readonly number[]) =>
+  const draw = (rows: readonly DetailPart[], x: number, room: number, tops: readonly number[]) =>
     rows.forEach((row, i) => {
       const y = tops[i] ?? 0;
-      const lines = wrapPixelText(scene, BODY_TEXT, room, row.value);
+      if ("owner" in row) {
+        addDetailOwner(scene, content, { x, y }, row.owner);
+        return;
+      }
+      const lines = wrapPixelText(scene, BODY_TEXT, room, valueOf(row));
       const label = addBodyText(scene, content, { x, y }, lines.join("\n"), {
-        colour: row.colour,
+        colour: colours[row.tone],
       });
       addNamePills([label]);
     });
-  const status: Row = {
-    colour: card.locked ? PALETTE.darkRed : PALETTE.forest,
-    value: card.status,
-  };
-  // Each effect's name a line leads with, as a perk's "Second chance: …", in its pill.
-  const plum: Row[] = card.lines.map((value) => ({
-    colour: PALETTE.plum,
-    value: withNamePills(gameData, value),
-  }));
-  const subtitle: Row = { colour: PALETTE.darkBrown, value: card.subtitle };
-  const owner = card.owner === undefined ? [] : [card.owner];
-  const besideRows: (Row | Owner)[] =
-    kind === "gear" ? [...plum, status] : [subtitle, ...owner, status];
-  const belowRows = kind === "gear" ? [] : plum;
-  const counts = (rows: readonly (Row | Owner)[], room: number): DetailRow[] =>
-    rows.map((row) =>
-      "dog" in row ? { roleLines: roleLines(scene, row.role).length } : lineCount(row, room),
-    );
-  const layout = detailCardLayout(pixelFontMetrics(scene, "body"), {
-    below: counts(belowRows, CARD_TEXT_ROOM.full),
-    beside: counts(besideRows, CARD_TEXT_ROOM.beside),
-  });
-  besideRows.forEach((row, i) => {
-    const y = layout.beside[i] ?? 0;
-    if ("dog" in row) {
-      addDetailOwner(scene, content, { x: CARD.besideX, y }, row);
-    } else {
-      draw([row], CARD.besideX, CARD_TEXT_ROOM.beside, [y]);
-    }
-  });
-  draw(belowRows, CARD.pad, CARD_TEXT_ROOM.full, layout.below);
+  draw(parts.beside, CARD.besideX, CARD_TEXT_ROOM.beside, layout.beside);
+  draw(parts.below, CARD.pad, CARD_TEXT_ROOM.full, layout.below);
   const rect = detailCardRect(SCREEN, layout.height);
   drawCardFrame(scene, parent, closePressed, rect, card.title, content);
   return rect;

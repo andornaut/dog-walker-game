@@ -109,15 +109,16 @@ export const HOME_LAYOUT = {
   bonus: { countGap: 14, gap: 4, heartInk: 7, rise: 1, scale: 2 },
   // The detail card that opens over the screen, centred and as tall as what it shows, in card
   // pixels: the paper starts 2px in, the band runs across its top 6px in with the title's caps
-  // 7px below the band's top, and the well sits under the band. Rows of 2x body text, each
-  // wrapped within the card less pad, rowGap between rows: a detail card's subtitle and status
-  // beside the well from besideX, besideDy under its top. A dog's card puts its owner's photo,
-  // name and role between them (detailOwner): their face-owner-<art> face (owner.face square) in
-  // the walk card's photo mat and frame, then owner.gap right of the photo their name in 2x body
-  // text and under it their role in 2x body text, wrapped, its capitals LABEL_HELP_GAP clear rows
-  // under the body font's lowest ink (helpCapDy). The name is in owner.nameColour: plum, where
-  // the walk card's name is tan, because this card's paper is cream and the walk card's is navy;
-  // the role is in owner.roleColour.
+  // 7px below the band's top, and the well sits under the band, on a dog's card with its bottom
+  // row level with the owner's photo's. Rows of 2x body text, each wrapped within the card less
+  // pad, rowGap between rows: a detail card's subtitle and status beside the well from besideX,
+  // besideDy under well.y, and a price last under the well. A dog's card puts its owner's photo,
+  // name and role under its subtitle (detailOwner): their face-owner-<art> face (owner.face
+  // square) in the walk card's photo mat and frame, then owner.gap right of the photo their name
+  // in 2x body text and under it their role in 2x body text, wrapped, its capitals
+  // LABEL_HELP_GAP clear rows under the body font's lowest ink (helpCapDy). The name is in
+  // owner.nameColour: plum, where the walk card's name is tan, because this card's paper is cream
+  // and the walk card's is navy; the role is in owner.roleColour.
   card: {
     band: { height: 24, inset: 6, titleY: 7 },
     besideDy: 4,
@@ -469,19 +470,33 @@ export const CARD_TEXT_ROOM = {
     HOME_LAYOUT.card.owner.gap,
 } as const;
 
-// A detail card's rows beside the well and under it, and the card's height. The rows under the
-// well start pad under whichever reaches lowest, the well or the rows beside it, and the card
-// is padded under the lowest of all.
+// The well's top on a detail card whose rows beside it are beside, at tops: well.y, or on a
+// dog's card the row that puts the well's bottom row level with the owner's photo's.
+function detailWellY(body: FontMetrics, beside: readonly DetailRow[], tops: readonly number[]) {
+  const { besideX, well } = HOME_LAYOUT.card;
+  const i = beside.findIndex((row) => typeof row !== "number");
+  const owner = beside[i];
+  if (owner === undefined || typeof owner === "number") {
+    return well.y;
+  }
+  const { photo } = detailOwner(body, { x: besideX, y: tops[i] ?? 0 }, owner.roleLines);
+  return photo.y + photo.height - well.size;
+}
+
+// A detail card's rows beside the well and under it, the well's top, and the card's height.
+// The rows under the well start pad under whichever reaches lowest, the well or the rows beside
+// it, and the card is padded under the lowest of all.
 export function detailCardLayout(
   body: FontMetrics,
   rows: { below: readonly DetailRow[]; beside: readonly DetailRow[] },
-): { below: number[]; beside: number[]; height: number } {
+): { below: number[]; beside: number[]; height: number; wellY: number } {
   const { besideDy, pad, well } = HOME_LAYOUT.card;
   const beside = cardRows(body, well.y + besideDy, rows.beside);
-  const upper = Math.max(well.y + well.size, beside.bottom);
+  const wellY = detailWellY(body, rows.beside, beside.tops);
+  const upper = Math.max(wellY + well.size, beside.bottom);
   const below = cardRows(body, upper + pad, rows.below);
   const bottom = rows.below.length > 0 ? below.bottom : upper;
-  return { below: below.tops, beside: beside.tops, height: bottom + pad };
+  return { below: below.tops, beside: beside.tops, height: bottom + pad, wellY };
 }
 
 // How wide a dog tile's name may be: from its text column to padRight inside its edge.
