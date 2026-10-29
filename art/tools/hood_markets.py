@@ -9,7 +9,7 @@ cheese-crates       48x48   card obstacle, 1 lane, in Kensington Market too: a c
                             a cut wheel stood on its edge at the right showing its yellow paste, a blue
                             cheese wedge in front and a chalk price tag hung on the crate. idle (4
                             frames, 350ms): three stink wisps rise a quarter wave a frame
-wedding-shoot       112x72  card obstacle, 2 lanes: a bride posing in a white gown and veil with a
+wedding-photo-shoot 112x72  card obstacle, 2 lanes: a bride posing in a white gown and veil with a
                             bouquet in the left lane; in the right lane a photographer in black
                             kneels facing her, a camera with a flash on top raised to his eye, a
                             silver reflector on a stand behind him. idle (4 frames, 400ms): the
@@ -39,7 +39,7 @@ art-sculpture       48x48   minor, 1 lane, the Distillery District's cone: a big
 
 Kensington Market:
 
-green-bin           48x48   card obstacle, 1 lane: a Toronto green bin knocked over onto its front, seen
+green-bin-spill     48x48   card obstacle, 1 lane: a Toronto green bin knocked over onto its front, seen
                             side on, its lid propped open up and back off the mouth, a wheel up in the air
                             at the bottom's back corner, scraps, a lettuce leaf and a banana peel spilling
                             out across the road. idle (4 frames, 350ms): the lid rocks up 1px on frame 2
@@ -68,29 +68,29 @@ cargo-bike          48x72   minor mover, 1 lane by 2 rows: a cargo bike riding d
 fx-hit-cheese-crates 77x77  play (8 frames, 70ms): a gold impact star, then a puff of lime stink
                             swelling up and shrinking away as the cut wheel bounces up out of it and
                             rolls off right, a quarter turn a frame, crumbs flying and wisps rising
-fx-hit-wedding-shoot 77x77  play (8 frames, 70ms): a lilac impact star, then a camera flash flaring
+fx-hit-wedding-photo-shoot 77x77  play (8 frames, 70ms): a lilac impact star, then a camera flash flaring
                             and fading while the bouquet flies up out of it, tumbling, and petals
                             scatter and drift down
-fx-hit-green-bin    77x77   play (8 frames, 70ms): a green impact star, then a comic splat of olive slop
+fx-hit-green-bin-spill 77x77   play (8 frames, 70ms): a green impact star, then a comic splat of olive slop
                             swelling and shrinking, drops flying off its arms, the banana peel flung up
                             out of it tumbling over, scraps thrown out either side
 sfx-hit-cheese-crates 0.40s a soft wooden thunk, a squish, then a rising plop that sags as it settles
-sfx-hit-wedding-shoot 0.58s a flash charging up, the shutter's double click, then a triangle
+sfx-hit-wedding-photo-shoot 0.58s a flash charging up, the shutter's double click, then a triangle
                             "ding dong" of wedding bells
-sfx-hit-green-bin   0.44s   a hollow plastic thunk, the lid clattering down in three shrinking knocks,
+sfx-hit-green-bin-spill 0.44s   a hollow plastic thunk, the lid clattering down in three shrinking knocks,
                             then a soft squelch and a gloop
 
 Cards (75x56), one per option, composed from the sprites above and the pack's exports:
 card-cheese-crates-sniff, -buy and -hurry-on at a brick shopfront's wooden door, which fits both the
-neighbourhoods it stands in; card-wedding-shoot-pose, -walk-around and -reshoot on the Distillery District's
-road; card-green-bin-hurry-past, -pay and -wade-through on Kensington Market's, the last with Archie wading
+neighbourhoods it stands in; card-wedding-photo-shoot-pose, -walk-around and -reshoot on the Distillery District's
+road; card-green-bin-spill-hurry-past, -pay and -wade-through on Kensington Market's, the last with Archie wading
 through the bin's slop, the banana peel on his head. The paid options show a bill (icon-bill) changing hands:
 the photographer reaching out to take it, the cheesemonger in an ochre shirt and white apron and the
 shopkeeper in a lilac shirt and cream apron, broom in hand, holding it up.
 
 The road sprites take the road outline rule (pixel.road_edge) and road.LIT's rim on their dark
 colours, so their silhouettes hold 3:1 on every road. People, movers and the card obstacles are laid
-out on the 32-unit design grid (the wedding shoot on 224/3 x 48 units, two lanes) and drawn
+out on the 32-unit design grid (the wedding photo shoot on 224/3 x 48 units, two lanes) and drawn
 road.SCALE (1.5) times bigger on a minis.Mini; the minor obstacles are laid out in obstacles.py's
 layout pixels (40 for one lane, 30 rows for a lane-spanning one, 40 for the market stall) and
 drawn obstacles.SCALE (1.2) times bigger. Each has <key>@<step> for every depth step in minis.STEPS,
@@ -135,8 +135,8 @@ OBSTACLE = ob.SCALE
 # The cheese crate's key, which its hit burst's and option pictures' keys extend.
 CHEESE = "cheese-crates"
 # The green bin's key, which its hit burst's and option pictures' keys extend.
-BIN = "green-bin"
-# The wedding shoot's design width: two lanes, 112px at PERSON.
+BIN = "green-bin-spill"
+# The wedding photo shoot's design width: two lanes, 112px at PERSON.
 SHOOT_W = 224 / 3
 
 
@@ -158,7 +158,7 @@ def line(g, pts, w, c):
             g.rect(x0 + (x1 - x0) * k / n, y0 + (y1 - y0) * k / n, w, w, c)
 
 
-# ---------- the wedding shoot ----------
+# ---------- the wedding photo shoot ----------
 
 def bride(g, b):
     """The bride, centred on design column 16 of the left lane, facing the pack: a haze veil falling behind
@@ -260,7 +260,7 @@ def reflector(g):
 SHOOT_PARTS = ("bride", "photographer", "reflector")
 
 
-def wedding_shoot(bob=0, flash=False, parts=SHOOT_PARTS, pay=False):
+def wedding_photo_shoot(bob=0, flash=False, parts=SHOOT_PARTS, pay=False):
     """The shoot across two lanes, laid out on SHOOT_W x 48 and drawn at PERSON to 112x72. bob is the
     bride's breath in drawn pixels; flash fires the flash: a white star, its arms tipped yellow, with
     yellow diagonals, flaring off the flash head. parts picks which figures to draw (the cards use them one at
@@ -577,7 +577,7 @@ def banana_peel(g, cx, base):
     g.rect(cx - 1, base - 8.5, 2, 2.5, "bark")
 
 
-def green_bin(rock=0):
+def green_bin_spill(rock=0):
     """A Toronto green bin knocked over onto its front, seen side on, on the 32-unit grid: the dgreen body
     lying along the road, lit green along its top and shaded forest along its bottom, its mouth at the left
     in a thick forest lip with a moulded band behind it; the lid propped open up and back off its hinge at
@@ -1029,7 +1029,7 @@ def road_sprites(s=1):
     movers and the card obstacles drawn at PERSON x s, the minor obstacles at OBSTACLE x s."""
     p, o = PERSON * s, OBSTACLE * s
     poses, ms = SHOOT_IDLE
-    yield "wedding-shoot", [("idle", frames(p, wedding_shoot, poses), ms)]
+    yield "wedding-photo-shoot", [("idle", frames(p, wedding_photo_shoot, poses), ms)]
     args, ms = VELVET_IDLE
     yield "velvet-rope", [("idle", frames(o, velvet_rope, [dict(glint=a) for a in args]), ms)]
     args, ms = PATIO_IDLE
@@ -1043,7 +1043,7 @@ def road_sprites(s=1):
     args, ms = SCULPTURE_IDLE
     yield "art-sculpture", [("idle", frames(o, art_sculpture, [dict(glint=a) for a in args]), ms)]
     args, ms = BIN_IDLE
-    yield BIN, [("idle", frames(p, green_bin, [dict(rock=a) for a in args]), ms)]
+    yield BIN, [("idle", frames(p, green_bin_spill, [dict(rock=a) for a in args]), ms)]
     args, ms = CHEESE_IDLE
     yield CHEESE, [("idle", frames(p, cheese_crates, [dict(phase=a) for a in args]), ms)]
     args, ms = PRODUCE_IDLE
@@ -1074,7 +1074,7 @@ def bouquet(g, cx, cy, tilt):
     g.rect(cx - 2 + tilt * 3, cy + 6, 4, 1, "white")
 
 
-def hit_wedding_shoot(step):
+def hit_wedding_photo_shoot(step):
     """A lilac impact star, then the camera flash flares white and yellow and fades, the bouquet flies up
     out of it tumbling, and eight petals scatter and drift down."""
     g = hits.Grid(64, 64)
@@ -1160,7 +1160,7 @@ def flying_peel(g, cx, cy, angle):
     turned([(-1.6, -11), (1.6, -11), (1.6, -7), (-1.6, -7)], "bark")
 
 
-def hit_green_bin(step):
+def hit_green_bin_spill(step):
     """A green impact star, then a comic splat of olive compost slop swelling out, a moss shine on its upper
     left and its round-ended arms reaching out, drops flying off every other arm as it shrinks; the banana
     peel flung up out of it, tumbling over as it rises and falls, and scraps (clay, a green lettuce leaf, a
@@ -1202,8 +1202,8 @@ def hit_green_bin(step):
     return g
 
 
-HIT_BURSTS = {"fx-hit-wedding-shoot": (hit_wedding_shoot, 8),
-              f"fx-hit-{CHEESE}": (hit_cheese_crates, 8), f"fx-hit-{BIN}": (hit_green_bin, 8)}
+HIT_BURSTS = {"fx-hit-wedding-photo-shoot": (hit_wedding_photo_shoot, 8),
+              f"fx-hit-{CHEESE}": (hit_cheese_crates, 8), f"fx-hit-{BIN}": (hit_green_bin_spill, 8)}
 
 
 def burst_sprites():
@@ -1225,8 +1225,8 @@ def sprites():
 # ---------- cards ----------
 
 def figure(*parts, flash=False, pay=False):
-    """Some of the wedding shoot's figures at 1x, as an image the size of its frame."""
-    return to_image(drawn(PERSON, wedding_shoot, flash=flash, parts=parts, pay=pay).outlined())
+    """Some of the wedding photo shoot's figures at 1x, as an image the size of its frame."""
+    return to_image(drawn(PERSON, wedding_photo_shoot, flash=flash, parts=parts, pay=pay).outlined())
 
 
 def card_wedding_pose():
@@ -1234,7 +1234,7 @@ def card_wedding_pose():
     the right edge firing its flash at them, hearts rising."""
     import cards
     a = cards.Art()
-    a.ground("street")
+    a.ground("distilleryDistrict")
     a.shadow(18, 62, 30)
     a.paste(figure("bride"), -6, -11)
     a.paste(figure("photographer", flash=True), -10, -12)
@@ -1267,8 +1267,8 @@ def card_wedding_walk_around():
     over the top of the shoot."""
     import cards
     a = cards.Art()
-    a.ground("street")
-    shoot = to_image(drawn(PERSON * 0.45, wedding_shoot, flash=True).outlined())
+    a.ground("distilleryDistrict")
+    shoot = to_image(drawn(PERSON * 0.45, wedding_photo_shoot, flash=True).outlined())
     a.shadow(10, 34, 20)
     a.shadow(32, 34, 20)
     a.paste(shoot, 1, 34 - shoot.height)
@@ -1284,7 +1284,7 @@ def card_wedding_reshoot():
     his feet, out of the shot."""
     import cards
     a = cards.Art()
-    a.ground("street")
+    a.ground("distilleryDistrict")
     a.shadow(18, 62, 30)
     a.paste(figure("bride"), -6, -11)
     a.paste(cards.sn.image("icon-bill"), 33, 31)
@@ -1331,9 +1331,9 @@ def card_bin_wade_through():
     banana peel draped over his head and brown splats on his coat."""
     import cards
     a = cards.Art()
-    a.ground("shops")
+    a.ground("kensingtonMarket")
     slime(a, [(18, 24, 11, 3), (28, 34, 20, 5), (40, 45, 30, 8), (42, 54, 34, 5)])
-    bin_ = to_image(drawn(PERSON * 0.6, green_bin).outlined())
+    bin_ = to_image(drawn(PERSON * 0.6, green_bin_spill).outlined())
     a.paste(bin_, 16 - bin_.width // 2, 26 - bin_.height)
     for x, y, col in ((24, 33, "green"), (8, 43, "clay"), (62, 38, "clay"), (18, 51, "green"), (66, 51, "clay")):
         a.paste(scrap(col), x, y)
@@ -1379,8 +1379,8 @@ def card_bin_pay():
     right, broom in hand, holding up the bill he has been paid."""
     import cards
     a = cards.Art()
-    a.ground("shops")
-    bin_ = to_image(drawn(PERSON * 0.75, green_bin).outlined())
+    a.ground("kensingtonMarket")
+    bin_ = to_image(drawn(PERSON * 0.75, green_bin_spill).outlined())
     a.shadow(18, 34, bin_.width)
     a.paste(bin_, 18 - bin_.width // 2, 34 - bin_.height)
     keeper = to_image(road.drawn(PERSON, road.dressed, sweeper_top, legs="slate", shoes="ink").outlined())
@@ -1392,15 +1392,15 @@ def card_bin_pay():
 
 
 def card_bin_hurry_past():
-    """Hurry past: the toppled green bin up the road at the right, Duchess pulling the pack away to the left
+    """Hurry past: the toppled green bin up the road at the right, Ginger pulling the pack away to the left
     and Archie behind her pulling back toward the bin, both leashes taut off the bottom."""
     import cards
     a = cards.Art()
-    a.ground("shops")
-    bin_ = to_image(drawn(PERSON * 0.75, green_bin).outlined())
+    a.ground("kensingtonMarket")
+    bin_ = to_image(drawn(PERSON * 0.75, green_bin_spill).outlined())
     a.shadow(56, 36, bin_.width)
     a.paste(bin_, 56 - bin_.width // 2, 36 - bin_.height)
-    c = a.dog("duchess", "pull", 14, 54, flip=True)
+    c = a.dog("ginger", "pull", 14, 54, flip=True)
     a.lead(14, c, 4)
     c = a.dog("archie", "pull", 40, 58)
     a.lead(40, c, 26)
@@ -1524,9 +1524,9 @@ def card_cheese_hurry_on():
 
 
 CARDS = {
-    "card-wedding-shoot-pose": card_wedding_pose,
-    "card-wedding-shoot-walk-around": card_wedding_walk_around,
-    "card-wedding-shoot-reshoot": card_wedding_reshoot,
+    "card-wedding-photo-shoot-pose": card_wedding_pose,
+    "card-wedding-photo-shoot-walk-around": card_wedding_walk_around,
+    "card-wedding-photo-shoot-reshoot": card_wedding_reshoot,
     f"card-{CHEESE}-sniff": card_cheese_sniff,
     f"card-{CHEESE}-buy": card_cheese_buy,
     f"card-{CHEESE}-hurry-on": card_cheese_hurry_on,
@@ -1573,7 +1573,7 @@ EFFECTS = {
         ("square", 0.15, (420, 200), 0.25, dict(vol=0.6, low=1000, attack=0.01, release=0.8, shape="h")),
     ],
     # the flash whining up, the shutter's two clicks, then two bells
-    "sfx-hit-wedding-shoot": [
+    "sfx-hit-wedding-photo-shoot": [
         ("square", 0.12, (1500, 3200), 0, dict(vol=0.15, duty=25, low=3500, attack=0.02, release=0.3,
                                                fx=sounds.DARK)),
         ("pinknoise", 0.02, None, 0.12, dict(vol=0.5, high=2000, low=5000, attack=0.001, release=0.6,

@@ -1,0 +1,80 @@
+{ "frames": {
+   "friendly-neighbour@69 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 100
+   },
+   "friendly-neighbour@69 1.aseprite": {
+    "frame": { "x": 33, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 100
+   },
+   "friendly-neighbour@69 2.aseprite": {
+    "frame": { "x": 66, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 100
+   },
+   "friendly-neighbour@69 3.aseprite": {
+    "frame": { "x": 99, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 100
+   },
+   "friendly-neighbour@69 4.aseprite": {
+    "frame": { "x": 132, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 350
+   },
+   "friendly-neighbour@69 5.aseprite": {
+    "frame": { "x": 165, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 350
+   },
+   "friendly-neighbour@69 6.aseprite": {
+    "frame": { "x": 198, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 400
+   },
+   "friendly-neighbour@69 7.aseprite": {
+    "frame": { "x": 231, "y": 0, "w": 33, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 33, "h": 50 },
+    "sourceSize": { "w": 33, "h": 50 },
+    "duration": 400
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "friendly-neighbour@69.png",
+  "format": "RGBA8888",
+  "size": { "w": 264, "h": 50 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "wave", "from": 4, "to": 5, "direction": "forward" },
+   { "name": "idle", "from": 6, "to": 7, "direction": "forward" }
+  ]
+ }
+}

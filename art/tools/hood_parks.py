@@ -10,7 +10,7 @@ porch-cat           a white calico cat lounging on its side, its head raised to 
                     amber eyes, front paws stretched out ahead. idle (4 frames, 300ms): the tail
                     tip flicks up, back, a slow blink, down. walk (4 frames, 100ms): a slinking
                     crawl, the front paws reaching in turn while the body lifts 1px between them
-capybara            a brown capybara side on: a barrel body on short legs and no tail, the big
+escaped-capybara    a brown capybara side on: a barrel body on short legs and no tail, the big
                     square-ended head with a dbrown nose, a small round ear and a high eye. idle (4 frames, 300ms): a
                     chew, rest, an ear flick, a blink. walk (4 frames, 160ms): a slow step, the
                     diagonal legs swapping and the body bobbing 1px on the passing frames
@@ -87,13 +87,13 @@ Hit moments, 77x77, laid out on hits.py's 64x64 design and drawn at hits.BURST_S
 opening on hits.impact's eight-point star in the encounter's colour:
 fx-hit-porch-cat    play (8 frames, 70ms)  a hiss puff with three red claw scratches across it,
                                            calico fur tufts flying out
-fx-hit-capybara     play (8 frames, 70ms)  a soft dust poof with grass blades and brown fur
+fx-hit-escaped-capybara play (8 frames, 70ms)  a soft dust poof with grass blades and brown fur
                                            tufts thrown up, then a calm heart rising
 
 Sounds, in sounds.py's format and rendered by its render_effects:
 sfx-hit-porch-cat   0.49s  a hiss of pink noise stepping down two bands, then a square "mrr" rising
                            into a falling "ow"
-sfx-hit-capybara    0.44s  a low square "huff", then three soft rising triangle chirps
+sfx-hit-escaped-capybara 0.44s  a low square "huff", then three soft rising triangle chirps
 
 Card illustrations, 75x56, composed from the exported sprites as cards.py composes its own:
 card-porch-cat-stand        Archie standing firm on his leash while the cat swipes up at his
@@ -101,11 +101,11 @@ card-porch-cat-stand        Archie standing firm on his leash while the cat swip
 card-porch-cat-treat        the cat lounging over a treat under rising hearts, Archie sitting
                             calm beside it
 card-porch-cat-bolt         Archie pulling hard past the lounging cat, speed lines behind it
-card-capybara-help          the zookeeper in an olive shirt and a bush hat leading the capybara
+card-escaped-capybara-help  the zookeeper in an olive shirt and a bush hat leading the capybara
                             off on a rope, a heart over the capybara
-card-capybara-call-zoo      a phone ringing in a callout over the capybara, chewing on the
+card-escaped-capybara-call-zoo a phone ringing in a callout over the capybara, chewing on the
                             trail, Archie waiting on his leash
-card-capybara-drag          the capybara chewing up the trail, Archie and Biscuit leaning hard
+card-escaped-capybara-drag  the capybara chewing up the trail, Archie and Lady leaning hard
                             toward it, hauled away on leashes taut off the bottom right, skid
                             marks and dust at their paws
 
@@ -238,7 +238,7 @@ def porch_cat(tail=0, blink=False, near=0, far=0, bob=0, sway=0, swipe=False):
     return lit(g)
 
 
-# ---------- capybara ----------
+# ---------- escaped-capybara ----------
 
 # The capybara's coat: brown, shaded dbrown, lit tan; the far legs and the nose dbrown.
 CAPY = dict(coat="brown", shade="dbrown", lit="tan", far="dbrown", nose="dbrown")
@@ -249,7 +249,7 @@ CAPYBARA_WALK = (dict(a=1.5, b=-1.5), dict(bob=-1), dict(a=-1.5, b=1.5), dict(bo
 CAPYBARA_WALK_MS = 160
 
 
-def capybara(a=0, b=0, bob=0, chew=0, ear=0, blink=False):
+def escaped_capybara(a=0, b=0, bob=0, chew=0, ear=0, blink=False):
     """A capybara side on, facing right: a barrel body on four short legs and the big blunt head, deep and
     square-ended, its nose dbrown. a moves the near foreleg and far hind leg along the ground (positive is
     ahead), b the other pair; a foot swinging ahead lifts 1px. bob lifts the body (negative is up), chew drops
@@ -1004,7 +1004,7 @@ def blade(g, x, y, lean, col):
     hits.dots(g, x, y, [(round(k * lean) + i, -k, col) for k in range(4) for i in range(2 if k < 3 else 1)])
 
 
-def hit_capybara(step):
+def hit_escaped_capybara(step):
     """A soft bump: a cream dust poof with brown fur tufts and grass blades thrown up out of it, then the poof
     settles and a heart rises, since the capybara takes it calmly."""
     g = hits.Grid(64, 64)
@@ -1037,7 +1037,7 @@ def hit_capybara(step):
 
 
 # Each burst: its drawing and its frame count, as hits.HITS has them.
-HITS = {"fx-hit-porch-cat": (hit_porch_cat, 8), "fx-hit-capybara": (hit_capybara, 8)}
+HITS = {"fx-hit-porch-cat": (hit_porch_cat, 8), "fx-hit-escaped-capybara": (hit_escaped_capybara, 8)}
 
 
 def hit_sprites():
@@ -1063,7 +1063,7 @@ EFFECTS = {
         ("triangle", 0.16, (380, 260), 0.33, dict(vol=0.45, attack=0.005, release=0.8, shape="h")),
     ],
     # A low "huff" through the nose, then three soft chirps rising, each quieter.
-    "sfx-hit-capybara": [
+    "sfx-hit-escaped-capybara": [
         ("pinknoise", 0.12, None, 0.01, dict(vol=0.3, low=1200, high=250, attack=0.025, release=0.7, shape="h")),
         ("triangle", 0.14, (300, 170), 0.01, dict(vol=0.3, attack=0.025, release=0.7, shape="h")),
         ("square", 0.14, (300, 170), 0.01, dict(vol=0.9, low=900, attack=0.025, release=0.7, shape="h")),
@@ -1083,7 +1083,7 @@ def render_sounds(out_dir):
 # ---------- card illustrations ----------
 
 # The zones the cards stand on, by game id: Cabbagetown's street and High Park's trail.
-CABBAGETOWN, HIGH_PARK = "snoozeCrescent", "park"
+CABBAGETOWN, HIGH_PARK = "cabbagetown", "highPark"
 
 
 def keeper_top(g, b):
@@ -1163,12 +1163,12 @@ def porch_cat_bolt():
     return a
 
 
-def capybara_help():
+def escaped_capybara_help():
     """Help the keeper: the zookeeper in khaki and a bush hat leads the capybara off on a rope, a heart over
     the capybara."""
     a = cards.Art()
     a.ground(HIGH_PARK)
-    a.put("capybara", "walk", 22, 50, 1)
+    a.put("escaped-capybara", "walk", 22, 50, 1)
     keeper = picture(road.drawn(road.SCALE, road.dressed, keeper_top, legs="clay", shoes="dbrown"))
     a.paste(keeper, 40, -3, flip=True)
     a.line(33, 29, 47, 43, "bark")
@@ -1191,12 +1191,12 @@ def phone(a, x, y, ring):
             a.fill(x + 8 + d, y + 3, 1, 8, "white")
 
 
-def capybara_call_zoo():
+def escaped_capybara_call_zoo():
     """Call the zoo: a phone rings in a callout over the capybara, chewing on the trail, Archie waiting on his
     leash."""
     a = cards.Art()
     a.ground(HIGH_PARK)
-    a.put("capybara", "idle", 24, 44)
+    a.put("escaped-capybara", "idle", 24, 44)
     a.paste(to_image(cards.chrome(Grid(21, 22), 0, 0, 21, 22).px), 4, 2)
     phone(a, 10, 6, True)
     c = a.dog("archie", "idle", 58, 58)
@@ -1210,12 +1210,12 @@ def puff(a, x, y):
     a.fill(x, y + 1, 5, 2, "cream")
 
 
-def capybara_drag():
+def escaped_capybara_drag():
     """Drag them away: the capybara chewing up the trail at the left, Archie leaning hard toward it with his
     paws dug in, hauled away by his leash taut off the bottom right, dust kicking up at his paws."""
     a = cards.Art()
     a.ground(HIGH_PARK)
-    a.put("capybara@75", "idle", 16, 34)
+    a.put("escaped-capybara@75", "idle", 16, 34)
     c = a.dog("archie", "pull", 48, 58, flip=True)
     a.lead(48, c, 68, 2)
     puff(a, 36, 53)
@@ -1226,9 +1226,9 @@ ILLUSTRATIONS = {
     "card-porch-cat-stand": porch_cat_stand,
     "card-porch-cat-treat": porch_cat_treat,
     "card-porch-cat-bolt": porch_cat_bolt,
-    "card-capybara-help": capybara_help,
-    "card-capybara-call-zoo": capybara_call_zoo,
-    "card-capybara-drag": capybara_drag,
+    "card-escaped-capybara-help": escaped_capybara_help,
+    "card-escaped-capybara-call-zoo": escaped_capybara_call_zoo,
+    "card-escaped-capybara-drag": escaped_capybara_drag,
 }
 
 
@@ -1255,8 +1255,8 @@ def road_sprites(suffix, step):
 
     yield f"porch-cat{suffix}", [("idle", frames(a, porch_cat, PORCH_CAT_IDLE), 300),
                                  ("walk", frames(a, porch_cat, PORCH_CAT_WALK), road.PERSON_WALK_MS)]
-    yield f"capybara{suffix}", [("idle", frames(a, capybara, CAPYBARA_IDLE), 300),
-                                ("walk", frames(a, capybara, CAPYBARA_WALK), CAPYBARA_WALK_MS)]
+    yield f"escaped-capybara{suffix}", [("idle", frames(a, escaped_capybara, CAPYBARA_IDLE), 300),
+                                        ("walk", frames(a, escaped_capybara, CAPYBARA_WALK), CAPYBARA_WALK_MS)]
     yield f"hen{suffix}", [("idle", frames(a, hen, HEN_IDLE), 400), ("run", frames(a, hen, HEN_RUN), 80)]
     yield f"ferrets{suffix}", [("idle", frames(a, ferrets, FERRETS_IDLE), 300),
                                ("run", frames(a, ferrets, FERRETS_RUN), 80)]
@@ -1276,7 +1276,7 @@ def road_sprites(suffix, step):
 
 # Where each road sprite's .aseprite source goes: the card obstacles with the encounters, the rest with the
 # obstacles.
-SOURCES = {"capybara": "art/encounters", "porch-cat": "art/encounters", "cherry-trees": "art/obstacles",
+SOURCES = {"escaped-capybara": "art/encounters", "porch-cat": "art/encounters", "cherry-trees": "art/obstacles",
            "fallen-log": "art/obstacles", "ferrets": "art/obstacles", "hen": "art/obstacles",
            "iron-fence-2": "art/obstacles", "iron-fence-3": "art/obstacles", "leaf-pile": "art/obstacles",
            "little-free-library": "art/obstacles", "picnic-blanket": "art/obstacles", "porch-steps": "art/obstacles"}

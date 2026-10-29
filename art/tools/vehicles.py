@@ -36,7 +36,7 @@ tourist-train       176x64  High Park's trackless tourist train crossing the roa
                             400ms): stopped, the middle passenger of the second car waving, the hand
                             swung out on frame 2; cue (3 frames, 120ms): the whistle, a white puff out of the
                             stack growing and lifting away
-ttc-bus-crossing    176x64  a TTC bus crossing Yonge Street side on, facing right (the game mirrors it for
+crosstown-bus       176x64  a TTC bus crossing Yonge Street side on, facing right (the game mirrors it for
                             left), on the train's grid: a red roof trim over the white upper body and
                             its one long dark window band, glints across it, a roof pod at the back, the
                             amber destination sign over the front door and windshield, the mirror on its
@@ -545,11 +545,11 @@ def tourist_train(roll=None, wave=0, toot=0):
     return lit(g)
 
 
-# ---------- TTC bus crossing ----------
+# ---------- Crosstown bus ----------
 
 
 # The key, and the bus's design grid: 176x64 at road.SCALE, as the tourist train's.
-BUS_KEY = "ttc-bus-crossing"
+BUS_KEY = "crosstown-bus"
 BUS_W, BUS_H = TRAIN_W, TRAIN_H
 # The body's rear and front columns, its roof, belt (white over red) and sill rows; the wheels' centre row,
 # radius and columns, the feet a row above the frame's bottom row as the train's.
@@ -674,7 +674,7 @@ def bus_body(g, doors=0, blink=0):
     g.rect(0, sill, BUS_W, BUS_H, None)
 
 
-def ttc_bus_crossing(roll=None, doors=0, kneel=0, blink=0):
+def crosstown_bus(roll=None, doors=0, kneel=0, blink=0):
     """A TTC bus crossing Yonge Street side on, facing right (see the docstring). roll (0 to 3) is a push frame:
     the spokes turn and the body dips onto its wheels on frames 1 and 2; doors opens both doors, kneel dips
     the body 1px at the stop, blink lights the indicator."""
@@ -994,7 +994,7 @@ def sprites():
                                        for tag, poses, ms in TRAIN_TAGS]
     for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
         s = SCALE * step
-        yield f"{BUS_KEY}{suffix}", [(tag, [small(this, s, ttc_bus_crossing, **q).outlined() for q in poses], ms)
+        yield f"{BUS_KEY}{suffix}", [(tag, [small(this, s, crosstown_bus, **q).outlined() for q in poses], ms)
                                      for tag, poses, ms in BUS_TAGS]
     for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
         s = SCALE * step

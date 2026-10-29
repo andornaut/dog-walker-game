@@ -563,8 +563,8 @@ def gadget_small(g):
 
 
 # Fixes drawn after the scaled owner, for shapes that do not survive the scale.
-SMALL_FIXES = {"biscuit": clare_small_fringe, "penny": gadget_small, "pierre": tara_small_bun,
-               "snowball": judy_small_ponytail}
+SMALL_FIXES = {"lady": clare_small_fringe, "penny": gadget_small, "pepe": tara_small_bun,
+               "sequoia": judy_small_ponytail}
 
 
 def small(dog, mood):
@@ -679,13 +679,13 @@ WALKERS = {
 
 
 OWNERS = {
-    "duchess": eve,
+    "ginger": eve,
     "reggie": ryan,
     "buddy": jason,
-    "pierre": tara,
-    "biscuit": clare,
+    "pepe": tara,
+    "lady": clare,
     "archie": kiwi,
-    "snowball": aunt_judy,
+    "sequoia": aunt_judy,
     "penny": gadget,
     "kilo": ralph,
 }

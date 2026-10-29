@@ -1,0 +1,211 @@
+{ "frames": {
+   "dog-sequoia@75 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 150
+   },
+   "dog-sequoia@75 1.aseprite": {
+    "frame": { "x": 41, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 150
+   },
+   "dog-sequoia@75 2.aseprite": {
+    "frame": { "x": 82, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 150
+   },
+   "dog-sequoia@75 3.aseprite": {
+    "frame": { "x": 123, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 150
+   },
+   "dog-sequoia@75 4.aseprite": {
+    "frame": { "x": 164, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 60
+   },
+   "dog-sequoia@75 5.aseprite": {
+    "frame": { "x": 205, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 60
+   },
+   "dog-sequoia@75 6.aseprite": {
+    "frame": { "x": 246, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 60
+   },
+   "dog-sequoia@75 7.aseprite": {
+    "frame": { "x": 287, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 60
+   },
+   "dog-sequoia@75 8.aseprite": {
+    "frame": { "x": 328, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 80
+   },
+   "dog-sequoia@75 9.aseprite": {
+    "frame": { "x": 369, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 80
+   },
+   "dog-sequoia@75 10.aseprite": {
+    "frame": { "x": 410, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 80
+   },
+   "dog-sequoia@75 11.aseprite": {
+    "frame": { "x": 451, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 80
+   },
+   "dog-sequoia@75 12.aseprite": {
+    "frame": { "x": 492, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 125
+   },
+   "dog-sequoia@75 13.aseprite": {
+    "frame": { "x": 533, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 125
+   },
+   "dog-sequoia@75 14.aseprite": {
+    "frame": { "x": 574, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 125
+   },
+   "dog-sequoia@75 15.aseprite": {
+    "frame": { "x": 615, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 125
+   },
+   "dog-sequoia@75 16.aseprite": {
+    "frame": { "x": 656, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 300
+   },
+   "dog-sequoia@75 17.aseprite": {
+    "frame": { "x": 697, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 300
+   },
+   "dog-sequoia@75 18.aseprite": {
+    "frame": { "x": 738, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 300
+   },
+   "dog-sequoia@75 19.aseprite": {
+    "frame": { "x": 779, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 300
+   },
+   "dog-sequoia@75 20.aseprite": {
+    "frame": { "x": 820, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 60
+   },
+   "dog-sequoia@75 21.aseprite": {
+    "frame": { "x": 861, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 60
+   },
+   "dog-sequoia@75 22.aseprite": {
+    "frame": { "x": 902, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 60
+   },
+   "dog-sequoia@75 23.aseprite": {
+    "frame": { "x": 943, "y": 0, "w": 41, "h": 41 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 41, "h": 41 },
+    "sourceSize": { "w": 41, "h": 41 },
+    "duration": 60
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "dog-sequoia@75.png",
+  "format": "RGBA8888",
+  "size": { "w": 984, "h": 41 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "react", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "pull", "from": 8, "to": 11, "direction": "forward" },
+   { "name": "tell", "from": 12, "to": 15, "direction": "forward" },
+   { "name": "idle", "from": 16, "to": 19, "direction": "forward" },
+   { "name": "shake", "from": 20, "to": 23, "direction": "forward" }
+  ]
+ }
+}

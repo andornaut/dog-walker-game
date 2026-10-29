@@ -18,7 +18,7 @@ are chibi and in Endesga 32 with coloured outlines. The walker is seen from behi
 dogs, except in wave and cheer; everything coming down the road faces the player:
 jogger (48x72, run: 4 frames at 100ms, a knee driven up, then that foot passing
 down, each side in turn, the ponytail swinging out from behind the head) wears
-an orange racerback singlet with a white race bib on its front; kid-on-bike
+an orange racerback singlet with a white race bib on its front; kid-on-a-bike
 (48x72, ride: 4 frames at 100ms, the pedals going round, a 1px sway and the
 streamers fluttering) is a kid in a red helmet on a mauve bike with training
 wheels and a lit headlamp. The movers going up the road ahead of the pack are
@@ -1844,7 +1844,7 @@ KID_BIKE_RIDE = [dict(lf=-5, rf=0, sway=-1, flutter=(0, 1, 1)), dict(lf=-3, rf=-
 KID_BIKE_RIDE_MS = 100
 
 
-def kid_on_bike(lf=0, rf=0, sway=0, flutter=(0, 0, 0)):
+def kid_on_a_bike(lf=0, rf=0, sway=0, flutter=(0, 0, 0)):
     """A kid riding a little bike down the road at the pack, facing the player as the cyclist does: a yellow tee, sky
     shorts, red shoes and ochre hair under a red helmet with a white stripe, its rim a dark visor line with the face
     clear under it, as the cyclist's. The bike is mauve, its front tire edge-on under a mudguard with a lit headlamp
@@ -1940,12 +1940,12 @@ def sprites():
                     ("idle", frames(big(dressed, thief_top, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "lost-wallet", [("idle", frames([big(wallet, False), big(wallet, True)]), 450)]
     neighbour = dict(legs="purple", shoes="dbrown")
-    yield "petting-neighbour", [("walk", frames(big(dressed, neighbour_top(False, -q.get("bob", 0)), **q, **neighbour)
-                                                for q in PERSON_WALK), PERSON_WALK_MS),
-                                ("wave", frames(big(dressed, neighbour_top(True, k), bob=NEIGHBOUR_CROUCH,
-                                                    **neighbour) for k in (0, 1)), 350),
-                                ("idle", frames(big(dressed, neighbour_top(False, k), bob=bb, **neighbour)
-                                                for k, bb in enumerate(BREATH)), BREATH_MS)]
+    yield "friendly-neighbour", [("walk", frames(big(dressed, neighbour_top(False, -q.get("bob", 0)), **q, **neighbour)
+                                                 for q in PERSON_WALK), PERSON_WALK_MS),
+                                 ("wave", frames(big(dressed, neighbour_top(True, k), bob=NEIGHBOUR_CROUCH,
+                                                     **neighbour) for k in (0, 1)), 350),
+                                 ("idle", frames(big(dressed, neighbour_top(False, k), bob=bb, **neighbour)
+                                                 for k, bb in enumerate(BREATH)), BREATH_MS)]
     yield "fx-bark", [("pop", frames([bark(False), bark(True)]), 120)]
     drive, drive_ms = TRUCK_DRIVE
     yield "ice-cream-truck", [("idle", frames([drawn(TRUCK_SCALE, ice_cream_truck, f) for f in (0, 1)]), 400),
@@ -1954,7 +1954,7 @@ def sprites():
                            ("idle", frames(big(mail_carrier, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "stroller", [("walk", frames(big(stroller, **q) for q in STROLLER_WALK), STROLLER_WALK_MS)]
     yield "jogger", [("run", frames(big(jogger, **q) for q in JOGGER_RUN), JOGGER_RUN_MS)]
-    yield "kid-on-bike", [("ride", frames(big(kid_on_bike, **q) for q in KID_BIKE_RIDE), KID_BIKE_RIDE_MS)]
+    yield "kid-on-a-bike", [("ride", frames(big(kid_on_a_bike, **q) for q in KID_BIKE_RIDE), KID_BIKE_RIDE_MS)]
 
 
 if __name__ == "__main__":

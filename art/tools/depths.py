@@ -7,8 +7,8 @@ ball-bounce, cyclist and coyote. Each runs the sprite's own drawing function on 
 minis.Mini, so it follows any redraw of the full-size sprite and gets its own
 full outline at the small size (see minis.py).
 
-At every step here: other-dog-owner, thief, petting-neighbour, mail-carrier,
-stroller, jogger, kid-on-bike, ice-cream-truck, puddle and pothole (no
+At every step here: other-dog-owner, thief, friendly-neighbour, mail-carrier,
+stroller, jogger, kid-on-a-bike, ice-cream-truck, puddle and pothole (no
 outline), hedge, hot-dog-cart, parked-car, delivery-truck,
 streetcar and taxi. Walkers
 are the pack, always drawn at 1x, and have none.
@@ -86,7 +86,7 @@ def own(s):
                     ("flee", [small(road, p, road.thief_fleeing, k).outlined() for k in (-1, 1)], 110),
                     ("idle", [dressed(p, road.thief_top, bob=b).outlined() for b in breath], ms)]
     neighbour = dict(legs="purple", shoes="dbrown")
-    yield "petting-neighbour", [
+    yield "friendly-neighbour", [
         ("walk", [dressed(p, road.neighbour_top(False, -w.get("bob", 0)), **w, **neighbour).outlined()
                   for w in road.PERSON_WALK], road.PERSON_WALK_MS),
         ("wave", [dressed(p, road.neighbour_top(True, k), bob=road.NEIGHBOUR_CROUCH, **neighbour).outlined()
@@ -101,8 +101,8 @@ def own(s):
                         road.STROLLER_WALK_MS)]
     yield "jogger", [("run", [small(road, p, road.jogger, **posed(q, p)).outlined() for q in road.JOGGER_RUN],
                       road.JOGGER_RUN_MS)]
-    yield "kid-on-bike", [("ride", [small(road, p, road.kid_on_bike, **posed(q, p)).outlined()
-                                    for q in road.KID_BIKE_RIDE], road.KID_BIKE_RIDE_MS)]
+    yield "kid-on-a-bike", [("ride", [small(road, p, road.kid_on_a_bike, **posed(q, p)).outlined()
+                                      for q in road.KID_BIKE_RIDE], road.KID_BIKE_RIDE_MS)]
 
     def times(q):
         return tuple(v * s for v in q)

@@ -6,7 +6,7 @@ nearest-neighbour to 1200x628, then padded with 1px of ink (its border colour)
 above and below to the 1200x630 Open Graph size. Dark wood boards on the left carry
 the logo and the tagline in font-title at 2x; on the right, a window onto
 Cabbagetown: the backdrop's houses and cross street, the road widening below them, and
-Casey walking Kilo, Lady and Duchess up the middle in the
+Casey walking Kilo, Lady and Ginger up the middle in the
 game's pack formation, the leashes running behind Casey to her hands.
 
 Built from public/art/images/ (logo, backdrop-cabbagetown, road-cabbagetown), the
@@ -149,7 +149,7 @@ def pack(view, cx, base):
             view.shadow(x, feet + 1, f.width)
         view.paste(f, x - f.width // 2, feet - f.getbbox()[3] + 1)
 
-    ids = ("kilo", "biscuit", "duchess")   # large, medium, small: formation order
+    ids = ("kilo", "lady", "ginger")   # large, medium, small: formation order
     dogs = [(f"dog-{d}", sn.side_dx(f"dog-{d}", side), base - row) for d, (side, row) in zip(ids, formation(ids))]
     for k, dx, feet in sorted(dogs, key=lambda d: d[2]):
         stand(k, cx + dx, feet)

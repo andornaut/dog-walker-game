@@ -6,7 +6,7 @@ Each dog gets two sprites in Endesga 32: a road sprite with coloured outlines an
 - dog-<name>: the road sprite, seen from above and behind, its frame by size class (DOG_CLASS,
   SIZE_CLASS): large 54x54 (Kilo the Alaskan Malamute, Sequoia the Great Pyrenees, Penny the golden
   retriever mix), medium 48x48 (Archie, Lady, Pepe the miniature poodle) and small 38x38 (Buddy,
-  Duchess, Reggie), the large dogs drawn DOG_ZOOM narrower and the small dogs DOG_ZOOM larger (more down
+  Ginger, Reggie), the large dogs drawn DOG_ZOOM narrower and the small dogs DOG_ZOOM larger (more down
   than across). Its drawing functions take 32-unit design coordinates and run on a minis.Mini at
   road_scale(name) (the side / 32), which keeps 1px lines and single pixels 1px; features drawn pixel by
   pixel take trail(), so they stay unbroken. Tags: walk (4
@@ -187,9 +187,9 @@ def kilo_face(mood):
     return g
 
 
-# ---------- Lady (biscuit): beagle, medium, tricolour, long ears, green collar ----------
+# ---------- Lady: beagle, medium, tricolour, long ears, green collar ----------
 
-def biscuit_road(q):
+def lady_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
     # the shoulders and front legs follow the head half as far, and the pitch carries both
@@ -218,7 +218,7 @@ def biscuit_road(q):
     return g
 
 
-def biscuit_face(mood):
+def lady_face(mood):
     g = edged(Grid(), "ink", close=True)
     g.cel(16, 28.5, 6.5, 3, "white", "lgrey")
     g.cel(16, 15.5, 9, 8, "ochre", "rust", "tan")
@@ -236,9 +236,9 @@ def biscuit_face(mood):
     return g
 
 
-# ---------- Duchess: Maltese, small, white, pink bow ----------
+# ---------- Ginger: Maltese, small, white, pink bow ----------
 
-def duchess_road(q):
+def ginger_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
     # the shoulders and front legs follow the head half as far, and the pitch carries both
@@ -266,7 +266,7 @@ def duchess_road(q):
     return g
 
 
-def duchess_face(mood):
+def ginger_face(mood):
     g = edged(Grid(), "ink", close=True)
     g.cel(16, 26.5, 6, 3.5, "white", "lgrey")
     d = droop(mood)
@@ -377,7 +377,7 @@ def buddy_face(mood):
     return g
 
 
-# ---------- Pepe (key pierre): miniature poodle, medium, black with a white stripe, show-clip pom-poms ----------
+# ---------- Pepe: miniature poodle, medium, black with a white stripe, show-clip pom-poms ----------
 
 # Pepe's coat: the curls (fill, shade, light), the shaved skin and the white stripe (fill, shade).
 CURL = ("navy", "ink", "dslate")
@@ -385,14 +385,14 @@ SHAVED = ("slate", "dslate", "grey")
 STRIPE = ("white", "lgrey")
 
 
-def pierre_edge(c):
+def pepe_edge(c):
     """Pepe's outline: grey round the black coat, which has no fill that holds against the dslate road,
     and the road outline round everything else."""
     return K["grey"] if c in {K[n] for n in CURL + SHAVED} else road_edge(c)
 
 
-def pierre_road(q):
-    g, q = edged(Grid(), pierre_edge), pose(q)
+def pepe_road(q):
+    g, q = edged(Grid(), pepe_edge), pose(q)
     b, ln = q["bob"], q["lean"]
     # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
@@ -438,7 +438,7 @@ def pierre_road(q):
     return g
 
 
-def pierre_face(mood):
+def pepe_face(mood):
     g = edged(Grid(), "ink", close=True)
     d = droop(mood)
     g.cel(16, 28.5, 6.5, 3, *CURL)
@@ -572,7 +572,7 @@ def archie_face(mood):
 
 # ---------- Sequoia: Great Pyrenees, large, giant white fluff, collar with a bell ----------
 
-def snowball_road(q):
+def sequoia_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln, o = q["bob"], q["lean"], 2
     # the shoulders and front legs follow the head half as far, and the pitch carries both
@@ -602,7 +602,7 @@ def snowball_road(q):
     return g
 
 
-def snowball_face(mood):
+def sequoia_face(mood):
     g = edged(Grid(), "ink", close=True)
     d = droop(mood)
     g.cel(16, 28, 9, 3.5, "white", "lgrey")
@@ -799,7 +799,7 @@ def despeckle(g, colours):
 
 
 def bow(g, cx, y, big=False, colours=("pink", "mauve"), folds=True):
-    """A bow: Duchess's is pink, Pepe's show ribbon mauve tied in purple. The knot and folds take the
+    """A bow: Ginger's is pink, Pepe's show ribbon mauve tied in purple. The knot and folds take the
     second colour; folds=False leaves the folds out, for a bow too small at road scale for them to land
     on its wings."""
     c, knot = colours
@@ -858,13 +858,13 @@ def mouth(g, y, mood):
 
 
 DOGS = {
-    "duchess": (duchess_road, duchess_face),
+    "ginger": (ginger_road, ginger_face),
     "reggie": (reggie_road, reggie_face),
     "buddy": (buddy_road, buddy_face),
-    "pierre": (pierre_road, pierre_face),
-    "biscuit": (biscuit_road, biscuit_face),
+    "pepe": (pepe_road, pepe_face),
+    "lady": (lady_road, lady_face),
     "archie": (archie_road, archie_face),
-    "snowball": (snowball_road, snowball_face),
+    "sequoia": (sequoia_road, sequoia_face),
     "penny": (penny_road, penny_face),
     "kilo": (kilo_road, kilo_face),
 }
@@ -873,13 +873,13 @@ DOGS = {
 # Each dog's road sprite side, by its size class: large 54, medium ROAD_SIZE (48) and small 38, about 1.1x, 1x
 # and 0.8x.
 SIZE_CLASS = {"large": 54, "medium": ROAD_SIZE, "small": 38}
-DOG_CLASS = {"kilo": "large", "snowball": "large", "penny": "large", "archie": "medium", "biscuit": "medium",
-             "pierre": "medium", "duchess": "small", "reggie": "small", "buddy": "small"}
+DOG_CLASS = {"kilo": "large", "sequoia": "large", "penny": "large", "archie": "medium", "lady": "medium",
+             "pepe": "medium", "ginger": "small", "reggie": "small", "buddy": "small"}
 DOG_SIZE = {name: SIZE_CLASS[DOG_CLASS[name]] for name in DOGS}
 # How much bigger a dog is drawn inside its frame, across and down. The large dogs are drawn narrower, Kilo
 # and Sequoia about 30px wide and Penny 28 at full size; the small dogs fill more of theirs, about 20px wide
 # (Buddy 19) and 31 to 32 tall. So the widths step about 30, 24 and 20.
-DOG_ZOOM = {"kilo": (0.93, 1), "snowball": (0.82, 1), "penny": (0.85, 1), "duchess": (1.13, 1.22),
+DOG_ZOOM = {"kilo": (0.93, 1), "sequoia": (0.82, 1), "penny": (0.85, 1), "ginger": (1.13, 1.22),
             "reggie": (1.09, 1.27), "buddy": (1.17, 1.27)}
 
 
@@ -887,8 +887,8 @@ DOG_ZOOM = {"kilo": (0.93, 1), "snowball": (0.82, 1), "penny": (0.85, 1), "duche
 # area nearest its size class's target, so the classes step evenly (the square root of the area about 17, 21.3
 # and 25.5px) however much of its design a breed's ears or topknot fill. The large dogs zoom past the
 # frame as far as Kilo's ears fit under its top edge, so they fill their tiles, and medium sits halfway.
-FACE_SIDE = {"archie": 30, "biscuit": 29, "buddy": 27, "duchess": 23, "kilo": 35, "penny": 37, "pierre": 27,
-             "reggie": 26, "snowball": 36}
+FACE_SIDE = {"archie": 30, "buddy": 27, "ginger": 23, "kilo": 35, "lady": 29, "penny": 37, "pepe": 27,
+             "reggie": 26, "sequoia": 36}
 
 
 def framed(px, side):

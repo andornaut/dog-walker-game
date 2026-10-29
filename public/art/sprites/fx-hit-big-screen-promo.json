@@ -1,0 +1,78 @@
+{ "frames": {
+   "fx-hit-big-screen-promo 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   },
+   "fx-hit-big-screen-promo 1.aseprite": {
+    "frame": { "x": 77, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   },
+   "fx-hit-big-screen-promo 2.aseprite": {
+    "frame": { "x": 154, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   },
+   "fx-hit-big-screen-promo 3.aseprite": {
+    "frame": { "x": 231, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   },
+   "fx-hit-big-screen-promo 4.aseprite": {
+    "frame": { "x": 308, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   },
+   "fx-hit-big-screen-promo 5.aseprite": {
+    "frame": { "x": 385, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   },
+   "fx-hit-big-screen-promo 6.aseprite": {
+    "frame": { "x": 462, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   },
+   "fx-hit-big-screen-promo 7.aseprite": {
+    "frame": { "x": 539, "y": 0, "w": 77, "h": 77 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 77 },
+    "sourceSize": { "w": 77, "h": 77 },
+    "duration": 70
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "fx-hit-big-screen-promo.png",
+  "format": "RGBA8888",
+  "size": { "w": 616, "h": 77 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "play", "from": 0, "to": 7, "direction": "forward" }
+  ]
+ }
+}

@@ -534,13 +534,13 @@ def jason_top(wave):
 
 # dog: (top, legs, shoes, extra), in owners.OWNERS order; extra draws over the legs after them
 OWNERS = {
-    "duchess": (eve_top, "skin1", "white", eve_legs),
+    "ginger": (eve_top, "skin1", "white", eve_legs),
     "reggie": (ryan_top, "slate", "dbrown", None),
     "buddy": (jason_top, "skin2", "dbrown", None),
-    "pierre": (tara_top, "skin1", "ink", None),
-    "biscuit": (clare_top, "skin1", "mauve", None),
+    "pepe": (tara_top, "skin1", "ink", None),
+    "lady": (clare_top, "skin1", "mauve", None),
     "archie": (kiwi_top, "brown", "red", None),
-    "snowball": (aunt_judy_top, "skin1", "white", aunt_judy_legs),
+    "sequoia": (aunt_judy_top, "skin1", "white", aunt_judy_legs),
     "penny": (gadget_top, "dslate", "dbrown", None),
     "kilo": (ralph_top, "slate", "dbrown", None),
 }

@@ -106,9 +106,9 @@ def pom(g, cx, cy, rx, ry, n=8, c="skin1", sh="brown", li="cream"):
     g.ell(cx, cy, rx - r, ry - r, c)
 
 
-# ---------- Duchess: Maltese, small, white, pink bow ----------
+# ---------- Ginger: Maltese, small, white, pink bow ----------
 
-def duchess(g):
+def ginger(g):
     # long silky coat falling to the ground, the haunch behind on the right
     g.cel(44, 54, 12, 9, "white", "lgrey")
     g.cel(31, 52, 13, 12, "white", "lgrey", "white")
@@ -130,7 +130,7 @@ def duchess(g):
 
 
 def bow(g, cx, y, colours=("pink", "mauve")):
-    """Duchess's pink bow, or Pepe's mauve show ribbon tied in purple: the knot and folds take the second colour."""
+    """Ginger's pink bow, or Pepe's mauve show ribbon tied in purple: the knot and folds take the second colour."""
     c, knot = colours
     g.tri((cx - 1, y + 2), (cx - 9, y - 2), (cx - 8, y + 7), c)
     g.tri((cx + 1, y + 2), (cx + 9, y - 2), (cx + 8, y + 7), c)
@@ -196,12 +196,12 @@ def buddy(g):
     nose(g, 21, 28)
 
 
-# ---------- Pepe (key pierre): miniature poodle, medium, black with a white stripe, show-clip pom-poms ----------
+# ---------- Pepe: miniature poodle, medium, black with a white stripe, show-clip pom-poms ----------
 
 # Pepe's coat is dogs.CURL and dogs.SHAVED.
 
 
-def pierre(g):
+def pepe(g):
     # shaved legs with pom-pom bracelets, a curly mane over the chest
     g.cel(48, 56, 9, 7, *dogs.CURL)
     for x in (24, 35):
@@ -234,9 +234,9 @@ def pierre(g):
     nose(g, 15, 29)
 
 
-# ---------- Biscuit: beagle, medium, tricolour, long ears, green collar ----------
+# ---------- Lady: beagle, medium, tricolour, long ears, green collar ----------
 
-def biscuit(g):
+def lady(g):
     # black saddle and white-tipped tail behind, white chest in front
     g.rect(52, 33, 3, 12, "navy")
     g.rect(52, 30, 3, 4, "white")
@@ -344,7 +344,7 @@ def archie(g):
 
 # ---------- Sequoia: Great Pyrenees, large, giant white fluff, collar with a bell ----------
 
-def snowball(g):
+def sequoia(g):
     g.cel(47, 52, 14, 11, "white", "lgrey")
     g.cel(31, 50, 18, 14, "white", "lgrey")
     legs(g, (21, 34), 52, "white", "lgrey", w=7)
@@ -622,13 +622,13 @@ def trista(g):
 
 
 PORTRAITS = {
-    "duchess": duchess,
+    "ginger": ginger,
     "reggie": reggie,
     "buddy": buddy,
-    "pierre": pierre,
-    "biscuit": biscuit,
+    "pepe": pepe,
+    "lady": lady,
     "archie": archie,
-    "snowball": snowball,
+    "sequoia": sequoia,
     "penny": penny,
     "kilo": kilo,
 }
@@ -647,8 +647,8 @@ WALKERS = {
 # How big each walker's bust is drawn in the 64px well: the adults' heads about 37px from crown to chin, topping
 # out 2 or 3px under the well's top edge, and Ada smaller as the youngest.
 WALKER_SIDE = {"ada": 64, "casey": 66, "mr-b": 72, "trista": 69}
-PORTRAIT_SIDE = {"archie": 59, "biscuit": 57, "buddy": 53, "duchess": 51, "kilo": 64, "penny": 64, "pierre": 56,
-                 "reggie": 53, "snowball": 63}
+PORTRAIT_SIDE = {"archie": 59, "buddy": 53, "ginger": 51, "kilo": 64, "lady": 57, "penny": 64, "pepe": 56,
+                 "reggie": 53, "sequoia": 63}
 
 
 def image(draw, side=S):

@@ -308,7 +308,7 @@ def skunk_rinse():
 
 def skunk_ignore():
     a = Art()
-    a.ground("street")
+    a.ground("distilleryDistrict")
     a.put("skunk", "idle", 18, 44)
     a.skunk_stink(30, 6, 2)
     a.put("dog-archie", "walk", 56, 50, 2)
@@ -323,7 +323,7 @@ def small_puddle(f=0):
 
 def other_dog_sniff():
     a = Art()
-    a.ground("park")
+    a.ground("highPark")
     a.put("other-dog", "walk", 46, 42)
     a.put("dog-archie", "walk", 30, 58)
     a.hearts([(6, 12), (14, 4), (25, 9)])
@@ -332,7 +332,7 @@ def other_dog_sniff():
 
 def other_dog_pull_away():
     a = Art()
-    a.ground("park")
+    a.ground("highPark")
     a.put("other-dog", "walk", 52, 44)
     c = a.put("dog-archie", "pull", 22, 56, flip=True)
     a.lead(22, c, 6)
@@ -393,7 +393,7 @@ def thief_let_go():
     """Let the tips go: Archie stands watching the thief run off up the street with the walker's green tip
     pouch swinging from his hand, dust puffing at his heels."""
     a = Art()
-    a.ground("street")
+    a.ground("distilleryDistrict")
     s = 0.8
     t = thief(s, road.thief_fleeing, 1, pouch=False)
     x, y = stand(a, t, 50, 40)
@@ -414,7 +414,7 @@ def thief_grab_back():
     mouth, out of sight behind his head, and his leash runs off the bottom edge. Strain ticks either side of
     the pouch and a red ! over Archie."""
     a = Art()
-    a.ground("street")
+    a.ground("distilleryDistrict")
     s = 1.2
     t = thief(s, road.dressed, thief_reaching, k=3)
     x, y = stand(a, t, 56, 56)
@@ -436,7 +436,7 @@ def thief_give_chase():
     clutching the tip pouch. Archie bounds off the ground over his shadow, ears flapping, his leash
     streaming back off the bottom edge, two lgrey speed lines under him and dust kicked up at his paws."""
     a = Art()
-    a.ground("street")
+    a.ground("distilleryDistrict")
     s = 0.65
     t = thief(s, road.thief_fleeing, -1, pouch=False)
     x, y = stand(a, t, 54, 34)
@@ -508,7 +508,7 @@ def neighbour_take():
     floating heart sits above the art window, so it is left out here. Cut out to float over the road."""
     a = Art(clear=True)
     a.put("dog-archie", "idle", 47, 57, shadow=False)
-    her = sn.frame("petting-neighbour", "wave", 1)
+    her = sn.frame("friendly-neighbour", "wave", 1)
     her.paste((0, 0, 0, 0), (34, 0, her.width, 14))
     top = 66 - her.height
     her.paste((0, 0, 0, 0), (35, 30 - top, her.width, her.height))
@@ -678,7 +678,7 @@ def belly_rubs():
 
 def good_leash():
     a = Art()
-    a.ground("park")
+    a.ground("highPark")
     a.put("squirrel", "idle", 58, 37)
     c = a.put("dog-archie", "walk", 30, 56, 1)
     a.lead(30, c, 24, 2)
@@ -691,7 +691,7 @@ def good_leash():
 
 def big_tipper():
     a = Art()
-    a.ground("shops")
+    a.ground("kensingtonMarket")
     # three coins face on, stacked two and one, under an up arrow
     for x, y in ((8, 34), (26, 34), (17, 18)):
         a.paste(sn.frame("tip", "idle"), x, y)
@@ -701,7 +701,7 @@ def big_tipper():
 
 def rush_hour():
     a = Art()
-    a.ground("street")
+    a.ground("distilleryDistrict")
     a.put("skunk", "idle", 52, 55)
     for x, y in ((4, 10), (20, 18), (6, 28)):
         a.paste(sn.frame("tip", "idle"), x, y)
@@ -733,7 +733,7 @@ def raincoat():
 def raincoats():
     """Archie in a yellow raincoat, standing in a puddle in the rain."""
     a = Art()
-    a.ground("street")
+    a.ground("distilleryDistrict")
     a.paste(small_puddle(1), 22, 38)
     a.put("dog-archie", "walk", 37, 50, shadow=False)
     a.paste(raincoat(), 25, 27)
@@ -745,7 +745,7 @@ def raincoats():
 def sweet_talker():
     a = Art()
     a.grass()
-    a.face("face-owner-pierre", "happy", 6, 14)
+    a.face("face-owner-pepe", "happy", 6, 14)
     # cheaper per dog: the cost in the bubble, and a down arrow beside it
     a.bubble(40, 8, 32, [""])
     sn.text(a, "$$", 45, 12, "forest")
@@ -759,7 +759,7 @@ def skip():
     """Walk on by: the skunk waits at the left while Archie trots on past it up the street, and the Hall
     pass held up over them (glyphs.py's 20x20 icon)."""
     a = Art()
-    a.ground("street")
+    a.ground("distilleryDistrict")
     a.put("skunk", "idle", 16, 49)
     c = a.put("dog-archie", "walk", 56, 58, 2)
     a.lead(56, c, 62)
@@ -1162,7 +1162,7 @@ ILLUSTRATIONS = {
     "card-thief-grab-back": thief_grab_back,
     "card-thief-give-chase": thief_give_chase,
     "card-lost-wallet-keep": wallet_keep,
-    "card-petting-neighbour-take": neighbour_take,
+    "card-friendly-neighbour-take": neighbour_take,
     "card-belly-rubs": belly_rubs,
     "card-good-leash": good_leash,
     "card-big-tipper": big_tipper,

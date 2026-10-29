@@ -2,7 +2,7 @@
 """Draw The Beaches' and Yonge Street's own road objects, their card obstacles' cards, hits and sounds.
 
 The Beaches:
-dropped-cone        48x72   card obstacle (Dropped ice cream): a kid in a peach sundress with brown
+dropped-ice-cream   48x72   card obstacle (Dropped ice cream): a kid in a peach sundress with brown
                             pigtails looking down, sad, at her ice cream cone tipped on its side on the
                             ground beside her, its strawberry scoop squashed into a pink puddle. She stands
                             still. idle (2 frames, 400ms): a breath, a tear on her cheek on frame 1
@@ -38,7 +38,7 @@ volleyball-net-2    112x42  minor, 2 lanes, drawn 42 rows tall: a beach volleyba
 volleyball-net-3    176x42  minor, 3 lanes, drawn 42 rows tall: the same net, a lane wider
 
 Yonge Street:
-promo-team          48x72   card obstacle (Big screen promo): a street team promoter in a turquoise
+big-screen-promo    48x72   card obstacle (Big screen promo): a street team promoter in a turquoise
                             branded tee with a yellow star, an amber cap and white sneakers, a TV camera
                             on her right shoulder (screen left) with a red tally light, a mic with a hot
                             pink flag held out in her other hand. walk (4 frames, 100ms):
@@ -91,24 +91,24 @@ obstacles.white_keyline's plum, and the nets' mesh holes and the platform's rail
 unoutlined.
 
 Hits (77x77, play: 8 frames, 70ms, laid out on 64x64 as hits.py's), each opening on hits.impact:
-fx-hit-dropped-cone the impact star in pink, then the strawberry scoop shoots up off a pink splat,
+fx-hit-dropped-ice-cream the impact star in pink, then the strawberry scoop shoots up off a pink splat,
                     drops and sprinkles flying out, the empty cone tumbling away
-fx-hit-promo-team   the impact star in amber, then camera flashes popping round a white flash that
+fx-hit-big-screen-promo the impact star in amber, then camera flashes popping round a white flash that
                     shrinks away, confetti in cyan, pink and yellow falling
 
 Cards (75x56 images, composed from the sprites above as cards.py composes its own):
-card-dropped-cone-lick        Archie licking the pink puddle round the dropped cone, the kid by it, sky
+card-dropped-ice-cream-lick   Archie licking the pink puddle round the dropped cone, the kid by it, sky
                               speed lines and icon-zoomies' amber paw print for the sugar rush
-card-dropped-cone-buy         the kid holding a new cone up under hearts, a callout of -$
-card-dropped-cone-walk-on-by  Archie pulled away from the dropped cone on its leash
-card-promo-team-wave          Archie under a spotlight beam, the promoter filming, flashes round it
-card-promo-team-merch         the promoter's turquoise star tee held up as merch, a callout of -$
-card-promo-team-push-through  Archie pulling past the promoter, speed lines behind it
+card-dropped-ice-cream-buy    the kid holding a new cone up under hearts, a callout of -$
+card-dropped-ice-cream-walk-on-by Archie pulled away from the dropped cone on its leash
+card-big-screen-promo-wave    Archie under a spotlight beam, the promoter filming, flashes round it
+card-big-screen-promo-merch   the promoter's turquoise star tee held up as merch, a callout of -$
+card-big-screen-promo-push-through Archie pulling past the promoter, speed lines behind it
 
 Sounds (sounds.py's format, under 0.6s):
-sfx-hit-dropped-cone  0.54s  splat: a pink noise plop over a low falling triangle, then a sad
+sfx-hit-dropped-ice-cream 0.54s  splat: a pink noise plop over a low falling triangle, then a sad
                              triangle "aww" sliding down a fifth
-sfx-hit-promo-team    0.54s  camera: two shutter clicks of filtered noise, a rising flash whine and
+sfx-hit-big-screen-promo 0.54s  camera: two shutter clicks of filtered noise, a rising flash whine and
                              a bright square "ta-da" up a fourth
 
 Usage:
@@ -168,7 +168,7 @@ def stamp(g, rows, cx, cy, cols):
                 raster(g).p(x0 + i, y0 + j, cols[ch])
 
 
-# ---------- dropped-cone: the kid and her dropped cone ----------
+# ---------- dropped-ice-cream: the kid and her dropped cone ----------
 
 def waffle(g, x0, x1, y0, apex):
     """A waffle cone held point down: a triangle from its rim (x0 to x1 on row y0) to its point on row apex,
@@ -254,13 +254,13 @@ def kid(top, lf=0, rf=0, bob=0, arms=0):
     return lit(g)
 
 
-def dropped_cone(**q):
+def dropped_ice_cream(**q):
     """kid() with kid_top, the tear on its own key."""
     tear = q.pop("tear", False)
     return kid(kid_top(tear), **q)
 
 
-# ---------- promo-team: the street team promoter ----------
+# ---------- big-screen-promo: the street team promoter ----------
 
 STAR = ("..#..", ".###.", "#####", ".###.", ".#.#.")
 
@@ -1027,7 +1027,7 @@ def ttc_bus(blink=0, roll=None):
 SPRINKLES = ("yellow", "cyan", "white", "lime")
 
 
-def hit_dropped_cone(step):
+def hit_dropped_ice_cream(step):
     """The impact star in pink, then the strawberry scoop shoots up off a pink splat, peaks and drops back
     as drops and sprinkles fly out of the splat and the empty cone tumbles away to the right."""
     g = hits.Grid(64, 64)
@@ -1063,7 +1063,7 @@ def hit_dropped_cone(step):
     return g
 
 
-def hit_promo_team(step):
+def hit_big_screen_promo(step):
     """The impact star in amber, then a white camera flash with yellow rays that shrinks away while
     four-point flashes pop round it in turn and confetti in cyan, pink and yellow falls."""
     g = hits.Grid(64, 64)
@@ -1090,7 +1090,7 @@ def hit_promo_team(step):
     return g
 
 
-HITS = {"fx-hit-dropped-cone": hit_dropped_cone, "fx-hit-promo-team": hit_promo_team}
+HITS = {"fx-hit-dropped-ice-cream": hit_dropped_ice_cream, "fx-hit-big-screen-promo": hit_big_screen_promo}
 
 
 # ---------- build: the road sprites at full size and every depth step ----------
@@ -1112,10 +1112,10 @@ def sprites():
     drive = range(4)
     for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
         p, o, car = P * step, O * step, tuple(v * step for v in CAR)
-        yield f"dropped-cone{suffix}", [
-            ("idle", [person(p, dropped_cone, bob=b, tear=k == 1).outlined() for k, b in enumerate(BREATH)],
+        yield f"dropped-ice-cream{suffix}", [
+            ("idle", [person(p, dropped_ice_cream, bob=b, tear=k == 1).outlined() for k, b in enumerate(BREATH)],
              BREATH_MS)]
-        yield f"promo-team{suffix}", [
+        yield f"big-screen-promo{suffix}", [
             ("walk", [depths.dressed(p, promo_top(), legs="navy", shoes="white", **w).outlined()
                       for w in PERSON_WALK], PERSON_WALK_MS),
             ("idle", [depths.dressed(p, promo_top(k == 0), legs="navy", shoes="white", bob=b).outlined()
@@ -1200,8 +1200,8 @@ def card_lick():
     icon-zoomies draws the zoomies."""
     import cards
     a = cards.Art()
-    a.ground("pawsPromenade")
-    a.put("dropped-cone", "idle", 20, 60, 1)
+    a.ground("theBeaches")
+    a.put("dropped-ice-cream", "idle", 20, 60, 1)
     c = a.dog("archie", "pull", 50, 57, flip=True)
     a.lead(50, c, 62)
     for x, y, n in ((63, 22, 6), (65, 27, 8), (63, 32, 5)):
@@ -1214,7 +1214,7 @@ def card_buy():
     """The kid holding up a new cone under hearts, a callout of -$."""
     import cards
     a = cards.Art()
-    a.ground("pawsPromenade")
+    a.ground("theBeaches")
     img = to_image(small(this(), P, kid_with_cone).outlined())
     a.shadow(40, 56, 30)
     a.paste(img, 40 - img.width // 2, 60 - img.height)
@@ -1227,8 +1227,8 @@ def card_walk_on_by():
     """Walk on by: Archie pulled away from the dropped cone on its leash."""
     import cards
     a = cards.Art()
-    a.ground("pawsPromenade")
-    a.put("dropped-cone", "idle", 52, 60)
+    a.ground("theBeaches")
+    a.put("dropped-ice-cream", "idle", 52, 60)
     c = a.dog("archie", "pull", 18, 56, flip=True)
     a.lead(18, c, 6)
     a.fill(31, 6, 2, 5, "red")
@@ -1255,9 +1255,9 @@ def card_wave():
     """Archie in a spotlight's pool, the promoter filming it, a flash popping."""
     import cards
     a = cards.Art()
-    a.ground("homeStretch")
+    a.ground("yongeStreet")
     beam(a, 0, 26, 24, 52, 17)
-    a.put("promo-team", "idle", 60, 68)
+    a.put("big-screen-promo", "idle", 60, 68)
     c = a.dog("archie", "idle", 24, 56, shadow=False)
     a.lead(24, c, 18)
     a.sparkle(42, 10, "white")
@@ -1268,8 +1268,8 @@ def card_merch():
     """The promoter's star tee held up as merch, a callout of -$."""
     import cards
     a = cards.Art()
-    a.ground("homeStretch")
-    a.put("promo-team", "idle", 22, 68)
+    a.ground("yongeStreet")
+    a.put("big-screen-promo", "idle", 22, 68)
     tee = to_image(merch_tee().outlined())
     a.paste(tee, 42, 26)
     a.bubble(46, 5, 24, ["-$"], "dred")
@@ -1280,8 +1280,8 @@ def card_push_through():
     """Archie pulling past the promoter, speed lines behind it."""
     import cards
     a = cards.Art()
-    a.ground("homeStretch")
-    a.put("promo-team", "walk", 56, 68, 1)
+    a.ground("yongeStreet")
+    a.put("big-screen-promo", "walk", 56, 68, 1)
     c = a.dog("archie", "pull", 24, 58)
     a.lead(24, c, 12)
     for y, x, w in ((32, 3, 8), (39, 1, 10), (46, 4, 7)):
@@ -1290,12 +1290,12 @@ def card_push_through():
 
 
 ILLUSTRATIONS = {
-    "card-dropped-cone-lick": card_lick,
-    "card-dropped-cone-buy": card_buy,
-    "card-dropped-cone-walk-on-by": card_walk_on_by,
-    "card-promo-team-wave": card_wave,
-    "card-promo-team-merch": card_merch,
-    "card-promo-team-push-through": card_push_through,
+    "card-dropped-ice-cream-lick": card_lick,
+    "card-dropped-ice-cream-buy": card_buy,
+    "card-dropped-ice-cream-walk-on-by": card_walk_on_by,
+    "card-big-screen-promo-wave": card_wave,
+    "card-big-screen-promo-merch": card_merch,
+    "card-big-screen-promo-push-through": card_push_through,
 }
 
 
@@ -1320,7 +1320,7 @@ def cards_preview(out, scale=4):
 
 EFFECTS = {
     # a wet splat, then a sad "aww"
-    "sfx-hit-dropped-cone": [
+    "sfx-hit-dropped-ice-cream": [
         ("pinknoise", 0.16, None, 0, dict(vol=0.7, low=1800, high=250, attack=0.003, release=0.85)),
         ("triangle", 0.18, (300, 100), 0, dict(vol=0.4, attack=0.003, release=0.8)),
         ("square", 0.14, (300, 130), 0, dict(vol=0.5, low=900, attack=0.003, release=0.8, shape="h")),
@@ -1328,7 +1328,7 @@ EFFECTS = {
         ("square", 0.34, ("E5", "A4"), 0.2, dict(vol=0.2, duty=25, low=1500, attack=0.04, release=0.6, shape="h")),
     ],
     # two shutter clicks, a flash whine rising, a bright "ta-da"
-    "sfx-hit-promo-team": [
+    "sfx-hit-big-screen-promo": [
         ("pinknoise", 0.025, None, 0.004, dict(vol=0.3, low=5000, high=2000, attack=0.001, release=0.9,
                                                fx=("lowpass", "4500"))),
         ("pinknoise", 0.025, None, 0.07, dict(vol=0.27, low=5000, high=2000, attack=0.001, release=0.9,

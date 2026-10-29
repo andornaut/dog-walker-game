@@ -1,0 +1,104 @@
+{ "frames": {
+   "crosstown-bus 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 176, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 176, "h": 64 },
+    "sourceSize": { "w": 176, "h": 64 },
+    "duration": 100
+   },
+   "crosstown-bus 1.aseprite": {
+    "frame": { "x": 176, "y": 0, "w": 176, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 176, "h": 64 },
+    "sourceSize": { "w": 176, "h": 64 },
+    "duration": 100
+   },
+   "crosstown-bus 2.aseprite": {
+    "frame": { "x": 352, "y": 0, "w": 176, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 176, "h": 64 },
+    "sourceSize": { "w": 176, "h": 64 },
+    "duration": 100
+   },
+   "crosstown-bus 3.aseprite": {
+    "frame": { "x": 528, "y": 0, "w": 176, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 176, "h": 64 },
+    "sourceSize": { "w": 176, "h": 64 },
+    "duration": 100
+   },
+   "crosstown-bus 4.aseprite": {
+    "frame": { "x": 704, "y": 0, "w": 176, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 176, "h": 64 },
+    "sourceSize": { "w": 176, "h": 64 },
+    "duration": 400
+   },
+   "crosstown-bus 5.aseprite": {
+    "frame": { "x": 880, "y": 0, "w": 176, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 176, "h": 64 },
+    "sourceSize": { "w": 176, "h": 64 },
+    "duration": 400
+   },
+   "crosstown-bus 6.aseprite": {
+    "frame": { "x": 1056, "y": 0, "w": 176, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 176, "h": 64 },
+    "sourceSize": { "w": 176, "h": 64 },
+    "duration": 400
+   },
+   "crosstown-bus 7.aseprite": {
+    "frame": { "x": 1232, "y": 0, "w": 176, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 176, "h": 64 },
+    "sourceSize": { "w": 176, "h": 64 },
+    "duration": 400
+   },
+   "crosstown-bus 8.aseprite": {
+    "frame": { "x": 1408, "y": 0, "w": 176, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 176, "h": 64 },
+    "sourceSize": { "w": 176, "h": 64 },
+    "duration": 120
+   },
+   "crosstown-bus 9.aseprite": {
+    "frame": { "x": 1584, "y": 0, "w": 176, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 176, "h": 64 },
+    "sourceSize": { "w": 176, "h": 64 },
+    "duration": 120
+   },
+   "crosstown-bus 10.aseprite": {
+    "frame": { "x": 1760, "y": 0, "w": 176, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 176, "h": 64 },
+    "sourceSize": { "w": 176, "h": 64 },
+    "duration": 120
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "crosstown-bus.png",
+  "format": "RGBA8888",
+  "size": { "w": 1936, "h": 64 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "push", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "idle", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "cue", "from": 8, "to": 10, "direction": "forward" }
+  ]
+ }
+}

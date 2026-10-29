@@ -11,7 +11,7 @@ sfx-dodge          0.23s  near miss: a swell of filtered noise and two light ris
 sfx-card           0.44s  paper swish, then a triangle chime G5 D6
 sfx-gear-found     0.55s  sparkle: a narrow-pulse glissando D5 up to D6 into a shimmering D major chord
 sfx-lost-wallet    0.45s  ka-ching: a drawer click, a shimmering C#7 E7 bell, then a jingle of two coins
-sfx-petting-neighbour 0.52s warm "aww": a triangle rising C5 to E5 with vibrato, then a soft G5 C6 chime
+sfx-friendly-neighbour 0.52s warm "aww": a triangle rising C5 to E5 with vibrato, then a soft G5 C6 chime
 sfx-heart-lost     0.32s  soft sigh: a triangle falling E5 to C5 over a muted square
 sfx-fired          1.80s  sad "wah wah wah waaah" down G4 F#4 F4 E4, muted square
 sfx-hit-skunk      0.50s  spray hiss: pink noise stepping down three bands over a falling "pfff"
@@ -204,7 +204,7 @@ EFFECTS = {
         ("triangle", 0.06, "C#7", 0.3, dict(vol=0.4, low=3500, attack=0.002, release=0.8)),
     ],
     # Warm and low where the treat is bright and quick: one voice rising a third, then a soft chime.
-    "sfx-petting-neighbour": [
+    "sfx-friendly-neighbour": [
         ("triangle", 0.4, ("C5", "E5"), 0, dict(vol=0.9, attack=0.03, release=0.6, shape="h",
                                                 fx=("tremolo", "6", "20"))),
         ("square", 0.4, ("C5", "E5"), 0, dict(vol=0.25, duty=25, low=1800, attack=0.03, release=0.6, shape="h")),

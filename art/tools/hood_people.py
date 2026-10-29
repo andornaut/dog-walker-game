@@ -59,7 +59,7 @@ delivery-cyclist    48x72   Kensington Market and Yonge Street; a fast rider com
                             bike, the rider and the box leaning right about the handlebar, the box's top
                             over to the frame's right edge and the tire swinging out left, the head
                             upright over the neck
-segway-rider        48x72   Distillery District, 1 lane; a Segway tour rider coming down a lane at the
+segway-tour-rider   48x72   Distillery District, 1 lane; a Segway tour rider coming down a lane at the
                             player, facing it as delivery-cyclist does, standing upright on the
                             platform between the Segway's two tires (edge-on either side under light
                             grey fenders), the hands on the T handlebar's grips, its column down in
@@ -80,7 +80,7 @@ gardener            48x72   Cabbagetown; a slow rider coming down a lane at the 
                             road.BREATH with the barrow tipped forward onto its nose, the handles up at
                             the chest and a leaf or two over the lip; cue (4 frames, 200ms): righting
                             the barrow before a restart, tipped, halfway, level, then braced to push
-ranger-cart         48x72   High Park, 1 lane; a park ranger's small utility cart, a stop-and-go mover
+park-rangers-cart   48x72   High Park, 1 lane; a park ranger's small utility cart, a stop-and-go mover
                             riding its lane at the player, facing it as pedicab does: a white roof on
                             two posts with an amber light on top, a kraft paper bag of leaves behind
                             the passenger seat, the ranger
@@ -820,7 +820,7 @@ def delivery_tilted(whole, body, head, tilt, p):
     return out
 
 
-# ---------- segway-rider: facing the player, standing on a Segway coming down a lane at it ----------
+# ---------- segway-tour-rider: facing the player, standing on a Segway coming down a lane at it ----------
 
 # Riding: nothing to pedal, so the rider bobs 1px over the cobbles on frames 1 and 2, the knees taking it, the
 # tread falls down both tires 1px a frame and the pennant flutters, its tip up, level, down, level. 4 frames
@@ -830,7 +830,7 @@ SEGWAY_RIDE_MS = 90
 SEGWAY_RIM = {**LIT, "cobalt": ("azure", None), "dstone": ("stone", None)}
 
 
-def segway_rider(bob=0, roll=0, flag=0):
+def segway_tour_rider(bob=0, roll=0, flag=0):
     """A Segway tour rider facing the player, standing upright on the platform between its two wheels, laid
     out on 32x48 as delivery_cyclist is: a white bike helmet with two vents and dark straps, black
     sunglasses, an azure tee under an open hi-vis yellow vest with two silver reflective bands, stone shorts,
@@ -1021,7 +1021,7 @@ def gardener(lf=0, rf=0, bob=0, roll="0", tilt="0"):
     return rim(g, GARDENER_RIM)
 
 
-# ---------- ranger-cart: a park ranger's utility cart, facing the player, stop and go ----------
+# ---------- park-rangers-cart: a park ranger's utility cart, facing the player, stop and go ----------
 
 # Driving: the front tires' tread falls 1px a frame and the body dips 1px onto them on frames 1 and 2; 4 frames
 # at 100ms, as every drive. Stopped: the amber light blinks while the ranger looks left, then right; 4 frames at
@@ -1035,7 +1035,7 @@ RANGER_CUE_MS = 120
 RANGER_RIM = {**LIT, "olive": ("moss", None), "dolive": ("olive", None)}
 
 
-def ranger_cart(roll=None, light=0, look=0, point=0):
+def park_rangers_cart(roll=None, light=0, look=0, point=0):
     """A park ranger's small utility cart coming down its lane at the pack, facing the player, laid out on
     32x48 and drawn at road.SCALE as the pedicab is: a white roof on two posts with an amber light on top, the
     ranger at the wheel on the cart's left (screen right) in an olive uniform and a tan flat-brimmed campaign
@@ -2222,16 +2222,16 @@ def steps(suffix, s):
 
     def segway(q):
         # the tread's phase and the pennant are choices, not offsets, so they skip the snap
-        return minis.small(here, p, segway_rider, roll=q["roll"], flag=q["flag"],
+        return minis.small(here, p, segway_tour_rider, roll=q["roll"], flag=q["flag"],
                            **posed(dict(bob=q["bob"]), p)).outlined()
 
-    yield f"segway-rider{suffix}", [("ride", [segway(q) for q in SEGWAY_RIDE], SEGWAY_RIDE_MS)]
+    yield f"segway-tour-rider{suffix}", [("ride", [segway(q) for q in SEGWAY_RIDE], SEGWAY_RIDE_MS)]
     yield f"gardener{suffix}", [("push", [own(gardener, q) for q in GARDENER_PUSH], GARDENER_PUSH_MS),
                                 ("idle", [own(gardener, q) for q in GARDENER_IDLE], road.BREATH_MS),
                                 ("cue", [own(gardener, q) for q in GARDENER_CUE], GARDENER_CUE_MS)]
-    yield f"ranger-cart{suffix}", [("push", [own(ranger_cart, q) for q in RANGER_PUSH], RANGER_PUSH_MS),
-                                   ("idle", [own(ranger_cart, q) for q in RANGER_IDLE], RANGER_IDLE_MS),
-                                   ("cue", [own(ranger_cart, q) for q in RANGER_CUE], RANGER_CUE_MS)]
+    yield f"park-rangers-cart{suffix}", [("push", [own(park_rangers_cart, q) for q in RANGER_PUSH], RANGER_PUSH_MS),
+                                         ("idle", [own(park_rangers_cart, q) for q in RANGER_IDLE], RANGER_IDLE_MS),
+                                         ("cue", [own(park_rangers_cart, q) for q in RANGER_CUE], RANGER_CUE_MS)]
 
     def bike(q):
         # the tread frame, the offered cone and the ring are choices, not offsets, so they skip the snap

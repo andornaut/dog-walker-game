@@ -6,13 +6,13 @@
         "dx": 80.5,
         "dy": -19.5,
         "light": "bus-headlamp",
-        "zones": ["street"]
+        "zones": ["distilleryDistrict"]
       },
       {
         "dx": -85,
         "dy": -15.5,
         "light": "tail-red",
-        "zones": ["street"]
+        "zones": ["distilleryDistrict"]
       }
     ],
     "cargo-bike": [
@@ -21,14 +21,29 @@
         "dx": 0.5,
         "dy": -10.5,
         "light": "rider-headlamp",
-        "zones": ["homeStretch", "street"]
+        "zones": ["distilleryDistrict", "yongeStreet"]
       },
       {
         "angle": 90,
         "dx": 0.5,
         "dy": -10.5,
         "light": "rider-headlamp-stone",
-        "zones": ["shops"]
+        "zones": ["kensingtonMarket"]
+      }
+    ],
+    "crosstown-bus": [
+      {
+        "angle": 0,
+        "dx": 77.5,
+        "dy": -15.5,
+        "light": "bus-headlamp",
+        "zones": ["yongeStreet"]
+      },
+      {
+        "dx": -83.5,
+        "dy": -11,
+        "light": "tail-red",
+        "zones": ["yongeStreet"]
       }
     ],
     "cyclist": [
@@ -37,14 +52,14 @@
         "dx": 0.5,
         "dy": -18.5,
         "light": "rider-headlamp",
-        "zones": ["homeStretch", "street"]
+        "zones": ["distilleryDistrict", "yongeStreet"]
       },
       {
         "angle": 90,
         "dx": 0.5,
         "dy": -18.5,
         "light": "rider-headlamp-stone",
-        "zones": ["shops"]
+        "zones": ["kensingtonMarket"]
       }
     ],
     "delivery-cyclist": [
@@ -85,7 +100,7 @@
           }
         ],
         "light": "rider-headlamp",
-        "zones": ["homeStretch", "street"]
+        "zones": ["distilleryDistrict", "yongeStreet"]
       },
       {
         "angle": 90,
@@ -124,7 +139,7 @@
           }
         ],
         "light": "rider-headlamp-stone",
-        "zones": ["shops"]
+        "zones": ["kensingtonMarket"]
       }
     ],
     "delivery-truck": [
@@ -132,7 +147,7 @@
         "dx": 0,
         "dy": 2,
         "light": "tail-red",
-        "zones": ["homeStretch", "shops"]
+        "zones": ["kensingtonMarket", "yongeStreet"]
       }
     ],
     "ice-cream-truck": [
@@ -140,23 +155,23 @@
         "dx": 0,
         "dy": 2,
         "light": "tail-red",
-        "zones": ["homeStretch", "shops"]
+        "zones": ["kensingtonMarket", "yongeStreet"]
       }
     ],
-    "kid-on-bike": [
+    "kid-on-a-bike": [
       {
         "angle": 90,
         "dx": 0.5,
         "dy": -14.5,
         "light": "rider-headlamp",
-        "zones": ["homeStretch", "street"]
+        "zones": ["distilleryDistrict", "yongeStreet"]
       },
       {
         "angle": 90,
         "dx": 0.5,
         "dy": -14.5,
         "light": "rider-headlamp-stone",
-        "zones": ["shops"]
+        "zones": ["kensingtonMarket"]
       }
     ],
     "minor-scooter": [
@@ -187,7 +202,7 @@
           }
         ],
         "light": "rider-headlamp",
-        "zones": ["homeStretch", "street"]
+        "zones": ["distilleryDistrict", "yongeStreet"]
       },
       {
         "angle": 90,
@@ -216,7 +231,7 @@
           }
         ],
         "light": "rider-headlamp-stone",
-        "zones": ["shops"]
+        "zones": ["kensingtonMarket"]
       }
     ],
     "parked-car": [
@@ -224,7 +239,7 @@
         "dx": 0,
         "dy": 2,
         "light": "tail-red",
-        "zones": ["homeStretch", "shops"]
+        "zones": ["kensingtonMarket", "yongeStreet"]
       }
     ],
     "pedicab": [
@@ -233,14 +248,14 @@
         "dx": 0.5,
         "dy": -15.5,
         "light": "rider-headlamp",
-        "zones": ["homeStretch", "street"]
+        "zones": ["distilleryDistrict", "yongeStreet"]
       },
       {
         "angle": 90,
         "dx": 0.5,
         "dy": -15.5,
         "light": "rider-headlamp-stone",
-        "zones": ["shops"]
+        "zones": ["kensingtonMarket"]
       }
     ],
     "roadside-gas-lamp": [
@@ -249,7 +264,7 @@
         "dy": 0,
         "light": "gas-lamp-pool",
         "pulse": [1, 0.8, 0.6, 0.8],
-        "zones": ["shops", "street"],
+        "zones": ["distilleryDistrict", "kensingtonMarket"],
         "facesRoad": true
       },
       {
@@ -258,7 +273,7 @@
         "dy": -126,
         "light": "gas-lamp-cone",
         "pulse": [1, 0.8, 0.6, 0.8],
-        "zones": ["shops", "street"],
+        "zones": ["distilleryDistrict", "kensingtonMarket"],
         "facesRoad": true
       },
       {
@@ -266,7 +281,7 @@
         "dy": 0,
         "light": "gas-lamp-pool-dusk",
         "pulse": [1, 0.8, 0.6, 0.8],
-        "zones": ["snoozeCrescent"],
+        "zones": ["cabbagetown"],
         "facesRoad": true
       },
       {
@@ -275,7 +290,7 @@
         "dy": -126,
         "light": "gas-lamp-cone-dusk",
         "pulse": [1, 0.8, 0.6, 0.8],
-        "zones": ["snoozeCrescent"],
+        "zones": ["cabbagetown"],
         "facesRoad": true
       }
     ],
@@ -284,7 +299,7 @@
         "dx": 0,
         "dy": 4,
         "light": "shop-window",
-        "zones": ["shops"]
+        "zones": ["kensingtonMarket"]
       }
     ],
     "roadside-shopfront-violet": [
@@ -292,7 +307,7 @@
         "dx": 0,
         "dy": 4,
         "light": "shop-window",
-        "zones": ["shops"]
+        "zones": ["kensingtonMarket"]
       }
     ],
     "roadside-street-lamp": [
@@ -301,7 +316,7 @@
         "dy": 0,
         "light": "street-lamp-pool",
         "pulse": [1, 0.75, 0.5, 0.2, 0.5, 0.75],
-        "zones": ["homeStretch"],
+        "zones": ["yongeStreet"],
         "facesRoad": true
       },
       {
@@ -310,7 +325,7 @@
         "dy": -157,
         "light": "street-lamp-cone",
         "pulse": [1, 0.75, 0.5, 0.2, 0.5, 0.75],
-        "zones": ["homeStretch"],
+        "zones": ["yongeStreet"],
         "facesRoad": true
       }
     ],
@@ -319,7 +334,7 @@
         "dx": 0,
         "dy": 2,
         "light": "tail-red",
-        "zones": ["homeStretch", "shops"]
+        "zones": ["kensingtonMarket", "yongeStreet"]
       }
     ],
     "streetcar": [
@@ -327,7 +342,7 @@
         "dx": 0,
         "dy": 2,
         "light": "tail-red",
-        "zones": ["homeStretch", "shops"]
+        "zones": ["kensingtonMarket", "yongeStreet"]
       }
     ],
     "taxi": [
@@ -335,7 +350,7 @@
         "dx": 0,
         "dy": 2,
         "light": "tail-red",
-        "zones": ["homeStretch", "shops"]
+        "zones": ["kensingtonMarket", "yongeStreet"]
       }
     ],
     "ttc-bus": [
@@ -343,22 +358,7 @@
         "dx": 0,
         "dy": 2,
         "light": "tail-red",
-        "zones": ["homeStretch", "shops"]
-      }
-    ],
-    "ttc-bus-crossing": [
-      {
-        "angle": 0,
-        "dx": 77.5,
-        "dy": -15.5,
-        "light": "bus-headlamp",
-        "zones": ["homeStretch"]
-      },
-      {
-        "dx": -83.5,
-        "dy": -11,
-        "light": "tail-red",
-        "zones": ["homeStretch"]
+        "zones": ["kensingtonMarket", "yongeStreet"]
       }
     ]
   },
