@@ -76,20 +76,21 @@ export const CELEBRATION_LAYOUT = {
   // centre on the feet line, its frame's top-left at walker.
   newWalker: {
     ...headline(NEW_WALKER_FEET, 10),
-    bubble: { height: 96, width: SCREEN_WIDTH - SIDE * 2, x: SIDE, y: BUBBLE_TOP },
-    button: { ...BUTTON, y: BUBBLE_TOP + 104 },
+    bubble: { height: 97, width: SCREEN_WIDTH - SIDE * 2, x: SIDE, y: BUBBLE_TOP },
+    button: { ...BUTTON, y: BUBBLE_TOP + 105 },
     // The walker's line, its first line's top at top, wrapped within maxWidth onto up to lines
     // lines a line of the body font apart, by GREETING_FIT.
     greeting: { lines: 2, maxWidth: BUBBLE_ROOM, top: BUBBLE_TOP + 4 },
     // The agility line over the perk line, a line of the body font at 2x apart, their tops at y,
     // each centred within maxWidth: an icon iconDrop rows under its line's top, iconGap, its
-    // word; itemGap between the rest.
+    // word; itemGap between the rest. The first line's icon tops leave LABEL_HELP_GAP clear rows
+    // under the body font's lowest ink on the greeting's last line.
     info: {
       iconDrop: 1,
       iconGap: 4,
       itemGap: 10,
       maxWidth: BUBBLE_ROOM,
-      y: [BUBBLE_TOP + 50, BUBBLE_TOP + 70],
+      y: [BUBBLE_TOP + 51, BUBBLE_TOP + 71],
     },
     // Tan dots every step pixels along a row of the bubble.
     rule: { fromX: 36, step: 3, toX: 323, y: BUBBLE_TOP + 43 },

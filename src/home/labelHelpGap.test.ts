@@ -4,7 +4,7 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, GearId, WalkerId } from "../data/types";
 import { HELP_LAYOUT } from "../help/helpLayout";
-import { GREETING_FIT, greetingLineTops, newWalkerRows } from "../hud/celebrationLayout";
+import { GREETING_FIT, greetingLineTops, infoItems, newWalkerRows } from "../hud/celebrationLayout";
 import { celebrationText } from "../hud/zoneCelebration";
 import { fillLine, wrapWords } from "../lib/lines";
 import { keysOf } from "../lib/records";
@@ -219,8 +219,8 @@ const endPairs: Pair[] = Object.values(gameData.dogs).map(({ owner }) => {
   return { font: "font-title", held: "exactly", help, label, labelTop, where: "end screen" };
 });
 
-// A new walker's greeting's last line over their first info line. Both are placed by their
-// font line's top.
+// A new walker's greeting's last line over their first info line, by its capitals and by its
+// icons' top, which sit higher. Both lines are placed by their font line's top.
 const walkerPairs: Pair[] = keysOf(gameData.walkers).flatMap((walker) => {
   const shown = celebrationText(gameData, { kind: "newWalker", walker });
   if (shown.kind !== "newWalker") {
@@ -232,16 +232,29 @@ const walkerPairs: Pair[] = keysOf(gameData.walkers).flatMap((walker) => {
   const rows = newWalkerRows(BODY, shown.info.length, fitted);
   const lines = greetingLineTops(BODY, fitted.style.scale, fitted.lines.length);
   const capTop = BODY.capTop * TEXT_SCALE;
-  return [
-    {
-      font: "font-body",
-      held: "at least",
-      help: (rows.info[0]?.y ?? 0) + capTop,
-      label: fitted.lines.at(-1) ?? "",
-      labelTop: (lines.at(-1) ?? 0) + capTop,
-      where: "new walker's bubble",
-    },
-  ];
+  const label = fitted.lines.at(-1) ?? "";
+  const labelTop = (lines.at(-1) ?? 0) + capTop;
+  const first = shown.info[0] ?? [];
+  const icons = infoItems(first).some((item) => item.kind === "icon");
+  const where = "new walker's bubble";
+  const caps: Pair = {
+    font: "font-body",
+    held: "at least",
+    help: (rows.info[0]?.y ?? 0) + capTop,
+    label,
+    labelTop,
+    where,
+  };
+  const iconTop = rows.info[0]?.iconY ?? 0;
+  const icon: Pair = {
+    font: "font-body",
+    held: "exactly",
+    help: iconTop,
+    label,
+    labelTop,
+    where: `${where} (icon)`,
+  };
+  return icons ? [caps, icon] : [caps];
 });
 
 // A help page's title over its body.
@@ -269,6 +282,10 @@ const PAIRS: readonly Pair[] = [
 // A label over its help text sits one offset per font above it: 10 clear rows under the lowest
 // row the font inks, so every label, its own ink however deep, leaves at least 10.
 describe("a label over its help text", () => {
+  it("measures a new walker's info icons under their greeting", () => {
+    expect(PAIRS.filter(({ where }) => where.endsWith("(icon)"))).not.toHaveLength(0);
+  });
+
   it.each(PAIRS.map((pair) => [pair.where, pair.label, pair.held, pair] as const))(
     "leaves the %s's %s %s 10 clear rows under its font's lowest ink",
     (_where, _label, held, pair) => {
