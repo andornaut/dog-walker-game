@@ -1,80 +1,18 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import type * as ConfigModules from "./src/tools/viteConfigModules";
+import { gameViteConfig } from "./vendor/game-kit/src/build/vite/gameConfig";
 
-import { runnerImport } from "vite";
-import { defineConfig } from "vitest/config";
-
-import type * as ConfigModules from "./src/tools/viteConfigModules.ts";
-
-// An absolute path in this repository. Vite resolves relative paths against root, which is
-// pages/, so every path below goes through here instead.
-function repoPath(path: string): string {
-  return resolve(import.meta.dirname, path);
-}
-
-// @andornaut/game-kit/<path> is the kit's module at <path>, as in tsconfig.json's paths.
-const KIT_ALIAS = { "@andornaut/game-kit": repoPath("vendor/game-kit/src") };
-
-// Vite bundles this file without its own resolve.alias, so the repository's code, which imports
-// the kit by its alias, loads through a module runner given the alias.
-const {
-  module: {
-    PHASER_BUILD,
-    PHASER_ENTRY_ID,
-    atlasPlugin,
-    generatedFilesPlugin,
-    gitHead,
-    phaserBuildPlugin,
-    precachePlugin,
-    securityHeadersPlugin,
-    shortCommit,
-  },
-} = await runnerImport<typeof ConfigModules>(repoPath("src/tools/viteConfigModules.ts"), {
-  resolve: { alias: KIT_ALIAS },
-});
-
-const packageVersion: string = JSON.parse(readFileSync(repoPath("package.json"), "utf8")).version;
-
-// The service worker's precache reads the map of hashed art this plugin writes.
-const atlas = atlasPlugin();
-
-export default defineConfig({
-  build: {
-    // Outside root, so Vite would leave the previous build's files in place without emptyOutDir.
-    emptyOutDir: true,
-    outDir: repoPath("dist"),
-    // The home page at /, the game at /play/ and the game data tables at /data/. Each page's
-    // path under pages/ is its URL. public/ is copied as-is.
-    rolldownOptions: {
-      input: {
-        main: repoPath("pages/index.html"),
-        play: repoPath("pages/play/index.html"),
-        data: repoPath("pages/data/index.html"),
-      },
-      // Phaser and phaserBuildPlugin's entry go in their own chunk, so a game code change keeps
-      // its hashed file name and a new service worker's precache gets it from the browser's HTTP
-      // cache.
-      output: {
-        codeSplitting: {
-          groups: [
-            {
-              name: "phaser",
-              test: (id: string) =>
-                id === PHASER_ENTRY_ID || /[\\/]node_modules[\\/]phaser[\\/]/.test(id),
-            },
-          ],
-        },
-      },
-    },
-    // The Phaser chunk alone is about 1.06 MB minified, so the 500 kB default always warns.
-    // Set just above it so that growth in Phaser or game code still warns.
-    chunkSizeWarningLimit: 1100,
-  },
-  // The version and commit the dev bar shows, typed in vendor/game-kit/src/build/buildInfo.d.ts.
-  // Fixed per commit, so two builds of one commit match.
-  define: {
-    __APP_VERSION__: JSON.stringify(packageVersion),
-    __COMMIT__: JSON.stringify(shortCommit(() => gitHead(repoPath(".")), process.env)),
+// The kit's Vite and Vitest config (gameViteConfig), which loads the plugins below from
+// src/tools/viteConfigModules.ts through a module runner given the kit's alias.
+export default gameViteConfig<typeof ConfigModules>({
+  // The Phaser chunk alone is about 1.06 MB minified, so the 500 kB default always warns.
+  // Set just above it so that growth in Phaser or game code still warns.
+  chunkSizeWarningLimit: 1100,
+  configModules: "src/tools/viteConfigModules.ts",
+  // The home page at /, the game at /play/ and the game data tables at /data/.
+  pages: {
+    main: "pages/index.html",
+    play: "pages/play/index.html",
+    data: "pages/data/index.html",
   },
   // atlasPlugin writes public/art/manifest.json from the art files, packs the art's images and
   // sprites into atlas pages, and writes every art file the game loads under /assets/art/ with a
@@ -83,42 +21,28 @@ export default defineConfig({
   // shared/export/ as the art and src/ change. npm run build writes shared/export/ first.
   // phaserBuildPlugin, in a build only, bundles Phaser from its source without the namespaces the
   // game does not use and without the Canvas renderer (PHASER_BUILD in src/tools/phaserBuild.ts).
-  // precachePlugin writes /sw.js, the service worker that precaches the game for offline play.
+  // precachePlugin writes /sw.js, the service worker that precaches the game for offline play,
+  // reading the map of hashed art atlasPlugin writes.
   // securityHeadersPlugin writes /_headers, the response headers with each page's CSP.
-  plugins: [
-    atlas,
-    generatedFilesPlugin({ repoRoot: repoPath(".") }),
-    phaserBuildPlugin(PHASER_BUILD),
-    precachePlugin({
-      getArtFiles: atlas.api.artFiles,
-      pageHtmlFile: "play/index.html",
-      serviceWorkerSource: repoPath("src/pwa/serviceWorker.ts"),
-    }),
-    securityHeadersPlugin(),
-  ],
-  // The container name the Playwright MCP reaches the dev or preview server by,
-  // over the playwright-mcp Docker network. Vite rejects any other Host header.
-  preview: {
-    allowedHosts: ["dwg-preview"],
+  plugins: (modules, repoPath) => {
+    const atlas = modules.atlasPlugin();
+    return [
+      atlas,
+      modules.generatedFilesPlugin({ repoRoot: repoPath(".") }),
+      modules.phaserBuildPlugin(modules.PHASER_BUILD),
+      modules.precachePlugin({
+        getArtFiles: atlas.api.artFiles,
+        pageHtmlFile: "play/index.html",
+        serviceWorkerSource: repoPath("src/pwa/serviceWorker.ts"),
+      }),
+      modules.securityHeadersPlugin(),
+    ];
   },
-  publicDir: repoPath("public"),
-  // The pages load their modules as /src/..., which names the repository's src/ rather than
-  // pages/src/.
-  resolve: {
-    alias: { "/src": repoPath("src"), ...KIT_ALIAS },
-  },
-  root: repoPath("pages"),
-  server: {
-    allowedHosts: ["dwg-preview"],
-    // The dev server serves src/ and node_modules/ from outside root, as /@fs/ URLs.
-    fs: { allow: [repoPath(".")] },
-  },
-  test: {
-    environment: "node",
-    include: ["vendor/game-kit/src/**/*.test.ts", "src/**/*.test.ts"],
-    root: repoPath("."),
-    // Whole-walk tests run several seconds alone and several times that on a loaded host or a
-    // CI runner, so the default 5 s is too tight; the slowest blocks set their own, longer limit.
-    testTimeout: 30_000,
-  },
+  // The container name the Playwright MCP reaches the dev or preview server by, over the
+  // playwright-mcp Docker network. Vite rejects any other Host header.
+  previewHost: "dwg-preview",
+  repoRoot: import.meta.dirname,
+  // Whole-walk tests run several seconds alone and several times that on a loaded host or a
+  // CI runner, so the default 5 s is too tight; the slowest blocks set their own, longer limit.
+  testTimeout: 30_000,
 });

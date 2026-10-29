@@ -11,7 +11,7 @@
 
 ## Site
 
-The pages and `public/` are laid out in the [root README](../README.md#developing). `pages/` is Vite's root, its HTML pages the build inputs, and they load modules as `/src/...`, which `vite.config.ts` aliases to the repository's `src/`. The game imports `vendor/game-kit/src/<path>` as `@andornaut/game-kit/<path>`, mapped in `tsconfig.json`'s `paths` (tsc and tsx) and `vite.config.ts`'s `resolve.alias` (Vite and Vitest). Vite bundles `vite.config.ts` without that alias, so the config loads its plugins from `src/tools/viteConfigModules.ts` through a Vite module runner given it.
+The pages and `public/` are laid out in the [root README](../README.md#developing). `pages/` is Vite's root, its HTML pages the build inputs, and they load modules as `/src/...`, which `vite.config.ts` aliases to the repository's `src/`. The game imports `vendor/game-kit/src/<path>` as `@andornaut/game-kit/<path>`, mapped in `tsconfig.json`'s `paths` (tsc and tsx) and `gameViteConfig`'s `resolve.alias` (Vite and Vitest). Vite bundles `vite.config.ts` without that alias, so the config is the kit's `gameViteConfig` (`vendor/game-kit/src/build/vite/gameConfig.ts`, imported by its path), which loads the game's plugins from `src/tools/viteConfigModules.ts` through a Vite module runner given it.
 
 ## Architecture
 
