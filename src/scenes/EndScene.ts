@@ -16,6 +16,7 @@ import {
   quipNameX,
   quipTextY,
   sideTotalAmountY,
+  sideTotalBand,
 } from "../home/endLayout";
 import {
   closingLines,
@@ -241,11 +242,17 @@ export class EndScene extends Scene {
     const zones = `${walk.zonesFinished}/${walkLength(gameData)}`;
     text(SIDE.right, SIDE.pipsY, zones, PALETTE.plum, 1);
     // The walk's total under the pips in the body font, as the breakdown's amounts are, on
-    // TOTAL's row, clear of its title-font label.
+    // TOTAL's row, clear of its title-font label, both on the row's band.
     const totalText = signedShortDollarText(walk.earnedCents);
     const totalY = sideTotalAmountY(body, fonts.title);
-    text(SIDE.right, totalY, totalText, PALETTE.forest, 1);
-    title(SIDE.x, SIDE.totalY, words.total, PALETTE.plum);
+    const { band } = SIDE;
+    const amount = text(SIDE.right, totalY, totalText, PALETTE[band.text.amount], 1);
+    title(SIDE.x, SIDE.totalY, words.total, PALETTE[band.text.label]);
+    const amountInkRight = amount.x - amount.displayWidth + inkSpan(amount).right;
+    const { fill, lip, outline } = sideTotalBand(body, fonts.title, amountInkRight);
+    fillRect(g, PALETTE[band.outline], outline);
+    fillRect(g, PALETTE[band.fill], fill);
+    fillRect(g, PALETTE[band.lip], lip);
 
     const quipsTop = rows[0]?.top ?? 0;
     const { rule } = QUIPS;

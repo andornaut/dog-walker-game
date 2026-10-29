@@ -1504,11 +1504,22 @@
         "y": 88
       },
       "side": {
+        "band": {
+          "fill": "yellow",
+          "lip": "amber",
+          "outline": "ink",
+          "padX": 4,
+          "padY": 1,
+          "text": {
+            "amount": "forest",
+            "label": "plum"
+          }
+        },
         "pipPitch": 21,
         "pipsY": 172,
         "right": 320,
         "totalHeight": 12,
-        "totalY": 194,
+        "totalY": 193,
         "x": 208
       },
       "titleY": 130

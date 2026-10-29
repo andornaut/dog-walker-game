@@ -7,8 +7,9 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { fillLine } from "../lib/lines";
 import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
+import { cents } from "../lib/units";
 import { defined } from "../testing/defined";
-import { fontFileMetrics, fontInkRows, inkWidth } from "../testing/fontInk";
+import { fontFileMetrics, fontInkRows, inkWidth, placedInk } from "../testing/fontInk";
 import { decodePng } from "../testing/png";
 import { inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { fittingText, TEXT_SCALE, TEXT_STYLE, textOnLines } from "../ui/textFit";
@@ -37,8 +38,10 @@ import {
   quipRowHeight,
   quipTextY,
   sideTotalAmountY,
+  sideTotalBand,
 } from "./endLayout";
 import { endTargetAt } from "./endView";
+import { signedShortDollarText } from "./home";
 import { MENU_TEXT_FIELDS } from "./menuText";
 
 const { badges, breakdown, panel: most, quips, side } = END_LAYOUT;
@@ -82,6 +85,79 @@ describe("the side column's total row", () => {
     );
     expect(side.totalY + side.totalHeight).toBe(lowest);
   });
+});
+
+// TOTAL's band, round TOTAL and a walk's total: nothing, a short and a long one, a loss and the
+// short form from a thousand dollars.
+describe("the side column's total band", () => {
+  const { band } = side;
+  const amountY = sideTotalAmountY(BODY, TITLE);
+  const amounts = [0, 400, 14_800, -1500, 123_400].map((amount) =>
+    signedShortDollarText(cents(amount)),
+  );
+  const label = gameData.menuText.end.total;
+  const labelInk = placedInk("font-title", TEXT_STYLE, label);
+  // The band round a total whose ink ends at the side column's right.
+  const placed = () => sideTotalBand(BODY, TITLE, side.right);
+
+  it("pads TOTAL's ink and the total's by padX columns either side", () => {
+    const { fill } = placed();
+    expect(side.x + labelInk.left - fill.x).toBe(band.padX);
+    expect(fill.x + fill.width - side.right).toBe(band.padX);
+  });
+
+  // The row's ink, TOTAL's and the amount's, from its highest row to its lowest.
+  const rowInk = (amount: string) => {
+    const title = fontInkRows("font-title", TEXT_STYLE, label);
+    const body = fontInkRows("font-body", TEXT_STYLE, amount);
+    return {
+      bottom: Math.max(side.totalY + title.bottom, amountY + body.bottom),
+      top: Math.min(side.totalY + title.top, amountY + body.top),
+    };
+  };
+
+  it.each(amounts)("holds the row's ink with %s at least padY rows inside the fill", (amount) => {
+    const { fill } = placed();
+    const ink = rowInk(amount);
+    expect(ink.top - fill.y).toBeGreaterThanOrEqual(band.padY);
+    expect(fill.y + fill.height - ink.bottom).toBeGreaterThanOrEqual(band.padY);
+  });
+
+  // Over the $ every total starts with, and under the row's lowest ink, descenders included.
+  it("pads the row's highest ink and its fonts' lowest by exactly padY rows", () => {
+    const { fill } = placed();
+    expect(Math.min(...amounts.map((amount) => rowInk(amount).top)) - fill.y).toBe(band.padY);
+    expect(fill.y + fill.height - (side.totalY + side.totalHeight)).toBe(band.padY);
+  });
+
+  it("draws a lip row under the fill and an outline round both", () => {
+    const { fill, lip, outline } = placed();
+    expect(lip).toEqual({ ...fill, height: 1, y: fill.y + fill.height });
+    expect(outline).toEqual({
+      height: fill.height + lip.height + 2,
+      width: fill.width + 2,
+      x: fill.x - 1,
+      y: fill.y - 1,
+    });
+  });
+
+  it("keeps the band under the zone count's ink and inside the panel's frame", () => {
+    const { outline } = placed();
+    expect(outline.y).toBeGreaterThan(side.pipsY + inkRowsFromCapTop(BODY) * 2);
+    expect(outline.x + outline.width).toBeLessThanOrEqual(most.x + most.width - 2);
+  });
+
+  // The rule over the owners' rows sits at least 2 clear rows under the band at every count of
+  // breakdown lines.
+  it.each(BREAKDOWN_LINES)(
+    "ends the band 2 rows over the rule under %i breakdown lines",
+    (lines) => {
+      const { outline } = placed();
+      const { rows } = endPanelLayout(FONTS, lines, quipRows(1, false, []));
+      const rule = (rows[0]?.top ?? 0) - quips.rule.above;
+      expect(rule - (outline.y + outline.height)).toBeGreaterThanOrEqual(2);
+    },
+  );
 });
 
 describe("endPanelLayout", () => {

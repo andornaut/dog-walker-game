@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { greyFor } from "../assets/greyRamp";
 import { gameData } from "../data";
 import { BADGE_TEXT_COLOURS } from "../home/badgesView";
+import { END_LAYOUT } from "../home/endLayout";
 import { STATS_LAYOUT } from "../home/statsLayout";
 import type { EffectNameKind } from "../hud/effectNames";
 import { changeLabels } from "../hud/hudView";
@@ -18,8 +19,9 @@ import { CHANGE_COLOURS, changeLabelColour } from "./changeLabelColours";
 import { DEBUFF_COLOURS } from "./debuffColours";
 import { EFFECT_PILLS, pillColours } from "./effectNameColours";
 
-// The band an earned badge's row lies on.
+// The band an earned badge's row lies on, and the end screen's TOTAL row's.
 const BAND = PALETTE[STATS_LAYOUT.wall.earned.fill];
+const TOTAL_BAND = END_LAYOUT.side.band;
 
 // WCAG relative luminance and contrast ratio.
 function luminance(colour: number): number {
@@ -93,6 +95,12 @@ describe("interaction-state colours", () => {
       ["an earned badge's name on its band", PALETTE[BADGE_TEXT_COLOURS.earned.name], BAND, TEXT],
       ["an earned badge's goal on its band", PALETTE[BADGE_TEXT_COLOURS.earned.goal], BAND, TEXT],
       ["a locked badge's name", PALETTE[BADGE_TEXT_COLOURS.locked.name], PALETTE.cream, TEXT],
+      ...(["amount", "label"] as const).map((text): [string, number, number, number] => [
+        `the end screen's TOTAL ${text} on its band`,
+        PALETTE[TOTAL_BAND.text[text]],
+        PALETTE[TOTAL_BAND.fill],
+        TEXT,
+      ]),
       ["a locked badge's status", PALETTE[BADGE_TEXT_COLOURS.locked.status], PALETTE.cream, TEXT],
       [
         "a locked badge's goal and progress",

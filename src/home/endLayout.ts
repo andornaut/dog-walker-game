@@ -63,14 +63,25 @@ export const END_LAYOUT = {
   ribbonBurst: { height: 48, width: 96, x: RIBBON.x - 12, y: RIBBON.y - 14 },
   // The side column: its labels from x, the zone pips, then TOTAL in the title font with its
   // capitals at totalY and the walk's total beside it in the body font, their capitals ending on
-  // one row; the zone count and the total end at right. The column ends totalHeight under
-  // totalY, under the lowest ink of both.
+  // one row; the zone count and the total end at right. TOTAL's row ends totalHeight under
+  // totalY, under the lowest ink of both. The row sits on a band (sideTotalBand): fill from padX
+  // columns left of TOTAL's ink to padX right of the total's, and from padY rows over the row's
+  // highest ink to padY under its lowest, a 1px lip row under it and a 1px outline round both.
+  // The column ends under the band's outline.
   side: {
+    band: {
+      fill: "yellow",
+      lip: "amber",
+      outline: "ink",
+      padX: 4,
+      padY: 1,
+      text: { amount: "forest", label: "plum" },
+    },
     pipPitch: 21,
     pipsY: PANEL.y + 60,
     right: 320,
     totalHeight: 12,
-    totalY: PANEL.y + 82,
+    totalY: PANEL.y + 81,
     x: 208,
   },
   titleY: PANEL.y + 18,
@@ -108,6 +119,46 @@ export function sideTotalLabelRoom(amountWidth: number): number {
 // TOTAL's end in the 2x title font, whose capitals start at side.totalY.
 export function sideTotalAmountY(body: FontMetrics, title: FontMetrics): number {
   return END_LAYOUT.side.totalY + (title.capHeight - body.capHeight) * TEXT_SCALE;
+}
+
+// The band behind TOTAL's row, round TOTAL's ink starting at side.x and the total's ink ending
+// at amountInkRight (exclusive): its outline, its fill and the lip under the fill.
+// The row's highest ink is the higher of TOTAL's letters' and the total's, whose $ and digits
+// rise no higher than the body font's letters.
+export function sideTotalBand(
+  body: FontMetrics,
+  title: FontMetrics,
+  amountInkRight: number,
+): { fill: Rect; lip: Rect; outline: Rect } {
+  const { band, totalY, x } = END_LAYOUT.side;
+  const inkTop = Math.min(
+    totalY - (title.capTop - title.letterTop) * TEXT_SCALE,
+    sideTotalAmountY(body, title) - (body.capTop - body.letterTop) * TEXT_SCALE,
+  );
+  const top = inkTop - band.padY;
+  const left = x - band.padX;
+  const fill = {
+    height: sideTotalInkBottom() + band.padY - top,
+    width: amountInkRight + band.padX - left,
+    x: left,
+    y: top,
+  };
+  return {
+    fill,
+    lip: { ...fill, height: 1, y: fill.y + fill.height },
+    outline: { height: fill.height + 3, width: fill.width + 2, x: fill.x - 1, y: fill.y - 1 },
+  };
+}
+
+// The row under TOTAL's row's lowest ink.
+function sideTotalInkBottom(): number {
+  return END_LAYOUT.side.totalY + END_LAYOUT.side.totalHeight;
+}
+
+// The row under the side column: under the band's outline, which ends a lip and an outline row
+// under its padY.
+function sideBottom(): number {
+  return sideTotalInkBottom() + END_LAYOUT.side.band.padY + 2;
 }
 
 // An owner's row: whether the owner fired you, and how many lines its closing line takes.
@@ -176,7 +227,8 @@ export function quipTextY(fonts: QuipFonts, row: QuipRow): number {
   return quipCapsTop(fonts, row) + quipHeaderDy(fonts, row);
 }
 
-// The breakdown ends a pitch under its last line's top; the side column ends under its total.
+// The breakdown ends a pitch under its last line's top; the side column ends under its total's
+// band.
 // The owners' rows start QUIPS_GAP under whichever ends lower, the tan rule 8px over them, and
 // the panel ends 8px under the last row.
 const QUIPS_GAP = 10;
@@ -194,9 +246,9 @@ export function endPanelLayout(
   breakdownLines: number,
   quipRows: readonly QuipRow[],
 ): EndPanelLayout {
-  const { breakdown, quips, side } = END_LAYOUT;
+  const { breakdown, quips } = END_LAYOUT;
   const listBottom = breakdown.top + breakdownLines * breakdown.pitch;
-  let top = Math.max(listBottom, side.totalY + side.totalHeight) + QUIPS_GAP;
+  let top = Math.max(listBottom, sideBottom()) + QUIPS_GAP;
   const shown = quipRows.length === 0 ? [{ fired: false, lines: 1 }] : quipRows;
   const rows = shown.map((quip) => {
     const row = { bubble: quipBubbleHeight(fonts, quip), height: quipRowHeight(fonts, quip), top };
