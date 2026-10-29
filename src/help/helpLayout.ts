@@ -8,12 +8,13 @@ import type { HelpAction } from "./helpPaging";
 const { screen: SCREEN, topBar: TOP_BAR } = SCREEN_LAYOUT;
 const { height, width } = SCREEN;
 
-// The help screen's geometry at the render resolution. A text position is the top-left of
-// its first line.
-// The body's lines, at most maxLines of them, are lineHeight apart. The picture is the walk
-// screen's width, ruled off a row above and below.
+// The help screen's geometry at the render resolution. A text position is its first line's
+// left edge and capitals' top.
+// The body's lines, at most maxLines of them, are lineHeight apart, its capitals the label gap
+// under the lowest row the title's font inks (helpCapDy). The picture is the walk screen's
+// width, ruled off a row above and below.
 export const HELP_LAYOUT = {
-  body: { lineHeight: 18, maxLines: 6, scale: 2, width: 336, x: 12, y: 334 },
+  body: { lineHeight: 18, maxLines: 6, scale: 2, width: 336, x: 12, y: 332 },
   // The close control's face is centred on the top bar.
   close: pageCloseControl(SCREEN, closeTopOnBar(TOP_BAR)),
   // A tap target apart, so each dot's target is its own slot, ending above Previous's and

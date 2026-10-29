@@ -260,7 +260,7 @@ const walkerPairs: Pair[] = keysOf(gameData.walkers).flatMap((walker) => {
 // A help page's title over its body.
 const helpPairs: Pair[] = gameData.help.map(({ title }) => ({
   font: "font-title",
-  held: "at least",
+  held: "exactly",
   help: HELP_LAYOUT.body.y,
   label: title,
   labelTop: HELP_LAYOUT.title.y,
