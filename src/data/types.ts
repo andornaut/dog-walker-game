@@ -581,9 +581,8 @@ export type Walker = WalkerUnlock & {
 
 // A debuff lasts its seconds of walking, a time that stops during a hit stop and under a card,
 // and never past the zone's end. Nothing cures it. stake is what it does, as a card states it
-// after the debuff's name, its {seconds} filled with how long it would last, its {slower} with how
-// much slower its multiply agility modifiers make lane changes, such as Muddy's, and its {cash}
-// with its bumpMoney. Its modifiers change stats while it lasts; one the rules act on by id, such
+// after the debuff's name, its {seconds} filled with how long it would last and its {cash} with
+// its bumpMoney. Its modifiers change stats while it lasts; one the rules act on by id, such
 // as Zoomies' drift, has none. While one with bumpMoney lasts, a plain bump also costs that cash,
 // as bumpMoney modifiers change it, on top of its hearts: all the cash there is when that is
 // less, and none at $0.

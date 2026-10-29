@@ -29,7 +29,7 @@ export function everyStripLine(): (FaceText & Pick<MessageLine, "names">)[] {
     ...keysOf(gameData.debuffs).map((debuff) => {
       const started = [{ debuff, secondsLeft: 99, untilZone: 0 }];
       const [said] = debuffLines(gameData, { ended: [], started });
-      const fields = { cash: amount, seconds: "99", slower: "100%" };
+      const fields = { cash: amount, seconds: "99" };
       return { names: said?.names ?? [], text: fillNames(strip.debuffStart[debuff], fields) };
     }),
     ...keysOf(gameData.shopGear).map((gear) =>

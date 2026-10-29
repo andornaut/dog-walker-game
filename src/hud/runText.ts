@@ -51,7 +51,7 @@ export const RUN_TEXT_FIELDS = {
   strip: {
     ...STRIP_LINE_FIELDS,
     debuffStart: {
-      muddy: ["seconds", "slower"],
+      muddy: ["seconds"],
       spotlight: ["cash", "seconds"],
       stinky: ["seconds"],
       zoomies: ["seconds"],

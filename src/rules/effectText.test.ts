@@ -163,18 +163,11 @@ describe("effectText", () => {
     }
   });
 
-  // Muddy's stake says how much slower lane changes are: 1 less muddyLaneSlow, as a percent.
-  it.each([
-    { slow: 0.5, slower: "50%" },
-    { slow: 0.75, slower: "25%" },
-  ])("fills Muddy's stake with $slower slower at muddyLaneSlow $slow", ({ slow, slower }) => {
-    const tuning = {
-      ...data.tuning,
-      multipliers: { ...data.tuning.multipliers, muddyLaneSlow: slow },
-    };
+  // Muddy's stake says how long it lasts.
+  it("fills Muddy's stake with its seconds", () => {
     const seconds = String(read(TEST_TUNING, "seconds", DEBUFFS.muddy.seconds));
-    expect(effectText({ ...data, tuning }, [{ debuff: "muddy", kind: "debuff" }])).toBe(
-      `${DEBUFFS.muddy.name}: ${fillNames(DEBUFFS.muddy.stake, { seconds, slower })}`,
+    expect(effectText(data, [{ debuff: "muddy", kind: "debuff" }])).toBe(
+      `${DEBUFFS.muddy.name}: ${fillNames(DEBUFFS.muddy.stake, { seconds })}`,
     );
   });
 });

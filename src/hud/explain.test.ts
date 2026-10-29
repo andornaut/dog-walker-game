@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { fillLine, fillNames } from "../lib/lines";
 import { maxHearts, placeInPack } from "../rules/dogs";
-import { read } from "../rules/units";
 import { testState } from "../testing/runState";
 import { newPlayerSave } from "../testing/saves";
 import { explainDetail } from "./explain";
@@ -86,12 +85,10 @@ describe("explainDetail", () => {
     expect(explainDetail(gameData, newPlayerSave, run, target)).toBeUndefined();
   });
 
-  it("fills the debuff's stake with its whole seconds left and how much slower lanes change", () => {
+  it("fills the debuff's stake with its whole seconds left", () => {
     const detail = explainDetail(gameData, newPlayerSave, run, { debuff: "muddy", kind: "debuff" });
-    const slow = read(gameData.tuning, "multipliers", "muddyLaneSlow");
-    const slower = `${Math.round(100 * (1 - slow))}%`;
     expect(detail?.card.lines.join(" ").toLowerCase()).toContain(
-      fillNames(gameData.debuffs.muddy.stake, { seconds: "10", slower }).toLowerCase(),
+      fillNames(gameData.debuffs.muddy.stake, { seconds: "10" }).toLowerCase(),
     );
   });
 });

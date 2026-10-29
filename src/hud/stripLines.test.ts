@@ -158,8 +158,6 @@ describe("luckyLine: the friendly neighbour", () => {
 
 describe("debuffLines", () => {
   const active = (debuff: DebuffId, secondsLeft: number) => ({ debuff, secondsLeft, untilZone: 0 });
-  // How much slower Muddy makes lane changes: 1 less muddyLaneSlow, as a percent.
-  const muddySlower = `${Math.round(100 * (1 - read(gameData.tuning, "multipliers", "muddyLaneSlow")))}%`;
   // A debuff's bump cash, for one that makes bumps cost cash, such as Spotlight.
   const cashOf = (debuff: DebuffId) => {
     const key = (gameData.debuffs[debuff] as Debuff).bumpMoney;
@@ -170,8 +168,7 @@ describe("debuffLines", () => {
     for (const debuff of keysOf(gameData.debuffs)) {
       const on = { debuffs: [active(debuff, 20)] };
       const off = { debuffs: [] };
-      const slower = debuff === "muddy" ? muddySlower : "0%";
-      const fields = { cash: cashOf(debuff), seconds: "20", slower };
+      const fields = { cash: cashOf(debuff), seconds: "20" };
       expect(debuffLines(gameData, debuffChanges(off, on))).toMatchObject([
         { icon: debuff, text: fillNames(strip.debuffStart[debuff], fields) },
       ]);
