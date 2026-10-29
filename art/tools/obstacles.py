@@ -26,6 +26,10 @@ delivery-truck      56x54   1 lane by 3 rows of footprint, a brown box van from 
                             climb the tires and the body dips 1px onto them on frames 1 and 2
 hot-dog-cart        112x66  2 lanes, a stainless street meat cart side on under a striped umbrella;
                             idle (2 frames, 500ms): wavy steam wisps rising off the steam table
+ice-cream-cart      112x66  2 lanes, the hot dog cart's frame: a turquoise beach ice cream cart under a
+                            turquoise and white umbrella, a cone for its finial, scoop tubs on its counter
+                            and a double cone on its side; idle (2 frames, 500ms): a pistachio drip runs
+                            down the side cone
 streetcar           56x66   1 lane by 3 rows of footprint, a red TTC Flexity from behind, its pantograph
                             on the roof, drawn at the footprint's near edge; idle (4 frames, 400ms): a
                             spark at the pan head on frame 2. drive (4 frames, 100ms): tread lines climb
@@ -588,6 +592,43 @@ def cart_edge(c):
     return None if c == K["haze"] else road_edge(c)
 
 
+def cart_wheels(g, w):
+    """A street cart's two wheels, behind its box: ink tires, grey hubs."""
+    for x in (19, w - 19):
+        g.cel(x, 48, 6, 6.5, "ink", None, "dslate")
+        g.cel(x, 48, 2, 2, "grey", None, "lgrey")
+
+
+def cart_umbrella(g, w, cols, top=2, base=15):
+    """A street cart's umbrella: six wedges from its tip at row top to row base, a scallop under each.
+    cols is ((lit, lit), (shade, shade)): the left three wedges take the lit pair in turn, the right three
+    the shaded pair."""
+    c = w / 2
+    left, right = 8, w - 8
+    for i in range(6):
+        x0, x1 = left + (right - left) * i / 6, left + (right - left) * (i + 1) / 6
+        g.tri((x0, base), (x1, base), (c, top), cols[i >= 3][i % 2])
+    for i in range(6):
+        x0 = left + (right - left) * i / 6
+        g.cel(x0 + (right - left) / 12, base, (right - left) / 12, 2.5, cols[i >= 3][i % 2])
+
+
+def cart_pole(g, w, top):
+    """A street cart's umbrella pole, from row top down to the counter."""
+    c = w / 2
+    g.rect(c - 1, top, 2, 28 - top, "slate")
+    g.rect(c - 1, top, 1, 28 - top, "grey")
+
+
+def cart_box(g, w, body, light, shade, lip=("white", "lgrey")):
+    """A street cart's counter lip, then its box: lit down its left in light, shaded down its right."""
+    g.rect(6, 28, w - 12, 2, lip[0])
+    g.rect(6, 29, w - 12, 1, lip[1])
+    g.rect(9, 30, w - 18, 15, body)
+    g.rect(9, 30, 1, 15, light)
+    g.rect(w - 14, 30, 5, 15, shade)
+
+
 def hot_dog_cart(steam=0, w=span(2)):
     """A Toronto street meat cart side on, two lanes wide, laid out on span(2) x 55 and drawn at SCALE to
     112x66: a stainless box on two wheels under a red and yellow striped umbrella with a scalloped valance,
@@ -596,27 +637,12 @@ def hot_dog_cart(steam=0, w=span(2)):
     with a mustard zigzag on the box's side. steam (0 or 1) shifts the wisps' wave half a period."""
     g = edged(Grid(w, 55), cart_edge)
     c = w / 2
-    # the wheels, behind the box: ink tires, grey hubs
-    for x in (19, w - 19):
-        g.cel(x, 48, 6, 6.5, "ink", None, "dslate")
-        g.cel(x, 48, 2, 2, "grey", None, "lgrey")
+    cart_wheels(g, w)
     # the umbrella: six wedges from the finial, red and yellow, the right three in shade
-    left, right, base = 8, w - 8, 15
-    for i in range(6):
-        x0, x1 = left + (right - left) * i / 6, left + (right - left) * (i + 1) / 6
-        lit_ = i < 3
-        col = ("red" if lit_ else "dred") if i % 2 == 0 else ("yellow" if lit_ else "amber")
-        g.tri((x0, base), (x1, base), (c, 2), col)
-    # the valance: a scallop under each wedge
-    for i in range(6):
-        x0 = left + (right - left) * i / 6
-        col = ("red" if i < 3 else "dred") if i % 2 == 0 else ("yellow" if i < 3 else "amber")
-        g.cel(x0 + (right - left) / 12, base, (right - left) / 12, 2.5, col)
+    cart_umbrella(g, w, (("red", "yellow"), ("dred", "amber")))
     g.rect(c - 1, 0, 2, 2, "grey")
     g.p(c - 1, 0, "lgrey")
-    # the pole down to the counter
-    g.rect(c - 1, 17, 2, 11, "slate")
-    g.rect(c - 1, 17, 1, 11, "grey")
+    cart_pole(g, w, 17)
     # on the counter, left: ketchup, mustard and relish bottles, their nozzles white, and a stack of buns
     for x, col, sh in ((12, "red", "dred"), (17, "yellow", "amber"), (22, "green", "dgreen")):
         g.rect(x, 21, 4, 7, col)
@@ -635,12 +661,8 @@ def hot_dog_cart(steam=0, w=span(2)):
         x0 = edge(x)
         for k, y in enumerate(range(edge(22.5) - 1, edge(18.5) - 1, -1)):
             px.p(x0 + STEAM_WAVE[(k + 3 * (steam + i)) % len(STEAM_WAVE)], y, "haze")
-    # the counter's lip, then the stainless box: lit along its top and left, shaded down its right
-    g.rect(6, 28, w - 12, 2, "white")
-    g.rect(6, 29, w - 12, 1, "lgrey")
-    g.rect(9, 30, w - 18, 15, "lgrey")
-    g.rect(9, 30, 1, 15, "white")
-    g.rect(w - 14, 30, 5, 15, "grey")
+    # the stainless box, lit along its top and left, shaded down its right, with two seams
+    cart_box(g, w, "lgrey", "white", "grey")
     g.rect(9, 30, w - 18, 1, "grey")
     for x in (round(w * 0.3), round(w * 0.7)):
         g.rect(x, 31, 1, 13, "grey")
@@ -650,6 +672,63 @@ def hot_dog_cart(steam=0, w=span(2)):
     for k, x in enumerate(range(round(c - 9), round(c + 9), 3)):
         g.rect(x, 37 - k % 2, 2, 1, "yellow")
     g.cel(c, 40, 11.5, 1.8, "tan", "ochre")
+    g.rect(9, 44, w - 18, 1, "slate")
+    return lit(g)
+
+
+# The ice cream cart's idle: a pistachio drip runs down the side sign's cone on frame 1.
+ICE_CREAM_CART_IDLE = (0, 1), 500
+
+
+def waffle(g, x0, x1, y0, tip):
+    """A waffle cone point down from its rim on row y0, lit tan on its left half and shaded ochre on its
+    right, crosshatched in 1px brown lines 3px apart down to TEXTURE_MIN."""
+    cx = (x0 + x1) / 2
+    g.tri((x0, y0), (x1, y0), (cx, tip), "tan")
+    g.tri((cx, y0), (x1, y0), (cx, tip), "ochre")
+    if scale_of(g) < TEXTURE_MIN:
+        return
+    px, edge = raster(g), pixel_edge(g)
+    cone = (K["tan"], K["ochre"])
+    for y in range(edge(y0), edge(tip)):
+        for x in range(edge(x0), edge(x1) + 1):
+            if 0 <= x < px.w and px.px[y][x] in cone and ((x + y) % 3 == 0 or (x - y) % 3 == 0):
+                px.p(x, y, "brown")
+
+
+def ice_cream_cart(drip=0, w=span(2)):
+    """A beach ice cream cart side on, the hot dog cart's frame: laid out on span(2) x 55 and drawn at SCALE
+    to 112x66, a turquoise box on two wheels under a turquoise and white umbrella, a strawberry cone for its
+    finial, lit on its left and shaded on its right; four tubs heaped with strawberry, vanilla, pistachio
+    and chocolate scoops along its cream counter, and on the box's side a cream panel with a pistachio and
+    strawberry double cone. drip (0 or 1) runs a pistachio drip down the cone's lit side."""
+    g = edged(Grid(w, 55), cart_edge)
+    c = w / 2
+    cart_wheels(g, w)
+    # the umbrella, 4 rows lower than the hot dog cart's under its cone finial
+    cart_umbrella(g, w, (("turquoise", "white"), ("dturq", "lgrey")), 6, 17)
+    g.tri((c - 2.2, 4), (c + 2.2, 4), (c, 9.7), "tan")
+    g.tri((c, 4), (c + 2.2, 4), (c, 9.7), "ochre")
+    g.cel(c, 2.7, 2.6, 2.1, "pink", "mauve", "white")
+    g.rect(c - 2.6, 3.4, 5.2, 1, "mauve")
+    cart_pole(g, w, 19)
+    # on the counter: four white tubs, each heaped with its scoop
+    for x, col, sh, li in ((14, "pink", "mauve", "white"), (25, "cream", "tan", "white"),
+                           (w - 25, "lime", "green", "white"), (w - 14, "brown", "dbrown", "tan")):
+        g.cel(x, 24, 4.2, 3, col, sh, li)
+        g.rect(x - 4, 24.5, 8, 3.5, "white")
+        g.rect(x + 3, 24.5, 1, 3.5, "lgrey")
+    cart_box(g, w, "turquoise", "foam", "dturq", ("cream", "tan"))
+    # the side sign: a cream panel, a waffle cone under a pistachio scoop and a strawberry one
+    g.rect(c - 12, 30, 24, 14, "cream")
+    g.rect(c + 10, 30, 2, 14, "tan")
+    waffle(g, c - 4.5, c + 4.5, 38.5, 46)
+    g.cel(c, 36.3, 5.2, 3, "lime", "green", "white")
+    g.cel(c, 32.3, 4.4, 2.8, "pink", "mauve", "white")
+    if drip:
+        # 1 drawn pixel wide, so it stays a drip at every depth step
+        px, edge = raster(g), pixel_edge(g)
+        px.rect(edge(c - 2.5), edge(38.5), 1, max(2, edge(42) - edge(38.5)), "lime")
     g.rect(9, 44, w - 18, 1, "slate")
     return lit(g)
 
@@ -672,6 +751,7 @@ def sprites():
     yield "delivery-truck", idle(delivery_truck, DELIVERY_IDLE, CAR_SCALE) + [
         ("drive", [drawn(CAR_SCALE, delivery_truck, roll=f).outlined() for f in drive], drive_ms)]
     yield "hot-dog-cart", idle(lambda f: hot_dog_cart(steam=f), HOT_DOG_CART_IDLE)
+    yield "ice-cream-cart", idle(lambda f: ice_cream_cart(drip=f), ICE_CREAM_CART_IDLE)
     yield "streetcar", idle(streetcar, STREETCAR_IDLE, CAR_SCALE) + [
         ("drive", [drawn(CAR_SCALE, streetcar, roll=f).outlined() for f in drive], drive_ms)]
     cue, cue_ms = TAXI_CUE

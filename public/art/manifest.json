@@ -6550,6 +6550,87 @@
       }
     },
     {
+      "key": "ice-cream-cart",
+      "png": "sprites/ice-cream-cart.png",
+      "json": "sprites/ice-cream-cart.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 100
+      }
+    },
+    {
+      "key": "ice-cream-cart@50",
+      "png": "sprites/ice-cream-cart@50.png",
+      "json": "sprites/ice-cream-cart@50.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 50
+      }
+    },
+    {
+      "key": "ice-cream-cart@56",
+      "png": "sprites/ice-cream-cart@56.png",
+      "json": "sprites/ice-cream-cart@56.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 56
+      }
+    },
+    {
+      "key": "ice-cream-cart@62",
+      "png": "sprites/ice-cream-cart@62.png",
+      "json": "sprites/ice-cream-cart@62.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 63
+      }
+    },
+    {
+      "key": "ice-cream-cart@69",
+      "png": "sprites/ice-cream-cart@69.png",
+      "json": "sprites/ice-cream-cart@69.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 69
+      }
+    },
+    {
+      "key": "ice-cream-cart@75",
+      "png": "sprites/ice-cream-cart@75.png",
+      "json": "sprites/ice-cream-cart@75.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 75
+      }
+    },
+    {
+      "key": "ice-cream-cart@81",
+      "png": "sprites/ice-cream-cart@81.png",
+      "json": "sprites/ice-cream-cart@81.json",
+      "anchor": {
+        "feetY": 53,
+        "opaqueWidth": 81
+      }
+    },
+    {
+      "key": "ice-cream-cart@88",
+      "png": "sprites/ice-cream-cart@88.png",
+      "json": "sprites/ice-cream-cart@88.json",
+      "anchor": {
+        "feetY": 57,
+        "opaqueWidth": 88
+      }
+    },
+    {
+      "key": "ice-cream-cart@94",
+      "png": "sprites/ice-cream-cart@94.png",
+      "json": "sprites/ice-cream-cart@94.json",
+      "anchor": {
+        "feetY": 61,
+        "opaqueWidth": 93
+      }
+    },
+    {
       "key": "ice-cream-truck",
       "png": "sprites/ice-cream-truck.png",
       "json": "sprites/ice-cream-truck.json",

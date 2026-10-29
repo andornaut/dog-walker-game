@@ -1,0 +1,30 @@
+{ "frames": {
+   "ice-cream-cart@75 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 84, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 84, "h": 50 },
+    "sourceSize": { "w": 84, "h": 50 },
+    "duration": 500
+   },
+   "ice-cream-cart@75 1.aseprite": {
+    "frame": { "x": 84, "y": 0, "w": 84, "h": 50 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 84, "h": 50 },
+    "sourceSize": { "w": 84, "h": 50 },
+    "duration": 500
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ice-cream-cart@75.png",
+  "format": "RGBA8888",
+  "size": { "w": 168, "h": 50 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+  ]
+ }
+}
