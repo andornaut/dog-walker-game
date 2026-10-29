@@ -2,6 +2,8 @@
 import "./crash/install";
 import "./main.css";
 
+import { MENU_FPS } from "@andornaut/game-kit/clock/frameCap";
+import { capFrameRate } from "@andornaut/game-kit/clock/phaser/capFrameRate";
 import { fitWholePixels } from "@andornaut/game-kit/view/phaser/fitWholePixels";
 import { Core, Game, Scale, WEBGL } from "phaser";
 
@@ -23,7 +25,6 @@ import { HelpPictureScene } from "./scenes/HelpPictureScene";
 import { HelpScene } from "./scenes/HelpScene";
 import { watchHomeScreen } from "./scenes/homeScreen";
 import { HudScene } from "./scenes/HudScene";
-import { capMenuFrameRate } from "./scenes/menuFrameCap";
 import { PauseScene } from "./scenes/PauseScene";
 import { QuitScene } from "./scenes/QuitScene";
 import { RunScene } from "./scenes/RunScene";
@@ -107,7 +108,8 @@ function bootGame(): Game {
   // At the top in portrait, so the spare height sits under the dog cards, where the walk
   // steers from the page too; centred in landscape.
   fitWholePixels("topInPortrait", SCREEN_CONFIG, game);
-  capMenuFrameRate(game);
+  // Menus draw at most about 60 frames a second; a walk (RunScene) draws every frame.
+  capFrameRate(MENU_FPS, () => game.scene.isActive(SCENE_KEYS.run), game);
   // The installed app has no dev panel, so its #dev-panel stays hidden and no cheat is set.
   if (devToolsOn()) {
     mountDevPanel(devPanelHost(game), document.getElementById("dev-panel"));

@@ -1,5 +1,6 @@
-// The frame rate cap away from the walk. Menus draw at most about MENU_FPS frames a second, so a
-// 120 Hz or faster phone does half or less of the work its refresh rate would ask for. 60 is the
+// A frame rate cap for when the game is not in play (phaser/capFrameRate). Menus draw at most
+// about MENU_FPS frames a second, so a 120 Hz or faster phone does half or less of the work its
+// refresh rate would ask for. 60 is the
 // rate a 60 Hz phone draws everything at, so a capped menu looks as it does there; 30 would show
 // each 60 ms frame of a tap burst for 33 or 67 ms, step a 140 ms press dip in 4 frames, and add
 // up to 33 ms to a dragged list.
