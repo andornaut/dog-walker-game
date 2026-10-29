@@ -13,7 +13,7 @@ function repoPath(path: string): string {
 }
 
 // @andornaut/game-kit/<path> is the kit's module at <path>, as in tsconfig.json's paths.
-const KIT_ALIAS = { "@andornaut/game-kit": repoPath("packages/game-kit/src") };
+const KIT_ALIAS = { "@andornaut/game-kit": repoPath("vendor/game-kit/src") };
 
 // Vite bundles this file without its own resolve.alias, so the repository's code, which imports
 // the kit by its alias, loads through a module runner given the alias.
@@ -60,7 +60,7 @@ export default defineConfig({
     // Set just above it so that growth in Phaser or game code still warns.
     chunkSizeWarningLimit: 1600,
   },
-  // The version and commit the dev bar shows, typed in packages/game-kit/src/build/buildInfo.d.ts.
+  // The version and commit the dev bar shows, typed in vendor/game-kit/src/build/buildInfo.d.ts.
   // Fixed per commit, so two builds of one commit match.
   define: {
     __APP_VERSION__: JSON.stringify(packageVersion),
@@ -102,7 +102,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["packages/game-kit/src/**/*.test.ts", "src/**/*.test.ts"],
+    include: ["vendor/game-kit/src/**/*.test.ts", "src/**/*.test.ts"],
     root: repoPath("."),
     // Whole-walk tests run several seconds alone and several times that on a loaded host or a
     // CI runner, so the default 5 s is too tight; the slowest blocks set their own, longer limit.

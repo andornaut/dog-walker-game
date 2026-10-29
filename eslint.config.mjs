@@ -8,15 +8,9 @@ import ts from "typescript-eslint";
 
 import { plugins, sourceRules, toolingRules } from "./eslint.config.base.mjs";
 
-const KIT_FILES = ["packages/game-kit/src/**/*.ts"];
-const SOURCE_FILES = [...KIT_FILES, "src/**/*.ts"];
-const PHASER_FILES = [
-  "packages/game-kit/src/**/phaser/**",
-  "src/main.ts",
-  "src/scenes/**",
-  "src/**/phaser/**",
-];
-const TEST_FILES = ["packages/game-kit/src/**/*.test.ts", "src/**/*.test.ts"];
+const SOURCE_FILES = ["src/**/*.ts"];
+const PHASER_FILES = ["src/main.ts", "src/scenes/**", "src/**/phaser/**"];
+const TEST_FILES = ["src/**/*.test.ts"];
 
 // The import boundaries, one row each: the files outside `except` may not import what `forbid`
 // names. Logic, layout and data stay free of Phaser and the scenes, so they run in unit tests
@@ -59,17 +53,6 @@ const CONTEXTS = {
     "state/runState",
   ],
   ui: ["assets"],
-};
-
-// The kit, a context of its own: it imports no game code, so it can be copied into another game,
-// and imports its own modules by relative path, so it works without the game's alias.
-const KIT_CONTEXT = {
-  files: KIT_FILES,
-  forbid: {
-    group: ["**/src", "**/src/*", "@andornaut/game-kit", "@andornaut/game-kit/*"],
-    message:
-      "packages/game-kit/ may import nothing from src/, and imports its own modules by relative path.",
-  },
 };
 
 const SRC_FOLDERS = folders("src").filter((folder) => folder !== "testing");
@@ -144,7 +127,7 @@ function allOf(globLists) {
 // partition the files: one config per context (or none) and set of boundaries that binds a file,
 // listing the patterns of the context and of every boundary in the set.
 function boundaryConfigs() {
-  const contexts = [KIT_CONTEXT, ...Object.keys(CONTEXTS).map(contextBoundary)];
+  const contexts = Object.keys(CONTEXTS).map(contextBoundary);
   return [undefined, ...contexts].flatMap((context) =>
     subsets(BOUNDARIES)
       .filter((binding) => context !== undefined || binding.length > 0)
@@ -169,8 +152,9 @@ function boundaryConfigs() {
 
 export default defineConfig(
   {
-    // .claude/ holds agent worktrees: full copies of the repo that CI never checks out.
-    ignores: [".claude/", ".wrangler/", "dist/", "node_modules/"],
+    // .claude/ holds agent worktrees: full copies of the repo that CI never checks out. vendor/
+    // holds copies of other repositories, linted there.
+    ignores: [".claude/", ".wrangler/", "dist/", "node_modules/", "vendor/"],
   },
   js.configs.recommended,
   ts.configs.recommended,

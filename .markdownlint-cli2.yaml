@@ -30,6 +30,7 @@ ignores:
   - "**/node_modules/**"
   - ".agents/**"
   - ".claude/**"
+  - "vendor/**"
   - AGENTS.md
   - CLAUDE.md
   - GEMINI.md

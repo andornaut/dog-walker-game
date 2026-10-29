@@ -12,12 +12,12 @@
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
-    "paths": { "@andornaut/game-kit/*": ["./packages/game-kit/src/*"] },
+    "paths": { "@andornaut/game-kit/*": ["./vendor/game-kit/src/*"] },
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "skipLibCheck": true
   },
-  "include": ["packages/game-kit/src", "src", "*.ts"]
+  "include": ["vendor/game-kit/src", "src", "*.ts"]
 }
