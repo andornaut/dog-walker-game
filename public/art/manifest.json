@@ -14448,12 +14448,6 @@
       "loop": true
     },
     {
-      "key": "music-walk",
-      "ogg": "sounds/music-walk.ogg",
-      "m4a": "sounds/music-walk.m4a",
-      "loop": true
-    },
-    {
       "key": "music-yonge-street",
       "ogg": "sounds/music-yonge-street.ogg",
       "m4a": "sounds/music-yonge-street.m4a",

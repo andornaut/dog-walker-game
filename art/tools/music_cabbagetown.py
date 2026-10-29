@@ -70,5 +70,5 @@ def music(tmp, out):
         p, length, "triangle", note, vol=0.9, attack=0.01, release=0.6), step=STEP)
     brushes = voice(tmp, "brush", brush_score(), brush, step=STEP)
     # The bass and brushes mix with their polarity inverted, so their attacks partly cancel the tine's instead of
-    # stacking on them: the lower peak lets the loop match music-walk's loudness after normalization.
+    # stacking on them: the lower peak leaves headroom when the loop is levelled to MUSIC_LUFS.
     mix([(tine, 0.5), (shimmer, 0.1), (guitar, 0.55), (bass, -0.55), (brushes, -2.5)], out)

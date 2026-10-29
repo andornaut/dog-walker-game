@@ -34,16 +34,13 @@ music-kensington-market 34.30s 16 bars at about 112 BPM in D mixolydian, loops s
                           accordion calls and marimba answers over a tresillo bass and hand drums
 music-the-beaches  34.90s 16 bars at about 110 BPM in F, loops seamlessly: calypso steel pan lead,
                           bouncing triangle bass, offbeat pulse strums, kick, hand drums and shaker
-music-walk         28.77s 12 bars at about 100 BPM in C, loops seamlessly: square lead,
-                          triangle walking bass, thin square arpeggio, soft kick and tick
 music-yonge-street 29.09s 16 bars at about 132 BPM in D dorian, loops seamlessly: pulse lead
                           with a dotted-eighth echo, octave square bass, offbeat stabs, kick and snare
 
 Each effect is levelled to the same loudness on a phone speaker (EFFECT_LUFS), with
 sfx-badge, sfx-fired, sfx-new-best and sfx-zone-done 2 LU louder, sfx-bump and sfx-dodge 3 LU quieter and
 sfx-heart-lost 1 LU quieter, and padded with silence at both ends; the times above are the sounding lengths. Each
-neighbourhood's loop is levelled to one phone loudness (MUSIC_LUFS); music-walk, the fallback loop, keeps its
-peak at PEAK_DB, since raising it to MUSIC_LUFS takes its AAC file over CEILING_DB. Each sound ships as mono 44.1kHz Ogg
+neighbourhood's loop is levelled to one phone loudness (MUSIC_LUFS). Each sound ships as mono 44.1kHz Ogg
 Vorbis plus AAC (.m4a), since iOS Safari cannot play Ogg, and a build stops if either
 file decodes to a peak at or over -1 dBFS.
 
@@ -333,40 +330,8 @@ EFFECTS = {
     ],
 }
 
-# Music: 12 bars of 16 sixteenths. A phrase over C Am F G twice (the second
-# resolving to C), then a bridge over F G Am G that turns back to the top.
-# Notes are "name:sixteenths"; "-" is a rest.
-
-LEAD = """
-E5:2 G5:2 C6:4 B5:2 G5:2 E5:4 | A5:6 G5:2 E5:4 -:4 | F5:2 A5:2 C6:4 A5:2 F5:2 G5:4 | G5:6 A5:2 G5:4 -:4
-E5:2 G5:2 C6:4 D6:2 C6:2 G5:4 | A5:2 C6:2 E6:4 D6:2 C6:2 A5:4 | F5:2 A5:2 C6:4 B5:2 A5:2 G5:2 D5:2 | C5:6 E5:2 C5:4 -:4
-A5:4 C6:4 A5:2 G5:2 F5:4 | G5:4 B5:4 D6:4 B5:4 | C6:4 B5:2 A5:2 E5:4 A5:4 | G5:6 F5:2 D5:4 -:4
-"""
-BASS = """
-C3:4 G3:4 E3:4 G3:4 | A2:4 E3:4 C3:4 E3:4 | F2:4 C3:4 A2:4 C3:4 | G2:4 D3:4 B2:4 D3:4
-C3:4 G3:4 E3:4 G3:4 | A2:4 E3:4 C3:4 E3:4 | F2:4 C3:4 G2:4 D3:4 | C3:4 G2:4 C3:4 -:4
-F2:4 C3:4 A2:4 C3:4 | G2:4 D3:4 B2:4 D3:4 | A2:4 E3:4 C3:4 E3:4 | G2:4 D3:4 B2:4 D3:4
-"""
-CHORDS = "C Am F G C Am FG C F G Am G"
-ARPS = {"C": "C4 E4 G4 C5", "Am": "A3 C4 E4 A4", "F": "F3 A3 C4 F4", "G": "G3 B3 D4 G4"}
-
-
 def parse(score):
     return [(t.split(":")[0], int(t.split(":")[1])) for t in score.split() if t != "|"]
-
-
-def arp_score():
-    notes = []
-    for chord in CHORDS.split():
-        for half in (["F", "G"] if chord == "FG" else [chord, chord]):
-            a, b, c, d = ARPS[half].split()
-            notes += [(x, 2) for x in (a, b, c, d)]
-    return notes
-
-
-def drum_score():
-    """Kick on beats 1 and 3, tick on 2 and 4, as (voice, sixteenths)."""
-    return [(v, 4) for _ in range(12) for v in ("kick", "tick", "kick", "tick")]
 
 
 def voice(tmp, name, score, play, step=STEP):
@@ -385,35 +350,14 @@ def voice(tmp, name, score, play, step=STEP):
     return out
 
 
-def drum(path, length, kind):
-    if kind == "kick":
-        tone(path, n(0.12), "triangle", (150, 45), attack=0.002, release=0.9, tail=length - n(0.12))
-    else:
-        tone(path, n(0.035), "pinknoise", None, vol=0.35, high=5000, attack=0.002, release=0.9,
-             tail=length - n(0.035))
-
-
-def music(tmp, out):
-    lead = voice(tmp, "lead", parse(LEAD), lambda p, length, note: tone(
-        p, length, "square", note, vol=0.45, low=3000, attack=0.008, release=0.7))
-    bass = voice(tmp, "bass", parse(BASS), lambda p, length, note: tone(
-        p, length, "triangle", note, vol=0.9, attack=0.006, release=0.5))
-    arp = voice(tmp, "arp", arp_score(), lambda p, length, note: tone(
-        p, length, "square", note, vol=0.14, duty=25, low=1800, attack=0.004, release=0.85))
-    drums = voice(tmp, "drums", drum_score(), drum)
-    mix([(lead, 1), (bass, 0.8), (arp, 1), (drums, 0.5)], out)
-
-
 # Each neighbourhood's walk music, by art id. Its loop is music-<art id>, rendered by music(tmp, out) in
 # art/tools/music_<art id with underscores>.py.
 ZONE_MUSIC = ("cabbagetown", "distillery-district", "high-park", "kensington-market", "the-beaches", "yonge-street")
-MUSIC = ("music-walk", *(f"music-{zone}" for zone in ZONE_MUSIC))
+MUSIC = tuple(f"music-{zone}" for zone in ZONE_MUSIC)
 
 
 def track(key):
     """The function that renders a music key into a wav: music(tmp, out)."""
-    if key == "music-walk":
-        return music
     return importlib.import_module("music_" + key.removeprefix("music-").replace("-", "_")).music
 
 
@@ -499,12 +443,9 @@ def render(out_dir, keys=(*EFFECTS, *MUSIC)):
         for key in keys:
             if key in MUSIC:
                 wav = f"{tmp}/{key}.wav"
-                if key == "music-walk":
-                    track(key)(tmp, wav)
-                else:
-                    raw = f"{tmp}/{key}-raw.wav"
-                    track(key)(tmp, raw)
-                    level_music(raw, wav)
+                raw = f"{tmp}/{key}-raw.wav"
+                track(key)(tmp, raw)
+                level_music(raw, wav)
                 encode(wav, out_dir, key)
     return list(keys)
 
