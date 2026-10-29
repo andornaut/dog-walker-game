@@ -604,7 +604,6 @@ export class ShopScene extends Scene {
     addShopTabs(
       this,
       root,
-      currentSettings(this).reducedMotion,
       SHOP_TABS.map((tab) => ({
         label: words.tabs[tab],
         open: tab === this.tab,

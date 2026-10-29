@@ -608,18 +608,18 @@ export function addSelectTile(
   return tile;
 }
 
-// A tab in parent: a face drawn in code, selected while it is the open tab and dipped while
-// pressed, its label centred in the title font.
+// A tab in parent: a face drawn in code, selected while it is the open tab, its select frame
+// held still, and dipped while pressed, its label centred in the title font.
 export function addTab(
   scene: Scene,
   parent: GameObjects.Container,
   rect: Rect,
   label: string,
-  look: { open: boolean; pressed: boolean; reducedMotion: boolean },
+  look: { open: boolean; pressed: boolean },
 ): void {
   const tile = addSelectTile(scene, parent, rect, {
     edge: true,
-    reducedMotion: look.reducedMotion,
+    reducedMotion: true,
     state: tileState({ ...PLAIN_ITEM, picked: look.open }),
     tile: false,
   });

@@ -43,14 +43,13 @@ export function addShopPage(
 export function addShopTabs(
   scene: Scene,
   parent: GameObjects.Container,
-  reducedMotion: boolean,
   tabs: readonly ShopPageTab[],
 ): void {
   shopTabRects(tabs.length).forEach((hit, i) => {
     const tab = tabs[i];
     if (tab !== undefined) {
       const { label, open, pressed } = tab;
-      addTab(scene, parent, shopTabFace(hit), label, { open, pressed, reducedMotion });
+      addTab(scene, parent, shopTabFace(hit), label, { open, pressed });
     }
   });
 }

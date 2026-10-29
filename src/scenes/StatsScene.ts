@@ -300,7 +300,6 @@ export class StatsScene extends Scene {
     addShopTabs(
       this,
       root,
-      currentSettings(this).reducedMotion,
       TABS.map((tab, i) => ({
         label: words.tabs[tab],
         open: tab === this.tab,
