@@ -6,7 +6,7 @@ import { ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { WalkerId } from "../data/types";
-import { cashLeft, ownerPhotoRect, WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
+import { ownerPhotoRect, WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
 import { wrapWords } from "../lib/lines";
 import { keysOf } from "../lib/records";
 import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
@@ -28,6 +28,7 @@ import { dollarAmountText, dollarText, shortDollarAmountText } from "./home";
 import {
   BANK_ROOM,
   bankAmountText,
+  bankWell,
   CARD_TEXT_ROOM,
   cardBand,
   detailCardLayout,
@@ -241,10 +242,7 @@ describe("top bar", () => {
     ["Settings", settings],
   ] as const;
   const hits = buttons.map(([, button]) => button.hit);
-  const wellInk = {
-    bottom: well.y + well.height - well.lip - 1,
-    right: well.x + well.width - well.lip - 1,
-  };
+  const wellInk = { bottom: well.y + well.height - well.lip - 1 };
 
   // Each button under the walk bar's button in the same place among its last four.
   const under = buttons.map(([name, button], i) => {
@@ -268,13 +266,9 @@ describe("top bar", () => {
     expect(ends.at(-1)).toBe(SCREEN_CONFIG.width);
   });
 
-  it("centres the bank's well on the bar's middle row and ends it before the first hit area", () => {
+  it("centres the bank's well on the bar's middle row and ends the widest before the first face", () => {
     expect(well.y + well.height / 2).toBe(mid);
-    expect(well.x + well.width).toBeLessThan(logbook.hit.x);
-  });
-
-  it("sets the bank across the well's ink columns", () => {
-    expect(bank.ink).toEqual({ left: well.x, right: wellInk.right });
+    expect(well.x + well.maxWidth).toBeLessThan(logbook.face.x);
   });
 
   // The title font's capitals, centred on the well's ink rows, a half pixel at most lower when
@@ -318,21 +312,24 @@ describe("the top bar's bank", () => {
     expect(bankAmountText(measure, { full: "full", short: "short" })).toBe(expected);
   });
 
-  // The first amount of each parity of ink: the centring reads only that.
-  const parity = (text: string) => (width(text) * bank.scale) % 2;
-  const sampled = amounts.filter(
-    (text, i) => amounts.findIndex((other) => parity(other) === parity(text)) === i,
-  );
-  it.each(sampled)("centres %s across the bank's ink columns", (text) => {
+  // The well is the ink and pad columns either side, no wider than its widest.
+  const { maxWidth } = HOME_LAYOUT.topBar.well;
+  it.each<[number, number]>([
+    [0, 2 * bank.pad],
+    [1, 1 + 2 * bank.pad],
+    [BANK_ROOM - 1, maxWidth - 1],
+    [BANK_ROOM, maxWidth],
+    [BANK_ROOM + 1, maxWidth],
+  ])("sets the well for %ipx of ink %ipx wide", (ink, wellWidth) => {
+    const { height, x, y } = HOME_LAYOUT.topBar.well;
+    expect(bankWell(ink)).toEqual({ height, width: wellWidth, x, y });
+  });
+
+  // Every amount's ink inside its well's ink columns, pad columns in from either side.
+  it.each(amounts)("holds %s inside its well", (text) => {
     const ink = width(text) * bank.scale;
-    const left = cashLeft(ink);
-    const right = left + ink - 1;
-    expect(left).toBeGreaterThanOrEqual(bank.ink.left);
-    expect(right).toBeLessThanOrEqual(bank.ink.right);
-    // Centred, a half pixel at most to the left when the widths' parities differ.
-    const offCentre = (bank.ink.left + bank.ink.right) / 2 - (left + right) / 2;
-    expect(offCentre).toBeGreaterThanOrEqual(0);
-    expect(offCentre).toBeLessThanOrEqual(0.5);
+    const well = bankWell(ink);
+    expect(well.x + bank.pad + ink).toBeLessThanOrEqual(well.x + well.width - bank.pad);
   });
 });
 

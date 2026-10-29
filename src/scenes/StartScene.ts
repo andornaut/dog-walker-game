@@ -52,6 +52,7 @@ import {
 } from "../home/home";
 import {
   bankAmountText,
+  bankWell,
   dogTileNameY,
   dogTilePlateY,
   HOME_LAYOUT,
@@ -88,7 +89,6 @@ import {
 } from "../hud/effectIcons";
 import { withNamePills } from "../hud/effectNames";
 import { downTail } from "../hud/moments";
-import { cashLeft } from "../hud/walkHud";
 import {
   type HoldPress,
   holdRule,
@@ -1288,18 +1288,12 @@ export class StartScene extends Scene {
       x: 0,
       y: TOP_BAR.height - TOP_BAR.rule,
     });
-    // The bank in its well: the "$" and the amount at the bank's scale, one font advance apart
-    // and centred across the well, in full where it fits and else in its short form.
-    const { bank, well, wellKey } = TOP_BAR;
-    if (this.textures.exists(wellKey)) {
-      root.add(this.add.image(well.x, well.y, wellKey).setOrigin(0));
-    } else {
-      const { height, lip, width, x, y } = well;
-      fillRect(g, PALETTE.ink, { height: height - lip, width: width - lip, x, y });
-    }
+    // The bank in its well: the "$" and the amount at the bank's scale, one font advance apart,
+    // in full where it fits and else in its short form, the well as wide as they need.
+    const { bank, well, wellKeys } = TOP_BAR;
     const dollar = this.text(root, 0, 0, "$", PALETTE.amber, { font: "title", scale: 1 });
     const amount = this.text(root, 0, 0, "", PALETTE.cream, { font: "title", scale: 1 });
-    const { capsY, scale } = bank;
+    const { capsY, pad, scale } = bank;
     const inkAt1x = (text: string) => {
       setPixelText(amount, text);
       const ink = inkSpan(amount);
@@ -1309,11 +1303,25 @@ export class StartScene extends Scene {
       full: dollarAmountText(save.bankCents),
       short: shortDollarAmountText(save.bankCents),
     });
-    setDollarAmount(dollar, amount, shown, (inkWidth) => ({
-      left: cashLeft(inkWidth * scale),
-      scale,
-      top: capsY,
-    }));
+    const rect = bankWell(inkAt1x(`$${shown}`) * scale);
+    const pieces = Object.values(wellKeys);
+    if (pieces.every((key) => this.textures.exists(key))) {
+      const middle = rect.width - 2;
+      root.add([
+        this.add.image(rect.x, rect.y, wellKeys.left).setOrigin(0),
+        this.add
+          .image(rect.x + 1, rect.y, wellKeys.mid)
+          .setOrigin(0)
+          .setScale(middle, 1),
+        this.add.image(rect.x + rect.width - 1, rect.y, wellKeys.right).setOrigin(0),
+      ]);
+    } else {
+      const { lip } = well;
+      fillRect(g, PALETTE.ink, { ...rect, height: rect.height - lip, width: rect.width - lip });
+    }
+    root.bringToTop(dollar);
+    root.bringToTop(amount);
+    setDollarAmount(dollar, amount, shown, () => ({ left: rect.x + pad, scale, top: capsY }));
     this.iconButton(root, "logbook", LOGBOOK_FACE, (x, y) =>
       imageIconOr(this, "icon-logbook", x, y, "L"),
     );

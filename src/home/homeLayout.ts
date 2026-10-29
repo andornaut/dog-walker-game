@@ -258,22 +258,23 @@ export const HOME_LAYOUT = {
   // A selected tile's ui-select frame sits 1px outside it.
   tileSelectOutset: 1,
   // The top bar: the bank in its well at the left, then plain plum, then the buttons. The well
-  // (wellKey) is ink on its first well.width - lip columns and well.height - lip rows, its lip
-  // on the last. The bank, the title font's "$" and amount one font advance apart, is set at
-  // bank.scale in full with thousands separated (bankAmountText), centred across the columns
-  // bank.ink.left to bank.ink.right (the well's ink), its capitals' top at bank.capsY.
+  // is as wide as the bank needs (bankWell), at most well.maxWidth, drawn from wellKeys: its left
+  // column, the middle column repeated, and its right column. It is ink on its first
+  // well.height - lip rows, its lip on the last. The bank, the title font's "$" and amount one
+  // font advance apart, is set at bank.scale in full with thousands separated (bankAmountText),
+  // its ink bank.pad columns in from the well's left, its capitals' top at bank.capsY.
   topBar: {
-    bank: {
-      capsY: 11,
-      ink: WALK_BAR.cash.ink,
-      scale: WALK_BAR.cash.scale,
-    },
+    bank: { capsY: 11, pad: 3, scale: WALK_BAR.cash.scale },
     faceSize: TOP_BAR_FACE,
     height: TOP_BAR_HEIGHT,
     mid: TOP_BAR_MID,
     rule: TOP_BAR_RULE,
-    well: { height: 28, lip: 1, width: 70, x: 5, y: 5 },
-    wellKey: "ui-home-cash-well",
+    well: { height: 28, lip: 1, maxWidth: 220, x: 5, y: 5 },
+    wellKeys: {
+      left: "ui-home-cash-well-left",
+      mid: "ui-home-cash-well-mid",
+      right: "ui-home-cash-well-right",
+    },
   },
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
   walkerOrigin: { x: WALKER_ORIGIN_X, y: WALKER_SECTION.y + TILE_OFFSET },
@@ -304,8 +305,16 @@ export const HOME_LAYOUT = {
   yardSign: Rect;
 };
 
-// How wide the bank's ink may be.
-export const BANK_ROOM = HOME_LAYOUT.topBar.bank.ink.right + 1 - HOME_LAYOUT.topBar.bank.ink.left;
+// How wide the bank's ink may be: the widest well less its padding.
+export const BANK_ROOM = HOME_LAYOUT.topBar.well.maxWidth - 2 * HOME_LAYOUT.topBar.bank.pad;
+
+// The bank's well for its ink inkWidth wide on screen: bank.pad columns either side of the ink,
+// at most well.maxWidth wide.
+export function bankWell(inkWidth: number): Rect {
+  const { bank, well } = HOME_LAYOUT.topBar;
+  const width = Math.min(well.maxWidth, inkWidth + 2 * bank.pad);
+  return { height: well.height, width, x: well.x, y: well.y };
+}
 
 // Which of the bank's texts, without its "$", it shows: full, the amount with thousands
 // separated, where "$" and it at bank.scale fit BANK_ROOM as inkWidthAt1x measures them at 1x,

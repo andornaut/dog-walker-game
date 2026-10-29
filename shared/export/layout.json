@@ -1940,10 +1940,7 @@
       "topBar": {
         "bank": {
           "capsY": 11,
-          "ink": {
-            "left": 5,
-            "right": 73
-          },
+          "pad": 3,
           "scale": 3
         },
         "faceSize": 20,
@@ -1953,11 +1950,15 @@
         "well": {
           "height": 28,
           "lip": 1,
-          "width": 70,
+          "maxWidth": 220,
           "x": 5,
           "y": 5
         },
-        "wellKey": "ui-home-cash-well"
+        "wellKeys": {
+          "left": "ui-home-cash-well-left",
+          "mid": "ui-home-cash-well-mid",
+          "right": "ui-home-cash-well-right"
+        }
       },
       "walkerAtGate": {
         "footY": 196,
