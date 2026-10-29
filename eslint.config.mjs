@@ -61,6 +61,17 @@ const CONTEXTS = {
   ui: ["assets"],
 };
 
+// The kit, a context of its own: it imports no game code, so it can be copied into another game,
+// and imports its own modules by relative path, so it works without the game's alias.
+const KIT_CONTEXT = {
+  files: KIT_FILES,
+  forbid: {
+    group: ["**/src", "**/src/*", "@andornaut/game-kit", "@andornaut/game-kit/*"],
+    message:
+      "packages/game-kit/ may import nothing from src/, and imports its own modules by relative path.",
+  },
+};
+
 const SRC_FOLDERS = folders("src").filter((folder) => folder !== "testing");
 
 function folders(path) {
@@ -133,7 +144,7 @@ function allOf(globLists) {
 // partition the files: one config per context (or none) and set of boundaries that binds a file,
 // listing the patterns of the context and of every boundary in the set.
 function boundaryConfigs() {
-  const contexts = Object.keys(CONTEXTS).map(contextBoundary);
+  const contexts = [KIT_CONTEXT, ...Object.keys(CONTEXTS).map(contextBoundary)];
   return [undefined, ...contexts].flatMap((context) =>
     subsets(BOUNDARIES)
       .filter((binding) => context !== undefined || binding.length > 0)
