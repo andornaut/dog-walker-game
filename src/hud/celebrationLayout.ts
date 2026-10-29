@@ -2,7 +2,7 @@ import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { WIDE_BUTTON } from "../layout/screenLayout";
 import type { FontMetrics } from "../ui/fontMetrics";
-import { type FittedText, TEXT_SCALE, textOnLines } from "../ui/textFit";
+import { type FittedText, TEXT_SCALE, TEXT_STYLE, textOnLines } from "../ui/textFit";
 import type { LinePart } from "./zoneCelebration";
 
 const SCREEN_WIDTH = SCREEN_CONFIG.width;
@@ -36,6 +36,10 @@ const ZONE_DONE_FEET = ROAD_TOP + 148;
 const PLATE_TOP = ZONE_DONE_FEET + 10;
 // Each version's button, 8 rows under its bubble or plate.
 const BUTTON = WIDE_BUTTON;
+// The earnings plate, as wide as the button under it; its line keeps EARNINGS_INSET inside the
+// plate's sides: the ui-panel's 4px frame and 4px of cream.
+const EARNINGS_PLATE = { height: 32, width: BUTTON.width, x: BUTTON.x, y: PLATE_TOP };
+const EARNINGS_INSET = 8;
 
 // A version's headline from its feet line: the walker's frame at WALKER_SCALE, centred on
 // CENTRE_X, standing on feetY; the burst behind it; and the small line's top subtitleGap rows
@@ -104,12 +108,21 @@ export const CELEBRATION_LAYOUT = {
   titleRoom: SCREEN_WIDTH - SIDE * 2,
   titleScale: TITLE_SCALE,
   walkerScale: WALKER_SCALE,
+  // The zone's earnings on one line at 2x, centred on a plate exactly the button's x and width,
+  // keeping earningsInset inside its sides (ZONE_EARNINGS_FIT).
   zoneDone: {
     ...headline(ZONE_DONE_FEET, 14),
     button: { ...BUTTON, y: PLATE_TOP + 40 },
+    earningsInset: EARNINGS_INSET,
     earningsY: PLATE_TOP + 7,
-    plate: { height: 32, width: 280, x: 40, y: PLATE_TOP },
+    plate: EARNINGS_PLATE,
   },
+} as const;
+
+// The zone's earnings: at 2x on one line, inside the plate's inset.
+export const ZONE_EARNINGS_FIT = {
+  room: EARNINGS_PLATE.width - 2 * EARNINGS_INSET,
+  style: TEXT_STYLE,
 } as const;
 
 // The walker's greeting: at 2x, wrapped onto up to its lines.

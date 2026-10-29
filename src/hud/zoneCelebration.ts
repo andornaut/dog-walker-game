@@ -11,12 +11,11 @@ import { perkIconKey } from "./effectIcons";
 import { RUN_TEXT_FIELDS as FIELDS } from "./runText";
 
 // What plays once a zone's fee coins have landed: the walker that zone unlocks for the first
-// time joins, or else the walker in use cheers over the zone's fees, tips and Walk bonus. After
-// the last zone only a joining walker plays, before the end screen.
+// time joins, or else the walker in use cheers over the zone's fees and tips. After the last zone,
+// the only one that pays the Walk bonus, only a joining walker plays, before the end screen.
 export type ZoneCelebration =
   | { readonly kind: "newWalker"; readonly walker: WalkerId }
   | {
-      readonly bonus: Cents;
       readonly fees: Cents;
       readonly kind: "zoneDone";
       readonly tips: Cents;
@@ -25,7 +24,7 @@ export type ZoneCelebration =
     };
 
 // The zone's earnings in the order the plate says them.
-const EARNINGS = ["fees", "tips", "bonus"] as const;
+export const ZONE_EARNINGS = ["fees", "tips"] as const;
 
 interface ZoneFinish {
   // The changes made since the zone began, its fees included.
@@ -49,19 +48,17 @@ export function zoneCelebration(
   if (joining !== undefined) {
     return { kind: "newWalker", walker: joining };
   }
-  let bonus = 0;
   let fees = 0;
   let tips = 0;
   for (const change of finish.changes) {
     if (change.kind === "money") {
       const kind = earningsKind(change);
-      bonus += kind === "fullPack" ? change.amount : 0;
       fees += kind === "fees" ? change.amount : 0;
       tips += kind === "tips" ? change.amount : 0;
     }
   }
   const { walker, zone } = finish;
-  const amounts = { bonus: cents(bonus), fees: cents(fees), tips: cents(tips) };
+  const amounts = { fees: cents(fees), tips: cents(tips) };
   return { ...amounts, kind: "zoneDone", walker, zone };
 }
 
@@ -86,7 +83,7 @@ export type LinePart =
 export type CelebrationText =
   | {
       readonly button: string;
-      // The zone's fees, tips and Walk bonus, each left out at $0, the amounts as money.
+      // The zone's fees and tips, the tips left out at $0, the amounts as money.
       readonly earnings: readonly LinePart[];
       readonly kind: "zoneDone";
       readonly subtitle: string;
@@ -123,7 +120,7 @@ export function celebrationText(
   if (celebration.kind === "zoneDone") {
     const words = text.zoneDone;
     // Each earning but $0 ones, or the fees alone when every one is $0.
-    const said = EARNINGS.filter((key) => celebration[key] !== 0);
+    const said = ZONE_EARNINGS.filter((key) => celebration[key] !== 0);
     const earnings = (said.length === 0 ? (["fees"] as const) : said).flatMap(
       (key, i): LinePart[] => [
         ...(i === 0 ? [] : [{ kind: "text", text: words.earnings.separator } as const]),

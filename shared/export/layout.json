@@ -1371,11 +1371,12 @@
           "x": 48,
           "y": 404
         },
+        "earningsInset": 8,
         "earningsY": 371,
         "plate": {
           "height": 32,
-          "width": 280,
-          "x": 40,
+          "width": 264,
+          "x": 48,
           "y": 364
         }
       }

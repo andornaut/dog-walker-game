@@ -69,7 +69,6 @@ describe("zoneCelebration", () => {
       zone: STREET,
     } as const;
     expect(zoneCelebration(gameData, ["mrB", "casey"], finish)).toEqual({
-      bonus: 0,
       fees: 18000,
       kind: "zoneDone",
       tips: 800,
@@ -82,9 +81,8 @@ describe("zoneCelebration", () => {
 describe("celebrationText", () => {
   const text = gameData.runText;
 
-  const zoneDone = (bonus: number, fees: number, tips: number) =>
+  const zoneDone = (fees: number, tips: number) =>
     ({
-      bonus: cents(bonus),
       fees: cents(fees),
       kind: "zoneDone",
       tips: cents(tips),
@@ -92,17 +90,12 @@ describe("celebrationText", () => {
       zone: "Willow Crescent",
     }) as const;
   const { earnings } = text.zoneDone;
-  const part = (key: "bonus" | "fees" | "tips", amount: string) =>
-    earnings[key].replace("{amount}", amount);
+  const part = (key: "fees" | "tips", amount: string) => earnings[key].replace("{amount}", amount);
 
   it.each([
-    [
-      "every earning",
-      zoneDone(5000, 24000, 3800),
-      [part("fees", "+$240"), part("tips", "+$38"), part("bonus", "+$50")],
-    ],
-    ["no $0 tips or bonus", zoneDone(0, 24000, 0), [part("fees", "+$240")]],
-    ["the fees alone when nothing paid", zoneDone(0, 0, 0), [part("fees", "+$0")]],
+    ["every earning", zoneDone(24000, 3800), [part("fees", "+$240"), part("tips", "+$38")]],
+    ["no $0 tips", zoneDone(24000, 0), [part("fees", "+$240")]],
+    ["the fees alone when nothing paid", zoneDone(0, 0), [part("fees", "+$0")]],
   ] as const)("writes %s as gains in dollars", (_name, celebration, parts) => {
     const shown = celebrationText(gameData, celebration);
     if (shown.kind !== "zoneDone") {
@@ -114,7 +107,7 @@ describe("celebrationText", () => {
   });
 
   it("heads Zone done with the zone and its amounts as money", () => {
-    const shown = celebrationText(gameData, zoneDone(0, 24000, 3800));
+    const shown = celebrationText(gameData, zoneDone(24000, 3800));
     expect(shown).toMatchObject({
       button: text.zoneDone.button,
       kind: "zoneDone",

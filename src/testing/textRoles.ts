@@ -39,7 +39,7 @@ import {
 import { dogRows, gearRows, type ShopRow, slotRows } from "../home/shop";
 import { SHOP_LAYOUT, SHOP_MESSAGE_FIT, shopRowTextRoom } from "../home/shopLayout";
 import { largeBodyText, smallCardText } from "../hud/cardText";
-import { CELEBRATION_LAYOUT, GREETING_FIT } from "../hud/celebrationLayout";
+import { CELEBRATION_LAYOUT, GREETING_FIT, ZONE_EARNINGS_FIT } from "../hud/celebrationLayout";
 import { faceTextWithNamePills } from "../hud/effectNames";
 import { type FaceText, inlineFaceBox, styledFaceRows } from "../hud/faceText";
 import { CHANGE_LABEL_STYLE, changeLabelRoom, hudLanes } from "../hud/hudLanes";
@@ -48,6 +48,7 @@ import { FIRED_LINE_FIT, LOW_CHIP_FIT, lowHeartsText } from "../hud/moments";
 import { MONEY_LABEL } from "../hud/moneyLabels";
 import { NOTE_PLATE, PAUSE_NOTE_LINES, PAUSE_NOTE_WIDTH } from "../hud/pauseMenu";
 import { DOG_CARD, WALK_BAR } from "../hud/walkHud";
+import { celebrationText } from "../hud/zoneCelebration";
 import {
   boxStyle,
   CARD_LAYOUT,
@@ -61,7 +62,9 @@ import type { Rect } from "../lib/rect";
 import { cents } from "../lib/units";
 import { amountText } from "../rules/causes";
 import { firesText } from "../rules/choices";
+import { payFor } from "../rules/run";
 import { startingDogSlots } from "../rules/shop";
+import { read } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { readBitmapFont } from "../tools/fontFile";
 import { barTitleRoom } from "../ui/barTitle";
@@ -396,6 +399,25 @@ function cashRole(): TextRoleCase[] {
   ];
 }
 
+// The zone celebration's earnings line at its widest: the fullest pack's pay, alone and with
+// tips up to a million dollars.
+function zoneEarningsRoles(): TextRoleCase[] {
+  const { tuning } = gameData;
+  const fees = cents(payFor(tuning) * read(tuning, "counts", "packSizeMax"));
+  const walker = defined(keysOf(gameData.walkers)[0]);
+  const lines = [0, 999, 9_999, 99_999, 999_999].map((dollars) => {
+    const shown = celebrationText(gameData, {
+      fees,
+      kind: "zoneDone",
+      tips: cents(dollars * 100),
+      walker,
+      zone: "",
+    });
+    return shown.kind === "zoneDone" ? shown.earnings.map(({ text }) => text).join("") : "";
+  });
+  return plainRole("zone celebration's earnings", "font-body", ZONE_EARNINGS_FIT, lines);
+}
+
 // The pause menu's note in both its forms, naming the widest walk cash (cashRole), on the note
 // plate's lines.
 function pauseNoteRoles(): TextRoleCase[] {
@@ -488,6 +510,7 @@ export function textRoleCases(): TextRoleCase[] {
     ...changeLabelRoles(),
     ...cashRole(),
     ...pauseNoteRoles(),
+    ...zoneEarningsRoles(),
     ...plainRole(
       "walk card's dog name",
       "font-title",
