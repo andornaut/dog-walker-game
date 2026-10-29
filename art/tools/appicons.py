@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Draw the site's icons: the home-screen app icons and the favicons.
 
-Archie's own art on a sunburst of foam and sky rays, in the house palette. The ink outline holds
-12.4:1 on foam and 5.6:1 on sky, so he separates from the rays in colour and in grey.
+Archie's own art on flat sky, the blue behind his portrait on the detail card (ui-detail-well), in
+the house palette. The ink outline holds 5.6:1 on sky, so he separates from it in colour and in grey.
 
 The app icons scale the master, Archie's 64x64 portrait (public/art/images/portrait-dog-archie.png)
-on the rays, by a whole number with nearest-neighbour, centred on CENTRE (33,37 in the portrait, the
-middle of his head and body, fixed so his tail does not move him) and the rays carried to the icon's
-edges, so every icon pixel is one master pixel. The rays radiate from that same point. Archie fills most of each icon: under the maskable
-icon's central 80% safe circle, his head from below the ear tips (portrait rows 23 to 41) and his
+on sky, by a whole number with nearest-neighbour, centred on CENTRE (33,37 in the portrait, the
+middle of his head and body, fixed so his tail does not move him) with the sky carried to the
+icon's edges, so every icon pixel is one master pixel. Archie fills most of each icon: under the
+maskable icon's central 80% safe circle, his head from below the ear tips (portrait rows 23 to 41) and his
 whole bandana stay inside it, and the ear tips, paws and tail may be cropped. The iOS rounded
 square crops less than that circle, so the 180 shows him whole.
 
@@ -20,10 +20,10 @@ square crops less than that circle, so the 180 shows him whole.
 The favicons are drawn at their own size, a tile with its corners cut:
 
   favicon.png             32x32    Archie's happy face (public/art/sprites/face-dog-archie.png,
-                                   frame 0) at 1x, its inked area centred, on the rays round the
-                                   tile's middle; the corners cut by 2px
-  favicon-16.png          16x16    the face drawn again at half size (ARCHIE_16) on flat foam;
-                                   the corners cut by 1px
+                                   frame 0) at 1x, its inked area centred, on sky; the corners
+                                   cut by 2px
+  favicon-16.png          16x16    the face drawn again at half size (ARCHIE_16) on sky; the
+                                   corners cut by 1px
 
 Usage:
   appicons.py preview OUT.png   every icon at its native size on ink, the maskable icon cropped to a
@@ -51,11 +51,10 @@ from pixel import K, PALETTE64  # noqa: E402
 
 PORTRAIT = "public/art/images/portrait-dog-archie.png"
 FACE = "public/art/sprites/face-dog-archie.png"  # frame 0, the happy face, is its first 32x32
-RAY_LIGHT, RAY_DARK = "foam", "sky"
-RAYS = 12  # light rays, each with a dark one beside it
+BACKGROUND = "sky"  # ui-detail-well's face, behind his portrait on the detail card
 SAFE = 0.4  # the maskable safe zone: a circle of radius 40% of the icon size
 MASTER = 64
-CENTRE = (33, 37)  # the portrait point the icons centre on and the rays radiate from
+CENTRE = (33, 37)  # the portrait point the icons centre on
 KEEP_ROWS = range(23, 42)  # the portrait's head below the ear tips, down to the chin
 BANDANA = ("red", "dred")
 
@@ -108,12 +107,9 @@ def centre(px):
     return (min(xs) + max(xs) + 1) / 2, (min(ys) + max(ys) + 1) / 2
 
 
-def rays(cx, cy):
-    """The ray colour at (x, y) round (cx, cy), defined past any edge."""
-    def at(x, y):
-        turn = math.atan2(y + 0.5 - cy, x + 0.5 - cx) / (2 * math.pi) + 1
-        return rgb(K[RAY_LIGHT if int(turn * RAYS * 2 + 0.5) % 2 else RAY_DARK])
-    return at
+def ground(x, y):
+    """The background colour at (x, y): flat sky, defined past any edge."""
+    return rgb(K[BACKGROUND])
 
 
 def portrait():
@@ -121,12 +117,12 @@ def portrait():
 
 
 def render(subject, size, scale):
-    """subject on the rays at a whole scale, centred on CENTRE, the rays carried to the edges."""
+    """subject on sky at a whole scale, centred on CENTRE, the sky carried to the edges."""
     cx, cy = CENTRE
     ox, oy = size / 2 - cx * scale, size / 2 - cy * scale
     assert ox == int(ox) and oy == int(oy), f"{size} does not centre the portrait at x{scale}"
     ox, oy = int(ox), int(oy)
-    bg = rays(cx, cy)
+    bg = ground
     img = Image.new("RGB", (size, size))
     cells = {}
     for y in range(size):
@@ -168,12 +164,12 @@ def favicon_32():
     face = opaque(Image.open(FACE).crop((0, 0, 32, 32)))
     cx, cy = centre(face)
     dx, dy = int(16 - cx), int(16 - cy)
-    return tile(32, {(x + dx, y + dy): c for (x, y), c in face.items()}, rays(16, 16), 2)
+    return tile(32, {(x + dx, y + dy): c for (x, y), c in face.items()}, ground, 2)
 
 
 def favicon_16():
     px = {(x, y): rgb(K[INK[ch]]) for y, row in enumerate(ARCHIE_16) for x, ch in enumerate(row) if ch != "."}
-    return tile(16, px, lambda x, y: rgb(K[RAY_LIGHT]), 1)
+    return tile(16, px, ground, 1)
 
 
 def check(name, img, size):
@@ -231,11 +227,11 @@ def preview(out, gap=16, zoom=8):
 
 
 def master():
-    """The master at 1x: the portrait on the rays, MASTER square, centred as the icons centre it."""
+    """The master at 1x: the portrait on sky, MASTER square, centred as the icons centre it."""
     subject = portrait()
     cx, cy = CENTRE
     x0, y0 = int(cx - MASTER / 2), int(cy - MASTER / 2)
-    bg = rays(cx, cy)
+    bg = ground
     img = Image.new("RGB", (MASTER, MASTER))
     for y in range(MASTER):
         for x in range(MASTER):
