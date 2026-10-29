@@ -58,12 +58,13 @@ REACT = [
     dict(fl=-1, fr=-1, bl=-1, br=-1, bob=-1, tail=0, ears=-1),
 ]
 # Straining at the leash, leaning right: the front paws scrabble one after the other with the hind legs
-# dug in, the lean surging 2px and 3px and the tail flicking; 4 frames at 80ms.
+# dug in, the lean surging 2 and 3 units with the shoulders following (pitch) and the neck stretched forward
+# (reach), as in the tell, and the tail flicking; 4 frames at 80ms.
 PULL = [
-    dict(fl=-1, fr=-1, bl=1, br=1, bob=0, tail=-2, lean=2),
-    dict(fl=-2, fr=-1, bl=1, br=1, bob=0, tail=-2, lean=3),
-    dict(fl=-1, fr=-2, bl=1, br=1, bob=0, tail=-1, lean=3),
-    dict(fl=-2, fr=-2, bl=1, br=1, bob=0, tail=-2, lean=2),
+    dict(fl=-1, fr=-1, bl=1, br=1, bob=0, tail=-2, lean=2, pitch=1, reach=1),
+    dict(fl=-2, fr=-1, bl=1, br=1, bob=0, tail=-2, lean=3, pitch=1, reach=1),
+    dict(fl=-1, fr=-2, bl=1, br=1, bob=0, tail=-1, lean=3, pitch=1, reach=1),
+    dict(fl=-2, fr=-2, bl=1, br=1, bob=0, tail=-2, lean=2, pitch=1, reach=1),
 ]
 # The tell before a pull, and the strain a still picture holds on its first frame: the dog pitches toward
 # what it wants, the head 2 and 3 units across with the shoulders following (pitch) and the neck stretched
@@ -92,6 +93,9 @@ SHAKE = [
     dict(lean=-2, tail=2, ears=-1, spray=3.5),
     dict(lean=2, tail=-1, ears=1),
 ]
+# The tags that lean toward a pull. Their depth steps settle apart from the rest (pixel.depth_settled), so a
+# change to a lean never moves the cuts in the other tags.
+LEAN_TAGS = ("pull", "tell")
 # Idle and shake follow the first four tags.
 ROAD_TAGS = [("walk", WALK, 150), ("react", REACT, 60), ("pull", PULL, 80), ("tell", TELL, 125), ("idle", IDLE, 300),
              ("shake", SHAKE, 60)]
@@ -101,9 +105,10 @@ FACE_TAGS = ["happy", "neutral", "upset"]
 def pose(q):
     """Every pose key with its default. flop lets both ears lag down behind the head (positive is down), as
     they do on the walk's rising beats; twitch moves the right ear alone (negative is up); spray is how far
-    the shake-off's droplets have flown from the flanks, 0 for none. lean moves the head across, and the
-    shoulders and front legs half as far plus pitch, with the hind legs planted; reach lifts the head up the
-    screen, away from the walker, as a dog stretches its neck toward what it wants."""
+    the shake-off's droplets have flown from the flanks, 0 for none. lean bends the head across and the
+    shoulders and front legs half as far; pitch moves the head, shoulders and front legs further across
+    together, over the planted hind legs; reach lifts the head up the screen, away from the walker, as a dog
+    stretches its neck toward what it wants."""
     return dict(dict(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, ears=0, flop=0, lean=0, twitch=0, spray=0, pitch=0,
                      reach=0), **q)
 
@@ -114,7 +119,7 @@ def kilo_road(q):
     g, q = edged(Grid()), pose(q)
     # o shifts the body down so the big head has headroom to lean
     b, ln, o = q["bob"], q["lean"], 2
-    # the shoulders and front legs follow the head half as far, plus the pitch
+    # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
     # legs: thick and white, the front pair tucked under the chest, peeking out at its sides, the back pair
     # under the hips
@@ -134,7 +139,7 @@ def kilo_road(q):
     g.cel(tx, 28 + b, 4, 2.2, "slate", "dslate", "grey")
     g.ell(tx + 0.5, 28.5 + b, 2, 1, "white")
     # a broad head with white cheeks at its sides, which set his ±15 outline, and small ears set wide, their tips rounded
-    hx, hb = 16 + ln, b - q["reach"]
+    hx, hb = 16 + ln + q["pitch"], b - q["reach"]
     e = q["ears"] + q["flop"]
     tip = max(2, 2.5 + o + hb + e)
     t = q["twitch"]
@@ -187,7 +192,7 @@ def kilo_face(mood):
 def biscuit_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
-    # the shoulders and front legs follow the head half as far, plus the pitch
+    # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
     g.rect(9 + sw, 18 + q["fl"] + b, 2, 3, "white")
     g.rect(21 + sw, 18 + q["fr"] + b, 2, 3, "white")
@@ -205,7 +210,7 @@ def biscuit_road(q):
     g.rect(bx - 5, 16 + b, 10, 2, "green")
     g.rect(bx - 5, 17 + b, 10, 1, "dgreen")
     # a round head no wider than the body, the long ears hanging from its sides past the collar
-    hx, hb = 16 + ln, b - q["reach"]
+    hx, hb = 16 + ln + q["pitch"], b - q["reach"]
     g.cel(hx, 11 + hb, 5.5, 5, "ochre", None, "tan")
     g.cel(hx - 5, 13 + hb - q["ears"] + q["flop"], 2, 4.5, "rust", "dbrown")
     g.cel(hx + 5, 13 + hb - q["ears"] + q["flop"] + q["twitch"], 2, 4.5, "rust", "dbrown")
@@ -236,7 +241,7 @@ def biscuit_face(mood):
 def duchess_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
-    # the shoulders and front legs follow the head half as far, plus the pitch
+    # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
     # the front paws peek out under the coat beside the chest, below the ears, stepping as the others' do
     g.rect(9 + sw, 21.5 + q["fl"] + b, 2, 2, "lgrey")
@@ -250,7 +255,7 @@ def duchess_road(q):
     g.ell(bx, 20 + b, 4, 1.2, "lgrey")
     tx = 16 + q["tail"]
     g.cel(tx, 26.5 + b, 3, 2, "white")
-    hx, hb = 16 + ln, b - q["reach"]
+    hx, hb = 16 + ln + q["pitch"], b - q["reach"]
     g.cel(hx - 4.5, 18 + hb - q["ears"] + q["flop"], 2.2, 4, "white", "lgrey")
     g.ell(hx + 4.5, 18 + hb - q["ears"] + q["flop"] + q["twitch"], 2.2, 4, "lgrey")
     # the head inlaid in lgrey over the ears and the back, so it holds apart from the white coat
@@ -281,7 +286,7 @@ def duchess_face(mood):
 def reggie_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
-    # the shoulders and front legs follow the head half as far, plus the pitch
+    # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
     g.rect(10 + sw, 21 + q["fl"] + b, 2, 2, "skin2")
     g.rect(20 + sw, 21 + q["fr"] + b, 2, 2, "skin2")
@@ -296,7 +301,7 @@ def reggie_road(q):
     g.p(tx, 24.5 + b, "skin2")
     g.rect(bx - 4, 19 + b, 8, 1, "red")
     g.rect(bx - 1, 19 + b, 2, 2, "dred")
-    hx, hb = 16 + ln, b - q["reach"]
+    hx, hb = 16 + ln + q["pitch"], b - q["reach"]
     g.cel(hx, 15 + hb, 5.5, 4.5, "skin1", "skin2", "cream")
     g.ell(hx - 4.8, 12.3 + hb - q["ears"] + q["flop"], 2, 1.7, "navy")
     g.ell(hx + 4.8, 12.3 + hb - q["ears"] + q["flop"] + q["twitch"], 2, 1.7, "navy")
@@ -328,7 +333,7 @@ def reggie_face(mood):
 def buddy_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
-    # the shoulders and front legs follow the head half as far, plus the pitch
+    # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
     g.rect(10 + sw, 21 + q["fl"] + b, 2, 3, "white")
     g.rect(20 + sw, 21 + q["fr"] + b, 2, 3, "white")
@@ -341,7 +346,7 @@ def buddy_road(q):
     # a short upright tail, white with a tan tip, standing clear of the rump
     g.rect(tx - 1, 27 + b, 2, 2, "white")
     g.rect(tx - 1, 28 + b, 2, 1, "ochre")
-    hx, hb = 16 + ln, b - q["reach"]
+    hx, hb = 16 + ln + q["pitch"], b - q["reach"]
     g.rect(bx - 4, 19 + b, 8, 1, "red")
     g.cel(hx, 15 + hb, 5, 4.5, "white", "lgrey")
     g.ell(hx + 2, 14 + hb, 2.5, 2, "ochre")
@@ -389,7 +394,7 @@ def pierre_edge(c):
 def pierre_road(q):
     g, q = edged(Grid(), pierre_edge), pose(q)
     b, ln = q["bob"], q["lean"]
-    # the shoulders and front legs follow the head half as far, plus the pitch
+    # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
     # a miniature poodle: compact, the head and mane sat D units lower over short legs than a standard's
     D = 1
@@ -409,7 +414,7 @@ def pierre_road(q):
     g.rect(tx, 25 + b, 1, 2, SHAVED[0])
     puff(g, tx + 0.5, 28 + b, 2, 1.8)
     # ear puffs hanging behind a round topknot
-    hx, hb = 16 + ln, b - q["reach"]
+    hx, hb = 16 + ln + q["pitch"], b - q["reach"]
     puff(g, hx - 5, 14.5 + D + hb - q["ears"] + q["flop"], 2, 3.5, ring=True)
     puff(g, hx + 5, 14.5 + D + hb - q["ears"] + q["flop"] + q["twitch"], 2, 3.5, ring=True)
     puff(g, hx, 10.5 + D + hb, 4, 3.8, ring=True)
@@ -467,7 +472,7 @@ EAR = ("brown", "dbrown")
 def archie_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
-    # the shoulders and front legs follow the head half as far, plus the pitch
+    # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
     # white legs with copper points where they meet the coat
     for x, y, d in ((9 + sw, 17, q["fl"] + b), (21 + sw, 17, q["fr"] + b), (10, 25, q["bl"]),
@@ -506,7 +511,7 @@ def archie_road(q):
     g.rect(bx - 5, 16.7 + b, 10, 1.4, "red")
     g.rect(bx - 1, 16.7 + b, 2, 2, "dred")
     # rose ears set high, each tip folding over and out in the shade
-    hx, hb = 16 + ln, b - q["reach"]
+    hx, hb = 16 + ln + q["pitch"], b - q["reach"]
     e = q["ears"] + q["flop"]
     for s, t in ((-1, 0), (1, q["twitch"])):
         g.tri((hx + s * 5.5, 10 + hb + t), (hx + s * 5, 5 + hb + e + t), (hx + s * 1.5, 7 + hb + t), EAR[0])
@@ -570,7 +575,7 @@ def archie_face(mood):
 def snowball_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln, o = q["bob"], q["lean"], 2
-    # the shoulders and front legs follow the head half as far, plus the pitch
+    # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
     g.rect(6 + sw, 15 + o + q["fl"] + b, 4, 4, "white")
     g.rect(22 + sw, 15 + o + q["fr"] + b, 4, 4, "white")
@@ -586,7 +591,7 @@ def snowball_road(q):
     tx = 16 + q["tail"]
     g.cel(tx, 23.5 + o + b, 4.5, 3.5, "white", "lgrey")
     # a broad round head, its drop ears hanging at the sides, marked a soft badger cream
-    hx, hb = 16 + ln, b - q["reach"]
+    hx, hb = 16 + ln + q["pitch"], b - q["reach"]
     e, t = -q["ears"] + q["flop"], q["twitch"]
     g.cel(hx, 9.5 + o + hb, 7.5, 6.5, "white", "lgrey", power=2.6)
     g.cel(hx - 7.5, 11.5 + o + hb + e, 2.3, 3.8, "cream", "tan")
@@ -628,7 +633,7 @@ GOLD = ("amber", "orange", "yellow")
 def penny_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln, o = q["bob"], q["lean"], 2
-    # the shoulders and front legs follow the head half as far, plus the pitch
+    # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
     # solid legs, each shaded down its outer side
     for x, y, d in ((7 + sw, 15 + o, q["fl"] + b), (22 + sw, 15 + o, q["fr"] + b), (9, 26, q["bl"]),
@@ -648,7 +653,7 @@ def penny_road(q):
         g.tri((l, 22 + b), (tx + tl, ty), (tx + tr, ty), c)
     # a broad skull with short flat drop ears at its sides, in the shade colour, over a neck as wide as the
     # skull down to the collar, so no road shows between an ear and the collar
-    hx, hb = 16 + ln, b - q["reach"]
+    hx, hb = 16 + ln + q["pitch"], b - q["reach"]
     left, right = min(hx, bx) - 6.5, max(hx, bx) + 6.5
     g.rect(left, 13 + o + hb, right - left, 3, GOLD[0])
     g.rect(bx - 6, 16 + o + b, 12, 2, "blue")

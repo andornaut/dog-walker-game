@@ -439,4 +439,4 @@ if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == "compare":
         compare(sys.argv[2])
     else:
-        main(sys.argv, sprites, "art/minis", __doc__, originals=originals)
+        main(sys.argv, sprites, "art/minis", __doc__, originals=originals, apart=dogs.LEAN_TAGS)

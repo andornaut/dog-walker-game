@@ -616,22 +616,22 @@ def depth_settled(sprites, originals=None, apart=()):
     set: a pose that differs from the rest pose (a crouch beside a standing walk) then takes out the rows
     and columns that change it least, and adding it leaves the other tags' settling as it was. Each step's
     apart frames then move sideways to keep their full-size offset from the rest (see _abreast). apart needs
-    each full-size sprite in sprites, so it takes no originals."""
+    each full-size sprite, in sprites or in originals."""
     sprites = list(sprites)
     if apart:
-        assert not originals, "apart settles against the full-size sprites in sprites, not originals"
-
         def split(keep):
-            return dict(depth_settled([(k, ts) for k, tags in sprites if (ts := [t for t in tags if keep(t[0])])]))
+            part = [(k, ts) for k, tags in sprites if (ts := [t for t in tags if keep(t[0])])]
+            full = {k: ts for k, tags in (originals or {}).items() if (ts := [t for t in tags if keep(t[0])])}
+            return dict(depth_settled(part, full or None)), {**full, **dict(part)}
 
-        rest, own = split(lambda tag: tag not in apart), split(lambda tag: tag in apart)
+        (rest, rest_full), (own, own_full) = split(lambda tag: tag not in apart), split(lambda tag: tag in apart)
         scales = depth_scales()
         out = []
         for key, tags in sprites:
             base, at, suffix = key.partition("@")
-            if at and all(k in d for k in (key, base) for d in (rest, own)):
+            if at and key in rest and key in own and base in rest_full and base in own_full:
                 own[key] = _abreast(own[key], rest[key], scales.get(f"@{suffix}", 1),
-                                    _middle(own[base]) - _middle(rest[base]))
+                                    _middle(own_full[base]) - _middle(rest_full[base]))
             settled_tags = {t[0]: t for t in rest.get(key, []) + own.get(key, [])}
             out.append((key, [settled_tags[t[0]] for t in tags]))
         return out
