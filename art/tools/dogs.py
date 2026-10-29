@@ -457,9 +457,25 @@ def archie_road(q):
     # a solid brown coat, as wide as Biscuit and longer in the coat
     bx = 16 + ln // 2
     g.cel(bx, 21.5 + b, 7, 6, *COAT)
-    # a short bobtail
+    # the fluffy bobtail held up over the rump: a tuft of two locks over a third, the white tip on top, set off from
+    # the coat by a plum line. Drawn at under 1.2px a design unit, the notch between the upper locks and each lock's
+    # shade break into lone pixels, so there the upper locks draw as one, the tuft goes unshaded and the tip is a
+    # block that stays 2px wide.
     tx = 16 + q["tail"]
-    g.cel(tx, 27.5 + b, 2, 1.6, *COAT)
+    big = scale_of(g) >= 1.2
+    sh = COAT[1] if big else None
+    upper = ((tx - 1.5, 1.4), (tx + 1.5, 1.4)) if big else ((tx, 2.6),)
+
+    def tuft(t):
+        for x, rx in upper:
+            t.cel(x, 26.8 + b, rx, 1.3, COAT[0], sh)
+        t.cel(tx, 28 + b, 1.6, 1.3, COAT[0], sh)
+        if big:
+            t.cel(tx, 25.6 + b, 1.2, 1, "white")
+        else:
+            t.rect(tx - 1.6, 24.6 + b, 3.2, 2, "white")
+
+    inlay(g, "plum", tuft)
     # the fluffy white ruff round the neck, tufted out past the shoulders and down onto the back
     g.cel(bx, 18.5 + b, 6.5, 2.4, "white", "lgrey")
     # its tufts flat white, so the ruff's one shade is its own crescent along the lower right

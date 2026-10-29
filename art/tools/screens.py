@@ -262,12 +262,23 @@ def comic(text, fill):
     return out
 
 
+# A pixel of Archie's face in portrait-dog-archie, where bust() gathers his head from.
+HEAD_SEED = (29, 25)
+
+
 def bust():
-    """Archie's head from portrait-dog-archie (its rows 10 to 41, the collar's ink line last) over a
-    short bandana in a closed ink line: {(x, y): RGBA} from the portrait's top-left."""
+    """Archie's head from portrait-dog-archie (its rows 10 to 41, the collar's ink line last, only what joins
+    his face, so the tip of his tail is left out) over a short bandana in a closed ink line: {(x, y): RGBA}
+    from the portrait's top-left."""
     img = sn.image("portrait-dog-archie")
-    px = {(x, y): img.getpixel((x, y)) for y in range(10, 42) for x in range(img.width)
-          if img.getpixel((x, y))[3]}
+    rows = {(x, y): img.getpixel((x, y)) for y in range(10, 42) for x in range(img.width)
+            if img.getpixel((x, y))[3]}
+    px, todo = {}, [HEAD_SEED]
+    while todo:
+        q = todo.pop()
+        if q in rows and q not in px:
+            px[q] = rows[q]
+            todo += [(q[0] + dx, q[1] + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)]
     band = {}
     for k in range(BANDANA_ROWS):
         half = 12.5 - 1.7 * k

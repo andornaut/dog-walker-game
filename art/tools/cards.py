@@ -43,6 +43,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import backdrops as bd  # noqa: E402
+import dogs  # noqa: E402
 import glyphs  # noqa: E402
 import scene as sn  # noqa: E402
 import road  # noqa: E402
@@ -506,19 +507,33 @@ def paw(g, x, y, col="white"):
                 g.p(x + i, y + j, "pink" if ch == "p" else col)
 
 
+# Archie's bobtail on card-belly-rubs, laid at 2,20 of rolled_over's grid (b brown, d dbrown, p plum, w white, .
+# left as drawn): three locks fanned out to the left, the middle one tipped white, a plum line where they meet the
+# rump.
+BOBTAIL = [
+    "..bb...",
+    "..bbbbp",
+    "...ddbp",
+    "wwbbbbp",
+    "wwbddbp",
+    "...bbbp",
+    "..bbbdp",
+    "..bd...",
+]
+BOBTAIL_INK = {"b": "brown", "d": "dbrown", "p": "plum", "w": "white"}
+
+
 def rolled_over():
     """Archie rolled onto his back: the brown body lies along the grass, its back down in
     dbrown, and the white belly up, pink at its middle. The legs fold: the hind pair splay out
     at the knee with the soles up, the front pair flop at the wrist, copper at the top and white
     below, each white paw showing its pink pads; the far leg of each pair is shaded. The bobtail
-    wags on the grass at the left, the head at the right faces the viewer with the white blaze
-    and muzzle and copper brows and cheeks, eyes shut in happy arcs and mouth open in a grin
-    with the tongue out, the rose ears flopped on the grass. The red bandana rings the neck,
+    (BOBTAIL), a tuft of three locks tipped white, wags on the grass at the left, the head at the
+    right faces the viewer with the white blaze and muzzle and copper brows and cheeks, eyes shut
+    in happy arcs and mouth open in a grin with the tongue out, the rose ears flopped on the grass. The red bandana rings the neck,
     its point lying on the white chest. 50x36 with its outline; the collar's lower end is at
     32,28."""
     g = Grid(50, 36)
-    # the bobtail, on the grass at the rump
-    g.ell(7.5, 24.5, 2.5, 2, "brown", "dbrown")
     # far legs first, shaded: a hind leg splayed at the knee and a front leg flopped at the wrist
     limb(g, [(16, 17), (14, 11)], "rust")
     limb(g, [(14, 11), (16, 7)], "lgrey")
@@ -532,6 +547,12 @@ def rolled_over():
     g.ell(21.5, 18.5, 9, 3.2, "white", "lgrey")
     g.rect(19, 18, 4, 2, "pink")
     g.rect(20, 17, 2, 1, "pink")
+    # the bobtail on the grass at the rump, a tuft of three locks fanned out to the left, the middle one tipped
+    # white, set off from the coat by a plum line
+    for y, row in enumerate(BOBTAIL, 20):
+        for x, ch in enumerate(row, 2):
+            if ch != ".":
+                g.p(x, y, BOBTAIL_INK[ch])
     # near legs: the hind thigh out to the left, the shin back up to the sole; the front leg up
     # from the chest, the forearm flopped toward the head
     limb(g, [(11, 19), (7, 13)], "ochre")
@@ -586,7 +607,7 @@ def belly_rubs():
     # kicking paws and a wriggling back, drawn as motion arcs
     kick(a, 15, 13, -1)
     kick(a, 51, 18, 1)
-    kick(a, 14, 32, -1)
+    kick(a, 11, 32, -1)
     # the leash runs from the collar off the bottom edge
     a.lead(44, 38, 52)
     a.hearts([(4, 4), (60, 6)])
