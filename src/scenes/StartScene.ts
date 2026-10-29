@@ -35,6 +35,7 @@ import {
 import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
 import {
   dogInfo,
+  dollarAmountText,
   dollarText,
   gearByPrice,
   gearInfo,
@@ -50,6 +51,7 @@ import {
   tapGear,
 } from "../home/home";
 import {
+  bankAmountText,
   dogTileNameY,
   dogTilePlateY,
   HOME_LAYOUT,
@@ -1286,8 +1288,8 @@ export class StartScene extends Scene {
       x: 0,
       y: TOP_BAR.height - TOP_BAR.rule,
     });
-    // The bank in its well: the "$" and the amount at the largest scale that fits, one font
-    // advance apart and centred across the well, or in its short form past every scale.
+    // The bank in its well: the "$" and the amount at the bank's scale, one font advance apart
+    // and centred across the well, in full where it fits and else in its short form.
     const { bank, well, wellKey } = TOP_BAR;
     if (this.textures.exists(wellKey)) {
       root.add(this.add.image(well.x, well.y, wellKey).setOrigin(0));
@@ -1298,7 +1300,16 @@ export class StartScene extends Scene {
     const dollar = this.text(root, 0, 0, "$", PALETTE.amber, { font: "title", scale: 1 });
     const amount = this.text(root, 0, 0, "", PALETTE.cream, { font: "title", scale: 1 });
     const { capsY, scale } = bank;
-    setDollarAmount(dollar, amount, shortDollarAmountText(save.bankCents), (inkWidth) => ({
+    const inkAt1x = (text: string) => {
+      setPixelText(amount, text);
+      const ink = inkSpan(amount);
+      return ink.right - ink.left;
+    };
+    const shown = bankAmountText(inkAt1x, {
+      full: dollarAmountText(save.bankCents),
+      short: shortDollarAmountText(save.bankCents),
+    });
+    setDollarAmount(dollar, amount, shown, (inkWidth) => ({
       left: cashLeft(inkWidth * scale),
       scale,
       top: capsY,

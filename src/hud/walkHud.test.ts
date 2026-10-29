@@ -6,7 +6,7 @@ import { dogFaceKey, ownerCardFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
-import { shortDollarAmountText } from "../home/home";
+import { dollarAmountText } from "../home/home";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { keysOf } from "../lib/records";
 import { type Point, type Rect, rectsOverlap } from "../lib/rect";
@@ -218,14 +218,13 @@ describe("evenGapLeft", () => {
   });
 });
 
-// The cash, as the game writes it at its scale: in the short form from a thousand dollars (each
-// amount's fit in the room: ui/textRoles.test.ts).
+// The cash, as the game writes it at its scale, under $1,000 (each amount's fit in the room:
+// ui/textRoles.test.ts).
 describe("the cash", () => {
   const { capsBottom, ink, scale, well } = WALK_BAR.cash;
-  // From nothing to the most a save can hold.
-  const amounts = [
-    0, 5, 88, 888, 999, 1_000, 1_234, 12_345, 99_999, 1_000_000, 123_456_789, 90_071_992_547_409,
-  ].map((dollars) => `$${shortDollarAmountText(cents(dollars * 100))}`);
+  const amounts = [0, 5, 88, 111, 888, 999].map(
+    (dollars) => `$${dollarAmountText(cents(dollars * 100))}`,
+  );
 
   it("keeps the capitals' bottom row on capsBottom, inside the well", () => {
     expect(cashTop() + TITLE_CAP_ROWS * scale - 1).toBe(capsBottom);

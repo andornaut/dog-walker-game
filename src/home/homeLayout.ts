@@ -260,9 +260,8 @@ export const HOME_LAYOUT = {
   // The top bar: the bank in its well at the left, then plain plum, then the buttons. The well
   // (wellKey) is ink on its first well.width - lip columns and well.height - lip rows, its lip
   // on the last. The bank, the title font's "$" and amount one font advance apart, is set at
-  // bank.scale, in the short form from a thousand dollars so its ink fits the columns
-  // bank.ink.left to bank.ink.right (the well's ink), centred across them, its capitals' top at
-  // bank.capsY.
+  // bank.scale in full with thousands separated (bankAmountText), centred across the columns
+  // bank.ink.left to bank.ink.right (the well's ink), its capitals' top at bank.capsY.
   topBar: {
     bank: {
       capsY: 11,
@@ -307,6 +306,17 @@ export const HOME_LAYOUT = {
 
 // How wide the bank's ink may be.
 export const BANK_ROOM = HOME_LAYOUT.topBar.bank.ink.right + 1 - HOME_LAYOUT.topBar.bank.ink.left;
+
+// Which of the bank's texts, without its "$", it shows: full, the amount with thousands
+// separated, where "$" and it at bank.scale fit BANK_ROOM as inkWidthAt1x measures them at 1x,
+// else short, its short form.
+export function bankAmountText(
+  inkWidthAt1x: (text: string) => number,
+  texts: { full: string; short: string },
+): string {
+  const fits = inkWidthAt1x(`$${texts.full}`) * HOME_LAYOUT.topBar.bank.scale <= BANK_ROOM;
+  return fits ? texts.full : texts.short;
+}
 
 // How wide a line of the walker's speech may be, as a label measures it: a bubble that wide
 // fits between the screen's margin and the Pet shop's board, so it never reaches the board.

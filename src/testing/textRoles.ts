@@ -9,8 +9,13 @@ import {
   SIDE_LABEL_ROOM,
   sideTotalLabelRoom,
 } from "../home/endLayout";
-import { dollarText, shortDollarAmountText, signedShortDollarText } from "../home/home";
-import { BANK_ROOM, DOG_TILE_TEXT_ROOM, HOME_LAYOUT } from "../home/homeLayout";
+import {
+  dollarAmountText,
+  dollarText,
+  shortDollarAmountText,
+  signedShortDollarText,
+} from "../home/home";
+import { BANK_ROOM, bankAmountText, DOG_TILE_TEXT_ROOM, HOME_LAYOUT } from "../home/homeLayout";
 import { messageLine } from "../home/homeLines";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import { confirmLines } from "../home/purchaseConfirm";
@@ -357,21 +362,28 @@ function shopRoles(): TextRoleCase[] {
   ];
 }
 
-// The cash on the walk bar and the bank on the home screen's top bar: every amount from nothing
-// to the most a save holds, in the short form from a thousand dollars.
+// The cash on the walk bar, which stays under $1,000; and the bank on the home screen's top
+// bar, every amount from nothing to the most a save holds, in full where it fits and else in
+// its short form.
 function cashRole(): TextRoleCase[] {
-  const amounts = [
+  const cash = [0, 111, 888, 999].map((dollars) => `$${dollarAmountText(cents(dollars * 100))}`);
+  const width = (text: string) => inkWidth("font-title", { scale: 1 }, text);
+  const bank = [
     0, 5, 88, 888, 999, 1_000, 1_234, 12_345, 99_999, 123_456, 1_000_000, 123_456_789,
     90_071_992_547_409,
-  ].map((dollars) => `$${shortDollarAmountText(cents(dollars * 100))}`);
+  ].map((dollars) => {
+    const amount = cents(dollars * 100);
+    const texts = { full: dollarAmountText(amount), short: shortDollarAmountText(amount) };
+    return `$${bankAmountText(width, texts)}`;
+  });
   const { room, scale } = WALK_BAR.cash;
   return [
-    ...plainRole("walk bar's cash", "font-title", { room, style: { scale } }, amounts),
+    ...plainRole("walk bar's cash", "font-title", { room, style: { scale } }, cash),
     ...plainRole(
       "home screen's bank",
       "font-title",
       { room: BANK_ROOM, style: { scale: HOME_LAYOUT.topBar.bank.scale } },
-      amounts,
+      bank,
     ),
   ];
 }

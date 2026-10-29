@@ -70,8 +70,8 @@ const NEIGHBOURHOOD_X = evenGapLeft(
 // bar's full height and minHitWidth wide or more (narrower than a 44px square, so four fit beside
 // six effect wells), side by side to the bar's right edge, each face buttonFace.size square on
 // row buttonFace.y, centred in its hit area. cash:
-// the "$" and the amount at scale, in the short form from a thousand dollars so its ink fits
-// room, centred across the well's ink columns (ink.left to ink.right), their capitals' bottom on
+// the "$" and the amount at scale, no wider than room (a walk's cash stays under $1,000),
+// centred across the well's ink columns (ink.left to ink.right), their capitals' bottom on
 // capsBottom. zone: the
 // neighbourhood well on one text line, the name from name.x and "n of N" right-aligned to end on
 // column progress.right, at least textGap apart.

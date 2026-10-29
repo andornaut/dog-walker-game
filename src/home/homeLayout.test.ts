@@ -24,8 +24,10 @@ import { AFFORD_OUTSET } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
 import { type DetailCard, dogDetail, gearDetail, walkerDetail } from "./detail";
 import { FEEDBACK } from "./feedback";
-import { dollarText, shortDollarAmountText } from "./home";
+import { dollarAmountText, dollarText, shortDollarAmountText } from "./home";
 import {
+  BANK_ROOM,
+  bankAmountText,
   CARD_TEXT_ROOM,
   cardBand,
   detailCardLayout,
@@ -289,15 +291,32 @@ describe("top bar", () => {
   });
 });
 
-// The bank as the game writes it, in the short form from a thousand dollars, measured on the
-// title font at 1x (each amount's fit in the room: ui/textRoles.test.ts).
+// The bank as the game writes it, in full where it fits and else in its short form, measured on
+// the title font at 1x (each amount's fit in the room: ui/textRoles.test.ts).
 describe("the top bar's bank", () => {
   const { bank } = HOME_LAYOUT.topBar;
   const width = (text: string) => inkWidth("font-title", { scale: 1 }, text);
+  const shown = (dollars: number) => {
+    const amount = cents(dollars * 100);
+    const texts = { full: dollarAmountText(amount), short: shortDollarAmountText(amount) };
+    return `$${bankAmountText(width, texts)}`;
+  };
   // From nothing to the most a save can hold.
   const amounts = [
     0, 5, 88, 888, 999, 1_000, 1_234, 12_345, 99_999, 1_000_000, 123_456_789, 90_071_992_547_409,
-  ].map((dollars) => `$${shortDollarAmountText(cents(dollars * 100))}`);
+  ].map(shown);
+
+  it.each<[string, number, string]>([
+    ["in full where it fits", BANK_ROOM / bank.scale, "full"],
+    [
+      "in its short form where the full amount is a pixel too wide",
+      BANK_ROOM / bank.scale + 1,
+      "short",
+    ],
+  ])("sets the bank %s", (_case, fullWidth, expected) => {
+    const measure = (text: string) => (text === "$full" ? fullWidth : 0);
+    expect(bankAmountText(measure, { full: "full", short: "short" })).toBe(expected);
+  });
 
   // The first amount of each parity of ink: the centring reads only that.
   const parity = (text: string) => (width(text) * bank.scale) % 2;
