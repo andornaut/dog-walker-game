@@ -24,7 +24,7 @@ export const HINTS = {
     trigger: { kind: "homeButton" },
   },
   luckyFind: {
-    text: "Lucky finds pay off. Aim for them!",
+    text: "Aim for lucky finds!",
     trigger: { kind: "luckyFind" },
   },
   minorBump: {
@@ -56,7 +56,7 @@ export const HINTS = {
     trigger: { encounter: "skunk", kind: "encounter" },
   },
   squirrel: {
-    text: "Squirrels never bump, but they tempt a pull.",
+    text: "Squirrels never bump you, but dogs pull toward them.",
     trigger: { kind: "pullLanded" },
   },
   tip: {

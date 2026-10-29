@@ -10,7 +10,7 @@ export const HELP_PAGES = [
   {
     art: "lanes",
     body:
-      "Drag anywhere: a short drag moves the pack a lane, and each lane-width more moves one more. " +
+      "Drag anywhere: a short drag moves the pack one lane, and a longer drag moves more lanes. " +
       "A tap moves one lane toward the side you tap. Keys: arrows, A/D or H/L. " +
       "Some obstacles move: an arrow shows each one's first move.",
     title: "Switch lanes",
