@@ -18,7 +18,7 @@ export const DOGS = {
     art: "biscuit",
     breed: "Beagle",
     look: "Tricolour, floppy ears, green collar",
-    name: "Biscuit",
+    name: "Lady",
     owner: {
       name: "Clare",
       role: "Psychologist",

@@ -30,7 +30,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 - **Lengths:** message strip lines and first-time hints fit the strip's 2 rows at full size, with or without a debuff bar (312 px a row at 2×, about 36 characters); the walker's bubble about 30 characters a line, growing to fit its lines, with walker's lines and owner parting lines at 2; card option names 2 or 3 words; hit labels one or two uppercase words with "!"
 - **Walkers:** Ada calm and precise, Casey warm and encouraging, Mr. B easygoing, Trista sporty and quick
 - **Owners** (each with 2 lines for each of happier, upset, fired and parting):
-  - **Clare** (Biscuit): psychologist, quiet and friendly, gentle observations, a little shy
+  - **Clare** (Lady): psychologist, quiet and friendly, gentle observations, a little shy
   - **Eve** (Ginger): YouTuber, everything is a video (vlog, views, subscribers)
   - **Gadget** (Penny): nervous but kind, double-checks everything, apologizes even when firing you
   - **Jason** (Buddy): lawn care pro, laid-back, yard talk (mowing, edging, weeds)
