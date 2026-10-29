@@ -1,20 +1,31 @@
 import { getOrInsertComputed } from "@andornaut/game-kit/maps";
+import {
+  type BitmapFont,
+  type FontMetrics,
+  fontMetrics,
+  laidGlyphs,
+  leftBearing,
+} from "@andornaut/game-kit/text/bitmapFont";
+import {
+  type FittedText,
+  fittingText,
+  type TextFitStyle,
+  widestLine,
+} from "@andornaut/game-kit/text/textFit";
 
 import { readBitmapFont } from "../tools/fontFile";
-import { type BitmapFontFile, type FontMetrics, fontMetrics, leftBearing } from "../ui/fontMetrics";
 import { inkWithPills, type LaidChar, pillGlyphAdvances } from "../ui/namePills";
-import { type FittedText, fittingText, type TextFitStyle } from "../ui/textFit";
 
-const GAME_GLYPHS = new Map<string, BitmapFontFile["glyphs"]>();
+const GAME_FONTS = new Map<string, BitmapFont>();
 
-// A font's glyphs as the game holds them: its .fnt's, and a blank glyph for each pill character,
-// a copy of its space with the pill's advance, as addPillGlyphs adds them.
-export function gameGlyphs(font: string): BitmapFontFile["glyphs"] {
+// A font as the game holds it: its .fnt's, and a blank glyph for each pill character, a copy of
+// its space with the pill's advance, as addPillGlyphs adds them.
+export function gameFont(font: string): BitmapFont {
   return getOrInsertComputed(
     font,
     () => {
-      const { glyphs } = readBitmapFont(font);
-      const space = glyphs.get(" ");
+      const file = readBitmapFont(font);
+      const space = file.glyphs.get(" ");
       const pills =
         space === undefined
           ? []
@@ -22,10 +33,15 @@ export function gameGlyphs(font: string): BitmapFontFile["glyphs"] {
               char,
               { ...space, advance },
             ]);
-      return new Map([...glyphs, ...pills]);
+      return { ...file, glyphs: new Map([...file.glyphs, ...pills]) };
     },
-    GAME_GLYPHS,
+    GAME_FONTS,
   );
+}
+
+// A font's glyphs as the game holds them (gameFont).
+export function gameGlyphs(font: string): BitmapFont["glyphs"] {
+  return gameFont(font).glyphs;
 }
 
 // A font's rows, from its .fnt.
@@ -33,45 +49,35 @@ export function fontFileMetrics(font: string): FontMetrics {
   return fontMetrics(readBitmapFont(font));
 }
 
-// A font's .fnt as Phaser's bitmap font cache holds it: glyphs keyed by character code.
-export function phaserFontData(font: string): {
-  chars: Record<
-    number,
-    { height: number; width: number; xAdvance: number; xOffset: number; yOffset: number }
-  >;
-  lineHeight: number;
-} {
-  const { lineHeight } = readBitmapFont(font);
+// A font's .fnt as Phaser's bitmap font cache holds it: glyphs keyed by character code, each
+// with its kerning keyed by the code of the character before it (PhaserFontData in the kit's
+// text/phaser/phaserBitmapFont).
+export function phaserFontData(font: string) {
+  const { kernings, lineHeight } = readBitmapFont(font);
+  const code = (char: string) => char.codePointAt(0) ?? 0;
   const chars = Object.fromEntries(
-    [...gameGlyphs(font)].map(([char, glyph]) => [
-      char.codePointAt(0) ?? 0,
-      { ...glyph, xAdvance: glyph.advance },
-    ]),
+    [...gameGlyphs(font)].map(([char, glyph]) => {
+      const kerning = Object.fromEntries(
+        [...kernings].flatMap(([pair, amount]) => {
+          const [first = "", second] = [...pair];
+          return second === char ? [[code(first), amount]] : [];
+        }),
+      );
+      return [code(char), { ...glyph, kerning, xAdvance: glyph.advance }];
+    }),
   );
   return { chars, lineHeight };
 }
 
 // Each character of a line of text in a font at a style, with the screen columns it inks from
-// the line's left edge, as Phaser lays it out: the pen moves by each glyph's advance and the
-// pair's kerning, both in font pixels before the style's scale. A glyph
-// that inks nothing, such as a space, inks no columns.
+// the line's left edge, as Phaser lays it out (laidGlyphs). Throws on a character the font lacks.
 export function laidChars(font: string, style: TextFitStyle, text: string): LaidChar[] {
-  const { kernings } = readBitmapFont(font);
-  const glyphs = gameGlyphs(font);
-  let x = 0;
-  let previous = "";
-  return [...text].map((char) => {
-    const glyph = glyphs.get(char);
-    if (glyph === undefined) {
-      throw new Error(`${font} has no ${char}`);
-    }
-    x += kernings.get(previous + char) ?? 0;
-    const span = { left: x + glyph.xOffset, right: x + glyph.xOffset + glyph.width };
-    x += glyph.advance;
-    previous = char;
-    const scaled = { left: span.left * style.scale, right: span.right * style.scale };
-    return { char, ink: glyph.width === 0 ? null : scaled, line: 0 };
-  });
+  const game = gameFont(font);
+  const missing = [...text].find((char) => !game.glyphs.has(char));
+  if (missing !== undefined) {
+    throw new Error(`${font} has no ${missing}`);
+  }
+  return laidGlyphs(game, style.scale, text).map((glyph) => ({ ...glyph, line: 0 }));
 }
 
 // The screen columns each inked glyph of text covers (laidChars).
@@ -149,5 +155,5 @@ export function fitInFont(
 ): FittedText & { widest: number } {
   const width = (at: TextFitStyle, line: string) => inkWidth(font, at, line);
   const fitted = fittingText(style, width, room, text);
-  return { ...fitted, widest: Math.max(...fitted.lines.map((line) => width(fitted.style, line))) };
+  return { ...fitted, widest: widestLine(width, fitted) };
 }

@@ -1,10 +1,15 @@
 import type { Point, Rect } from "@andornaut/game-kit/rect";
+import {
+  type FontMetrics,
+  inkRowsFromCapTop,
+  inkRowsOfLines,
+} from "@andornaut/game-kit/text/bitmapFont";
 
 import type { DogId } from "../data/types";
 import { ownerPhotoRect, WALK_BAR, type WalkBarButtonId } from "../hud/walkHud";
 import type { PackPlacement } from "../layout/packFormation";
-import { type FontMetrics, helpCapDy, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import type { GridSpec } from "../ui/grid";
+import { helpCapDy } from "../ui/labelHelpGap";
 import { BUTTON_LIP_PX } from "../ui/selection";
 import { TOP_BAR_FACE, TOP_BAR_HEIGHT, TOP_BAR_MID, TOP_BAR_WELL } from "../ui/topBarTrim";
 import type { SectionId } from "./sections";

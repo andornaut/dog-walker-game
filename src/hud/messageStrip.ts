@@ -1,10 +1,14 @@
 import { clamp01 } from "@andornaut/game-kit/numbers";
 import type { Point, Rect } from "@andornaut/game-kit/rect";
+import {
+  type FontMetrics,
+  inkRowsFromCapTop,
+  inkRowsOfLines,
+} from "@andornaut/game-kit/text/bitmapFont";
 
 import { SCREEN_LAYOUT } from "../data/screen";
 import type { DogId, GameData } from "../data/types";
 import { read } from "../rules/units";
-import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { effectIconKey, type EffectItem } from "./effectIcons";
 import type { NameMark } from "./effectNames";
 import { type FaceBox, type FaceRow, faceRows, type FaceText } from "./faceText";

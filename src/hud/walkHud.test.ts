@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 
 import { keysOf } from "@andornaut/game-kit/records";
 import { type Point, type Rect, rectsOverlap } from "@andornaut/game-kit/rect";
+import { inkRowsFromCapTop } from "@andornaut/game-kit/text/bitmapFont";
 import { pixels } from "@andornaut/game-kit/units";
 import { describe, expect, it } from "vitest";
 
@@ -19,7 +20,6 @@ import { LONE } from "../testing/packPlaces";
 import { inside } from "../testing/rects";
 import { decodePng } from "../tools/atlas/atlasBuild";
 import { opaqueRect } from "../tools/atlas/atlasPixels";
-import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { cents } from "../units";
 import { maxEffects } from "./effectIcons";

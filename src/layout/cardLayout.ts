@@ -1,8 +1,13 @@
 import type { Rect } from "@andornaut/game-kit/rect";
+import {
+  type FontMetrics,
+  inkRowsFromCapTop,
+  inkRowsOfLines,
+} from "@andornaut/game-kit/text/bitmapFont";
+import { type TextFitStyle } from "@andornaut/game-kit/text/textFit";
 
 import { CARD_HEADER, cardRowRects, type CardRowSpec } from "../ui/cardRow";
-import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
-import { TEXT_SCALE, type TextFitStyle } from "../ui/textFit";
+import { TEXT_SCALE } from "../ui/textFit";
 import { CARD_CHARMS_HEIGHT } from "./buffLayout";
 
 // The choice cards: the card-frame sprite's parts in card pixels, the row of cards centred

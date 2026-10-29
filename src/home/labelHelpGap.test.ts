@@ -1,5 +1,7 @@
 import { fillLine, wrapWords } from "@andornaut/game-kit/lines";
 import { keysOf } from "@andornaut/game-kit/records";
+import { inkRowsFromCapTop } from "@andornaut/game-kit/text/bitmapFont";
+import { fittingText, type TextFitStyle } from "@andornaut/game-kit/text/textFit";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -11,9 +13,8 @@ import { celebrationText } from "../hud/zoneCelebration";
 import type { Owned } from "../save/schema";
 import { fontFileMetrics, gameGlyphs, inkWidth } from "../testing/fontInk";
 import { veteranSave } from "../testing/saves";
-import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
-import { fittingText, TEXT_SCALE, type TextFitStyle } from "../ui/textFit";
+import { TEXT_SCALE } from "../ui/textFit";
 import { cents } from "../units";
 import { badgeProgress, badgeWall, wallCell } from "./badgesView";
 import {

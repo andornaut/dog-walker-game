@@ -1,9 +1,10 @@
 import type { Rect } from "@andornaut/game-kit/rect";
+import { type FontMetrics, inkRowsFromCapTop } from "@andornaut/game-kit/text/bitmapFont";
 
 import { DOG_SLOTS } from "../data/dogSlots";
 import { TITLE_CAP_ROWS } from "../hud/walkHud";
 import { closeControl } from "../ui/closeControl";
-import { type FontMetrics, helpCapDy, inkRowsFromCapTop } from "../ui/fontMetrics";
+import { helpCapDy } from "../ui/labelHelpGap";
 import { type ScrollbarRects, scrollbarRects } from "../ui/scrollbar";
 import { SELECT_OUTSET } from "../ui/selection";
 import { TEXT_SCALE, TEXT_STYLE } from "../ui/textFit";

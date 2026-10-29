@@ -1,6 +1,7 @@
 import { wrapWords } from "@andornaut/game-kit/lines";
 import { keysOf } from "@andornaut/game-kit/records";
 import { insetRect, rectsOverlap } from "@andornaut/game-kit/rect";
+import { inkRowsFromCapTop, inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -9,7 +10,6 @@ import { withNamePills } from "../hud/effectNames";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
-import { inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { cents } from "../units";
 import {

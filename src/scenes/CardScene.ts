@@ -1,5 +1,6 @@
 import { itemAt } from "@andornaut/game-kit/arrays";
 import { insetRect, type Rect } from "@andornaut/game-kit/rect";
+import { inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
 import { type GameObjects, Scene } from "phaser";
 
 import { SKIP_CARD_ART } from "../assets/cardArt";
@@ -38,7 +39,6 @@ import {
   type OptionView,
 } from "../rules/choices";
 import { cardHeader } from "../ui/cardRow";
-import { inkRowsOfLines } from "../ui/fontMetrics";
 import { rectIndexAt } from "../ui/grid";
 import { PLAIN_ITEM, tileState } from "../ui/interaction";
 import { addDisplayText, hasDisplayFont } from "../ui/phaser/displayText";

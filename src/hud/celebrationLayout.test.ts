@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 
 import { keysOf } from "@andornaut/game-kit/records";
+import { fitsRoom, fittingText, type TextFitStyle } from "@andornaut/game-kit/text/textFit";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -11,7 +12,7 @@ import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { decodePng } from "../testing/png";
 import { inside } from "../testing/rects";
 import { plainMarks } from "../ui/pixelFont";
-import { fitsRoom, fittingText, TEXT_SCALE, type TextFitStyle } from "../ui/textFit";
+import { TEXT_SCALE } from "../ui/textFit";
 import {
   CELEBRATION_LAYOUT as LAYOUT,
   GREETING_FIT,

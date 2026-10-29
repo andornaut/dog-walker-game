@@ -1,12 +1,17 @@
 import type { Point, Rect } from "@andornaut/game-kit/rect";
+import {
+  type FontMetrics,
+  inkRowsFromCapTop,
+  inkRowsOfLines,
+} from "@andornaut/game-kit/text/bitmapFont";
+import { type TextFitStyle } from "@andornaut/game-kit/text/textFit";
 
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, GameData } from "../data/types";
 import { type FaceMood, faceMood } from "../rules/treats";
 import { slotIndexOf } from "../state/pack";
 import type { Pack, PackSlot } from "../state/runState";
-import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
-import { TEXT_STYLE, type TextFitStyle } from "../ui/textFit";
+import { TEXT_STYLE } from "../ui/textFit";
 import type { Cents } from "../units";
 import { type FaceBox, type FaceText, fillFaceText, ownerFaceText } from "./faceText";
 import type { ChangeLabel } from "./hudView";

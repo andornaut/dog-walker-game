@@ -1,10 +1,11 @@
 import { clamp01 } from "@andornaut/game-kit/numbers";
 import type { Rect } from "@andornaut/game-kit/rect";
+import { type FontMetrics, inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
 
 import { laneDirectionForKey } from "../input/keyBindings";
 import type { Settings } from "../save/schema";
 import { type CloseControl, closeControl } from "../ui/closeControl";
-import { type FontMetrics, helpCapDy, inkRowsOfLines, LABEL_HELP_GAP } from "../ui/fontMetrics";
+import { helpCapDy, LABEL_HELP_GAP } from "../ui/labelHelpGap";
 import { TEXT_SCALE, textOnLines } from "../ui/textFit";
 import { cardBand, HOME_LAYOUT } from "./homeLayout";
 

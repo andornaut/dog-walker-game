@@ -1,7 +1,7 @@
 import type { Point, Rect } from "@andornaut/game-kit/rect";
+import { type FontMetrics, inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
 
 import type { ScreenLayout } from "../layout/screenLayout";
-import { type FontMetrics, inkRowsOfLines } from "../ui/fontMetrics";
 import { TEXT_STYLE } from "../ui/textFit";
 import { OWNER_TAB } from "./walkHud";
 

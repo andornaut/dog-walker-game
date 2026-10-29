@@ -2,6 +2,7 @@ import { itemAt } from "@andornaut/game-kit/arrays";
 import { BUILD_LABEL } from "@andornaut/game-kit/build/buildLabel";
 import { fillLine } from "@andornaut/game-kit/lines";
 import { containsPoint, insetRect, type Rect } from "@andornaut/game-kit/rect";
+import { fittingText } from "@andornaut/game-kit/text/textFit";
 import { type GameObjects, Scene, Scenes } from "phaser";
 
 import { gameData } from "../data";
@@ -58,7 +59,7 @@ import {
 } from "../ui/phaser/pixelText";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { GREYED } from "../ui/selection";
-import { fittingText, TEXT_SCALE } from "../ui/textFit";
+import { TEXT_SCALE } from "../ui/textFit";
 import { listenHomeBar } from "./homeBarPress";
 import { addCardTitle, addDetailCard } from "./homePanels";
 import { listenOnePress } from "./onePress";

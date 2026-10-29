@@ -1,10 +1,10 @@
+import { inkRowsFromCapTop } from "@andornaut/game-kit/text/bitmapFont";
 import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG } from "../data/screen";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { fontFileMetrics } from "../testing/fontInk";
 import { inside } from "../testing/rects";
-import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { confirmLeftCapTop, PURCHASE_CONFIRM_LAYOUT } from "./purchaseConfirmLayout";
 
 const LAYOUT = PURCHASE_CONFIRM_LAYOUT;

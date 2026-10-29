@@ -1,6 +1,7 @@
 import { itemAt } from "@andornaut/game-kit/arrays";
 import { keysOf } from "@andornaut/game-kit/records";
 import { insetRect, type Rect, rectsOverlap } from "@andornaut/game-kit/rect";
+import { inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -11,7 +12,6 @@ import { MAX_CARD_OPTIONS } from "../rules/choices";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { inside } from "../testing/rects";
 import { CARD_HEADER } from "../ui/cardRow";
-import { inkRowsOfLines } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { CARD_CHARMS_HEIGHT, cardCharmPlates, cardCharmWidth, CHARM } from "./buffLayout";
 import {

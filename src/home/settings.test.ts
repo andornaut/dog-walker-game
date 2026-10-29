@@ -2,6 +2,7 @@ import { buildLabel } from "@andornaut/game-kit/build/buildLabel";
 import { fillLine } from "@andornaut/game-kit/lines";
 import { keysOf } from "@andornaut/game-kit/records";
 import type { Rect } from "@andornaut/game-kit/rect";
+import { fittingText, type TextFitStyle } from "@andornaut/game-kit/text/textFit";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -12,8 +13,7 @@ import { fitInFont, fontFileMetrics, gameGlyphs, inkWidth, placedInk } from "../
 import { inside } from "../testing/rects";
 import { SETTINGS_EXPORT_ROWS } from "../tools/layoutExport";
 import { closeFace } from "../ui/closeControl";
-import { LABEL_HELP_GAP } from "../ui/fontMetrics";
-import { fittingText, type TextFitStyle } from "../ui/textFit";
+import { LABEL_HELP_GAP } from "../ui/labelHelpGap";
 import { MENU_TEXT_FIELDS } from "./menuText";
 import {
   INSTALL_STEPS,

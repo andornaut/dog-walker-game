@@ -1,6 +1,6 @@
 // A bitmap font's glyph, in font pixels: its inked box from the pen position and the line's
 // top, and how far it moves the pen.
-interface BitmapGlyph {
+export interface BitmapGlyph {
   readonly advance: number;
   readonly height: number;
   readonly width: number;
@@ -8,9 +8,10 @@ interface BitmapGlyph {
   readonly yOffset: number;
 }
 
-// A bitmap font as an XML BMFont file describes it: its glyphs by character, the pen shift
-// between a pair of characters (keyed first then second), and its line height.
-export interface BitmapFontFile {
+// A bitmap font: its glyphs by character, the pen shift between a pair of characters (keyed
+// first then second), and its line height, in font pixels. parseBitmapFont reads one from an
+// XML BMFont file; phaser/phaserBitmapFont reads one from Phaser's bitmap font cache.
+export interface BitmapFont {
   readonly glyphs: ReadonlyMap<string, BitmapGlyph>;
   readonly kernings: ReadonlyMap<string, number>;
   readonly lineHeight: number;
@@ -26,7 +27,8 @@ function char(code: number | undefined): string {
   return String.fromCodePoint(code ?? 0);
 }
 
-export function parseBitmapFont(fnt: string): BitmapFontFile {
+// The font an XML BMFont (.fnt) file describes.
+export function parseBitmapFont(fnt: string): BitmapFont {
   const common = attributes(/<common\b[^>]*>/.exec(fnt)?.[0] ?? "");
   const glyphs = new Map(
     [...fnt.matchAll(/<char\b[^>]*>/g)].map(([tag]) => {
@@ -101,13 +103,41 @@ export function inkRowsOfLines(metrics: FontMetrics, lines: number): number {
   return (Math.max(1, lines) - 1) * metrics.lineHeight + inkRowsFromCapTop(metrics);
 }
 
-// A label over its help text leaves LABEL_HELP_GAP clear rows between the lowest row the
-// label's font inks, its deepest descender's, and the help text's capitals: one offset per
-// font, so labels in a list line up, and a label with no descender leaves a few more.
-export const LABEL_HELP_GAP = 10;
+// A character of a line as Phaser lays it out, with the screen columns it inks from the line's
+// left edge, or null where its glyph inks nothing, such as a space's.
+export interface LaidGlyph {
+  readonly char: string;
+  readonly ink: { readonly left: number; readonly right: number } | null;
+}
 
-// How far the help text's capitals' top sits under its label's, in screen pixels, for a label in
-// the font label at scale.
-export function helpCapDy(label: FontMetrics, scale: number): number {
-  return inkRowsFromCapTop(label) * scale + LABEL_HELP_GAP;
+// Each character of line the font has, laid out at scale as Phaser's BitmapText lays it out:
+// the pen moves by each glyph's advance and the kerning between it and the glyph before, both in
+// font pixels before scale. A character the font lacks is skipped, as Phaser skips it.
+export function laidGlyphs(font: BitmapFont, scale: number, line: string): LaidGlyph[] {
+  let x = 0;
+  let previous: string | null = null;
+  return [...line].flatMap((char) => {
+    const glyph = font.glyphs.get(char);
+    if (glyph === undefined) {
+      return [];
+    }
+    x += previous === null ? 0 : (font.kernings.get(previous + char) ?? 0);
+    const left = x + glyph.xOffset;
+    x += glyph.advance;
+    previous = char;
+    const ink =
+      glyph.width === 0 ? null : { left: left * scale, right: (left + glyph.width) * scale };
+    return [{ char, ink }];
+  });
+}
+
+// The screen pixels from the first column line inks to the last, in the font at scale: its
+// first glyph's left side bearing and its last glyph's right one left out. 0 for a line that
+// inks nothing.
+export function inkWidth(font: BitmapFont, scale: number, line: string): number {
+  const spans = laidGlyphs(font, scale, line).flatMap((glyph) => glyph.ink ?? []);
+  if (spans.length === 0) {
+    return 0;
+  }
+  return Math.max(...spans.map((span) => span.right)) - Math.min(...spans.map((span) => span.left));
 }

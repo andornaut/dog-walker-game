@@ -1,9 +1,9 @@
+import { inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
 import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { amountText } from "../rules/causes";
 import { fontFileMetrics } from "../testing/fontInk";
-import { inkRowsOfLines } from "../ui/fontMetrics";
 import { cents } from "../units";
 import { perkIconKey } from "./effectIcons";
 import { FEEDBACK } from "./feedback";

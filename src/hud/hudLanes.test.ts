@@ -1,11 +1,11 @@
 import { readFileSync } from "node:fs";
 
 import { type Point, type Rect, rectsOverlap } from "@andornaut/game-kit/rect";
+import { inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
 import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { fontFileMetrics } from "../testing/fontInk";
-import { inkRowsOfLines } from "../ui/fontMetrics";
 import { perkIconKey } from "./effectIcons";
 import {
   CHANGE_CHIP,

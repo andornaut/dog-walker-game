@@ -1,6 +1,7 @@
 import { fillLine, wrapWords } from "@andornaut/game-kit/lines";
 import { keysOf } from "@andornaut/game-kit/records";
 import type { Rect } from "@andornaut/game-kit/rect";
+import { inkRowsFromCapTop } from "@andornaut/game-kit/text/bitmapFont";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -9,7 +10,6 @@ import { read } from "../rules/units";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, fontInk, inkWidth, placedInk } from "../testing/fontInk";
 import { veteranSave } from "../testing/saves";
-import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { TEXT_SCALE } from "../ui/textFit";
 import { cents } from "../units";

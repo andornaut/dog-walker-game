@@ -1,11 +1,16 @@
 import { fillLine } from "@andornaut/game-kit/lines";
+import type { FontMetrics } from "@andornaut/game-kit/text/bitmapFont";
+import {
+  fitsRoom,
+  type FittedText,
+  fittingText,
+  type TextFitStyle,
+} from "@andornaut/game-kit/text/textFit";
 
 import type { GameData } from "../data/types";
 import { boxStyle, CARD_LAYOUT, cardEffectBox, FIRES_FIT } from "../layout/cardLayout";
 import { firesText, type OptionView } from "../rules/choices";
 import { formatDollars } from "../rules/effectText";
-import type { FontMetrics } from "../ui/fontMetrics";
-import { fitsRoom, type FittedText, fittingText, type TextFitStyle } from "../ui/textFit";
 import { withNamePills } from "./effectNames";
 import { RUN_TEXT_FIELDS } from "./runText";
 

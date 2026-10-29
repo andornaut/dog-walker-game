@@ -1,9 +1,14 @@
 import { wrapWords } from "@andornaut/game-kit/lines";
 import { getOrInsertComputed } from "@andornaut/game-kit/maps";
 import type { Rect } from "@andornaut/game-kit/rect";
+import { type FontMetrics, fontMetrics, leftBearing } from "@andornaut/game-kit/text/bitmapFont";
+import {
+  phaserBitmapFont,
+  type PhaserFontData,
+} from "@andornaut/game-kit/text/phaser/phaserBitmapFont";
+import { type FittedText, fittingText, type TextFitStyle } from "@andornaut/game-kit/text/textFit";
 import type { GameObjects, Scene, Types } from "phaser";
 
-import { type FontMetrics, fontMetrics, leftBearing } from "../fontMetrics";
 import { inkWithPills, type LaidChar, laidPills, pillGlyphAdvances, pillRows } from "../namePills";
 import {
   GLYPH_HEIGHT,
@@ -13,7 +18,6 @@ import {
   pixelFontAtlas,
   plainMarks,
 } from "../pixelFont";
-import { type FittedText, fittingText, type TextFitStyle } from "../textFit";
 
 // body: mixed case, for running text, card effects and labels. title: capitals, for
 // titles, numbers, money and buttons. Both are white glyphs, tinted to a palette colour.
@@ -127,23 +131,8 @@ export function pixelFontMetrics(scene: Scene, role: FontRole): FontMetrics {
   if (key === FALLBACK_FONT_KEY) {
     return FALLBACK_METRICS;
   }
-  const { data } = scene.cache.bitmapFont.get(key) as {
-    data: Types.GameObjects.BitmapText.BitmapFontData;
-  };
-  return getOrInsertComputed(
-    data,
-    () => {
-      // Phaser keys a font's glyphs by character code.
-      const glyphs = new Map(
-        Object.entries(data.chars).map(([code, glyph]) => [
-          String.fromCodePoint(Number(code)),
-          { height: glyph.height, yOffset: glyph.yOffset },
-        ]),
-      );
-      return fontMetrics({ glyphs, lineHeight: data.lineHeight });
-    },
-    METRICS,
-  );
+  const { data } = scene.cache.bitmapFont.get(key) as { data: PhaserFontData };
+  return getOrInsertComputed(data, () => fontMetrics(phaserBitmapFont(data)), METRICS);
 }
 
 // Text placed by its origin, at a whole-pixel position. With originY 0, y is the top of

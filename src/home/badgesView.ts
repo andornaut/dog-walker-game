@@ -1,5 +1,6 @@
 import { fillLine, wrapWords } from "@andornaut/game-kit/lines";
 import type { Rect } from "@andornaut/game-kit/rect";
+import { type TextFitStyle } from "@andornaut/game-kit/text/textFit";
 
 import { badgeKey } from "../assets/spriteKeys";
 import type { AchievementCondition, AchievementId, GameData } from "../data/types";
@@ -7,7 +8,7 @@ import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { achievementProgress } from "../rules/achievements";
 import type { SaveDocument } from "../save/schema";
 import { GREYED } from "../ui/selection";
-import { TEXT_SCALE, type TextFitStyle } from "../ui/textFit";
+import { TEXT_SCALE } from "../ui/textFit";
 import { dollarsToCents } from "../units";
 import { dollarText } from "./home";
 import { MENU_TEXT_FIELDS } from "./menuText";

@@ -1,8 +1,8 @@
 import type { Point, Rect } from "@andornaut/game-kit/rect";
+import type { FontMetrics } from "@andornaut/game-kit/text/bitmapFont";
 
 import { SCREEN_LAYOUT } from "../data/screen";
 import { amountText } from "../rules/causes";
-import type { FontMetrics } from "../ui/fontMetrics";
 import { type Cents, cents } from "../units";
 import { FEEDBACK, tickMs } from "./feedback";
 import { CHANGE_LABEL_STYLE, changeChipAt, changeLabelRoom } from "./hudLanes";

@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 
 import { keysOf } from "@andornaut/game-kit/records";
 import { type Rect } from "@andornaut/game-kit/rect";
+import { inkRowsFromCapTop } from "@andornaut/game-kit/text/bitmapFont";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -12,7 +13,6 @@ import { defined } from "../testing/defined";
 import { everyStripLine } from "../testing/everyStripLine";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { inside } from "../testing/rects";
-import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { faceTextWithNamePills } from "./effectNames";
 import { type FaceText, inlineFaceBox } from "./faceText";

@@ -15,7 +15,7 @@ interface Drawn {
 function fakeScene(fonts: Readonly<Record<string, string>>): { drawn: Drawn[]; scene: Scene } {
   const drawn: Drawn[] = [];
   const glyphs = (chars: string) =>
-    Object.fromEntries([...chars].map((char) => [char.codePointAt(0), {}]));
+    Object.fromEntries([...chars].map((char) => [char.codePointAt(0), { kerning: {} }]));
   const scene = {
     add: {
       bitmapText: (_x: number, y: number, font: string, text: string) => {
@@ -39,7 +39,7 @@ function fakeScene(fonts: Readonly<Record<string, string>>): { drawn: Drawn[]; s
         // Each font's capitals start 4 rows into its line, as font-title's do.
         get: (key: string) => ({
           data: {
-            chars: { ...glyphs(fonts[key] ?? ""), [72]: { height: 5, yOffset: 4 } },
+            chars: { ...glyphs(fonts[key] ?? ""), [72]: { height: 5, kerning: {}, yOffset: 4 } },
             lineHeight: 12,
           },
         }),

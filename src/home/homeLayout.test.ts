@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { wrapWords } from "@andornaut/game-kit/lines";
 import { keysOf } from "@andornaut/game-kit/records";
 import { insetRect, type Rect, rectsOverlap } from "@andornaut/game-kit/rect";
+import { inkRowsFromCapTop, inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
 import { describe, expect, it } from "vitest";
 
 import { ownerFaceKey } from "../assets/spriteKeys";
@@ -16,7 +17,6 @@ import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, fontInk, fontInkRows, inkWidth } from "../testing/fontInk";
 import { decodePng } from "../testing/png";
 import { inside } from "../testing/rects";
-import { inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { gridRects } from "../ui/grid";
 import { MARK_OFFSET } from "../ui/mark";
 import { plainMarks } from "../ui/pixelFont";

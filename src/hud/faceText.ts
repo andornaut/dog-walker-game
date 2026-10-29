@@ -1,7 +1,8 @@
+import type { FontMetrics } from "@andornaut/game-kit/text/bitmapFont";
+import type { TextFitStyle } from "@andornaut/game-kit/text/textFit";
+
 import type { DogId, GameData } from "../data/types";
 import type { FaceMood } from "../rules/treats";
-import type { FontMetrics } from "../ui/fontMetrics";
-import type { TextFitStyle } from "../ui/textFit";
 
 // Walk text that names owners, each name drawn led by the owner's face: the face, then the
 // name, then the rest of the line. A filled {owner} becomes a face and name token, which wraps

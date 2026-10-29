@@ -1,4 +1,5 @@
 import type { Rect } from "@andornaut/game-kit/rect";
+import type { TextFitStyle } from "@andornaut/game-kit/text/textFit";
 import type { GameObjects, Scene } from "phaser";
 
 import { ownerCardFaceKey } from "../assets/spriteKeys";
@@ -21,7 +22,6 @@ import {
   setPixelText,
   withProbe,
 } from "../ui/phaser/pixelText";
-import type { TextFitStyle } from "../ui/textFit";
 import { addNamePills } from "./effectNameColours";
 import { playFirstTag } from "./sprites";
 

@@ -1,3 +1,5 @@
+import { inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
+import type { TextFitStyle } from "@andornaut/game-kit/text/textFit";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -5,9 +7,7 @@ import { CARD_LAYOUT, plaqueRoom } from "../layout/cardLayout";
 import { hasPlaque, type OptionView } from "../rules/choices";
 import { everyCardOption } from "../testing/everyCardOption";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
-import { inkRowsOfLines } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
-import type { TextFitStyle } from "../ui/textFit";
 import { plaqueTexts, smallCardText } from "./cardText";
 
 const BODY = fontFileMetrics("font-body");

@@ -1,6 +1,7 @@
 import type { Rect } from "@andornaut/game-kit/rect";
+import { type FontMetrics, inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
 
-import { type FontMetrics, helpCapDy, inkRowsOfLines } from "../ui/fontMetrics";
+import { helpCapDy } from "../ui/labelHelpGap";
 import { type ScrollbarRects, scrollbarRects } from "../ui/scrollbar";
 import { BADGE_STRIP, type WallCellLines } from "./badgesView";
 import { SHOP_LAYOUT, shopListFrame, shopTabRects } from "./shopLayout";

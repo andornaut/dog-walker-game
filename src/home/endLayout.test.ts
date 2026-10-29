@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 
 import { fillLine } from "@andornaut/game-kit/lines";
 import { insetRect, type Rect, rectsOverlap } from "@andornaut/game-kit/rect";
+import { inkRowsFromCapTop, inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
+import { fittingText } from "@andornaut/game-kit/text/textFit";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -10,8 +12,7 @@ import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { defined } from "../testing/defined";
 import { fontFileMetrics, fontInkRows, inkWidth, placedInk } from "../testing/fontInk";
 import { decodePng } from "../testing/png";
-import { inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
-import { fittingText, TEXT_SCALE, TEXT_STYLE, textOnLines } from "../ui/textFit";
+import { TEXT_SCALE, TEXT_STYLE, textOnLines } from "../ui/textFit";
 import { cents } from "../units";
 import {
   BADGE_STRIP,

@@ -1,5 +1,7 @@
 import { placeholders } from "@andornaut/game-kit/lines";
 import { keysOf } from "@andornaut/game-kit/records";
+import { inkRowsFromCapTop } from "@andornaut/game-kit/text/bitmapFont";
+import type { TextFitStyle } from "@andornaut/game-kit/text/textFit";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -9,8 +11,6 @@ import type { FaceMood } from "../rules/treats";
 import { bodyRunWidth } from "../testing/bodyFont";
 import { defined } from "../testing/defined";
 import { fontFileMetrics } from "../testing/fontInk";
-import { inkRowsFromCapTop } from "../ui/fontMetrics";
-import type { TextFitStyle } from "../ui/textFit";
 import { clampHearts } from "../units";
 import {
   faceRows,

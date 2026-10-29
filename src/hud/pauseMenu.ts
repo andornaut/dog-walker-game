@@ -1,6 +1,5 @@
 import type { Rect } from "@andornaut/game-kit/rect";
-
-import { type FontMetrics, inkRowsOfLines } from "../ui/fontMetrics";
+import { type FontMetrics, inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
 
 // The menu's buttons, top to bottom; each one's label is menuText.pause[item].
 export const PAUSE_MENU_ITEMS = ["resume", "help", "settings", "headHome"] as const;

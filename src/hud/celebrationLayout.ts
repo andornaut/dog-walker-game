@@ -1,8 +1,10 @@
+import type { FontMetrics } from "@andornaut/game-kit/text/bitmapFont";
+import { type FittedText } from "@andornaut/game-kit/text/textFit";
+
 import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { WIDE_BUTTON } from "../layout/screenLayout";
-import type { FontMetrics } from "../ui/fontMetrics";
-import { type FittedText, TEXT_SCALE, TEXT_STYLE, textOnLines } from "../ui/textFit";
+import { TEXT_SCALE, TEXT_STYLE, textOnLines } from "../ui/textFit";
 import type { LinePart } from "./zoneCelebration";
 
 const SCREEN_WIDTH = SCREEN_CONFIG.width;

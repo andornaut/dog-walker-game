@@ -1,4 +1,5 @@
-import type { TextFitStyle } from "../ui/textFit";
+import type { TextFitStyle } from "@andornaut/game-kit/text/textFit";
+
 import { gameGlyphs } from "./fontInk";
 
 // A line's width in screen pixels in the body font at scale: the sum of its glyphs' advances,

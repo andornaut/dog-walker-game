@@ -1,5 +1,6 @@
 import { wrapWords } from "@andornaut/game-kit/lines";
 import { rectsOverlap } from "@andornaut/game-kit/rect";
+import { inkRowsFromCapTop } from "@andornaut/game-kit/text/bitmapFont";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -10,7 +11,6 @@ import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, placedInk } from "../testing/fontInk";
 import { inside } from "../testing/rects";
 import { closeFace } from "../ui/closeControl";
-import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { TEXT_SCALE } from "../ui/textFit";
 import { topBarContentRows, topBarRects } from "../ui/topBarTrim";
 import { helpBody } from "./helpBody";

@@ -1,7 +1,8 @@
 import type { Rect } from "@andornaut/game-kit/rect";
+import { type FontMetrics } from "@andornaut/game-kit/text/bitmapFont";
 
 import { SCREEN_CONFIG } from "../data/screen";
-import { type FontMetrics, helpCapDy } from "../ui/fontMetrics";
+import { helpCapDy } from "../ui/labelHelpGap";
 import { overlayRegion } from "./homeBar";
 import { cardBand, HOME_LAYOUT } from "./homeLayout";
 import type { ConfirmChoice } from "./purchaseConfirm";

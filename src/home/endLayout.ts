@@ -1,7 +1,12 @@
 import type { Rect } from "@andornaut/game-kit/rect";
+import {
+  type FontMetrics,
+  inkRowsFromCapTop,
+  inkRowsOfLines,
+} from "@andornaut/game-kit/text/bitmapFont";
 
 import { WIDE_BUTTON } from "../layout/screenLayout";
-import { type FontMetrics, helpCapDy, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
+import { helpCapDy } from "../ui/labelHelpGap";
 import { TEXT_SCALE } from "../ui/textFit";
 import { badgeStripMinHeight, badgeStripRows } from "./badgesView";
 

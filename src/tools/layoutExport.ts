@@ -1,4 +1,5 @@
 import type { Rect } from "@andornaut/game-kit/rect";
+import { type FontMetrics, fontMetrics } from "@andornaut/game-kit/text/bitmapFont";
 
 import { DEPTH_STEPS } from "../assets/depthSteps";
 import { LOADING_ART, ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
@@ -69,7 +70,6 @@ import { walkerFootY } from "../layout/screenLayout";
 import { MAX_CARD_OPTIONS } from "../rules/choices";
 import { read } from "../rules/units";
 import { walkProjection } from "../runner/walkGeometry";
-import { type FontMetrics, fontMetrics } from "../ui/fontMetrics";
 import { gridRects } from "../ui/grid";
 import { readBitmapFont } from "./fontFile";
 

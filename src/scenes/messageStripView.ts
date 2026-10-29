@@ -1,3 +1,4 @@
+import { type TextFitStyle } from "@andornaut/game-kit/text/textFit";
 import type { GameObjects, Scene } from "phaser";
 
 import { gameData } from "../data";
@@ -33,7 +34,6 @@ import {
   setPixelText,
   withProbe,
 } from "../ui/phaser/pixelText";
-import { type TextFitStyle } from "../ui/textFit";
 import { addFaceRows, addFramedOwnerFace, measureRuns } from "./faceTextView";
 import { addPanel } from "./uiKit";
 

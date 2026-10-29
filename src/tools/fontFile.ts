@@ -1,13 +1,12 @@
 import { readFileSync } from "node:fs";
 
 import { getOrInsertComputed } from "@andornaut/game-kit/maps";
+import { type BitmapFont, parseBitmapFont } from "@andornaut/game-kit/text/bitmapFont";
 
-import { type BitmapFontFile, parseBitmapFont } from "../ui/fontMetrics";
-
-const FONTS = new Map<string, BitmapFontFile>();
+const FONTS = new Map<string, BitmapFont>();
 
 // A font's .fnt, as the game loads it from public/art/fonts/.
-export function readBitmapFont(font: string): BitmapFontFile {
+export function readBitmapFont(font: string): BitmapFont {
   return getOrInsertComputed(
     font,
     () => {

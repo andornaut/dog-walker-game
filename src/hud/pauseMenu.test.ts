@@ -1,5 +1,6 @@
 import { itemAt } from "@andornaut/game-kit/arrays";
 import { fillNames, sentences, wrapWords } from "@andornaut/game-kit/lines";
+import { inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -9,7 +10,6 @@ import { overlayRegion } from "../home/homeBar";
 import { walkLength } from "../rules/route";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics } from "../testing/fontInk";
-import { inkRowsOfLines } from "../ui/fontMetrics";
 import { cents } from "../units";
 import {
   homeQuestionLayout,

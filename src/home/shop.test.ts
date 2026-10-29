@@ -1,5 +1,6 @@
 import { fillNames } from "@andornaut/game-kit/lines";
 import { keysOf } from "@andornaut/game-kit/records";
+import { inkRowsFromCapTop } from "@andornaut/game-kit/text/bitmapFont";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -13,7 +14,6 @@ import { startingDogSlots, unlockPrice } from "../rules/shop";
 import type { Owned } from "../save/schema";
 import { fontFileMetrics, inkWidth, placedInk } from "../testing/fontInk";
 import { TEST_TUNING } from "../testing/tuning";
-import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { GREYED, pictureBox, SELECT_OUTSET } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
 import { cents } from "../units";

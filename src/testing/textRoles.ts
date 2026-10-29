@@ -3,6 +3,8 @@ import { UNKNOWN_COMMIT } from "@andornaut/game-kit/build/buildVersion";
 import { fillLine, fillNames } from "@andornaut/game-kit/lines";
 import { keysOf } from "@andornaut/game-kit/records";
 import type { Rect } from "@andornaut/game-kit/rect";
+import { overflowOf } from "@andornaut/game-kit/text/overflow";
+import { type TextFitStyle } from "@andornaut/game-kit/text/textFit";
 
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
@@ -82,7 +84,7 @@ import { readBitmapFont } from "../tools/fontFile";
 import { barTitleRoom } from "../ui/barTitle";
 import { closeControl } from "../ui/closeControl";
 import { plainMarks } from "../ui/pixelFont";
-import { TEXT_SCALE, TEXT_STYLE, type TextFitStyle, textOnLines } from "../ui/textFit";
+import { TEXT_SCALE, TEXT_STYLE, textOnLines } from "../ui/textFit";
 import { cents } from "../units";
 import { bodyRunWidth } from "./bodyFont";
 import { defined } from "./defined";
@@ -106,16 +108,6 @@ const TITLE = fontFileMetrics("font-title");
 const FACE_BOX = inlineFaceBox(BODY, TEXT_SCALE);
 
 type Font = "font-body" | "font-display" | "font-title";
-
-// How text set on lines lines with its widest line widest misses most lines no wider than room.
-function overflowOf(most: number, room: number, lines: number, widest: number): string {
-  return [
-    lines > most ? `${lines} lines of ${most}` : "",
-    widest > room ? `${widest}px wide in ${room}px` : "",
-  ]
-    .filter((part) => part !== "")
-    .join(", ");
-}
 
 // Text as a font draws it: the title and display fonts in capitals, marks made plain.
 const shownIn = (font: Font, text: string) =>
