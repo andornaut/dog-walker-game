@@ -48,7 +48,7 @@ import glyphs  # noqa: E402
 import scene as sn  # noqa: E402
 import road  # noqa: E402
 import roads  # noqa: E402
-from pixel import Grid, bitmap, build as build_sprites, dk, edged, to_image  # noqa: E402
+from pixel import Grid, K, bitmap, build as build_sprites, dk, edged, to_image  # noqa: E402
 from ui import chrome  # noqa: E402
 
 CW, CH = 112, 153
@@ -217,30 +217,92 @@ ARROW = ["...a...", "..aaa..", ".aaaaa.", "aaaaaaa", "..aaa..", "..aaa..", "..aa
 
 # ---------- encounters ----------
 
+def tub():
+    """49x22: a clawfoot tub from the front, its lip wider than its body, shaded on the right and
+    underneath, on two grey feet, outlined in dslate so it holds on the grey tiles."""
+    g = Grid(49, 22)
+    g.rect(0, 0, 49, 3, "white")
+    g.rect(0, 2, 49, 1, "lgrey")
+    g.rect(2, 3, 45, 12, "white")
+    g.rect(3, 15, 43, 1, "white")
+    g.rect(43, 3, 4, 12, "lgrey")
+    g.rect(42, 15, 4, 1, "lgrey")
+    g.rect(5, 16, 39, 1, "lgrey")
+    for x in (7, 37):
+        g.rect(x, 17, 5, 2, "grey")
+        g.rect(x + 1, 19, 1, 1, "grey")
+        g.rect(x + 3, 19, 1, 1, "grey")
+    g.edge = lambda c: K["dslate"]
+    return to_image(g.outlined())
+
+
+def foam():
+    """51x9: white puffs shaded lgrey along the tub's lip, over the dog's legs."""
+    g = Grid(51, 9)
+    for cx, cy, r in ((5, 5, 3.2), (11, 4, 4), (18, 5, 3.5), (33, 5, 3.5), (40, 4, 4), (46, 5, 3.2),
+                      (25, 6, 3)):
+        g.ell(cx, cy, r, r, "white", "lgrey")
+    g.edge = lambda c: K["grey"]
+    return to_image(g.outlined())
+
+
+def bath_bubble():
+    """A 5x5 white ring with a glint, slate-lined, floating over the tiles."""
+    g = Grid(5, 5)
+    g.ell(2.5, 2.5, 2.5, 2.5, "white")
+    g.ell(2.5, 2.5, 1.5, 1.5, None)
+    g.p(1, 1, "white")
+    g.edge = lambda c: K["slate"]
+    return to_image(g.outlined())
+
+
 def skunk_grooming():
     a = Art()
     a.tiles_bg()
     a.put("dog-archie", "walk", 37, 44, shadow=False)
-    a.fill(14, 34, 47, 3, "white")
-    a.fill(16, 37, 43, 14, "white")
-    a.fill(56, 37, 3, 14, "lgrey")
-    a.fill(16, 50, 43, 1, "grey")
-    a.fill(20, 51, 3, 3, "grey")
-    a.fill(52, 51, 3, 3, "grey")
-    for x, y in ((18, 22), (22, 12), (54, 24), (52, 12)):
-        a.fill(x, y, 3, 3, "white")
-        a.fill(x + 1, y + 1, 1, 1, "cyan")
+    a.paste(tub(), 13, 33)
+    a.paste(foam(), 12, 28)
+    for x, y in ((15, 14), (54, 10), (58, 22)):
+        a.paste(bath_bubble(), x, y)
     return a
 
 
+def spray_drop():
+    """A 2x2 cyan drop lit white at its top left, in a sky rim."""
+    g = Grid(2, 2)
+    g.rect(0, 0, 2, 2, "cyan")
+    g.p(0, 0, "white")
+    g.edge = lambda c: K["sky"]
+    return to_image(g.outlined())
+
+
+def hose():
+    """24x16: the hose lying on the lawn from the left edge, a grey spray nozzle at its end pointing up
+    and right."""
+    g = Grid(24, 16)
+    for x in range(0, 14):
+        g.rect(x, 12 + (1 if 4 <= x < 10 else 0), 1, 2, "forest")
+    g.rect(14, 11, 2, 3, "forest")
+    g.rect(15, 9, 3, 3, "lgrey")
+    g.rect(17, 7, 3, 3, "lgrey")
+    g.rect(17, 11, 1, 1, "grey")
+    g.rect(19, 9, 1, 1, "grey")
+    return to_image(g.outlined())
+
+
 def skunk_rinse():
+    """The hose on the lawn sprays an arc of drops onto Archie's back; the stink lines stay, as he is still
+    Stinky."""
     a = Art()
     a.grass()
     a.put("dog-archie", "walk", 44, 50, 1)
-    a.fill(0, 10, 16, 2, "dgreen")
-    a.fill(16, 9, 3, 4, "grey")
-    a.drops([(20 + k * 2, 11 + k + (k % 2)) for k in range(10)])
-    a.skunk_stink(56, 8)
+    a.paste(hose(), 0, 30)
+    for t in range(9):
+        u = t / 8
+        a.paste(spray_drop(), round(20 + 20 * u), round(34 - 30 * u + 26 * u * u))
+    for x, y in ((33, 18), (52, 16)):
+        a.paste(spray_drop(), x, y)
+    a.skunk_stink(58, 6)
     return a
 
 

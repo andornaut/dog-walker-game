@@ -40,7 +40,9 @@ ui-slider-knob (10x16; tags normal, pressed, disabled), icon-sound (tags on, off
 icon-sound-panel, icon-music-panel, icon-effects-panel, icon-motion-panel and icon-install-panel (tags on, off),
 ui-zone-pips (18x8; tags todo, and <zone> and <zone>-done for each zone in ZONE_COLOURS), ui-tile
 (24x24 nine-slice, 4px on every side; tags normal, selected, disabled), ui-touch-drag (104x40, the
-help screen's one lane-width drag; tags press, drag, release).
+help screen's swipe, a white glove dragging one lane-width; tags right and left, each a whole swipe of
+15 frames timed per frame (TOUCH_MS) and ending on an empty frame, drag (the swipe right's 7 drag
+frames, 70ms) and still (one frame for reduced motion)).
 
 Panels, bubbles, plates, tiles and card frames share one chrome (chrome_shape); hits.py, moments.py,
 scene.py and cards.py draw their plates, callouts and frames with it.
@@ -1465,80 +1467,122 @@ def zone_banner():
     return g
 
 
-def touch_track(g, left, right, y):
-    """The touch hint's two-way track on row y: an amber line (orange along its lower row) between
-    two orange arrowheads 5 columns long, their tips on columns left and right."""
-    g.rect(left + 5, y - 1, right - left - 9, 2, "amber")
-    g.rect(left + 5, y, right - left - 9, 1, "orange")
-    for i in range(5):
-        g.rect(left + i, y - i, 1, 1 + 2 * i, "orange")
-        g.rect(right - i, y - i, 1, 1 + 2 * i, "orange")
-
-
-def touch_mark(g, x, y, col):
-    """A touch mark the fingertip left at x, y: a small ring."""
-    g.ell(x, y, 3, 3, col)
-    g.ell(x, y, 1.6, 1.6, None)
-
-
-def touch_glow(g, x, y):
-    """The pressed fingertip's glow centred on x, y."""
-    g.ell(x, y, 4, 4, "yellow", "amber")
-
-
-def touch_speed(g, x):
-    """Speed lines on the left of a hand whose fingertip is on column x."""
-    for y, dx in ((16, 0), (20, 3), (24, 0)):
-        g.rect(x - 20 - dx, y, 8, 1, "white")
-
-
-def touch_hand(g, x, y):
-    """The pointing hand, its index fingertip's contact pixel at x, y (the finger's top row y - 1),
-    the other fingers curled to the right and a white cuff below: 17 columns, 29 rows."""
-    dx, dy = x - 48, y - 6
-    for rx, ry, w, h, c in ((46, 6, 5, 13, "skin1"), (47, 5, 3, 1, "skin1"), (47, 6, 3, 2, "cream"),
-                            (42, 16, 15, 12, "skin1"), (43, 15, 13, 1, "skin1"),
-                            (51, 19, 6, 1, "skin2"), (51, 23, 6, 1, "skin2"), (51, 27, 6, 1, "skin2"),
-                            (40, 18, 3, 6, "skin1"), (40, 23, 3, 1, "skin2"), (50, 7, 1, 11, "skin2"),
-                            (56, 16, 1, 12, "skin2"), (43, 27, 13, 1, "skin2"), (43, 28, 13, 6, "white"),
-                            (43, 33, 13, 1, "lgrey"), (55, 28, 1, 6, "lgrey")):
-        g.rect(rx + dx, ry + dy, w, h, c)
-
-
-# ui-touch-drag: one lane-width drag (64px) to the right on a 104x40 frame, for the help screen.
-# The track's centre is row TOUCH_Y, the drag runs from column TOUCH_FROM to TOUCH_TO, and each
-# frame is (fingertip column, fingertip row, glow, the marks left behind, speed lines).
+# ui-touch-drag: the help screen's swipe, a white glove dragging one lane-width (64px) on a 104x40
+# frame. The fingertip's contact row is TOUCH_Y; a swipe right runs from column TOUCH_FROM to TOUCH_TO
+# and a swipe left back again, so the anchor (TOUCH_FROM, TOUCH_Y) stands on lane 1's centre.
 TOUCH_SIZE, TOUCH_Y, TOUCH_FROM, TOUCH_TO = (104, 40), 6, 20, 84
-TOUCH_HALF = (TOUCH_FROM + TOUCH_TO) // 2
-TOUCH_FRAMES = {
-    "press": [(TOUCH_FROM, TOUCH_Y - 3, None, (), False), (TOUCH_FROM, TOUCH_Y, "glow", (), False)],
-    "drag": [(TOUCH_FROM, TOUCH_Y, "glow", (), False), (41, TOUCH_Y, "glow", ("faint",), True),
-             (63, TOUCH_Y, "glow", ("faint", "bright"), True), (TOUCH_TO, TOUCH_Y, "glow", ("faint", "bright"), True)],
-    "release": [(TOUCH_TO, TOUCH_Y - 3, "ring", ("faint", "bright"), False),
-                (TOUCH_TO, TOUCH_Y - 3, "fading", ("faint", "bright"), False)],
-}
-TOUCH_MS = 150
+# The glove, a right hand from the back pointing up, outlined in ink: the fingertip's contact pixel is
+# column TOUCH_TIP of row 0. W white, L lgrey shade, G grey creases and the line above the cuff, C and D
+# the cuff and its shade.
+TOUCH_GLOVE = [
+    ".....WW.........",
+    "....WWWW........",
+    "....WWWL........",
+    "....WWWL........",
+    "....WWWL........",
+    "....WWWL........",
+    "....WWWLWWW.....",
+    "....WWWLWWWLWW..",
+    "....WWWGWWWGWWW.",
+    "....WWWGWWWGWWWL",
+    ".WW.WWWGWWWGWWWL",
+    "WWWLWWWWWWWWWWWL",
+    "WWWWLWWWWWWWWWWL",
+    ".WWWWWWWWWWWWWWL",
+    "..WWWWWWWWWWWWWL",
+    "...WWWWWWWWWWWL.",
+    "....WWWWWWWWWWL.",
+    "....WWWWWWWWWLL.",
+    "....LLLLLLLLLLL.",
+    "....GGGGGGGGGGG.",
+    "....CCCCCCCCCCD.",
+    "....CCCCCCCCCCD.",
+    "....CCCCCCCCCCD.",
+]
+TOUCH_TIP = 5
+TOUCH_GLOVE_COLS = {"W": "white", "L": "lgrey", "G": "grey", "C": "white", "D": "lgrey"}
+# The drag's offsets from its start, eased in and out over 7 frames; the glove off the glass stands
+# TOUCH_HOVER down and right of the contact.
+TOUCH_OFFSETS = (4, 12, 24, 38, 51, 60, 64)
+TOUCH_HOVER = (2, 3)
+# Per-frame ms of one swipe: hover, press (2), drag (7), hold (2), lift (2) and the empty pause.
+TOUCH_MS = [300, 80, 100] + [70] * 7 + [80, 80, 90, 90, 350]
+# The still for reduced motion: the swipe right's fifth drag frame.
+TOUCH_STILL = 4
 
 
-def touch_drag(x, y, glow, marks, speed):
-    """A frame of ui-touch-drag: the track, the marks the drag left (faint at its start, bright
-    halfway), the glow under the fingertip (a wide yellow ring, then a light grey one, as it lifts), the speed
-    lines trailing on the left while it moves, and the hand. Drawn dragging right; the game
-    mirrors it for a drag to the left."""
+def touch_layer(draw):
+    """One layer of a touch frame, outlined in ink on its own, so a later layer's line sits over an earlier
+    layer's fill (the glove's line over the trail and the ring)."""
     g = Grid(*TOUCH_SIZE)
-    touch_track(g, 4, 99, TOUCH_Y)
-    for mark in marks:
-        touch_mark(g, TOUCH_FROM if mark == "faint" else TOUCH_HALF, TOUCH_Y, "lgrey" if mark == "faint" else "white")
-    if glow == "glow":
-        touch_glow(g, x, TOUCH_Y)
-    elif glow is not None:
-        # wider than a touch mark, so it shows either side of the lifted finger
-        g.ell(x, TOUCH_Y, 5, 5, "yellow" if glow == "ring" else "lgrey")
-        g.ell(x, TOUCH_Y, 3.4, 3.4, None)
-    if speed:
-        touch_speed(g, x)
-    touch_hand(g, x, y)
-    return g
+    draw(g)
+    g.edge = lambda c: K["ink"]
+    return g.outlined()
+
+
+def touch_ring(x, r, col):
+    """The press ring (yellow) or the lift ring (lgrey) round the contact at column x, under the glove."""
+    def draw(g):
+        g.ell(x + 0.5, TOUCH_Y + 0.5, r, r, col)
+        g.ell(x + 0.5, TOUCH_Y + 0.5, r - 1.25, r - 1.25, None)
+    return touch_layer(draw)
+
+
+def touch_glove(x, dx=0, dy=0):
+    cols = {k: K[v] for k, v in TOUCH_GLOVE_COLS.items()}
+    return touch_layer(lambda g: bitmap(g, x - TOUCH_TIP + dx, TOUCH_Y + dy, TOUCH_GLOVE, cols))
+
+
+def touch_trail(head, start, fade=0):
+    """The dots the fingertip leaves from start to head, as the help picture's pack-move dots: 2x2 every
+    4px in an ink rim, white within 20px of the finger, then lgrey, then grey, none past 48px. fade draws
+    the tail in 12px per frame once the finger stops."""
+    way = 1 if head >= start else -1
+
+    def draw(g):
+        x = start
+        while (head - x) * way > 5:
+            back = (head - x) * way + 12 * fade
+            if back <= 48:
+                g.rect(x if way > 0 else x - 1, TOUCH_Y - 1, 2, 2,
+                       "white" if back < 20 else "lgrey" if back < 36 else "grey")
+            x += 4 * way
+    return touch_layer(draw)
+
+
+def touch_frame(*layers):
+    out = [[None] * TOUCH_SIZE[0] for _ in range(TOUCH_SIZE[1])]
+    for rows in layers:
+        for y, row in enumerate(rows):
+            for x, c in enumerate(row):
+                if c:
+                    out[y][x] = c
+    return out
+
+
+def touch_swipe(start, way):
+    """One swipe from column start, way 1 (right) or -1 (left), as TOUCH_MS times it: the glove hovers off
+    the glass, presses (the yellow ring grows), drags with the ring round the fingertip and the dots behind,
+    holds while the dots draw in, lifts (the lgrey ring grows as the glove leaves) and is gone."""
+    end = start + 64 * way
+    frames = [touch_frame(touch_glove(start, *TOUCH_HOVER)),
+              touch_frame(touch_ring(start, 3.5, "yellow"), touch_glove(start)),
+              touch_frame(touch_ring(start, 5.5, "yellow"), touch_glove(start))]
+    for o in TOUCH_OFFSETS:
+        x = start + o * way
+        frames.append(touch_frame(touch_trail(x, start), touch_ring(x, 3.5, "yellow"), touch_glove(x)))
+    for fade in (1, 2):
+        frames.append(touch_frame(touch_trail(end, start, fade), touch_ring(end, 3.5, "yellow"), touch_glove(end)))
+    frames.append(touch_frame(touch_ring(end, 4, "lgrey"), touch_glove(end, *TOUCH_HOVER)))
+    frames.append(touch_frame(touch_ring(end, 5.5, "lgrey"), touch_glove(end, TOUCH_HOVER[0] + 1, TOUCH_HOVER[1] + 2)))
+    frames.append(touch_frame())
+    return frames
+
+
+def touch_tags():
+    right, left = touch_swipe(TOUCH_FROM, 1), touch_swipe(TOUCH_TO, -1)
+    return [("right", right, TOUCH_MS), ("left", left, TOUCH_MS),
+            ("drag", right[3:10], 70), ("still", [right[3 + TOUCH_STILL]], 1000)]
 
 
 IMAGES = {
@@ -1622,8 +1666,7 @@ def sprites():
     yield "ui-zone-pips", [("todo", [zone_pip().outlined(False)], 1000)] + [
         (zone + suffix, [zone_pip(zone, bool(suffix)).outlined(False)], 1000)
         for zone in ZONE_COLOURS for suffix in ("", "-done")]
-    yield "ui-touch-drag", [(tag, [touch_drag(*f).outlined() for f in frames], TOUCH_MS)
-                            for tag, frames in TOUCH_FRAMES.items()]
+    yield "ui-touch-drag", touch_tags()
 
 
 def preview(out, scale=3, width=380):

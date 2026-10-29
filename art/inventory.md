@@ -326,7 +326,7 @@ Card keys use the data keys (`card-skunk-rinse`, `card-belly-rubs`). The neighbo
 | `ui-stitch-h`, `ui-stitch-v`                                                                                    | image  | 8×2, 2×8              |                                                                                                      | The Pocket's stitch line, repeated with TileSprite                      |
 | `ui-switch`                                                                                                     | sprite | 32×16                 | `on`, `off`                                                                                          |                                                                         |
 | `ui-tile`                                                                                                       | sprite | 24×24 nine-slice      | `normal`, `selected`, `disabled`                                                                     | Walker, dog and gear tiles: insets 4                                    |
-| `ui-touch-drag`                                                                                                 | sprite | 104×40                | `press`, `drag`, `release`                                                                           | The help screen's drag, mirrored for left                               |
+| `ui-touch-drag`                                                                                                 | sprite | 104×40                | `right`, `left`, `drag`, `still`                                                                     | The help screen's swipe: a glove, a lane each way                       |
 
 ## Sounds
 
