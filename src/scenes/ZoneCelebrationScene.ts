@@ -83,7 +83,8 @@ export class ZoneCelebrationScene extends Scene {
       this.add.image(version.burst.x, version.burst.y, ART.burst).setOrigin(0);
     }
     this.addWalker(data.celebration, reduced, version.feetY);
-    soundboardOf(this).play("badge");
+    // A finished neighbourhood plays its own sound; a walker unlocked plays the badge's.
+    soundboardOf(this).play(text.kind === "zoneDone" ? "zoneDone" : "badge");
 
     const finish = () => {
       if (this.done) {

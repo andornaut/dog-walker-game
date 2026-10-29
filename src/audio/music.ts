@@ -5,10 +5,6 @@ import type { Zone } from "../data/types";
 import { assertNever } from "../lib/assertNever";
 import { effectiveVolumes, type Mix } from "./sound";
 
-// CLEANUP (added 2026-10-27): the single walk loop each zone plays until its own loads. Remove
-// it, and its manifest sound, once all six zone loops are in the manifest.
-export const FALLBACK_MUSIC_KEY = "music-walk";
-
 // A fade between silence and full volume as a walk starts or ends.
 export const MUSIC_FADE_MS = 500;
 
@@ -18,11 +14,6 @@ export const MUSIC_CROSS_FADE_MS = 1000;
 // Zone music is keyed by the zone's art, as its backdrop is: music-high-park and so on.
 export function musicKey(zone: Pick<Zone, "art">): string {
   return `music-${zone.art}`;
-}
-
-// The keys a zone may play, in preference order.
-export function musicKeysOf(zone: Pick<Zone, "art">): readonly string[] {
-  return [musicKey(zone), FALLBACK_MUSIC_KEY];
 }
 
 // level is the fade's current gain, from 0 (silent) to 1 (full); a fade moves the whole way in

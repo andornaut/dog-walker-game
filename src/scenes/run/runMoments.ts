@@ -1,6 +1,6 @@
 import type { Scene } from "phaser";
 
-import { stepCues } from "../../audio/stepCues";
+import { choiceCues, pullCues, stepCues } from "../../audio/stepCues";
 import { gameData } from "../../data";
 import type { DogId, HintId, HintTrigger } from "../../data/types";
 import { type BuffPop, leashPops, popsOf, stepValues, walkStartMarks } from "../../hud/buffMarks";
@@ -249,11 +249,13 @@ export class RunMoments {
   }
 
   // A tell barks and says which dog spotted the squirrel; a strain that ends without a pull,
-  // blocked or steered away from, bursts over its dog and says nothing. A landed pull raises its
-  // hint. The strain, the bubble and the bark pop are drawn with the pack.
+  // blocked or steered away from, bursts over its dog and says nothing. A landed pull plays the
+  // squirrel's sound and raises its hint (pullCues). The strain, the bubble and the bark pop are
+  // drawn with the pack.
   pulled(step: PullStep): void {
+    const sound = soundboardOf(this.scene);
+    pullCues(step).forEach((cue) => sound.play(cue));
     if (step.tells.length > 0) {
-      soundboardOf(this.scene).play("bark");
       this.hint({ kind: "pull" });
     }
     for (const tell of step.tells) {
@@ -474,9 +476,11 @@ export class RunMoments {
     }
   }
 
-  // A card choice's values a buff changed, such as a loss forgiven or a debuff shortened: a pop
-  // over the owner's dog, or the pack.
+  // A card choice's heart loss sound (choiceCues), and its values a buff changed, such as a loss
+  // forgiven or a debuff shortened: a pop over the owner's dog, or the pack.
   chosen(outcome: ChoiceOutcome): void {
+    const sound = soundboardOf(this.scene);
+    choiceCues(outcomeChanges(outcome)).forEach((cue) => sound.play(cue));
     const values = outcome.modified.map((value) => ({
       bump: false,
       dog: value.subject.kind === "hearts" ? value.subject.dog : null,

@@ -63,13 +63,11 @@ class Soundboard {
     });
   }
 
-  // Fades in the first of keys that loaded, fading out any other loop.
-  playMusic(keys: readonly string[]): void {
+  // Fades in key's loop, if it loaded, fading out any other loop.
+  playMusic(key: string): void {
     this.guard("play music", () => {
-      const key = keys.find((candidate) => this.game.cache.audio.exists(candidate));
-      if (key === undefined) {
-        const names = keys.join(" or ");
-        this.reportOnce(names, `Sound ${names} did not load; playing nothing in its place.`);
+      if (!this.game.cache.audio.exists(key)) {
+        this.reportOnce(key, `Sound ${key} did not load; playing nothing in its place.`);
         return;
       }
       this.music = playMusic(key, this.music);

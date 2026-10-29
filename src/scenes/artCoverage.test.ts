@@ -32,7 +32,7 @@ import {
   ZONE_CELEBRATION_ART,
   ZONE_PIPS_KEY,
 } from "../assets/spriteKeys";
-import { musicKeysOf } from "../audio/music";
+import { musicKey } from "../audio/music";
 import { hitCue, SOUND_KEYS, soundKeyFor, soundKeysOf } from "../audio/sound";
 import { gameData } from "../data";
 import type { CardSource, EncounterId, ZoneId } from "../data/types";
@@ -590,11 +590,8 @@ describe("sound art", () => {
     expect(keysOf(SOUND_KEYS).filter((cue) => soundKeyFor(loaded, cue) === undefined)).toEqual([]);
   });
 
-  it("plays a looping music in every zone", () => {
-    const silent = gameData.world.zones.filter((zone) => {
-      const key = musicKeysOf(zone).find((candidate) => sounds.has(candidate)) ?? "";
-      return sounds.get(key)?.loop !== true;
-    });
+  it("plays a looping music of its own in every zone", () => {
+    const silent = gameData.world.zones.filter((zone) => sounds.get(musicKey(zone))?.loop !== true);
     expect(silent.map(({ art }) => art)).toEqual([]);
   });
 

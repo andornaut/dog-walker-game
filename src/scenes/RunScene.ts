@@ -1,6 +1,6 @@
 import { Scene } from "phaser";
 
-import { musicKeysOf } from "../audio/music";
+import { musicKey } from "../audio/music";
 import { gameData } from "../data";
 import { LANE_COUNT } from "../data/screen";
 import type { DogId } from "../data/types";
@@ -552,7 +552,7 @@ export class RunScene extends Scene implements HudRun {
   // banner: through the celebration and the fork.
   private startZone(run: RunState): void {
     this.world?.banner.show(run, this.reducedMotion());
-    soundboardOf(this).playMusic(musicKeysOf(currentZone(gameData, run)));
+    soundboardOf(this).playMusic(musicKey(currentZone(gameData, run)));
   }
 
   private showCard(view: CardView): void {

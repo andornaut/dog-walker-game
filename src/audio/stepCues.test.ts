@@ -10,13 +10,15 @@ import type { GearId, WalkerId } from "../data/types";
 import { WALKERS } from "../data/walkers";
 import { seededRandom } from "../lib/random";
 import { keysOf } from "../lib/records";
-import { cents } from "../lib/units";
+import { cents, clampHearts } from "../lib/units";
+import type { HeartChange, MoneyChange } from "../rules/causes";
+import { NO_PULLS, type PullStep } from "../runner/pulls";
 import { startRoad, stepWalk, type Walk } from "../runner/walk";
 import type { WalkItem } from "../runner/walkItems";
 import { newRun, type PackDogs } from "../state/runState";
 import { atPack, data, geometry, tuning } from "../testing/walk";
 import { hitCue, type SoundCue, soundKeyFor } from "./sound";
-import { stepCues } from "./stepCues";
+import { choiceCues, pullCues, stepCues } from "./stepCues";
 
 const sounds = new Set(parseManifest(shippedManifest).sounds.map(({ key }) => key));
 const loaded = (key: string) => sounds.has(key);
@@ -134,5 +136,72 @@ describe("stepCues", () => {
     expect(stepCues(walkData, stepWalk(walkData, geometry, seededRandom(1), 0.01, walk))).toEqual(
       [],
     );
+  });
+});
+
+// A pull step of a lone kilo with only the given tells, pulls and failed strains.
+const pullStep = (step: Partial<Pick<PullStep, "failed" | "pulled" | "tells">>): PullStep => ({
+  failed: [],
+  leashed: [],
+  pulled: [],
+  pulls: NO_PULLS,
+  tells: [],
+  walk: {
+    road: startRoad(5),
+    run: newRun(walkData, 3, { dogs: ["kilo"], gear: null, walker: "casey" }),
+  },
+  ...step,
+});
+const TELL = { direction: 1, dog: "kilo", kind: "squirrel" } as const;
+
+describe("pullCues", () => {
+  it.each([
+    { cues: ["bark"], name: "barks as a dog spots a squirrel", step: { tells: [TELL] } },
+    {
+      cues: ["pull"],
+      name: "plays the squirrel as its pull moves the pack",
+      step: { pulled: [{ direction: 1, dog: "kilo", moved: true }] },
+    },
+    {
+      cues: [],
+      name: "plays nothing for a pull that cannot move the pack",
+      step: { pulled: [{ direction: 1, dog: "kilo", moved: false }] },
+    },
+    {
+      cues: [],
+      name: "plays nothing for a strain that ends with no pull",
+      step: { failed: ["kilo"] },
+    },
+  ] as const)("$name", ({ cues, step }) => {
+    const played = pullCues(pullStep(step));
+    expect(played).toEqual(cues);
+    expect(played.filter((cue) => soundKeyFor(loaded, cue) === undefined)).toEqual([]);
+  });
+});
+
+const heartChange = (before: number, after: number): HeartChange => ({
+  after: clampHearts(5, after),
+  before: clampHearts(5, before),
+  causes: [],
+  dog: "kilo",
+  kind: "hearts",
+});
+const moneyChange: MoneyChange = { amount: cents(-500), causes: [], dog: null, kind: "money" };
+
+describe("choiceCues", () => {
+  it.each([
+    { changes: [heartChange(3, 2)], cues: ["heartLost"], name: "a heart lost" },
+    {
+      changes: [heartChange(3, 2), heartChange(4, 3)],
+      cues: ["heartLost"],
+      name: "hearts lost by two owners, once",
+    },
+    { changes: [heartChange(3, 4)], cues: [], name: "a heart gained" },
+    { changes: [heartChange(3, 3)], cues: [], name: "a heart loss forgiven" },
+    { changes: [moneyChange], cues: [], name: "cash lost" },
+  ])("plays $cues for $name, from a shipped sound", ({ changes, cues }) => {
+    const played = choiceCues(changes);
+    expect(played).toEqual(cues);
+    expect(played.filter((cue) => soundKeyFor(loaded, cue) === undefined)).toEqual([]);
   });
 });

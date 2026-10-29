@@ -13,9 +13,12 @@ export type BaseCue =
   | "dodge"
   | "fired"
   | "gearFound"
+  | "heartLost"
   | "newBest"
+  | "pull"
   | "tip"
-  | "treat";
+  | "treat"
+  | "zoneDone";
 // An encounter's hit moment, played with its own sound: an obstacle's or a lucky find's.
 type HitCue = `hit:${EncounterId}` | `luckyHit:${EncounterId}`;
 export type SoundCue = BaseCue | HitCue;
@@ -31,9 +34,13 @@ export const SOUND_KEYS: Readonly<Record<BaseCue, string>> = {
   dodge: "sfx-dodge",
   fired: "sfx-fired",
   gearFound: "sfx-gear-found",
+  heartLost: "sfx-heart-lost",
   newBest: "sfx-new-best",
+  // A squirrel's pull, the only pull there is, plays the squirrel's own sound.
+  pull: "sfx-hit-squirrel",
   tip: "sfx-tip",
   treat: "sfx-treat",
+  zoneDone: "sfx-zone-done",
 };
 
 // The cues the home screen and the menus it opens play: Settings' volume preview and a

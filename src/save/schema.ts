@@ -285,7 +285,7 @@ export interface SaveDefaults {
 export type Settings = SaveDocument["settings"];
 
 export const DEFAULT_SETTINGS: Settings = {
-  musicVolume: 0.6,
+  musicVolume: 0.45,
   muted: false,
   reducedMotion: false,
   sfxVolume: 0.8,

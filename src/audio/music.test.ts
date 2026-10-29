@@ -4,13 +4,11 @@ import { gameData } from "../data";
 import {
   advanceDeck,
   advanceMusic,
-  FALLBACK_MUSIC_KEY,
   MUSIC_CROSS_FADE_MS,
   MUSIC_FADE_MS,
   MUSIC_STOPPED,
   type MusicDeck,
   musicKey,
-  musicKeysOf,
   type MusicState,
   NO_MUSIC,
   playMusic,
@@ -30,9 +28,9 @@ const PLAYING: MusicState = { kind: "playing" };
 const FADE = MUSIC_FADE_MS;
 const CROSS = MUSIC_CROSS_FADE_MS;
 
-describe("musicKeysOf", () => {
-  it("plays the zone's own loop, falling back to the walk loop", () => {
-    expect(musicKeysOf({ art: "high-park" })).toEqual(["music-high-park", FALLBACK_MUSIC_KEY]);
+describe("musicKey", () => {
+  it("plays the zone's own loop, keyed by its art", () => {
+    expect(musicKey({ art: "high-park" })).toBe("music-high-park");
   });
 
   it("gives every zone a loop of its own", () => {
