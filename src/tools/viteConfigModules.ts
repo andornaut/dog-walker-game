@@ -2,8 +2,10 @@
 // gameViteConfig loads it through a single Vite module runner, which resolves @andornaut/game-kit
 // as the app does.
 export { securityHeadersPlugin } from "../headers/securityHeadersPlugin";
+export { HASHED_ICONS } from "../pwa/icons";
 export { precachePlugin } from "../pwa/precachePlugin";
 export { atlasPlugin } from "./atlas/atlasPlugin";
 export { generatedFilesPlugin } from "./generatedFilesPlugin";
 export { PHASER_BUILD } from "./phaserBuild";
 export { phaserBuildPlugin } from "@andornaut/game-kit/build/vite/phaserBuildPlugin";
+export { hashedIconsPlugin } from "@andornaut/game-kit/pwa/vite/hashedIconsPlugin";
