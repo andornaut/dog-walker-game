@@ -3,7 +3,8 @@
 
 Images (16x16 icons unless noted): icon-pause, icon-play, icon-home, icon-help, icon-close,
 icon-logbook, icon-settings, icon-share (Safari's Share button, on the iOS install steps card),
-icon-lock, icon-bill (a green dollar bill with a white $, on an item for sale the bank covers),
+icon-browser-menu (the browser menu button's three dots, on the Firefox for Android install steps
+card), icon-lock, icon-bill (a green dollar bill with a white $, on an item for sale the bank covers),
 icon-treat (the treat pickup, its bone and heart as road.treat lays them out at 16x16, for the
 message strip), icon-stinky; icon-dog-slot (32x32, a pack slot for sale in the
 shop: a doghouse with a green plus badge, as the shop's item-<gear> art, outlined with icon_edge);
@@ -133,7 +134,7 @@ def plate(face, lit, shade, w=24, h=24):
 # icon-pause, icon-play, icon-home, icon-help, icon-close, icon-logbook, icon-settings and icon-sound
 # sit on ui-icon-button's navy face, so they have no outline: cream holds 9.6:1 there, tan 6.6:1,
 # amber 7.5:1, orange 5.0:1 and pink 5.1:1. The -panel icons sit on the Settings panel's cream, and icon-share
-# on the install steps card's: dbrown holds 5.85:1 there, plum 9.42:1 and dred 5.07:1.
+# and icon-browser-menu on the install steps card's: dbrown holds 5.85:1 there, plum 9.42:1 and dred 5.07:1.
 
 # The speaker, note and effects inks: face, shade on the lower-right edges, and the mute X.
 NAVY_FACE = ("cream", "tan", "pink")
@@ -361,6 +362,19 @@ def share_icon():
         for x, ch in enumerate(row):
             if ch != ".":
                 g.p(x, y, face if ch == "f" else shade)
+    return g
+
+
+def browser_menu_icon():
+    """The browser menu button, for the Firefox for Android install steps card: three round
+    4x4 dots stacked on the centre line with 2px gaps, lit like icon-share."""
+    face, shade, _ = CREAM_PANEL
+    g = Grid(16, 16)
+    for top in (0, 6, 12):
+        for y, row in enumerate([".ff.", "fffs", "ffss", ".ss."]):
+            for x, ch in enumerate(row):
+                if ch != ".":
+                    g.p(6 + x, top + y, face if ch == "f" else shade)
     return g
 
 
@@ -1525,6 +1539,7 @@ IMAGES = {
     "icon-logbook": lambda: to_image(logbook_icon().outlined(False)),
     "icon-settings": lambda: to_image(settings_icon().outlined(False)),
     "icon-share": lambda: to_image(share_icon().outlined(False)),
+    "icon-browser-menu": lambda: to_image(browser_menu_icon().outlined(False)),
     "icon-lock": lambda: to_image(lock().outlined()),
     "icon-bill": lambda: to_image(bill().outlined()),
     "icon-treat": lambda: to_image(treat_icon().outlined()),
