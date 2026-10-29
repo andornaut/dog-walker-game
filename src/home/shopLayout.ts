@@ -4,7 +4,6 @@ import { closeControl } from "../ui/closeControl";
 import { type FontMetrics, helpCapDy, inkRowsFromCapTop } from "../ui/fontMetrics";
 import { type ScrollbarRects, scrollbarRects } from "../ui/scrollbar";
 import { TEXT_STYLE } from "../ui/textFit";
-import { HOME_LAYOUT } from "./homeLayout";
 import { SHOP_TABS } from "./shop";
 
 // The Pet shop page under the home screen's top bar, which stays in view with the bank:
@@ -30,8 +29,6 @@ const DOG_HEADING_Y =
   SLOT_ROWS.y + (DOG_SLOTS.length - 1) * SLOT_ROWS.pitch + SLOT_ROWS.height + ROWS_TO_HEADING;
 
 export const SHOP_LAYOUT = {
-  // The detail card's title band, the title from titleX.
-  band: { ...HOME_LAYOUT.card.band, titleX: 16 },
   close: closeControl(PANEL),
   // The Dogs tab: the slot heading and a row for every slot, then the dog heading and rows.
   dogs: {

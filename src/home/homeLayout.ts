@@ -443,6 +443,17 @@ export function cardBand(card: Rect): Rect {
   return { height, width: card.width - 2 * inset, x: card.x + inset, y: card.y + inset };
 }
 
+// A detail card height tall, centred on the screen.
+export function detailCardRect(screen: { height: number; width: number }, height: number): Rect {
+  const { width } = HOME_LAYOUT.card;
+  return {
+    height,
+    width,
+    x: (screen.width - width) / 2,
+    y: Math.round((screen.height - height) / 2),
+  };
+}
+
 const BESIDE_ROOM = HOME_LAYOUT.card.width - HOME_LAYOUT.card.besideX - HOME_LAYOUT.card.pad;
 
 // How wide the detail card's rows beside the well and under it may be, and the owner's name

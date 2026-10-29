@@ -70,7 +70,7 @@ import { PALETTE } from "../ui/phaser/palette";
 import { fitPixelText, pixelFontMetrics, placePixelText } from "../ui/phaser/pixelText";
 import { GREYED, pictureBox, type PlateKind } from "../ui/selection";
 import type { CelebrationSceneData } from "./CelebrationScene";
-import { addDetailCard, drawDetailCard } from "./homePanels";
+import { addCardTitle, addDetailCard, drawDetailCard } from "./homePanels";
 import {
   addPlate,
   addTileBadge,
@@ -664,19 +664,8 @@ export class ShopScene extends Scene {
 
   // The card, its title band and its close control.
   private drawCard(root: GameObjects.Container): void {
-    const { titleX, titleY } = LAYOUT.band;
-    const band = cardBand(PANEL);
-    addDetailCard(this, root, PANEL, band);
-    addBodyText(
-      this,
-      root,
-      { x: PANEL.x + titleX, y: band.y + titleY },
-      gameData.homeText.shop.title,
-      {
-        colour: PALETTE.white,
-        font: "title",
-      },
-    );
+    addDetailCard(this, root, PANEL, cardBand(PANEL));
+    root.add(addCardTitle(this, PANEL, gameData.homeText.shop.title));
     addCloseButton(this, root, LAYOUT.close, this.pressed?.kind === "close");
   }
 

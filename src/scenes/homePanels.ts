@@ -8,16 +8,24 @@ import {
   CARD_TEXT_ROOM,
   cardBand,
   detailCardLayout,
+  detailCardRect,
   detailOwner,
   type DetailRow,
   HOME_LAYOUT,
 } from "../home/homeLayout";
 import { withNamePills } from "../hud/effectNames";
 import { insetRect, type Point, type Rect } from "../lib/rect";
+import { barTitleLeft } from "../ui/barTitle";
 import { closeControl } from "../ui/closeControl";
 import { addDim, drawFramedRect, drawRing } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import { addPixelText, pixelFontMetrics, wrapPixelText } from "../ui/phaser/pixelText";
+import {
+  addPixelText,
+  inkSpan,
+  pixelFontMetrics,
+  placePixelText,
+  wrapPixelText,
+} from "../ui/phaser/pixelText";
 import { AFFORD_OUTSET } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
 import { addNamePills } from "./effectNameColours";
@@ -56,16 +64,6 @@ export function addAffordFrame(
 
 const CARD = HOME_LAYOUT.card;
 
-// A card height tall, centred on the screen.
-function centredCard(height: number): Rect {
-  return {
-    height,
-    width: CARD.width,
-    x: (SCREEN.width - CARD.width) / 2,
-    y: Math.round((SCREEN.height - height) / 2),
-  };
-}
-
 // A dim layer over the whole screen, then the card's frame, title band and close control; the
 // content goes in a container placed at the card.
 function drawCardFrame(
@@ -77,16 +75,26 @@ function drawCardFrame(
   content: GameObjects.Container,
 ): void {
   parent.add(addDim(scene, SCREEN));
-  const { inset, titleY } = CARD.band;
   addDetailCard(scene, parent, rect, cardBand(rect));
   content.setPosition(rect.x, rect.y);
-  parent.add(content);
-  addBodyText(scene, content, { x: rect.width / 2, y: inset + titleY }, title, {
+  parent.add([content, addCardTitle(scene, rect, title)]);
+  addCloseButton(scene, parent, closeControl(rect), closePressed);
+}
+
+// The title of a card drawn as the detail card is: white 2x title text in its band, the
+// capitals card.band.titleY under the band's top and the ink where barTitleLeft puts it beside
+// the card's close control.
+export function addCardTitle(scene: Scene, card: Rect, title: string): GameObjects.BitmapText {
+  const band = cardBand(card);
+  const label = addPixelText(scene, 0, 0, title, {
     colour: PALETTE.white,
     font: "title",
-    originX: 0.5,
+    scale: TEXT_SCALE,
   });
-  addCloseButton(scene, parent, closeControl(rect), closePressed);
+  const ink = inkSpan(label);
+  const x = barTitleLeft(band, closeControl(card), ink.right - ink.left);
+  placePixelText(label, x, band.y + CARD.band.titleY);
+  return label;
 }
 
 // A nine-slice in parent, or the rect framed in code while its art is missing.
@@ -248,7 +256,7 @@ export function drawDetailCard(
     }
   });
   draw(belowRows, CARD.pad, CARD_TEXT_ROOM.full, layout.below);
-  const rect = centredCard(layout.height);
+  const rect = detailCardRect(SCREEN, layout.height);
   drawCardFrame(scene, parent, closePressed, rect, card.title, content);
   return rect;
 }

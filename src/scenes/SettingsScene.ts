@@ -54,7 +54,7 @@ import {
 } from "../ui/phaser/pixelText";
 import { GREYED } from "../ui/selection";
 import { fittingText, TEXT_SCALE } from "../ui/textFit";
-import { addDetailCard } from "./homePanels";
+import { addCardTitle, addDetailCard } from "./homePanels";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenOutsideTap, onBackPressed, type OverlayData } from "./overlay";
 import { currentSettings, setSettings } from "./profileStore";
@@ -441,16 +441,11 @@ export class SettingsScene extends Scene {
   private render(): void {
     clearScene(this);
     const settings = currentSettings(this);
-    const { band, close, panel, title } = this.layout;
+    const { band, close, panel } = this.layout;
     addScreenBackdrop(this);
     // The card and its title band.
     addDetailCard(this, this.add.container(0, 0), panel, band);
-    addPixelText(this, title.x, title.y, gameData.menuText.settings.title, {
-      colour: PALETTE.white,
-      font: "title",
-      originX: 0.5,
-      scale: TEXT_SCALE,
-    });
+    addCardTitle(this, panel, gameData.menuText.settings.title);
     const rows = this.add.container(0, 0);
     for (const row of this.rows) {
       if (hasNote(row)) {
@@ -480,12 +475,7 @@ export class SettingsScene extends Scene {
     const icon = STEPS_ICONS[steps.browser];
     addDim(this, SCREEN_LAYOUT.screen);
     addDetailCard(this, this.add.container(0, 0), steps.card, steps.band);
-    addPixelText(this, steps.title.x, steps.title.y, words.title, {
-      colour: PALETTE.white,
-      font: "title",
-      originX: 0.5,
-      scale: TEXT_SCALE,
-    });
+    addCardTitle(this, steps.card, words.title);
     if (this.textures.exists(icon)) {
       this.add.image(steps.icon.x, steps.icon.y, icon).setOrigin(0);
     }

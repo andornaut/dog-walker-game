@@ -2353,10 +2353,6 @@
           "y": 393
         }
       ],
-      "title": {
-        "x": 180,
-        "y": 112
-      },
       "track": {
         "dy": 30,
         "height": 10,
@@ -2366,12 +2362,6 @@
       }
     },
     "shop": {
-      "band": {
-        "height": 24,
-        "inset": 6,
-        "titleY": 7,
-        "titleX": 16
-      },
       "close": {
         "hit": {
           "height": 44,

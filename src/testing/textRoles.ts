@@ -18,6 +18,8 @@ import {
 import {
   BANK_ROOM,
   bankAmountText,
+  cardBand,
+  detailCardRect,
   DOG_TILE_TEXT_ROOM,
   HOME_LAYOUT,
   UPDATE_PLATE_ROOM,
@@ -26,7 +28,14 @@ import { messageLine, PLATE_MODES } from "../home/homeLines";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import { confirmLines } from "../home/purchaseConfirm";
 import { PURCHASE_CONFIRM_LAYOUT } from "../home/purchaseConfirmLayout";
-import { INSTALL_STEPS_FIT, noteRoom, SETTINGS_NOTE_STYLE } from "../home/settings";
+import {
+  INSTALL_STEPS,
+  INSTALL_STEPS_FIT,
+  installStepsLayout,
+  noteRoom,
+  SETTINGS_NOTE_STYLE,
+  settingsLayout,
+} from "../home/settings";
 import { dogRows, gearRows, type ShopRow, slotRows } from "../home/shop";
 import { SHOP_LAYOUT, SHOP_MESSAGE_FIT, shopRowTextRoom } from "../home/shopLayout";
 import { largeBodyText, smallCardText } from "../hud/cardText";
@@ -47,12 +56,15 @@ import {
 } from "../layout/cardLayout";
 import { fillLine, fillNames } from "../lib/lines";
 import { keysOf } from "../lib/records";
+import type { Rect } from "../lib/rect";
 import { cents } from "../lib/units";
 import { amountText } from "../rules/causes";
 import { firesText } from "../rules/choices";
 import { startingDogSlots } from "../rules/shop";
 import type { Owned } from "../save/schema";
 import { readBitmapFont } from "../tools/fontFile";
+import { barTitleRoom } from "../ui/barTitle";
+import { closeControl } from "../ui/closeControl";
 import { plainMarks } from "../ui/pixelFont";
 import { TEXT_SCALE, TEXT_STYLE, type TextFitStyle, textOnLines } from "../ui/textFit";
 import { bodyRunWidth } from "./bodyFont";
@@ -383,6 +395,50 @@ function cashRole(): TextRoleCase[] {
   ];
 }
 
+// A card with a title band and a close control, and every title the data puts on it.
+export interface CardTitles {
+  readonly card: Rect;
+  readonly role: string;
+  readonly titles: readonly string[];
+}
+
+export function cardTitles(): CardTitles[] {
+  const screen = SCREEN_LAYOUT.screen;
+  const { installSteps, title } = gameData.menuText.settings;
+  return [
+    {
+      card: detailCardRect(screen, screen.height),
+      role: "detail card's title",
+      titles: [gameData.dogs, gameData.shopGear, gameData.walkers].flatMap((items) =>
+        Object.values(items).map(({ name }) => name),
+      ),
+    },
+    {
+      card: installStepsLayout(screen, INSTALL_STEPS.lines).card,
+      role: "install steps' title",
+      titles: Object.values(installSteps).map((steps) => steps.title),
+    },
+    {
+      card: settingsLayout({ body: BODY, title: TITLE }, screen, []).panel,
+      role: "settings title",
+      titles: [title],
+    },
+    { card: SHOP_LAYOUT.panel, role: "shop title", titles: [gameData.homeText.shop.title] },
+  ];
+}
+
+// Each card's titles in the room its band leaves them beside its close control.
+function cardTitleRoles(): TextRoleCase[] {
+  return cardTitles().flatMap(({ card, role, titles }) =>
+    plainRole(
+      role,
+      "font-title",
+      { room: barTitleRoom(cardBand(card), closeControl(card)), style: TEXT_STYLE },
+      titles,
+    ),
+  );
+}
+
 // Every text role, each string the data puts in it.
 export function textRoleCases(): TextRoleCase[] {
   const strip = everyStripLine();
@@ -396,6 +452,7 @@ export function textRoleCases(): TextRoleCase[] {
   const { newWalker, zoneDone } = gameData.runText;
   const { settings } = gameData.menuText;
   return [
+    ...cardTitleRoles(),
     ...faceRole("strip", 2, messageStripLayout(BODY).room, strip),
     ...ownerQuipRoles(),
     ...faceRole(

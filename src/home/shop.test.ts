@@ -16,6 +16,7 @@ import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { GREYED, pictureBox, SELECT_OUTSET } from "../ui/selection";
 import { FEEDBACK } from "./feedback";
 import { gearByPrice, type Purchase } from "./home";
+import { cardBand } from "./homeLayout";
 import {
   dogRows,
   gearRows,
@@ -324,8 +325,9 @@ describe("the shop's message", () => {
 // A selected tab, lifted and framed, keeps 6px of card clear under the title band.
 describe("the shop's tabs", () => {
   it("clear the title band by 6px when selected", () => {
-    const { band, panel, tab } = SHOP_LAYOUT;
-    const bandBottom = panel.y + band.inset + band.height;
+    const { panel, tab } = SHOP_LAYOUT;
+    const band = cardBand(panel);
+    const bandBottom = band.y + band.height;
     expect(tab.drawY - FEEDBACK.liftPx - SELECT_OUTSET - bandBottom).toBeGreaterThanOrEqual(6);
   });
 });

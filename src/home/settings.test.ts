@@ -174,9 +174,8 @@ function rowParts(i: number): [string, Rect][] {
 }
 
 describe("the settings card", () => {
-  const { band, close, panel, rows, title: titleAt } = layout;
+  const { band, close, panel, rows } = layout;
   const bandBottom = band.y + band.height;
-  const capHeight = titleFont.capHeight * 2;
 
   it("exports the rows the shipped notes wrap to", () => {
     expect(SETTINGS_EXPORT_ROWS).toEqual(shapes);
@@ -185,7 +184,6 @@ describe("the settings card", () => {
   it.each<[string, Rect, Rect]>([
     ["the card with every row", panel, screen],
     ["the band", band, panel],
-    ["the title's capitals", { height: capHeight, width: 0, x: titleAt.x, y: titleAt.y }, band],
     ["the close control's face", closeFace(close), band],
     ["the close control's hit area", close.hit, panel],
     ...rows.map(({ rect }, i): [string, Rect, Rect] => [`row ${i + 1}`, rect, panel]),
@@ -196,8 +194,7 @@ describe("the settings card", () => {
     expect(inside(inner, outer)).toBe(true);
   });
 
-  it("centres the title on the card, and starts the rows 8px under the band", () => {
-    expect(titleAt.x).toBe(panel.x + panel.width / 2);
+  it("starts the rows 8px under the band", () => {
     expect(rows[0]?.rect.y).toBe(bandBottom + 8);
   });
 
@@ -253,27 +250,23 @@ describe("the settings card", () => {
 describe.each(keysOf(gameData.menuText.settings.installSteps))(
   "the %s install steps' card",
   (browser) => {
-    const { steps: installSteps, title: installStepsTitle } =
-      gameData.menuText.settings.installSteps[browser];
+    const { steps: installSteps } = gameData.menuText.settings.installSteps[browser];
     const { room, style } = INSTALL_STEPS_FIT;
     const fitted = fitInFont("font-body", style, room, installSteps);
-    const { band, card, close, icon, steps, title } = installStepsLayout(
+    const { band, card, close, icon, steps } = installStepsLayout(
       SCREEN_CONFIG,
       fitted.lines.length,
     );
-    const capHeight = fontFileMetrics("font-title").capHeight * 2;
     const body = fontFileMetrics("font-body");
     // From the first line's capitals to the last line's lowest ink, at 2x.
     const stepsHeight =
       (fitted.lines.length - 1) * INSTALL_STEPS.linePitch + (body.inkBottom - body.capTop) * 2;
-    const titleWidth = inkWidth("font-title", { scale: 2 }, installStepsTitle);
     const { size } = INSTALL_STEPS.icon;
     const glyph: Rect = { height: size, width: size, ...icon };
 
     it.each<[string, Rect, Rect]>([
       ["the card", card, screen],
       ["the band", band, card],
-      ["the title's capitals", { height: capHeight, width: 0, x: title.x, y: title.y }, band],
       ["the close control's face", closeFace(close), band],
       ["the close control's hit area", close.hit, card],
       ["the steps", { height: stepsHeight, width: room, x: steps.x, y: steps.y }, card],
@@ -282,8 +275,7 @@ describe.each(keysOf(gameData.menuText.settings.installSteps))(
       expect(inside(inner, outer)).toBe(true);
     });
 
-    it("keeps the centred title clear of the close control, and the steps under the band", () => {
-      expect(title.x + titleWidth / 2).toBeLessThan(closeFace(close).x);
+    it("starts the steps under the band", () => {
       expect(steps.y).toBeGreaterThan(band.y + band.height);
     });
 

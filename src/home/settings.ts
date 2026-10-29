@@ -79,7 +79,8 @@ export interface SettingsRowLayout {
 }
 
 export interface SettingsLayout {
-  // The title band across the card's top, the title's capitals centred on it.
+  // The title band across the card's top, its title placed beside the close control
+  // (barTitleLeft).
   band: Rect;
   close: CloseControl;
   panel: Rect;
@@ -87,7 +88,6 @@ export interface SettingsLayout {
   rows: SettingsRowLayout[];
   // A tan rule along the top of every row after the first, SEPARATOR_INSET in from its sides.
   separators: Rect[];
-  title: { x: number; y: number };
   track: SliderTrack & { dy: number; height: number };
 }
 
@@ -202,7 +202,6 @@ export function settingsLayout(
       x: rect.x + SEPARATOR_INSET,
       y: rect.y,
     })),
-    title: { x: x + PANEL.width / 2, y: band.y + HOME_LAYOUT.card.band.titleY },
     track: { ...track, width: SETTINGS_ROW.width - 2 * pad, x: rowX + pad },
   };
 }
@@ -236,7 +235,6 @@ export interface InstallStepsLayout {
   icon: { x: number; y: number };
   // The steps' first line's left edge and capitals' top.
   steps: { x: number; y: number };
-  title: { x: number; y: number };
 }
 
 // The card for steps wrapped onto lines lines.
@@ -260,6 +258,5 @@ export function installStepsLayout(
     close: closeControl(card),
     icon: { x: card.x + pad, y: stepsY + icon.dy },
     steps: { x: card.x + pad + icon.size + icon.gap, y: stepsY },
-    title: { x: card.x + INSTALL_STEPS.width / 2, y: band.y + HOME_LAYOUT.card.band.titleY },
   };
 }
