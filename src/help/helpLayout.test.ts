@@ -85,11 +85,7 @@ describe("help pages", () => {
         width,
         helpBody(gameData, page),
       );
-      const title = placedInk(
-        "font-title",
-        { letterSpacing: 0, scale: titleScale },
-        page.title.toUpperCase(),
-      );
+      const title = placedInk("font-title", { scale: titleScale }, page.title.toUpperCase());
       return (
         lines.some((line) => bodyTextWidth(scale, line) > width) ||
         lines.length > maxLines ||

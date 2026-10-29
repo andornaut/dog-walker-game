@@ -11,23 +11,23 @@ import { bodyRunWidth } from "../testing/bodyFont";
 import { defined } from "../testing/defined";
 import { fontFileMetrics } from "../testing/fontInk";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
-import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
+import type { TextFitStyle } from "../ui/textFit";
 import {
   faceRows,
   type FaceText,
   fillFaceText,
-  fittingFaceRows,
   INLINE_FACE,
   inlineFaceBox,
   ownerFaceText,
+  styledFaceRows,
   withoutFace,
 } from "./faceText";
-import { MESSAGE_LINE, MESSAGE_STRIP, messageStripLayout } from "./messageStrip";
+import { MESSAGE_STRIP, messageStripLayout } from "./messageStrip";
 import { lowHeartsText } from "./moments";
 import { bumpLines, firedLine, forgivenLines, spareTreatUsedLine, treatLine } from "./stripLines";
 
 const BODY = fontFileMetrics("font-body");
-const AT_2X = { letterSpacing: 0, scale: MESSAGE_STRIP.scale };
+const AT_2X = { scale: MESSAGE_STRIP.scale };
 const width2x = (run: string) => bodyRunWidth(AT_2X, run);
 const BOX_2X = defined(inlineFaceBox(BODY, MESSAGE_STRIP.scale));
 
@@ -220,20 +220,16 @@ describe("an inline face", () => {
     expect(BOX_2X.framed - BOX_2X.rise).toBeLessThanOrEqual(pitch);
   });
 
-  // The one-row strip under the debuff bars: a line that fits its room at 2x keeps its face,
-  // and one set at 1x, the last of TEXT_FIT_STYLES, shows the owner's name alone.
+  // A style of one line keeps the line whole on one row, however narrow its room; a style of
+  // more lines breaks it within the room. Either keeps the owner's face.
   const said = defined(PLACES.find(([path]) => path === "strip.plainHit")?.[1] ?? undefined);
-  const at1x = { letterSpacing: 0, scale: 1 };
-  it.each<[string, number, number, number]>([
-    ["keeps the face at 2x", MESSAGE_LINE.room, 2, 1],
-    ["shows the name alone at 1x", bodyRunWidth(at1x, said.text), 1, 0],
-  ])("%s", (_name, room, textScale, faces) => {
-    const boxAt = (style: TextFitStyle) => inlineFaceBox(BODY, style.scale);
-    const set = fittingFaceRows(TEXT_FIT_STYLES, bodyRunWidth, boxAt, room, said);
-    const [row] = set.rows;
-    expect(set.style.scale).toBe(textScale);
-    expect(row?.faces).toHaveLength(faces);
-    expect(row?.texts.map(({ text }) => text).join("")).toBe(said.text);
-    expect(row?.width).toBeLessThanOrEqual(room);
+  it.each<[string, TextFitStyle, number]>([
+    ["keeps a line of one line whole", { scale: 2 }, 1],
+    ["breaks a line of two lines", { lines: 2, scale: 2 }, 2],
+  ])("%s", (_name, style, count) => {
+    const room = bodyRunWidth(style, said.text) - 1;
+    const rows = styledFaceRows(style, bodyRunWidth, BOX_2X, room, said);
+    expect(rows).toHaveLength(count);
+    expect(rows.flatMap((row) => row.faces)).toHaveLength(1);
   });
 });

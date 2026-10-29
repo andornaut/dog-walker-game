@@ -18,7 +18,7 @@ const TEXT = `${inPill(2, NAME)} faster lane changes`;
 
 describe("a name pill in the body font", () => {
   it.each([1, 2])("insets the name, then gaps the description, by its columns at %ix", (scale) => {
-    const chars = laidChars("font-body", { letterSpacing: 0, scale }, TEXT);
+    const chars = laidChars("font-body", { scale }, TEXT);
     const [pill] = laidPills(scale, chars);
     const name = chars.slice(1, 1 + NAME.length).flatMap((char) => char.ink ?? []);
     const next = chars.slice(NAME.length + 2).find((char) => char.ink !== null)?.ink;
@@ -29,7 +29,7 @@ describe("a name pill in the body font", () => {
   });
 
   it("counts the pill as the text's ink, and its advance holds the pill", () => {
-    const style = { letterSpacing: 0, scale: 2 };
+    const style = { scale: 2 };
     const chars = laidChars("font-body", style, inPill(0, NAME));
     const [pill] = laidPills(2, chars);
     expect(fontInk("font-body", style, inPill(0, NAME))).toEqual({

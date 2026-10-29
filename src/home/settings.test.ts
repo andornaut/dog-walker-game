@@ -10,7 +10,7 @@ import { fitInFont, fontFileMetrics, gameGlyphs, inkWidth, placedInk } from "../
 import { inside } from "../testing/rects";
 import { SETTINGS_EXPORT_ROWS } from "../tools/layoutExport";
 import { closeFace } from "../ui/closeControl";
-import { fittingTextsAlike, type TextFitStyle } from "../ui/textFit";
+import { fittingText, type TextFitStyle } from "../ui/textFit";
 import { MENU_TEXT_FIELDS } from "./menuText";
 import {
   INSTALL_STEPS,
@@ -18,7 +18,7 @@ import {
   installStepsLayout,
   knobX,
   noteRoom,
-  SETTINGS_NOTE_STYLES,
+  SETTINGS_NOTE_STYLE,
   SETTINGS_ROW,
   settingsLayout,
   type SettingsRowShape,
@@ -81,13 +81,13 @@ const SHIPPED_ROWS: readonly ShippedRow[] = [
   { kind: "button", label: words.install, note: words.installNote },
 ];
 const notedRows = SHIPPED_ROWS.flatMap((row) => (row.kind === "slider" ? [] : [row]));
-const fittedNotes = fittingTextsAlike(
-  SETTINGS_NOTE_STYLES,
-  notedRows.map((row) => ({
-    inkWidth: (style: TextFitStyle, line: string) => inkWidth("font-body", style, line),
-    room: noteRoom(row.kind),
-    text: row.note,
-  })),
+const fittedNotes = notedRows.map((row) =>
+  fittingText(
+    SETTINGS_NOTE_STYLE,
+    (style: TextFitStyle, line: string) => inkWidth("font-body", style, line),
+    noteRoom(row.kind),
+    row.note,
+  ),
 );
 const shapes: SettingsRowShape[] = SHIPPED_ROWS.map((row) =>
   row.kind === "slider"
@@ -98,7 +98,7 @@ const bodyFont = fontFileMetrics("font-body");
 const titleFont = fontFileMetrics("font-title");
 const layout = settingsLayout({ body: bodyFont, title: titleFont }, SCREEN_CONFIG, shapes);
 const screen: Rect = { ...SCREEN_CONFIG, x: 0, y: 0 };
-const TWO_X = { letterSpacing: 0, scale: 2 };
+const TWO_X = { scale: 2 };
 const KNOB_RISE = 3;
 const KNOB_HEIGHT = 16;
 
@@ -177,19 +177,6 @@ describe("the settings card", () => {
   const { band, close, panel, rows, title: titleAt } = layout;
   const bandBottom = band.y + band.height;
   const capHeight = titleFont.capHeight * 2;
-
-  it("sets every note at 2x with the glyphs' own spacing, within its lines and room", () => {
-    for (const [i, fitted] of fittedNotes.entries()) {
-      const row = notedRows[i];
-      expect(fitted.style).toMatchObject(TWO_X);
-      expect(fitted.lines.length).toBeLessThanOrEqual(SETTINGS_ROW.note.lines);
-      for (const line of fitted.lines) {
-        expect(inkWidth("font-body", TWO_X, line)).toBeLessThanOrEqual(
-          noteRoom(row?.kind ?? "switch"),
-        );
-      }
-    }
-  });
 
   it("exports the rows the shipped notes wrap to", () => {
     expect(SETTINGS_EXPORT_ROWS).toEqual(shapes);
@@ -278,8 +265,8 @@ describe.each(keysOf(gameData.menuText.settings.installSteps))(
   (browser) => {
     const { steps: installSteps, title: installStepsTitle } =
       gameData.menuText.settings.installSteps[browser];
-    const { room, styles } = INSTALL_STEPS_FIT;
-    const fitted = fitInFont("font-body", styles, room, installSteps);
+    const { room, style } = INSTALL_STEPS_FIT;
+    const fitted = fitInFont("font-body", style, room, installSteps);
     const { band, card, close, icon, steps, title } = installStepsLayout(
       SCREEN_CONFIG,
       fitted.lines.length,
@@ -289,15 +276,9 @@ describe.each(keysOf(gameData.menuText.settings.installSteps))(
     // From the first line's capitals to the last line's lowest ink, at 2x.
     const stepsHeight =
       (fitted.lines.length - 1) * INSTALL_STEPS.linePitch + (body.inkBottom - body.capTop) * 2;
-    const titleWidth = inkWidth("font-title", { letterSpacing: 0, scale: 2 }, installStepsTitle);
+    const titleWidth = inkWidth("font-title", { scale: 2 }, installStepsTitle);
     const { size } = INSTALL_STEPS.icon;
     const glyph: Rect = { height: size, width: size, ...icon };
-
-    it("sets the steps at 2x within their lines and room", () => {
-      expect(fitted.style.scale).toBe(2);
-      expect(fitted.lines.length).toBeLessThanOrEqual(INSTALL_STEPS.lines);
-      expect(fitted.widest).toBeLessThanOrEqual(room);
-    });
 
     it.each<[string, Rect, Rect]>([
       ["the card", card, screen],

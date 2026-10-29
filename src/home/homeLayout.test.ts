@@ -14,13 +14,7 @@ import { cents } from "../lib/units";
 import { unlockPrice } from "../rules/shop";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
-import {
-  fitInFont,
-  fontFileMetrics,
-  fontInk,
-  inkWidth,
-  TWO_X_FIT_STYLES,
-} from "../testing/fontInk";
+import { fontFileMetrics, fontInk, inkWidth } from "../testing/fontInk";
 import { inside } from "../testing/rects";
 import { inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import { gridRects } from "../ui/grid";
@@ -30,17 +24,14 @@ import { AFFORD_OUTSET } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
 import { type DetailCard, dogDetail, gearDetail, walkerDetail } from "./detail";
 import { FEEDBACK } from "./feedback";
-import { dollarAmountText, dollarText, shortDollarAmountText } from "./home";
+import { dollarText, shortDollarAmountText } from "./home";
 import {
-  BANK_ROOM,
-  bankFit,
   CARD_TEXT_ROOM,
   cardBand,
   detailCardLayout,
   detailOwner,
   detailOwnerHeight,
   type DetailRow,
-  DOG_TILE_TEXT_ROOM,
   dogTileNameY,
   dogTilePlateY,
   HOME_LAYOUT,
@@ -284,70 +275,37 @@ describe("top bar", () => {
     expect(bank.ink).toEqual({ left: well.x, right: wellInk.right });
   });
 
-  // The title font's capitals at each scale, centred on the well's ink rows, a half pixel at most
-  // lower when their parities differ.
+  // The title font's capitals, centred on the well's ink rows, a half pixel at most lower when
+  // their parities differ.
   const capHeight = fontFileMetrics("font-title").capHeight;
-  it.each(bank.scales.map((scale) => [scale] as const))(
-    "centres the bank's capitals at %ix on the well's ink rows",
-    (scale) => {
-      const top = bank.capsY[scale];
-      const bottom = top + capHeight * scale - 1;
-      expect(top).toBeGreaterThan(well.y);
-      expect(bottom).toBeLessThan(wellInk.bottom);
-      const offCentre = (top + bottom) / 2 - (well.y + wellInk.bottom) / 2;
-      expect(offCentre).toBeGreaterThanOrEqual(0);
-      expect(offCentre).toBeLessThanOrEqual(0.5);
-    },
-  );
+  it("centres the bank's capitals on the well's ink rows", () => {
+    const { capsY: top, scale } = bank;
+    const bottom = top + capHeight * scale - 1;
+    expect(top).toBeGreaterThan(well.y);
+    expect(bottom).toBeLessThan(wellInk.bottom);
+    const offCentre = (top + bottom) / 2 - (well.y + wellInk.bottom) / 2;
+    expect(offCentre).toBeGreaterThanOrEqual(0);
+    expect(offCentre).toBeLessThanOrEqual(0.5);
+  });
 });
 
-// The bank as the game writes it, measured on the title font at 1x.
+// The bank as the game writes it, in the short form from a thousand dollars, measured on the
+// title font at 1x (each amount's fit in the room: ui/textRoles.test.ts).
 describe("the top bar's bank", () => {
   const { bank } = HOME_LAYOUT.topBar;
-  const smallest = bank.scales.at(-1);
-  const width = (text: string) => inkWidth("font-title", { letterSpacing: 0, scale: 1 }, text);
-  const texts = (dollars: number) => {
-    const amount = cents(dollars * 100);
-    return [`$${dollarAmountText(amount)}`, `$${shortDollarAmountText(amount)}`];
-  };
-  // From nothing to the most a save can hold; every scale and both forms are covered.
+  const width = (text: string) => inkWidth("font-title", { scale: 1 }, text);
+  // From nothing to the most a save can hold.
   const amounts = [
-    0, 5, 88, 888, 1_234, 12_345, 99_999, 1_000_000, 123_456_789, 90_071_992_547_409,
-  ];
+    0, 5, 88, 888, 999, 1_000, 1_234, 12_345, 99_999, 1_000_000, 123_456_789, 90_071_992_547_409,
+  ].map((dollars) => `$${shortDollarAmountText(cents(dollars * 100))}`);
 
-  it("covers every scale and both forms with the amounts", () => {
-    const fits = amounts.map((dollars) => bankFit(width, texts(dollars)));
-    const taken = new Set(fits.map((fit) => fit.scale));
-    expect([...taken].sort()).toEqual([...bank.scales].sort());
-    const forms = new Set(amounts.map((dollars, i) => texts(dollars).indexOf(fits[i]?.text ?? "")));
-    expect([...forms].sort()).toEqual([0, 1]);
-  });
-
-  // The first amount of each scale, form and parity of ink: the fit and the centring read only
-  // those.
-  const fitKey = (dollars: number) => {
-    const { scale, text } = bankFit(width, texts(dollars));
-    return `${scale},${texts(dollars).indexOf(text)},${(width(text) * scale) % 2}`;
-  };
+  // The first amount of each parity of ink: the centring reads only that.
+  const parity = (text: string) => (width(text) * bank.scale) % 2;
   const sampled = amounts.filter(
-    (dollars, i) => amounts.findIndex((other) => fitKey(other) === fitKey(dollars)) === i,
+    (text, i) => amounts.findIndex((other) => parity(other) === parity(text)) === i,
   );
-
-  it.each(sampled)(
-    "sets $%i in full whenever it fits, at the largest scale whose ink fits the bank's room",
-    (dollars) => {
-      const [full = "", short = ""] = texts(dollars);
-      const { scale, text } = bankFit(width, texts(dollars));
-      const fullFits = bank.scales.some((each) => width(full) * each <= BANK_ROOM);
-      expect(text).toBe(fullFits ? full : short);
-      expect(scale).toBe(bank.scales.find((each) => width(text) * each <= BANK_ROOM));
-      expect(width(text) * scale).toBeLessThanOrEqual(BANK_ROOM);
-    },
-  );
-
-  it.each(sampled)("centres $%i across the bank's ink columns at the scale it takes", (dollars) => {
-    const { scale, text } = bankFit(width, texts(dollars));
-    const ink = width(text) * scale;
+  it.each(sampled)("centres %s across the bank's ink columns", (text) => {
+    const ink = width(text) * bank.scale;
     const left = cashLeft(ink);
     const right = left + ink - 1;
     expect(left).toBeGreaterThanOrEqual(bank.ink.left);
@@ -356,16 +314,6 @@ describe("the top bar's bank", () => {
     const offCentre = (bank.ink.left + bank.ink.right) / 2 - (left + right) / 2;
     expect(offCentre).toBeGreaterThanOrEqual(0);
     expect(offCentre).toBeLessThanOrEqual(0.5);
-  });
-
-  // A full amount too wide at every scale gives way to its short form, at the largest scale
-  // that fits it, or the smallest past every one.
-  it.each([
-    ["the short form at the largest scale", 10, { scale: bank.scales[0], text: "short" }],
-    ["the short form at the smallest scale", BANK_ROOM + 1, { scale: smallest, text: "short" }],
-  ])("sets an amount too wide at every scale in %s", (_, shortWidth, expected) => {
-    const measure = (text: string) => (text === "full" ? BANK_ROOM + 1 : shortWidth);
-    expect(bankFit(measure, ["full", "short"])).toEqual(expected);
   });
 });
 
@@ -387,18 +335,6 @@ describe("a dog tile's text", () => {
     const plateY = dogTilePlateY(body);
     expect(plateY + ink).toBe(tileHeight - dogTile.plateFoot);
     expect(dogTile.lockedNameY + ink).toBeLessThan(plateY);
-  });
-
-  // The grid's names share one size, so one name too wide at 2x sets every dog's name at 1x:
-  // each must fit the column at 2x, its glyphs closer if need be. The widest name at 2x fits
-  // wherever it does.
-  const nameWidth = (text: string) => bodyTextWidth(2, plainMarks(text));
-  const widestName = Object.values(gameData.dogs)
-    .map((dog) => dog.name)
-    .reduce((a, b) => (nameWidth(b) > nameWidth(a) ? b : a));
-  it.each([widestName])("sets %j at 2x", (text) => {
-    const fitted = fitInFont("font-body", TWO_X_FIT_STYLES, DOG_TILE_TEXT_ROOM, plainMarks(text));
-    expect(fitted.widest).toBeLessThanOrEqual(DOG_TILE_TEXT_ROOM);
   });
 });
 
@@ -460,7 +396,7 @@ describe("a detail card", () => {
 
   // The columns a line inks in the body font at scale.
   const inkRight = (scale: number, line: string) =>
-    fontInk("font-body", { letterSpacing: 0, scale }, plainMarks(line)).right;
+    fontInk("font-body", { scale }, plainMarks(line)).right;
   const dogCards = cards.flatMap(([kind, card]) =>
     kind === "dog" && card.owner !== undefined
       ? [[card.title, card.owner.name, card.owner.role, card] as const]
@@ -561,24 +497,10 @@ describe("a detail card", () => {
   );
 });
 
-// Start walk's loading label fits the pressed face's room on one line in the title font, at
-// the largest of its sizes that does.
+// Start walk's labels keep inside the button (each fits the room: ui/textRoles.test.ts).
 describe("Start walk's loading label", () => {
-  const { room, styles } = HOME_LAYOUT.startLoading;
-
   it("leaves a margin inside the button", () => {
-    expect(room).toBeLessThan(startButton.width);
-  });
-
-  it("sets its text", () => {
-    const fitted = fitInFont(
-      "font-title",
-      styles,
-      room,
-      plainMarks(gameData.homeText.startLoading),
-    );
-    expect(fitted.lines).toHaveLength(1);
-    expect(fitted.widest).toBeLessThanOrEqual(room);
+    expect(HOME_LAYOUT.startLoading.room).toBeLessThan(startButton.width);
   });
 });
 
@@ -653,7 +575,7 @@ describe("the dog slot sign", () => {
   });
 
   it.each(lines)("sets $text on the cream", ({ capY, text }) => {
-    const width = inkWidth("font-body", { letterSpacing: 0, scale }, text);
+    const width = inkWidth("font-body", { scale }, text);
     expect(Math.floor(x - width / 2)).toBeGreaterThanOrEqual(cream.x);
     expect(Math.ceil(x + width / 2)).toBeLessThanOrEqual(cream.x + cream.width);
     expect(capY).toBeGreaterThanOrEqual(cream.y);

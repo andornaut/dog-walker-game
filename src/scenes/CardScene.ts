@@ -17,12 +17,12 @@ import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
 import { cardCharmPlates } from "../layout/buffLayout";
 import {
-  boxStyles,
   CARD_LAYOUT,
   cardRowIn,
   FIRES_FIT,
   forkHomeRect,
   largeBodyBox,
+  largeBodyStyle,
   largeCardHeight,
   largeCardRect,
   plaqueRoom,
@@ -93,7 +93,6 @@ const REFUSE = { flashMs: 80, flashes: 4, shake: 3, shakeMs: 40 };
 const CARD_SLOP_PX = Number.POSITIVE_INFINITY;
 const LARGE = { ...CARD_LAYOUT.large, key: "card-frame-large" };
 // The enlarged card's body keeps this many rows clear under its text.
-const LARGE_BODY_GAP = 4;
 // Marks an option that would fire an owner, over the plaque's left rivet: card-frame
 // pixels, and card-frame-large pixels where it is drawn at 2x.
 const FIRES_KEY = "ui-fires";
@@ -370,8 +369,8 @@ export class CardScene extends Scene {
     const option = entry.option;
     const measured = this.addLargeBody(option, 0, 0);
     measured.parts.forEach((part) => part.destroy());
-    const height = largeCardHeight(measured.height + LARGE_BODY_GAP);
-    // The rows under the body move up by what it gave up.
+    const height = largeCardHeight(measured.height);
+    // The rows under the body move up by what it gave up, or down by what it grew.
     const shift = height - LARGE.height;
     const { walkView } = SCREEN_LAYOUT;
     const { x, y } = largeCardRect(walkView, height);
@@ -379,13 +378,22 @@ export class CardScene extends Scene {
     const tag = cardFrameTag(view.source);
     const g = this.add.graphics();
     if (this.textures.exists(LARGE.key)) {
-      // The frame's top down to the body's end, then its foot, over the body's last rows.
+      // The frame's top down to the body's end, the body's rows again for a card grown past the
+      // frame, then its foot, over the body's last rows.
       const frameName = tagFrame(this, LARGE.key, tag);
-      const foot = LARGE.height - (LARGE.body.y + LARGE.body.height);
+      const { body } = LARGE;
+      const bodyEnd = body.y + body.height;
+      const foot = LARGE.height - bodyEnd;
       this.add
         .sprite(x, y, LARGE.key, frameName)
         .setOrigin(0)
-        .setCrop(0, 0, LARGE.width, height - foot);
+        .setCrop(0, 0, LARGE.width, Math.min(height, LARGE.height) - foot);
+      for (let grown = 0; grown < shift; grown += body.height) {
+        this.add
+          .sprite(x, y + bodyEnd + grown - body.y, LARGE.key, frameName)
+          .setOrigin(0)
+          .setCrop(0, body.y, LARGE.width, Math.min(body.height, shift - grown));
+      }
       this.add
         .sprite(x, y + shift, LARGE.key, frameName)
         .setOrigin(0)
@@ -425,8 +433,8 @@ export class CardScene extends Scene {
   }
 
   // The enlarged card's body from (x, top): an option that would fire an owner says so first,
-  // in dark red, then each change it makes, at 2x where it fits the frame's body and else at
-  // 1x, measured on the font. Returns its parts and the height their ink takes.
+  // in dark red, then each change it makes, at 2x wrapped within the frame's body, which grows
+  // to hold them, measured on the font. Returns its parts and the height their ink takes.
   private addLargeBody(
     option: OptionView | undefined,
     x: number,
@@ -451,8 +459,8 @@ export class CardScene extends Scene {
     const text = largeBodyText(gameData, option);
     const body = addPixelText(this, x, top + box.top, text, { colour: PALETTE.plum, scale: 2 });
     const metrics = pixelFontMetrics(this, "body");
-    const fit = { room: LARGE.body.width, styles: boxStyles(metrics, box.height) };
-    const { lines, style } = fitPixelText(body, fit, x, top + box.top);
+    const style = largeBodyStyle(metrics, box.height, SCREEN_LAYOUT.walkView);
+    const { lines } = fitPixelText(body, { room: LARGE.body.width, style }, x, top + box.top);
     addNamePills([body]);
     parts.push(body);
     return { height: box.top + inkRowsOfLines(metrics, lines.length) * style.scale, parts };
@@ -647,8 +655,7 @@ export class CardScene extends Scene {
     }
 
     // An option that would fire an owner says so at the foot of its effect, in dark red, where
-    // the effect still fits over it; the effect at 2x where it fits the card, else at 1x. Holding
-    // the card shows both larger.
+    // the effect still fits over it; the effect at 2x. Holding the card shows both larger.
     const fires = entry.option?.fires ?? [];
     const shown = withProbe(this, { colour: PALETTE.plum }, (probe) =>
       smallCardText(gameData, pixelFontMetrics(this, "body"), labelInkWidth(probe), entry.option),

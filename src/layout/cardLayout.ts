@@ -1,7 +1,7 @@
 import type { Rect } from "../lib/rect";
 import { CARD_HEADER, cardRowRects, type CardRowSpec } from "../ui/cardRow";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
-import type { TextFitStyle } from "../ui/textFit";
+import { TEXT_SCALE, type TextFitStyle } from "../ui/textFit";
 import { CARD_CHARMS_HEIGHT } from "./buffLayout";
 
 // The choice cards: the card-frame sprite's parts in card pixels, the row of cards centred
@@ -22,12 +22,13 @@ export const CARD_LAYOUT = {
   forkHome: { gap: 6, height: 44, width: 160 },
   height: 153,
   // The enlarged card's body: a firing warning in the title font at 1x, warningGap over the
-  // changes, which take the rest of the body.
+  // changes, which take the rest of the body and bodyGap rows under their lowest ink.
   large: {
     art: { x: 8, y: 32 },
     badge: { height: 26, width: 142, x: 12, y: 242 },
     band: { height: 18, room: 154, y: 4 },
     body: { height: 82, width: 142, x: 12, y: 152 },
+    bodyGap: 4,
     fires: { x: 8, y: 238 },
     height: 280,
     warningGap: 4,
@@ -46,23 +47,17 @@ function linesInHeight(metrics: FontMetrics, scale: number, height: number): num
   return height < ink ? 0 : Math.floor((height - ink) / (metrics.lineHeight * scale)) + 1;
 }
 
-// Body text in a box height tall: at 2x on the lines that fit it, else at 1x.
-export function boxStyles(body: FontMetrics, height: number): TextFitStyle[] {
-  return [2, 1].flatMap((scale) => {
-    const lines = linesInHeight(body, scale, height);
-    return lines === 0 ? [] : [{ letterSpacing: 0, lines, scale }];
-  });
+// Body text in a box height tall: at 2x on the lines that fit it, at least one.
+export function boxStyle(body: FontMetrics, height: number): TextFitStyle {
+  return { lines: Math.max(1, linesInHeight(body, TEXT_SCALE, height)), scale: TEXT_SCALE };
 }
 
 // An option's firing warning: the body font at 1x on up to two lines across the effect, and the
 // title font at 1x on up to two lines across the enlarged card's body.
 export const FIRES_FIT = {
-  large: {
-    room: CARD_LAYOUT.large.body.width,
-    styles: [{ letterSpacing: 0, lines: 2, scale: 1 }],
-  },
-  small: { room: CARD_LAYOUT.effect.width, styles: [{ letterSpacing: 0, lines: 2, scale: 1 }] },
-} as const satisfies Record<string, { room: number; styles: readonly TextFitStyle[] }>;
+  large: { room: CARD_LAYOUT.large.body.width, style: { lines: 2, scale: 1 } },
+  small: { room: CARD_LAYOUT.effect.width, style: { lines: 2, scale: 1 } },
+} as const satisfies Record<string, { room: number; style: TextFitStyle }>;
 
 // A card's effect box, in card pixels: its top and height, under a path card's paws and over a
 // firing warning fireLines lines long, whose capitals start at warningY.
@@ -104,11 +99,19 @@ function cardRowSpec(maxCount: number): CardRowSpec {
   };
 }
 
-// The enlarged card's height for body content contentHeight tall: its body's rows, which
-// card-frame-large draws alike, shrink to the content, and never grow past the frame's.
+// The enlarged card's height for body content contentHeight tall, bodyGap under it: its body's
+// rows, which card-frame-large draws alike, shrink to the content or grow past the frame's.
 export function largeCardHeight(contentHeight: number): number {
-  const { body, height } = CARD_LAYOUT.large;
-  return height - Math.max(0, body.height - Math.ceil(contentHeight));
+  const { body, bodyGap, height } = CARD_LAYOUT.large;
+  return height - body.height + Math.ceil(contentHeight) + bodyGap;
+}
+
+// The enlarged card's changes in a body box height tall: body text at 2x on the lines the box
+// holds once the card grows as far as area holds it and its charms.
+export function largeBodyStyle(body: FontMetrics, height: number, area: Rect): TextFitStyle {
+  const { large } = CARD_LAYOUT;
+  const growth = area.height - (large.height + CARD_CHARMS_HEIGHT);
+  return boxStyle(body, height + growth);
 }
 
 // The enlarged card's rect, height tall, centred in area on whole pixels with its charms'

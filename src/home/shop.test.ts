@@ -10,22 +10,12 @@ import { sizeHearts } from "../rules/dogs";
 import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { startingDogSlots, unlockPrice } from "../rules/shop";
 import type { Owned } from "../save/schema";
-import {
-  fitInFont,
-  fontFileMetrics,
-  inkWidth,
-  placedInk,
-  TWO_X_FIT_STYLES,
-} from "../testing/fontInk";
+import { fontFileMetrics, inkWidth, placedInk } from "../testing/fontInk";
 import { TEST_TUNING } from "../testing/tuning";
-import { readBitmapFont } from "../tools/fontFile";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
-import { plainMarks } from "../ui/pixelFont";
 import { GREYED, pictureBox, SELECT_OUTSET } from "../ui/selection";
-import { TEXT_FIT_STYLES } from "../ui/textFit";
 import { FEEDBACK } from "./feedback";
-import { dollarText, gearByPrice, type Purchase } from "./home";
-import { messageLine } from "./homeLines";
+import { gearByPrice, type Purchase } from "./home";
 import {
   dogRows,
   gearRows,
@@ -47,7 +37,6 @@ import {
   shopListBottom,
   shopListFrame,
   shopMessageCapTop,
-  shopRowTextRoom,
   shopScrollbar,
   shopTabRects,
 } from "./shopLayout";
@@ -258,7 +247,7 @@ describe("ownedCountNote", () => {
     ["gear", have, have.gear.length, Object.keys(data.shopGear).length] as const,
     ["slots", have, have.dogSlots.length, data.dogSlots.length] as const,
   ]);
-  const style = { letterSpacing: 0, scale: 2 };
+  const style = { scale: 2 };
 
   // slotRows checks the slots' count with every set of slots owned.
   it.each(cases.filter(([list]) => list !== "slots"))(
@@ -306,107 +295,18 @@ describe("shopOpenTab", () => {
   });
 });
 
-// Every row's name and line, with nothing bought and with every item owned, fit the room the
-// price plate or OWNED leaves them in a row beside a scrollbar, the narrower, both measured on
-// the fonts at 2x.
-describe("a shop row's text", () => {
-  // A label's width as Phaser gives it: its glyphs' advances at 2x.
-  const advances = (font: string, text: string) => {
-    const { glyphs } = readBitmapFont(font);
-    return 2 * [...text].reduce((sum, char) => sum + (glyphs.get(char)?.advance ?? 0), 0);
-  };
-  const rightWidth = (row: ShopRow) =>
-    row.price === null
-      ? SHOP_LAYOUT.row.ownedDx + advances("font-title", gameData.homeText.shop.owned.toUpperCase())
-      : advances("font-body", dollarText(row.price)) + 6;
-  const everything: Owned = {
-    dogSlots: allSlots,
-    dogs: keysOf(gameData.dogs),
-    gear: keysOf(gameData.shopGear),
-    walkers: [],
-  };
-  const rows = [owned, everything].flatMap((have) => [
-    ...gearRows(gameData, have),
-    ...slotRows(gameData, have),
-    ...dogRows(gameData, have),
-  ]);
-  it("sets every row's name and line beside its price or OWNED", () => {
-    const offenders = rows.flatMap((row) =>
-      [row.name, row.line]
-        .filter((text) => {
-          const room = shopRowTextRoom(SHOP_LAYOUT.row.scrollWidth, rightWidth(row));
-          return (
-            text !== "" &&
-            fitInFont("font-body", TEXT_FIT_STYLES, room, plainMarks(text)).widest > room
-          );
-        })
-        .map((text) => `${row.id}: ${text}`),
-    );
-    expect(offenders).toEqual([]);
-  });
-
-  // A tab's names share one size, so each name, a dog's, a gear item's or a slot's, fits at 2x:
-  // each row for sale or owned, whichever leaves its name the least room.
-  const tightest = rows.filter((row) =>
-    rows.every(
-      (other) =>
-        other.id !== row.id ||
-        rightWidth(other) < rightWidth(row) ||
-        (rightWidth(other) === rightWidth(row) && rows.indexOf(other) >= rows.indexOf(row)),
-    ),
-  );
-  it.each(tightest.map((row) => [row.name, row.id, row] as const))(
-    "sets %j (%s) at 2x",
-    (_name, _id, row) => {
-      const room = shopRowTextRoom(SHOP_LAYOUT.row.scrollWidth, rightWidth(row));
-      const fitted = fitInFont("font-body", TWO_X_FIT_STYLES, room, plainMarks(row.name));
-      expect(fitted.widest).toBeLessThanOrEqual(room);
-    },
-  );
-});
-
-// Every message a tap in the shop leaves fits on one line on its plate, its ink inside the
-// plate's frame: each priced row's "can't afford" with its whole
-// price short, and each purchase's thanks.
+// A message, at 2x on one line, keeps its ink inside its plate's frame (every message fits the
+// plate's room: ui/textRoles.test.ts).
 describe("the shop's message", () => {
-  const everyRow = [
-    ...gearRows(gameData, owned),
-    ...slotRows(gameData, owned),
-    ...dogRows(gameData, owned),
-  ];
-  const messages = everyRow.flatMap((row) => [
-    ...(row.price === null
-      ? []
-      : [
-          messageLine(gameData.homeText, { amount: row.price, kind: "cantAfford", name: row.name }),
-        ]),
-    messageLine(gameData.homeText, { kind: "bought", name: row.name, purchase: row.purchase }),
-  ]);
   const body = fontFileMetrics("font-body");
   const { frame, plate, textDx } = SHOP_LAYOUT.message;
-  // Of the messages set on one line in each style, the widest, and any set on more: the plate's
-  // rows read only the style, and a narrower message in the same style fits where the widest does.
-  const { room, styles } = SHOP_MESSAGE_FIT;
-  const fit = (text: string) => fitInFont("font-body", styles, room, plainMarks(text));
-  const unique = [...new Set(messages)].flatMap((text) => (text === null ? [] : [text]));
-  const widestOfStyle = unique.filter(
-    (text) =>
-      fit(text).lines.length !== 1 ||
-      unique.every(
-        (other) =>
-          JSON.stringify(fit(other).style) !== JSON.stringify(fit(text).style) ||
-          fit(other).widest < fit(text).widest ||
-          (fit(other).widest === fit(text).widest && unique.indexOf(other) >= unique.indexOf(text)),
-      ),
-  );
+  const { room, style } = SHOP_MESSAGE_FIT;
 
-  it.each(widestOfStyle)("sets %j on one line inside its plate's frame", (text) => {
-    const fitted = fitInFont("font-body", styles, room, plainMarks(text));
-    expect(fitted.lines).toHaveLength(1);
-    expect(fitted.widest).toBeLessThanOrEqual(plate.width - 2 * textDx);
-    const capTop = shopMessageCapTop(body, fitted.style.scale);
+  it("keeps a message's ink inside its plate's frame", () => {
+    expect(room).toBeLessThanOrEqual(plate.width - 2 * textDx);
+    const capTop = shopMessageCapTop(body, style.scale);
     expect(capTop).toBeGreaterThanOrEqual(plate.y + frame);
-    expect(capTop + inkRowsFromCapTop(body) * fitted.style.scale).toBeLessThanOrEqual(
+    expect(capTop + inkRowsFromCapTop(body) * style.scale).toBeLessThanOrEqual(
       plate.y + plate.height - frame,
     );
   });

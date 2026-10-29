@@ -5,16 +5,14 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { badgeStripHits, type BadgeView } from "../home/badgesView";
 import {
-  breakdownLabelRoom,
   END_LAYOUT,
   endPanelLayout,
   grantedQuipLines,
+  QUIP_LINES,
   QUIP_TEXT_ROOM,
   quipNameX,
   quipTextY,
-  SIDE_LABEL_ROOM,
   sideTotalAmountY,
-  sideTotalLabelRoom,
 } from "../home/endLayout";
 import {
   closingLines,
@@ -23,7 +21,7 @@ import {
   endTargetAt,
   zonePips,
 } from "../home/endView";
-import { signedDollarText } from "../home/home";
+import { signedShortDollarText } from "../home/home";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import {
   homecomers,
@@ -56,15 +54,13 @@ import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,
-  fitPixelTextsAlike,
   inkSpan,
-  type LabelToFit,
   pixelFontMetrics,
   setPixelText,
   withProbe,
 } from "../ui/phaser/pixelText";
 import { onceBeforeRender } from "../ui/phaser/rampDim";
-import { TEXT_FIT_STYLES, TEXT_SCALE, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
+import { TEXT_SCALE, textOnLines } from "../ui/textFit";
 import {
   addBadgeCelebration,
   addBadgeDetail,
@@ -184,18 +180,15 @@ export class EndScene extends Scene {
       addBodyText(this, undefined, { x, y }, value, { colour, originX });
     const title = (x: number, y: number, value: string, colour: number, originX = 0) =>
       addBodyText(this, undefined, { x, y }, value, { colour, font: "title", originX });
-    // A label set in the first of TEXT_FIT_STYLES that fits room.
-    const fitted = (label: GameObjects.BitmapText, room: number, x: number, y: number) =>
-      fitPixelText(label, { room, styles: TEXT_FIT_STYLES }, x, y);
     const body = pixelFontMetrics(this, "body");
     // A closing line wraps onto a second line at 2x while the panel has room for it.
-    const quipFit = { room: QUIP_TEXT_ROOM, styles: WRAPPING_TEXT_FIT_STYLES };
+    const quipFit = (lines: number) => ({ room: QUIP_TEXT_ROOM, style: textOnLines(lines) });
     const wanted = closing.map((line) => {
       const { lines: shown } = withProbe(this, BODY_TEXT, (probe) => {
         setPixelText(probe, line.text);
-        return fitPixelText(probe, quipFit, 0, 0);
+        return fitPixelText(probe, quipFit(QUIP_LINES), 0, 0);
       });
-      return { fired: line.fired, lines: shown.length };
+      return { fired: line.fired, lines: Math.min(QUIP_LINES, shown.length) };
     });
     const quipLines = grantedQuipLines(body, lines.length, wanted);
     const quipRows = closing.map(({ fired }, i) => ({ fired, lines: itemAt(quipLines, i) }));
@@ -215,25 +208,16 @@ export class EndScene extends Scene {
       soundboardOf(this).play("newBest");
     }
 
-    // Each label fits the room its amount leaves it, every label at the largest size that fits
-    // them all.
-    const room = (amount: GameObjects.BitmapText) => {
-      const ink = inkSpan(amount);
-      return breakdownLabelRoom(ink.right - ink.left);
-    };
+    // Each amount in the short form from a thousand dollars, the labels clear of it.
     let y = BREAKDOWN.top;
-    const labels: LabelToFit[] = [];
     for (const line of lines) {
-      const amount = signedDollarText(line.amount);
-      const shown = text(BREAKDOWN.amountRight, y, amount, amountColour(line.amount), 1);
-      const label = text(BREAKDOWN.label, y, line.label, PALETTE.plum);
-      labels.push({ label, room: room(shown), x: BREAKDOWN.label, y });
+      const amount = signedShortDollarText(line.amount);
+      text(BREAKDOWN.amountRight, y, amount, amountColour(line.amount), 1);
+      text(BREAKDOWN.label, y, line.label, PALETTE.plum);
       y += BREAKDOWN.pitch;
     }
-    fitPixelTextsAlike(TEXT_FIT_STYLES, labels);
 
-    const zonesLabel = text(SIDE.x, BREAKDOWN.top, words.zonesWalked, PALETTE.plum);
-    fitted(zonesLabel, SIDE_LABEL_ROOM, SIDE.x, BREAKDOWN.top);
+    text(SIDE.x, BREAKDOWN.top, words.zonesWalked, PALETTE.plum);
     zonePips(walkLength(gameData), walk).forEach((pip, i) => {
       const x = SIDE.x + i * SIDE.pipPitch;
       const tag = pipTag(gameData, { state: pip, zone: walk.route[i] ?? null });
@@ -249,13 +233,11 @@ export class EndScene extends Scene {
     const zones = `${walk.zonesFinished}/${walkLength(gameData)}`;
     text(SIDE.right, SIDE.pipsY, zones, PALETTE.plum, 1);
     // The walk's total under the pips in the body font, as the breakdown's amounts are, on
-    // TOTAL's row, its title-font label fitting the room the amount leaves it.
-    const totalText = signedDollarText(walk.earnedCents);
+    // TOTAL's row, clear of its title-font label.
+    const totalText = signedShortDollarText(walk.earnedCents);
     const totalY = sideTotalAmountY(body, pixelFontMetrics(this, "title"));
-    const total = text(SIDE.right, totalY, totalText, PALETTE.forest, 1);
-    const totalInk = inkSpan(total);
-    const totalLabel = title(SIDE.x, SIDE.totalY, words.total, PALETTE.plum);
-    fitted(totalLabel, sideTotalLabelRoom(totalInk.right - totalInk.left), SIDE.x, SIDE.totalY);
+    text(SIDE.right, totalY, totalText, PALETTE.forest, 1);
+    title(SIDE.x, SIDE.totalY, words.total, PALETTE.plum);
 
     const quipsTop = rows[0]?.top ?? 0;
     const { rule } = QUIPS;
@@ -283,18 +265,12 @@ export class EndScene extends Scene {
       name.setX(quipNameX(nameInk.right - nameInk.left) - nameInk.left);
       if (line.fired) {
         const header = fillLine(MENU_TEXT_FIELDS.end, words, "firedYou", { owner });
-        const fired = title(textX, row + headerY, header, PALETTE.darkRed);
-        fitted(fired, QUIP_TEXT_ROOM, textX, row + headerY);
+        title(textX, row + headerY, header, PALETTE.darkRed);
       }
       const quipRow = itemAt(quipRows, i);
       const textY = row + quipTextY(body, quipRow, height);
       const quip = text(textX, textY, line.text, PALETTE.plum);
-      fitPixelText(
-        quip,
-        quipRow.lines > 1 ? quipFit : { ...quipFit, styles: TEXT_FIT_STYLES },
-        textX,
-        textY,
-      );
+      fitPixelText(quip, quipFit(quipRow.lines), textX, textY);
     });
 
     if (celebrating) {

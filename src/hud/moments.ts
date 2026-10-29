@@ -6,7 +6,7 @@ import { type FaceMood, faceMood } from "../rules/treats";
 import { slotIndexOf } from "../state/pack";
 import type { Pack, PackSlot } from "../state/runState";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
-import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
+import { TEXT_STYLE, type TextFitStyle } from "../ui/textFit";
 import { type FaceBox, type FaceText, fillFaceText, ownerFaceText } from "./faceText";
 import type { ChangeLabel } from "./hudView";
 import { cashTop, DOG_CARD, OWNER_TAB, TITLE_CAP_ROWS, WALK_BAR } from "./walkHud";
@@ -78,12 +78,11 @@ export const MOMENTS = {
 } as const;
 
 // Where coins land: the middle of the cash, at its largest scale.
-const LARGEST_CASH = WALK_BAR.cash.scales[0];
 const { ink } = WALK_BAR.cash;
 export const TOP_BAR_POINTS = {
   bank: {
     x: Math.floor((ink.left + ink.right) / 2),
-    y: Math.floor(cashTop(LARGEST_CASH) + (TITLE_CAP_ROWS * LARGEST_CASH) / 2),
+    y: Math.floor(cashTop() + (TITLE_CAP_ROWS * WALK_BAR.cash.scale) / 2),
   },
 } as const;
 
@@ -280,12 +279,11 @@ export function lowHeartsText(data: Pick<GameData, "dogs" | "runText">, dog: Dog
   return fillFaceText(data.runText.lowHearts, { owner: ownerFaceText(data, "upset", dog) });
 }
 
-// The line in the first of TEXT_FIT_STYLES whose ink fits the screen less the chip's margin
-// and padding each side. The box holds the label's width, which counts the last glyph's
-// trailing pixel.
+// The line at 2x on one row, no wider than the screen less the chip's margin and padding each
+// side. The box holds the label's width, which counts the last glyph's trailing pixel.
 export const LOW_CHIP_FIT = {
   room: SCREEN_CONFIG.width - 2 * (LOW_CHIP.margin + LOW_CHIP.padX) - 1,
-  styles: TEXT_FIT_STYLES,
+  style: TEXT_STYLE,
 } as const;
 
 // The chip's box and its text's capitals' top-left, for a line width wide at scale over slot,
@@ -317,8 +315,8 @@ export const FIRED_LINE = { lines: 3, maxWidth: 200, padding: 6, scale: 2 } as c
 // The bubble holds the label's width, which counts the last glyph's trailing pixel.
 export const FIRED_LINE_FIT = {
   room: FIRED_LINE.maxWidth - 2 * FIRED_LINE.padding - 1,
-  styles: [{ letterSpacing: 0, lines: FIRED_LINE.lines, scale: FIRED_LINE.scale }],
-} as const satisfies { room: number; styles: readonly TextFitStyle[] };
+  style: { lines: FIRED_LINE.lines, scale: FIRED_LINE.scale },
+} as const satisfies { room: number; style: TextFitStyle };
 
 // A fired line's bubble's height for lines lines.
 export function firedLineHeight(body: FontMetrics, lines: number): number {

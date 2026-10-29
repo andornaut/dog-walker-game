@@ -12,7 +12,7 @@ import {
   installStepsLayout,
   knobX,
   noteRoom,
-  SETTINGS_NOTE_STYLES,
+  SETTINGS_NOTE_STYLE,
   SETTINGS_ROW,
   type SettingsFonts,
   type SettingsLayout,
@@ -47,15 +47,13 @@ import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
   fitPixelText,
-  fitPixelTextsAlike,
   labelInkWidth,
-  type LabelToFit,
   pixelFontMetrics,
   setPixelText,
   withProbe,
 } from "../ui/phaser/pixelText";
 import { GREYED } from "../ui/selection";
-import { fittingTextsAlike, TEXT_SCALE } from "../ui/textFit";
+import { fittingText, TEXT_SCALE } from "../ui/textFit";
 import { addDetailCard } from "./homePanels";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenOutsideTap, onBackPressed, type OverlayData } from "./overlay";
@@ -160,26 +158,19 @@ function hasNote(row: Row): row is NotedRow {
   return row.kind !== "slider";
 }
 
-// Each row's shape: every note fitted alike in its room, as render sets them, decides how many
-// lines it takes.
+// Each row's shape: its note, wrapped in its room as render sets it, decides how many lines it
+// takes.
 function rowShapes(scene: Scene, rows: readonly Row[]): SettingsRowShape[] {
   const words = gameData.menuText.settings;
-  const noted = rows.filter(hasNote);
-  const fitted = withProbe(scene, BODY_TEXT, (probe) =>
-    fittingTextsAlike(
-      SETTINGS_NOTE_STYLES,
-      noted.map((row) => ({
-        inkWidth: labelInkWidth(probe),
-        room: noteRoom(row.kind),
-        text: words[row.note],
-      })),
-    ),
-  );
-  return rows.map((row) =>
-    hasNote(row)
-      ? { kind: row.kind, noteLines: fitted[noted.indexOf(row)]?.lines.length ?? 1 }
-      : { kind: row.kind },
-  );
+  return rows.map((row) => {
+    if (!hasNote(row)) {
+      return { kind: row.kind };
+    }
+    const { lines } = withProbe(scene, BODY_TEXT, (probe) =>
+      fittingText(SETTINGS_NOTE_STYLE, labelInkWidth(probe), noteRoom(row.kind), words[row.note]),
+    );
+    return { kind: row.kind, noteLines: lines.length };
+  });
 }
 
 const NO_FONT = { capHeight: 0, capTop: 0, inkBottom: 0, lineHeight: 0 };
@@ -461,16 +452,13 @@ export class SettingsScene extends Scene {
       scale: TEXT_SCALE,
     });
     const rows = this.add.container(0, 0);
-    const notes: LabelToFit[] = [];
     for (const row of this.rows) {
       if (hasNote(row)) {
-        notes.push(this.drawNotedRow(rows, row, settings));
+        this.drawNotedRow(rows, row, settings);
       } else {
         this.drawSlider(row, settings);
       }
     }
-    // Every row's note at the largest size that fits them all, as rowShapes measured them.
-    fitPixelTextsAlike(SETTINGS_NOTE_STYLES, notes);
     // Over the rows, since a switch row's face covers its top row.
     const separators = this.add.graphics();
     this.layout.separators.forEach((rect) => fillRect(separators, PALETTE.tan, rect));
@@ -512,13 +500,9 @@ export class SettingsScene extends Scene {
   }
 
   // A switch or install row: a normal row that dips while pressed, with its icon, label and note,
-  // and its switch or button. A switch row shows its setting in its icon and switch. The note is
-  // left for render to fit with the others'. Returns the note.
-  private drawNotedRow(
-    parent: GameObjects.Container,
-    row: NotedRow,
-    settings: Settings,
-  ): LabelToFit {
+  // and its switch or button. A switch row shows its setting in its icon and switch. The note
+  // wraps in its room, as rowShapes measured it.
+  private drawNotedRow(parent: GameObjects.Container, row: NotedRow, settings: Settings): void {
     const index = this.rowIndex(row.key);
     const { control, noteY, rect } = itemAt(this.layout.rows, index);
     const on = row.kind === "button" || switchOn(row.key, settings);
@@ -549,9 +533,14 @@ export class SettingsScene extends Scene {
       scale: TEXT_SCALE,
     });
     tile.content.add(icon === undefined ? [label, note] : [icon, label, note]);
-    const noteFit = { label: note, room: noteRoom(row.kind), ...noteAt };
+    fitPixelText(
+      note,
+      { room: noteRoom(row.kind), style: SETTINGS_NOTE_STYLE },
+      noteAt.x,
+      noteAt.y,
+    );
     if (control === null) {
-      return noteFit;
+      return;
     }
     if (row.kind === "button") {
       addMenuButton(
@@ -561,17 +550,16 @@ export class SettingsScene extends Scene {
         { available: true, primary: false, secondary: true },
         tile.content,
       );
-      return noteFit;
+      return;
     }
     const image = addTagImage(this, "ui-switch", on ? "on" : "off", control.x, control.y);
     if (image !== undefined) {
       tile.content.add(image);
-      return noteFit;
+      return;
     }
     const g = this.add.graphics();
     fillRect(g, on ? PALETTE.forest : PALETTE.slate, control);
     tile.content.add(g);
-    return noteFit;
   }
 
   // A volume slider: drag along the row to set it. Muted, it is disabled and reads "Muted".

@@ -5,7 +5,7 @@ import type { Rect } from "../lib/rect";
 import { dollarsToCents } from "../lib/units";
 import { achievementProgress } from "../rules/achievements";
 import type { SaveDocument } from "../save/schema";
-import type { TextFitStyle } from "../ui/textFit";
+import { TEXT_SCALE, type TextFitStyle } from "../ui/textFit";
 import { dollarText } from "./home";
 import { MENU_TEXT_FIELDS } from "./menuText";
 
@@ -254,12 +254,8 @@ export function badgeNameTops(lines: number, top: number): number[] {
   return Array.from({ length: lines }, (_, n) => first + n * namePitch);
 }
 
-// A strip's names at 2x, wrapped at spaces onto up to nameLines lines, then with their glyphs a
-// screen pixel closer; never smaller.
-const BADGE_NAME_STYLES: readonly TextFitStyle[] = [
-  { letterSpacing: 0, lines: BADGE_STRIP.nameLines, scale: 2 },
-  { letterSpacing: -0.5, lines: BADGE_STRIP.nameLines, scale: 2 },
-];
+// A strip's names at 2x, wrapped at spaces onto up to nameLines lines.
+export const BADGE_NAME_STYLE: TextFitStyle = { lines: BADGE_STRIP.nameLines, scale: TEXT_SCALE };
 
 export interface BadgeRowNames {
   // Each name's lines, in the order the names came.
@@ -267,23 +263,19 @@ export interface BadgeRowNames {
   readonly style: TextFitStyle;
 }
 
-// A strip's names in one style for the whole row, each broken at spaces into lines in a slot
-// slotWidth wide less 2px each side: the first of BADGE_NAME_STYLES that sets every name on at
-// most its lines, each no wider than the room as inkWidth measures it, else the last.
+// A strip's names in BADGE_NAME_STYLE, each broken at spaces into lines in a slot slotWidth
+// wide less 2px each side, as inkWidth measures them.
 export function badgeRowNames(
   inkWidth: (style: TextFitStyle, line: string) => number,
   slotWidth: number,
   names: readonly string[],
 ): BadgeRowNames {
   const room = slotWidth - 4;
-  const setIn = (style: TextFitStyle) =>
-    names.map((name) => wrapWords((line) => inkWidth(style, line), room, name));
-  const fits = (style: TextFitStyle, lines: readonly string[]) =>
-    lines.length <= (style.lines ?? 1) && lines.every((line) => inkWidth(style, line) <= room);
-  const style =
-    BADGE_NAME_STYLES.find((tried) => setIn(tried).every((lines) => fits(tried, lines))) ??
-    (BADGE_NAME_STYLES.at(-1) as TextFitStyle);
-  return { lines: setIn(style), style };
+  const style = BADGE_NAME_STYLE;
+  return {
+    lines: names.map((name) => wrapWords((line) => inkWidth(style, line), room, name)),
+    style,
+  };
 }
 
 export function celebrationTitle(data: Pick<GameData, "menuText">, count: number): string {

@@ -1,92 +1,24 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { ZoneId } from "../data/types";
-import { boxStyles, CARD_LAYOUT, FIRES_FIT, largeBodyBox, plaqueRoom } from "../layout/cardLayout";
-import { keysOf } from "../lib/records";
-import { cents } from "../lib/units";
-import { cardFor, firesText, hasPlaque, type OptionView } from "../rules/choices";
-import { fitInFont, fontFileMetrics, inkWidth } from "../testing/fontInk";
-import { testState } from "../testing/runState";
+import { CARD_LAYOUT, plaqueRoom } from "../layout/cardLayout";
+import { hasPlaque, type OptionView } from "../rules/choices";
+import { everyCardOption } from "../testing/everyCardOption";
+import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { inkRowsOfLines } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import type { TextFitStyle } from "../ui/textFit";
-import { largeBodyText, type PlaqueSize, plaqueTexts, smallCardText } from "./cardText";
-import { withNamePills } from "./effectNames";
+import { type PlaqueSize, plaqueTexts, smallCardText } from "./cardText";
 
 const BODY = fontFileMetrics("font-body");
-const TITLE = fontFileMetrics("font-title");
-const ONE: TextFitStyle = { letterSpacing: 0, scale: 1 };
+const ONE: TextFitStyle = { scale: 1 };
 const body = (text: string) => plainMarks(text);
 const title = (text: string) => plainMarks(text).toUpperCase();
 
-// Every card option the data can deal: each encounter's card for each dog alone and for the
-// three longest-named dogs together, on their last heart (so options fire them) and on five,
-// with the bank full and empty; and each zone's path card with each upgrade.
-function everyOption(): OptionView[] {
-  const dogs = keysOf(gameData.dogs);
-  const longest = [...dogs]
-    .sort((a, b) => gameData.dogs[b].name.length - gameData.dogs[a].name.length)
-    .slice(0, 3);
-  const packs = [...dogs.map((dog) => [dog]), longest];
-  const states = packs.flatMap((pack) =>
-    [1, 5].flatMap((hearts) =>
-      [0, 10_000].map((money) =>
-        testState(Object.fromEntries(pack.map((dog) => [dog, hearts])), { money: cents(money) }),
-      ),
-    ),
-  );
-  const encounters = keysOf(gameData.encounters).filter(
-    (id) => gameData.encounters[id].resolution.kind === "card",
-  );
-  const zones = gameData.world.zones.map(({ id }) => id as ZoneId);
-  const upgrades = keysOf(gameData.upgrades);
-  const first = states[0] ?? testState({ kilo: 5 });
-  return [
-    ...states.flatMap((state) =>
-      encounters.flatMap(
-        (encounter) =>
-          cardFor(gameData, state, {
-            affected: state.pack.map(({ dog }) => dog),
-            encounter,
-            kind: "encounter",
-          }).options,
-      ),
-    ),
-    ...zones.flatMap((zone) =>
-      upgrades.flatMap(
-        (upgrade) =>
-          cardFor(gameData, first, { kind: "fork", paths: [zone], upgrades: [upgrade] }).options,
-      ),
-    ),
-  ];
-}
-
-// Each option once, by what its card shows, and Skip.
-const OPTIONS = [
-  ...new Map(
-    everyOption().map((option) => [
-      JSON.stringify([option.label, option.text, option.fires, largeBodyText(gameData, option)]),
-      option,
-    ]),
-  ).values(),
-];
-const CASES: [string, OptionView | undefined][] = [
-  ["Skip", undefined],
-  ...OPTIONS.map((option): [string, OptionView] => [`${option.label}: ${option.text}`, option]),
-];
+const CASES = everyCardOption();
 const firesOf = (option: OptionView | undefined) =>
   option === undefined || option.fires.length === 0 ? null : option.fires;
 const bodyWidth = (style: TextFitStyle, line: string) => inkWidth("font-body", style, body(line));
-
-// Whether a text set in a font in the first of styles that fits room keeps within its lines
-// and its room.
-function fits(font: string, styles: readonly TextFitStyle[], room: number, text: string) {
-  const fitted = fitInFont(font, styles, room, text);
-  return (
-    styles.length > 0 && fitted.lines.length <= (fitted.style.lines ?? 1) && fitted.widest <= room
-  );
-}
 
 // The names of the cards that fitsOn rejects.
 const misfits = (fitsOn: (option: OptionView | undefined) => boolean) =>
@@ -103,46 +35,16 @@ describe("every card the data can deal", () => {
     ).toEqual([]);
   });
 
-  // The effect fits its box, under a path card's paws and over the warning where it shows; the
-  // warning shows where the effect still fits over it. Every option's whole effect shows, a path
-  // card's upgrade line included.
-  it("fits its firing warning and its whole effect in the effect box", () => {
-    const { effect: area, warningGap } = CARD_LAYOUT;
+  // The warning ends on the effect box's foot, where it shows (every effect and warning fits its
+  // box: ui/textRoles.test.ts).
+  it("sets its firing warning's lowest ink on the effect box's foot", () => {
+    const { effect: area } = CARD_LAYOUT;
     expect(
       misfits((option) => {
-        const { box, effect, warning } = smallCardText(gameData, BODY, bodyWidth, option);
-        const full = withNamePills(gameData, option?.text ?? gameData.runText.card.skipEffect);
-        const fitted = warning === null ? [effect] : [effect, warning];
-        const effectBottom = box.y + inkRowsOfLines(BODY, effect.lines.length) * effect.style.scale;
-        const foot = warning === null ? area.y + area.height : box.warningY - warningGap;
+        const { box, warning } = smallCardText(gameData, BODY, bodyWidth, option);
         return (
-          effect.lines.join(" ") === full.split(/\s+/).join(" ") &&
-          fitted.every(
-            ({ lines, style }) =>
-              lines.length <= (style.lines ?? 1) &&
-              lines.every((line) => bodyWidth(style, line) <= area.width),
-          ) &&
-          effectBottom <= foot &&
-          (warning === null ||
-            box.warningY + inkRowsOfLines(BODY, warning.lines.length) === area.y + area.height)
-        );
-      }),
-    ).toEqual([]);
-  });
-
-  it("fits its firing warning and its changes in the enlarged card's body", () => {
-    const { large } = CARD_LAYOUT;
-    const { room, styles } = FIRES_FIT.large;
-    expect(
-      misfits((option) => {
-        const fires = firesOf(option);
-        const warning = fires === null ? null : title(firesText(gameData, fires));
-        const lines = warning === null ? 0 : fitInFont("font-title", styles, room, warning).lines;
-        const box = largeBodyBox(TITLE, typeof lines === "number" ? lines : lines.length);
-        const text = body(largeBodyText(gameData, option));
-        return (
-          (warning === null || fits("font-title", styles, room, warning)) &&
-          fits("font-body", boxStyles(BODY, box.height), large.body.width, text)
+          warning === null ||
+          box.warningY + inkRowsOfLines(BODY, warning.lines.length) === area.y + area.height
         );
       }),
     ).toEqual([]);

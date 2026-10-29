@@ -3,7 +3,7 @@ import type { Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
 import type { FontMetrics } from "../ui/fontMetrics";
 import { type ScrollbarRects, scrollbarRects } from "../ui/scrollbar";
-import { TEXT_FIT_STYLES } from "../ui/textFit";
+import { TEXT_STYLE } from "../ui/textFit";
 import { HOME_LAYOUT } from "./homeLayout";
 import { SHOP_TABS } from "./shop";
 
@@ -83,10 +83,10 @@ export const SHOP_LAYOUT = {
   tab: { drawHeight: 28, drawY: 85, gap: 8, height: 44, width: 160, x: ROW_X, y: 77 },
 } as const;
 
-// The message on one line inside its plate, in the first of TEXT_FIT_STYLES whose ink fits.
+// The message at 2x on one line inside its plate.
 export const SHOP_MESSAGE_FIT = {
   room: LIST.width - 2 * SHOP_LAYOUT.message.textDx,
-  styles: TEXT_FIT_STYLES,
+  style: TEXT_STYLE,
 } as const;
 
 // The top of the message's capitals at scale, centred on its plate.

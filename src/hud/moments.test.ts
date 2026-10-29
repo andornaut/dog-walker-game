@@ -16,7 +16,7 @@ import { PACK_PLACES } from "../testing/packPlaces";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import type { TextFitStyle } from "../ui/textFit";
-import { fittingFaceRows, inlineFaceBox } from "./faceText";
+import { inlineFaceBox, styledFaceRows } from "./faceText";
 import { linePanels } from "./messageStrip";
 import {
   arcControl,
@@ -370,20 +370,14 @@ describe("the low-hearts chip", () => {
   )("over card %i keeps %s's line, led by their face, on screen", (_i, name, dog, slot) => {
     const said = lowHeartsText(gameData, dog);
     const line = { ...said, text: plainMarks(said.text) };
-    const fitted = fittingFaceRows(
-      LOW_CHIP_FIT.styles,
-      bodyRunWidth,
-      boxAt,
-      LOW_CHIP_FIT.room,
-      line,
-    );
-    const [row] = fitted.rows;
-    expect(fitted.rows).toHaveLength(1);
+    const face = defined(boxAt(LOW_CHIP_FIT.style));
+    const rows = styledFaceRows(LOW_CHIP_FIT.style, bodyRunWidth, face, LOW_CHIP_FIT.room, line);
+    const [row] = rows;
+    expect(rows).toHaveLength(1);
     expect(row?.width).toBeLessThanOrEqual(LOW_CHIP_FIT.room);
     expect(row?.faces.map((face) => face.dog)).toEqual([dog]);
     expect(row?.texts.some(({ text }) => text.startsWith(name))).toBe(true);
-    const face = defined(boxAt(fitted.style));
-    const { scale } = fitted.style;
+    const { scale } = LOW_CHIP_FIT.style;
     const width = Math.ceil(row?.width ?? 0);
     const { box, text: caps } = lowChipPlace(BODY, SCREEN_CONFIG.width, slot, {
       face,
@@ -414,7 +408,7 @@ describe("a fired line's bubble", () => {
   const fired = Object.values(gameData.quips).flatMap(({ fired: lines }) => lines);
   it.each(fired)("holds %j", (text) => {
     const plain = plainMarks(text);
-    const fitted = fitInFont("font-body", FIRED_LINE_FIT.styles, FIRED_LINE_FIT.room, plain);
+    const fitted = fitInFont("font-body", FIRED_LINE_FIT.style, FIRED_LINE_FIT.room, plain);
     expect(fitted.lines.length).toBeLessThanOrEqual(FIRED_LINE.lines);
     expect(fitted.widest).toBeLessThanOrEqual(FIRED_LINE_FIT.room);
     for (const slot of SLOTS) {

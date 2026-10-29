@@ -4,7 +4,6 @@ import type { PackPlacement } from "../layout/packFormation";
 import type { Point, Rect } from "../lib/rect";
 import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import type { GridSpec } from "../ui/grid";
-import type { TextFitStyle } from "../ui/textFit";
 import type { SectionId } from "./sections";
 
 // Every tappable thing is at least 44 game pixels (48 CSS pixels on a 390px-wide phone) on
@@ -248,16 +247,9 @@ export const HOME_LAYOUT = {
   startButton: START_BUTTON,
   // Start walk's label caps on its raised face; the label sinks with the face.
   startLabel: { readyY: 12, scale: 3 },
-  // The pressed face's label while the walk waits for its art: centred on the ready label's
-  // caps, at its size if that fits inside the face less 12px a side, else smaller.
-  startLoading: {
-    room: START_BUTTON.width - 24,
-    styles: [
-      { letterSpacing: 0, scale: 3 },
-      { letterSpacing: 0, scale: 2 },
-      { letterSpacing: -0.5, scale: 2 },
-    ] satisfies TextFitStyle[],
-  },
+  // The pressed face's label while the walk waits for its art: the ready label's, at its size
+  // on its caps, inside the face less 12px a side.
+  startLoading: { room: START_BUTTON.width - 24 },
   // The street name's centre and caps top on screen-home's street sign, clear of the walker's
   // speech bubble.
   streetSign: { x: 327, y: 75 },
@@ -267,15 +259,15 @@ export const HOME_LAYOUT = {
   tileSelectOutset: 1,
   // The top bar: the bank in its well at the left, then plain plum, then the buttons. The well
   // (wellKey) is ink on its first well.width - lip columns and well.height - lip rows, its lip
-  // on the last. The bank, the title font's "$" and amount one font advance apart, is set at the
-  // largest of bank.scales whose ink fits the columns bank.ink.left to bank.ink.right (the
-  // well's ink), centred across them, its capitals' top at bank.capsY by scale; past every
-  // scale, its short form at the smallest.
+  // on the last. The bank, the title font's "$" and amount one font advance apart, is set at
+  // bank.scale, in the short form from a thousand dollars so its ink fits the columns
+  // bank.ink.left to bank.ink.right (the well's ink), centred across them, its capitals' top at
+  // bank.capsY.
   topBar: {
     bank: {
-      capsY: { 2: 14, 3: 11 },
+      capsY: 11,
       ink: WALK_BAR.cash.ink,
-      scales: [3, 2],
+      scale: WALK_BAR.cash.scale,
     },
     faceSize: TOP_BAR_FACE,
     height: TOP_BAR_HEIGHT,
@@ -313,28 +305,8 @@ export const HOME_LAYOUT = {
   yardSign: Rect;
 };
 
-type BankScale = (typeof HOME_LAYOUT.topBar.bank.scales)[number];
-
 // How wide the bank's ink may be.
 export const BANK_ROOM = HOME_LAYOUT.topBar.bank.ink.right + 1 - HOME_LAYOUT.topBar.bank.ink.left;
-
-// The bank's text and scale: the first of texts (the full amount, then its short form) whose
-// ink, inkWidthAt1x wide at 1x, fits BANK_ROOM at one of the bank's scales, at the largest that
-// fits; else the last text at the smallest scale.
-export function bankFit(
-  inkWidthAt1x: (text: string) => number,
-  texts: readonly string[],
-): { scale: BankScale; text: string } {
-  const { scales } = HOME_LAYOUT.topBar.bank;
-  for (const text of texts) {
-    const width = inkWidthAt1x(text);
-    const scale = scales.find((each) => width * each <= BANK_ROOM);
-    if (scale !== undefined) {
-      return { scale, text };
-    }
-  }
-  return { scale: scales.at(-1) ?? scales[0], text: texts[texts.length - 1] ?? "" };
-}
 
 // How wide a line of the walker's speech may be, as a label measures it: a bubble that wide
 // fits between the screen's margin and the Pet shop's board, so it never reaches the board.

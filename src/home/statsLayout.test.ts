@@ -54,7 +54,7 @@ describe("the tabs", () => {
   it("fits every tab label", () => {
     STATS_TABS.forEach((tab, i) => {
       const label = gameData.menuText.stats.tabs[tab];
-      const style = { letterSpacing: 0, scale: TEXT_SCALE };
+      const style = { scale: TEXT_SCALE };
       expect(inkWidth("font-title", style, label.toUpperCase())).toBeLessThan(tabs[i]?.width ?? 0);
     });
   });
@@ -83,7 +83,7 @@ describe("the open badge", () => {
 
   it("holds every badge", () => {
     for (const badge of BADGES) {
-      const title = { letterSpacing: 0, scale: 2 };
+      const title = { scale: 2 };
       const room = detail.width - 2 * detailText.x;
       expect(inkWidth("font-title", title, badge.name.toUpperCase())).toBeLessThanOrEqual(room);
       const goal = wrapWords(width, DETAIL_TEXT_WIDTH, badge.goal);
@@ -100,7 +100,7 @@ describe("the open badge", () => {
 });
 
 const { dogs, panel, rows, scrollbar, view, wall, wallText } = STATS_LAYOUT;
-const STYLE = { letterSpacing: 0, scale: TEXT_SCALE };
+const STYLE = { scale: TEXT_SCALE };
 // The least gap between a label's ink and its value's, and between any ink and the scrollbar.
 const GAP = 4;
 const BAR_LEFT = scrollbar.x - GAP;

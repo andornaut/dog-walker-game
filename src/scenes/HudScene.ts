@@ -5,7 +5,7 @@ import { dogCardTag, dogFaceKey, ownerCardFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { AchievementId, DebuffId, DogId, HintTrigger } from "../data/types";
-import { dollarAmountText } from "../home/home";
+import { shortDollarAmountText } from "../home/home";
 import {
   effectIconKey,
   type EffectItem,
@@ -18,7 +18,7 @@ import { explainDetail } from "../hud/explain";
 import { FEEDBACK } from "../hud/feedback";
 import { runHintTriggers } from "../hud/hintTriggers";
 import {
-  CHANGE_LABEL_STYLES,
+  CHANGE_LABEL_STYLE,
   changeChipPlace,
   changeLabelRoom,
   type HudLanes,
@@ -51,9 +51,7 @@ import {
 import {
   type BarButton,
   cardHearts,
-  cardNameFit,
   cashLeft,
-  cashScale,
   cashTop,
   DEBUFF_BAR,
   debuffBarRects,
@@ -569,8 +567,7 @@ export class HudScene extends Scene {
     return this.feedback?.shownMoney(landed) ?? landed;
   }
 
-  // The "$" and the amount from the cash's x at the largest scale that fits, one font advance
-  // apart, their capitals' bottom on the same row at every scale.
+  // The "$" and the amount from the cash's x at the cash's scale, one font advance apart.
   private showMoney(amount: string): void {
     const { dollar, money } = this;
     if (dollar === undefined || money === undefined || money.text === amount) {
@@ -578,8 +575,8 @@ export class HudScene extends Scene {
     }
     const { topBar } = LAYOUT;
     setDollarAmount(dollar, money, amount, (inkWidth) => {
-      const scale = cashScale(inkWidth);
-      return { left: topBar.x + cashLeft(inkWidth * scale), scale, top: topBar.y + cashTop(scale) };
+      const { scale } = WALK_BAR.cash;
+      return { left: topBar.x + cashLeft(inkWidth * scale), scale, top: topBar.y + cashTop() };
     });
   }
 
@@ -713,7 +710,7 @@ export class HudScene extends Scene {
     }
     const { run } = view;
     g.clear();
-    this.showMoney(dollarAmountText(this.shownMoney(run)));
+    this.showMoney(shortDollarAmountText(this.shownMoney(run)));
     const zone = currentZone(gameData, run);
     if (this.zoneLabel !== undefined) {
       setPixelText(this.zoneLabel, zone.name);
@@ -723,24 +720,13 @@ export class HudScene extends Scene {
     }
     const ownedSlots = profileSave(this).owned.dogSlots.length;
     const lead = leadSlot(run.pack.map((slot) => slot.status === "walking"));
-    // Every card's name at the one scale they all fit.
-    const nameFit = cardNameFit(
-      run.pack.flatMap((slot, i) => {
-        const label = this.cards[i]?.name;
-        if (label === undefined) {
-          return [];
-        }
-        setPixelText(label, gameData.dogs[slot.dog].name);
-        return [label.width / label.scaleX];
-      }),
-    );
     LAYOUT.dogSlots.forEach((rect, i) => {
       const card = this.cards[i];
       if (card !== undefined) {
         const packSlot = run.pack[i];
         const shown = slotShown(ownedSlots, i, packSlot !== undefined);
         const slot = shown === "hidden" ? null : packSlot;
-        this.drawCard(g, { nameFit, rect, run, slot, view: card });
+        this.drawCard(g, { rect, run, slot, view: card });
         card.lead.setVisible(i === lead);
       }
     });
@@ -753,14 +739,13 @@ export class HudScene extends Scene {
   private drawCard(
     g: GameObjects.Graphics,
     card: {
-      nameFit: ReturnType<typeof cardNameFit>;
       rect: Rect;
       run: RunState;
       slot: PackSlot | null | undefined;
       view: CardView;
     },
   ): void {
-    const { nameFit, rect, run, slot, view } = card;
+    const { rect, run, slot, view } = card;
     const parts = [view.card, view.dogFace, view.ownerFace, ...view.hearts];
     if (slot === undefined || slot === null) {
       parts.forEach((part) => part.setVisible(false));
@@ -790,7 +775,12 @@ export class HudScene extends Scene {
       });
     }
     setPixelText(view.name, dog.name);
-    scalePixelText(view.name, nameFit.scale, rect.x + DOG_CARD.name.x, rect.y + nameFit.top);
+    scalePixelText(
+      view.name,
+      DOG_CARD.name.scale,
+      rect.x + DOG_CARD.name.x,
+      rect.y + DOG_CARD.name.top,
+    );
     this.showOwnerName(view.owner, dog.owner.name, rect);
     setPixelText(view.fired, fired ? gameData.runText.fired : "");
     const max = ownerMaxHearts(gameData, run, slot.dog);
@@ -1069,8 +1059,8 @@ export class HudScene extends Scene {
     this.labels.join(fadeAway(this, chip.parts, { ms: LABEL_FADE_MS, rise: 0 }));
   }
 
-  // A change on a cream chip in its changeLabelColour, so it reads over anything; fitted to room
-  // by CHANGE_LABEL_STYLES, and placed by place. Its parts, and its chip's rect.
+  // A change on a cream chip in its changeLabelColour, so it reads over anything; set within
+  // room in CHANGE_LABEL_STYLE, and placed by place. Its parts, and its chip's rect.
   private addChangeChip(
     label: ChangeLabel,
     room: number,
@@ -1078,7 +1068,7 @@ export class HudScene extends Scene {
   ): ChangeChip {
     const colour = changeLabelColour(label);
     const text = addPixelText(this, 0, 0, label.text, { colour, scale: 2 });
-    const { lines, style } = fitPixelText(text, { room, styles: CHANGE_LABEL_STYLES }, 0, 0);
+    const { lines, style } = fitPixelText(text, { room, style: CHANGE_LABEL_STYLE }, 0, 0);
     const ink = inkSpan(text);
     const placed = place({ lines: lines.length, scale: style.scale, width: ink.right - ink.left });
     placePixelText(text, placed.text.x - ink.left, placed.text.y);

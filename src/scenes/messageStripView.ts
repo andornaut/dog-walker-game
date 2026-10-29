@@ -7,7 +7,6 @@ import {
   EMPTY_MESSAGE_STRIP,
   isOwnerLead,
   lineAlpha,
-  lineLeadSlot,
   linePlace,
   MESSAGE_STRIP,
   messageIconKey,
@@ -34,8 +33,8 @@ import {
   setPixelText,
   withProbe,
 } from "../ui/phaser/pixelText";
-import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
-import { addFaceRows, addFramedOwnerFace, fitFaceRows, measureRuns } from "./faceTextView";
+import { type TextFitStyle } from "../ui/textFit";
+import { addFaceRows, addFramedOwnerFace, measureRuns } from "./faceTextView";
 import { addPanel } from "./uiKit";
 
 // A line said from the run scene, as a MessageLine: the HUD shows it on its message strip.
@@ -129,16 +128,15 @@ export class MessageStrip {
   }
 }
 
-// The line's lead and text: with no debuff bar up, its rows at 2x on a panel as tall as they
-// are; under bars, one row fitted by TEXT_FIT_STYLES on the one-row panel, the strip's own
-// where the line shows a face. An owner's lead moves the text right, and grows a panel shorter
-// than the lead. Each owner the text names has their face inline before their name, but the
-// owner whose face and name lead the line.
+// The line's lead and text, its rows at 2x on a panel as tall as they are, under bars debuff
+// bars. An owner's lead moves the text right, and grows a panel shorter than the lead. Each
+// owner the text names has their face inline before their name, but the owner whose face and
+// name lead the line.
 function draw(scene: Scene, depth: number, bars: number, line: StripLine): Drawn {
   const body = pixelFontMetrics(scene, "body");
   const owner = typeof line.lead === "string" ? undefined : line.lead;
   const name = owner === undefined ? "" : gameData.dogs[owner.dog].owner.name;
-  const slot = bars === 0 ? stripLeadSlot(body) : lineLeadSlot(body, bars);
+  const slot = stripLeadSlot(body, bars);
   const lead =
     owner === undefined
       ? undefined
@@ -150,12 +148,8 @@ function draw(scene: Scene, depth: number, bars: number, line: StripLine): Drawn
     ...withoutFace(owner?.dog, line),
     ...(line.names === undefined ? {} : { names: line.names }),
   });
-  const set = bars === 0 ? wrappedRows(scene, room, said) : oneRow(scene, room, said);
-  const place = linePlace(body, bars, {
-    faced: lead !== undefined || set.rows.some((row) => row.faces.length > 0),
-    rows: set.rows.length,
-    scale: set.fit.scale,
-  });
+  const set = wrappedRows(scene, room, said);
+  const place = linePlace(body, bars, set.rows.length);
   const panel: Faded = addPanel(
     scene,
     lead === undefined ? place.panel : ownerLeadPanel(place.panel, lead),
@@ -199,20 +193,10 @@ function wrappedRows(
   room: number,
   line: FaceText,
 ): { fit: TextFitStyle; rows: FaceRow[] } {
-  const fit = { letterSpacing: 0, scale: MESSAGE_STRIP.scale };
+  const fit = { scale: MESSAGE_STRIP.scale };
   const box = inlineFaceBox(pixelFontMetrics(scene, "body"), fit.scale);
   const rows = measureRuns(scene, TEXT_STYLE, (width) =>
     messageRows((run) => width(fit, run), box, room, line),
   );
   return { fit, rows };
-}
-
-// The line on one row in the first of TEXT_FIT_STYLES that fits room.
-function oneRow(
-  scene: Scene,
-  room: number,
-  line: FaceText,
-): { fit: TextFitStyle; rows: FaceRow[] } {
-  const fitted = fitFaceRows(scene, TEXT_STYLE, { room, styles: TEXT_FIT_STYLES }, line);
-  return { fit: fitted.style, rows: fitted.rows };
 }

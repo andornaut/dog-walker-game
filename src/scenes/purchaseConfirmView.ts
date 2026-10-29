@@ -6,8 +6,8 @@ import { PURCHASE_CONFIRM_LAYOUT } from "../home/purchaseConfirmLayout";
 import type { Rect } from "../lib/rect";
 import { addDim } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import { addPixelText, fitPixelText } from "../ui/phaser/pixelText";
-import { TEXT_FIT_STYLES, TEXT_SCALE } from "../ui/textFit";
+import { addPixelText } from "../ui/phaser/pixelText";
+import { TEXT_SCALE } from "../ui/textFit";
 import { addDetailCard, addDetailWell } from "./homePanels";
 import { addMenuButton } from "./uiKit";
 
@@ -42,7 +42,7 @@ export function drawPurchaseConfirm(
   layer.add(addDim(scene, LAYOUT.screen));
   addDetailCard(scene, layer, LAYOUT.card, LAYOUT.band);
   const centred = (
-    at: { capTop: number; centreX: number; font: "body" | "title"; room: number },
+    at: { capTop: number; centreX: number; font: "body" | "title" },
     value: string,
     colour: number,
   ) => {
@@ -52,7 +52,6 @@ export function drawPurchaseConfirm(
       originX: 0.5,
       scale: TEXT_SCALE,
     });
-    fitPixelText(label, { room: at.room, styles: TEXT_FIT_STYLES }, at.centreX, at.capTop);
     layer.add(label);
   };
   centred(LAYOUT.title, lines.title, PALETTE.white);

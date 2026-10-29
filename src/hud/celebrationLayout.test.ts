@@ -22,19 +22,9 @@ import {
 } from "./celebrationLayout";
 import { celebrationText } from "./zoneCelebration";
 
-// Each version's big line, upper-cased in font-display as addDisplayText draws it.
+// Each version's big line, in font-display at its scale (every title fits the title room:
+// ui/textRoles.test.ts).
 describe("the celebration's title", () => {
-  it("sets each version's title on one line inside the title room", () => {
-    const width = (style: TextFitStyle, line: string) => inkWidth("font-display", style, line);
-    const { newWalker, zoneDone } = gameData.runText;
-    const misfits = [newWalker.title, zoneDone.title].filter((title) => {
-      const shown = plainMarks(title).toUpperCase();
-      const { lines, style } = fittingText(LAYOUT.titleStyles, width, LAYOUT.titleRoom, shown);
-      return lines.length !== 1 || lines[0] !== shown || width(style, shown) > LAYOUT.titleRoom;
-    });
-    expect(misfits).toEqual([]);
-  });
-
   // The display font's capitals carry their outline and shadow in their rows.
   it.each(["newWalker", "zoneDone"] as const)(
     "keeps the %s title's outline 6 rows clear of the subtitle's",
@@ -59,7 +49,7 @@ describe("a new walker's bubble", () => {
       throw new Error("a new walker's text");
     }
     const greeting = plainMarks(shown.greeting);
-    const fitted = fittingText(GREETING_FIT.styles, width, GREETING_FIT.room, greeting);
+    const fitted = fittingText(GREETING_FIT.style, width, GREETING_FIT.room, greeting);
     return {
       fitted,
       greeting,
@@ -93,7 +83,7 @@ describe("a new walker's bubble", () => {
         (item) =>
           item.kind === "icon"
             ? iconSize(item.icon).width
-            : bodyRunWidth({ letterSpacing: 0, scale: TEXT_SCALE }, item.text),
+            : bodyRunWidth({ scale: TEXT_SCALE }, item.text),
         items,
       );
       const row = rows.info[i] ?? { iconY: 0, y: 0 };

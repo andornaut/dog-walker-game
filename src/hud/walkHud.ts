@@ -70,8 +70,9 @@ const NEIGHBOURHOOD_X = evenGapLeft(
 // bar's full height and minHitWidth wide or more (narrower than a 44px square, so four fit beside
 // six effect wells), side by side to the bar's right edge, each face buttonFace.size square on
 // row buttonFace.y, centred in its hit area. cash:
-// the "$" and the amount at the largest of scales whose ink fits room, centred across the well's
-// ink columns (ink.left to ink.right), their capitals' bottom on capsBottom. zone: the
+// the "$" and the amount at scale, in the short form from a thousand dollars so its ink fits
+// room, centred across the well's ink columns (ink.left to ink.right), their capitals' bottom on
+// capsBottom. zone: the
 // neighbourhood well on one text line, the name from name.x and "n of N" right-aligned to end on
 // column progress.right, at least textGap apart.
 // effects: a well of size at pitch from x along y for every effect a walk can have
@@ -86,7 +87,7 @@ export const WALK_BAR = {
     capsBottom: 30,
     ink: CASH_INK,
     room: 69,
-    scales: [3, 2, 1],
+    scale: 3,
     well: CASH_WELL,
   },
   effects: { ...EFFECT_ROW, pitch: EFFECT_ROW.size + EFFECT_GAP, x: NEIGHBOURHOOD_X },
@@ -169,22 +170,16 @@ export function walkBarLayout(bar: Rect, wells = EFFECT_WELLS): WalkBarLayout {
   return { buttons, effectHolds, effectWells, zoneWell };
 }
 
-// The largest of the cash's scales at which text measuring widthAt1x fits its room, else the
-// smallest.
-export function cashScale(widthAt1x: number): number {
-  const { room, scales } = WALK_BAR.cash;
-  return scales.find((scale) => widthAt1x * scale <= room) ?? scales[scales.length - 1] ?? 1;
-}
-
 // The first ink column of the cash, or the home top bar's bank, for ink inkWidth wide on
 // screen: centred across the well's ink, a half pixel rounded left.
 export function cashLeft(inkWidth: number): number {
   return Math.floor((CASH_INK.left + CASH_INK.right) / 2 - (inkWidth - 1) / 2);
 }
 
-// The top of the cash's capitals at scale, so their bottom row is the same at every scale.
-export function cashTop(scale: number): number {
-  return WALK_BAR.cash.capsBottom + 1 - TITLE_CAP_ROWS * scale;
+// The top of the cash's capitals, their bottom row on capsBottom.
+export function cashTop(): number {
+  const { capsBottom, scale } = WALK_BAR.cash;
+  return capsBottom + 1 - TITLE_CAP_ROWS * scale;
 }
 
 // A debuff bar (ui-debuff-bar, 360x16): its icon, its name up to name.room wide, and the fill
@@ -264,7 +259,7 @@ export function zoneProgressLayout(strip: Rect, share: number): ZoneProgressLayo
 }
 
 // A dog card (ui-dog-card, the size of a slot in the card row). The name is centred on name.x
-// at the largest of its scales that fits name.room, its top by scale. The owner's photo heads
+// at name.scale, its capitals' top at name.top, no wider than name.room. The owner's photo heads
 // the column right of the dog's, their face (face.size square) at owner.face on every card with
 // a dog, a fired dog's included, inside the card art's photo: its white mat and ink frame, each
 // photo's pixels wide, round the face. Their name goes beside it in the body font at scale from
@@ -278,7 +273,7 @@ export const DOG_CARD = {
   fired: { x: 24, y: 38 },
   hearts: { perRow: 6, pitch: 9, x: 45, y: 52 },
   lead: { x: 10, y: 54 },
-  name: { room: 108, tops: { 1: 6, 2: 4 }, x: 60 },
+  name: { room: 108, scale: 2, top: 4, x: 60 },
   owner: {
     face: { size: 20, x: 47, y: 25 },
     photo: { frame: 1, mat: 1 },
@@ -334,14 +329,6 @@ export function cardHearts(hearts: number, max: number): CardHeart[] {
   return heartRows(perRow, hearts, max).flatMap((row, rowIndex) =>
     row.map((full, column) => ({ full, x: x + column * pitch, y: y + rowIndex * pitch })),
   );
-}
-
-// The scale every card's name shares, from each name's width at 1x: 2x when every name fits,
-// else 1x, with the top of the capitals.
-export function cardNameFit(widthsAt1x: readonly number[]): { scale: 1 | 2; top: number } {
-  const { room, tops } = DOG_CARD.name;
-  const scale = widthsAt1x.every((width) => width * 2 <= room) ? 2 : 1;
-  return { scale, top: tops[scale] };
 }
 
 // The card the LEAD tag is on: the first dog still walking.

@@ -4,7 +4,7 @@ import type { Rect } from "../lib/rect";
 import type { Settings } from "../save/schema";
 import { type CloseControl, closeControl } from "../ui/closeControl";
 import { type FontMetrics, inkRowsOfLines } from "../ui/fontMetrics";
-import { TEXT_SCALE, textFitStylesOnLines } from "../ui/textFit";
+import { TEXT_SCALE, textOnLines } from "../ui/textFit";
 import { cardBand, HOME_LAYOUT } from "./homeLayout";
 
 // The settings screen moves a volume in 5% steps, from 0 to 1.
@@ -127,9 +127,8 @@ export function noteRoom(kind: "button" | "switch"): number {
   return width - pad - SETTINGS_ROW[kind].width - controlGap - note.dx;
 }
 
-// The notes, fitted alike: up to note.lines lines at 2x with the glyphs' own spacing, closer or
-// at 1x only where they would not fit.
-export const SETTINGS_NOTE_STYLES = textFitStylesOnLines(SETTINGS_ROW.note.lines);
+// A note: at 2x, wrapped onto up to note.lines lines.
+export const SETTINGS_NOTE_STYLE = textOnLines(SETTINGS_ROW.note.lines);
 
 // The note's first line's capitals' top, from the row's top: labelGap clear rows under the
 // label's capitals.
@@ -229,7 +228,7 @@ export const INSTALL_STEPS = {
 export const INSTALL_STEPS_FIT = {
   room:
     INSTALL_STEPS.width - 2 * INSTALL_STEPS.pad - INSTALL_STEPS.icon.size - INSTALL_STEPS.icon.gap,
-  styles: textFitStylesOnLines(INSTALL_STEPS.lines),
+  style: textOnLines(INSTALL_STEPS.lines),
 };
 
 export interface InstallStepsLayout {

@@ -4,25 +4,14 @@ import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { rectsOverlap } from "../lib/rect";
 import { cents } from "../lib/units";
 import { amountText } from "../rules/causes";
-import { fitInFont, fontFileMetrics } from "../testing/fontInk";
+import { fontFileMetrics } from "../testing/fontInk";
 import { inkRowsOfLines } from "../ui/fontMetrics";
-import { plainMarks } from "../ui/pixelFont";
 import { FEEDBACK } from "./feedback";
-import { CHANGE_CHIP, CHANGE_LABEL_STYLES } from "./hudLanes";
+import { CHANGE_CHIP, CHANGE_LABEL_STYLE } from "./hudLanes";
 import type { ChangeLabel } from "./hudView";
 import { MESSAGE_STRIP } from "./messageStrip";
 import { curvePoint, TOP_BAR_POINTS } from "./moments";
-import {
-  cashChipPlace,
-  cashLostLabel,
-  cashLostMs,
-  freeCashSlot,
-  mergeTips,
-  MONEY_LABEL,
-  moneyChipPlace,
-  moneyFlightPath,
-  stackOrders,
-} from "./moneyLabels";
+import { cashChipPlace, cashLostLabel, cashLostMs, freeCashSlot, mergeTips, MONEY_LABEL, moneyChipPlace, moneyFlightPath, stackOrders } from "./moneyLabels";
 import { WALK_BAR, walkBarLayout } from "./walkHud";
 
 const BODY = fontFileMetrics("font-body");
@@ -79,15 +68,8 @@ describe("cashChipPlace", () => {
     ...Object.values(bar.buttons).map(({ hit }) => hit),
   ];
   const stripTop = TOP_BAR.y + TOP_BAR.height + MESSAGE_STRIP.gap;
-  // Each count of lines and scale once: the chip's place reads only those.
-  const chips = CHANGE_LABEL_STYLES.map(({ lines, scale }) => ({
-    lines: lines ?? 1,
-    scale,
-    width: MONEY_LABEL.room,
-  })).filter(
-    (chip, i, all) =>
-      all.findIndex((other) => other.lines === chip.lines && other.scale === chip.scale) === i,
-  );
+  // A money label says its amount on one line (every amount fits it: ui/textRoles.test.ts).
+  const chips = [{ lines: 1, scale: CHANGE_LABEL_STYLE.scale, width: MONEY_LABEL.room }];
   it.each(chips)(
     "pops the widest $lines-line chip at $scale x under the cash, clear of the bar's wells and the strip",
     (text) => {
@@ -190,18 +172,6 @@ describe("moneyFlightPath", () => {
       expect(x).toBeGreaterThanOrEqual(Math.min(gutter, path.to.x));
       expect(x + chip.width).toBeLessThanOrEqual(SCREEN_WIDTH);
     }
-  });
-});
-
-// Every money label, at the largest amounts a change makes, fits the label's room.
-describe("a money change's label", () => {
-  // The widest amounts gained and lost.
-  it.each([999, -999])("fits %i dollars", (dollars) => {
-    const { room } = MONEY_LABEL;
-    const text = amountText("money", dollars * 100);
-    const fitted = fitInFont("font-body", CHANGE_LABEL_STYLES, room, plainMarks(text));
-    expect(fitted.lines).toHaveLength(1);
-    expect(fitted.widest).toBeLessThanOrEqual(room);
   });
 });
 

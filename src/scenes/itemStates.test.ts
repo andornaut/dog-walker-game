@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
-import { type DetailCard, dogDetail, walkerDetail } from "../home/detail";
 import { dollarText, isAffordable, type Purchase, purchasePrice } from "../home/home";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { walkerTile } from "../home/walkers";
@@ -12,9 +11,8 @@ import { keysOf } from "../lib/records";
 import { cents } from "../lib/units";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
-import { fontFileMetrics, fontInk } from "../testing/fontInk";
+import { fontFileMetrics } from "../testing/fontInk";
 import { type ItemLook, itemTile, itemTileLook } from "../ui/interaction";
-import { fittingText, type TextFitStyle, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
 import { PLATE_PAD } from "./itemArt";
 
 const OWNED: Owned = { dogSlots: [1], dogs: [], gear: [], walkers: [] };
@@ -33,8 +31,6 @@ const START_LOOKS: Readonly<Record<StateName, ItemLook>> = {
   owned: { art: "colour", badge: null, plate: null, state: "normal" },
   short: { art: "grey", badge: "lock", plate: "short", state: "disabled" },
 };
-
-const dogPrice = (dog: DogId) => purchasePrice(gameData, OWNED, { dog, kind: "dog" }) ?? cents(0);
 
 // A dog's or gear item's tile as the start screen builds it, with the bank at its price
 // (affordable), a cent short, or the item owned.
@@ -91,20 +87,6 @@ describe("a start screen tile's state", () => {
   });
 });
 
-// Every dog for sale with the bank at its price (affordable) or a cent short.
-const forSale = SHOP_DOGS.flatMap((dog) =>
-  (["affordable", "short"] as const).map((state) => {
-    const price = dogPrice(dog);
-    return { bank: cents(state === "short" ? price - 1 : price), dog, state };
-  }),
-);
-
-// The width text inks in font-body in a style.
-const inkWidth = (style: TextFitStyle, text: string) => {
-  const ink = fontInk("font-body", style, text);
-  return ink.right - ink.left;
-};
-
 // Every walker's name, owned or not, shows on the goal plate at 2x: the widest name fits
 // wherever it does.
 describe("a walker tile's name plate", () => {
@@ -121,11 +103,6 @@ describe("a walker tile's name plate", () => {
 });
 
 describe("the text of an item not owned fits", () => {
-  const { card } = HOME_LAYOUT;
-  const besideRoom = card.width - card.besideX - card.pad;
-  const fitted = (status: string) =>
-    fittingText(WRAPPING_TEXT_FIT_STYLES, inkWidth, besideRoom, status);
-
   // The gear item whose price is widest on its plate.
   const priceWidth = (gear: (typeof GEAR)[number]) =>
     bodyTextWidth(
@@ -137,28 +114,5 @@ describe("the text of an item not owned fits", () => {
     const { cells, tileInset } = HOME_LAYOUT.pocket;
     const plate = priceWidth(gear) + 2 * PLATE_PAD;
     expect(plate).toBeLessThanOrEqual(cells.cellWidth - 2 * tileInset);
-  });
-
-  // Of each state's statuses, the widest at 2x: a narrower one fits wherever it does.
-  const statusOf = ({ bank, dog }: (typeof forSale)[number]) =>
-    dogDetail(gameData, OWNED, bank, dog).status;
-  const statusWidth = (row: (typeof forSale)[number]) =>
-    inkWidth({ letterSpacing: 0, scale: 2 }, statusOf(row));
-  const widestStatus = forSale.filter((row) =>
-    forSale.every(
-      (other) =>
-        other.state !== row.state ||
-        statusWidth(other) < statusWidth(row) ||
-        (statusWidth(other) === statusWidth(row) && forSale.indexOf(other) >= forSale.indexOf(row)),
-    ),
-  );
-  it.each(widestStatus)("sets $dog's status on one line at 2x when $state", (row) => {
-    const shown: DetailCard = dogDetail(gameData, OWNED, row.bank, row.dog);
-    const { lines, style } = fitted(shown.status);
-    expect({ lines: lines.length, scale: style.scale }).toEqual({ lines: 1, scale: 2 });
-  });
-
-  it.each(WALKERS)("sets %s's goal at 2x", (walker) => {
-    expect(fitted(walkerDetail(gameData, OWNED, walker).status).style.scale).toBe(2);
   });
 });

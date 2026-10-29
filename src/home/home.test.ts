@@ -35,6 +35,7 @@ import {
   rosterRows,
   shortDollarAmountText,
   signedDollarText,
+  signedShortDollarText,
   tapDog,
   tapGear,
 } from "./home";
@@ -74,6 +75,8 @@ describe("money text", () => {
       ["signedDollarText", signedDollarText, dollars(240), "+$240"],
       ["signedDollarText", signedDollarText, -dollars(1200), "−$1,200"],
       ["signedDollarText", signedDollarText, -1_250, "−$12"],
+      ["signedShortDollarText", signedShortDollarText, dollars(240), "+$240"],
+      ["signedShortDollarText", signedShortDollarText, -dollars(1234), "−$1.2k"],
     ];
     for (const [, text, amount, shown] of cases) {
       expect(text(amount)).toBe(shown);

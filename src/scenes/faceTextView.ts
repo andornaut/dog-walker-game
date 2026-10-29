@@ -6,9 +6,9 @@ import {
   type FaceBox,
   type FaceRow,
   type FaceText,
-  fittingFaceRows,
   inlineFaceBox,
   type OwnerFace,
+  styledFaceRows,
 } from "../hud/faceText";
 import type { Rect } from "../lib/rect";
 import { drawFramedRect } from "../ui/phaser/draw";
@@ -40,27 +40,25 @@ export function measureRuns<T>(
   return withProbe(scene, style, (probe) =>
     measure((fit, text) => {
       setPixelText(probe, text);
-      probe.setLetterSpacing(fit.letterSpacing);
       scalePixelText(probe, fit.scale, 0, 0);
       return probe.width;
     }),
   );
 }
 
-// The line's rows in the first of styles that fits room, as fittingFaceRows sets them, measured
-// on the font they are drawn in, and the inline face's box at the style's scale.
+// The line's rows in fit's style within its room, as styledFaceRows sets them, measured on the
+// font they are drawn in, and the inline face's box at the style's scale.
 export function fitFaceRows(
   scene: Scene,
   style: PixelTextStyle,
-  fit: { room: number; styles: readonly TextFitStyle[] },
+  fit: { room: number; style: TextFitStyle },
   line: FaceText,
 ): { box: FaceBox | undefined; rows: FaceRow[]; style: TextFitStyle } {
-  const body = pixelFontMetrics(scene, "body");
-  const boxAt = (at: TextFitStyle) => inlineFaceBox(body, at.scale);
-  const fitted = measureRuns(scene, style, (width) =>
-    fittingFaceRows(fit.styles, width, boxAt, fit.room, line),
+  const box = inlineFaceBox(pixelFontMetrics(scene, "body"), fit.style.scale);
+  const rows = measureRuns(scene, style, (width) =>
+    styledFaceRows(fit.style, width, box, fit.room, line),
   );
-  return { ...fitted, box: boxAt(fitted.style) };
+  return { box, rows, style: fit.style };
 }
 
 // The rows drawn from x, the first row's capitals' top at capsTop and each further row a line
@@ -82,7 +80,7 @@ export function addFaceRows(
   const parts = rows.flatMap((row, i) => {
     const top = at.capsTop + i * pitch;
     const texts = row.texts.map(({ text: run, x }) => {
-      const label = addPixelText(scene, 0, 0, run, style).setLetterSpacing(fit.letterSpacing);
+      const label = addPixelText(scene, 0, 0, run, style);
       scalePixelText(label, fit.scale, at.x + x, top);
       labels.push(label);
       return label;

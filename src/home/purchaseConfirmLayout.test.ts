@@ -1,36 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
-import { cents } from "../lib/units";
-import { fitInFont, fontFileMetrics } from "../testing/fontInk";
+import { fontFileMetrics } from "../testing/fontInk";
 import { inside } from "../testing/rects";
-import { newPlayerSave } from "../testing/saves";
-import { TEST_TUNING } from "../testing/tuning";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
-import { plainMarks } from "../ui/pixelFont";
-import { TEXT_FIT_STYLES } from "../ui/textFit";
-import { confirmLines } from "./purchaseConfirm";
 import { PURCHASE_CONFIRM_LAYOUT } from "./purchaseConfirmLayout";
-import { dogRows, gearRows, slotRows } from "./shop";
 
 const LAYOUT = PURCHASE_CONFIRM_LAYOUT;
-const data = { ...gameData, tuning: TEST_TUNING };
-const owned = { ...newPlayerSave.owned, dogs: [], gear: [] };
-const rows = [...gearRows(data, owned), ...slotRows(data, owned), ...dogRows(data, owned)].flatMap(
-  ({ name, price, purchase }) => (price === null ? [] : [{ name, price, purchase }]),
-);
-// A bank that covers everything at once, so its bank after is the widest one.
-const everything = cents(rows.reduce((sum, row) => sum + row.price, 0));
-const lines = rows.map((row) =>
-  confirmLines(data, {
-    bankAfter: everything,
-    name: row.name,
-    price: row.price,
-    purchase: row.purchase,
-  }),
-);
 
 describe("the purchase confirm's layout", () => {
   it("centres the card on the screen", () => {
@@ -64,15 +41,6 @@ describe("the purchase confirm's layout", () => {
     { font: "font-title", key: "price", place: LAYOUT.price },
     { font: "font-body", key: "left", place: LAYOUT.left },
   ] as const;
-
-  it.each(texts)("sets every $key on one line at 2x within its room", ({ font, key, place }) => {
-    for (const text of new Set(lines.map((line) => line[key]))) {
-      const fitted = fitInFont(font, TEXT_FIT_STYLES, place.room, plainMarks(text));
-      expect(fitted.lines, text).toHaveLength(1);
-      expect(fitted.style.scale, text).toBe(2);
-      expect(fitted.widest, text).toBeLessThanOrEqual(place.room);
-    }
-  });
 
   it("keeps the title's capitals in its band", () => {
     const capHeight = fontFileMetrics("font-title").capHeight * 2;

@@ -35,7 +35,6 @@ import {
 import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
 import {
   dogInfo,
-  dollarAmountText,
   dollarText,
   gearByPrice,
   gearInfo,
@@ -51,8 +50,6 @@ import {
   tapGear,
 } from "../home/home";
 import {
-  bankFit,
-  DOG_TILE_TEXT_ROOM,
   dogTileNameY,
   dogTilePlateY,
   HOME_LAYOUT,
@@ -123,19 +120,15 @@ import { drawFocusRing, drawFramedRect, drawRing, drawShadow, fillRect } from ".
 import { PALETTE } from "../ui/phaser/palette";
 import {
   addPixelText,
-  fitPixelText,
-  fitPixelTextsAlike,
   type FontRole,
   inkSpan,
-  type LabelToFit,
   pixelFontMetrics,
   placePixelText,
-  scalePixelText,
   setPixelText,
   withProbe,
 } from "../ui/phaser/pixelText";
 import { BUTTON_COLOURS, GREYED, pictureBox, type SelectLook } from "../ui/selection";
-import { TEXT_FIT_STYLES, TEXT_SCALE, type TextFitStyle } from "../ui/textFit";
+import { TEXT_SCALE } from "../ui/textFit";
 import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { addNamePills } from "./effectNameColours";
@@ -243,7 +236,6 @@ const START_BUTTON: Rect = HOME_LAYOUT.startButton;
 // Start walk's opacity while it waits for the rest of the art to load.
 const WAITING_ALPHA = 0.6;
 const START_LABEL = HOME_LAYOUT.startLabel;
-const START_LOADING = HOME_LAYOUT.startLoading;
 const GEAR_BADGE: Rect = HOME_LAYOUT.gearBadge;
 // The keyboard ring sits outside the ui-select frame.
 const FOCUS_OUTSET = 5;
@@ -1026,18 +1018,6 @@ export class StartScene extends Scene {
     return addBodyText(this, parent, { x, y }, value, { colour, ...options });
   }
 
-  // Fits body labels at TEXT_SCALE alike, in the first of styles that fits them all, each with
-  // its capitals' top at its (x, y); labels set smaller are centred on the row their capitals
-  // take at TEXT_SCALE.
-  private fitOnRowsAlike(styles: readonly TextFitStyle[], labels: readonly LabelToFit[]): void {
-    const fitted = fitPixelTextsAlike(styles, labels);
-    const { capHeight } = pixelFontMetrics(this, "body");
-    labels.forEach(({ label, x, y }, i) => {
-      const scale = fitted[i]?.style.scale ?? TEXT_SCALE;
-      placePixelText(label, x, y + Math.floor((capHeight * (TEXT_SCALE - scale)) / 2));
-    });
-  }
-
   // The street, yard and porch come from the screen-home art, drawn once; a plain yard
   // stands in while the art is missing.
   private drawGate(): void {
@@ -1317,19 +1297,11 @@ export class StartScene extends Scene {
     }
     const dollar = this.text(root, 0, 0, "$", PALETTE.amber, { font: "title", scale: 1 });
     const amount = this.text(root, 0, 0, "", PALETTE.cream, { font: "title", scale: 1 });
-    const inkAt1x = (text: string) => {
-      setPixelText(amount, text);
-      const ink = inkSpan(amount);
-      return ink.right - ink.left;
-    };
-    const { scale, text } = bankFit(inkAt1x, [
-      `$${dollarAmountText(save.bankCents)}`,
-      `$${shortDollarAmountText(save.bankCents)}`,
-    ]);
-    setDollarAmount(dollar, amount, text.slice(1), (inkWidth) => ({
+    const { capsY, scale } = bank;
+    setDollarAmount(dollar, amount, shortDollarAmountText(save.bankCents), (inkWidth) => ({
       left: cashLeft(inkWidth * scale),
       scale,
-      top: bank.capsY[scale],
+      top: capsY,
     }));
     this.iconButton(root, "logbook", LOGBOOK_FACE, (x, y) =>
       imageIconOr(this, "icon-logbook", x, y, "L"),
@@ -1611,8 +1583,6 @@ export class StartScene extends Scene {
     const reduced = currentSettings(this).reducedMotion;
     const capacity = packCapacity(gameData, owned);
     const tiles = dogTiles();
-    // Every tile's name, fitted once all are drawn so they share one size.
-    const names: LabelToFit[] = [];
     rosterOrder().forEach((id, i) => {
       const rect = dogFace(itemAt(tiles, i));
       const { x, y } = rect;
@@ -1657,23 +1627,21 @@ export class StartScene extends Scene {
       view.face = { object: face, y: faceAt.y };
 
       const body = pixelFontMetrics(this, "body");
-      const fitText = (value: string, top: number) => {
-        const label = this.text(content, x + textX, top, value, ink);
-        names.push({ label, room: DOG_TILE_TEXT_ROOM, x: x + textX, y: top });
+      const nameText = (value: string, top: number) => {
+        this.text(content, x + textX, top, value, ink);
       };
       if (badge === null) {
         // Every dog earns the same pay, so an owned tile names the dog alone; its card says the
         // pay.
-        fitText(dog.name, y + dogTileNameY(body));
+        nameText(dog.name, y + dogTileNameY(body));
         return;
       }
       // A locked dog shows its name over its price plate, and its badge.
-      fitText(dog.name, y + lockedNameY);
+      nameText(dog.name, y + lockedNameY);
       addTileBadge(this, content, badge, { x: x + badgeAt.dx, y: y + badgeAt.dy });
       const plateY = dogTilePlateY(body);
       this.lockedPlate(content, tile, { capY: y + plateY - 1, originX: 0, x: x + textX });
     });
-    this.fitOnRowsAlike(TEXT_FIT_STYLES, names);
   }
 
   // The Pocket section's tiles, one per gear item cheapest first; a hold shows an item's
@@ -1846,25 +1814,11 @@ export class StartScene extends Scene {
       const top = START_LABEL.readyY + (disabled || down ? BUTTON_PRESS_PX : 0);
       const colour = PALETTE[BUTTON_COLOURS[state].label];
       const loading = down && this.artWait?.kind === "start";
-      const text = this.text(
-        group,
-        x + width / 2,
-        y + top,
-        loading ? loadingLabel : label,
-        colour,
-        {
-          font: "title",
-          originX: 0.5,
-          scale: START_LABEL.scale,
-        },
-      );
-      if (loading) {
-        // Centred on the ready label's caps, at whichever size fits.
-        const { scale } = fitPixelText(text, START_LOADING, x + width / 2, y + top).style;
-        const { capHeight } = pixelFontMetrics(this, "title");
-        const lower = Math.round(((START_LABEL.scale - scale) * capHeight) / 2);
-        scalePixelText(text, scale, x + width / 2, y + top + lower);
-      }
+      this.text(group, x + width / 2, y + top, loading ? loadingLabel : label, colour, {
+        font: "title",
+        originX: 0.5,
+        scale: START_LABEL.scale,
+      });
       return group;
     };
     const up = variant(false);

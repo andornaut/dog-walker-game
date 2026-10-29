@@ -1,5 +1,5 @@
 import type { GameData } from "../data/types";
-import { boxStyles, CARD_LAYOUT, cardEffectBox, FIRES_FIT } from "../layout/cardLayout";
+import { boxStyle, CARD_LAYOUT, cardEffectBox, FIRES_FIT } from "../layout/cardLayout";
 import { fillLine } from "../lib/lines";
 import { firesText, type OptionView } from "../rules/choices";
 import { formatDollars } from "../rules/effectText";
@@ -68,7 +68,8 @@ function smallEffectTexts(
 // A small card's effect and firing warning, as inkWidth measures a line in the body font: the
 // warning over the effect's foot with the first of smallEffectTexts that fits over it; else the
 // first that fits the whole box with the warning left to the fires marker and the enlarged
-// card; else the last text in the box's last style. The effect's top is box.y.
+// card; else the last text in the whole box, at its size however long. The effect's top is
+// box.y.
 export function smallCardText(
   data: Pick<GameData, "dogs" | "homeText" | "runText"> & PillData,
   body: FontMetrics,
@@ -81,20 +82,20 @@ export function smallCardText(
   const said =
     fires.length === 0
       ? null
-      : fittingText(FIRES_FIT.small.styles, inkWidth, room, firesText(data, fires));
+      : fittingText(FIRES_FIT.small.style, inkWidth, room, firesText(data, fires));
   const warnings = said !== null && fits(said) ? [said, null] : [null];
   const path = option?.path !== undefined;
   const texts = smallEffectTexts(data, option);
   for (const warning of warnings) {
     const box = cardEffectBox(body, { fireLines: warning?.lines.length ?? 0, path });
     for (const text of texts) {
-      const effect = fittingText(boxStyles(body, box.height), inkWidth, room, text);
+      const effect = fittingText(boxStyle(body, box.height), inkWidth, room, text);
       if (fits(effect)) {
         return { box, effect, warning };
       }
     }
   }
   const box = cardEffectBox(body, { fireLines: 0, path });
-  const effect = fittingText(boxStyles(body, box.height), inkWidth, room, texts.at(-1) ?? "");
+  const effect = fittingText(boxStyle(body, box.height), inkWidth, room, texts.at(-1) ?? "");
   return { box, effect, warning: null };
 }

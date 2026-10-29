@@ -3,13 +3,9 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { CardSource, DogId, EncounterId } from "../data/types";
 import { largeBodyText } from "../hud/cardText";
-import { boxStyles, CARD_LAYOUT } from "../layout/cardLayout";
 import { fillNames } from "../lib/lines";
-import { keysOf } from "../lib/records";
 import { cents, dollarsToCents } from "../lib/units";
-import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { activeModifier, testState } from "../testing/runState";
-import { plainMarks } from "../ui/pixelFont";
 import { cardFor } from "./choices";
 import { read } from "./units";
 
@@ -121,18 +117,6 @@ describe("a card's text for the dogs it catches", () => {
           ({ label }) => label === grabBack,
         );
         expect(view?.text).toBe(text);
-      }
-    });
-
-    // The small card's effect, in the body font at 2x on the lines its height holds, else 1x.
-    const { effect } = CARD_LAYOUT;
-    const styles = boxStyles(fontFileMetrics("font-body"), effect.height);
-
-    it("fits every forgiven loss in a card's effect", () => {
-      for (const dog of keysOf(gameData.dogs)) {
-        const fitted = fitInFont("font-body", styles, effect.width, plainMarks(forgiven(dog)));
-        expect(fitted.widest).toBeLessThanOrEqual(effect.width);
-        expect(fitted.lines.length).toBeLessThanOrEqual(fitted.style.lines ?? 1);
       }
     });
   });

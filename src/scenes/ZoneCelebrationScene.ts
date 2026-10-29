@@ -26,6 +26,7 @@ import {
   addPixelText,
   fitPixelText,
   pixelFontMetrics,
+  scalePixelText,
   setPixelText,
   withProbe,
 } from "../ui/phaser/pixelText";
@@ -115,16 +116,14 @@ export class ZoneCelebrationScene extends Scene {
     this.addButton(this.addBubble(text), text.button, finish);
   }
 
-  // The title in font-display at 2x, or smaller where it would not fit the screen, and the
-  // subtitle in font-display-cream under it.
+  // The title in font-display at 2x, and the subtitle in font-display-cream under it.
   private addHeadline(version: Version, text: CelebrationText): void {
-    const { centreX, titleRoom, titleScale, titleStyles } = LAYOUT;
+    const { centreX, titleScale } = LAYOUT;
     const title = { colour: PALETTE.yellow, font: "title", originX: 0.5 } as const;
     // addDisplayText draws the display font at 1x, so the title is scaled after.
     const big = addDisplayText(this, centreX, 0, text.title, title);
-    const { scale } = fitPixelText(big, { room: titleRoom, styles: titleStyles }, centreX, 0).style;
-    // A smaller title keeps its line's bottom row, so it stays over the subtitle.
-    atLineTop(big, version.titleY + (big.height / scale) * (titleScale - scale));
+    scalePixelText(big, titleScale, centreX, 0);
+    atLineTop(big, version.titleY);
     const subtitle = { ...title, colour: PALETTE.cream, variant: "cream" } as const;
     atLineTop(addDisplayText(this, centreX, 0, text.subtitle, subtitle), version.subtitleY);
   }
@@ -204,7 +203,7 @@ export class ZoneCelebrationScene extends Scene {
         originX: 0.5,
         scale: style.scale,
       });
-      atLineTop(label.setLetterSpacing(style.letterSpacing), tops[i] ?? greeting.top);
+      atLineTop(label, tops[i] ?? greeting.top);
     });
     const { rule } = rows;
     const dots = this.add.graphics();

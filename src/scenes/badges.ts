@@ -140,13 +140,11 @@ export function addBadgeCelebration(
     const burst = () => addConfetti(scene, reduced, 1, slot.centreX, badgeY);
     const image = addBadge(scene, badge.art, true, slot.centreX, badgeY);
     if (names !== undefined) {
-      const { letterSpacing, scale } = names.style;
+      const { scale } = names.style;
       const lines = names.lines[i] ?? [];
       const tops = badgeNameTops(lines.length, rect.y);
       lines.forEach((line, n) => {
-        addPixelText(scene, slot.centreX, tops[n] ?? 0, line, { ...style, scale })
-          .setLetterSpacing(letterSpacing)
-          .setDepth(1);
+        addPixelText(scene, slot.centreX, tops[n] ?? 0, line, { ...style, scale }).setDepth(1);
       });
     }
     if (reduced) {

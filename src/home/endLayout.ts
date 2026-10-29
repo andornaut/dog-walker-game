@@ -76,6 +76,9 @@ export const END_LAYOUT = {
 export const QUIP_TEXT_ROOM =
   END_LAYOUT.quips.bubble.x + END_LAYOUT.quips.bubble.width - 6 - END_LAYOUT.quips.textX;
 
+// The most lines a closing line wraps onto, while the panel has room for them.
+export const QUIP_LINES = 2;
+
 // How wide the side column's labels may be: from the column to the right edge its zone count
 // keeps to.
 export const SIDE_LABEL_ROOM = END_LAYOUT.side.right - END_LAYOUT.side.x;

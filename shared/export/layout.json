@@ -143,10 +143,8 @@
       },
       "name": {
         "room": 108,
-        "tops": {
-          "1": 6,
-          "2": 4
-        },
+        "scale": 2,
+        "top": 4,
         "x": 60
       },
       "owner": {
@@ -893,58 +891,38 @@
       {
         "icon": {
           "x": 14,
-          "y": 71
+          "y": 74
         },
         "panel": {
-          "height": 26,
+          "height": 52,
           "width": 344,
           "x": 8,
           "y": 66
         },
         "room": 312,
-        "textX": 34,
-        "faced": {
-          "icon": {
-            "x": 14,
-            "y": 74
-          },
-          "panel": {
-            "height": 32,
-            "width": 344,
-            "x": 8,
-            "y": 66
-          },
-          "room": 312,
-          "textX": 34
-        }
+        "rowTops": [
+          76,
+          96
+        ],
+        "textX": 34
       },
       {
         "icon": {
           "x": 14,
-          "y": 87
+          "y": 90
         },
         "panel": {
-          "height": 26,
+          "height": 52,
           "width": 344,
           "x": 8,
           "y": 82
         },
         "room": 312,
-        "textX": 34,
-        "faced": {
-          "icon": {
-            "x": 14,
-            "y": 90
-          },
-          "panel": {
-            "height": 32,
-            "width": 344,
-            "x": 8,
-            "y": 82
-          },
-          "room": 312,
-          "textX": 34
-        }
+        "rowTops": [
+          92,
+          112
+        ],
+        "textX": 34
       }
     ]
   },
@@ -1229,6 +1207,7 @@
           "x": 12,
           "y": 152
         },
+        "bodyGap": 4,
         "fires": {
           "x": 8,
           "y": 238
@@ -1373,16 +1352,6 @@
       },
       "titleRoom": 312,
       "titleScale": 2,
-      "titleStyles": [
-        {
-          "letterSpacing": 0,
-          "scale": 2
-        },
-        {
-          "letterSpacing": 0,
-          "scale": 1
-        }
-      ],
       "walkerScale": 2,
       "zoneDone": {
         "burst": {
@@ -1960,21 +1929,7 @@
         "scale": 3
       },
       "startLoading": {
-        "room": 328,
-        "styles": [
-          {
-            "letterSpacing": 0,
-            "scale": 3
-          },
-          {
-            "letterSpacing": 0,
-            "scale": 2
-          },
-          {
-            "letterSpacing": -0.5,
-            "scale": 2
-          }
-        ]
+        "room": 328
       },
       "streetSign": {
         "x": 327,
@@ -1984,18 +1939,12 @@
       "tileSelectOutset": 1,
       "topBar": {
         "bank": {
-          "capsY": {
-            "2": 14,
-            "3": 11
-          },
+          "capsY": 11,
           "ink": {
             "left": 5,
             "right": 73
           },
-          "scales": [
-            3,
-            2
-          ]
+          "scale": 3
         },
         "faceSize": 20,
         "height": 40,
@@ -2865,11 +2814,7 @@
           "right": 73
         },
         "room": 69,
-        "scales": [
-          3,
-          2,
-          1
-        ],
+        "scale": 3,
         "well": {
           "height": 37,
           "width": 70,

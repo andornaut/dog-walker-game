@@ -6,7 +6,7 @@ import { dogFaceKey, ownerCardFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
-import { dollarAmountText } from "../home/home";
+import { shortDollarAmountText } from "../home/home";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { keysOf } from "../lib/records";
 import { type Point, type Rect, rectsOverlap } from "../lib/rect";
@@ -14,7 +14,6 @@ import { cents, pixels } from "../lib/units";
 import { maxHearts } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import { walkLength } from "../rules/route";
-import { read } from "../rules/units";
 import { zoneLength } from "../runner/walk";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, fontInk } from "../testing/fontInk";
@@ -27,9 +26,7 @@ import { plainMarks } from "../ui/pixelFont";
 import { maxEffects } from "./effectIcons";
 import {
   cardHearts,
-  cardNameFit,
   cashLeft,
-  cashScale,
   cashTop,
   DEBUFF_BAR,
   debuffBarRects,
@@ -68,8 +65,7 @@ const centre = (rect: Rect): Point => ({
 const BODY = fontFileMetrics("font-body");
 
 // The columns a line inks in the body font at 1x, from its left edge to its last ink.
-const inkRight = (line: string) =>
-  fontInk("font-body", { letterSpacing: 0, scale: 1 }, plainMarks(line)).right;
+const inkRight = (line: string) => fontInk("font-body", { scale: 1 }, plainMarks(line)).right;
 
 // Every dog's owner's name, by dog.
 const owners = keysOf(gameData.dogs).map((dog) => [dog, gameData.dogs[dog].owner.name] as const);
@@ -90,7 +86,7 @@ const HEART_SIZE = frameSize("ui-heart");
 
 // The columns text inks in the title font at 1x, from its left edge to its last ink.
 function titleWidth(text: string): number {
-  return fontInk("font-title", { letterSpacing: 0, scale: 1 }, text).right;
+  return fontInk("font-title", { scale: 1 }, text).right;
 }
 
 describe("the walk bar", () => {
@@ -222,81 +218,29 @@ describe("evenGapLeft", () => {
   });
 });
 
-describe("cashScale", () => {
-  const { room, scales } = WALK_BAR.cash;
-  const [largest = 1] = scales;
-  const smallest = scales.at(-1) ?? 1;
-  // Amounts as the game writes them, the thousands comma included.
-  it.each(["$0", "$888", "$1,234", "$99,999", "$1,000,000"])(
-    "sets %s at the largest scale that fits the cash's room",
-    (cash) => {
-      const width = titleWidth(cash);
-      const scale = cashScale(width);
-      const fits = scales.filter((each) => width * each <= room);
-      expect(scale).toBe(fits[0] ?? smallest);
-    },
-  );
+// The cash, as the game writes it at its scale: in the short form from a thousand dollars (each
+// amount's fit in the room: ui/textRoles.test.ts).
+describe("the cash", () => {
+  const { capsBottom, ink, scale, well } = WALK_BAR.cash;
+  // From nothing to the most a save can hold.
+  const amounts = [
+    0, 5, 88, 888, 999, 1_000, 1_234, 12_345, 99_999, 1_000_000, 123_456_789, 90_071_992_547_409,
+  ].map((dollars) => `$${shortDollarAmountText(cents(dollars * 100))}`);
 
-  // The most cash a walk could plausibly reach, from the tuning: the purse, a full pack's pay in
-  // every zone, every tip at Big tipper's value, every lucky find a kept wallet, and the Walk
-  // bonus.
-  const money = (key: Parameters<typeof read<"money">>[2]) => read(gameData.tuning, "money", key);
-  const count = (key: Parameters<typeof read<"counts">>[2]) => read(gameData.tuning, "counts", key);
-  const zones = walkLength(gameData);
-  const busiest = Math.max(...gameData.world.zones.map(({ density }) => density.luckyFinds));
-  const tipValue = money("tip") + money("bigTipperTipBonus");
-  const perZone = (zone: number) =>
-    count("packSizeMax") * money("payPerDog") +
-    (count("tipsFirstZone") + count("tipsGainPerZone") * zone) * tipValue +
-    Math.ceil(gameData.tuning.counts.luckyFindsPerZone.lostWallet * busiest) *
-      money("lostWalletKeep");
-  const plausible = cents(
-    money("startPurse") +
-      Array.from({ length: zones }, (_, zone) => perZone(zone)).reduce((a, b) => a + b, 0) +
-      money("walkBonus"),
-  );
-  // The widest of them: cashScale takes the largest scale that fits, so only an amount too wide
-  // at every scale could overflow.
-  it.each([`$${dollarAmountText(plausible)}`])(
-    "fits %s in the cash's room at the scale it takes",
-    (cash) => {
-      const width = titleWidth(cash);
-      expect(width * cashScale(width)).toBeLessThanOrEqual(room);
-    },
-  );
-
-  it("sets the largest scale for a small amount and the smallest past every room", () => {
-    expect(cashScale(titleWidth("$0"))).toBe(largest);
-    expect(cashScale(room + 1)).toBe(smallest);
+  it("keeps the capitals' bottom row on capsBottom, inside the well", () => {
+    expect(cashTop() + TITLE_CAP_ROWS * scale - 1).toBe(capsBottom);
+    expect(cashTop()).toBeGreaterThan(well.y);
   });
 
-  it.each(scales.map((scale) => [scale] as const))(
-    "keeps the capitals' bottom row on the same row at %ix, inside the well",
-    (scale) => {
-      const bottom = cashTop(scale) + TITLE_CAP_ROWS * scale - 1;
-      expect(bottom).toBe(WALK_BAR.cash.capsBottom);
-      expect(cashTop(scale)).toBeGreaterThan(WALK_BAR.cash.well.y);
-    },
+  // The first amount of each parity of ink: the centring reads only that.
+  const centred = amounts.filter(
+    (cash, i) =>
+      amounts.findIndex(
+        (other) => (titleWidth(other) * scale) % 2 === (titleWidth(cash) * scale) % 2,
+      ) === i,
   );
-
-  // Amounts as the game writes them, by the scale each takes; every scale is covered.
-  const ranged = [0, 5, 88, 888, 1_234, 99_999, 1_000_000, 123_456_789].map(
-    (dollars) => `$${dollarAmountText(cents(dollars * 100))}`,
-  );
-  it("covers every scale with the ranged amounts", () => {
-    const taken = new Set(ranged.map((cash) => cashScale(titleWidth(cash))));
-    expect([...taken].sort()).toEqual([...scales].sort());
-  });
-
-  // The first amount of each scale and parity of ink: the centring reads only those.
-  const centreKey = (cash: string) =>
-    `${cashScale(titleWidth(cash))},${(titleWidth(cash) * cashScale(titleWidth(cash))) % 2}`;
-  const centred = ranged.filter(
-    (cash, i) => ranged.findIndex((other) => centreKey(other) === centreKey(cash)) === i,
-  );
-  it.each(centred)("centres %s across the well's ink at the scale it takes", (cash) => {
-    const { ink } = WALK_BAR.cash;
-    const inkWidth = titleWidth(cash) * cashScale(titleWidth(cash));
+  it.each(centred)("centres %s across the well's ink", (cash) => {
+    const inkWidth = titleWidth(cash) * scale;
     const left = cashLeft(inkWidth);
     const right = left + inkWidth - 1;
     expect(left).toBeGreaterThanOrEqual(ink.left);
@@ -604,16 +548,6 @@ describe("the dog cards", () => {
     expect(ownerNameLines(rightEdge, name)).toEqual(expected);
   });
 
-  const { room } = DOG_CARD.name;
-  // The cards' names share one scale: the widest exactly fitting 2x keeps it, and one a pixel
-  // too wide sets them all at 1x.
-  it.each<[string, number[], 1 | 2]>([
-    ["every name at 2x when all fit", [room / 2, room / 4], 2],
-    ["every name at 1x when one is too wide for 2x", [room / 4, room / 2 + 1], 1],
-  ])("sets %s", (_name, widths, scale) => {
-    expect(cardNameFit(widths)).toEqual({ scale, top: DOG_CARD.name.tops[scale] });
-  });
-
   it.each<[string, boolean[], number | undefined]>([
     ["the first dog while it walks", [true, true, true], 0],
     ["the next walking dog once the first is fired", [false, true, true], 1],
@@ -641,8 +575,7 @@ describe("the walk bar's neighbourhood name and count", () => {
   const { name, progress, textGap } = WALK_BAR.zone;
   const well = BAR.zoneWell;
   const body = fontFileMetrics("font-body");
-  const inkOf = (text: string) =>
-    fontInk("font-body", { letterSpacing: 0, scale: 1 }, plainMarks(text));
+  const inkOf = (text: string) => fontInk("font-body", { scale: 1 }, plainMarks(text));
   const counts = Array.from({ length: walkLength(gameData) }, (_, i) =>
     zoneProgressText(gameData, i),
   );

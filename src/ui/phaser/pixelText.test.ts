@@ -42,7 +42,7 @@ describe("labelPills", () => {
     const second = `${inPill(1, "Hi")} x`;
     const laid = [
       { char: "a", ink: { left: 0, right: 4 }, line: 0 },
-      ...laidChars("font-body", { letterSpacing: 0, scale: 1 }, second).map((char) => ({
+      ...laidChars("font-body", { scale: 1 }, second).map((char) => ({
         ...char,
         line: 1,
       })),
@@ -87,8 +87,7 @@ describe("addPixelText", () => {
   // shift scales with the label, one whose title ink starts right of its origin and one whose
   // ink starts at it.
   const inkStart = (font: FontRole, first: string) =>
-    fontInk(FONTS[font], { letterSpacing: 0, scale: 1 }, font === "title" ? `${first}OW` : first)
-      .left;
+    fontInk(FONTS[font], { scale: 1 }, font === "title" ? `${first}OW` : first).left;
   const starts = (first: string) => `${inkStart("title", first)},${inkStart("body", first)}`;
   const oneX = FIRSTS.filter(
     (first, i) => FIRSTS.findIndex((other) => starts(other) === starts(first)) === i,
@@ -105,7 +104,7 @@ describe("addPixelText", () => {
     ({ scale, text }) => {
       const { drawn, scene } = fakeScene();
       const x = 12;
-      const style = { letterSpacing: 0, scale };
+      const style = { scale };
       const inkLeft = (["title", "body"] as const).map((font) => {
         addPixelText(scene, x, 0, text, { colour: 0, font, scale });
         const shown = font === "title" ? text.toUpperCase() : text;

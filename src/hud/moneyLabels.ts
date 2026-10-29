@@ -3,7 +3,7 @@ import { type Cents, cents } from "../lib/units";
 import { amountText } from "../rules/causes";
 import type { FontMetrics } from "../ui/fontMetrics";
 import { FEEDBACK, tickMs } from "./feedback";
-import { CHANGE_LABEL_STYLES, changeChipAt, changeLabelRoom } from "./hudLanes";
+import { CHANGE_LABEL_STYLE, changeChipAt, changeLabelRoom } from "./hudLanes";
 import type { ChangeLabel } from "./hudView";
 import { messagePanel } from "./messageStrip";
 import { arcControl, TOP_BAR_POINTS } from "./moments";
@@ -101,14 +101,11 @@ export function cashChipPlace(
   return changeChipAt(body, { x, y: first + slot * (tallestChip(body) + gap) }, text);
 }
 
-// The height of the tallest change chip, of every style a label may take.
+// The height of a money label's chip: its amount on one line (every amount fits one line:
+// ui/textRoles.test.ts).
 function tallestChip(body: FontMetrics): number {
-  return Math.max(
-    ...CHANGE_LABEL_STYLES.map(
-      ({ lines, scale }) =>
-        changeChipAt(body, { x: 0, y: 0 }, { lines: lines ?? 1, scale, width: 0 }).chip.height,
-    ),
-  );
+  const { scale } = CHANGE_LABEL_STYLE;
+  return changeChipAt(body, { x: 0, y: 0 }, { lines: 1, scale, width: 0 }).chip.height;
 }
 
 // The tip label showing adding up next, a tip grabbed before it flies: one label for both, their

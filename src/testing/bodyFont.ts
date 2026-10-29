@@ -9,8 +9,7 @@ export function bodyTextWidth(scale: number, line: string): number {
 }
 
 // A run of text's width in screen pixels in the body font at a style, as Phaser measures a
-// label's width: its glyphs' advances and the style's letterSpacing between each pair.
+// label's width: its glyphs' advances.
 export function bodyRunWidth(style: TextFitStyle, run: string): number {
-  const gaps = Math.max(0, [...run].length - 1);
-  return bodyTextWidth(style.scale, run) + style.letterSpacing * gaps * style.scale;
+  return bodyTextWidth(style.scale, run);
 }

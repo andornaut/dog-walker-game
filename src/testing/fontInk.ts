@@ -2,19 +2,7 @@ import { getOrInsertComputed } from "../lib/maps";
 import { readBitmapFont } from "../tools/fontFile";
 import { type BitmapFontFile, type FontMetrics, fontMetrics, leftBearing } from "../ui/fontMetrics";
 import { inkWithPills, type LaidChar, pillGlyphAdvances } from "../ui/namePills";
-import {
-  type FittedText,
-  fittingText,
-  TEXT_FIT_STYLES,
-  TEXT_SCALE,
-  type TextFitStyle,
-} from "../ui/textFit";
-
-// The TEXT_FIT_STYLES at TEXT_SCALE: the sizes a list of names is built to keep, since the
-// list shares one size and one name too wide at 2x sets them all at 1x.
-export const TWO_X_FIT_STYLES: readonly TextFitStyle[] = TEXT_FIT_STYLES.filter(
-  (style) => style.scale === TEXT_SCALE,
-);
+import { type FittedText, fittingText, type TextFitStyle } from "../ui/textFit";
 
 const GAME_GLYPHS = new Map<string, BitmapFontFile["glyphs"]>();
 
@@ -63,8 +51,8 @@ export function phaserFontData(font: string): {
 }
 
 // Each character of a line of text in a font at a style, with the screen columns it inks from
-// the line's left edge, as Phaser lays it out: the pen moves by each glyph's advance, the pair's
-// kerning and the style's letterSpacing, all in font pixels before the style's scale. A glyph
+// the line's left edge, as Phaser lays it out: the pen moves by each glyph's advance and the
+// pair's kerning, both in font pixels before the style's scale. A glyph
 // that inks nothing, such as a space, inks no columns.
 export function laidChars(font: string, style: TextFitStyle, text: string): LaidChar[] {
   const { kernings } = readBitmapFont(font);
@@ -78,7 +66,7 @@ export function laidChars(font: string, style: TextFitStyle, text: string): Laid
     }
     x += kernings.get(previous + char) ?? 0;
     const span = { left: x + glyph.xOffset, right: x + glyph.xOffset + glyph.width };
-    x += glyph.advance + style.letterSpacing;
+    x += glyph.advance;
     previous = char;
     const scaled = { left: span.left * style.scale, right: span.right * style.scale };
     return { char, ink: glyph.width === 0 ? null : scaled, line: 0 };
@@ -130,15 +118,15 @@ export function narrowestGlyphGap(font: string, style: TextFitStyle, text: strin
   return Math.min(Infinity, ...spans.slice(1).map((span, i) => span.left - (spans[i]?.right ?? 0)));
 }
 
-// Text set in a font in the first of styles that fits room, as fitPixelText sets it, with the
-// widest of its lines' ink.
+// Text set in a font in style within room, as fitPixelText sets it, with the widest of its
+// lines' ink.
 export function fitInFont(
   font: string,
-  styles: readonly TextFitStyle[],
+  style: TextFitStyle,
   room: number,
   text: string,
 ): FittedText & { widest: number } {
-  const width = (style: TextFitStyle, line: string) => inkWidth(font, style, line);
-  const fitted = fittingText(styles, width, room, text);
+  const width = (at: TextFitStyle, line: string) => inkWidth(font, at, line);
+  const fitted = fittingText(style, width, room, text);
   return { ...fitted, widest: Math.max(...fitted.lines.map((line) => width(fitted.style, line))) };
 }

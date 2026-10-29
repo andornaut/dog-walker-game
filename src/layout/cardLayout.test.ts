@@ -8,9 +8,10 @@ import { itemAt } from "../lib/arrays";
 import { keysOf } from "../lib/records";
 import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
 import { MAX_CARD_OPTIONS } from "../rules/choices";
-import { inkWidth } from "../testing/fontInk";
+import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { inside } from "../testing/rects";
 import { CARD_HEADER } from "../ui/cardRow";
+import { inkRowsOfLines } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { CARD_CHARMS_HEIGHT, cardCharmPlates, cardCharmWidth, CHARM } from "./buffLayout";
 import {
@@ -19,21 +20,29 @@ import {
   cardRows,
   cardRowTop,
   forkHomeRect,
+  largeBodyStyle,
   largeCardHeight,
   largeCardRect,
 } from "./cardLayout";
 
 describe("largeCardHeight", () => {
-  it("shrinks the large card by its empty body rows, in whole rows, up to the full card", () => {
-    for (const [, content, height] of [
-      ["the full card for a full body", 82, 280],
-      ["the full card for a body that overflows", 120, 280],
-      ["a card shorter by the empty rows", 20, 218],
-      ["whole rows for a fractional height", 19.5, 218],
-      ["the frame without its body rows for no content", 0, 198],
-    ] as const) {
-      expect(largeCardHeight(content)).toBe(height);
-    }
+  it.each([
+    ["the full card for a full body", 78, 280],
+    ["a taller card for a body past the frame's", 120, 322],
+    ["a card shorter by the empty rows", 20, 222],
+    ["whole rows for a fractional height", 19.5, 222],
+    ["the frame without its body rows but the gap for no content", 0, 202],
+  ] as const)("sets %s", (_, content, height) => {
+    expect(largeCardHeight(content)).toBe(height);
+  });
+
+  // The changes' most lines, at the tallest box, under no warning.
+  it("keeps the tallest enlarged card and its charms in the walk view", () => {
+    const body = fontFileMetrics("font-body");
+    const { lines = 1, scale } = largeBodyStyle(body, CARD_LAYOUT.large.body.height, WALK);
+    const card = largeCardRect(WALK, largeCardHeight(inkRowsOfLines(body, lines) * scale));
+    expect(card.y).toBeGreaterThanOrEqual(WALK.y);
+    expect(bottom(card) + CARD_CHARMS_HEIGHT).toBeLessThanOrEqual(bottom(WALK));
   });
 });
 
@@ -112,7 +121,7 @@ const ITEMS: EffectItem[] = [
   ...keysOf(gameData.walkerPerks).map((perk): EffectItem => ({ kind: "perk", perk })),
   ...keysOf(gameData.upgrades).map((upgrade): EffectItem => ({ kind: "upgrade", upgrade })),
 ];
-const ONE_X = { letterSpacing: 0, scale: 1 };
+const ONE_X = { scale: 1 };
 const CHARM_WIDTHS = ITEMS.flatMap((item) =>
   charmEffects(gameData, item).map((effect) => {
     const name = inkWidth("font-body", ONE_X, effectName(gameData, item));

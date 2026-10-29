@@ -1,7 +1,7 @@
 import type { ScreenLayout } from "../layout/screenLayout";
 import type { Point, Rect } from "../lib/rect";
 import { type FontMetrics, inkRowsOfLines } from "../ui/fontMetrics";
-import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
+import { textOnLines } from "../ui/textFit";
 import { OWNER_TAB } from "./walkHud";
 
 // Each transient layer of the walk's HUD keeps to its own lane, so none covers another. The
@@ -10,7 +10,8 @@ import { OWNER_TAB } from "./walkHud";
 // a tip's by the cash, and flies to the cash (moneyLabels.ts), in no lane. The lanes:
 // - ownerTabs: the row the owners' photo tabs pop into, over the road's last rows and the cards'
 //   tops. A heart change's number keeps above it.
-// - heartLabels: a heart change, by slot, on the card's bottom rows.
+// - heartLabels: a heart change, by slot, on the card's bottom rows. A label on two lines grows
+//   up the card from the lane's bottom.
 export interface HudLanes {
   heartLabels: Rect[];
   ownerTabs: Rect;
@@ -42,11 +43,8 @@ export function hudLanes(layout: Pick<ScreenLayout, "dogRow" | "dogSlots">): Hud
 // over and under the text's ink, the ink centred in it. A heart label sits at its lane's middle.
 export const CHANGE_CHIP = { height: 20, padX: 2, padY: 3 } as const;
 
-// At 2x, with its glyphs closer, at 1x, or at 1x on two lines.
-export const CHANGE_LABEL_STYLES: readonly TextFitStyle[] = [
-  ...TEXT_FIT_STYLES,
-  { letterSpacing: 0, lines: 2, scale: 1 },
-];
+// At 2x, wrapping onto a second line where it is wider than its room.
+export const CHANGE_LABEL_STYLE = textOnLines(2);
 
 // How wide a change label's ink may be in a lane width wide.
 export function changeLabelRoom(laneWidth: number): number {
@@ -67,17 +65,16 @@ export function changeChipAt(
   return { chip, text: { x: at.x + padX, y: at.y + Math.floor((height - ink) / 2) } };
 }
 
-// A change label's chip in the middle of lane, and where its ink's left edge and capitals' top
-// go, for text on lines lines at scale, its ink width wide.
+// A change label's chip in the middle of lane, or, where it is taller than the lane, its bottom
+// on the lane's bottom; and where its ink's left edge and capitals' top go, for text on lines
+// lines at scale, its ink width wide.
 export function changeChipPlace(
   body: FontMetrics,
   lane: Rect,
   text: { lines: number; scale: number; width: number },
 ): { chip: Rect; text: Point } {
   const { height } = changeChipAt(body, lane, text).chip;
-  return changeChipAt(
-    body,
-    { x: lane.x, y: lane.y + Math.floor((lane.height - height) / 2) },
-    text,
-  );
+  const centred = lane.y + Math.floor((lane.height - height) / 2);
+  const y = Math.min(centred, lane.y + lane.height - height);
+  return changeChipAt(body, { x: lane.x, y }, text);
 }

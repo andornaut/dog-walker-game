@@ -2,12 +2,7 @@ import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import { WIDE_BUTTON } from "../layout/screenLayout";
 import type { FontMetrics } from "../ui/fontMetrics";
-import {
-  type FittedText,
-  TEXT_SCALE,
-  type TextFitStyle,
-  textFitStylesOnLines,
-} from "../ui/textFit";
+import { type FittedText, TEXT_SCALE, textOnLines } from "../ui/textFit";
 import type { LinePart } from "./zoneCelebration";
 
 const SCREEN_WIDTH = SCREEN_CONFIG.width;
@@ -103,15 +98,10 @@ export const CELEBRATION_LAYOUT = {
   },
   // A new walker's centre hops in from fromX, and fx-confetti bursts at burstY as they land.
   runIn: { burstY: ROAD_TOP + 44, durationMs: 600, fromX: 400 },
-  // The big line is font-display at titleScale, or at the first of titleStyles whose ink fits
-  // titleRoom: each whole scale down to 1, glyphs at the font's own spacing. The small line is
-  // font-display-cream at 1x.
+  // The big line is font-display at titleScale on one line, no wider than titleRoom. The small
+  // line is font-display-cream at 1x.
   titleRoom: SCREEN_WIDTH - SIDE * 2,
   titleScale: TITLE_SCALE,
-  titleStyles: Array.from({ length: TITLE_SCALE }, (_, i): TextFitStyle => ({
-    letterSpacing: 0,
-    scale: TITLE_SCALE - i,
-  })),
   walkerScale: WALKER_SCALE,
   zoneDone: {
     ...headline(ZONE_DONE_FEET, 14),
@@ -121,10 +111,10 @@ export const CELEBRATION_LAYOUT = {
   },
 } as const;
 
-// The walker's greeting: on up to its lines at 2x, with its glyphs closer, or at 1x.
+// The walker's greeting: at 2x, wrapped onto up to its lines.
 export const GREETING_FIT = {
   room: CELEBRATION_LAYOUT.newWalker.greeting.maxWidth,
-  styles: textFitStylesOnLines(CELEBRATION_LAYOUT.newWalker.greeting.lines),
+  style: textOnLines(CELEBRATION_LAYOUT.newWalker.greeting.lines),
 } as const;
 
 // The top of each of the greeting's lines lines at scale, a line of the body font apart.

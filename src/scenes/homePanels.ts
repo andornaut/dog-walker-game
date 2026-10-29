@@ -17,14 +17,9 @@ import { insetRect, type Point, type Rect } from "../lib/rect";
 import { closeControl } from "../ui/closeControl";
 import { addDim, drawFramedRect, drawRing } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
-import {
-  addPixelText,
-  fitPixelText,
-  pixelFontMetrics,
-  wrapPixelText,
-} from "../ui/phaser/pixelText";
+import { addPixelText, pixelFontMetrics, wrapPixelText } from "../ui/phaser/pixelText";
 import { AFFORD_OUTSET } from "../ui/selection";
-import { TEXT_SCALE, WRAPPING_TEXT_FIT_STYLES } from "../ui/textFit";
+import { TEXT_SCALE } from "../ui/textFit";
 import { addNamePills } from "./effectNameColours";
 import { playFirstTag } from "./sprites";
 import {
@@ -208,42 +203,22 @@ export function drawDetailCard(
     const centre = { x: well.x + well.size / 2, y: well.y + well.size / 2 };
     content.add(scene.add.image(centre.x, centre.y, picture.fallback));
   }
-  // Rows of text at the tops the card's layout gives them: each wrapped on the font within its
-  // room, or a fitted row on one line, its glyphs closer, before it wraps.
-  type Row = { colour: number; fit?: boolean; value: string };
-  const fitted = (row: Row, room: number, x: number, y: number) => {
-    const label = addBodyText(scene, content, { x, y }, row.value, { colour: row.colour });
-    return {
-      label,
-      lines: fitPixelText(label, { room, styles: WRAPPING_TEXT_FIT_STYLES }, x, y).lines,
-    };
-  };
-  const lineCount = (row: Row, room: number) => {
-    if (row.fit !== true) {
-      return wrapPixelText(scene, BODY_TEXT, room, row.value).length;
-    }
-    const probe = fitted(row, room, 0, 0);
-    probe.label.destroy();
-    return probe.lines.length;
-  };
+  // Rows of text at the tops the card's layout gives them, each wrapped on the font within its
+  // room at 2x.
+  type Row = { colour: number; value: string };
+  const lineCount = (row: Row, room: number) =>
+    wrapPixelText(scene, BODY_TEXT, room, row.value).length;
   const draw = (rows: readonly Row[], x: number, room: number, tops: readonly number[]) =>
     rows.forEach((row, i) => {
       const y = tops[i] ?? 0;
-      const label =
-        row.fit === true
-          ? fitted(row, room, x, y).label
-          : addBodyText(
-              scene,
-              content,
-              { x, y },
-              wrapPixelText(scene, BODY_TEXT, room, row.value).join("\n"),
-              { colour: row.colour },
-            );
+      const lines = wrapPixelText(scene, BODY_TEXT, room, row.value);
+      const label = addBodyText(scene, content, { x, y }, lines.join("\n"), {
+        colour: row.colour,
+      });
       addNamePills([label]);
     });
   const status: Row = {
     colour: card.locked ? PALETTE.darkRed : PALETTE.forest,
-    fit: true,
     value: card.status,
   };
   // Each effect's name a line leads with, as a perk's "Second chance: …", in its pill.

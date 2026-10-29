@@ -1,10 +1,10 @@
 import { wrapWords } from "../lib/lines";
 
-// A label's scale, the font pixels added between its glyphs, and how many lines it may wrap
-// onto (1 when unset). letterSpacing is in font pixels, before the scale, so letterSpacing
-// times scale is a whole number of screen pixels, keeping the glyphs on the pixel grid.
+// Every text role has one fixed size: text never shrinks to fit its room. Text that would not
+// fit wraps onto more lines, its box grows, or its words are shortened in the data.
+
+// A role's scale and how many lines its box holds (1 when unset).
 export interface TextFitStyle {
-  letterSpacing: number;
   lines?: number;
   scale: number;
 }
@@ -12,27 +12,13 @@ export interface TextFitStyle {
 // The scale menu and HUD text draws at, so it reads on a phone; 1x is for incidental marks only.
 export const TEXT_SCALE = 2;
 
-// Text that may not fit its room at 2x tries 2x with its glyphs a screen pixel closer, then 1x.
-// The body and title fonts leave a font pixel between glyphs, two screen pixels at 2x, so a
-// screen pixel closer keeps one between them.
-export const TEXT_FIT_STYLES: readonly TextFitStyle[] = [
-  { letterSpacing: 0, scale: 2 },
-  { letterSpacing: -0.5, scale: 2 },
-  { letterSpacing: 0, scale: 1 },
-];
+// Text at TEXT_SCALE on one line.
+export const TEXT_STYLE: TextFitStyle = { scale: TEXT_SCALE };
 
-// TEXT_FIT_STYLES, each wrapping onto up to lines lines.
-export function textFitStylesOnLines(lines: number): TextFitStyle[] {
-  return TEXT_FIT_STYLES.map((style) => ({ ...style, lines }));
+// Text at TEXT_SCALE wrapping onto up to lines lines.
+export function textOnLines(lines: number): TextFitStyle {
+  return { lines, scale: TEXT_SCALE };
 }
-
-// TEXT_FIT_STYLES with two lines at 2x tried before 1x, for text in a box that can grow a line.
-export const WRAPPING_TEXT_FIT_STYLES: readonly TextFitStyle[] = [
-  { letterSpacing: 0, scale: 2 },
-  { letterSpacing: -0.5, scale: 2 },
-  { letterSpacing: 0, lines: 2, scale: 2 },
-  { letterSpacing: 0, scale: 1 },
-];
 
 // Text set in a style, broken into its lines.
 export interface FittedText {
@@ -51,52 +37,22 @@ export function fitsRoom(
   return lines.length <= (style.lines ?? 1) && lines.every((line) => inkWidth(style, line) <= room);
 }
 
-// The first style that sets text in at most its lines, each paragraph (split at "\n") starting a
-// line and broken at spaces, each line's ink no wider than room as inkWidth measures it; else
-// the last style, a line per paragraph.
+// Text in style, each paragraph (split at "\n") starting a line. A style of more than one line
+// breaks each paragraph at spaces into lines whose ink is no wider than room as inkWidth
+// measures it, as many as it takes. Text too long for its role keeps its size and overflows,
+// which fitsRoom tells.
 export function fittingText(
-  styles: readonly TextFitStyle[],
+  style: TextFitStyle,
   inkWidth: (style: TextFitStyle, line: string) => number,
   room: number,
   text: string,
 ): FittedText {
   const paragraphs = text.split("\n");
-  for (const style of styles) {
-    const most = style.lines ?? 1;
-    const lines = paragraphs.flatMap((paragraph) =>
-      most === 1 ? [paragraph] : wrapWords((line) => inkWidth(style, line), room, paragraph),
-    );
-    if (fitsRoom(inkWidth, room, { lines, style })) {
-      return { lines, style };
-    }
-  }
-  return { lines: paragraphs, style: styles.at(-1) as TextFitStyle };
-}
-
-// A text to fit alongside others: its words, its room and how its ink is measured.
-export interface TextToFit {
-  inkWidth: (style: TextFitStyle, line: string) => number;
-  room: number;
-  text: string;
-}
-
-// texts set in one style: the first of styles that sets every one of them within its room as
-// fittingText does, else the last style. The rows of a list share one size this way.
-export function fittingTextsAlike(
-  styles: readonly TextFitStyle[],
-  texts: readonly TextToFit[],
-): FittedText[] {
-  const setIn = (style: TextFitStyle) =>
-    texts.map(({ inkWidth, room, text }) => ({
-      fitted: fittingText([style], inkWidth, room, text),
-      inkWidth,
-      room,
-    }));
-  for (const style of styles) {
-    const set = setIn(style);
-    if (set.every(({ fitted, inkWidth, room }) => fitsRoom(inkWidth, room, fitted))) {
-      return set.map(({ fitted }) => fitted);
-    }
-  }
-  return setIn(styles.at(-1) as TextFitStyle).map(({ fitted }) => fitted);
+  const lines =
+    (style.lines ?? 1) === 1
+      ? paragraphs
+      : paragraphs.flatMap((paragraph) =>
+          wrapWords((line) => inkWidth(style, line), room, paragraph),
+        );
+  return { lines, style };
 }

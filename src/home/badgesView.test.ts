@@ -191,7 +191,7 @@ describe("badgeProgress", () => {
 
 describe("wallCell", () => {
   const { wallText } = STATS_LAYOUT;
-  const style = { letterSpacing: 0, scale: TEXT_SCALE };
+  const style = { scale: TEXT_SCALE };
   const bodyInk = (line: string) => inkWidth("font-body", style, line);
   const fitsTwoLines = (text: string) =>
     wrapWords(bodyInk, wallText.width, text).length <= wallText.lines - 1;

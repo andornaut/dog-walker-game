@@ -236,27 +236,15 @@ function withoutOrphan(
     : [...rows];
 }
 
-// The line's rows in the first of styles that sets it on at most the style's lines, each row
-// no wider than room as width measures it at the style; else the last style on one row. A
-// style on one line keeps the line whole.
-export function fittingFaceRows(
-  styles: readonly TextFitStyle[],
+// The line's rows in style, each face in box: broken within room as faceRows breaks them, or,
+// for a style of one line, the whole line on one row however wide.
+export function styledFaceRows(
+  style: TextFitStyle,
   width: (style: TextFitStyle, text: string) => number,
-  box: (style: TextFitStyle) => FaceBox | undefined,
+  box: FaceBox | undefined,
   room: number,
   line: FaceText,
-): { rows: FaceRow[]; style: TextFitStyle } {
-  const setIn = (style: TextFitStyle) => {
-    const most = style.lines ?? 1;
-    const measure = (text: string) => width(style, text);
-    return faceRows(measure, box(style), most === 1 ? Infinity : room, line);
-  };
-  for (const style of styles) {
-    const rows = setIn(style);
-    if (rows.length <= (style.lines ?? 1) && rows.every((row) => row.width <= room)) {
-      return { rows, style };
-    }
-  }
-  const last = styles.at(-1) as TextFitStyle;
-  return { rows: setIn({ ...last, lines: 1 }), style: last };
+): FaceRow[] {
+  const measure = (text: string) => width(style, text);
+  return faceRows(measure, box, (style.lines ?? 1) === 1 ? Infinity : room, line);
 }

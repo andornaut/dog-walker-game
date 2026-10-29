@@ -3,66 +3,33 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
-import { fillLine } from "../lib/lines";
 import { insetRect, type Rect } from "../lib/rect";
 import { defined } from "../testing/defined";
-import { fontFileMetrics, inkWidth, narrowestGlyphGap } from "../testing/fontInk";
+import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
-import { plainMarks } from "../ui/pixelFont";
-import {
-  fitsRoom,
-  fittingText,
-  TEXT_FIT_STYLES,
-  TEXT_SCALE,
-  type TextFitStyle,
-  WRAPPING_TEXT_FIT_STYLES,
-} from "../ui/textFit";
+import { TEXT_SCALE } from "../ui/textFit";
 import {
   BADGE_STRIP,
   badgeNameTops,
-  type BadgeRowNames,
-  badgeRowNames,
-  badgeStrip,
   badgeStripHits,
   CELEBRATION_PANEL,
   panelBadgeStrip,
 } from "./badgesView";
 import {
-  breakdownLabelRoom,
   END_LAYOUT,
   endPanelFits,
   endPanelLayout,
   grantedQuipLines,
-  QUIP_TEXT_ROOM,
   quipNameX,
   type QuipRow,
   quipRowHeight,
   quipTextY,
-  SIDE_LABEL_ROOM,
   sideTotalAmountY,
-  sideTotalLabelRoom,
 } from "./endLayout";
-import { signedDollarText } from "./home";
-import { MENU_TEXT_FIELDS } from "./menuText";
 
 const { badges, breakdown, panel: most, quips, side } = END_LAYOUT;
 const BODY = fontFileMetrics("font-body");
 const TITLE = fontFileMetrics("font-title");
-
-// Text as each font draws it: the title font in capitals, typographic marks made plain.
-const FONTS = { body: "font-body", title: "font-title" } as const;
-type Role = keyof typeof FONTS;
-const shown = (role: Role, text: string) =>
-  role === "title" ? plainMarks(text).toUpperCase() : plainMarks(text);
-const width = (role: Role) => (style: TextFitStyle, line: string) =>
-  inkWidth(FONTS[role], style, line);
-
-// Text set in the first of styles that fits room, as fitPixelText sets it, or undefined when no
-// style fits it.
-function fitted(role: Role, styles: readonly TextFitStyle[], room: number, text: string) {
-  const set = fittingText(styles, width(role), room, shown(role, text));
-  return fitsRoom(width(role), room, set) ? set : undefined;
-}
 
 // Fees, tips and card costs always show, the other earnings only sometimes, so a breakdown
 // runs from 3 lines to one per kind of earnings but one, since the Walk bonus (a finished walk)
@@ -178,7 +145,7 @@ describe("an owner's row", () => {
   });
 
   // The widest owner's name, centred under the well, reaches nearest the bubble and the frame.
-  const nameWidth = (name: string) => inkWidth("font-body", { letterSpacing: 0, scale: 1 }, name);
+  const nameWidth = (name: string) => inkWidth("font-body", { scale: 1 }, name);
   const widestName = Object.values(gameData.dogs)
     .map(({ owner }) => owner.name)
     .sort((a, b) => nameWidth(b) - nameWidth(a))
@@ -186,7 +153,7 @@ describe("an owner's row", () => {
   it.each(widestName.map((name) => [name] as const))(
     "sets %s under the well, inside the frame and clear of the bubble",
     (name) => {
-      const width = inkWidth("font-body", { letterSpacing: 0, scale: 1 }, name);
+      const width = inkWidth("font-body", { scale: 1 }, name);
       const left = quipNameX(width);
       expect(left).toBeGreaterThan(bubble.x + bubble.width);
       expect(left + width).toBeLessThanOrEqual(most.x + most.width - 2);
@@ -194,137 +161,9 @@ describe("an owner's row", () => {
   );
 });
 
-const QUIPS = Object.values(gameData.quips).flatMap((moments) => Object.values(moments).flat());
-const ALL_STYLES = [...TEXT_FIT_STYLES, ...WRAPPING_TEXT_FIT_STYLES];
-
-// The end screen closes on each owner's fired or happier line. Every quip is checked, so a
-// screen that shows the others in the same bubble is covered too.
-describe("an owner's closing line", () => {
-  it("sets every quip inside its bubble in every row, with any count of breakdown lines", () => {
-    const offenders = BREAKDOWN_LINES.flatMap((lines) =>
-      QUIPS.filter((quip) => {
-        const wanted = fittingText(
-          WRAPPING_TEXT_FIT_STYLES,
-          width("body"),
-          QUIP_TEXT_ROOM,
-          shown("body", quip),
-        );
-        // Fired rows: the tallest, so the fewest second lines.
-        const count = SCREEN_CONFIG.dogSlotCount;
-        const wants = Array<number>(count).fill(wanted.lines.length);
-        const granted = grantedQuipLines(BODY, lines, quipRows(count, true, wants));
-        return (
-          !endPanelFits(endPanelLayout(BODY, lines, quipRows(count, true, granted)).panel) ||
-          granted.some((given) => {
-            const styles = given > 1 ? WRAPPING_TEXT_FIT_STYLES : TEXT_FIT_STYLES;
-            const set = fitted("body", styles, QUIP_TEXT_ROOM, quip);
-            return set === undefined || set.lines.length > given;
-          })
-        );
-      }).map((quip) => `${lines} lines: ${quip}`),
-    );
-    expect(offenders).toEqual([]);
-  });
-
-  it("keeps a pixel between every quip's glyphs at every style", () => {
-    const offenders = ALL_STYLES.flatMap((style) =>
-      QUIPS.filter((quip) => narrowestGlyphGap("font-body", style, plainMarks(quip)) < 1).map(
-        (quip) => `${JSON.stringify(style)}: ${quip}`,
-      ),
-    );
-    expect(offenders).toEqual([]);
-  });
-
-  it("moves glyphs by whole screen pixels at every style", () => {
-    expect(
-      ALL_STYLES.filter((style) => !Number.isInteger(style.letterSpacing * style.scale)),
-    ).toEqual([]);
-  });
-});
-
-describe("the end screen's text", () => {
-  const words = gameData.menuText.end;
-
-  // A fired row's line saying the owner fired you, over the closing line.
-  it("sets every fired row's header inside its bubble", () => {
-    const owners = Object.values(gameData.dogs).map((dog) => dog.owner.name);
-    const headings = owners.map((owner) =>
-      fillLine(MENU_TEXT_FIELDS.end, words, "firedYou", { owner }),
-    );
-    expect(
-      headings.filter((heading) => !fitted("title", TEXT_FIT_STYLES, QUIP_TEXT_ROOM, heading)),
-    ).toEqual([]);
-  });
-
-  it("sets the side column's label at 2x", () => {
-    expect(fitted("body", TEXT_FIT_STYLES, SIDE_LABEL_ROOM, words.zonesWalked)?.style.scale).toBe(
-      2,
-    );
-  });
-
-  // Each label keeps clear of a four-figure amount, gained or lost, at 2x: the breakdown's in
-  // the body font, and TOTAL in the title font beside the walk's total in the side column. The
-  // wider of the two amounts leaves the least room.
-  const amountWidth = (role: Role, amount: string) =>
-    width(role)({ letterSpacing: 0, scale: 2 }, shown(role, amount));
-  const amounts = [9_999_00, -9_999_00]
-    .map((amount) => signedDollarText(amount))
-    .sort((a, b) => amountWidth("body", b) - amountWidth("body", a))
-    .slice(0, 1);
-  const labels = [
-    ...Object.values(words.earnings).map(
-      (label) =>
-        [
-          label,
-          "body",
-          (amount: string) => breakdownLabelRoom(amountWidth("body", amount)),
-        ] as const,
-    ),
-    [
-      words.total,
-      "title",
-      (amount: string) => sideTotalLabelRoom(amountWidth("body", amount)),
-    ] as const,
-  ];
-  it.each(
-    labels.flatMap(([label, role, room]) =>
-      amounts.map((amount) => [label, amount, role, room] as const),
-    ),
-  )("sets %s beside %s", (label, amount, role, room) => {
-    expect(fitted(role, TEXT_FIT_STYLES, room(amount), label)).toBeDefined();
-  });
-});
-
+// A badge strip's names wrap at 2x onto up to its lines (every name fits them:
+// ui/textRoles.test.ts).
 describe("a badge strip's names", () => {
-  const names = gameData.achievements.map(({ name }) => plainMarks(name));
-  const strip = { maxNamed: BADGE_STRIP.maxNamed, width: badges.width - 8, x: badges.x + 4 };
-  const counts = Array.from({ length: strip.maxNamed }, (_, i) => i + 1);
-  const slotWidth = (count: number) => defined(badgeStrip(strip, count).slots[0]).width;
-  const bodyWidth = width("body");
-  const AT_2X = { letterSpacing: 0, scale: TEXT_SCALE };
-  const fits = (count: number, set: BadgeRowNames) =>
-    set.style.scale === TEXT_SCALE &&
-    set.lines.every(
-      (lines) =>
-        lines.length <= BADGE_STRIP.nameLines &&
-        lines.every((line) => bodyWidth(set.style, line) <= slotWidth(count) - 4),
-    );
-
-  // In the fullest named row, whose slots are the narrowest: a name that wraps onto 2 lines
-  // there wraps onto no more in a wider slot.
-  it.each(names)("sets %s at 2x on at most 2 lines in the fullest named row", (name) => {
-    expect(fits(strip.maxNamed, badgeRowNames(bodyWidth, slotWidth(strip.maxNamed), [name]))).toBe(
-      true,
-    );
-  });
-
-  // Every name sits on the row's one style, the closer glyphs only when a name needs them.
-  it.each(counts)("sets a row of %i of the widest names in one style at 2x", (count) => {
-    const wide = (name: string) => bodyWidth(AT_2X, name);
-    const widest = [...names].sort((a, b) => wide(b) - wide(a)).slice(0, count);
-    expect(fits(count, badgeRowNames(bodyWidth, slotWidth(count), widest))).toBe(true);
-  });
-
   // The title, the badges and a 2-line name each keep their ink inside the panel's 2px frame,
   // in order down the strip: the end screen's and a celebration's over the home screen.
   it.each([

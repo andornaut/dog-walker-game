@@ -95,11 +95,7 @@ describe("the walker's speech", () => {
   ]);
   const width = (line: string) => bodyTextWidth(2, plainMarks(line));
   const nameInk = (dog: DogId) =>
-    inkWidth(
-      "font-body",
-      { letterSpacing: 0, scale: 1 },
-      plainMarks(gameData.dogs[dog].owner.name),
-    );
+    inkWidth("font-body", { scale: 1 }, plainMarks(gameData.dogs[dog].owner.name));
   const { padX } = HOME_LAYOUT.speech;
   const { gap } = HOME_LAYOUT.speech.owner;
   // The quip art's rim, which the owner's face and name stay inside.

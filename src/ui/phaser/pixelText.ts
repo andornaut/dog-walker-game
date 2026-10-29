@@ -13,7 +13,7 @@ import {
   pixelFontAtlas,
   plainMarks,
 } from "../pixelFont";
-import { type FittedText, fittingText, fittingTextsAlike, type TextFitStyle } from "../textFit";
+import { type FittedText, fittingText, type TextFitStyle } from "../textFit";
 
 // body: mixed case, for running text, card effects and labels. title: capitals, for
 // titles, numbers, money and buttons. Both are white glyphs, tinted to a palette colour.
@@ -272,48 +272,17 @@ function laidChar(char: Types.GameObjects.BitmapText.BitmapTextCharacter): LaidC
   };
 }
 
-// Sets the label in the first of styles that fits its text in room, each line's ink no wider
-// than room and wrapped at spaces onto at most the style's lines, else the last style on one
-// line, keeping (x, y) its origin's x and the top of its first line's capitals. Returns the
-// style and the lines.
+// Sets the label's text in fit's style (fittingText), wrapped within fit's room where the style
+// takes more than one line, keeping (x, y) its origin's x and the top of its first line's
+// capitals. Returns the style and the lines.
 export function fitPixelText(
   label: GameObjects.BitmapText,
-  fit: { room: number; styles: readonly TextFitStyle[] },
+  fit: { room: number; style: TextFitStyle },
   x: number,
   y: number,
 ): FittedText {
-  const fitted = fittingText(fit.styles, labelInkWidth(label), fit.room, label.text);
+  const fitted = fittingText(fit.style, labelInkWidth(label), fit.room, label.text);
   setFittedText(label, fitted, x, y);
-  return fitted;
-}
-
-// A label to fit alongside others: its room, and its origin's x and its capitals' top.
-export interface LabelToFit {
-  label: GameObjects.BitmapText;
-  room: number;
-  x: number;
-  y: number;
-}
-
-// Fits labels alike, in the first of styles that fits every one within its room
-// (fittingTextsAlike), each kept at its (x, y). Returns each label's fitted text, in order.
-export function fitPixelTextsAlike(
-  styles: readonly TextFitStyle[],
-  labels: readonly LabelToFit[],
-): FittedText[] {
-  // Each text is read before any is measured, since measuring sets the label's text.
-  const texts = labels.map(({ label, room }) => ({
-    inkWidth: labelInkWidth(label),
-    room,
-    text: label.text,
-  }));
-  const fitted = fittingTextsAlike(styles, texts);
-  labels.forEach(({ label, x, y }, i) => {
-    const one = fitted[i];
-    if (one !== undefined) {
-      setFittedText(label, one, x, y);
-    }
-  });
   return fitted;
 }
 
@@ -324,7 +293,6 @@ export function labelInkWidth(
 ): (style: TextFitStyle, line: string) => number {
   return (style, line) => {
     setPixelText(label, line);
-    label.setLetterSpacing(style.letterSpacing);
     scalePixelText(label, style.scale, label.x, label.y);
     const ink = inkSpan(label);
     return ink.right - ink.left;
@@ -340,7 +308,6 @@ export function setFittedText(
   y: number,
 ): void {
   setPixelText(label, fitted.lines.join("\n"));
-  label.setLetterSpacing(fitted.style.letterSpacing);
   scalePixelText(label, fitted.style.scale, x, y);
 }
 
