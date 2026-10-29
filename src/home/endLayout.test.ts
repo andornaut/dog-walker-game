@@ -1,13 +1,17 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
+import { fillLine } from "../lib/lines";
 import { insetRect, type Rect, rectsOverlap } from "../lib/rect";
 import { defined } from "../testing/defined";
-import { fontFileMetrics, inkWidth } from "../testing/fontInk";
-import { inkRowsFromCapTop } from "../ui/fontMetrics";
-import { TEXT_SCALE } from "../ui/textFit";
+import { fontFileMetrics, fontInkRows, inkWidth } from "../testing/fontInk";
+import { decodePng } from "../testing/png";
+import { inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
+import { fittingText, TEXT_SCALE, TEXT_STYLE, textOnLines } from "../ui/textFit";
 import {
   BADGE_STRIP,
   badgeNameTops,
@@ -23,6 +27,11 @@ import {
   endPanelFits,
   endPanelLayout,
   grantedQuipLines,
+  QUIP_LINES,
+  QUIP_TEXT_ROOM,
+  quipBubbleHeight,
+  quipCapsTop,
+  quipInkTop,
   quipNameX,
   type QuipRow,
   quipRowHeight,
@@ -30,6 +39,7 @@ import {
   sideTotalAmountY,
 } from "./endLayout";
 import { endTargetAt } from "./endView";
+import { MENU_TEXT_FIELDS } from "./menuText";
 
 const { badges, breakdown, panel: most, quips, side } = END_LAYOUT;
 const BODY = fontFileMetrics("font-body");
@@ -173,25 +183,105 @@ describe("endBadgeRows", () => {
 // An owner's row, mirrored: the bubble at the left, the face's well right of the bubble's
 // tail, and the owner's name under the well inside the panel's frame.
 describe("an owner's row", () => {
-  const { bubble, face, headerY, nameY, textX, well } = quips;
+  const { bubble, face, nameY, textX, well } = quips;
   const bodyInk = inkRowsFromCapTop(BODY);
-  const titleInk = inkRowsFromCapTop(fontFileMetrics("font-title"));
-  const rows = [false, true].flatMap((fired) => [1, 2].map((lines) => ({ fired, lines })));
 
-  it.each(rows)("holds its text, its well and the name under it: %o", (row) => {
-    const height = quipRowHeight(FONTS, row);
-    const textTop = quipTextY(FONTS, row, height);
-    const textBottom = textTop + (row.lines - 1) * BODY.lineHeight * 2 + bodyInk * 2;
-    expect(textBottom + bubble.padBottom).toBeLessThanOrEqual(height);
-    if (row.fired) {
-      expect(textTop).toBeGreaterThan(headerY + titleInk * 2);
-    } else {
-      // Centred down the bubble.
-      expect(Math.abs(height - textBottom - textTop)).toBeLessThanOrEqual(1);
-    }
-    expect(well.y + well.size).toBeLessThanOrEqual(nameY);
-    expect(nameY + bodyInk).toBeLessThanOrEqual(height);
+  // ui-quip's cream rows down its middle column: its frame is every row above and below them.
+  it("takes the bubble's frame rows from ui-quip", () => {
+    const png = decodePng(readFileSync("public/art/images/ui-quip.png"));
+    const column = Math.floor(png.width / 2);
+    const colour = (row: number) => {
+      const at = (row * png.width + column) * 4;
+      return png.data.subarray(at, at + 4).join();
+    };
+    const cream = colour(Math.floor(png.height / 2));
+    const rows = Array.from({ length: png.height }, (_, row) => colour(row) === cream);
+    const frame = { bottom: png.height - 1 - rows.lastIndexOf(true), top: rows.indexOf(true) };
+    expect(frame).toEqual(bubble.frame);
   });
+
+  // Closing lines from the data, wrapped as the end screen wraps them: each kind of row's
+  // widest line alone, and with its shortest after it, which takes two lines. A fired row's
+  // header names the owner with the widest header.
+  const width = (font: string, text: string) => inkWidth(font, TEXT_STYLE, text);
+  const wrap = (text: string) =>
+    fittingText(
+      textOnLines(QUIP_LINES),
+      (style, line) => inkWidth("font-body", style, line),
+      QUIP_TEXT_ROOM,
+      text,
+    ).lines;
+  const header = Object.values(gameData.dogs)
+    .map(({ owner }) =>
+      fillLine(MENU_TEXT_FIELDS.end, gameData.menuText.end, "firedYou", { owner: owner.name }),
+    )
+    .sort((a, b) => width("font-title", b) - width("font-title", a))[0];
+  const rows = (["happier", "fired"] as const).flatMap((moment) => {
+    const said = Object.values(gameData.quips)
+      .flatMap((moments) => moments[moment])
+      .sort((a, b) => width("font-body", b) - width("font-body", a));
+    const widest = said[0] ?? "";
+    return [widest, `${widest} ${said.at(-1) ?? ""}`].map((text) => {
+      const shown = wrap(text);
+      return { fired: moment === "fired", lines: shown.length, shown, text };
+    });
+  });
+
+  it("covers a one-line and a two-line closing line on each kind of row", () => {
+    expect(rows.map(({ fired, lines }) => ({ fired, lines }))).toEqual([
+      { fired: false, lines: 1 },
+      { fired: false, lines: 2 },
+      { fired: true, lines: 1 },
+      { fired: true, lines: 2 },
+    ]);
+  });
+
+  // The block runs from the first line's highest letter ink to the closing line's lowest ink as
+  // the font metrics give them, so every line in a font sits alike, and holds the text's ink.
+  it.each(rows)(
+    "centres $text down the bubble's cream, any odd row under it",
+    ({ fired, lines, shown }) => {
+      const row = { fired, lines };
+      const height = quipBubbleHeight(FONTS, row);
+      const textY = quipTextY(FONTS, row);
+      const blockTop = quipInkTop(FONTS, row);
+      const blockBottom = textY + inkRowsOfLines(BODY, lines) * TEXT_SCALE;
+      const above = blockTop - bubble.frame.top;
+      const below = height - bubble.frame.bottom - blockBottom;
+      expect(above).toBeGreaterThanOrEqual(bubble.pad);
+      expect([0, 1]).toContain(below - above);
+      const first = fired
+        ? fontInkRows("font-title", TEXT_STYLE, header ?? "")
+        : fontInkRows("font-body", TEXT_STYLE, shown[0] ?? "");
+      const last = fontInkRows("font-body", TEXT_STYLE, shown.at(-1) ?? "");
+      expect(quipCapsTop(FONTS, row) + first.top).toBeGreaterThanOrEqual(blockTop);
+      const lastTop = textY + (lines - 1) * BODY.lineHeight * TEXT_SCALE;
+      expect(lastTop + last.bottom).toBeLessThanOrEqual(blockBottom);
+    },
+  );
+
+  // A one-line happy row's bubble is the well's height; any other grows down to hold its text.
+  it.each(rows)(
+    "starts $text's bubble on the well's top, at least the well's height",
+    ({ fired, lines }) => {
+      const row = { fired, lines };
+      const height = quipBubbleHeight(FONTS, row);
+      expect(height).toBeGreaterThanOrEqual(well.size);
+      expect(height === well.size).toBe(!fired && lines === 1);
+      expect(well.y).toBe(0);
+    },
+  );
+
+  it.each(rows)(
+    "ends $text's row under its bubble and the name's lowest ink",
+    ({ fired, lines }) => {
+      const row = { fired, lines };
+      expect(well.y + well.size).toBeLessThanOrEqual(nameY);
+      expect(quipRowHeight(FONTS, row)).toBe(
+        Math.max(quipBubbleHeight(FONTS, row), nameY + bodyInk),
+      );
+    },
+  );
 
   it("puts the bubble at the left and the well at the right, inside the panel's frame", () => {
     expect(bubble.x).toBeGreaterThanOrEqual(most.x + 2);

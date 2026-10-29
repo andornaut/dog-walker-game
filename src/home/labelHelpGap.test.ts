@@ -24,7 +24,7 @@ import {
   gearDetail,
   walkerDetail,
 } from "./detail";
-import { END_LAYOUT, quipRowHeight, quipTextY } from "./endLayout";
+import { quipCapsTop, quipTextY } from "./endLayout";
 import { dollarText } from "./home";
 import { CARD_TEXT_ROOM, detailCardLayout, detailOwner, type DetailRow } from "./homeLayout";
 import { MENU_TEXT_FIELDS } from "./menuText";
@@ -218,8 +218,8 @@ const endPairs: Pair[] = Object.values(gameData.dogs).map(({ owner }) => {
   const words = gameData.menuText.end;
   const label = fillLine(MENU_TEXT_FIELDS.end, words, "firedYou", { owner: owner.name });
   const row = { fired: true, lines: 1 };
-  const help = quipTextY(FONTS, row, quipRowHeight(FONTS, row));
-  const labelTop = END_LAYOUT.quips.headerY;
+  const help = quipTextY(FONTS, row);
+  const labelTop = quipCapsTop(FONTS, row);
   return { font: "font-title", held: "exactly", help, label, labelTop, where: "end screen" };
 });
 

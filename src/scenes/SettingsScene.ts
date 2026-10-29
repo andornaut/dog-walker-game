@@ -173,7 +173,7 @@ function rowShapes(scene: Scene, rows: readonly Row[]): SettingsRowShape[] {
   });
 }
 
-const NO_FONT = { capHeight: 0, capTop: 0, inkBottom: 0, lineHeight: 0 };
+const NO_FONT = { capHeight: 0, capTop: 0, inkBottom: 0, letterTop: 0, lineHeight: 0 };
 const NO_FONTS: SettingsFonts = { body: NO_FONT, title: NO_FONT };
 
 function settingsFonts(scene: Scene): SettingsFonts {

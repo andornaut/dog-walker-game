@@ -1411,7 +1411,11 @@
       },
       "quips": {
         "bubble": {
-          "padBottom": 4,
+          "frame": {
+            "bottom": 3,
+            "top": 2
+          },
+          "pad": 2,
           "width": 244,
           "x": 36
         },
@@ -1420,7 +1424,6 @@
           "y": 1
         },
         "gap": 2,
-        "headerY": 5,
         "nameY": 37,
         "rule": {
           "above": 8,

@@ -16,18 +16,21 @@ export const END_LAYOUT = {
   panel: PANEL,
   // An owner's row, mirroring the home screen's bubble: a speech bubble from x with its tail
   // at the right pointing at the face in its well, and the owner's name in rust at 1x under
-  // the well, its capitals nameY under the row's top, centred on the well. A fired row's
-  // bubble has "{owner} fired you" in the title font with its capitals at headerY and the
-  // closing line's first capitals LABEL_HELP_GAP clear rows under the title font's lowest ink
-  // (quipTextTop); a happy row's has only the line, centred down the bubble. The bubble ends
-  // padBottom under a line at quipTextTop's lowest ink, and the row is at least as tall as the
-  // name's lowest ink; the next row starts gap under it. A 1px tan rule width wide from x
-  // runs above over the first row.
+  // the well, its capitals nameY under the row's top, centred on the well. The bubble's frame
+  // takes frame.top rows over its cream and frame.bottom under it. Its text is a block: a fired
+  // row's "{owner} fired you" in the title font over the closing line, whose first capitals sit
+  // LABEL_HELP_GAP clear rows under the title font's lowest ink (helpCapDy), or a happy row's
+  // closing line alone; from the first line's highest letter ink (letterTop: a body line's
+  // ascenders) to the last line's lowest ink. The block is centred down the cream, any odd row
+  // left under it, at least pad clear rows above and below; a larger pad would push the tallest
+  // panel, three fired rows under six breakdown lines, onto the badges. The bubble is as tall as
+  // the block needs and at least as tall as the well, its top on the well's; the row is at least
+  // as tall as the name's lowest ink, and the next row starts gap under it. A 1px tan rule width
+  // wide from x runs above over the first row.
   quips: {
-    bubble: { padBottom: 4, width: 244, x: 36 },
+    bubble: { frame: { bottom: 3, top: 2 }, pad: 2, width: 244, x: 36 },
     face: { x: 291, y: 1 },
     gap: 2,
-    headerY: 5,
     nameY: 37,
     rule: { above: 8, width: 288, x: 36 },
     tail: { x: 279, y: 15 },
@@ -119,43 +122,70 @@ export interface QuipFonts {
   readonly title: FontMetrics;
 }
 
-// A fired row's closing line's first capitals, from the row's top, under its header.
-function quipTextTop(title: FontMetrics): number {
-  return END_LAYOUT.quips.headerY + helpCapDy(title, TEXT_SCALE);
+// How far a row's first line inks above its capitals at 2x: a body line's ascenders, or none
+// for a fired row's header, whose letters start on its capitals.
+function quipRise(fonts: QuipFonts, row: QuipRow): number {
+  const first = row.fired ? fonts.title : fonts.body;
+  return (first.capTop - first.letterTop) * TEXT_SCALE;
 }
 
-// From a line's capitals to its last line's lowest ink, on lines lines of the body font at 2x.
-function quipTextHeight(body: FontMetrics, lines: number): number {
-  return inkRowsOfLines(body, lines) * TEXT_SCALE;
+// From a row's first capitals (a fired row's header's, else its closing line's) to its closing
+// line's first capitals.
+function quipHeaderDy(fonts: QuipFonts, row: QuipRow): number {
+  return row.fired ? helpCapDy(fonts.title, TEXT_SCALE) : 0;
 }
 
-// An owner's row's height, and its bubble's: down to the closing line's lowest ink under the
-// header's place and padBottom more, and at least down to the lowest ink of the name under the
-// well.
+// A row's text block: from its first line's highest letter ink to its closing line's lowest
+// ink, on lines lines of the body font at 2x.
+function quipBlockHeight(fonts: QuipFonts, row: QuipRow): number {
+  const lines = inkRowsOfLines(fonts.body, row.lines) * TEXT_SCALE;
+  return quipRise(fonts, row) + quipHeaderDy(fonts, row) + lines;
+}
+
+// An owner's bubble's height: its frame, pad clear rows either side of the text block, and at
+// least the well's height.
+export function quipBubbleHeight(fonts: QuipFonts, row: QuipRow): number {
+  const { bubble, well } = END_LAYOUT.quips;
+  const { bottom, top } = bubble.frame;
+  return Math.max(well.size, top + bubble.pad + quipBlockHeight(fonts, row) + bubble.pad + bottom);
+}
+
+// An owner's row's height: its bubble's, and at least down to the lowest ink of the name under
+// the well.
 export function quipRowHeight(fonts: QuipFonts, row: QuipRow): number {
-  const { bubble, nameY } = END_LAYOUT.quips;
-  const text = quipTextTop(fonts.title) + quipTextHeight(fonts.body, row.lines) + bubble.padBottom;
-  return Math.max(text, nameY + inkRowsFromCapTop(fonts.body));
+  const { nameY } = END_LAYOUT.quips;
+  return Math.max(quipBubbleHeight(fonts, row), nameY + inkRowsFromCapTop(fonts.body));
 }
 
-// The closing line's first capitals, from the row's top: under a fired row's header, or
-// centred down a happy row's bubble.
-export function quipTextY(fonts: QuipFonts, row: QuipRow, height: number): number {
-  return row.fired
-    ? quipTextTop(fonts.title)
-    : Math.floor((height - quipTextHeight(fonts.body, row.lines)) / 2);
+// The text block's highest ink, from the row's top: the block centred down the bubble's cream,
+// any odd row left under it.
+export function quipInkTop(fonts: QuipFonts, row: QuipRow): number {
+  const { bottom, top } = END_LAYOUT.quips.bubble.frame;
+  const cream = quipBubbleHeight(fonts, row) - top - bottom;
+  return top + Math.floor((cream - quipBlockHeight(fonts, row)) / 2);
+}
+
+// The row's first capitals, from its top: a fired row's header's, else its closing line's.
+export function quipCapsTop(fonts: QuipFonts, row: QuipRow): number {
+  return quipInkTop(fonts, row) + quipRise(fonts, row);
+}
+
+// The closing line's first capitals, from the row's top: under a fired row's header, or the
+// row's first capitals on a happy row.
+export function quipTextY(fonts: QuipFonts, row: QuipRow): number {
+  return quipCapsTop(fonts, row) + quipHeaderDy(fonts, row);
 }
 
 // The breakdown ends a pitch under its last line's top; the side column ends under its total.
 // The owners' rows start QUIPS_GAP under whichever ends lower, the tan rule 8px over them, and
-// the panel ends 8px under the last bubble.
+// the panel ends 8px under the last row.
 const QUIPS_GAP = 10;
 const PANEL_FOOT = 8;
 
 interface EndPanelLayout {
   panel: typeof PANEL;
-  // Each owner's row: its top and its bubble's height.
-  rows: { height: number; top: number }[];
+  // Each owner's row: its top, its height and its bubble's.
+  rows: { bubble: number; height: number; top: number }[];
 }
 
 // The panel and the owners' rows, each row's closing line on the lines it is given.
@@ -169,7 +199,7 @@ export function endPanelLayout(
   let top = Math.max(listBottom, side.totalY + side.totalHeight) + QUIPS_GAP;
   const shown = quipRows.length === 0 ? [{ fired: false, lines: 1 }] : quipRows;
   const rows = shown.map((quip) => {
-    const row = { height: quipRowHeight(fonts, quip), top };
+    const row = { bubble: quipBubbleHeight(fonts, quip), height: quipRowHeight(fonts, quip), top };
     top += row.height + quips.gap;
     return row;
   });

@@ -114,6 +114,7 @@ const FALLBACK_METRICS: FontMetrics = {
   capHeight: GLYPH_HEIGHT,
   capTop: 0,
   inkBottom: GLYPH_HEIGHT,
+  letterTop: 0,
   lineHeight: LINE_HEIGHT,
 };
 

@@ -12,6 +12,7 @@ import {
   grantedQuipLines,
   QUIP_LINES,
   QUIP_TEXT_ROOM,
+  quipCapsTop,
   quipNameX,
   quipTextY,
   sideTotalAmountY,
@@ -251,7 +252,7 @@ export class EndScene extends Scene {
     fillRect(g, PALETTE.tan, { height: 1, width: rule.width, x: rule.x, y: quipsTop - rule.above });
     const celebrating = earned.length > 0;
     closing.forEach((line, i) => {
-      const { height, top: row } = itemAt(rows, i);
+      const { bubble: bubbleHeight, top: row } = itemAt(rows, i);
       const { well } = QUIPS;
       fillRect(g, PALETTE.tan, { height: well.size, width: well.size, x: well.x, y: row + well.y });
       const faceX = QUIPS.face.x;
@@ -263,19 +264,19 @@ export class EndScene extends Scene {
         const face = this.add.sprite(faceX, faceY, key).setOrigin(0);
         playTag(face, key, line.fired ? "fired" : "happy", reduced);
       }
-      const { bubble, headerY, nameY, textX } = QUIPS;
-      this.addBubble({ height, width: bubble.width, x: bubble.x, y: row });
+      const { bubble, nameY, textX } = QUIPS;
+      this.addBubble({ height: bubbleHeight, width: bubble.width, x: bubble.x, y: row });
       // The owner's name under the well, at 1x.
       const owner = gameData.dogs[line.dog].owner.name;
       const name = addPixelText(this, 0, row + nameY, owner, { colour: PALETTE.rust, scale: 1 });
       const nameInk = inkSpan(name);
       name.setX(quipNameX(nameInk.right - nameInk.left) - nameInk.left);
+      const quipRow = itemAt(quipRows, i);
       if (line.fired) {
         const header = fillLine(MENU_TEXT_FIELDS.end, words, "firedYou", { owner });
-        title(textX, row + headerY, header, PALETTE.darkRed);
+        title(textX, row + quipCapsTop(fonts, quipRow), header, PALETTE.darkRed);
       }
-      const quipRow = itemAt(quipRows, i);
-      const textY = row + quipTextY(fonts, quipRow, height);
+      const textY = row + quipTextY(fonts, quipRow);
       const quip = text(textX, textY, line.text, PALETTE.plum);
       fitPixelText(quip, quipFit(quipRow.lines), textX, textY);
     });

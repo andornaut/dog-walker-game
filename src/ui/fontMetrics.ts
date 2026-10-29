@@ -51,12 +51,14 @@ export function parseBitmapFont(fnt: string): BitmapFontFile {
 }
 
 // A font's rows, in font pixels down from a line's top: where its capitals start (capTop) and
-// how many rows they take, from its H; the row under its lowest ink, descenders included; and
-// the distance from one line's top to the next.
+// how many rows they take, from its H; the highest row a letter or digit inks, ascenders
+// included (letterTop); the row under its lowest ink, descenders included; and the distance
+// from one line's top to the next.
 export interface FontMetrics {
   readonly capHeight: number;
   readonly capTop: number;
   readonly inkBottom: number;
+  readonly letterTop: number;
   readonly lineHeight: number;
 }
 
@@ -66,10 +68,14 @@ export function fontMetrics(font: {
 }): FontMetrics {
   const capital = font.glyphs.get("H");
   const inked = [...font.glyphs.values()].filter((glyph) => glyph.height > 0);
+  const letters = [...font.glyphs]
+    .filter(([char, glyph]) => glyph.height > 0 && /[\p{L}\p{N}]/u.test(char))
+    .map(([, glyph]) => glyph.yOffset);
   return {
     capHeight: capital?.height ?? 0,
     capTop: capital?.yOffset ?? 0,
     inkBottom: Math.max(0, ...inked.map((glyph) => glyph.yOffset + glyph.height)),
+    letterTop: letters.length === 0 ? (capital?.yOffset ?? 0) : Math.min(...letters),
     lineHeight: font.lineHeight,
   };
 }

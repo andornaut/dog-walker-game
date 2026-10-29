@@ -2,14 +2,17 @@ import { describe, expect, it } from "vitest";
 
 import { fontMetrics, inkRowsFromCapTop, inkRowsOfLines, parseBitmapFont } from "./fontMetrics";
 
-// A font with a capital H on rows 2 to 7, a g reaching row 9 and a kerned pair.
+// A font with a capital H on rows 2 to 7, a d's ascender from row 1, a g reaching row 9, a
+// backtick from row 0 and a kerned pair.
 const FNT = `<?xml version="1.0"?>
 <font>
   <common lineHeight="11" base="8" scaleW="64" scaleH="16" pages="1" packed="0"/>
-  <chars count="3">
+  <chars count="5">
     <char id="32" x="0" y="0" width="0" height="0" xoffset="0" yoffset="0" xadvance="2" page="0"/>
     <char id="72" x="1" y="0" width="4" height="6" xoffset="0" yoffset="2" xadvance="5" page="0"/>
     <char id="103" x="6" y="0" width="3" height="6" xoffset="-1" yoffset="4" xadvance="4" page="0"/>
+    <char id="100" x="10" y="0" width="3" height="7" xoffset="0" yoffset="1" xadvance="4" page="0"/>
+    <char id="96" x="14" y="0" width="1" height="2" xoffset="0" yoffset="0" xadvance="2" page="0"/>
   </chars>
   <kernings count="1">
     <kerning first="72" second="103" amount="-1"/>
@@ -36,9 +39,15 @@ describe("parseBitmapFont", () => {
 });
 
 describe("fontMetrics", () => {
-  it("takes the capitals from H and the lowest ink from any glyph", () => {
+  it("takes the capitals from H, the highest ink from letters and the lowest from any glyph", () => {
     const metrics = fontMetrics(parseBitmapFont(FNT));
-    expect(metrics).toEqual({ capHeight: 6, capTop: 2, inkBottom: 10, lineHeight: 11 });
+    expect(metrics).toEqual({
+      capHeight: 6,
+      capTop: 2,
+      inkBottom: 10,
+      letterTop: 1,
+      lineHeight: 11,
+    });
     expect(inkRowsFromCapTop(metrics)).toBe(8);
   });
 });
