@@ -5,11 +5,18 @@ import { DOGS } from "../data/dogs";
 import type { ZoneId } from "../data/types";
 import { WORLD } from "../data/world";
 import { cents } from "../lib/units";
-import type { RunState } from "../state/runState";
+import type { EndReason, RunState } from "../state/runState";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WORLD } from "../testing/world";
-import { fireOwnersAtZero, fullPackBonus, payZone, tipValue, walkEarnings } from "./run";
+import {
+  endReasonOf,
+  fireOwnersAtZero,
+  fullPackBonus,
+  payZone,
+  tipValue,
+  walkEarnings,
+} from "./run";
 import { read } from "./units";
 
 const data = { debuffs: DEBUFFS, dogs: DOGS, tuning: TEST_TUNING, world: TEST_WORLD };
@@ -76,9 +83,9 @@ describe("payZone", () => {
       ],
       ["three dogs", testState({ buddy: 3, duchess: 5, kilo: 5 }), ["buddy", "duchess", "kilo"]],
     ] satisfies readonly [string, RunState, readonly ("buddy" | "duchess" | "kilo")[]][]) {
-      const { changes, state } = payZone(data, { ...run, bankedPay: cents(500) });
-      expect(state.money).toBe(run.money + pay * walking.length);
-      expect(state.bankedPay).toBe(500 + pay * walking.length);
+      const { changes, state } = payZone(data, { ...run, money: cents(500) });
+      expect(state.money).toBe(500 + pay * walking.length);
+      expect(state.zoneEndMoney).toBe(state.money);
       expect(changes).toEqual(
         walking.map((dog) => ({
           amount: pay,
@@ -132,6 +139,8 @@ describe("fireOwnersAtZero", () => {
     const { fired, state } = fireOwnersAtZero(emptied);
     expect(fired).toEqual(["buddy"]);
     expect(state.money).toBe(banked.money);
+    expect(state.zoneEndMoney).toBe(banked.zoneEndMoney);
+    expect(state.phase).toEqual({ kind: "walking" });
     expect(state.pack).toEqual([
       { dog: "buddy", status: "fired", zoneIndex: 2 },
       { dog: "duchess", hearts: 1, status: "walking" },
@@ -146,48 +155,50 @@ describe("fireOwnersAtZero", () => {
   });
 });
 
-describe("walkEarnings", () => {
-  const ended = (reason: "finished" | "noDogs" | "wentHome") =>
-    ({ kind: "ended", reason }) as const;
+describe("endReasonOf", () => {
+  it.each<[string, RunState["phase"], EndReason]>([
+    ["a walk not yet ended, as heading home", { kind: "walking" }, "wentHome"],
+    ["a finished walk", { kind: "ended", reason: "finished" }, "finished"],
+    ["a walk every owner fired you out of", { kind: "ended", reason: "noDogs" }, "noDogs"],
+    ["a walk that headed home", { kind: "ended", reason: "wentHome" }, "wentHome"],
+  ])("ends %s", (_name, phase, reason) => {
+    expect(endReasonOf({ phase })).toBe(reason);
+  });
+});
 
-  it.each<[string, Pick<RunState, "bankedPay" | "money" | "phase">, number, number]>([
-    [
-      "banks a finished walk's money",
-      { bankedPay: cents(4_000), money: cents(6_000), phase: ended("finished") },
-      6_000,
-      0,
-    ],
-    [
-      "banks the money of a walk that headed home",
-      { bankedPay: cents(4_000), money: cents(6_000), phase: ended("wentHome") },
-      6_000,
-      0,
-    ],
-    [
-      "banks the money of a walk not yet ended",
-      { bankedPay: cents(4_000), money: cents(6_000), phase: { kind: "walking" } },
-      6_000,
-      0,
-    ],
-    [
-      "banks only the pay of a walk every owner fired you out of, losing the cash carried",
-      { bankedPay: cents(4_000), money: cents(6_000), phase: ended("noDogs") },
-      4_000,
-      2_000,
-    ],
-    [
-      "banks what is left when card costs spent into the pay before every owner fired you",
-      { bankedPay: cents(4_000), money: cents(2_500), phase: ended("noDogs") },
-      2_500,
-      0,
-    ],
-    [
-      "banks nothing when every owner fired you before any pay",
-      { bankedPay: cents(0), money: cents(900), phase: ended("noDogs") },
-      0,
-      900,
-    ],
-  ])("%s", (_name, run, banked, lost) => {
-    expect(walkEarnings(run)).toEqual({ banked, lost });
+describe("walkEarnings", () => {
+  // Paid at a zone's end, then a tip earned in the next zone.
+  const paid = payZone(data, testState({ buddy: 5, duchess: 5 })).state;
+  const tip = tipValue(data, paid).amount;
+  const tipped: RunState = { ...paid, money: cents(paid.money + tip) };
+  // A card cost that spends the tip and some of the zone's end money too.
+  const spent: RunState = { ...tipped, money: cents(paid.money - tip) };
+  const early = ["noDogs", "wentHome"] as const;
+
+  it.each([
+    ["at a fork, with nothing earned since the zone's end", paid, paid.money],
+    ["mid-zone, losing what the zone earned since its end", tipped, paid.money],
+    ["after card costs spent below the zone's end money, keeping what is left", spent, spent.money],
+  ] satisfies [string, RunState, number][])(
+    "an early end keeps the last zone's end money at most: %s",
+    (_name, run, banked) => {
+      for (const reason of early) {
+        expect(walkEarnings(reason, run)).toEqual({ banked, lost: run.money - banked });
+      }
+    },
+  );
+
+  it("an early end in the first zone keeps only the starting money", () => {
+    const run: RunState = { ...tipped, zoneEndMoney: tipped.startMoney };
+    for (const reason of early) {
+      expect(walkEarnings(reason, run).banked).toBe(tipped.startMoney);
+    }
+  });
+
+  it.each([
+    ["mid-zone", tipped],
+    ["after card costs", spent],
+  ] satisfies [string, RunState][])("a finished walk banks all its money: %s", (_name, run) => {
+    expect(walkEarnings("finished", run)).toEqual({ banked: run.money, lost: 0 });
   });
 });

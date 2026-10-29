@@ -28,8 +28,8 @@ export const MONEY_LABEL = {
 // How long a change label takes to fade in place.
 export const LABEL_FADE_MS = 1100;
 
-// The label for the cash a walk carried and lost when the last owner fired you
-// (walkEarnings): a loss that pops by the cash, as a gain does (cashChipPlace), and goes into it.
+// The label for the cash a walk carried and lost by ending early, heading home or with the last
+// owner firing you (walkEarnings): a loss that pops by the cash, as a gain does (cashChipPlace), and goes into it.
 export function cashLostLabel(lost: Cents): ChangeLabel {
   const amount = cents(-lost);
   return {

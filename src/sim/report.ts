@@ -122,7 +122,7 @@ export interface MatrixRow extends BadgeCounters {
   // Achievements a run earns on its own facts, per run.
   readonly meanBadges: number;
   readonly meanCardsSeen: number;
-  // The cash a walk carried and lost when every owner fired you, in cents per walk; meanEarnings
+  // The cash a walk carried and lost by ending early, in cents per walk; meanEarnings
   // and the percentiles count only what walks banked.
   readonly meanCashLost: number;
   readonly meanDrops: number;

@@ -17,7 +17,7 @@ import { withSetupStart } from "../dev/setupRun";
 import { startZoneClocks, tickZoneClocks, type ZoneClocks } from "../dev/zoneClock";
 import { effectItems } from "../hud/effectIcons";
 import { cardHintTriggers, startHintTriggers } from "../hud/hintTriggers";
-import { homeQuestionNote } from "../hud/homeQuestion";
+import { homeQuestionNote, pauseNote } from "../hud/homeQuestion";
 import { NOTHING_PAUSED, type RunPause, walkPaused } from "../hud/topBar";
 import { type ExplainShown } from "../hud/walkHud";
 import { type ZoneCelebration, zoneCelebration } from "../hud/zoneCelebration";
@@ -264,6 +264,8 @@ export class RunScene extends Scene implements HudRun {
         homeNote: () =>
           this.session === undefined ? [] : homeQuestionNote(gameData, this.session.walk.run),
         over: () => this.session === undefined || this.session.walk.run.phase.kind === "ended",
+        pauseNote: () =>
+          this.session === undefined ? "" : pauseNote(gameData, this.session.walk.run),
       }),
       moments: new RunMoments(this, { items, pack, quips: random.quips, still }),
       pack,
@@ -423,7 +425,7 @@ export class RunScene extends Scene implements HudRun {
     );
   }
 
-  // Ends the walk with what is banked, as the Home answer or a replayed one does.
+  // Ends the walk with what the finished zones earned, as the Home answer or a replayed one does.
   private headHome(): void {
     if (this.session !== undefined) {
       this.apply(headHomeSession(this.session));
@@ -451,6 +453,9 @@ export class RunScene extends Scene implements HudRun {
     }
     const { run } = step.session.walk;
     if (run.phase.kind === "ended") {
+      if (run.phase.reason === "wentHome") {
+        this.world?.moments.headedHome(run);
+      }
       // A walker the last zone unlocks joins before the end screen.
       if (celebration === undefined) {
         this.endWalk();

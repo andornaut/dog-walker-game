@@ -19,6 +19,8 @@ interface MenuFlowHost {
   homeNote: () => readonly HomeNoteLine[];
   // Whether the walk is over or not yet started, when the menu stays shut.
   over: () => boolean;
+  // What the pause menu's note says Head home keeps.
+  pauseNote: () => string;
 }
 
 // Everything that pauses the walk but the hit stop, which the session holds, and an
@@ -245,8 +247,9 @@ export class MenuFlow {
     if (this.pauseMode === "homeQuestion") {
       return { ...answers, mode: "homeQuestion", note: this.host.homeNote() };
     }
+    const note = this.host.pauseNote();
     return overlay === undefined
-      ? { ...answers, mode: "menu" }
-      : { ...answers, mode: "menu", overlay };
+      ? { ...answers, mode: "menu", note }
+      : { ...answers, mode: "menu", note, overlay };
   }
 }

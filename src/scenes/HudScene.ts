@@ -564,10 +564,12 @@ export class HudScene extends Scene {
     }
   }
 
-  // The cash the walk keeps (walkEarnings), less fees and money changes still flying to it, so
-  // the cash lost with the last firing counts down once its label lands.
+  // The cash the walk keeps, all of it until it ends (walkEarnings), less fees and money changes
+  // still flying to it, so the cash an early end loses counts down once its label lands.
   private shownMoney(run: RunState): Cents {
-    const landed = cents(walkEarnings(run).banked - this.moneyInFlight);
+    const kept =
+      run.phase.kind === "ended" ? walkEarnings(run.phase.reason, run).banked : run.money;
+    const landed = cents(kept - this.moneyInFlight);
     return this.feedback?.shownMoney(landed) ?? landed;
   }
 

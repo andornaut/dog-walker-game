@@ -66,7 +66,7 @@ describe("the Home question's panel", () => {
     const money = dollarText(cents(9_999_900));
     const zone = gameData.world.zones.map((candidate) => candidate.name).reduce(longer);
     const note = [
-      fillNames(words.lose, { fees: money, zone }),
+      fillNames(words.lose, { lost: money, zone }),
       fillNames(words.zonesLeft, { count: String(walkLength(gameData) - 1) }),
     ];
     const room = PAUSE_NOTE_WIDTH - 2 * NOTE_PLATE.padX;
@@ -81,14 +81,19 @@ describe("the Home question's panel", () => {
   });
 });
 
-// The pause menu's own note, a sentence a line, wraps at 2x onto the lines its plate is laid
-// out for, in a panel inside the band and road, the last line's lowest ink inside the plate.
+// The pause menu's own note, each sentence starting a line, wraps at 2x onto the lines its
+// plate is laid out for, in a panel inside the band and road, the last line's lowest ink inside
+// the plate. The walk's cash stays under $1,000.
 describe("the pause menu's note", () => {
-  it("sets each sentence on a line of its plate", () => {
+  const words = gameData.menuText.pause;
+  const cash = dollarText(cents(99_900));
+
+  it.each([
+    ["keeping some of the cash", fillNames(words.note, { cash, kept: cash })],
+    ["keeping all the cash", fillNames(words.noteAll, { cash })],
+  ])("sets its note %s on the lines of its plate", (_name, note) => {
     const room = PAUSE_NOTE_WIDTH - 2 * NOTE_PLATE.padX;
-    const said = sentences(gameData.menuText.pause.note);
-    const lines = said.flatMap((sentence) => wrapWords(bodyWidth, room, sentence));
-    expect(lines).toEqual(said);
+    const lines = sentences(note).flatMap((sentence) => wrapWords(bodyWidth, room, sentence));
     expect(lines.filter((line) => bodyWidth(line) > room)).toEqual([]);
     expect(lines.length).toBeLessThanOrEqual(PAUSE_NOTE_LINES);
     const parts = { buttonCount: PAUSE_MENU_ITEMS.length, noteLines: PAUSE_NOTE_LINES };

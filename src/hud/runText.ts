@@ -39,7 +39,7 @@ export const RUN_TEXT_FIELDS = {
   firedBy: ["owner"],
   foundGear: ["gear"],
   homeQuestion: {
-    lose: ["fees", "zone"],
+    lose: ["lost", "zone"],
     zonesLeft: ["count"],
   },
   lowHearts: ["owner"],

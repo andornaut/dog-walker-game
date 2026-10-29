@@ -1,7 +1,7 @@
 import type { GameData } from "../data/types";
 import { lastHeartOwnersOf, runCountersOf } from "../rules/achievements";
 import { walkLength } from "../rules/route";
-import { walkEarnings } from "../rules/run";
+import { endReasonOf, walkEarnings } from "../rules/run";
 import type { RunState } from "../state/runState";
 import type { RunResult } from "./checkpoint";
 import type { Checkpoint, DogRun } from "./schema";
@@ -24,12 +24,12 @@ function dogRuns(run: RunState): DogRun[] {
 
 // The run so far, for the save after a zone's pay is banked (finishZone has moved zoneIndex on
 // to the next zone, whose fork is not yet taken) or as the tab hides mid-zone, which counts only
-// the zones before it.
+// the zones before it and banks as heading home.
 export function checkpointOf(data: RunSliceData, run: RunState): Checkpoint {
   return {
     counters: runCountersOf(run),
     dogs: dogRuns(run),
-    earnedCents: walkEarnings(run).banked,
+    earnedCents: walkEarnings(endReasonOf(run), run).banked,
     route: [...run.route],
     zonesFinished: zonesDone(data, run),
   };
@@ -37,8 +37,8 @@ export function checkpointOf(data: RunSliceData, run: RunState): Checkpoint {
 
 // A run that has ended, for finishRun. A run that has not ended counts as heading home.
 export function runResultOf(data: RunSliceData, run: RunState): RunResult {
-  const outcome = run.phase.kind === "ended" ? run.phase.reason : "wentHome";
-  const { banked, lost } = walkEarnings(run);
+  const outcome = endReasonOf(run);
+  const { banked, lost } = walkEarnings(outcome, run);
   return {
     counters: runCountersOf(run),
     dogs: dogRuns(run),

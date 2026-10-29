@@ -24,15 +24,17 @@ function setupRoute(data: RouteData, setup: RunSetup, state: RunState): readonly
 }
 
 // A new run moved to the setup's zone, on the setup's route, and given its money, applied
-// after newRun so the override replaces the starting purse. The zones before the
-// setup's are skipped.
+// after newRun so the override replaces the starting purse, which an early end keeps as its
+// zone end money. The zones before the setup's are skipped.
 export function withSetupStart(data: RouteData, setup: RunSetup, state: RunState): RunState {
+  const money = setup.money === undefined ? state.money : cents(setup.money);
   return {
     ...state,
     firstZone: setup.zone - 1,
-    money: setup.money === undefined ? state.money : cents(setup.money),
+    money,
     route: setupRoute(data, setup, state),
-    startMoney: setup.money === undefined ? state.startMoney : cents(setup.money),
+    startMoney: money,
+    zoneEndMoney: money,
     zoneIndex: setup.zone - 1,
   };
 }

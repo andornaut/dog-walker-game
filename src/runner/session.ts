@@ -223,7 +223,7 @@ export function chooseShownCard(
     : { events: [], session };
 }
 
-// Heading home keeps what was earned; it is stamped at the run time of the step it comes
+// Heading home keeps what the finished zones earned; it is stamped at the run time of the step it comes
 // before.
 export function headHomeSession(session: Session): SessionStep {
   const input: SessionInput = { kind: "home" };

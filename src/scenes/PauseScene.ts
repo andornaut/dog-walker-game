@@ -40,13 +40,15 @@ export interface PauseOverlay {
   readonly open: "help" | "settings";
 }
 
-// menu is the pause menu; homeQuestion asks whether to head home, for the pause menu's and a
-// fork card's Head home, its note saying what going home keeps and gives up.
+// menu is the pause menu, its note saying what Head home keeps; homeQuestion asks whether to
+// head home, for the pause menu's and a fork card's Head home, its note saying what going home
+// gives up.
 export type PauseSceneData = {
   onHeadHome: () => void;
   onResume: () => void;
 } & (
-  { mode: "homeQuestion"; note: readonly HomeNoteLine[] } | { mode: "menu"; overlay?: PauseOverlay }
+  | { mode: "homeQuestion"; note: readonly HomeNoteLine[] }
+  | { mode: "menu"; note: string; overlay?: PauseOverlay }
 );
 
 // The Home question's note lines' colours, by what they say.
@@ -101,7 +103,7 @@ export class PauseScene extends Scene {
     const note =
       data.mode === "homeQuestion"
         ? data.note.map((line) => ({ colour: NOTE_COLOURS[line.kind], text: line.text }))
-        : [{ colour: PALETTE.plum, text: menu.note }];
+        : [{ colour: PALETTE.plum, text: data.note }];
     const noteWidth = PAUSE_NOTE_WIDTH - 2 * NOTE_PLATE.padX;
     // The note wraps at 2x; the menu's own starts each sentence on a line of its own.
     const noteParts = note.map(({ colour, text }) => {

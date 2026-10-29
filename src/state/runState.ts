@@ -91,9 +91,6 @@ type Phase =
   | { readonly kind: "walking" };
 
 export interface RunState {
-  // The pay banked at each zone's end this walk, part of money. A walk that ends with every
-  // owner having fired you banks only this (walkEarnings).
-  readonly bankedPay: Cents;
   // Plain hits that cost their owner a heart, so neither dodged nor forgiven, by obstacle kind.
   readonly bumpsByKind: Readonly<Partial<Record<MinorObstacleId, number>>>;
   // Plain hits that landed, by zone index. A zone with no entry had none.
@@ -145,6 +142,9 @@ export interface RunState {
   readonly walker: WalkerId;
   // Distance travelled into the current zone.
   readonly zoneDistance: Pixels;
+  // The money at the last zone's end, its pay banked, or at the run's start before any. A walk
+  // that ends early keeps no more than this (walkEarnings).
+  readonly zoneEndMoney: Cents;
   // The current zone's position in the walk, counting from 0.
   readonly zoneIndex: number;
 }
@@ -160,7 +160,6 @@ export interface Loadout {
 export function blankRun(start: Pick<RunState, "gear" | "pack" | "route" | "walker">): RunState {
   const { gear, pack, route, walker } = start;
   return {
-    bankedPay: cents(0),
     bumpsByKind: {},
     bumpsByZone: [],
     cardsThisZone: 0,
@@ -186,6 +185,7 @@ export function blankRun(start: Pick<RunState, "gear" | "pack" | "route" | "walk
     upgradesPicked: [],
     walker,
     zoneDistance: pixels(0),
+    zoneEndMoney: cents(0),
     zoneIndex: 0,
   };
 }
@@ -236,5 +236,11 @@ export function newRun(
           walked,
         );
   const money = read(data.tuning, "money", "startPurse");
-  return { ...geared, money, pack: packWith(geared.modifiers), startMoney: money };
+  return {
+    ...geared,
+    money,
+    pack: packWith(geared.modifiers),
+    startMoney: money,
+    zoneEndMoney: money,
+  };
 }

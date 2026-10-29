@@ -5,6 +5,7 @@ import type { FieldTable } from "../lib/lines";
 export const MENU_TEXT_FIELDS = {
   celebration: { titleMany: ["count"] },
   end: { firedYou: ["owner"] },
+  pause: { note: ["cash", "kept"], noteAll: ["cash"] },
   settings: { volume: ["percent"] },
   stats: {
     badgeLine: ["line"],

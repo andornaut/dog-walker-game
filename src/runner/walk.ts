@@ -1162,7 +1162,8 @@ export function finishZone(data: WalkData, run: RunState): ZoneEnd {
   };
 }
 
-// Heading home keeps the money banked; the current zone pays nothing.
+// Heading home ends the walk, which keeps its last zone's end money (walkEarnings); the current
+// zone pays nothing.
 export function headHome(run: RunState): RunState {
   return { ...run, phase: { kind: "ended", reason: "wentHome" } };
 }

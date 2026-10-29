@@ -358,8 +358,8 @@ export function payoutMs(flights: readonly PayoutFlight[]): number {
   return lastLandMs(flights) + MOMENTS.payout.chipMs;
 }
 
-// A run that ends on a firing or a payout waits for the longest of them, and of the cash lost
-// with the last firing showing (cashLostMs), before the end screen, so the moment is seen.
+// A run that ends on a firing or a payout waits for the longest of them, and of the cash an
+// early end lost showing (cashLostMs), before the end screen, so the moment is seen.
 export function endScreenDelayMs(moments: {
   firingSeconds: number;
   lossMs: number;

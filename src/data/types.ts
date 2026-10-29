@@ -884,8 +884,8 @@ export interface RunText {
   // A gear drop's name wherever a change or a held card names what made it: {gear} is the
   // item's name.
   readonly foundGear: string;
-  // lose is the current zone's pay the dogs still walking would earn, given up, and zonesLeft
-  // the zones after this one, shown when any are.
+  // lose is what the current zone has earned, its cash and the pay the dogs still walking would
+  // earn, given up, and zonesLeft the zones after this one, shown when any are.
   readonly homeQuestion: {
     readonly headHome: string;
     readonly keepWalking: string;
@@ -1021,7 +1021,9 @@ export interface MenuText {
   readonly pause: {
     readonly headHome: string;
     readonly help: string;
+    // What Head home keeps of the cash: note when it keeps less than all of it, else noteAll.
     readonly note: string;
+    readonly noteAll: string;
     readonly resume: string;
     readonly settings: string;
     readonly title: string;

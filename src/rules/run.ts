@@ -1,7 +1,7 @@
 import type { DogId, GameData, LiveTuning } from "../data/types";
 import { addCents, type Cents, cents, roundDollars } from "../lib/units";
 import { mapPack, packDogs } from "../state/pack";
-import type { ActiveModifier, RunState } from "../state/runState";
+import type { ActiveModifier, EndReason, RunState } from "../state/runState";
 import {
   type Cause,
   causesTotal,
@@ -101,8 +101,8 @@ export function payFor(tuning: LiveTuning): Cents {
   return read(tuning, "money", "payPerDog");
 }
 
-// At the end of a zone, every dog still walking earns the pay, banked into the money and
-// counted in bankedPay, one change per dog.
+// At the end of a zone, every dog still walking earns the pay, banked into the money, one change
+// per dog. The money then is the zone's end money, the most an early end keeps (walkEarnings).
 export function payZone(data: Pick<GameData, "tuning">, state: RunState): Payments {
   const pay = payFor(data.tuning);
   const changes = packDogs(state).map((dog): MoneyChange => ({
@@ -112,25 +112,24 @@ export function payZone(data: Pick<GameData, "tuning">, state: RunState): Paymen
     kind: "money",
   }));
   const paid = changes.reduce((sum, change) => addCents(sum, change.amount), cents(0));
-  return {
-    changes,
-    state: {
-      ...state,
-      bankedPay: addCents(state.bankedPay, paid),
-      money: addCents(state.money, paid),
-    },
-  };
+  const money = addCents(state.money, paid);
+  return { changes, state: { ...state, money, zoneEndMoney: money } };
 }
 
-// What a walk banks, and the cash it carried and lost. A walk that ends with every owner having
-// fired you banks only the pay its zones' ends banked, or all its money when card costs have
-// left less, and loses the rest; every other walk, ended or not, banks all its money.
-export function walkEarnings(run: Pick<RunState, "bankedPay" | "money" | "phase">): {
-  readonly banked: Cents;
-  readonly lost: Cents;
-} {
-  const firedOut = run.phase.kind === "ended" && run.phase.reason === "noDogs";
-  const banked = firedOut ? cents(Math.min(run.money, run.bankedPay)) : run.money;
+// How a walk ended, or would end now if it has not: by heading home, as an interrupted walk does.
+export function endReasonOf(run: Pick<RunState, "phase">): EndReason {
+  return run.phase.kind === "ended" ? run.phase.reason : "wentHome";
+}
+
+// What a walk ending for reason banks, and the cash it carried and lost. A finished walk banks
+// all its money. One that ends early, heading home or with every owner having fired you, banks
+// its last zone's end money, or all its money when card costs have spent below it, and loses
+// what the current zone earned since.
+export function walkEarnings(
+  reason: EndReason,
+  run: Pick<RunState, "money" | "zoneEndMoney">,
+): { readonly banked: Cents; readonly lost: Cents } {
+  const banked = reason === "finished" ? run.money : cents(Math.min(run.money, run.zoneEndMoney));
   return { banked, lost: cents(run.money - banked) };
 }
 

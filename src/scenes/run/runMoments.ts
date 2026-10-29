@@ -75,7 +75,7 @@ import {
   previewAchievements,
 } from "../../save/achievementPreview";
 import type { RunResult } from "../../save/checkpoint";
-import type { EffectSource, RunState } from "../../state/runState";
+import type { EffectSource, EndReason, RunState } from "../../state/runState";
 import { fillRect } from "../../ui/phaser/draw";
 import { PALETTE } from "../../ui/phaser/palette";
 import { pixelLinePoints } from "../../ui/pixelShapes";
@@ -425,10 +425,8 @@ export class RunMoments {
   }
 
   // Each owner who fired you has their dog trot off the road over the firing's hold, with
-  // their fired line. When the last one fires you, the cash the walk carried and lost
-  // (walkEarnings) pops by the cash and the counter counts down to what the walk keeps, all
-  // before the end screen opens. The loss stays out of the banked changes: the end screen's
-  // breakdown takes it from the run's result.
+  // their fired line. When the last one fires you, the walk loses its cash (cashLost) once the
+  // firing has played.
   private fired(dogs: readonly DogId[], run: RunState): void {
     if (dogs.length === 0) {
       return;
@@ -442,10 +440,22 @@ export class RunMoments {
       return;
     }
     this.endMoments.firingSeconds = firingSeconds();
-    const { lost } = walkEarnings(run);
+    this.cashLost(run.phase.reason, run);
+  }
+
+  // A walk that heads home loses its cash (cashLost).
+  headedHome(run: RunState): void {
+    this.cashLost("wentHome", run);
+  }
+
+  // The cash a walk ending for reason carried and lost (walkEarnings) pops by the cash and the
+  // counter counts down to what the walk keeps, before the end screen opens. The loss stays out
+  // of the banked changes: the end screen's breakdown takes it from the run's result.
+  private cashLost(reason: EndReason, run: RunState): void {
+    const { lost } = walkEarnings(reason, run);
     if (lost > 0) {
       this.scene.events.emit(CHANGE_LABELS_EVENT, [cashLostLabel(lost)]);
-      this.endMoments.lossMs = cashLostMs(still, lost);
+      this.endMoments.lossMs = cashLostMs(this.deps.still(), lost);
     }
   }
 

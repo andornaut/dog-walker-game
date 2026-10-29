@@ -20,7 +20,7 @@ import {
 } from "../rules/achievements";
 import { type CardView, type Choice, type ChoiceData } from "../rules/choices";
 import { currentZoneId } from "../rules/route";
-import { walkEarnings } from "../rules/run";
+import { endReasonOf, walkEarnings } from "../rules/run";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { advanceLaneControl, pullLane } from "../runner/laneControl";
 import { destinationLane } from "../runner/laneMotion";
@@ -161,7 +161,7 @@ export interface RunResult {
   readonly deliveries: readonly ZoneDelivery[];
   readonly debuffCosts: Readonly<Record<DebuffId, Readonly<DebuffCost>>>;
   readonly debuffsByZone: DebuffsByZone;
-  // The cash the run carried and lost when every owner fired you (walkEarnings).
+  // The cash the run carried and lost by ending early (walkEarnings).
   readonly cashLost: Cents;
   // The money banked at the end of the run.
   readonly earnings: Cents;
@@ -572,7 +572,7 @@ export function simulateRun(data: SimData, seed: number, config: SimConfig): Run
     zones: [],
   };
   playBySkill(data, seed, config, tally);
-  const { banked, lost } = walkEarnings(tally.run);
+  const { banked, lost } = walkEarnings(endReasonOf(tally.run), tally.run);
   const facts: RunFacts = {
     ...runCountersOf(tally.run),
     dogsHome: packDogs(tally.run).length,

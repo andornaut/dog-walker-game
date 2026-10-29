@@ -46,6 +46,7 @@ import { CHANGE_LABEL_STYLE, changeLabelRoom, hudLanes } from "../hud/hudLanes";
 import { messageStripLayout, ownerLeadLayout, stripLeadSlot } from "../hud/messageStrip";
 import { FIRED_LINE_FIT, LOW_CHIP_FIT, lowHeartsText } from "../hud/moments";
 import { MONEY_LABEL } from "../hud/moneyLabels";
+import { NOTE_PLATE, PAUSE_NOTE_LINES, PAUSE_NOTE_WIDTH } from "../hud/pauseMenu";
 import { DOG_CARD, WALK_BAR } from "../hud/walkHud";
 import {
   boxStyle,
@@ -395,6 +396,23 @@ function cashRole(): TextRoleCase[] {
   ];
 }
 
+// The pause menu's note in both its forms, naming the widest walk cash (cashRole), on the note
+// plate's lines.
+function pauseNoteRoles(): TextRoleCase[] {
+  const fields = MENU_TEXT_FIELDS.pause;
+  const words = gameData.menuText.pause;
+  const amounts = [888, 999].map((dollars) => dollarText(cents(dollars * 100)));
+  const notes = amounts.flatMap((cash) => [
+    fillLine(fields, words, "noteAll", { cash }),
+    ...amounts.map((kept) => fillLine(fields, words, "note", { cash, kept })),
+  ]);
+  const fit = {
+    room: PAUSE_NOTE_WIDTH - 2 * NOTE_PLATE.padX,
+    style: { lines: PAUSE_NOTE_LINES, scale: NOTE_PLATE.scale },
+  };
+  return plainRole("pause menu's note", "font-body", fit, notes);
+}
+
 // A card with a title band and a close control, and every title the data puts on it.
 export interface CardTitles {
   readonly card: Rect;
@@ -469,6 +487,7 @@ export function textRoleCases(): TextRoleCase[] {
     ),
     ...changeLabelRoles(),
     ...cashRole(),
+    ...pauseNoteRoles(),
     ...plainRole(
       "walk card's dog name",
       "font-title",

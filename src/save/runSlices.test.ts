@@ -23,13 +23,13 @@ const data = {
   world: WORLD,
 };
 const start = newRun(data, 3, { dogs: ["kilo", "duchess"], gear: null, walker: "casey" });
-// In zone 3 with 2 zones paid; duchess fired you in zone 2.
+// In zone 3 with 2 zones paid and $12.50 earned since; duchess fired you in zone 2.
 const midRun: RunState = {
   ...start,
-  bankedPay: cents(3_000),
   money: cents(4_250),
   pack: [defined(start.pack[0]), { dog: "duchess", status: "fired", zoneIndex: 1 }],
   route: ["street", "pawsPromenade", "park"],
+  zoneEndMoney: cents(3_000),
   zoneIndex: 2,
 };
 
@@ -39,14 +39,14 @@ if (walking.status !== "walking") {
 }
 
 describe("checkpointOf", () => {
-  it("records the zones paid, the money and the zone each owner fired you in", () => {
+  it("records the zones paid, the money heading home keeps and the zone each owner fired you in", () => {
     expect(checkpointOf(data, midRun)).toEqual({
       counters: { ...quietCounters(), startCents: start.startMoney },
       dogs: [
         { firedInZone: null, id: "kilo" },
         { firedInZone: 2, id: "duchess" },
       ],
-      earnedCents: 4_250,
+      earnedCents: midRun.zoneEndMoney,
       route: ["street", "pawsPromenade", "park"],
       zonesFinished: 2,
     });
@@ -112,15 +112,15 @@ describe("runResultOf", () => {
       ["a run that has not ended", midRun],
     ] satisfies readonly [string, RunState][]) {
       expect(runResultOf(data, run)).toMatchObject({
-        earnedCents: 4_250,
-        lostCents: 0,
+        earnedCents: midRun.zoneEndMoney,
+        lostCents: midRun.money - midRun.zoneEndMoney,
         outcome: "wentHome",
         zone: 3,
       });
     }
   });
 
-  it("banks only the pay of a run every owner fired you out of, losing the cash carried", () => {
+  it("banks the last zone's end money of a run every owner fired you out of, losing the rest", () => {
     const firedOut: RunState = {
       ...midRun,
       pack: [
@@ -130,8 +130,8 @@ describe("runResultOf", () => {
       phase: { kind: "ended", reason: "noDogs" },
     };
     expect(runResultOf(data, firedOut)).toMatchObject({
-      earnedCents: 3_000,
-      lostCents: 1_250,
+      earnedCents: midRun.zoneEndMoney,
+      lostCents: midRun.money - midRun.zoneEndMoney,
       outcome: "noDogs",
     });
   });
