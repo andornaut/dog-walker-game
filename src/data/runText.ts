@@ -25,7 +25,7 @@ export const RUN_TEXT = {
     upgradeDurationShort: { nextZone: "Next", now: "Now", run: "All walk" },
   },
   causes: {
-    atMax: "at max",
+    atMax: "full",
     bump: "bump",
     treat: "treat",
   },
