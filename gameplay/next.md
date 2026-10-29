@@ -11,14 +11,14 @@ The game grows sideways rather than upward. A world is a set of neighbourhoods w
 - Accounts and cloud saves
 - Art polish beyond a basic pixel pass; sound beyond a few effects and one music loop
 - Card variety: once the numbers are tuned, give each shared card obstacle a look per neighbourhood, so the three don't repeat; its options stay the same everywhere
-- Cosmetics: 2 accessories per dog, each made for that dog ($60 each; e.g. Duchess tiara and pearl collar, Kilo beanie and trail pack, Pepe beret and bow tie); 6 leash colours ($30 each); 6 home screen decor pieces with fixed spots in the gate scene ($50 to $130)
+- Cosmetics: 2 accessories per dog, each made for that dog ($60 each; e.g. Ginger tiara and pearl collar, Kilo beanie and trail pack, Pepe beret and bow tie); 6 leash colours ($30 each); 6 home screen decor pieces with fixed spots in the gate scene ($50 to $130)
 - Dog training: two courses per owned dog: Heel (the dog strains twice as long before it pulls, $80) and Good manners (its owner has +1 max ♥, $120)
 - House hub: a home base you decorate and improve with mostly cosmetic unlocks
 - iOS and Android app wrappers
 - Minigames as an alternative way to resolve encounters
 - Needs and traits: each dog wants something (a need with its own spot, urgency and payoff cards) and has a trait (fancy, chaser, food-driven) that changes which cards catch it and what it pulls toward
 - Owner loyalty: each finished walk without a firing raises that owner's loyalty, slowly adding a small permanent bonus (+$1 pay, then a heart of max)
-- Owner requests: each owner asks for one small thing per walk (e.g. Eve: "keep Duchess dry"), shown on the dog's doghouse card; meeting it pays a bonus and a happy quip
+- Owner requests: each owner asks for one small thing per walk (e.g. Eve: "keep Ginger dry"), shown on the dog's doghouse card; meeting it pays a bonus and a happy quip
 - Permanent unlocks as walk choices: pick a walk boost or a permanent unlock, Hades-style
 - Sidewalk lanes: the outer 2 of the 5 lanes become sidewalks and the middle 3 stay road, so the choice comes from what each lane holds. Sidewalks have no traffic, hold most tips, and their plain obstacles are frequent but cheap (pedestrians, strollers, sandwich boards); the road has the bigger tips, the pickups, traffic and card obstacles. Lane widths, the drag rule and the edge clamp stay
 - Special dogs found mid-walk, only with 2 or fewer dogs; once found, they join the roster

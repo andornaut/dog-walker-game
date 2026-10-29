@@ -44,7 +44,7 @@ export const DOGS = {
     art: "duchess",
     breed: "Maltese",
     look: "White coat, pink bow",
-    name: "Duchess",
+    name: "Ginger",
     owner: {
       name: "Eve",
       role: "YouTuber",

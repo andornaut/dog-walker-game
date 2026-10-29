@@ -31,7 +31,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 - **Walkers:** Ada calm and precise, Casey warm and encouraging, Mr. B easygoing, Trista sporty and quick
 - **Owners** (each with 2 lines for each of happier, upset, fired and parting):
   - **Clare** (Biscuit): psychologist, quiet and friendly, gentle observations, a little shy
-  - **Eve** (Duchess): YouTuber, everything is a video (vlog, views, subscribers)
+  - **Eve** (Ginger): YouTuber, everything is a video (vlog, views, subscribers)
   - **Gadget** (Penny): nervous but kind, double-checks everything, apologizes even when firing you
   - **Jason** (Buddy): lawn care pro, laid-back, yard talk (mowing, edging, weeds)
   - **Aunt Judy** (Sequoia): tennis star, older and athletic, tennis talk (aces, faults, match point)
@@ -116,7 +116,7 @@ Each neighbourhood also has its own card obstacle (see Encounters and debuffs) a
 
 - Used for encounters and forks. Up to three across, art-led: an illustration plus a one-line effect; hold to enlarge for details
 - Every card hits the whole pack. No card opens without a collision, except the fork card. A hit that opens a card costs nothing until you choose
-- Each option's outcome is fixed and shown on the card, with hearts per dog ("−1♥ Duchess, −1♥ Kilo", not "−1♥ each"). A perk, gear item or upgrade that changes an option shows its charm centred just under that option's card: the item's icon on the left and, beside it, the item's name over what it did to that option (Hall pass's skip "Free skip", Quick recovery "Half time", Second chance "Safe", Sweet talker "Free"), with two charms stacked, the enlarged card included, never on the card, so the card keeps its full text box. The card row (title, cards and charms) rises to the 2/3 line of the walk view. Choices only, no minigames
+- Each option's outcome is fixed and shown on the card, with hearts per dog ("−1♥ Ginger, −1♥ Kilo", not "−1♥ each"). A perk, gear item or upgrade that changes an option shows its charm centred just under that option's card: the item's icon on the left and, beside it, the item's name over what it did to that option (Hall pass's skip "Free skip", Quick recovery "Half time", Second chance "Safe", Sweet talker "Free"), with two charms stacked, the enlarged card included, never on the card, so the card keeps its full text box. The card row (title, cards and charms) rises to the 2/3 line of the walk view. Choices only, no minigames
 - A money option shows its price on its plate, greyed out when you can't afford it, so cash never goes below $0; every card keeps at least one option that costs no money, and its plate is blank. Money options are charged once per card, whatever the pack size; heart options cost each owner, so a bigger pack has more owners who can fire you. Slower options cost money (missed tips) instead of time
 - An option says what it would do before you pick: a debuff option states its stake ("Quick rinse → Stinky: tips pay nothing for 60s"), an option that would fire an owner says so ("Fires Jason"), and a heart Second chance would forgive reads as safe
 - A fork's path card shows its upgrade's duration (Now, Next neighbourhood, Rest of walk) where other cards show a price

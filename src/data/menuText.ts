@@ -21,7 +21,7 @@ export const MENU_TEXT = {
       fees: "Pay",
       fullPack: "Walk bonus",
       luckyFinds: "Lucky finds",
-      start: "Starting cash",
+      start: "Start cash",
       tips: "Tips",
     },
     firedYou: "{owner} fired you!",

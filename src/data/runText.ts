@@ -18,7 +18,7 @@ export const RUN_TEXT = {
     need: "{amount}",
     pickOne: "Pick one",
     skip: "Skip (Hall pass)",
-    skipEffect: "Skip this card, free once each neighbourhood.",
+    skipEffect: "Skip this card for free.",
     skipHeld: "Skip this card: nothing happens.",
     upgradeDuration: { nextZone: "Next neighbourhood", now: "Now", run: "Rest of walk" },
     upgradeDurationShort: { nextZone: "Next", now: "Now", run: "All walk" },

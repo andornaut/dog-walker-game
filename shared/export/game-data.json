@@ -10,7 +10,7 @@
         "id": "capybara",
         "kind": "encounter"
       },
-      "text": "Muddy: lane changes 67% slower for 30s",
+      "text": "Muddy: 67% slower moves for 30s",
       "title": "Escaped capybara"
     },
     {
@@ -88,7 +88,7 @@
         "id": "droppedCone",
         "kind": "encounter"
       },
-      "text": "Muddy: lane changes 67% slower for 30s",
+      "text": "Muddy: 67% slower moves for 30s",
       "title": "Dropped ice cream"
     },
     {
@@ -127,7 +127,7 @@
         "id": "greenBin",
         "kind": "encounter"
       },
-      "text": "Muddy: lane changes 67% slower for 30s",
+      "text": "Muddy: 67% slower moves for 30s",
       "title": "Green bin spill"
     },
     {
@@ -179,7 +179,7 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "Zoomies: the pack drifts on its own for 40s",
+      "text": "Zoomies: the pack drifts for 40s",
       "title": "Other dog"
     },
     {
@@ -218,7 +218,7 @@
         "id": "porchCat",
         "kind": "encounter"
       },
-      "text": "Zoomies: the pack drifts on its own for 40s",
+      "text": "Zoomies: the pack drifts for 40s",
       "title": "Porch cat"
     },
     {
@@ -231,7 +231,7 @@
         "id": "promoTeam",
         "kind": "encounter"
       },
-      "text": "Spotlight: bumps also cost $20 for 30s",
+      "text": "Spotlight: bumps cost $20 for 30s",
       "title": "Big screen promo"
     },
     {
@@ -335,7 +335,7 @@
         "id": "thief",
         "kind": "encounter"
       },
-      "text": "Zoomies: the pack drifts on its own for 40s",
+      "text": "Zoomies: the pack drifts for 40s",
       "title": "Thief"
     },
     {
@@ -348,7 +348,7 @@
         "id": "weddingShoot",
         "kind": "encounter"
       },
-      "text": "Spotlight: bumps also cost $20 for 30s",
+      "text": "Spotlight: bumps cost $20 for 30s",
       "title": "Wedding photo shoot"
     },
     {
@@ -543,7 +543,7 @@
         "id": null,
         "kind": "skip"
       },
-      "text": "Skip this card, free once each neighbourhood.",
+      "text": "Skip this card for free.",
       "title": ""
     }
   ],
@@ -559,7 +559,7 @@
       ],
       "name": "Muddy",
       "seconds": "muddySeconds",
-      "stake": "lane changes {slower} slower for {seconds}s"
+      "stake": "{slower} slower moves for {seconds}s"
     },
     {
       "id": "spotlight",
@@ -567,7 +567,7 @@
       "modifiers": [],
       "name": "Spotlight",
       "seconds": "spotlightSeconds",
-      "stake": "bumps also cost {cash} for {seconds}s"
+      "stake": "bumps cost {cash} for {seconds}s"
     },
     {
       "id": "stinky",
@@ -587,7 +587,7 @@
       "modifiers": [],
       "name": "Zoomies",
       "seconds": "zoomiesSeconds",
-      "stake": "the pack drifts on its own for {seconds}s"
+      "stake": "the pack drifts for {seconds}s"
     }
   ],
   "dogs": [
@@ -676,7 +676,7 @@
       "art": "duchess",
       "breed": "Maltese",
       "look": "White coat, pink bow",
-      "name": "Duchess",
+      "name": "Ginger",
       "owner": {
         "name": "Eve",
         "role": "YouTuber"
@@ -1548,7 +1548,7 @@
       ],
       "name": "Fanny pack",
       "price": "fannyPack",
-      "short": "Saves a spare treat for later",
+      "short": "Keeps a spare treat",
       "iconKey": "item-fanny-pack"
     },
     {
@@ -1560,7 +1560,7 @@
       ],
       "name": "Hall pass",
       "price": "hallPass",
-      "short": "Skip 1 card each neighbourhood",
+      "short": "Free card skips",
       "iconKey": "item-hall-pass"
     },
     {
@@ -1575,7 +1575,7 @@
       ],
       "name": "Lucky collar",
       "price": "luckyCollar",
-      "short": "+1 max ♥ for every dog's owner",
+      "short": "+1 max ♥ per owner",
       "iconKey": "item-lucky-collar"
     },
     {
@@ -1590,7 +1590,7 @@
       ],
       "name": "Running shoes",
       "price": "runningShoes",
-      "short": "+{percent} lane change speed",
+      "short": "Faster lane changes",
       "iconKey": "item-running-shoes"
     },
     {
@@ -1607,7 +1607,7 @@
       ],
       "name": "Whistle",
       "price": "whistle",
-      "short": "Medium and large dogs dodge too",
+      "short": "Every dog dodges",
       "iconKey": "item-whistle"
     }
   ],
@@ -3545,7 +3545,7 @@
       "density": {
         "cards": 1,
         "luckyFinds": 1,
-        "minorObstacles": 0.76,
+        "minorObstacles": 0.7,
         "tips": 1.2
       },
       "difficulty": 3,
@@ -3669,7 +3669,7 @@
       "density": {
         "cards": 1,
         "luckyFinds": 1.25,
-        "minorObstacles": 1.12,
+        "minorObstacles": 1.02,
         "tips": 1
       },
       "difficulty": 3,
@@ -3917,7 +3917,7 @@
       "density": {
         "cards": 1,
         "luckyFinds": 1,
-        "minorObstacles": 1.1,
+        "minorObstacles": 1.18,
         "tips": 1
       },
       "difficulty": 5,

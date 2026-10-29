@@ -235,7 +235,7 @@ export const WORLD = {
     },
     {
       art: "kensington-market",
-      density: { cards: 1, luckyFinds: 1, minorObstacles: 0.76, tips: 1.2 },
+      density: { cards: 1, luckyFinds: 1, minorObstacles: 0.7, tips: 1.2 },
       difficulty: 3,
       difficultyName: "Normal",
       id: "shops",
@@ -347,7 +347,7 @@ export const WORLD = {
     },
     {
       art: "the-beaches",
-      density: { cards: 1, luckyFinds: 1.25, minorObstacles: 1.12, tips: 1 },
+      density: { cards: 1, luckyFinds: 1.25, minorObstacles: 1.02, tips: 1 },
       difficulty: 3,
       difficultyName: "Normal",
       id: "pawsPromenade",
@@ -571,7 +571,7 @@ export const WORLD = {
     },
     {
       art: "yonge-street",
-      density: { cards: 1, luckyFinds: 1, minorObstacles: 1.1, tips: 1 },
+      density: { cards: 1, luckyFinds: 1, minorObstacles: 1.18, tips: 1 },
       difficulty: 5,
       difficultyName: "Hardest",
       id: "homeStretch",

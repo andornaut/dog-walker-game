@@ -9,14 +9,14 @@ export const DEBUFFS = {
     modifiers: [{ by: "muddyLaneSlow", operation: "multiply", stat: "agility" }],
     name: "Muddy",
     seconds: "muddySeconds",
-    stake: "lane changes {slower} slower for {seconds}s",
+    stake: "{slower} slower moves for {seconds}s",
   },
   spotlight: {
     bumpMoney: "spotlightBump",
     modifiers: [],
     name: "Spotlight",
     seconds: "spotlightSeconds",
-    stake: "bumps also cost {cash} for {seconds}s",
+    stake: "bumps cost {cash} for {seconds}s",
   },
   stinky: {
     modifiers: [{ by: "stinkyTipValue", operation: "multiply", stat: "tipValue" }],
@@ -28,6 +28,6 @@ export const DEBUFFS = {
     modifiers: [],
     name: "Zoomies",
     seconds: "zoomiesSeconds",
-    stake: "the pack drifts on its own for {seconds}s",
+    stake: "the pack drifts for {seconds}s",
   },
 } as const satisfies Record<string, Debuff>;
