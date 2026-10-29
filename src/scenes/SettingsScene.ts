@@ -35,6 +35,7 @@ import {
 } from "../home/settings";
 import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import {
+  exitShown,
   installApp,
   installState,
   menuBrowser,
@@ -299,17 +300,18 @@ export class SettingsScene extends Scene {
     // the steps' card is open, the back button and the dim around that card close it, the
     // settings card included. As listenDismiss, with the area read as each press lands.
     onBackPressed(this, () => this.back());
+    const exit = exitShown();
     listenOutsideTap(
       this,
       () =>
         this.steps === undefined
-          ? regionOutside(data.region, [this.layout.panel])
-          : regionOutside(data.region, [this.steps.card]),
+          ? regionOutside(exit, data.region, [this.layout.panel])
+          : regionOutside(exit, data.region, [this.steps.card]),
       () => this.back(),
     );
     // Over the walk, the HUD takes the walk bar's presses (topBarAction).
     if (data.region === "home") {
-      listenHomeBar(this, () => this.close());
+      listenHomeBar(this, exit, () => this.close());
     }
     // Sound on the top bar flips the sound switch here too.
     onSceneEvent(this, this.game.events, BAR_MUTED_EVENT, () => this.render());

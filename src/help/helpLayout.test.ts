@@ -4,7 +4,7 @@ import { inkRowsFromCapTop } from "@andornaut/game-kit/text/bitmapFont";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { HOME_LAYOUT } from "../home/homeLayout";
+import { HOME_BAR_LAST_FACE, HOME_LAYOUT } from "../home/homeLayout";
 import { TITLE_CAP_ROWS } from "../hud/walkHud";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { bodyTextWidth } from "../testing/bodyFont";
@@ -19,14 +19,15 @@ import type { HelpAction } from "./helpPaging";
 
 // Help's top bar is the home pages': as tall, trimmed alike, its heading's capitals and close
 // face centred down the rows between the trim's line and edge as the home bar's button faces
-// are, the close face where the home bar's Settings face is.
+// are, the close face where the home bar's last face is (Exit's, or Settings' where Exit is
+// hidden).
 describe("help's top bar", () => {
   const { close, heading, topBar } = HELP_LAYOUT;
   const home = HOME_LAYOUT.topBar;
   const homeBar = { height: home.height, width: topBar.width, x: 0, y: 0 };
   const rows = topBarContentRows(topBar.height);
   const capRows = TITLE_CAP_ROWS * TEXT_SCALE;
-  const homeFace = { ...HOME_LAYOUT.settings.face, height: home.faceSize, width: home.faceSize };
+  const homeFace = { ...HOME_BAR_LAST_FACE, height: home.faceSize, width: home.faceSize };
   // How many more rows a part leaves below it than above it, between the trim's line and edge.
   const offCentre = (top: number, size: number) => rows.bottom - (top + size) - (top - rows.top);
 

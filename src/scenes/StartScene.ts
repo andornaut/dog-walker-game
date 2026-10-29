@@ -59,6 +59,8 @@ import {
   dogTileNameY,
   dogTilePlateY,
   HOME_LAYOUT,
+  type HomeBarButton,
+  homeBarButtons,
   sectionFill,
   slotSignText,
   updatePlateText,
@@ -111,6 +113,7 @@ import type { PackPlacement } from "../layout/packFormation";
 import { addFigure, PackFigures } from "../pack/phaser/packFigures";
 import {
   acceptUpdate,
+  exitShown,
   installNudgeDue,
   noteInstallNudged,
   PHONE_EVENTS,
@@ -151,7 +154,7 @@ import type { CelebrationSceneData } from "./CelebrationScene";
 import { addNamePills } from "./effectNameColours";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
-import { HOME_PAGE_OPENING_EVENT, openHomePage } from "./homeBarPress";
+import { exitGame, HOME_PAGE_OPENING_EVENT, openHomePage } from "./homeBarPress";
 import { addAffordFrame, drawDetailCard } from "./homePanels";
 import {
   addPlate,
@@ -208,6 +211,7 @@ import {
   BODY_TEXT,
   BUTTON_PRESS_PX,
   buttonFaces,
+  exitIcon,
   type IconButton,
   imageIcon,
   imageIconOr,
@@ -230,14 +234,6 @@ const PORCH_SPOTS: Readonly<Partial<Record<DogId, { footY: number; x: number }>>
   HOME_LAYOUT.porchSpots;
 const PORCH_DOG_OFFSET = HOME_LAYOUT.porchDogOffset;
 const TOP_BAR = HOME_LAYOUT.topBar;
-const HELP_BUTTON: Rect = HOME_LAYOUT.help.hit;
-const HELP_FACE = HOME_LAYOUT.help.face;
-const MUTE_BUTTON: Rect = HOME_LAYOUT.mute.hit;
-const MUTE_FACE = HOME_LAYOUT.mute.face;
-const SETTINGS_BUTTON: Rect = HOME_LAYOUT.settings.hit;
-const SETTINGS_FACE = HOME_LAYOUT.settings.face;
-const LOGBOOK_BUTTON: Rect = HOME_LAYOUT.logbook.hit;
-const LOGBOOK_FACE = HOME_LAYOUT.logbook.face;
 const PET_SHOP: Rect = HOME_LAYOUT.petShop;
 const PET_SHOP_BOARD: Rect = HOME_LAYOUT.petShop.board;
 const SLOT_SIGN = HOME_LAYOUT.slotSign;
@@ -286,6 +282,7 @@ type Target =
   | { dog: DogId; kind: "dog" }
   | { gear: GearId; kind: "gear" }
   | { kind: "bubble" }
+  | { kind: "exit" }
   | { kind: "help" }
   | { kind: "logbook" }
   | { kind: "mute" }
@@ -413,8 +410,8 @@ const LAST_VISIT_BANK_KEY = "homeLastVisitBank";
 // say when one has just been unlocked. A session's first visit has none to compare with.
 const LAST_VISIT_WALKERS_KEY = "homeLastVisitWalkers";
 
-// The screen before a walk: the bank at the top bar's left and Logbook, Help, Sound and
-// Settings at its right; the walker and pack at the gate beside the Pet shop; the Walker, Dogs
+// The screen before a walk: the bank at the top bar's left and Logbook, Help, Sound, Settings
+// and Exit at its right (Exit where exitShown); the walker and pack at the gate beside the Pet shop; the Walker, Dogs
 // and Pocket sections and Start walk. While a newer version of the game waits, the update plate
 // under the top bar takes the walker's bubble's place until tapped. Buying happens only in the
 // shop: tapping the building opens it, and tapping a locked dog, gear item or the dog slot sign
@@ -428,6 +425,8 @@ export class StartScene extends Scene {
   // A press of Start walk or help made before boot has loaded the rest of the art: the latest
   // runs once it has, and Start walk shows held down and dimmed while it waits.
   private artWait: { action: () => void; kind: "help" | "start" } | undefined;
+  // Whether the top bar shows Exit (exitShown).
+  private exit = true;
   private focus: Focus | null = null;
   private gateDogs: { dog: DogId; footY: number; sprite: GameObjects.Sprite }[] = [];
   // A press on a dog or gear tile that may become a hold.
@@ -472,6 +471,7 @@ export class StartScene extends Scene {
   create(): void {
     this.action = { kind: "none" };
     this.artWait = undefined;
+    this.exit = exitShown();
     this.focus = null;
     this.hold = undefined;
     this.overlay = undefined;
@@ -515,7 +515,10 @@ export class StartScene extends Scene {
       down: (pointer) => {
         addTapBurst(this, pointer.x, pointer.y);
         // The top bar stays lit over an open card, and its buttons take their presses.
-        if (this.overlay !== undefined && homeBarButtonAt(pointer.x, pointer.y) === undefined) {
+        if (
+          this.overlay !== undefined &&
+          homeBarButtonAt(this.exit, pointer.x, pointer.y) === undefined
+        ) {
           this.overlayPress = { x: pointer.x, y: pointer.y };
           if (this.closePressed()) {
             this.render();
@@ -583,7 +586,7 @@ export class StartScene extends Scene {
       this,
       () => {
         const rect = this.overlay?.rect;
-        return rect === undefined ? undefined : regionOutside("home", [rect]);
+        return rect === undefined ? undefined : regionOutside(this.exit, "home", [rect]);
       },
       () => this.closeOverlay(),
     );
@@ -789,12 +792,10 @@ export class StartScene extends Scene {
     const update: readonly [Rect, Target][] = this.shownControls().plate
       ? [[UPDATE_PLATE.hit, { kind: "update" }]]
       : [];
+    const bar = homeBarButtons(this.exit).map(([kind, { hit }]): [Rect, Target] => [hit, { kind }]);
     const fixed: readonly [Rect, Target][] = [
       [START_BUTTON, { kind: "start" }],
-      [HELP_BUTTON, { kind: "help" }],
-      [MUTE_BUTTON, { kind: "mute" }],
-      [SETTINGS_BUTTON, { kind: "settings" }],
-      [LOGBOOK_BUTTON, { kind: "logbook" }],
+      ...bar,
       ...update,
       [PET_SHOP, { kind: "petShop" }],
     ];
@@ -877,8 +878,8 @@ export class StartScene extends Scene {
     this.pending.add(timer);
   }
 
-  // Whether act opens a page for target: help, the Logbook, the settings or the Pet shop, which
-  // a dog or gear not yet bought opens too.
+  // Whether act opens a page for target, or leaves the game: help, the Logbook, the settings or
+  // the Pet shop, which a dog or gear not yet bought opens too, and Exit.
   private opensPage(target: Target): boolean {
     switch (target.kind) {
       case "dog":
@@ -890,6 +891,7 @@ export class StartScene extends Scene {
             : tapGear(owned, target.gear, this.loadout);
         return tap.kind === "shop";
       }
+      case "exit":
       case "help":
       case "logbook":
       case "petShop":
@@ -964,6 +966,9 @@ export class StartScene extends Scene {
         this.render();
         return;
       }
+      case "exit":
+        exitGame();
+        return;
       case "mute":
         this.showMuted(toggleMuted(this));
         return;
@@ -1466,12 +1471,27 @@ export class StartScene extends Scene {
     root.bringToTop(dollar);
     root.bringToTop(amount);
     setDollarAmount(dollar, amount, shown, () => ({ left: rect.x + pad, scale, top: capsY }));
-    this.iconButton(root, "logbook", LOGBOOK_FACE, (x, y) =>
-      imageIconOr(this, "icon-logbook", x, y, "L"),
-    );
-    this.iconButton(root, "settings", SETTINGS_FACE, (x, y) => settingsIcon(this, x, y));
-    this.iconButton(root, "help", HELP_FACE, (x, y) => imageIconOr(this, "icon-help", x, y, "?"));
-    this.iconButton(root, "mute", MUTE_FACE, (x, y) => soundIcon(this, !isMuted(this), x, y));
+    for (const [id, { face }] of homeBarButtons(this.exit)) {
+      this.iconButton(root, id, face, (x, y) => this.barIcon(id, x, y));
+    }
+  }
+
+  // A top bar button's icon on its face at (x, y).
+  private barIcon(id: HomeBarButton, x: number, y: number): ReturnType<typeof imageIcon> {
+    switch (id) {
+      case "exit":
+        return exitIcon(this, x, y);
+      case "help":
+        return imageIconOr(this, "icon-help", x, y, "?");
+      case "logbook":
+        return imageIconOr(this, "icon-logbook", x, y, "L");
+      case "mute":
+        return soundIcon(this, !isMuted(this), x, y);
+      case "settings":
+        return settingsIcon(this, x, y);
+      default:
+        return id satisfies never;
+    }
   }
 
   // The starter owners waiting at the gate until the first walk; a picked dog has gone to the

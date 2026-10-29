@@ -8,6 +8,7 @@ import { badgeStripRows, CELEBRATION_PANEL } from "../home/badgesView";
 import { overlayRegion, regionOutside } from "../home/homeBar";
 import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { WIDE_BUTTON } from "../layout/screenLayout";
+import { exitShown } from "../pwa";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { addBadgeCelebration, addCheeringFace } from "./badges";
 import { listenHomeBar } from "./homeBarPress";
@@ -75,7 +76,8 @@ export class CelebrationScene extends Scene {
       }
     });
     // The dim around the panel and Nice! closes, as Nice! does; the top bar keeps its buttons.
-    listenDismiss(this, regionOutside("home", [panel, buttonRect]), close);
-    listenHomeBar(this, close);
+    const exit = exitShown();
+    listenDismiss(this, regionOutside(exit, "home", [panel, buttonRect]), close);
+    listenHomeBar(this, exit, close);
   }
 }

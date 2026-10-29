@@ -1,7 +1,7 @@
 import { containsPoint, type Point, type Rect } from "@andornaut/game-kit/rect";
 
 import { SCREEN_LAYOUT } from "../data/screen";
-import { HOME_LAYOUT } from "../home/homeLayout";
+import { HOME_BAR_LAST_FACE, HOME_LAYOUT } from "../home/homeLayout";
 import { TITLE_CAP_ROWS } from "../hud/walkHud";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { pageCloseControl } from "../ui/closeControl";
@@ -24,13 +24,14 @@ const TITLE_Y = ILLUSTRATION.y + ILLUSTRATION.height + 26;
 // left edge and capitals' top.
 // The top bar is the home pages' (HOME_LAYOUT.topBar), its heading's capitals centred on the
 // bar's mid row as the home bar's button faces are, and the close control's face where the home
-// bar's Settings face is, in its 44x44 target in the screen's top-right corner.
+// bar's last face is (Exit's, or Settings' where Exit is hidden), in its 44x44 target in the
+// screen's top-right corner.
 // The body's lines, at most maxLines of them, are lineHeight apart, its capitals the label gap
 // under the lowest row the title's font inks (helpCapDy). The picture is the walk screen's
 // width, ruled off a row above and below.
 export const HELP_LAYOUT = {
   body: { lineHeight: 18, maxLines: 6, scale: 2, width: 336, x: 12, y: TITLE_Y + 22 },
-  close: { ...pageCloseControl(SCREEN), ...HOME_LAYOUT.settings.face },
+  close: { ...pageCloseControl(SCREEN), ...HOME_BAR_LAST_FACE },
   // A tap target apart, so each dot's target is its own slot, ending above Previous's and
   // Next's.
   dots: { centreX: width / 2, size: 8, spacing: MIN_TAP_SIZE, y: height - 84 },

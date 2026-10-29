@@ -175,6 +175,13 @@ export function leaveGame(): void {
   backGuard?.leave();
 }
 
+// Whether the home top bar shows Exit: everywhere but Firefox for Android's installed app,
+// which ignores a script's close, so Exit could only go to the site's home page inside the app.
+// WORKAROUND: https://bugzilla.mozilla.org/show_bug.cgi?id=2079243 (see isFirefoxAndroidApp).
+export function exitShown(): boolean {
+  return !isFirefoxAndroidApp(navigator.userAgent, (query) => matchMedia(query).matches);
+}
+
 // Whether the phone is on its side now, with the turn-upright notice over the game.
 export function isPhoneSideways(): boolean {
   return orientation?.sideways() ?? false;

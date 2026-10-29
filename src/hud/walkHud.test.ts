@@ -12,7 +12,7 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
 import { dollarAmountText } from "../home/home";
-import { HOME_LAYOUT } from "../home/homeLayout";
+import { HOME_BAR_LAST_FACE, HOME_LAYOUT } from "../home/homeLayout";
 import { maxHearts } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import { zoneLength } from "../runner/walk";
@@ -150,7 +150,7 @@ describe("the walk bar", () => {
   it("sets its button faces, cash well and cash as the start screen's top bar sets its own", () => {
     const home = HOME_LAYOUT.topBar;
     for (const id of WALK_BAR_BUTTONS) {
-      expect(BAR.buttons[id].face.y - topBar.y).toBe(HOME_LAYOUT.help.face.y);
+      expect(BAR.buttons[id].face.y - topBar.y).toBe(HOME_BAR_LAST_FACE.y);
     }
     const { cash } = WALK_BAR;
     expect([cash.well.x, cash.well.y, cash.well.height]).toEqual([

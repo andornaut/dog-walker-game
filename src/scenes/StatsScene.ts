@@ -16,7 +16,7 @@ import {
 } from "../home/badgesView";
 import { FEEDBACK } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
-import { HOME_BAR_HITS, overlayRegion } from "../home/homeBar";
+import { homeBarHits, overlayRegion } from "../home/homeBar";
 import {
   badgesBottom,
   DOG_STATS,
@@ -48,6 +48,7 @@ import {
   stepScroll,
 } from "../input/listScroll";
 import { screenArea } from "../input/outsideTap";
+import { exitShown } from "../pwa";
 import { rectIndexAt } from "../ui/grid";
 import { PALETTE } from "../ui/palette";
 import { fillRect } from "../ui/phaser/draw";
@@ -209,13 +210,14 @@ export class StatsScene extends Scene {
     // The top bar's empty area and the margins around the card close the page, as on the shop,
     // and the top bar's buttons keep their own taps. Back closes an open badge first, as Escape
     // does.
+    const exit = exitShown();
     listenDismiss(
       this,
-      screenArea([PANEL, ...HOME_BAR_HITS]),
+      screenArea([PANEL, ...homeBarHits(exit)]),
       () => this.close(),
       () => this.back(),
     );
-    listenHomeBar(this, () => this.close());
+    listenHomeBar(this, exit, () => this.close());
   }
 
   // An open badge closes, else the page.

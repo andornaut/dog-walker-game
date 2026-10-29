@@ -2,7 +2,7 @@ import { containsPoint, type Rect } from "@andornaut/game-kit/rect";
 
 import { SCREEN_LAYOUT } from "../data/screen";
 import type { OutsideArea } from "../input/outsideTap";
-import { HOME_LAYOUT } from "./homeLayout";
+import { HOME_LAYOUT, type HomeBarButton, homeBarButtons } from "./homeLayout";
 
 // Where an overlay sits: on a home page (the start screen, the Pet shop, the Logbook), or on a
 // walk.
@@ -19,42 +19,43 @@ export function overlayRegion(region: OverlayRegion): Rect {
   return { height: screen.y + screen.height - top, width: screen.width, x: screen.x, y: top };
 }
 
-export type HomeBarButton = "help" | "logbook" | "mute" | "settings";
+export type HomeBarAction = "close" | "exit" | "mute" | "openHelp" | "openLogbook" | "openSettings";
 
-export type HomeBarAction = "close" | "mute" | "openHelp" | "openLogbook" | "openSettings";
-
-const HOME_BAR_BUTTONS: readonly (readonly [HomeBarButton, Rect])[] = [
-  ["help", HOME_LAYOUT.help.hit],
-  ["logbook", HOME_LAYOUT.logbook.hit],
-  ["mute", HOME_LAYOUT.mute.hit],
-  ["settings", HOME_LAYOUT.settings.hit],
-];
-
-// Every top bar button's tap area.
-export const HOME_BAR_HITS: readonly Rect[] = HOME_BAR_BUTTONS.map(([, hit]) => hit);
+// Every top bar button's tap area, Exit's among them where exit is true (homeBarButtons).
+export function homeBarHits(exit: boolean): Rect[] {
+  return homeBarButtons(exit).map(([, { hit }]) => hit);
+}
 
 // Where a tap outside an overlay's panel and covered counts in region: in overlayRegion, off
-// the home top bar's buttons, whose tap areas reach a little below the bar.
-export function regionOutside(region: OverlayRegion, covered: readonly Rect[]): OutsideArea {
-  const bar = region === "home" ? HOME_BAR_HITS : [];
+// the home top bar's buttons as shown (exit: whether Exit is among them), whose tap areas reach
+// a little below the bar.
+export function regionOutside(
+  exit: boolean,
+  region: OverlayRegion,
+  covered: readonly Rect[],
+): OutsideArea {
+  const bar = region === "home" ? homeBarHits(exit) : [];
   return { covered: [...covered, ...bar], dim: overlayRegion(region) };
 }
 
-// The top bar button a press at (x, y) lands on, if any.
-export function homeBarButtonAt(x: number, y: number): HomeBarButton | undefined {
-  return HOME_BAR_BUTTONS.find(([, hit]) => containsPoint(hit, x, y))?.[0];
+// The top bar button a press at (x, y) lands on, if any, with Exit among the buttons where exit
+// is true.
+export function homeBarButtonAt(exit: boolean, x: number, y: number): HomeBarButton | undefined {
+  return homeBarButtons(exit).find(([, { hit }]) => containsPoint(hit, x, y))?.[0];
 }
 
 // What a top bar button does over an overlay on a home page, given which of the Logbook and the
-// settings is open: Sound mutes or unmutes, and help, the Logbook and the settings open as on
-// the bare start screen or the Pet shop, in place of any other overlay (openHomePage). While the
-// button's own page is open, the button closes it, as the walk bar's pause button resumes from
-// its menu.
+// settings is open: Sound mutes or unmutes, Exit leaves the game, and help, the Logbook and the
+// settings open as on the bare start screen or the Pet shop, in place of any other overlay
+// (openHomePage). While the button's own page is open, the button closes it, as the walk bar's
+// pause button resumes from its menu.
 export function homeBarAction(
   open: { readonly logbook: boolean; readonly settings: boolean },
   button: HomeBarButton,
 ): HomeBarAction {
   switch (button) {
+    case "exit":
+      return "exit";
     case "help":
       return "openHelp";
     case "logbook":

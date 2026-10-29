@@ -1738,42 +1738,6 @@
         "x": 194,
         "y": 166
       },
-      "help": {
-        "face": {
-          "x": 265,
-          "y": 9
-        },
-        "hit": {
-          "height": 44,
-          "width": 34,
-          "x": 258,
-          "y": 0
-        }
-      },
-      "logbook": {
-        "face": {
-          "x": 231,
-          "y": 9
-        },
-        "hit": {
-          "height": 44,
-          "width": 34,
-          "x": 224,
-          "y": 0
-        }
-      },
-      "mute": {
-        "face": {
-          "x": 299,
-          "y": 9
-        },
-        "hit": {
-          "height": 44,
-          "width": 34,
-          "x": 292,
-          "y": 0
-        }
-      },
       "path": {
         "width": 32,
         "x": 164
@@ -1890,18 +1854,6 @@
           "y": 201
         }
       },
-      "settings": {
-        "face": {
-          "x": 333,
-          "y": 9
-        },
-        "hit": {
-          "height": 44,
-          "width": 34,
-          "x": 326,
-          "y": 0
-        }
-      },
       "slotSign": {
         "art": {
           "x": 255,
@@ -1983,7 +1935,7 @@
         "well": {
           "height": 29,
           "lip": 1,
-          "maxWidth": 220,
+          "maxWidth": 186,
           "x": 5,
           "y": 5
         },
@@ -2065,6 +2017,120 @@
         "width": 128,
         "x": 6,
         "y": 138
+      },
+      "barButtons": {
+        "exitHidden": {
+          "logbook": {
+            "face": {
+              "x": 231,
+              "y": 9
+            },
+            "hit": {
+              "height": 44,
+              "width": 34,
+              "x": 224,
+              "y": 0
+            }
+          },
+          "help": {
+            "face": {
+              "x": 265,
+              "y": 9
+            },
+            "hit": {
+              "height": 44,
+              "width": 34,
+              "x": 258,
+              "y": 0
+            }
+          },
+          "mute": {
+            "face": {
+              "x": 299,
+              "y": 9
+            },
+            "hit": {
+              "height": 44,
+              "width": 34,
+              "x": 292,
+              "y": 0
+            }
+          },
+          "settings": {
+            "face": {
+              "x": 333,
+              "y": 9
+            },
+            "hit": {
+              "height": 44,
+              "width": 34,
+              "x": 326,
+              "y": 0
+            }
+          }
+        },
+        "exitShown": {
+          "logbook": {
+            "face": {
+              "x": 197,
+              "y": 9
+            },
+            "hit": {
+              "height": 44,
+              "width": 34,
+              "x": 190,
+              "y": 0
+            }
+          },
+          "help": {
+            "face": {
+              "x": 231,
+              "y": 9
+            },
+            "hit": {
+              "height": 44,
+              "width": 34,
+              "x": 224,
+              "y": 0
+            }
+          },
+          "mute": {
+            "face": {
+              "x": 265,
+              "y": 9
+            },
+            "hit": {
+              "height": 44,
+              "width": 34,
+              "x": 258,
+              "y": 0
+            }
+          },
+          "settings": {
+            "face": {
+              "x": 299,
+              "y": 9
+            },
+            "hit": {
+              "height": 44,
+              "width": 34,
+              "x": 292,
+              "y": 0
+            }
+          },
+          "exit": {
+            "face": {
+              "x": 333,
+              "y": 9
+            },
+            "hit": {
+              "height": 44,
+              "width": 34,
+              "x": 326,
+              "y": 0
+            }
+          }
+        }
       },
       "dogRects": [
         {

@@ -444,6 +444,29 @@ export function settingsIcon(scene: Scene, x: number, y: number): Placed[] {
   return icon.length > 0 ? icon : cogIcon(scene, x, y);
 }
 
+// A door with an arrow out of it for Exit, drawn in code while icon-exit is missing.
+const EXIT_ROWS = [
+  "#####...",
+  "#...#...",
+  "#...#.#.",
+  "#..#####",
+  "#...#.#.",
+  "#...#...",
+  "#...#...",
+  "#####...",
+];
+
+// icon-exit, or the door while the art is missing.
+export function exitIcon(scene: Scene, x: number, y: number): Placed[] {
+  const icon = imageIcon(scene, "icon-exit", x, y);
+  if (icon.length > 0) {
+    return icon;
+  }
+  const g = scene.add.graphics({ x, y });
+  drawPixelRows(g, PALETTE.amber, EXIT_ROWS, { x: 0, y: 0 }, 2);
+  return [g];
+}
+
 export function selectOuter(rect: Rect, outset = SELECT_OUTSET): Rect {
   return insetRect(-outset, rect);
 }

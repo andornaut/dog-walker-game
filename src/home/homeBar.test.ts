@@ -7,12 +7,11 @@ import {
   homeBackAction,
   type HomeBarAction,
   homeBarAction,
-  type HomeBarButton,
   homeBarButtonAt,
   overlayRegion,
   regionOutside,
 } from "./homeBar";
-import { HOME_LAYOUT } from "./homeLayout";
+import { HOME_BAR_BUTTONS, HOME_LAYOUT, type HomeBarButton, homeBarButtons } from "./homeLayout";
 
 const centre = (rect: Rect) => ({ x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 });
 const BAR_BOTTOM = HOME_LAYOUT.topBar.height - 1;
@@ -34,34 +33,62 @@ describe("overlayRegion", () => {
   });
 });
 
-describe("regionOutside", () => {
-  const settingsHit = HOME_LAYOUT.settings.hit;
+// Each button's centre on the top bar as shown, with Exit or without it.
+function buttonCentres(exit: boolean): Partial<Record<HomeBarButton, { x: number; y: number }>> {
+  return Object.fromEntries(homeBarButtons(exit).map(([id, { hit }]) => [id, centre(hit)]));
+}
+
+describe.each([true, false])("the top bar with Exit shown %s", (exit) => {
+  const centres = buttonCentres(exit);
+  const settingsHit = homeBarButtons(exit).find(([id]) => id === "settings")?.[1].hit;
   // A point on the row under the top bar, under the Settings button or clear of every button.
-  const underSettings = { x: centre(settingsHit).x, y: BAR_BOTTOM + 1 };
+  const underSettings = {
+    x: settingsHit === undefined ? 0 : centre(settingsHit).x,
+    y: BAR_BOTTOM + 1,
+  };
   const underBank = { x: HOME_LAYOUT.topBar.well.x, y: BAR_BOTTOM + 1 };
+
   it.each([
     ["home: under the top bar, clear of its buttons", "home", underBank, true],
     ["home: on a button's tap area under the top bar", "home", underSettings, false],
-    ["home: on the top bar", "home", centre(HOME_LAYOUT.help.hit), false],
+    ["home: on the top bar", "home", centres.help ?? underBank, false],
     ["walk: in the walk view", "walk", centre(SCREEN_LAYOUT.walkView), true],
-  ] as const)("%s", (_, region, point, outside) => {
-    expect(isOutside(regionOutside(region, []), point)).toBe(outside);
+  ] as const)("regionOutside, %s", (_, region, point, outside) => {
+    expect(isOutside(regionOutside(exit, region, []), point)).toBe(outside);
+  });
+
+  // The bar's buttons left to right, Exit last where it shows, and what a press finds on each.
+  it("lists its buttons left to right, Exit last where it shows", () => {
+    const order = ["logbook", "help", "mute", "settings", ...(exit ? ["exit"] : [])];
+    expect(homeBarButtons(exit).map(([id]) => id)).toEqual(order);
+  });
+
+  it.each(HOME_BAR_BUTTONS.map((id) => [id, centres[id]] as const))(
+    "homeBarButtonAt finds %s at its centre where it shows",
+    (id, point) => {
+      expect(point === undefined).toBe(id === "exit" && !exit);
+      if (point !== undefined) {
+        expect(homeBarButtonAt(exit, point.x, point.y)).toBe(id);
+      }
+    },
+  );
+
+  it("homeBarButtonAt finds nothing on the bank's well", () => {
+    expect(homeBarButtonAt(exit, HOME_LAYOUT.topBar.well.x, HOME_LAYOUT.topBar.mid)).toBe(
+      undefined,
+    );
   });
 });
 
-describe("homeBarButtonAt", () => {
+// Where Exit shows, its column, the screen's last, holds Exit; where it is hidden, Settings.
+describe("the top bar's last column", () => {
+  const last = { x: SCREEN_LAYOUT.screen.width - 1, y: HOME_LAYOUT.topBar.mid };
   it.each([
-    ["help", centre(HOME_LAYOUT.help.hit)],
-    ["logbook", centre(HOME_LAYOUT.logbook.hit)],
-    ["mute", centre(HOME_LAYOUT.mute.hit)],
-    ["settings", centre(HOME_LAYOUT.settings.hit)],
-    [undefined, { x: HOME_LAYOUT.topBar.well.x, y: HOME_LAYOUT.topBar.mid }],
-  ] satisfies readonly [HomeBarButton | undefined, { x: number; y: number }][])(
-    "finds %s",
-    (button, point) => {
-      expect(homeBarButtonAt(point.x, point.y)).toBe(button);
-    },
-  );
+    [true, "exit"],
+    [false, "settings"],
+  ] as const)("with Exit shown %s, holds %s", (exit, button) => {
+    expect(homeBarButtonAt(exit, last.x, last.y)).toBe(button);
+  });
 });
 
 describe("homeBarAction", () => {
@@ -70,6 +97,7 @@ describe("homeBarAction", () => {
   const SETTINGS = { logbook: false, settings: true };
   // open: which of the Logbook and the settings is open, over the start screen or the shop.
   it.each([
+    ["neither open", NONE, "exit", "exit"],
     ["neither open", NONE, "help", "openHelp"],
     ["neither open", NONE, "logbook", "openLogbook"],
     ["neither open", NONE, "mute", "mute"],
@@ -80,6 +108,8 @@ describe("homeBarAction", () => {
     ["the settings open", SETTINGS, "mute", "mute"],
     ["the settings open", SETTINGS, "settings", "close"],
     ["the settings open", SETTINGS, "help", "openHelp"],
+    ["the Logbook open", LOGBOOK, "exit", "exit"],
+    ["the settings open", SETTINGS, "exit", "exit"],
   ] satisfies readonly [string, typeof NONE, HomeBarButton, HomeBarAction][])(
     "with %s, %s does %s",
     (_, open, button, action) => {

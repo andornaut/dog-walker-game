@@ -4,7 +4,7 @@ import { gameData } from "../data";
 import { overlayRegion, regionOutside } from "../home/homeBar";
 import { homeQuestionLayout, QUIT_QUESTION_ANSWERS } from "../hud/pauseMenu";
 import { isPauseKey, menuKeyActs } from "../input/keyBindings";
-import { leaveGame } from "../pwa";
+import { exitShown, leaveGame } from "../pwa";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { listenHomeBar } from "./homeBarPress";
 import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
@@ -44,7 +44,8 @@ export class QuitScene extends Scene {
         keepPlaying();
       }
     });
-    listenDismiss(this, regionOutside("home", covered), keepPlaying);
-    listenHomeBar(this, keepPlaying);
+    const exit = exitShown();
+    listenDismiss(this, regionOutside(exit, "home", covered), keepPlaying);
+    listenHomeBar(this, exit, keepPlaying);
   }
 }

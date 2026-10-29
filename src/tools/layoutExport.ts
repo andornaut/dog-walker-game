@@ -13,7 +13,7 @@ import {
 import type { GameData } from "../data/types";
 import { dotRects, HELP_LAYOUT } from "../help/helpLayout";
 import { END_LAYOUT } from "../home/endLayout";
-import { HOME_LAYOUT, updatePlateText } from "../home/homeLayout";
+import { HOME_LAYOUT, homeBarButtons, updatePlateText } from "../home/homeLayout";
 import { settingsLayout, type SettingsRowShape } from "../home/settings";
 import { SHOP_TABS } from "../home/shop";
 import { SHOP_LAYOUT, shopTabRects } from "../home/shopLayout";
@@ -232,6 +232,12 @@ export function layoutExport(
       },
       home: {
         ...HOME_LAYOUT,
+        // The top bar's buttons left to right, each its face and hit: with Exit, and where Exit
+        // is hidden (Firefox for Android's installed app).
+        barButtons: {
+          exitHidden: Object.fromEntries(homeBarButtons(false)),
+          exitShown: Object.fromEntries(homeBarButtons(true)),
+        },
         dogRects: gridRects(
           HOME_LAYOUT.dogTiles,
           Object.keys(data.dogs).length,

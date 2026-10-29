@@ -6,7 +6,7 @@ import {
 } from "@andornaut/game-kit/text/bitmapFont";
 
 import type { DogId } from "../data/types";
-import { ownerPhotoRect, WALK_BAR, type WalkBarButtonId } from "../hud/walkHud";
+import { ownerPhotoRect, WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
 import type { PackPlacement } from "../layout/packFormation";
 import type { GridSpec } from "../ui/grid";
 import { helpCapDy } from "../ui/labelHelpGap";
@@ -21,14 +21,6 @@ import type { SectionId } from "./sections";
 const GAP = 8;
 // The gate scene in the screen-home art: the street, the yard and the path to the gate.
 const GATE = { height: 156, y: 40 };
-// The top bar's button in the walk bar's walkId column, its hit area from the bar's top.
-function topBarButton(walkId: WalkBarButtonId) {
-  const { faceX, hitWidth, hitX } = WALK_BAR.buttons[walkId];
-  return {
-    face: { x: faceX, y: TOP_BAR_FACE.y },
-    hit: { height: 44, width: hitWidth, x: hitX, y: 0 },
-  } as const;
-}
 
 // The update plate joins the top bar's bottom edge, its button centred down it.
 const UPDATE_PANEL = { height: 42, width: 352, x: 4, y: TOP_BAR_HEIGHT };
@@ -163,13 +155,6 @@ export const HOME_LAYOUT = {
     { dx: 26, footDy: -12 },
   ],
   gearBadge: { height: 18, width: 18, x: 194, y: 166 },
-  // The top bar's four buttons at its right end, left to right: Logbook, Help, Sound and
-  // Settings, under the walk bar's last four (its Help, Sound, Settings and Pause). Each is its
-  // ui-icon-button face and its 34x44 hit area from the bar's top, the walk bar's hit columns,
-  // side by side to the screen's edge with each face centred in its hit.
-  help: topBarButton("sound"),
-  logbook: topBarButton("help"),
-  mute: topBarButton("settings"),
   path: { width: 32, x: 164 },
   // The Pet shop building on the yard's right lot, which opens the shop; its hit area is its
   // frame. board is its PET SHOP board, which the walker's bubble keeps clear of.
@@ -212,7 +197,6 @@ export const HOME_LAYOUT = {
     pocket: POCKET_SECTION,
     walker: WALKER_SECTION,
   },
-  settings: topBarButton("pause"),
   // The dog slot sign hung from the Pet shop's awning across its front: its art (key, with
   // normal and pressed tags) drawn at art, its board inside the frame, and its gold outline 2px
   // outside the board. The board's cream lies inside its frame, lit top row and shaded bottom
@@ -268,9 +252,10 @@ export const HOME_LAYOUT = {
   // A selected tile's ui-select frame sits 1px outside it.
   tileSelectOutset: 1,
   // The top bar, plum with every top bar's trim (topBarRects): the bank in its well at the left,
-  // then plain plum, then the buttons, the faces centred on row mid. The well
-  // is as wide as the bank needs (bankWell), at most well.maxWidth, drawn from wellKeys: its left
-  // column, the middle column repeated, and its right column. It is ink on its first
+  // then plain plum, then the buttons, the faces centred on row mid. The well is as wide as the
+  // bank needs (bankWell), at most well.maxWidth, which ends 6 columns before the first face with
+  // Exit shown and is the same with it hidden. It is drawn from wellKeys: its left column, the
+  // middle column repeated, and its right column. It is ink on its first
   // well.height - lip rows and well.width - lip columns, its lip on the rest. The bank, the title
   // font's "$" and amount one font advance apart, is set at bank.scale in full with thousands
   // separated (bankAmountText), its ink bank.pad columns in from the well's left, its capitals'
@@ -283,7 +268,7 @@ export const HOME_LAYOUT = {
     well: {
       height: TOP_BAR_WELL.height,
       lip: TOP_BAR_WELL.lip,
-      maxWidth: 220,
+      maxWidth: 186,
       x: TOP_BAR_WELL.x,
       y: TOP_BAR_WELL.y,
     },
@@ -345,6 +330,43 @@ export const HOME_LAYOUT = {
   walkerTiles: GridSpec;
   yardSign: Rect;
 };
+
+// The top bar's buttons, left to right. Exit, last, is left out in Firefox for Android's
+// installed app, which ignores a script's close (exitShown in src/pwa).
+export const HOME_BAR_BUTTONS = ["logbook", "help", "mute", "settings", "exit"] as const;
+export type HomeBarButton = (typeof HOME_BAR_BUTTONS)[number];
+
+// A top bar button: its ui-icon-button face and its hit area from the bar's top.
+export interface HomeBarButtonPlace {
+  face: Point;
+  hit: Rect;
+}
+
+// The top bar's button fromRight columns in from the screen's right edge (1 the last): the walk
+// bar's columns, its Pause column the last, continued leftward at the same pitch.
+function topBarButton(fromRight: number): HomeBarButtonPlace {
+  const last = WALK_BAR.buttons[WALK_BAR_BUTTONS[WALK_BAR_BUTTONS.length - 1] ?? "pause"];
+  const dx = (fromRight - 1) * last.hitWidth;
+  return {
+    face: { x: last.faceX - dx, y: TOP_BAR_FACE.y },
+    hit: { height: 44, width: last.hitWidth, x: last.hitX - dx, y: 0 },
+  };
+}
+
+// The face of the button at the top bar's right end: Exit's, or Settings' where Exit is hidden.
+export const HOME_BAR_LAST_FACE: Point = topBarButton(1).face;
+
+// The top bar's buttons at its right end, left to right (HOME_BAR_BUTTONS), Exit among them
+// where exit is true: each its ui-icon-button face and its 34x44 hit area, in the walk bar's hit
+// columns, side by side to the screen's edge with each face centred in its hit. With Exit the
+// five are Logbook, then Help, Sound and Settings under the walk bar's Help, Sound and Settings,
+// and Exit under its Pause; without it the four move a column right, Settings under Pause.
+export function homeBarButtons(
+  exit: boolean,
+): readonly (readonly [HomeBarButton, HomeBarButtonPlace])[] {
+  const shown = HOME_BAR_BUTTONS.filter((id) => exit || id !== "exit");
+  return shown.map((id, i) => [id, topBarButton(shown.length - i)] as const);
+}
 
 // How wide the bank's ink may be: the widest well less its lip and padding.
 export const BANK_ROOM =

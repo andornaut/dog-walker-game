@@ -8,7 +8,7 @@ import { dogDetail, gearDetail } from "../home/detail";
 import { FEEDBACK, shakeOffset } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
 import { dollarText, type Purchase } from "../home/home";
-import { HOME_BAR_HITS, overlayRegion } from "../home/homeBar";
+import { homeBarHits, overlayRegion } from "../home/homeBar";
 import { type HomeAction, messageLine } from "../home/homeLines";
 import {
   answerPurchase,
@@ -61,6 +61,7 @@ import {
   stepScroll,
 } from "../input/listScroll";
 import { screenArea } from "../input/outsideTap";
+import { exitShown } from "../pwa";
 import type { SaveDocument } from "../save/schema";
 import type { ArtLook } from "../ui/interaction";
 import { PALETTE } from "../ui/palette";
@@ -279,15 +280,17 @@ export class ShopScene extends Scene {
     // The top bar's empty area and the margins around the card close the shop, card and all, or
     // cancel an open confirm; back cancels the confirm or closes an open card first, as Escape
     // does. The top bar's buttons keep their own taps.
+    const exit = exitShown();
     listenDismiss(
       this,
-      screenArea([PANEL, ...HOME_BAR_HITS]),
+      screenArea([PANEL, ...homeBarHits(exit)]),
       () => (this.confirm === undefined ? this.close() : this.back()),
       () => this.back(),
     );
     // A page the top bar opens over the shop closes an open card or confirm first.
     listenHomeBar(
       this,
+      exit,
       () => this.close(),
       () => {
         if (this.confirm !== undefined || this.detail !== undefined) {

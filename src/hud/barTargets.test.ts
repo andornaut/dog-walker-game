@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { SCREEN_LAYOUT } from "../data/screen";
 import { homeBarAction, homeBarButtonAt } from "../home/homeBar";
-import { HOME_LAYOUT } from "../home/homeLayout";
+import { HOME_LAYOUT, homeBarButtons } from "../home/homeLayout";
 import { NOTHING_PAUSED, type RunPause, topBarAction, topBarButtonAt, walkPresses } from "./topBar";
 import { type ExplainShown, explainTargetAt, opensOnTap, WALK_BAR, walkBarLayout } from "./walkHud";
 
@@ -114,17 +114,17 @@ describe("the walk bar's and dog cards' targets under each overlay", () => {
   });
 });
 
-// The home top bar on the start screen, the Pet shop and the Logbook: what is open over the page
-// sets only whether the Logbook or the settings is the button's own page.
-const HOME_TARGETS = {
-  bankWell: { x: HOME_LAYOUT.topBar.well.x + 1, y: HOME_LAYOUT.topBar.mid },
-  help: centre(HOME_LAYOUT.help.hit),
-  logbook: centre(HOME_LAYOUT.logbook.hit),
-  mute: centre(HOME_LAYOUT.mute.hit),
-  settings: centre(HOME_LAYOUT.settings.hit),
-} as const;
+// The home top bar on the start screen, the Pet shop and the Logbook, with Exit shown and
+// hidden: what is open over the page sets only whether the Logbook or the settings is the
+// button's own page.
+const bankWell = { x: HOME_LAYOUT.topBar.well.x + 1, y: HOME_LAYOUT.topBar.mid };
 
-type HomeTarget = keyof typeof HOME_TARGETS;
+function homeTargets(exit: boolean): Readonly<Record<string, Point>> {
+  return {
+    bankWell,
+    ...Object.fromEntries(homeBarButtons(exit).map(([id, { hit }]) => [id, centre(hit)])),
+  };
+}
 
 const NONE = { logbook: false, settings: false };
 
@@ -141,28 +141,30 @@ const HOME_MODALS: readonly (readonly [string, typeof NONE])[] = [
   ["the settings' install steps", { logbook: false, settings: true }],
 ];
 
-const HOME_BASE: Readonly<Record<HomeTarget, string | undefined>> = {
+const HOME_BASE: Readonly<Record<string, string | undefined>> = {
   bankWell: undefined,
+  exit: "exit",
   help: "openHelp",
   logbook: "openLogbook",
   mute: "mute",
   settings: "openSettings",
 };
 
-function homeTargetAction(open: typeof NONE, point: Point): string | undefined {
-  const button = homeBarButtonAt(point.x, point.y);
+function homeTargetAction(exit: boolean, open: typeof NONE, point: Point): string | undefined {
+  const button = homeBarButtonAt(exit, point.x, point.y);
   return button === undefined ? undefined : homeBarAction(open, button);
 }
 
-describe("the home top bar's targets under each overlay", () => {
+describe.each([true, false])("the home top bar's targets with Exit shown %s", (exit) => {
+  const targets = homeTargets(exit);
   const rows = HOME_MODALS.flatMap(([modal, open]) =>
-    (Object.keys(HOME_TARGETS) as HomeTarget[]).map((target) => {
+    Object.entries(targets).map(([target, point]) => {
       const own =
         (target === "logbook" && open.logbook) || (target === "settings" && open.settings);
-      return [modal, target, open, own ? "close" : HOME_BASE[target]] as const;
+      return [modal, target, own ? "close" : HOME_BASE[target], open, point] as const;
     }),
   );
-  it.each(rows)("under %s, %s does %s", (_modal, target, open, expected) => {
-    expect(homeTargetAction(open, HOME_TARGETS[target])).toBe(expected);
+  it.each(rows)("under %s, %s does %s", (_modal, _target, expected, open, point) => {
+    expect(homeTargetAction(exit, open, point)).toBe(expected);
   });
 });

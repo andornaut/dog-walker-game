@@ -10,6 +10,7 @@ import {
   type PauseMenuItem,
   pauseMenuLayout,
 } from "../hud/pauseMenu";
+import { exitShown } from "../pwa";
 import { PALETTE } from "../ui/palette";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
@@ -100,7 +101,7 @@ export class PauseScene extends Scene {
     );
     // The dimmed band and road around the panel resume, as Resume and Keep walking do. The top
     // bar and dog cards are not dimmed and keep their own taps.
-    const outside = regionOutside("walk", covered);
+    const outside = regionOutside(exitShown(), "walk", covered);
     listenOutsideTap(this, () => outside, onResume);
     const overlay = data.mode === "menu" ? data.overlay : undefined;
     if (overlay !== undefined) {

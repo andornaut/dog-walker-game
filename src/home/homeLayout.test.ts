@@ -11,7 +11,7 @@ import { ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { WalkerId } from "../data/types";
-import { ownerPhotoRect, WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
+import { ownerPhotoRect, WALK_BAR } from "../hud/walkHud";
 import { unlockPrice } from "../rules/shop";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
@@ -46,7 +46,9 @@ import {
   type DetailRow,
   dogTileNameY,
   dogTilePlateY,
+  HOME_BAR_LAST_FACE,
   HOME_LAYOUT,
+  homeBarButtons,
   pocketLining,
   sectionFill,
   slotSignText,
@@ -243,29 +245,31 @@ describe("section fills", () => {
   });
 });
 
-describe("top bar", () => {
-  const { help, logbook, mute, settings, topBar } = HOME_LAYOUT;
-  const { bank, faceSize, mid, well } = topBar;
-  const buttons = [
-    ["Logbook", logbook],
-    ["Help", help],
-    ["Sound", mute],
-    ["Settings", settings],
-  ] as const;
+// The top bar's buttons with Exit shown and hidden: each walk bar column they share holds the
+// same button's place, Exit's in the last, and without it the four move a column right.
+describe.each([
+  [true, ["logbook", "help", "mute", "settings", "exit"], ["help", "sound", "settings", "pause"]],
+  [false, ["logbook", "help", "mute", "settings"], ["help", "sound", "settings", "pause"]],
+] as const)("top bar buttons with Exit shown %s", (exit, order, walkColumns) => {
+  const { faceSize, height, mid } = HOME_LAYOUT.topBar;
+  const buttons = homeBarButtons(exit);
   const hits = buttons.map(([, button]) => button.hit);
-  const wellInk = { bottom: well.y + well.height - well.lip - 1 };
 
-  // Each button under the walk bar's button in the same place among its last four.
-  const under = buttons.map(([name, button], i) => {
-    const walkId = WALK_BAR_BUTTONS[WALK_BAR_BUTTONS.length - buttons.length + i] ?? "pause";
-    return [name, walkId, button] as const;
+  it("runs left to right in order", () => {
+    expect(buttons.map(([id]) => id)).toEqual(order);
+  });
+
+  // The last four buttons, right to left, each under the walk bar's button in the same column.
+  const under = buttons.slice(-walkColumns.length).map(([id, button], i) => {
+    const walkId = walkColumns[i] ?? "pause";
+    return [id, walkId, button] as const;
   });
   it.each(under)(
     "puts %s's hit in the walk bar's %s column from the bar's top, its face centred in it on the middle row",
     (_, walkId, button) => {
       const { hitWidth, hitX } = WALK_BAR.buttons[walkId];
       expect(button.hit).toMatchObject({ width: hitWidth, x: hitX, y: 0 });
-      expect(button.hit.height).toBeGreaterThanOrEqual(topBar.height);
+      expect(button.hit.height).toBeGreaterThanOrEqual(height);
       expect(2 * (button.face.x - button.hit.x) + faceSize).toBe(button.hit.width);
       expect(button.face.y + faceSize / 2).toBe(mid);
     },
@@ -276,6 +280,21 @@ describe("top bar", () => {
     expect(hits.slice(1).map((hit) => hit.x)).toEqual(ends.slice(0, -1));
     expect(ends.at(-1)).toBe(SCREEN_CONFIG.width);
   });
+
+  it("ends on the face Help's close control takes", () => {
+    expect(buttons.at(-1)?.[1].face).toEqual(HOME_BAR_LAST_FACE);
+  });
+
+  it("keeps the bank's widest well before the first face", () => {
+    const { well } = HOME_LAYOUT.topBar;
+    expect(well.x + well.maxWidth).toBeLessThan(buttons[0]?.[1].face.x ?? 0);
+  });
+});
+
+describe("top bar", () => {
+  const { topBar } = HOME_LAYOUT;
+  const { bank, well } = topBar;
+  const wellInk = { bottom: well.y + well.height - well.lip - 1 };
 
   // The bank's well is as clear of the bar's top and bottom as the walk bar's cash well is of its
   // bar's, as tall as its art, and its widest ends before the first face.
@@ -288,7 +307,6 @@ describe("top bar", () => {
     expect(decodePng(readFileSync(`public/art/images/${topBar.wellKeys.mid}.png`)).height).toBe(
       well.height,
     );
-    expect(well.x + well.maxWidth).toBeLessThan(logbook.face.x);
   });
 
   // The title font's capitals, centred on the well's ink rows, a half pixel at most lower when
@@ -780,14 +798,16 @@ describe("the update plate", () => {
     expect(inside(button, hit)).toBe(true);
   });
 
-  it.each([
-    ["the Help button's", HOME_LAYOUT.help.hit],
-    ["the Logbook button's", HOME_LAYOUT.logbook.hit],
+  const clear: readonly (readonly [string, Rect])[] = [
+    ...[true, false].flatMap((exit) =>
+      homeBarButtons(exit).map(
+        ([id, { hit }]) => [`the ${id} button's, Exit shown ${exit}`, hit] as const,
+      ),
+    ),
     ["the Pet shop's", petShop],
     ["the Pet shop board's", petShop.board],
-    ["the Settings button's", HOME_LAYOUT.settings.hit],
-    ["the Sound button's", HOME_LAYOUT.mute.hit],
-  ])("keeps the tap area clear of %s", (_, rect) => {
+  ];
+  it.each(clear)("keeps the tap area clear of %s", (_, rect) => {
     expect(rectsOverlap(hit, rect)).toBe(false);
   });
 
