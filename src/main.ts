@@ -74,10 +74,11 @@ function watchFirstWalk(game: Game): void {
 // Scenes render in list order: the HUD over the road, cards, the zone celebration and the
 // pause menu over the HUD, help (its page's picture of the walk, HUD and card over it),
 // settings and stats over those, and the dev overlay, which starts itself, over everything.
-// Boot runs first and starts the start screen.
+// Boot runs first and starts the start screen. The canvas clears to the page's plum, so launch
+// shows no rectangle before the loading screen's art; the walk fills its own ink.
 function bootGame(): Game {
   const game = new Game({
-    backgroundColor: "#181425",
+    backgroundColor: "#3e2731",
     height: SCREEN_CONFIG.height,
     // Two touch pointers, so the walk sees a finger that lands while another rests.
     input: { activePointers: 2 },

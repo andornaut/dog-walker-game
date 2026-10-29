@@ -47,7 +47,7 @@ import {
 import { startRoad, type Walk } from "../runner/walk";
 import { checkpointOf, runResultOf } from "../save/runSlices";
 import { type Loadout, newRun, type RunState } from "../state/runState";
-import { colourFromHex } from "../ui/phaser/palette";
+import { colourFromHex, PALETTE } from "../ui/phaser/palette";
 import type { HudSceneData } from "./HudScene";
 import type { HudRun, RunHudView } from "./hudWalk";
 import { onWindowEvent } from "./overlay";
@@ -153,6 +153,9 @@ export class RunScene extends Scene implements HudRun {
   create(data: RunSceneData): void {
     this.resetState();
     ensureRoadPlaceholders(this);
+    // Ink under the walk, where a bump's nudge moves the road off the canvas's edge rows and the
+    // canvas's plum clear colour would show.
+    this.cameras.main.setBackgroundColor(PALETTE.ink);
 
     const { setup } = data;
     const recorder = new RunRecorder(data.replay);
