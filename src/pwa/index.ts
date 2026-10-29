@@ -6,7 +6,7 @@ import { chooseSoundFormat, type SoundFormat } from "../audio/soundFormat";
 import { browserStorage, lazyStorage } from "../save/storage";
 import { guardBackNavigation } from "./backNavigation";
 import { dispatchPhoneEvent, PHONE_EVENTS } from "./events";
-import { type InstallFlow, type InstallOutcome, watchInstall } from "./installFlow";
+import { type InstallFlow, type InstallOutcome, pageRunsAsApp, watchInstall } from "./installFlow";
 import { createInstallNudge, type InstallNudge } from "./installNudge";
 import type { InstallState, MenuInstallBrowser } from "./installState";
 import { type OrientationRelay, relayOrientationEvents, type Viewport } from "./orientation";
@@ -121,7 +121,7 @@ export function setupPhoneApp(): Promise<void> {
   relayVisibilityEvents(window, document);
   showTurnUprightNotice();
   orientation = relayOrientationEvents(readViewport, window);
-  guardBackNavigation(window, history);
+  guardBackNavigation(pageRunsAsApp(window), window, history);
   const wakeLock = "wakeLock" in navigator ? navigator.wakeLock : undefined;
   screenWakeLock = createScreenWakeLock(wakeLock, document);
   // Held whenever the game is visible until the scenes take over with stopWakeLock and

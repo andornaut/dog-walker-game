@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { AUDIO_UNLOCK_EVENTS, unlockAudioOnFirstGesture } from "./audioUnlock";
-import { BACK_GUARD_STATE, guardBackNavigation, type HistoryLike } from "./backNavigation";
+import {
+  BACK_GUARD_GESTURES,
+  BACK_GUARD_STATE,
+  guardBackNavigation,
+  type HistoryLike,
+} from "./backNavigation";
 import { PHONE_EVENTS } from "./events";
 import { relayVisibilityEvents, type VisibilitySource } from "./visibility";
 import { createScreenWakeLock, type WakeLockLike, type WakeLockSentinelLike } from "./wakeLock";
@@ -141,29 +146,51 @@ class FakeHistory extends EventTarget implements HistoryLike {
 }
 
 describe("guardBackNavigation", () => {
-  it("pushes a guard entry, then turns each back into back-pressed and stays", () => {
+  // A page whose player has given the first input that pushes the guard.
+  function guarded(asApp: boolean): { history: FakeHistory; seen: string[] } {
     const history = new FakeHistory();
     const seen = recordEvents(history);
-    guardBackNavigation(history, history);
-    expect(history.state).toEqual(BACK_GUARD_STATE);
+    guardBackNavigation(asApp, history, history);
+    history.dispatchEvent(new Event(BACK_GUARD_GESTURES[0]));
+    return { history, seen };
+  }
+
+  it.each([
+    { asApp: false, presses: [PHONE_EVENTS.backPressed, PHONE_EVENTS.backPressed], where: "tab" },
+    { asApp: true, presses: [], where: "installed app" },
+  ])("in a $where, stays on the game through each back", ({ asApp, presses }) => {
+    const { history, seen } = guarded(asApp);
     history.back();
     history.back();
-    expect(seen).toEqual([PHONE_EVENTS.backPressed, PHONE_EVENTS.backPressed]);
+    expect(seen).toEqual(presses);
     expect(history.state).toEqual(BACK_GUARD_STATE);
+    expect(history.length).toBe(2);
+  });
+
+  it("pushes no guard before the player's first input", () => {
+    const history = new FakeHistory();
+    guardBackNavigation(false, history, history);
+    expect(history.length).toBe(1);
+  });
+
+  it.each(BACK_GUARD_GESTURES)("pushes a missing guard on %s, and never a second", (type) => {
+    const history = new FakeHistory();
+    guardBackNavigation(false, history, history);
+    history.dispatchEvent(new Event(type));
+    expect(history.state).toEqual(BACK_GUARD_STATE);
+    history.dispatchEvent(new Event(type));
     expect(history.length).toBe(2);
   });
 
   it("does not push a second guard when the page reloads on one", () => {
-    const history = new FakeHistory();
-    guardBackNavigation(history, history);
-    guardBackNavigation(history, history);
+    const { history } = guarded(false);
+    guardBackNavigation(false, history, history);
+    history.dispatchEvent(new Event(BACK_GUARD_GESTURES[0]));
     expect(history.length).toBe(2);
   });
 
   it("ignores a popstate that lands on the guard entry, as going forward does", () => {
-    const history = new FakeHistory();
-    const seen = recordEvents(history);
-    guardBackNavigation(history, history);
+    const { history, seen } = guarded(false);
     history.dispatchEvent(new Event("popstate"));
     expect(seen).toEqual([]);
   });
