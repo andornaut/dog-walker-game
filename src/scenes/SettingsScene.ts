@@ -5,6 +5,7 @@ import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { MenuText } from "../data/types";
 import { FEEDBACK } from "../home/feedback";
 import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
+import { type OverlayRegion, overlayRegion, regionOutside } from "../home/homeBar";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import {
   INSTALL_STEPS_FIT,
@@ -27,7 +28,6 @@ import {
   volumeSteps,
 } from "../home/settings";
 import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
-import { screenArea } from "../input/outsideTap";
 import { itemAt } from "../lib/arrays";
 import { fillLine } from "../lib/lines";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
@@ -55,9 +55,16 @@ import {
 import { addRampDim } from "../ui/phaser/rampDim";
 import { GREYED } from "../ui/selection";
 import { fittingText, TEXT_SCALE } from "../ui/textFit";
+import { HOME_MUTED_EVENT, listenHomeBar } from "./homeBarPress";
 import { addCardTitle, addDetailCard } from "./homePanels";
 import { listenOnePress } from "./onePress";
-import { closeOverlay, listenOutsideTap, onBackPressed, type OverlayData } from "./overlay";
+import {
+  closeOverlay,
+  listenOutsideTap,
+  onBackPressed,
+  onSceneEvent,
+  type OverlayData,
+} from "./overlay";
 import { currentSettings, setSettings } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
@@ -187,9 +194,11 @@ function switchOn(key: SwitchKey, settings: Settings): boolean {
 }
 
 // What the settings are launched with: the scene under them, which they resume on close, and
-// the part of the screen they dim: the whole start screen, or the walk view the pause menu dims.
+// where they open, which sets the part of the screen they dim (overlayRegion): a home page under
+// its lit top bar, whose buttons keep working (listenHomeBar), or the walk view the pause menu
+// dims.
 export interface SettingsData extends OverlayData {
-  readonly dim: Rect;
+  readonly region: OverlayRegion;
 }
 
 // Sound on or off, music and effects volume, reduced motion and, until the game is installed
@@ -221,8 +230,8 @@ export class SettingsScene extends Scene {
 
   create(data: SettingsData): void {
     this.resumeKey = data.resume;
-    this.dim = data.dim;
-    this.dimmed = addRampDim(this, data.dim);
+    this.dim = overlayRegion(data.region);
+    this.dimmed = addRampDim(this, this.dim);
     this.rows = settingsRows(offersInstall(installState()));
     this.layout = settingsLayout(settingsFonts(this), SCREEN_CONFIG, rowShapes(this, this.rows));
     this.dragging = undefined;
@@ -278,18 +287,23 @@ export class SettingsScene extends Scene {
       },
     });
     // The back button and the dimmed screen around the card close it, as the close control in
-    // its band does; over the walk, the lit top bar and dog cards are not around it. While the
-    // steps' card is open, the back button and the screen around that card close it, the
+    // its band does; the lit top bar, and over the walk the dog cards, are not around it. While
+    // the steps' card is open, the back button and the dim around that card close it, the
     // settings card included. As listenDismiss, with the area read as each press lands.
     onBackPressed(this, () => this.back());
     listenOutsideTap(
       this,
       () =>
         this.steps === undefined
-          ? { covered: [this.layout.panel], dim: this.dim }
-          : screenArea([this.steps.card]),
+          ? regionOutside(data.region, [this.layout.panel])
+          : regionOutside(data.region, [this.steps.card]),
       () => this.back(),
     );
+    if (data.region === "home") {
+      listenHomeBar(this, () => this.close());
+      // Sound on the top bar flips the sound switch here too.
+      onSceneEvent(this, this.game.events, HOME_MUTED_EVENT, () => this.render());
+    }
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (menuKeyActs(event.repeat, event.key)) {
         this.onKey(event.key);
@@ -491,7 +505,7 @@ export class SettingsScene extends Scene {
   private drawSteps(steps: OpenSteps): void {
     const words = gameData.menuText.settings.installSteps[steps.browser];
     const icon = STEPS_ICONS[steps.browser];
-    addDim(this, SCREEN_LAYOUT.screen);
+    addDim(this, this.dim);
     addDetailCard(this, this.add.container(0, 0), steps.card, steps.band);
     addCardTitle(this, steps.card, words.title);
     if (this.textures.exists(icon)) {

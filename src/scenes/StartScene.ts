@@ -50,6 +50,7 @@ import {
   tapDog,
   tapGear,
 } from "../home/home";
+import { homeBarButtonAt, overlayRegion, regionOutside } from "../home/homeBar";
 import {
   bankAmountText,
   bankWell,
@@ -102,7 +103,6 @@ import {
   TILE_SLOP_PX,
 } from "../input/hold";
 import { isConfirmKey, isMuteKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
-import { screenArea } from "../input/outsideTap";
 import type { PackPlacement } from "../layout/packFormation";
 import { clampIndex, itemAt } from "../lib/arrays";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
@@ -148,6 +148,7 @@ import type { CelebrationSceneData } from "./CelebrationScene";
 import { addNamePills } from "./effectNameColours";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
+import { HOME_MUTED_EVENT } from "./homeBarPress";
 import { addAffordFrame, drawDetailCard } from "./homePanels";
 import {
   addPlate,
@@ -215,6 +216,7 @@ import {
 } from "./uiKit";
 
 const SCREEN = SCREEN_LAYOUT.screen;
+const HOME_REGION = overlayRegion("home");
 const GATE = HOME_LAYOUT.gate;
 const PATH = HOME_LAYOUT.path;
 const WALKER_AT_GATE = HOME_LAYOUT.walkerAtGate;
@@ -496,7 +498,8 @@ export class StartScene extends Scene {
     listenOnePress(this, {
       down: (pointer) => {
         addTapBurst(this, pointer.x, pointer.y);
-        if (this.overlay !== undefined) {
+        // The top bar stays lit over an open card, and its buttons take their presses.
+        if (this.overlay !== undefined && homeBarButtonAt(pointer.x, pointer.y) === undefined) {
           this.overlayPress = { x: pointer.x, y: pointer.y };
           if (this.closePressed()) {
             this.render();
@@ -564,7 +567,7 @@ export class StartScene extends Scene {
       this,
       () => {
         const rect = this.overlay?.rect;
-        return rect === undefined ? undefined : screenArea([rect]);
+        return rect === undefined ? undefined : regionOutside("home", [rect]);
       },
       () => this.closeOverlay(),
     );
@@ -584,6 +587,10 @@ export class StartScene extends Scene {
     this.time.delayedCall(0, () => this.celebrate());
     // Settings can change reduced motion or mute, so the screen is drawn again.
     onSceneEvent(this, this.game.events, SETTINGS_CLOSED_EVENT, () => this.render());
+    // Sound on the top bar, tapped over an overlay, which takes the press.
+    onSceneEvent(this, this.game.events, HOME_MUTED_EVENT, (muted: boolean) =>
+      this.showMuted(muted),
+    );
     // The shop draws under the top bar, so the bank there follows each purchase; on close
     // the walker says the shop's last purchase or refusal.
     onSceneEvent(this, this.game.events, SHOP_CHANGED_EVENT, () => this.render());
@@ -878,13 +885,9 @@ export class StartScene extends Scene {
         this.render();
         return;
       }
-      case "mute": {
-        const muted = toggleMuted(this);
-        const { noticeSoundOff, noticeSoundOn } = gameData.homeText;
-        this.action = { kind: "notice", text: muted ? noticeSoundOff : noticeSoundOn };
-        this.render();
+      case "mute":
+        this.showMuted(toggleMuted(this));
         return;
-      }
       case "help":
         this.afterArt("help", () => openHelp(this, SCENE_KEYS.start));
         return;
@@ -893,8 +896,7 @@ export class StartScene extends Scene {
         openOverlay(this, SCENE_KEYS.stats, { resume: SCENE_KEYS.start });
         return;
       case "settings": {
-        // Over the whole start screen, dimmed.
-        const data: SettingsData = { dim: SCREEN, resume: SCENE_KEYS.start };
+        const data: SettingsData = { region: "home", resume: SCENE_KEYS.start };
         openOverlay(this, SCENE_KEYS.settings, data);
         return;
       }
@@ -907,6 +909,13 @@ export class StartScene extends Scene {
       default:
         target satisfies never;
     }
+  }
+
+  // The walker says sound went off or on, and the top bar's Sound button follows.
+  private showMuted(muted: boolean): void {
+    const { noticeSoundOff, noticeSoundOn } = gameData.homeText;
+    this.action = { kind: "notice", text: muted ? noticeSoundOff : noticeSoundOn };
+    this.render();
   }
 
   // Picks or drops a dog or gear item, and keeps the result as the last loadout.
@@ -1258,7 +1267,15 @@ export class StartScene extends Scene {
     const { target } = overlay;
     const card = this.detailCard(save, target);
     const picture = this.detailPicture(target);
-    const rect = drawDetailCard(this, layer, this.closePressed(), card, picture, target.kind);
+    const rect = drawDetailCard(
+      this,
+      layer,
+      HOME_REGION,
+      this.closePressed(),
+      card,
+      picture,
+      target.kind,
+    );
     this.overlay = { ...overlay, rect };
   }
 

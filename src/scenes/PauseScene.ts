@@ -1,7 +1,7 @@
 import { Core, Scene, Scenes } from "phaser";
 
 import { gameData } from "../data";
-import { SCREEN_LAYOUT } from "../data/screen";
+import { overlayRegion, regionOutside } from "../home/homeBar";
 import type { HomeNoteLine } from "../hud/homeQuestion";
 import {
   HOME_QUESTION_ANSWERS,
@@ -79,7 +79,7 @@ export class PauseScene extends Scene {
   create(data: PauseSceneData): void {
     const { onHeadHome, onResume } = data;
     this.pressed = undefined;
-    const { walkView } = SCREEN_LAYOUT;
+    const walkView = overlayRegion("walk");
     addRampDim(this, walkView);
     const headHome = () => {
       soundboardOf(this).stopMusic();
@@ -160,7 +160,8 @@ export class PauseScene extends Scene {
     // The dimmed band and road around the panel resume, as Resume and Keep walking do. The top
     // bar and dog cards are not dimmed and keep their own taps.
     const covered = [insetRect(-1, panel), ...layout.hits];
-    listenOutsideTap(this, () => ({ covered, dim: walkView }), onResume);
+    const outside = regionOutside("walk", covered);
+    listenOutsideTap(this, () => outside, onResume);
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       const number = cardNumberForKey(this.entries.length, event.key);
       if (number !== undefined && menuKeyActs(event.repeat, event.key)) {
@@ -191,7 +192,7 @@ export class PauseScene extends Scene {
     afterTapFx(this, () => {
       this.scene.setVisible(false);
       onceSceneEvent(this, this.events, Scenes.Events.RESUME, () => this.scene.setVisible(true));
-      const data: SettingsData = { dim: SCREEN_LAYOUT.walkView, resume: SCENE_KEYS.pause };
+      const data: SettingsData = { region: "walk", resume: SCENE_KEYS.pause };
       openOverlay(this, SCENE_KEYS.settings, data);
     });
   }

@@ -30,7 +30,7 @@ export interface PurchaseConfirmHits {
 
 const LAYOUT = PURCHASE_CONFIRM_LAYOUT;
 
-// The confirm over everything the scene drew before it: the screen dimmed, the ui-detail-card
+// The confirm over everything the scene drew before it: the shop dimmed, the ui-detail-card
 // with its band and "Buy {name}?", the picture in its well, the price and the bank it would
 // leave, then Cancel and Buy. Returns where it is tapped.
 export function drawPurchaseConfirm(
@@ -39,7 +39,7 @@ export function drawPurchaseConfirm(
   input: PurchaseConfirmViewInput,
 ): PurchaseConfirmHits {
   const { lines, picture, pressed } = input;
-  layer.add(addDim(scene, LAYOUT.screen));
+  layer.add(addDim(scene, LAYOUT.dim));
   addDetailCard(scene, layer, LAYOUT.card, LAYOUT.band);
   const centred = (
     at: { capTop: number; centreX: number; font: "body" | "title" },

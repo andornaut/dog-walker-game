@@ -4,11 +4,13 @@ import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
 import type { AchievementId, DogId } from "../data/types";
 import { badgeStripRows, CELEBRATION_PANEL } from "../home/badgesView";
+import { overlayRegion, regionOutside } from "../home/homeBar";
 import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { WIDE_BUTTON } from "../layout/screenLayout";
 import type { Rect } from "../lib/rect";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { addBadgeCelebration, addCheeringFace } from "./badges";
+import { listenHomeBar } from "./homeBarPress";
 import { closeOverlay, listenDismiss } from "./overlay";
 import { currentSettings } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
@@ -37,8 +39,9 @@ export class CelebrationScene extends Scene {
 
   create({ achievements, owners, resume }: CelebrationSceneData): void {
     const reduced = currentSettings(this).reducedMotion;
-    // Dimmed down the colour ramps, as under the pause menu and the cards.
-    addRampDim(this, SCREEN);
+    // Dimmed down the colour ramps under the lit top bar, as under the pause menu and the cards.
+    const dim = overlayRegion("home");
+    addRampDim(this, dim);
     const cheering = owners.slice(0, 3);
     const height = PANEL.badgesHeight + (cheering.length > 0 ? PANEL.facesHeight : 0);
     const top = Math.round((SCREEN.height - height - BUTTON.gap - BUTTON.height) / 2);
@@ -71,7 +74,8 @@ export class CelebrationScene extends Scene {
         close();
       }
     });
-    // The dim around the panel and Nice! closes, as Nice! does.
-    listenDismiss(this, [panel, buttonRect], close);
+    // The dim around the panel and Nice! closes, as Nice! does; the top bar keeps its buttons.
+    listenDismiss(this, regionOutside("home", [panel, buttonRect]), close);
+    listenHomeBar(this, close);
   }
 }

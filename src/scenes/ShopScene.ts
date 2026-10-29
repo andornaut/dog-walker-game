@@ -6,6 +6,7 @@ import { dogDetail, gearDetail } from "../home/detail";
 import { FEEDBACK, shakeOffset } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
 import { dollarText, type Purchase } from "../home/home";
+import { HOME_BAR_HITS, overlayRegion } from "../home/homeBar";
 import { type HomeAction, messageLine } from "../home/homeLines";
 import {
   answerPurchase,
@@ -57,6 +58,7 @@ import {
   scrollToShow,
   stepScroll,
 } from "../input/listScroll";
+import { screenArea } from "../input/outsideTap";
 import { clampIndex } from "../lib/arrays";
 import { containsPoint, type Rect } from "../lib/rect";
 import { cents } from "../lib/units";
@@ -67,6 +69,7 @@ import { PALETTE } from "../ui/phaser/palette";
 import { fitPixelText, pixelFontMetrics, placePixelText } from "../ui/phaser/pixelText";
 import { GREYED, pictureBox, type PlateKind } from "../ui/selection";
 import type { CelebrationSceneData } from "./CelebrationScene";
+import { listenHomeBar } from "./homeBarPress";
 import { drawDetailCard } from "./homePanels";
 import {
   addPlate,
@@ -272,14 +275,16 @@ export class ShopScene extends Scene {
         this.onKey(event.key);
       }
     });
-    // The top bar and the margins around the card close the shop, card and all, or cancel an
-    // open confirm; back cancels the confirm or closes an open card first, as Escape does.
+    // The top bar's empty area and the margins around the card close the shop, card and all, or
+    // cancel an open confirm; back cancels the confirm or closes an open card first, as Escape
+    // does. The top bar's buttons keep their own taps.
     listenDismiss(
       this,
-      [PANEL],
+      screenArea([PANEL, ...HOME_BAR_HITS]),
       () => (this.confirm === undefined ? this.close() : this.back()),
       () => this.back(),
     );
+    listenHomeBar(this, () => this.close());
   }
 
   // The confirm's answer at a point, or undefined off its answers or with no confirm open.
@@ -840,6 +845,7 @@ export class ShopScene extends Scene {
       purchase.kind === "dog"
         ? dogDetail(gameData, save.owned, save.bankCents, purchase.dog)
         : gearDetail(gameData, save.owned, save.bankCents, save.lastLoadout, purchase.gear);
-    drawDetailCard(this, layer, false, card, purchasePicture(purchase), purchase.kind);
+    const dim = overlayRegion("home");
+    drawDetailCard(this, layer, dim, false, card, purchasePicture(purchase), purchase.kind);
   }
 }

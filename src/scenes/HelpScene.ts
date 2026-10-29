@@ -7,6 +7,7 @@ import { helpActionForKey, helpActionForPointer } from "../help/helpInput";
 import { dotRects, HELP_LAYOUT, helpActionAt } from "../help/helpLayout";
 import { applyHelpAction, clampPage, type HelpAction, helpButtons } from "../help/helpPaging";
 import { closeHelp } from "../help/helpSeen";
+import { screenArea } from "../input/outsideTap";
 import { itemAt } from "../lib/arrays";
 import { insetRect, type Point, type Rect } from "../lib/rect";
 import { addFilledRect } from "../ui/phaser/draw";
@@ -95,7 +96,7 @@ export class HelpScene extends Scene {
         }
       },
     });
-    listenDismiss(this, [HELP_LAYOUT.screen], () => this.close());
+    listenDismiss(this, screenArea([HELP_LAYOUT.screen]), () => this.close());
   }
 
   private showPressed(pressed: Pressed | undefined): void {

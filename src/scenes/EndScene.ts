@@ -363,7 +363,7 @@ export class EndScene extends Scene {
     afterTapFx(this, () => {
       this.closeCard();
       this.card = this.add.container(0, 0).setDepth(CARD_DEPTH);
-      addBadgeDetail(this, this.card, this.reduced, true, badge);
+      addBadgeDetail(this, this.card, SCREEN_LAYOUT.screen, this.reduced, true, badge);
     });
   }
 

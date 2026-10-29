@@ -2,7 +2,6 @@ import type { GameObjects, Scene } from "phaser";
 
 import { ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { SCREEN_LAYOUT } from "../data/screen";
 import type { AchievementId, DogId } from "../data/types";
 import {
   BADGE_STRIP,
@@ -171,13 +170,14 @@ const DETAIL_TEXT = STATS_LAYOUT.detailText;
 // The badge and its confetti are drawn at 2x, so the burst shows around the bigger badge.
 const DETAIL_BADGE_SCALE = 2;
 
-// A badge's card, the one every screen opens on a badge, in parent over a dimmed screen: the
-// badge at 2x with its name, status, goal and line, and the close control in its corner. An
-// earned badge bursts with confetti when burst is set, or with reduced motion shows a still
-// frame of it. Returns the card's rect.
+// A badge's card, the one every screen opens on a badge, in parent over dim, the part of the
+// screen it dims: the badge at 2x with its name, status, goal and line, and the close control in
+// its corner. An earned badge bursts with confetti when burst is set, or with reduced motion
+// shows a still frame of it. Returns the card's rect.
 export function addBadgeDetail(
   scene: Scene,
   parent: GameObjects.Container,
+  dim: Rect,
   reduced: boolean,
   burst: boolean,
   badge: BadgeView,
@@ -191,7 +191,7 @@ export function addBadgeDetail(
   const fonts = { body: pixelFontMetrics(scene, "body"), title: pixelFontMetrics(scene, "title") };
   const panel = detailPanel(fonts, goal.length, line.length);
   const tops = detailTextTops(fonts, goal.length);
-  parent.add([addDim(scene, SCREEN_LAYOUT.screen), addPanel(scene, panel)]);
+  parent.add([addDim(scene, dim), addPanel(scene, panel)]);
   addCloseButton(scene, parent, closeControl(panel), false);
   const centre = DETAIL.x + DETAIL.width / 2;
   const badgeY = DETAIL.y + DETAIL_TEXT.badgeY;

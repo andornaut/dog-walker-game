@@ -14,6 +14,7 @@ import {
 } from "../home/badgesView";
 import { FEEDBACK } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
+import { HOME_BAR_HITS, overlayRegion } from "../home/homeBar";
 import {
   badgesBottom,
   DOG_STATS,
@@ -44,6 +45,7 @@ import {
   scrollMax,
   stepScroll,
 } from "../input/listScroll";
+import { screenArea } from "../input/outsideTap";
 import { clampIndex } from "../lib/arrays";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import { rectIndexAt } from "../ui/grid";
@@ -57,6 +59,7 @@ import {
   withProbe,
 } from "../ui/phaser/pixelText";
 import { addBadge, addBadgeDetail, BADGE_SIZE } from "./badges";
+import { listenHomeBar } from "./homeBarPress";
 import { closeOverlay, listenDismiss, type OverlayData } from "./overlay";
 import { currentSettings, profileSave } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
@@ -215,14 +218,16 @@ export class StatsScene extends Scene {
         }
       }
     });
-    // The top bar and the margins around the card close the page, as on the shop. Back closes
-    // an open badge first, as Escape does.
+    // The top bar's empty area and the margins around the card close the page, as on the shop,
+    // and the top bar's buttons keep their own taps. Back closes an open badge first, as Escape
+    // does.
     listenDismiss(
       this,
-      [PANEL],
+      screenArea([PANEL, ...HOME_BAR_HITS]),
       () => this.close(),
       () => this.back(),
     );
+    listenHomeBar(this, () => this.close());
   }
 
   // An open badge closes, else the page.
@@ -496,7 +501,8 @@ export class StatsScene extends Scene {
   // Any tap closes it.
   private drawDetail(badge: BadgeView): void {
     const reduced = currentSettings(this).reducedMotion;
-    addBadgeDetail(this, this.add.container(0, 0), reduced, this.burst, badge);
+    const dim = overlayRegion("home");
+    addBadgeDetail(this, this.add.container(0, 0), dim, reduced, this.burst, badge);
     this.burst = false;
   }
 }

@@ -64,17 +64,18 @@ export function addAffordFrame(
 
 const CARD = HOME_LAYOUT.card;
 
-// A dim layer over the whole screen, then the card's frame, title band and close control; the
-// content goes in a container placed at the card.
+// A dim layer over dim, then the card's frame, title band and close control; the content goes
+// in a container placed at the card.
 function drawCardFrame(
   scene: Scene,
   parent: GameObjects.Container,
+  dim: Rect,
   closePressed: boolean,
   rect: Rect,
   title: string,
   content: GameObjects.Container,
 ): void {
-  parent.add(addDim(scene, SCREEN));
+  parent.add(addDim(scene, dim));
   addDetailCard(scene, parent, rect, cardBand(rect));
   content.setPosition(rect.x, rect.y);
   parent.add([content, addCardTitle(scene, rect, title)]);
@@ -187,10 +188,12 @@ function addDetailOwner(
 
 // A held dog's, walker's or gear item's detail card over a dim layer, as tall as what it
 // shows, its rows beside the well and under it as detailParts places them. Returns the card's
-// rect, so a tap outside it or on its close control closes it.
+// rect, so a tap outside it or on its close control closes it. dim is the part of the screen
+// dimmed under it (overlayRegion on a home page).
 export function drawDetailCard(
   scene: Scene,
   parent: GameObjects.Container,
+  dim: Rect,
   closePressed: boolean,
   card: DetailCard,
   picture: DetailPicture,
@@ -248,6 +251,6 @@ export function drawDetailCard(
   draw(parts.beside, CARD.besideX, CARD_TEXT_ROOM.beside, layout.beside);
   draw(parts.below, CARD.pad, CARD_TEXT_ROOM.full, layout.below);
   const rect = detailCardRect(SCREEN, layout.height);
-  drawCardFrame(scene, parent, closePressed, rect, card.title, content);
+  drawCardFrame(scene, parent, dim, closePressed, rect, card.title, content);
   return rect;
 }

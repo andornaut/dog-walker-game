@@ -7,10 +7,8 @@ import {
   outsidePressDown,
   outsidePressMove,
   outsideTapped,
-  screenArea,
 } from "../input/outsideTap";
 import { gamePoint, onBarePage } from "../input/pageTap";
-import type { Rect } from "../lib/rect";
 import { PHONE_EVENTS } from "../pwa";
 import { read } from "../rules/units";
 import { listenOnePress } from "./onePress";
@@ -80,19 +78,17 @@ export function onBackPressed(scene: Scene, back: () => void): void {
 }
 
 // Closes an overlay the ways every overlay closes besides its own controls: the phone's back
-// button, and a tap outside it (listenOutsideTap) on the screen around covered, its panel and
-// any control drawn outside the panel, or on the page beside the game. A full-screen page
-// covers the screen itself, so only the page beside the game counts. back is what the back
-// button does, as Escape does (isPauseKey): close unless a card is open over the overlay, which
-// closes first.
+// button, and a tap outside it (listenOutsideTap) in area, around its panel and any control
+// drawn outside the panel, or on the page beside the game. A full-screen page covers the screen
+// itself, so only the page beside the game counts. back is what the back button does, as Escape
+// does (isPauseKey): close unless a card is open over the overlay, which closes first.
 export function listenDismiss(
   scene: Scene,
-  covered: readonly Rect[],
+  area: OutsideArea,
   close: () => void,
   back: () => void = close,
 ): void {
   onBackPressed(scene, back);
-  const area = screenArea(covered);
   listenOutsideTap(scene, () => area, close);
 }
 

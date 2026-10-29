@@ -86,6 +86,8 @@ function bootGame(): Game {
     pixelArt: true,
     // Sized by whole device pixels per game pixel, in fitWholePixels.
     scale: { autoCenter: Scale.CENTER_BOTH, mode: Scale.NONE },
+    // Scenes draw in this order. The home pages' overlays come before the settings, and help
+    // with its pictures after every overlay it can open over (the top bar opens it over any).
     scene: [
       BootScene,
       StartScene,
@@ -95,14 +97,14 @@ function bootGame(): Game {
       ZoneCelebrationScene,
       PauseScene,
       EndScene,
+      ShopScene,
+      StatsScene,
+      CelebrationScene,
+      SettingsScene,
       HelpScene,
       HelpPictureScene,
       new HudScene(SCENE_KEYS.helpHud),
       new CardScene(SCENE_KEYS.helpCard),
-      SettingsScene,
-      ShopScene,
-      StatsScene,
-      CelebrationScene,
       DevOverlayScene,
     ],
     type: AUTO,

@@ -705,7 +705,7 @@ export class HudScene extends Scene {
       return;
     }
     const layer = overlay.add.container(0, 0).setDepth(HUD_DEPTH.detail);
-    drawDetailCard(overlay, layer, false, detail.card, detail.picture, detail.kind);
+    drawDetailCard(overlay, layer, LAYOUT.screen, false, detail.card, detail.picture, detail.kind);
     this.explained = { key, layer };
   }
 
