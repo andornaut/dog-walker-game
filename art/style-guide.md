@@ -208,7 +208,7 @@ The walk HUD's layout is in `src/hud/walkHud.ts` and `topBar.ts`, and each piece
 - Hit effects draw over every road sprite and the pack. The pack is always drawn at full size, so they have no depth variants.
 - Each `ui-hit-flash-<colour>` pairs a light ink, holding 3:1 or more on the dark roads, with a dark fringe on its inward edge for the light roads. Mauve, under 3:1 on dslate, takes a pink rim (one step up its ramp) on its inward edge.
 - With reduced motion a bump or splash holds its peak frame (`fx-bump` and `fx-bump-big` frame 1, `fx-splash` frame 2); debris, shakes and `react` are skipped, and the white flash is one 120ms blink.
-- Each message strip line leads with a 16×16 content icon (`icon-bump`, `icon-treat`, `icon-last-heart`, `icon-fired`, the debuff's icon, `icon-lucky`, `icon-trait-chaser`, `icon-hint`).
+- Each message strip line leads with a 16×16 content icon (`icon-bump`, `icon-treat`, `icon-last-heart`, `icon-fired`, the debuff's icon, `icon-lucky`, `icon-badge` for a badge earned, `icon-trait-chaser`, `icon-hint`).
 
 #### Comic words
 
