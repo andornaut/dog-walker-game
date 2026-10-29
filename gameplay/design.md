@@ -133,7 +133,7 @@ Each neighbourhood also has its own card obstacle (see Encounters and debuffs) a
 ### Pickups
 
 - **Tip:** +$1
-- **Treat:** a grab item, not carried. It goes to the dog nearest where it touched (the front dog if only the walker touched it), whose owner gets +♥ up to the max; if that owner is already at max, the treat goes to the owner with the fewest hearts (ties to the dog nearer the front), and if every owner is at max, it's wasted, unless the Fanny pack can keep it
+- **Treat:** a grab item, not carried. It goes to the dog nearest where it touched (the front dog if only the walker touched it), whose owner gets +♥ up to the max; if that owner is already at max, the treat goes to the owner with the fewest hearts (ties to the dog nearer the front), and if every owner is at max, the Fanny pack keeps it when it has room; otherwise the treat pays $5 of cash, a gain like any other (see Money changes), counted with the tips on the end screen but never as a tip, so Stinky and Big tipper don't change it
 
 ### Dogs
 
