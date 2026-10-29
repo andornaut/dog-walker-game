@@ -248,7 +248,7 @@ Placed by the style guide's Roadside table (`shared/roadside.json`): the lawn pr
 | `ui-quip`                                                               | image  | 24×24 nine-slice  |                                            |                                                                          |
 | `ui-quip-tail`, `ui-quip-tail-down`                                     | image  | 6×8, 8×6          |                                            | Point left, and down at the speaker                                      |
 | `ui-strip-well`                                                         | image  | 24×24 nine-slice  |                                            | The card row's subtitle band                                             |
-| `ui-walk-bar`                                                           | image  | 360×48            |                                            | The walk's top bar; the game draws the effect wells and buttons on it    |
+| `ui-walk-bar`                                                           | image  | 360×40            |                                            | The walk's top bar; the game draws the effect wells and buttons on it    |
 | `ui-zone-pips`                                                          | sprite | 18×8              | `todo`, `<zone>`, `<zone>-done`            | One pip per zone of the route on the end screen                          |
 
 ## Zone celebration

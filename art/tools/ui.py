@@ -20,7 +20,7 @@ ui-strip-well (24x24 nine-slice, the band behind a card row's subtitle), ui-quip
 8px corners), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6), ui-celebrate-burst (148x132, the
 starburst behind the walker in the zone celebration), ui-zone-banner (248x48); the start screen top
 bar's bank well, drawn at (5, 5) in three pieces that stretch it to the bank's width,
-ui-home-cash-well-left, ui-home-cash-well-mid (repeated across) and ui-home-cash-well-right (1x29 each); the walk HUD's ui-walk-bar (360x48),
+ui-home-cash-well-left, ui-home-cash-well-mid (repeated across) and ui-home-cash-well-right (1x29 each); the walk HUD's ui-walk-bar (360x40),
 ui-effect-well (22x22), ui-dog-card-band (360x76, drawn at (0, 480)), ui-lead-tag (27x11, LEAD baked
 in with font-title) and ui-owner-tab (36x36).
 
@@ -1089,33 +1089,27 @@ def strip_well():
     return g
 
 
-# ---------- the walk HUD: the 48-row walk bar, the debuff bars and the dog cards ----------
+# ---------- the walk HUD: the 40-row walk bar, the debuff bars and the dog cards ----------
 
-WALK_BAR = (360, 48)
-# Every top bar (the start screen's, the walk bar, Help's) is flat plum with this trim: a dbrown line
-# on row 1, and the bottom rows brown, dbrown and ink, so the bar ends on a lit edge over the scene.
+WALK_BAR = (360, 40)
+# Every top bar (the start screen's, the walk bar, Help's) is 40 rows of flat plum with this trim: a
+# dbrown line on row 1, and the bottom rows brown, dbrown and ink, so the bar ends on a lit edge over
+# the scene.
 TOP_BAR_LINE = 1
 TOP_BAR_EDGE = ("brown", "dbrown", "ink")
-# The walk bar's wells, in screen pixels: the cash, and the neighbourhood with its name and "n of N"
-# on one line.
-WALK_WELLS = ((5, 5, 70, 37), (81, 5, 144, 12))
-# The row of effect wells under the neighbourhood well: six 22x22 wells from x 81, on the
-# neighbourhood well's left edge (the perk, Pocket, found item and three upgrades), 2 columns of
-# plum between each, on rows 20 to 41. Between the trim lines (row 1 and row 45) the neighbourhood
-# well (rows 5 to 16) and the wells split the height evenly, 3 plum rows above the name well, 3
-# between and 3 under the wells, and the cash well spans the same rows 5 to 41. Across the bar the
-# cash well sits 5 columns from the screen's edge, and the neighbourhood column (x 81 to 224) sits 6
-# columns from the cash well and 6 from Help's face. The buttons' hits, 34 wide, fill x 224 to 359
-# at a 34 pitch, each face centred in its hit (faces at 231 + 34i), so 7 columns lie before Help's
-# face and after Pause's.
+# The walk bar's cash well, in screen pixels: the start screen's bank well at its narrowest, 3 rows
+# clear of the trim above and below.
+WALK_CASH_WELL = (5, 5, 70, 29)
+# The effect wells the game draws on the bar: six 22x22 wells (the perk, Pocket, found item and three
+# upgrades), 2 columns apart, set evenly between the cash well and Help's face at x 231, on rows 8 to
+# 29, centred on the buttons' faces (rows 9 to 28). The buttons' hits, 34 wide, fill x 224 to 359 at
+# a 34 pitch, each face centred in its hit (faces at 231 + 34i).
 EFFECT_WELL = 22
 
 
 def walk_bar():
-    """360x48, ui-walk-bar: flat plum with the top bars' trim (dbrown on row 1; brown, dbrown and ink
-    on rows 45 to 47) and two ink wells: cash 5,5 70x37, sized for "$888" at 3x with no coin, and
-    neighbourhood 81,5 144x12, one text line over the six effect wells with 6 columns of padding
-    each side, 6 columns from the cash well and 6 from Help's face at x 231.
+    """360x40, ui-walk-bar: flat plum with the top bars' trim (dbrown on row 1; brown, dbrown and ink
+    on rows 37 to 39) and the ink cash well at 5,5 70x29, sized for "$888" at 3x with no coin.
     The game draws the effect wells, the Help, Sound, Settings and Pause buttons and every text and
     icon on it."""
     w, h = WALK_BAR
@@ -1124,14 +1118,12 @@ def walk_bar():
     g.rect(0, TOP_BAR_LINE, w, 1, "dbrown")
     for i, c in enumerate(TOP_BAR_EDGE):
         g.rect(0, h - len(TOP_BAR_EDGE) + i, w, 1, c)
-    for x, y, ww, hh in WALK_WELLS:
-        well(g, x, y, ww, hh)
+    well(g, *WALK_CASH_WELL)
     return g
 
 
-# The start screen top bar's bank well, in screen pixels at its narrowest: the walk bar's cash well's width and
-# left edge, 3 rows clear of the trim above and below, as in the walk bar.
-HOME_CASH_WELL = (5, 5, 70, 29)
+# The start screen top bar's bank well, in screen pixels at its narrowest: the walk bar's cash well.
+HOME_CASH_WELL = WALK_CASH_WELL
 
 
 # The start screen top bar's bank well in three pieces, left to right, each one column of a well with the walk bar's
