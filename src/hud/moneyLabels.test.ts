@@ -11,7 +11,17 @@ import { CHANGE_CHIP, CHANGE_LABEL_STYLE } from "./hudLanes";
 import type { ChangeLabel } from "./hudView";
 import { MESSAGE_STRIP } from "./messageStrip";
 import { curvePoint, TOP_BAR_POINTS } from "./moments";
-import { cashChipPlace, cashLostLabel, cashLostMs, freeCashSlot, mergeTips, MONEY_LABEL, moneyChipPlace, moneyFlightPath, stackOrders } from "./moneyLabels";
+import {
+  cashChipPlace,
+  cashLostLabel,
+  cashLostMs,
+  freeCashSlot,
+  mergeTips,
+  MONEY_LABEL,
+  moneyChipPlace,
+  moneyFlightPath,
+  stackOrders,
+} from "./moneyLabels";
 import { WALK_BAR, walkBarLayout } from "./walkHud";
 
 const BODY = fontFileMetrics("font-body");
