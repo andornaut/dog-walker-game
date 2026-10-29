@@ -1,5 +1,3 @@
-import { SCREEN_CONFIG } from "../data/screen";
-
 // The message a page posts to a waiting service worker to make it take over now.
 // serviceWorker.ts imports only its type, so the worker still builds with no imports.
 export const SKIP_WAITING_MESSAGE = "skip-waiting";
@@ -40,15 +38,15 @@ export interface UpdateState {
 }
 
 // wait: hold the boot, so a newer version can be checked for and installed first.
-// run: run the version the page loaded, with no notice.
+// run: run the version the page loaded, with no update plate.
 // switch: have the waiting version take over and reload into it.
-// prompt: show the update notice, whose Reload switches.
+// prompt: show the home screen's update plate, whose button switches.
 type UpdateAction = "prompt" | "run" | "switch" | "wait";
 
 // Before the player has interacted, a waiting version takes over at once. On a fresh load the
 // boot waits for the check and install, so that reload comes before the game draws. Once they
-// have interacted the page never reloads on its own, and the notice shows on each arrival home.
-// A switch that has not reloaded by the end of the boot wait lets the game boot.
+// have interacted the page never reloads on its own, and the update plate shows on each arrival
+// home. A switch that has not reloaded by the end of the boot wait lets the game boot.
 export function updateAction({
   interacted,
   newer,
@@ -125,34 +123,8 @@ export function activateWaitingWorker(
   worker.postMessage(SKIP_WAITING_MESSAGE);
 }
 
-// Where the notice sits in the game: over the gate scene's street, under the top bar, clear of
-// the home screen's steps and Start walk at the bottom.
-const NOTICE = { maxWidth: 260, top: 48 } as const;
-
-interface BoxLike {
-  readonly height: number;
-  readonly left: number;
-  readonly top: number;
-  readonly width: number;
-}
-
-// Where the notice goes, in page pixels, for the canvas's bounding box: centred on it
-// (centreX is the notice's centre), its top at game y NOTICE.top, and at most NOTICE.maxWidth
-// game pixels wide.
-export function noticePlacement(canvas: BoxLike): {
-  centreX: number;
-  maxWidth: number;
-  top: number;
-} {
-  return {
-    centreX: canvas.left + canvas.width / 2,
-    maxWidth: (canvas.width * NOTICE.maxWidth) / SCREEN_CONFIG.width,
-    top: canvas.top + (canvas.height * NOTICE.top) / SCREEN_CONFIG.height,
-  };
-}
-
 export interface UpdateFlow {
-  // The notice's Reload: switch to the waiting version, if there is one.
+  // The update plate's button: switch to the waiting version, if there is one.
   accept(): void;
   // Resolves once the game may boot. It never resolves for a page that reloads first.
   readonly bootable: Promise<void>;
@@ -170,8 +142,8 @@ export interface UpdateFlow {
 }
 
 // Acts on updateAction whenever its state changes: lets the game boot, switches to the waiting
-// version, or shows the notice through show(visible), the last only on a change. A page some
-// version controls starts with a newer one pending, so the boot waits for watch or
+// version, or shows the update plate through show(visible), the last only on a change. A page
+// some version controls starts with a newer one pending, so the boot waits for watch or
 // noRegistration; a first visit has none to wait for.
 export function createUpdateFlow(
   container: ContainerLike,

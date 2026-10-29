@@ -11,6 +11,8 @@ export const PHONE_EVENTS = {
   turnedSideways: "turned-sideways",
   // The phone is upright again and the notice is gone.
   turnedUpright: "turned-upright",
+  // The home screen's update plate shows or hides: updatePlateShown says which.
+  updatePlate: "update-plate",
 } as const;
 
 type PhoneEventName = (typeof PHONE_EVENTS)[keyof typeof PHONE_EVENTS];

@@ -4,6 +4,7 @@ import type { PackPlacement } from "../layout/packFormation";
 import type { Point, Rect } from "../lib/rect";
 import { type FontMetrics, helpCapDy, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import type { GridSpec } from "../ui/grid";
+import { BUTTON_LIP_PX } from "../ui/selection";
 import type { SectionId } from "./sections";
 
 // Every tappable thing is at least 44 game pixels (48 CSS pixels on a 390px-wide phone) on
@@ -277,6 +278,23 @@ export const HOME_LAYOUT = {
       right: "ui-home-cash-well-right",
     },
   },
+  // The update plate under the top bar while a newer version waits: a ui-panel across the gate
+  // scene's top, over the street sign and clear of the Pet shop's board, in place of the
+  // walker's bubble. On one row: iconKey's 16x16 icon at icon.x, the title in 2x title text in
+  // titleColour, its ink starting at titleX, and the ui-button's go look at button with its
+  // label, centred, at least labelPad inside either side. The label's capitals are centred on the
+  // button's face (the button less its lip), the title's share their row, and the icon is
+  // centred on that row (updatePlateText). The tap area is hit.
+  updatePlate: {
+    button: { height: 28, width: 128, x: 218, y: 49 },
+    hit: { height: 44, width: 128, x: 218, y: 41 },
+    icon: { size: 16, x: 14 },
+    iconKey: "icon-update",
+    labelPad: 8,
+    panel: { height: 44, width: 352, x: 4, y: 41 },
+    titleColour: "plum",
+    titleX: 36,
+  },
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
   walkerOrigin: { x: WALKER_ORIGIN_X, y: WALKER_SECTION.y + TILE_OFFSET },
   // A walker tile: the portrait's box and the portrait in it, the walker's perk icon right of
@@ -302,6 +320,7 @@ export const HOME_LAYOUT = {
   sectionFillKeys: Readonly<Record<SectionId, string>>;
   sections: Readonly<Record<SectionId, Rect>>;
   slotSign: { readonly [key: string]: unknown; board: Rect; hit: Rect };
+  updatePlate: { readonly [key: string]: unknown; button: Rect; hit: Rect; panel: Rect };
   walkerTiles: GridSpec;
   yardSign: Rect;
 };
@@ -488,4 +507,21 @@ export function slotSignText(body: FontMetrics): {
   const block = linePitch + inkRowsFromCapTop(body) * scale;
   const headCapY = cream.y + Math.floor((cream.height - block) / 2);
   return { cream, headCapY, priceCapY: headCapY + linePitch, x: cream.x + cream.width / 2 };
+}
+
+// How wide the update plate's title and button label may be: the title from titleX to GAP
+// short of the button, the label inside the button less labelPad either side.
+export const UPDATE_PLATE_ROOM = {
+  label: HOME_LAYOUT.updatePlate.button.width - 2 * HOME_LAYOUT.updatePlate.labelPad,
+  title: HOME_LAYOUT.updatePlate.button.x - GAP - HOME_LAYOUT.updatePlate.titleX,
+} as const;
+
+// The update plate's row, from the 2x title font's metrics: the capitals' top for the title
+// and the button's label, centred on the button's face, and the icon's top, centred on the
+// capitals.
+export function updatePlateText(title: FontMetrics): { capY: number; iconY: number } {
+  const { button, icon } = HOME_LAYOUT.updatePlate;
+  const caps = title.capHeight * 2;
+  const capY = button.y + Math.floor((button.height - BUTTON_LIP_PX - caps) / 2);
+  return { capY, iconY: capY + Math.floor((caps - icon.size) / 2) };
 }

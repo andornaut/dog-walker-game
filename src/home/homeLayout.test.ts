@@ -41,6 +41,8 @@ import {
   pocketLining,
   sectionFill,
   slotSignText,
+  UPDATE_PLATE_ROOM,
+  updatePlateText,
 } from "./homeLayout";
 
 const { dogOrigin, dogTiles, sectionFrame, sections, startButton, walkerOrigin, walkerTiles } =
@@ -604,5 +606,45 @@ describe("the dog slot sign", () => {
     expect(below - above).toBeGreaterThanOrEqual(0);
     expect(below - above).toBeLessThanOrEqual(1);
     expect(headCapY + inkRows).toBeLessThan(priceCapY);
+  });
+});
+
+describe("the update plate", () => {
+  const { button, hit, icon, panel, titleX } = HOME_LAYOUT.updatePlate;
+  const { petShop, topBar } = HOME_LAYOUT;
+  const TITLE = fontFileMetrics("font-title");
+  const { capY, iconY } = updatePlateText(TITLE);
+
+  it("lies inside the screen, under the top bar and clear of the Pet shop's board", () => {
+    expect(
+      inside(panel, { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 }),
+    ).toBe(true);
+    expect(panel.y).toBeGreaterThanOrEqual(topBar.height);
+    expect(rectsOverlap(panel, petShop.board)).toBe(false);
+  });
+
+  it.each([
+    ["the button", button],
+    ["the icon", { height: icon.size, width: icon.size, x: icon.x, y: iconY }],
+  ])("holds %s inside the plate", (_, rect) => {
+    expect(inside(rect, panel)).toBe(true);
+  });
+
+  it("covers the button with a tap area at least 44 tall", () => {
+    expect(hit.height).toBeGreaterThanOrEqual(44);
+    expect(inside(button, hit)).toBe(true);
+  });
+
+  it("leaves the title's room between the icon and the button", () => {
+    expect(titleX).toBeGreaterThan(icon.x + icon.size);
+    expect(titleX + UPDATE_PLATE_ROOM.title).toBeLessThan(button.x);
+  });
+
+  it("puts the capitals on the button's face, the icon on their row", () => {
+    const caps = TITLE.capHeight * TEXT_SCALE;
+    expect(capY).toBeGreaterThanOrEqual(button.y);
+    expect(capY + caps).toBeLessThanOrEqual(button.y + button.height);
+    expect(iconY).toBeLessThanOrEqual(capY);
+    expect(iconY + icon.size).toBeGreaterThanOrEqual(capY + caps);
   });
 });

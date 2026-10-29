@@ -1958,6 +1958,36 @@
           "right": "ui-home-cash-well-right"
         }
       },
+      "updatePlate": {
+        "button": {
+          "height": 28,
+          "width": 128,
+          "x": 218,
+          "y": 49
+        },
+        "hit": {
+          "height": 44,
+          "width": 128,
+          "x": 218,
+          "y": 41
+        },
+        "icon": {
+          "size": 16,
+          "x": 14
+        },
+        "iconKey": "icon-update",
+        "labelPad": 8,
+        "panel": {
+          "height": 44,
+          "width": 352,
+          "x": 4,
+          "y": 41
+        },
+        "titleColour": "plum",
+        "titleX": 36,
+        "capY": 56,
+        "iconY": 53
+      },
       "walkerAtGate": {
         "footY": 196,
         "x": 180

@@ -10,6 +10,7 @@ import { TEST_TUNING } from "../testing/tuning";
 import type { HomeLoadout } from "./home";
 import {
   bubbleSpeech,
+  gateTop,
   type HomeAction,
   HOW_TO_WALKS,
   messageLine,
@@ -250,5 +251,14 @@ describe("packBonusLine", () => {
     ["a lead already at the cap", capped, ["duchess", "kilo"], null],
   ])("shows how far the lead's owner's max rises for %s", (_name, tuning, dogs, expected) => {
     expect(packBonusLine({ ...data, tuning }, { dogs, gear: null })).toBe(expected);
+  });
+});
+
+describe("gateTop", () => {
+  it.each<[boolean, ReturnType<typeof gateTop>]>([
+    [false, "bubble"],
+    [true, "updatePlate"],
+  ])("with a version waiting %s shows the %s, never both", (waiting, expected) => {
+    expect(gateTop(waiting)).toBe(expected);
   });
 });

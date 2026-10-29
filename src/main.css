@@ -119,41 +119,6 @@ body:has(.dev-sheet:not([hidden])) #game {
   fill: #3e2731;
 }
 
-/* The update notice: over the top of the game, under the home screen's top bar and clear of
-   its steps and Start walk. src/pwa sets left, top and max-width from the canvas's box. */
-.update-toast {
-  position: fixed;
-  left: 50%;
-  top: 48px;
-  z-index: 10;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 2px 2px 2px 12px;
-  transform: translateX(-50%);
-  border: 2px solid #e4a672;
-  background: #3e2731;
-  color: #ead4aa;
-  font:
-    600 16px/1.2 system-ui,
-    sans-serif;
-  white-space: nowrap;
-}
-
-.update-toast button {
-  box-sizing: border-box;
-  min-width: 88px;
-  min-height: 44px;
-  border: 0;
-  border-bottom: 4px solid #f77622;
-  background: #feae34;
-  color: #3e2731;
-  font: inherit;
-  cursor: pointer;
-}
-
-.turn-upright[hidden],
-.update-toast[hidden] {
+.turn-upright[hidden] {
   display: none;
 }

@@ -189,3 +189,9 @@ export function bubbleSpeech(
     ? { owner: null, paragraphs: [walkerLine] }
     : { owner, paragraphs: [quip] };
 }
+
+// What the gate scene's top shows: the update plate while a newer version waits, which hides
+// the walker's bubble, else the bubble.
+export function gateTop(updateWaiting: boolean): "bubble" | "updatePlate" {
+  return updateWaiting ? "updatePlate" : "bubble";
+}

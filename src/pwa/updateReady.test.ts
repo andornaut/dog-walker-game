@@ -5,7 +5,6 @@ import {
   type ContainerLike,
   createUpdateFlow,
   newerVersionOf,
-  noticePlacement,
   type RegistrationLike,
   RESUME_CHECK_MS,
   resumeCheckDue,
@@ -400,13 +399,5 @@ describe("createUpdateFlow", () => {
     container.takeOver();
     expect(shown).toEqual([]);
     expect(reload).not.toHaveBeenCalled();
-  });
-});
-
-describe("noticePlacement", () => {
-  // Centred on the canvas, its top at game y 48 and at most 260 game px wide.
-  it("places the notice on a scaled, letterboxed canvas", () => {
-    const canvas = { height: 1120, left: 0, top: 20, width: 720 };
-    expect(noticePlacement(canvas)).toEqual({ centreX: 360, maxWidth: 520, top: 116 });
   });
 });

@@ -795,6 +795,12 @@ export interface HomeText {
   readonly startWalk: string;
   // Said first in the walker's bubble while the browser keeps no save.
   readonly unsaved: string;
+  // The plate under the top bar while a newer version of the game waits: its title, and its
+  // button, which reloads into that version.
+  readonly update: {
+    readonly button: string;
+    readonly title: string;
+  };
   // What the bubble says for an owned walker picked or focused: its agility and perk, or its
   // perk alone in walkerInfoBase for a walker at the base lane-change speed.
   readonly walkerInfo: string;

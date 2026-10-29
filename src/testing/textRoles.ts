@@ -15,7 +15,13 @@ import {
   shortDollarAmountText,
   signedShortDollarText,
 } from "../home/home";
-import { BANK_ROOM, bankAmountText, DOG_TILE_TEXT_ROOM, HOME_LAYOUT } from "../home/homeLayout";
+import {
+  BANK_ROOM,
+  bankAmountText,
+  DOG_TILE_TEXT_ROOM,
+  HOME_LAYOUT,
+  UPDATE_PLATE_ROOM,
+} from "../home/homeLayout";
 import { messageLine } from "../home/homeLines";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import { confirmLines } from "../home/purchaseConfirm";
@@ -442,6 +448,18 @@ export function textRoleCases(): TextRoleCase[] {
       "font-title",
       { room: HOME_LAYOUT.startLoading.room, style: { scale: HOME_LAYOUT.startLabel.scale } },
       [gameData.homeText.startWalk, gameData.homeText.startLoading],
+    ),
+    ...plainRole(
+      "update plate's title",
+      "font-title",
+      { room: UPDATE_PLATE_ROOM.title, style: TEXT_STYLE },
+      [gameData.homeText.update.title],
+    ),
+    ...plainRole(
+      "update plate's button",
+      "font-title",
+      { room: UPDATE_PLATE_ROOM.label, style: TEXT_STYLE },
+      [gameData.homeText.update.button],
     ),
     ...endRoles(),
     ...shopRoles(),

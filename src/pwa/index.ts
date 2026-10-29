@@ -1,18 +1,18 @@
-// The game as an installed phone app: the service worker and its update notice, the screen wake
+// The game as an installed phone app: the service worker and its update plate, the screen wake
 // lock, the back gesture, visibility and orientation events, the turn-upright notice, audio
 // unlock, the install offer and persistent storage. setupPhoneApp runs once from main.ts; the
 // scenes listen for PHONE_EVENTS on window and call the functions below.
 import { chooseSoundFormat, type SoundFormat } from "../audio/soundFormat";
 import { browserStorage, lazyStorage } from "../save/storage";
 import { guardBackNavigation } from "./backNavigation";
-import { PHONE_EVENTS } from "./events";
+import { dispatchPhoneEvent, PHONE_EVENTS } from "./events";
 import { type InstallFlow, type InstallOutcome, watchInstall } from "./installFlow";
 import { createInstallNudge, type InstallNudge } from "./installNudge";
 import type { InstallState, MenuInstallBrowser } from "./installState";
 import { type OrientationRelay, relayOrientationEvents, type Viewport } from "./orientation";
 import { serviceWorkerUrl } from "./serviceWorkerUrl";
 import { requestPersistentStorage, type StoragePersistence } from "./storagePersistence";
-import { createUpdateFlow, noticePlacement, type UpdateFlow } from "./updateReady";
+import { createUpdateFlow, type UpdateFlow } from "./updateReady";
 import { relayVisibilityEvents } from "./visibility";
 import { createScreenWakeLock, type ScreenWakeLock } from "./wakeLock";
 
@@ -23,30 +23,8 @@ export { type InstallState, type MenuInstallBrowser, offersInstall } from "./ins
 export type { StoragePersistence } from "./storagePersistence";
 
 const SERVICE_WORKER_URL = "/sw.js";
-// Elements in pages/play/index.html.
+// An element in pages/play/index.html.
 const TURN_UPRIGHT_ID = "turn-upright";
-const UPDATE_READY_ID = "update-ready";
-const GAME_ID = "game";
-
-// Keeps the notice over the game's top, wherever the canvas is scaled and letterboxed to.
-// Returns a function that places it now, for when it is shown.
-function placeNoticeOverGame(notice: HTMLElement): () => void {
-  const game = document.getElementById(GAME_ID);
-  if (game === null) {
-    return () => undefined;
-  }
-  const place = () => {
-    const canvas = game.querySelector("canvas") ?? game;
-    const { centreX, maxWidth, top } = noticePlacement(canvas.getBoundingClientRect());
-    notice.style.left = `${centreX}px`;
-    notice.style.top = `${top}px`;
-    notice.style.maxWidth = `${maxWidth}px`;
-  };
-  place();
-  new ResizeObserver(place).observe(game);
-  window.addEventListener("resize", place);
-  return place;
-}
 
 // The sound format BootScene loads and the service worker precaches.
 export function browserSoundFormat(): SoundFormat | undefined {
@@ -60,10 +38,12 @@ let orientation: OrientationRelay | undefined;
 let persistence: Promise<StoragePersistence> = Promise.resolve("unsupported");
 let screenWakeLock: ScreenWakeLock | undefined;
 let updateFlow: UpdateFlow | undefined;
+// Whether the home screen shows the update plate.
+let updateShown = false;
 
 // How long a fresh load holds the boot for a newer version to be checked for and installed, so
 // it reloads into that version before the game draws. A slower install switches once it lands,
-// or, after the player has interacted, offers the notice on the home screen.
+// or, after the player has interacted, offers the update plate on the home screen.
 const BOOT_WAIT_MS = 4000;
 // Input that counts as the player interacting, after which the page never reloads on its own.
 const INTERACTION_EVENTS = ["keydown", "pointerdown"] as const;
@@ -75,22 +55,17 @@ function registerServiceWorker(): Promise<void> {
     return Promise.resolve();
   }
   const container = navigator.serviceWorker;
-  const notice = document.getElementById(UPDATE_READY_ID);
-  const placeNotice = notice === null ? () => undefined : placeNoticeOverGame(notice);
   const flow = createUpdateFlow(
     container,
     () => Date.now(),
     () => navigator.onLine,
     () => location.reload(),
     (visible) => {
-      if (notice !== null) {
-        placeNotice();
-        notice.hidden = !visible;
-      }
+      updateShown = visible;
+      dispatchPhoneEvent(window, PHONE_EVENTS.updatePlate);
     },
   );
   updateFlow = flow;
-  notice?.querySelector("button")?.addEventListener("click", () => flow.accept());
   for (const type of INTERACTION_EVENTS) {
     window.addEventListener(type, () => flow.noteInteraction(), { capture: true, passive: true });
   }
@@ -170,9 +145,20 @@ export function stopWakeLock(): void {
   screenWakeLock?.stop();
 }
 
-// Whether the home screen is in front, the only place the update notice shows.
+// Whether the home screen is in front, the only place the update plate shows.
 export function setOnHomeScreen(onHome: boolean): void {
   updateFlow?.setOnHome(onHome);
+}
+
+// Whether the home screen shows the update plate: a newer version waits, after the player has
+// interacted, with the home screen in front. PHONE_EVENTS.updatePlate fires on each change.
+export function updatePlateShown(): boolean {
+  return updateShown;
+}
+
+// The update plate's button: switch to the waiting version and reload into it.
+export function acceptUpdate(): void {
+  updateFlow?.accept();
 }
 
 // A walk started, which counts as the player interacting even with no input (a dev walk URL).

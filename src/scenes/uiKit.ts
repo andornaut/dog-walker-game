@@ -33,6 +33,7 @@ import {
 } from "../ui/phaser/pixelText";
 import {
   BUTTON_COLOURS,
+  BUTTON_LIP_PX,
   type ButtonLook,
   GREYED,
   SELECT_OUTSET,
@@ -192,7 +193,6 @@ const BUTTON_TAGS: Readonly<Record<ButtonLook, readonly string[]>> = {
 
 // The ui-button's face sinks this far into its lip when pressed, as the art draws it.
 export const BUTTON_PRESS_PX = 2;
-const BUTTON_LIP_PX = 4;
 
 // A disabled button drawn in code: a flat grey face in an ink line at the pressed depth with
 // no lip, so it never looks raised.

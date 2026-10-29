@@ -54,6 +54,9 @@ export const BUTTON_COLOURS = {
   secondary: { face: "cream", label: "plum", lip: "tan" },
 } as const satisfies Record<ButtonLook, { face: string; label: string; lip: string | null }>;
 
+// The rows of ui-button's lip under a raised face, the bottom of its rect.
+export const BUTTON_LIP_PX = 4;
+
 // The plate a price or goal sits on: buy while the bank covers the price, short while it
 // does not, goal for an item a goal unlocks or one that needs another bought first.
 export type PlateKind = "buy" | "goal" | "short";

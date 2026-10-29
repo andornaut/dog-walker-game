@@ -3,7 +3,7 @@ import type { Point } from "../lib/rect";
 // A press on the page beside the game's canvas (the margins of a wide screen, below a short
 // one) counts as a tap outside an open overlay too, by the same tap rule. Only the bare page
 // counts: its root, its body and the game's container around the canvas. The canvas has its
-// own rule, and page UI such as the site nav, the dev panel or a toast keeps its presses.
+// own rule, and page UI such as the site nav or the dev panel keeps its presses.
 export function onBarePage(
   bare: readonly (EventTarget | null)[],
   target: EventTarget | null,

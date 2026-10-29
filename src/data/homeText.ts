@@ -104,6 +104,10 @@ export const HOME_TEXT = {
   startLoading: "Grabbing leashes...",
   startWalk: "Start walk",
   unsaved: "Progress won't be saved.",
+  update: {
+    button: "Update now",
+    title: "Update available",
+  },
   walkerInfo: "{walker}: {perk}, {agility} lane change speed.",
   walkerInfoBase: "{walker}: {perk}.",
   walkerLocked: "Finish {zone} to unlock.",

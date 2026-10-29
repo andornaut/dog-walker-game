@@ -58,9 +58,11 @@ import {
   HOME_LAYOUT,
   sectionFill,
   slotSignText,
+  updatePlateText,
 } from "../home/homeLayout";
 import {
   bubbleSpeech,
+  gateTop,
   type HomeAction,
   packBonusLine,
   storageNotice,
@@ -105,7 +107,15 @@ import { clampIndex, itemAt } from "../lib/arrays";
 import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import type { Cents } from "../lib/units";
 import { addFigure, PackFigures } from "../pack/phaser/packFigures";
-import { installNudgeDue, noteInstallNudged, startWakeLock, stopWakeLock } from "../pwa";
+import {
+  acceptUpdate,
+  installNudgeDue,
+  noteInstallNudged,
+  PHONE_EVENTS,
+  startWakeLock,
+  stopWakeLock,
+  updatePlateShown,
+} from "../pwa";
 import type { SaveDocument } from "../save/schema";
 import { walksFinished, walksPlayed } from "../save/stats";
 import { packDogsOf } from "../state/pack";
@@ -151,6 +161,7 @@ import {
   onBackPressed,
   onceSceneEvent,
   onSceneEvent,
+  onWindowEvent,
   openOverlay,
 } from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
@@ -239,6 +250,7 @@ const START_BUTTON: Rect = HOME_LAYOUT.startButton;
 const WAITING_ALPHA = 0.6;
 const START_LABEL = HOME_LAYOUT.startLabel;
 const GEAR_BADGE: Rect = HOME_LAYOUT.gearBadge;
+const UPDATE_PLATE = HOME_LAYOUT.updatePlate;
 // The keyboard ring sits outside the ui-select frame.
 const FOCUS_OUTSET = 5;
 
@@ -270,6 +282,7 @@ type Target =
   | { kind: "settings" }
   | { kind: "slotSign" }
   | { kind: "start" }
+  | { kind: "update" }
   | { kind: "walker"; walker: WalkerId };
 
 // One key per tappable thing, for its feedback timers.
@@ -319,13 +332,16 @@ interface Focusable {
   target: Target;
 }
 
-// The keyboard's rows, top to bottom as the screen shows them: the dog slot sign while it
-// shows and the Pet shop, the walkers, the dog rows, the Pocket and Start walk.
-function focusRows(signShown: boolean): Focusable[][] {
+// The keyboard's rows, top to bottom as the screen shows them: the update plate's button while
+// it shows, the dog slot sign while it shows and the Pet shop, the walkers, the dog rows, the
+// Pocket and Start walk.
+function focusRows(shown: { sign: boolean; update: boolean }): Focusable[][] {
   const walkers = walkerTiles();
   const sign: Focusable = { rect: SLOT_SIGN.board, target: { kind: "slotSign" } };
+  const update: Focusable = { rect: UPDATE_PLATE.button, target: { kind: "update" } };
   const rows: Focusable[][] = [
-    [...(signShown ? [sign] : []), { rect: PET_SHOP, target: { kind: "petShop" } }],
+    ...(shown.update ? [[update]] : []),
+    [...(shown.sign ? [sign] : []), { rect: PET_SHOP, target: { kind: "petShop" } }],
     walkerIds().map((walker, i): Focusable => ({
       rect: itemAt(walkers, i),
       target: { kind: "walker", walker },
@@ -366,7 +382,7 @@ interface TileView {
   face?: { object: GameObjects.Image | GameObjects.Sprite; y: number };
   // The Pet shop's glint frames, shown in place of its normal face while one plays.
   glint?: { frames: readonly (string | number)[]; image: GameObjects.Image };
-  // An icon button shows its pressed face rather than dipping.
+  // A button with a pressed face shows it rather than dipping.
   iconButton?: IconButton;
   lift: number;
   mark?: { image: GameObjects.Image; y: number };
@@ -388,9 +404,10 @@ const LAST_VISIT_WALKERS_KEY = "homeLastVisitWalkers";
 
 // The screen before a walk: the bank at the top bar's left and Logbook, Help, Sound and
 // Settings at its right; the walker and pack at the gate beside the Pet shop; the Walker, Dogs
-// and Pocket sections and Start walk. Buying happens only in the shop: tapping the building
-// opens it, and tapping a locked dog, gear item or the dog slot sign opens it on that
-// item. Holding a dog or gear tile opens its detail card.
+// and Pocket sections and Start walk. While a newer version of the game waits, the update plate
+// under the top bar takes the walker's bubble's place until tapped. Buying happens only in the
+// shop: tapping the building opens it, and tapping a locked dog, gear item or the dog slot sign
+// opens it on that item. Holding a dog or gear tile opens its detail card.
 // The arrow keys move a focus ring, Enter or Space picks, Escape, P or back closes a card, ?
 // opens help, S settings, L the logbook and M mutes. Start walk and help wait for boot to load
 // the rest of the art, which it does behind this screen.
@@ -570,6 +587,8 @@ export class StartScene extends Scene {
     onSceneEvent(this, this.game.events, SHOP_CLOSED_EVENT, (closed: ShopClosed) =>
       this.shopClosed(closed),
     );
+    // The update plate shows on the home screen while a newer version waits.
+    onWindowEvent(this, PHONE_EVENTS.updatePlate, () => this.render());
     // A tap made while another tap's act opened help, settings or stats over this screen is
     // dropped, so it cannot act once the screen resumes, as is a press waiting for the art and
     // a press still down, whose release lands on the overlay.
@@ -597,7 +616,7 @@ export class StartScene extends Scene {
     }
     const direction = focusDirectionForKey(key);
     if (direction !== undefined) {
-      const rows = focusRows(this.signShown());
+      const rows = focusRows(this.shownControls());
       this.focus = moveFocus(
         rows.map((row) => row.length),
         direction,
@@ -634,7 +653,7 @@ export class StartScene extends Scene {
     if (this.focus === null) {
       return undefined;
     }
-    const row = focusRows(this.signShown())[this.focus.row] ?? [];
+    const row = focusRows(this.shownControls())[this.focus.row] ?? [];
     return row[clampIndex(row.length, this.focus.column)];
   }
 
@@ -642,6 +661,11 @@ export class StartScene extends Scene {
   private signShown(): boolean {
     const { bankCents, owned } = this.save();
     return slotSign(gameData, owned, bankCents) !== null;
+  }
+
+  // The controls that come and go: the dog slot sign and the update plate.
+  private shownControls(): { sign: boolean; update: boolean } {
+    return { sign: this.signShown(), update: gateTop(updatePlateShown()) === "updatePlate" };
   }
 
   // A focused dog or gear item in words, so a keyboard player has what a hold shows, and a
@@ -709,12 +733,18 @@ export class StartScene extends Scene {
     if (walker !== undefined) {
       return { kind: "walker", walker: itemAt(walkerIds(), walker) };
     }
+    // The top bar's buttons come before the update plate's, whose tap area reaches up under
+    // their hit areas.
+    const update: readonly [Rect, Target][] = this.shownControls().update
+      ? [[UPDATE_PLATE.hit, { kind: "update" }]]
+      : [];
     const fixed: readonly [Rect, Target][] = [
       [START_BUTTON, { kind: "start" }],
       [HELP_BUTTON, { kind: "help" }],
       [MUTE_BUTTON, { kind: "mute" }],
       [SETTINGS_BUTTON, { kind: "settings" }],
       [LOGBOOK_BUTTON, { kind: "logbook" }],
+      ...update,
       [PET_SHOP, { kind: "petShop" }],
     ];
     if (this.signShown() && containsPoint(SLOT_SIGN.hit, x, y)) {
@@ -859,6 +889,9 @@ export class StartScene extends Scene {
         return;
       case "start":
         this.startWalk();
+        return;
+      case "update":
+        acceptUpdate();
         return;
       default:
         target satisfies never;
@@ -1055,7 +1088,11 @@ export class StartScene extends Scene {
     this.drawTopBar(root, g, save);
     this.drawPetShop(root, save);
     this.drawSlotSign(root, save);
-    this.drawPackAtGate(root, g, save);
+    const updatePlate = gateTop(updatePlateShown()) === "updatePlate";
+    this.drawPackAtGate(root, g, save, !updatePlate);
+    if (updatePlate) {
+      this.drawUpdatePlate(root);
+    }
     const sections = this.sections(save);
     for (const id of SECTION_IDS) {
       const note = this.drawSection(root, SECTION_RECTS[id], sections[id]);
@@ -1356,10 +1393,13 @@ export class StartScene extends Scene {
     }
   }
 
+  // The walker and pack at the gate, the walker's bubble over them when bubble is true, and the
+  // gear badge.
   private drawPackAtGate(
     root: GameObjects.Container,
     g: GameObjects.Graphics,
     save: SaveDocument,
+    bubble: boolean,
   ): void {
     const { footY, x } = WALKER_AT_GATE;
     const reduced = currentSettings(this).reducedMotion;
@@ -1396,6 +1436,34 @@ export class StartScene extends Scene {
       }
     }
 
+    if (bubble) {
+      this.drawBubble(root, save, reduced);
+    }
+
+    // Equipped gear shows as a badge beside the walker, moved right of any dog whose feet
+    // are below its top, and kept clear of the Pet shop.
+    if (this.loadout.gear !== null) {
+      const clear = Math.max(
+        GEAR_BADGE.x,
+        ...dogs
+          .filter(({ feet }) => feet.footY > GEAR_BADGE.y)
+          .map(
+            ({ dog, feet }) =>
+              feet.x + Math.ceil(spriteMetrics(dogSpriteKey(gameData, dog)).opaqueWidth / 2) + 1,
+          ),
+      );
+      const rect = { ...GEAR_BADGE, x: Math.min(clear, PET_SHOP.x - GEAR_BADGE.width) };
+      const badge = this.tileView(root, "gateBadge");
+      badge.rise = targetId({ gear: this.loadout.gear, kind: "gear" });
+      fillRect(addGraphicsIn(this, badge.container), PALETTE.plum, rect);
+      const at = { x: rect.x + 1, y: rect.y + 1 };
+      this.addGearIcon(badge.container, "colour", this.loadout.gear, at, 0.5);
+    }
+  }
+
+  // The walker's speech bubble over the gate, its tail's tip over the walker.
+  private drawBubble(root: GameObjects.Container, save: SaveDocument, reduced: boolean): void {
+    const { x } = WALKER_AT_GATE;
     const state = { action: this.action, loadout: this.loadout };
     const speech = bubbleSpeech(
       gameData.homeText,
@@ -1452,26 +1520,38 @@ export class StartScene extends Scene {
     if (tail !== undefined) {
       bubble.add(this.add.image(x - tail.tipX, top + size.height - 1, tail.key).setOrigin(0));
     }
+  }
 
-    // Equipped gear shows as a badge beside the walker, moved right of any dog whose feet
-    // are below its top, and kept clear of the Pet shop.
-    if (this.loadout.gear !== null) {
-      const clear = Math.max(
-        GEAR_BADGE.x,
-        ...dogs
-          .filter(({ feet }) => feet.footY > GEAR_BADGE.y)
-          .map(
-            ({ dog, feet }) =>
-              feet.x + Math.ceil(spriteMetrics(dogSpriteKey(gameData, dog)).opaqueWidth / 2) + 1,
-          ),
-      );
-      const rect = { ...GEAR_BADGE, x: Math.min(clear, PET_SHOP.x - GEAR_BADGE.width) };
-      const badge = this.tileView(root, "gateBadge");
-      badge.rise = targetId({ gear: this.loadout.gear, kind: "gear" });
-      fillRect(addGraphicsIn(this, badge.container), PALETTE.plum, rect);
-      const at = { x: rect.x + 1, y: rect.y + 1 };
-      this.addGearIcon(badge.container, "colour", this.loadout.gear, at, 0.5);
-    }
+  // The update plate under the top bar while a newer version waits: the icon (none while its art
+  // is missing), the title, and the button, whose face sinks while pressed and which reloads
+  // into the new version.
+  private drawUpdatePlate(root: GameObjects.Container): void {
+    const { button, icon, iconKey, panel, titleColour, titleX } = UPDATE_PLATE;
+    const text = gameData.homeText.update;
+    root.add(addPanel(this, panel));
+    const { capY, iconY } = updatePlateText(pixelFontMetrics(this, "title"));
+    root.add(imageIcon(this, iconKey, icon.x, iconY));
+    this.text(root, titleX, capY, text.title, PALETTE[titleColour], { font: "title" });
+    const view = this.tileView(root, "update");
+    const faces = buttonFaces(this, true, button, "primary");
+    view.container.add(faces);
+    const centreX = button.x + button.width / 2;
+    const label = this.text(
+      view.container,
+      centreX,
+      capY,
+      text.button,
+      PALETTE[BUTTON_COLOURS.primary.label],
+      { font: "title", originX: 0.5 },
+    );
+    view.iconButton = {
+      setPressed(pressed) {
+        faces[0]?.setVisible(!pressed);
+        faces[1]?.setVisible(pressed);
+        placePixelText(label, centreX, capY + (pressed ? BUTTON_PRESS_PX : 0));
+      },
+    };
+    view.iconButton.setPressed(false);
   }
 
   // The Pet shop on the yard's right lot: ui-pet-shop, its front sinking while pressed, with
