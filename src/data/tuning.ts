@@ -93,7 +93,7 @@ export const TUNING = {
     prices: {
       buddy: 600,
       // The second and third dog slots; every player starts with one.
-      dogSlot2: 2000,
+      dogSlot2: 1000,
       dogSlot3: 2000,
       fannyPack: 500,
       ginger: 200,
