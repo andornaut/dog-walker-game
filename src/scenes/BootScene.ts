@@ -38,7 +38,7 @@ import {
   loadingWalkerAt,
   stepFraction,
 } from "../layout/loadingScreen";
-import { browserSoundFormat, startWakeLock, unlockAudioOnFirstGesture } from "../pwa";
+import { browserSoundFormat, launchReady, startWakeLock, unlockAudioOnFirstGesture } from "../pwa";
 import { addFilledRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPillGlyphs, registerFallbackPixelFont } from "../ui/phaser/pixelText";
@@ -130,8 +130,10 @@ export class BootScene extends Scene {
     } catch (error) {
       console.error("The art manifest is invalid; drawing placeholders instead.", error);
     }
-    // Opened now so the loading walker follows the saved reduced motion setting.
-    const profileOpened = openProfile(this).then((load) => {
+    // Opened once the save may be written (launchReady), so a version about to be replaced never
+    // banks it; the loading walker then follows the saved reduced motion setting.
+    const profileOpened = launchReady().then(async () => {
+      const load = await openProfile(this);
       if (load.status === "corrupt" || load.status === "newer" || load.status === "unavailable") {
         console.warn(`The save is ${load.status}, so play starts fresh: ${load.reason}`);
       }

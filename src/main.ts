@@ -143,9 +143,9 @@ function bootGame(): Game {
   return game;
 }
 
-// The game boots once the service worker has had the chance to switch a fresh load to a newer
-// version, so it never draws the old one first, and once the dev panel's queued save edits are
-// written, so the game loads the edited save. The installed app writes none.
-void setupPhoneApp()
-  .then(() => (devToolsOn() ? applyPendingSaveEdits() : undefined))
-  .then(bootGame);
+// The game boots at once, loading while the service worker checks for a newer version: BootScene
+// holds the save and the home screen until launchReady, so a fresh load switching to a newer
+// version never draws the old home screen first. It boots once the dev panel's queued save edits
+// are written, so the game loads the edited save. The installed app writes none.
+setupPhoneApp();
+void (devToolsOn() ? applyPendingSaveEdits() : Promise.resolve()).then(bootGame);

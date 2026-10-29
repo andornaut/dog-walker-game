@@ -13,7 +13,11 @@ import {
   requestPersistentStorage,
   type StoragePersistence,
 } from "@andornaut/game-kit/pwa/storagePersistence";
-import { createUpdateFlow, type UpdateFlow } from "@andornaut/game-kit/pwa/updateReady";
+import {
+  createUpdateFlow,
+  registerWhenDue,
+  type UpdateFlow,
+} from "@andornaut/game-kit/pwa/updateReady";
 import { createScreenWakeLock, type ScreenWakeLock } from "@andornaut/game-kit/pwa/wakeLock";
 import { localSaveStorage } from "@andornaut/game-kit/save/storage";
 
@@ -58,21 +62,28 @@ let orientation: OrientationRelay | undefined;
 let persistence: Promise<StoragePersistence> = Promise.resolve("unsupported");
 let screenWakeLock: ScreenWakeLock | undefined;
 let updateFlow: UpdateFlow | undefined;
+// Resolves once the game may show its first screen and write its save (UpdateFlow.bootable).
+let ready: Promise<void> = Promise.resolve();
+// Called on each change of whether the home screen is in front (registerWhenDue).
+let homeHook: (onHome: boolean) => void = () => undefined;
 // Whether the home screen shows the update plate.
 let updateShown = false;
 
-// How long a fresh load holds the boot for a newer version to be checked for and installed, so
-// it reloads into that version before the game draws. A slower install switches once it lands,
-// or, after the player has interacted, offers the update plate on the home screen.
+// How long a fresh load holds the home screen and the save for a newer version to be checked for
+// and installed, so it reloads into that version before the home screen draws; the game loads
+// meanwhile. A slower install switches once it lands, or, after the player has interacted, offers
+// the update plate on the home screen.
 const BOOT_WAIT_MS = 4000;
 // Input that counts as the player interacting, after which the page never reloads on its own.
 const INTERACTION_EVENTS = ["keydown", "pointerdown"] as const;
 
 // The production build only: the dev server has no sw.js, and a worker would serve stale
-// modules over hot reloads. Resolves once the game may boot.
-function registerServiceWorker(): Promise<void> {
+// modules over hot reloads. A page a version controls registers now, so its update check runs
+// while the game loads; a first visit registers once the home screen shows, so the precache does
+// not compete with the game's own downloads.
+function registerServiceWorker(): void {
   if (!import.meta.env.PROD || !("serviceWorker" in navigator)) {
-    return Promise.resolve();
+    return;
   }
   const container = navigator.serviceWorker;
   const flow = createUpdateFlow(
@@ -94,14 +105,15 @@ function registerServiceWorker(): Promise<void> {
   window.addEventListener(PHONE_EVENTS.appHidden, () => flow.setVisible(false));
   window.addEventListener(PHONE_EVENTS.appVisible, () => flow.setVisible(true));
   setTimeout(() => flow.endBootWait(), BOOT_WAIT_MS);
-  container
-    .register(serviceWorkerUrl(SERVICE_WORKER_URL, browserSoundFormat()), { scope: "/" })
-    .then((registration) => flow.watch(registration))
-    .catch((error: unknown) => {
-      console.warn("Service worker registration failed; the game will not work offline.", error);
-      flow.noRegistration();
-    });
-  return flow.bootable;
+  homeHook = registerWhenDue(container, flow, () =>
+    container
+      .register(serviceWorkerUrl(SERVICE_WORKER_URL, browserSoundFormat()), { scope: "/" })
+      .catch((error: unknown) => {
+        console.warn("Service worker registration failed; the game will not work offline.", error);
+        throw error;
+      }),
+  );
+  ready = flow.bootable;
 }
 
 function readViewport(): Viewport {
@@ -126,10 +138,10 @@ function showTurnUprightNotice(): void {
   });
 }
 
-// Resolves once the game may boot: at once, or after a fresh load has checked for a newer
-// version (it never resolves for a page that reloads into one first).
-export function setupPhoneApp(): Promise<void> {
-  const bootable = registerServiceWorker();
+// Sets up the service worker and the phone app's behaviour. The game is constructed at once and
+// waits on launchReady only for its first screen and its save.
+export function setupPhoneApp(): void {
+  registerServiceWorker();
   installFlow = watchInstall(window);
   // Asked once per launch of the installed app, never in a browser tab. Not waited for: the game
   // boots whatever the browser answers, or if it never does.
@@ -156,7 +168,13 @@ export function setupPhoneApp(): Promise<void> {
   // Held whenever the game is visible until the scenes take over with stopWakeLock and
   // startWakeLock (for example, letting the screen sleep on a menu).
   screenWakeLock.start();
-  return bootable;
+}
+
+// Resolves once the game may show its first screen and write its save: at once, or after a fresh
+// load has checked for a newer version, for at most BOOT_WAIT_MS (it never resolves for a page
+// that reloads into one first).
+export function launchReady(): Promise<void> {
+  return ready;
 }
 
 // The browser's CloseWatcher, where it has one (Chrome 120 and later, Firefox 149 and later).
@@ -185,9 +203,10 @@ export function stopWakeLock(): void {
   screenWakeLock?.stop();
 }
 
-// Whether the home screen is in front, the only place the update plate shows.
+// Whether the home screen is in front, the only place the update plate shows. A first visit
+// registers the service worker on its first arrival home.
 export function setOnHomeScreen(onHome: boolean): void {
-  updateFlow?.setOnHome(onHome);
+  homeHook(onHome);
 }
 
 // Whether the home screen shows the update plate: a newer version waits, after the player has
