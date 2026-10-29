@@ -473,11 +473,11 @@ describe("quick lane changes across a row", { timeout: 10_000 }, () => {
   // steps until the row has passed: every tip in a lane it passes is collected, and a cone in a
   // lane it passes is hit.
   it("meets the row in every lane it passes", () => {
-    for (const [, walker, dogs, kind, taps, lanes] of [
+    for (const [name, walker, dogs, kind, taps, lanes] of [
       [
         "three dogs across tips in three lanes",
         "casey",
-        ["kilo", "biscuit", "buddy"],
+        ["kilo", "biscuit", "pierre"],
         "tip",
         3,
         [1, 2, 3],
@@ -487,7 +487,7 @@ describe("quick lane changes across a row", { timeout: 10_000 }, () => {
       [
         "three dogs past a cone two lanes back",
         "casey",
-        ["kilo", "biscuit", "buddy"],
+        ["kilo", "biscuit", "pierre"],
         "cone",
         3,
         [1],
@@ -515,8 +515,8 @@ describe("quick lane changes across a row", { timeout: 10_000 }, () => {
         }
         session = next;
       }
-      expect(met).toEqual(lanes);
-      expect(session.walk.road.control.motion).toEqual({ kind: "still", lane: taps });
+      expect(met, name).toEqual(lanes);
+      expect(session.walk.road.control.motion, name).toEqual({ kind: "still", lane: taps });
     }
   });
 });

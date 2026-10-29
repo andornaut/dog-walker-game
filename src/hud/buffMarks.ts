@@ -2,8 +2,8 @@ import type { CharmEffect, DogId, Effect, GameData } from "../data/types";
 import { fillLine, fillNames } from "../lib/lines";
 import { amountText } from "../rules/causes";
 import type { CardView, OptionView } from "../rules/choices";
-import { isLarge, packSizeRaise, placeInPack } from "../rules/dogs";
-import { largeSpeedText } from "../rules/effectText";
+import { packSizeRaise, placeInPack, SIZE_AGILITY } from "../rules/dogs";
+import { laneSpeedText } from "../rules/effectText";
 import type { ModifiedSubject, ModifiedValue } from "../rules/modified";
 import { standingModified, type StandingRun } from "../rules/standing";
 import type { WalkStep } from "../runner/walk";
@@ -331,9 +331,12 @@ export function leashPops(data: MarkData, run: StandingRun, dogs: readonly DogId
   );
 }
 
+// The strip line a walk's start says for each dog of a size that changes the pack's agility.
+export const SIZE_STRIP_LINES = { large: "largeDog", small: "smallDog" } as const;
+
 // What a walk's start says of its gear and pack: a strip line for each gear that changes it
 // from the start, such as Running shoes' agility, led by the gear's icon as its well glints, and
-// a line for each large dog.
+// a line for each large or small dog, in pack order.
 export function walkStartMarks(
   data: MarkData,
   run: StandingRun,
@@ -345,7 +348,10 @@ export function walkStartMarks(
       return item?.kind === "gear" ? [item] : [];
     }),
   );
-  const large = packDogs(run).filter((dog) => isLarge(data.dogs[dog]));
+  const sized = packDogs(run).flatMap((dog) => {
+    const { name, size } = data.dogs[dog];
+    return size === "medium" ? [] : [{ agility: SIZE_AGILITY[size], name, size }];
+  });
   return {
     glints: gear,
     lines: [
@@ -356,11 +362,11 @@ export function walkStartMarks(
           name: effectName(data, item),
         }),
       })),
-      ...large.map((dog): MessageLine => ({
+      ...sized.map(({ agility, name, size }): MessageLine => ({
         icon: "hint",
-        text: stripLine(data, "largeDog", {
-          dog: data.dogs[dog].name,
-          speed: largeSpeedText(data.tuning),
+        text: stripLine(data, SIZE_STRIP_LINES[size], {
+          dog: name,
+          speed: laneSpeedText(data.tuning, agility),
         }),
       })),
     ],

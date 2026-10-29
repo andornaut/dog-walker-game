@@ -266,7 +266,9 @@ describe("grabbing a gear drop", () => {
     {
       act: (run) => packAgility(data, run),
       found: (before) =>
-        (before as number) + read(TEST_TUNING, "multipliers", "runningShoesAgility"),
+        expect.closeTo(
+          (before as number) + read(TEST_TUNING, "multipliers", "runningShoesAgility"),
+        ),
       gear: "runningShoes",
     },
     {

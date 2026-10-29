@@ -1,16 +1,27 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import type { DogId, Size } from "../data/types";
 import { fillNames } from "../lib/lines";
+import { keysOf } from "../lib/records";
 import { cents } from "../lib/units";
 import { gearSourceName } from "../rules/causes";
 import type { OptionView } from "../rules/choices";
+import { laneSpeedText } from "../rules/effectText";
 import { grabGear } from "../rules/gearDrops";
 import { type ModifiedValue, modifierCause } from "../rules/modified";
 import { read } from "../rules/units";
 import type { WalkItem } from "../runner/walkItems";
+import { packDogs } from "../state/pack";
 import { type ModifierSource, newRun } from "../state/runState";
-import { type BuffPop, extraHearts, optionMarks, type PoppedValue, popsOf } from "./buffMarks";
+import {
+  type BuffPop,
+  extraHearts,
+  optionMarks,
+  type PoppedValue,
+  popsOf,
+  walkStartMarks,
+} from "./buffMarks";
 import { type EffectItem, effectName } from "./effectIcons";
 
 const { card, seconds } = gameData.runText;
@@ -254,4 +265,52 @@ describe("found gear's marks", () => {
       fillNames(gameData.runText.explain.extraHearts, { hearts, name, owner }),
     ]);
   });
+});
+
+describe("walkStartMarks", () => {
+  const ofSize = (size: Size) =>
+    keysOf(gameData.dogs).filter((dog) => gameData.dogs[dog].size === size);
+  const speed = (agility: "largeDogAgility" | "smallDogAgility") =>
+    laneSpeedText(gameData.tuning, agility);
+  // The strip line a walk's start says for dog: largeDog for a large dog, smallDog for a small
+  // one and none for a medium one.
+  const sizeLine = (dog: DogId): string[] => {
+    const { name, size } = gameData.dogs[dog];
+    const { largeDog, smallDog } = gameData.runText.strip;
+    switch (size) {
+      case "large":
+        return [fillNames(largeDog, { dog: name, speed: speed("largeDogAgility") })];
+      case "medium":
+        return [];
+      case "small":
+        return [fillNames(smallDog, { dog: name, speed: speed("smallDogAgility") })];
+      default:
+        return size satisfies never;
+    }
+  };
+  it.each([
+    { large: 0, medium: 3, small: 0 },
+    { large: 0, medium: 0, small: 3 },
+    { large: 3, medium: 0, small: 0 },
+    { large: 1, medium: 1, small: 1 },
+    { large: 2, medium: 0, small: 1 },
+  ])(
+    "says a line for each of $small small and $large large dogs, in pack order, and none for " +
+      "$medium medium dogs",
+    ({ large, medium, small }) => {
+      const dogs = [
+        ...ofSize("small").slice(0, small),
+        ...ofSize("medium").slice(0, medium),
+        ...ofSize("large").slice(0, large),
+      ] as [DogId, DogId, DogId];
+      const run = newRun(gameData, 3, { dogs, gear: null, walker: "casey" });
+      const { glints, lines } = walkStartMarks(gameData, run);
+      expect(glints).toEqual([]);
+      expect(lines).toEqual(
+        packDogs(run)
+          .flatMap(sizeLine)
+          .map((text) => ({ icon: "hint", text })),
+      );
+    },
+  );
 });

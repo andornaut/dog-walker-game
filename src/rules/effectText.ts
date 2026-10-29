@@ -13,6 +13,7 @@ import type {
   LiveTuning,
   Modifier,
   MoneyEffect,
+  MultiplierKey,
   ProbabilityKey,
   SharedHeartsEffect,
   Size,
@@ -111,10 +112,10 @@ export function agilityPercent(agility: number): string | null {
   return Math.round(fraction * 100) === 0 ? null : percentText(fraction);
 }
 
-// How much a large dog slows the pack's lane changes, as a percent of the base lane-change
-// speed: largeDogAgility as "10%".
-export function largeSpeedText(tuning: LiveTuning): string {
-  return percentMagnitude(read(tuning, "multipliers", "largeDogAgility"));
+// How much an agility amount, such as a dog size's SIZE_AGILITY, changes the pack's lane changes
+// by, as an unsigned percent of the base lane-change speed: largeDogAgility as "10%".
+export function laneSpeedText(tuning: LiveTuning, agility: MultiplierKey): string {
+  return percentMagnitude(read(tuning, "multipliers", agility));
 }
 
 // A gear item's shop line, its {percent} the share of the base lane-change speed its agility

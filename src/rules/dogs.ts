@@ -1,4 +1,13 @@
-import type { Dog, DogId, GameData, LiveTuning, Modifier, PackSize } from "../data/types";
+import type {
+  Dog,
+  DogId,
+  GameData,
+  LiveTuning,
+  Modifier,
+  MultiplierKey,
+  PackSize,
+  Size,
+} from "../data/types";
 import { clampHearts, type Hearts } from "../lib/units";
 import type { RunState } from "../state/runState";
 import { modifiedStat } from "./modifiers";
@@ -96,7 +105,16 @@ export function startHearts(
   return clampHearts(max, max);
 }
 
-// A large dog slows the pack's lane changes by largeDogAgility.
-export function isLarge(dog: Pick<Dog, "size">): boolean {
-  return dog.size === "large";
+// What each dog of a size adds to the pack's agility, or null for a size that adds none.
+export const SIZE_AGILITY = {
+  large: "largeDogAgility",
+  medium: null,
+  small: "smallDogAgility",
+} as const satisfies { readonly [S in Size]: MultiplierKey | null };
+
+// What a dog adds to the pack's agility as it walks: smallDogAgility for a small dog,
+// largeDogAgility for a large one and nothing for a medium one.
+export function dogAgility(tuning: LiveTuning, dog: Pick<Dog, "size">): number {
+  const key = SIZE_AGILITY[dog.size];
+  return key === null ? 0 : read(tuning, "multipliers", key);
 }

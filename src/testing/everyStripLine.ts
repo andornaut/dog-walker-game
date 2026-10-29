@@ -1,4 +1,5 @@
 import { gameData } from "../data";
+import { SIZE_STRIP_LINES } from "../hud/buffMarks";
 import { effectLine } from "../hud/effectIcons";
 import { type FaceText, fillFaceText, ownerFaceText } from "../hud/faceText";
 import type { MessageLine } from "../hud/messageStrip";
@@ -43,6 +44,11 @@ export function everyStripLine(): (FaceText & Pick<MessageLine, "names">)[] {
     line("fullPackHome", { amount }),
     line("luckyWallet", {}),
     line("spareTreatSaved", {}),
+    // Each large or small dog's walk-start line, at a two-digit percent.
+    ...keysOf(gameData.dogs).flatMap((id) => {
+      const { name, size } = gameData.dogs[id];
+      return size === "medium" ? [] : [line(SIZE_STRIP_LINES[size], { dog: name, speed: "99%" })];
+    }),
     ...dogs.flatMap(({ dog, owner }) => [
       line("fired", { dog, owner }),
       line("secondChance", { owner }),

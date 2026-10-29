@@ -687,8 +687,10 @@ export interface HomeText {
     readonly dogKind: string;
     // A large dog's row, under its size and hearts: it slows lane changes.
     readonly dogLarge: string;
-    // A small dog's row, under its size and hearts: it dodges a bump one in {dodgeIn} times.
+    // A small dog's rows, under its size and hearts: it dodges a bump one in {dodgeIn} times,
+    // and it speeds up lane changes.
     readonly dogSmall: string;
+    readonly dogSmallSpeed: string;
     readonly dogStatus: string;
     readonly gearEquipped: string;
     readonly gearOwned: string;
@@ -930,7 +932,8 @@ export interface RunText {
     // the item found before it, {old}.
     readonly gearFound: string;
     readonly gearSwapped: string;
-    // At a walk's start, for each large dog in the pack, which slows lane changes.
+    // At a walk's start, for each large dog in the pack, which slows lane changes; smallDog for
+    // each small dog, which speeds them up.
     readonly largeDog: string;
     // The friendly neighbour's line: {hearts} is the total the neighbour shares; each owner's
     // heart pop shows their own gain.
@@ -939,6 +942,7 @@ export interface RunText {
     readonly plainHit: string;
     readonly pull: string;
     readonly secondChance: string;
+    readonly smallDog: string;
     readonly spareTreatSaved: string;
     readonly spareTreatUsed: string;
     readonly treat: string;

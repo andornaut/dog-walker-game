@@ -1,12 +1,12 @@
 import type { DogId, GameData, GearId, WalkerId } from "../data/types";
 import { fillLine } from "../lib/lines";
 import type { Cents } from "../lib/units";
-import { sizeHearts } from "../rules/dogs";
+import { SIZE_AGILITY, sizeHearts } from "../rules/dogs";
 import {
   capitalize,
   dodgeInText,
   effectText,
-  largeSpeedText,
+  laneSpeedText,
   SIZE_NAMES,
 } from "../rules/effectText";
 import type { Owned } from "../save/schema";
@@ -74,14 +74,18 @@ function priceLine(data: DetailData, owned: Owned, bank: Cents, purchase: Purcha
   return fillLine(FIELDS, data.homeText.detail, key, { price: dollarText(cost) });
 }
 
-// A dog's size row: a large dog's lane-change slowdown or a small dog's dodge, and none for a
-// medium dog.
-function sizeRow(data: DetailData, dog: DogId): readonly string[] {
+// A dog's size rows: a large dog's lane-change slowdown, a small dog's dodge and lane-change
+// speed-up, and none for a medium dog.
+function sizeRows(data: DetailData, dog: DogId): readonly string[] {
   const text = data.homeText.detail;
   const { size } = data.dogs[dog];
   switch (size) {
     case "large":
-      return [fillLine(FIELDS, text, "dogLarge", { speed: largeSpeedText(data.tuning) })];
+      return [
+        fillLine(FIELDS, text, "dogLarge", {
+          speed: laneSpeedText(data.tuning, SIZE_AGILITY.large),
+        }),
+      ];
     case "medium":
       return [];
     case "small":
@@ -89,13 +93,16 @@ function sizeRow(data: DetailData, dog: DogId): readonly string[] {
         fillLine(FIELDS, text, "dogSmall", {
           dodgeIn: dodgeInText(data.tuning, "smallDodgeChance"),
         }),
+        fillLine(FIELDS, text, "dogSmallSpeed", {
+          speed: laneSpeedText(data.tuning, SIZE_AGILITY.small),
+        }),
       ];
     default:
       return size satisfies never;
   }
 }
 
-// A dog's breed, its size and hearts, its size row, and its owner's photo, name and role.
+// A dog's breed, its size and hearts, its size rows, and its owner's photo, name and role.
 export function dogDetail(data: DetailData, owned: Owned, bank: Cents, dog: DogId): DetailCard {
   const { breed, name, owner, size } = data.dogs[dog];
   const purchase: Purchase = { dog, kind: "dog" };
@@ -107,7 +114,7 @@ export function dogDetail(data: DetailData, owned: Owned, bank: Cents, dog: DogI
         hearts: String(sizeHearts(data.tuning, data.dogs[dog])),
         size: capitalize(SIZE_NAMES[size]),
       }),
-      ...sizeRow(data, dog),
+      ...sizeRows(data, dog),
     ],
     locked: isLocked(data, owned, bank, purchase),
     owner: {

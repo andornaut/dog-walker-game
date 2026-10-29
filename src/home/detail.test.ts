@@ -10,7 +10,7 @@ import {
   capitalize,
   dodgeInText,
   effectText,
-  largeSpeedText,
+  laneSpeedText,
   SIZE_NAMES,
 } from "../rules/effectText";
 import { walkerGoal } from "../rules/walkers";
@@ -45,15 +45,18 @@ describe("dogDetail", () => {
   it.each([
     {
       id: firstDog("large"),
-      row: [fillNames(text.dogLarge, { speed: largeSpeedText(data.tuning) })],
+      row: [fillNames(text.dogLarge, { speed: laneSpeedText(data.tuning, "largeDogAgility") })],
     },
     { id: firstDog("medium"), row: [] },
     {
       id: firstDog("small"),
-      row: [fillNames(text.dogSmall, { dodgeIn: dodgeInText(data.tuning, "smallDodgeChance") })],
+      row: [
+        fillNames(text.dogSmall, { dodgeIn: dodgeInText(data.tuning, "smallDodgeChance") }),
+        fillNames(text.dogSmallSpeed, { speed: laneSpeedText(data.tuning, "smallDogAgility") }),
+      ],
     },
   ])(
-    "gives $id's breed, size and hearts, its size row, and its owner's name and role",
+    "gives $id's breed, size and hearts, its size rows, and its owner's name and role",
     ({ id, row }) => {
       const card = dogDetail(data, { ...owned, dogs: [id] }, dollars(0), id);
       const dog = data.dogs[id];

@@ -180,6 +180,8 @@ export const TUNING = {
     rushHourTips: 2,
     rushHourTreats: 2,
     scrollSpeedGainPerZone: 0.2,
+    // Each small dog in the pack adds this to the walker's agility.
+    smallDogAgility: 0.1,
     // What a tip pays while the pack is Stinky.
     stinkyTipValue: 0,
   },

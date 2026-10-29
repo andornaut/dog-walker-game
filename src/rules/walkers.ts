@@ -2,7 +2,7 @@ import type { Effect, GameData, Modifier, Walker, WalkerId, ZoneId } from "../da
 import { keysOf } from "../lib/records";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
-import { isLarge } from "./dogs";
+import { dogAgility } from "./dogs";
 import { modifiedStat } from "./modifiers";
 import { packModifiers } from "./run";
 import { read } from "./units";
@@ -14,17 +14,13 @@ export function walkerEffects(data: WalkerData, walker: WalkerId): readonly Effe
   return data.walkerPerks[data.walkers[walker].perk].effects;
 }
 
-// What the pack's large dogs take off the walker's agility: largeDogAgility for each walking one.
-function largeDogsAgility(
-  data: Pick<GameData, "dogs" | "tuning">,
-  run: Pick<RunState, "pack">,
-): number {
-  const large = packDogs(run).filter((dog) => isLarge(data.dogs[dog])).length;
-  return large * read(data.tuning, "multipliers", "largeDogAgility");
+// What the pack's walking dogs add to the walker's agility, each its dogAgility.
+function dogsAgility(data: Pick<GameData, "dogs" | "tuning">, run: Pick<RunState, "pack">): number {
+  return packDogs(run).reduce((sum, dog) => sum + dogAgility(data.tuning, data.dogs[dog]), 0);
 }
 
-// The agility the pack changes lanes at: the walker's, with its modifiers, and its large dogs',
-// which never take it below minPackAgility, or the walker's own when lower; then scaled by the
+// The agility the pack changes lanes at: the walker's, with its modifiers, and its dogs', which
+// never take it below minPackAgility, or the walker's own when lower; then scaled by the
 // multiply agility modifiers of the run and its debuffs, such as Muddy's, so a Muddy pack changes
 // lanes at muddyLaneSlow of its own speed.
 export function packAgility(
@@ -33,7 +29,7 @@ export function packAgility(
 ): number {
   const agility = walkerAgility(data, run.modifiers, run.walker);
   const floor = Math.min(agility, read(data.tuning, "multipliers", "minPackAgility"));
-  const walking = Math.max(floor, agility + largeDogsAgility(data, run));
+  const walking = Math.max(floor, agility + dogsAgility(data, run));
   const scaling = packModifiers(data, run).filter(({ operation }) => operation === "multiply");
   return modifiedStat(data.tuning, scaling, "agility", walking);
 }

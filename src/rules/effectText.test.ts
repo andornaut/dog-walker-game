@@ -17,7 +17,7 @@ import {
   effectText,
   formatDollars,
   gearShort,
-  largeSpeedText,
+  laneSpeedText,
   perkEffect,
   sentenceList,
   SIZE_NAMES,
@@ -186,12 +186,15 @@ describe("agilityPercent", () => {
   });
 });
 
-describe("largeSpeedText", () => {
-  it("gives largeDogAgility as an unsigned percent of the base lane-change speed", () => {
-    expect(largeSpeedText(TEST_TUNING)).toBe(
-      unsignedPercent(read(TEST_TUNING, "multipliers", "largeDogAgility")),
-    );
-  });
+describe("laneSpeedText", () => {
+  it.each(["largeDogAgility", "smallDogAgility"] as const)(
+    "gives %s as an unsigned percent of the base lane-change speed",
+    (key) => {
+      expect(laneSpeedText(TEST_TUNING, key)).toBe(
+        unsignedPercent(read(TEST_TUNING, "multipliers", key)),
+      );
+    },
+  );
 });
 
 describe("gearShort", () => {

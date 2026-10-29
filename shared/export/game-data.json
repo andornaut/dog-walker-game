@@ -3062,6 +3062,7 @@
       "rushHourTips": 2,
       "rushHourTreats": 2,
       "scrollSpeedGainPerZone": 0.2,
+      "smallDogAgility": 0.1,
       "stinkyTipValue": 0
     },
     "pixels": {

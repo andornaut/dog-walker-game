@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { DogId, WalkerId, ZoneId } from "../data/types";
+import type { DogId, Size, WalkerId, ZoneId } from "../data/types";
 import { keysOf } from "../lib/records";
 import { newRun } from "../state/runState";
-import { isLarge } from "./dogs";
 import { read } from "./units";
 import { newWalkers, packAgility, slowestPackAgility, walkerAgility } from "./walkers";
 
@@ -25,39 +24,55 @@ describe("walkerAgility", () => {
 });
 
 describe("packAgility", () => {
-  const dogIds = keysOf(gameData.dogs);
-  const large = dogIds.filter((dog) => isLarge(gameData.dogs[dog]));
-  const smaller = dogIds.filter((dog) => !isLarge(gameData.dogs[dog]));
+  const ofSize = (size: Size) =>
+    keysOf(gameData.dogs).filter((dog) => gameData.dogs[dog].size === size);
+  const perSmall = read(gameData.tuning, "multipliers", "smallDogAgility");
   const perLarge = read(gameData.tuning, "multipliers", "largeDogAgility");
-  // A pack of three with count large dogs in it.
-  const packWith = (count: number) =>
-    [...large.slice(0, count), ...smaller.slice(0, 3 - count)] as [DogId, DogId, DogId];
-
   const minPack = read(gameData.tuning, "multipliers", "minPackAgility");
+  // A pack of three with small small dogs and large large dogs, medium dogs filling the rest.
+  const packOf = (small: number, large: number) =>
+    [
+      ...ofSize("small").slice(0, small),
+      ...ofSize("large").slice(0, large),
+      ...ofSize("medium").slice(0, 3 - small - large),
+    ] as [DogId, DogId, DogId];
+  const mixes = [0, 1, 2, 3].flatMap((small) =>
+    [0, 1, 2, 3].filter((large) => small + large <= 3).map((large) => ({ large, small })),
+  );
+  const gears = [null, "runningShoes"] as const;
   const packs = WALKER_IDS.flatMap((walker) =>
-    [0, 1, 2, 3].map((count) => ({
-      count,
-      run: newRun(gameData, 3, { dogs: packWith(count), gear: null, walker }),
-      walker,
-    })),
+    gears.flatMap((gear) =>
+      mixes.map(({ large, small }) => ({
+        gear,
+        large,
+        run: newRun(gameData, 3, { dogs: packOf(small, large), gear, walker }),
+        small,
+        walker,
+      })),
+    ),
   );
 
-  // The nimblest walker and the slowest: the floor reads a walker only through its own agility.
+  // The nimblest walker and gear and the slowest: the floor reads a walker only through its own
+  // agility.
   const ownOf = ({ run, walker }: (typeof packs)[number]) =>
     walkerAgility(gameData, run.modifiers, walker);
   const owns = packs.map(ownOf);
   const extremes = packs.filter(
     (pack) => ownOf(pack) === Math.max(...owns) || ownOf(pack) === Math.min(...owns),
   );
-  const ends = extremes.filter(
-    (pack) => extremes.find((other) => ownOf(other) === ownOf(pack))?.walker === pack.walker,
-  );
+  const ends = extremes.filter((pack) => {
+    const first = extremes.find((other) => ownOf(other) === ownOf(pack));
+    return first?.walker === pack.walker && first.gear === pack.gear;
+  });
   it.each(ends)(
-    "slows $walker by largeDogAgility for each of $count large dogs, never below minPackAgility",
-    ({ count, run, walker }) => {
+    "moves $walker with $gear by smallDogAgility for each of $small small dogs and " +
+      "largeDogAgility for each of $large large dogs, never below minPackAgility",
+    ({ large, run, small, walker }) => {
       const own = walkerAgility(gameData, run.modifiers, walker);
       const floor = Math.min(own, minPack);
-      expect(packAgility(gameData, run)).toBeCloseTo(Math.max(floor, own + count * perLarge));
+      expect(packAgility(gameData, run)).toBeCloseTo(
+        Math.max(floor, own + small * perSmall + large * perLarge),
+      );
     },
   );
 
@@ -69,13 +84,17 @@ describe("packAgility", () => {
     expect(Math.min(...agilities)).toBeCloseTo(slowestPackAgility(gameData));
   });
 
-  it("slows a walker above the slowest by each large dog", () => {
-    const fastest = WALKER_IDS.reduce((a, b) =>
-      gameData.walkers[a].agility >= gameData.walkers[b].agility ? a : b,
-    );
-    const run = newRun(gameData, 3, { dogs: packWith(1), gear: null, walker: fastest });
-    expect(packAgility(gameData, run)).toBeLessThan(gameData.walkers[fastest].agility);
-  });
+  it.each(WALKER_IDS.flatMap((walker) => gears.map((gear) => ({ gear, walker }))))(
+    "speeds $walker with $gear up with each small dog, with no cap",
+    ({ gear, walker }) => {
+      const agilities = [0, 1, 2, 3].map((small) =>
+        packAgility(gameData, newRun(gameData, 3, { dogs: packOf(small, 0), gear, walker })),
+      );
+      agilities.slice(1).forEach((agility, i) => {
+        expect(agility).toBeGreaterThan(agilities[i] ?? Infinity);
+      });
+    },
+  );
 });
 
 describe("newWalkers", () => {

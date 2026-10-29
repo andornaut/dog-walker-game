@@ -17,6 +17,7 @@ export const STRIP_LINE_FIELDS = {
   plainHit: ["dog", "hearts", "obstacle", "owner"],
   pull: ["dog"],
   secondChance: ["owner"],
+  smallDog: ["dog", "speed"],
   spareTreatSaved: [],
   spareTreatUsed: ["owner"],
   treat: ["dog", "hearts", "owner"],
