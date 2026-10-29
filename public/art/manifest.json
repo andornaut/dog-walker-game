@@ -14332,6 +14332,18 @@
       "png": "images/ui-home-cash-well.png"
     },
     {
+      "key": "ui-home-cash-well-left",
+      "png": "images/ui-home-cash-well-left.png"
+    },
+    {
+      "key": "ui-home-cash-well-mid",
+      "png": "images/ui-home-cash-well-mid.png"
+    },
+    {
+      "key": "ui-home-cash-well-right",
+      "png": "images/ui-home-cash-well-right.png"
+    },
+    {
       "key": "ui-lead-tag",
       "png": "images/ui-lead-tag.png"
     },

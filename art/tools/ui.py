@@ -17,7 +17,9 @@ ui-scroll-thumb (6x24, three-slices with 3px caps); the walker section's ui-cork
 ui-strip-well (24x24 nine-slice, the band behind a card row's subtitle), ui-quip (24x24 nine-slice,
 8px corners), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6), ui-celebrate-burst (148x132, the
 starburst behind the walker in the zone celebration), ui-zone-banner (248x48); the start screen top
-bar's ui-home-cash-well (70x28, drawn at (5, 5)); the walk HUD's ui-walk-bar (360x48),
+bar's ui-home-cash-well (70x28, drawn at (5, 5)) and the same well in three pieces that stretch it
+to the bank's width, ui-home-cash-well-left, ui-home-cash-well-mid (repeated across) and
+ui-home-cash-well-right (1x28 each); the walk HUD's ui-walk-bar (360x48),
 ui-effect-well (22x22), ui-dog-card-band (360x76, drawn at (0, 480)), ui-lead-tag (27x11, LEAD baked
 in with font-title) and ui-owner-tab (36x36).
 
@@ -1072,8 +1074,8 @@ EFFECT_WELL = 22
 def walk_bar():
     """360x48, ui-walk-bar: plum wood with a trim (dbrown on row 1; brown, dbrown and ink on rows
     45 to 47) and two ink wells, the grain kept 1px clear of each and of the effect row:
-    cash 5,5 70x37, sized for "$888" at 3x with no coin, and neighbourhood 83,5 140x12, one text line
-    over the six effect wells with 4 columns of padding each side, 8 columns from the cash well and 8 from
+    cash 5,5 70x37, sized for "$888" at 3x with no coin, and neighbourhood 81,5 144x12, one text line
+    over the six effect wells with 6 columns of padding each side, 6 columns from the cash well and 6 from
     Help's face at x 231.
     The game draws the effect wells, the Help, Sound, Settings and Pause buttons and every text and
     icon on it."""
@@ -1114,6 +1116,27 @@ def home_cash_well():
     _, _, w, h = HOME_CASH_WELL
     g = Grid(w, h)
     well(g, 0, 0, w, h)
+    return g
+
+
+# The bank well's three pieces, left to right, each one column of home_cash_well: its first, any
+# middle one and its last. Every middle column is the same, so the middle repeats with no seam.
+HOME_CASH_WELL_PIECES = ("left", "mid", "right")
+
+
+def home_cash_well_piece(piece):
+    """1x28, ui-home-cash-well-<piece>: one column of ui-home-cash-well, so the game can draw the
+    well as wide as the bank needs. left: the ink side, its top and bottom pixels clipped for the
+    corners. mid: ink over the dbrown lip's row, repeated (TileSprite) between the caps. right: the
+    dbrown lip's side, clipped top and bottom. left + mid x (w - 2) + right is the well w wide."""
+    _, _, _, h = HOME_CASH_WELL
+    n = len(HOME_CASH_WELL_PIECES)
+    whole = Grid(n, h)
+    well(whole, 0, 0, n, h)
+    x = HOME_CASH_WELL_PIECES.index(piece)
+    g = Grid(1, h)
+    for y in range(h):
+        g.px[y][0] = whole.px[y][x]
     return g
 
 
@@ -1521,6 +1544,8 @@ IMAGES = {
     "ui-walk-bar": lambda: to_image(walk_bar().outlined(False)),
     "ui-effect-well": lambda: to_image(effect_well().outlined(False)),
     "ui-home-cash-well": lambda: to_image(home_cash_well().outlined(False)),
+    **{f"ui-home-cash-well-{p}": (lambda p=p: to_image(home_cash_well_piece(p).outlined(False)))
+       for p in HOME_CASH_WELL_PIECES},
     "ui-dog-card-band": lambda: to_image(dog_card_band().outlined(False)),
     "ui-lead-tag": lead_tag,
     "ui-owner-tab": lambda: to_image(owner_tab().outlined(False)),
