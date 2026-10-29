@@ -110,7 +110,7 @@ export function closingLines(
 }
 
 // What a press on the end screen lands on: with a badge's card open, anything closes it, as on
-// the Stats page; else a badge the walk earned, by its tap target, or Back home.
+// the Logbook; else a badge the walk earned, by its tap target, or Back home.
 export type EndTarget = "dismiss" | "home" | { readonly badge: number };
 
 export function endTargetAt(

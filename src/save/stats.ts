@@ -6,7 +6,7 @@ import type { DogStats, SaveStats } from "./schema";
 // A dog's stats before its first walk.
 export const ZERO_DOG_STATS: DogStats = { timesFired: 0, walks: 0, zonesFinished: 0 };
 
-// What the logbook's Stats page shows, derived from the saved stats.
+// What the Logbook shows, derived from the saved stats.
 interface StatsPage {
   bestRunCents: Cents;
   // The best walk's dogs and neighbourhoods finished; none before any walk.

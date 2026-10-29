@@ -1173,7 +1173,7 @@ export type AchievementCondition =
   | { readonly kind: "finishOnLastHeart" }
   | { readonly kind: "fullPackBonus"; readonly packSize: number };
 
-// A badge on the Stats page's wall, earned once every condition holds. Celebration only: it
+// A badge on the Logbook's wall, earned once every condition holds. Celebration only: it
 // changes nothing in play. The badge art is badge-<id in kebab case>.
 export interface Achievement {
   readonly badgeLine: string;

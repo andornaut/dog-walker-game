@@ -119,7 +119,7 @@ function amountColour(amount: number): number {
 // The walk's result, already banked: what made up the total, zones walked, the bank, a ribbon
 // for a new best walk, and a closing line from each owner. Badges the run earned burst in
 // under the panel while the owners still walking cheer, and a tap or a hold on one opens its
-// card, as on the Stats page. Back home returns to the start screen. The screen takes no input
+// card, as on the Logbook. Back home returns to the start screen. The screen takes no input
 // until seconds.screenTapGuard after its first frame, so a steering tap never answers it.
 export class EndScene extends Scene {
   // The badges just earned, in their slots' order.

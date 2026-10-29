@@ -30,7 +30,7 @@ const SCROLLBAR: ScrollbarSpec = {
   x: PANEL.x + PANEL.width - 9,
 };
 
-// The Stats page's geometry.
+// The Logbook's geometry.
 export const STATS_LAYOUT = {
   // The close control, in the screen's corner.
   close: pageCloseControl(SCREEN_LAYOUT.screen),

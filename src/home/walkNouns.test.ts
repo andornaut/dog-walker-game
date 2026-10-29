@@ -8,7 +8,7 @@ import { overallRows } from "./statsView";
 
 const words = MENU_TEXT.stats;
 
-describe("the Stats page's words", () => {
+describe("the Logbook's words", () => {
   const { outcomes, overall } = overallRows(gameData, veteranSave().stats);
 
   it("say walk, never run, on every tab, heading and row", () => {

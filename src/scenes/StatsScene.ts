@@ -104,7 +104,7 @@ const SCROLL = STATS_LAYOUT.scroll;
 const VIEW_MASK_KEY = "stats-view-mask";
 const SCREEN = SCREEN_LAYOUT.screen;
 
-// The Stats page, which the home screen's Logbook button opens, in three tabs on the cream
+// The Logbook, which the home screen's Logbook button opens, in three tabs on the cream
 // panel: overall figures and walks by outcome; a block per dog with its walks, zones and
 // firings; and the badge wall, a badge per row, where tapping a badge opens its name, goal and
 // line. A tab taller than the panel scrolls in it by a drag, the wheel, the arrow keys or the
