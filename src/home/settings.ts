@@ -105,7 +105,7 @@ export interface SettingsFonts {
 // note's lowest ink. A slider row is slider.height tall, with its percentage on the label's
 // line, ending pad in from the row's right, and its track under them, pad in from either side.
 export const SETTINGS_ROW = {
-  button: { height: 24, width: 52 },
+  button: { height: 24, width: 80 },
   // Between a note's room and the control beside it.
   controlGap: 10,
   icon: { dx: 6, dy: 9 },

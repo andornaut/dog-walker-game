@@ -992,7 +992,6 @@ export interface MenuText {
     readonly title: string;
   };
   readonly end: {
-    readonly backHome: string;
     // The breakdown's lines, by what the money came from.
     readonly earnings: {
       readonly cardCosts: string;
@@ -1005,6 +1004,7 @@ export interface MenuText {
       readonly tips: string;
     };
     readonly firedYou: string;
+    readonly headHome: string;
     readonly newBest: string;
     // The title, by how the walk ended.
     readonly titles: {
