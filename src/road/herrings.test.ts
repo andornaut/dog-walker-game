@@ -10,7 +10,8 @@ import { moverPlace, moverTell } from "../runner/movers";
 import { startRoad, stepWalk, type Walk, zoneLength } from "../runner/walk";
 import { planZone } from "../runner/zonePlan";
 import { plannerStreams } from "../testing/movers";
-import { FASTEST_WALKER, GAME_ROAD, inZone, REAL, realRun } from "../testing/planner";
+import { FASTEST_WALKER, GAME_ROAD, inZone, REAL, type Real, realRun } from "../testing/planner";
+import { mapZones } from "../testing/world";
 import { distractionScroll } from "./distractions";
 import { herringNow } from "./herrings";
 
@@ -27,27 +28,38 @@ const HERRING_KINDS = keysOf(REAL.minorObstacles).flatMap((kind: MinorObstacleId
   return [{ kind, share: read(REAL.tuning, "probability", movement.herringShare), zones }];
 });
 const SEEDS = Array.from({ length: 8 }, (_, i) => i + 1);
-const HERRING_MOVERS_ENOUGH = 150;
+const HERRING_SHARE_TOLERANCE = 0.1;
+// Enough draws that the tolerance is 4 standard deviations of their share, sqrt(0.25 / n) at most.
+const HERRING_MOVERS_ENOUGH = Math.ceil(0.25 / (HERRING_SHARE_TOLERANCE / 4) ** 2);
 const HERRING_SEEDS_MOST = 240;
 
+// The real data with each zone that weighs kind above 0 weighing it as much as all its other minor
+// obstacles together, so about half of what such a zone plans of them is kind.
+const weighedUp = (kind: MinorObstacleId): Real => ({
+  ...REAL,
+  world: mapZones((zone) => {
+    const weights = zone.weights.minorObstacles;
+    if (weights[kind] === 0) {
+      return zone;
+    }
+    const others = Object.values<number>(weights).reduce((sum, weight) => sum + weight, 0);
+    return {
+      ...zone,
+      weights: { ...zone.weights, minorObstacles: { ...weights, [kind]: others - weights[kind] } },
+    };
+  }, REAL.world),
+});
+
 // A zone planned on a seed at the walk's first or last position.
-const planned = (zone: ZoneId, zoneIndex: number, seed: number): Walk =>
-  planZone(REAL, GAME_ROAD, plannerStreams(seed), {
+const planned = (data: Real, zone: ZoneId, zoneIndex: number, seed: number): Walk =>
+  planZone(data, GAME_ROAD, plannerStreams(seed), {
     road: startRoad(LANE_COUNT),
-    run: inZone(realRun(REAL, FASTEST_WALKER), zone, zoneIndex),
+    run: inZone(realRun(data, FASTEST_WALKER), zone, zoneIndex),
   });
-// Each plan the tests read, planned once.
-const plans = new Map<string, Walk>();
-const plannedOnce = (zone: ZoneId, zoneIndex: number, seed: number): Walk => {
-  const key = `${zone} ${zoneIndex} ${seed}`;
-  const walk = plans.get(key) ?? planned(zone, zoneIndex, seed);
-  plans.set(key, walk);
-  return walk;
-};
-const plansOf = (zones: readonly ZoneId[], seeds: readonly number[]) =>
+const plansOf = (data: Real, zones: readonly ZoneId[], seeds: readonly number[]) =>
   zones.flatMap((zone) =>
-    [0, REAL.world.walkLength - 1].flatMap((zoneIndex) =>
-      seeds.map((seed) => ({ seed, walk: plannedOnce(zone, zoneIndex, seed), zone, zoneIndex })),
+    [0, data.world.walkLength - 1].flatMap((zoneIndex) =>
+      seeds.map((seed) => ({ seed, walk: planned(data, zone, zoneIndex, seed), zone, zoneIndex })),
     ),
   );
 
@@ -57,14 +69,16 @@ describe("red herrings", { timeout: 120_000 }, () => {
   });
 
   // Of a kind's movers each zone plans, about its share come as red herrings, each one of them,
-  // not one more. Planned a seed at a time from seed 1 until HERRING_MOVERS_ENOUGH of the kind's
-  // movers come up or the search has planned HERRING_SEEDS_MOST seeds, so a kind its zones weigh
-  // low takes more seeds rather than too few movers.
+  // not one more. Each mover's draw alone makes it a red herring, whatever else its zone plans, so
+  // its zones weigh it up (weighedUp) to bring more of them a plan. Planned a seed at a time from
+  // seed 1 until HERRING_MOVERS_ENOUGH of the kind's movers come up or the search has planned
+  // HERRING_SEEDS_MOST seeds.
   it.each(HERRING_KINDS)("plans about $share of $kind's movers as red herrings", (herring) => {
+    const data = weighedUp(herring.kind);
     let movers = 0;
     let herrings = 0;
     for (let seed = 1; seed <= HERRING_SEEDS_MOST && movers < HERRING_MOVERS_ENOUGH; seed++) {
-      for (const { walk } of plansOf(herring.zones, [seed])) {
+      for (const { walk } of plansOf(data, herring.zones, [seed])) {
         const { road } = walk;
         const kindOf = (event: { kind: string }) => event.kind === herring.kind;
         const placed = road.pending.filter((event) => kindOf(event) && event.mover !== undefined);
@@ -78,7 +92,7 @@ describe("red herrings", { timeout: 120_000 }, () => {
       }
     }
     expect(movers).toBeGreaterThanOrEqual(HERRING_MOVERS_ENOUGH);
-    expect(Math.abs(herrings / movers - herring.share)).toBeLessThan(0.1);
+    expect(Math.abs(herrings / movers - herring.share)).toBeLessThan(HERRING_SHARE_TOLERANCE);
   });
 
   // Each red herring is no spawn of the walk's, and its seed plans it again the same. It shows from
@@ -88,9 +102,9 @@ describe("red herrings", { timeout: 120_000 }, () => {
     const end = distractionScroll(REAL, GAME_ROAD);
     const length = zoneLength(REAL);
     let shown = 0;
-    for (const { seed, walk, zone, zoneIndex } of plansOf(herring.zones, SEEDS)) {
+    for (const { seed, walk, zone, zoneIndex } of plansOf(REAL, herring.zones, SEEDS)) {
       const { road } = walk;
-      expect(planned(zone, zoneIndex, seed).road.herrings).toEqual(road.herrings);
+      expect(planned(REAL, zone, zoneIndex, seed).road.herrings).toEqual(road.herrings);
       for (const event of road.herrings) {
         shown += 1;
         expect(road.pending).not.toContainEqual(event);
@@ -127,7 +141,7 @@ describe("red herrings", { timeout: 120_000 }, () => {
       // The first seed's plan with one of them.
       let plan: { walk: Walk } | undefined;
       for (let seed = 1; seed <= HERRING_SEEDS_MOST && plan === undefined; seed++) {
-        plan = plansOf(herring.zones, [seed]).find(({ walk }) =>
+        plan = plansOf(REAL, herring.zones, [seed]).find(({ walk }) =>
           walk.road.herrings.some(({ kind }) => kind === herring.kind),
         );
       }
@@ -146,7 +160,7 @@ describe("red herrings", { timeout: 120_000 }, () => {
         }
         return steps;
       };
-      const walk = plan?.walk ?? planned(herring.zones[0] ?? "highPark", 0, 1);
+      const walk = plan?.walk ?? planned(REAL, herring.zones[0] ?? "highPark", 0, 1);
       expect(walked({ ...walk, road: { ...walk.road, herrings: [] } })).toEqual(walked(walk));
     },
   );
