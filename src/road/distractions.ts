@@ -8,9 +8,9 @@ import { read, readTable } from "../rules/units";
 import { type Box, overlaps } from "../runner/collision";
 import { DART_VERGE_LANES, stopsOnVerge } from "../runner/moverPlanning";
 import { drawnLanes, hasLeftRoad, type MoverOnRoad, moverPlace, moverY } from "../runner/movers";
-import type { SpawnEvent } from "../runner/spawning";
+import { minorLook } from "../runner/obstacleLooks";
 import { itemHeight, type RoadGeometry, zoneLength } from "../runner/walk";
-import { footprintOf, type WalkItem, type WalkItemKind } from "../runner/walkItems";
+import { footprintOf, type WalkItem, type WalkSpawn } from "../runner/walkItems";
 import { eachRoadsideProp, type RoadsideTable, START_STRIP_LENGTH } from "./roadsideProps";
 
 // The distraction movers: red herrings. They wear the zone's own hazards (distractionKinds), step
@@ -77,7 +77,7 @@ export interface DistractionDeps {
 export interface DistractionFrame {
   readonly geometry: RoadGeometry;
   readonly items: readonly WalkItem[];
-  readonly pending: readonly SpawnEvent<WalkItemKind>[];
+  readonly pending: readonly WalkSpawn[];
   readonly previousArt: string | null;
   readonly zone: Pick<Zone, "art" | "weights">;
   readonly zoneDistance: number;
@@ -164,7 +164,7 @@ export function distractionKinds(
       const obstacle = data.minorObstacles[id];
       return weight > 0 && obstacle.onFoot === true && obstacle.shape.lanes === 1;
     })
-    .map(([id, weight]): [string, number] => [minorObstacleSpriteKey(id), weight])
+    .map(([id, weight]): [string, number] => [minorObstacleSpriteKey(minorLook(data, id)), weight])
     .filter(([key]) => drawable(key));
   return kinds.length > 0
     ? kinds
@@ -348,7 +348,7 @@ function isClear(
 function arrivalOf(
   data: DistractionData,
   geometry: RoadGeometry,
-  event: SpawnEvent<WalkItemKind>,
+  event: WalkSpawn,
 ): { distance: number; item: WalkItem } {
   const height = itemHeight(data, geometry, event.kind, event.mover !== undefined);
   return {
@@ -360,6 +360,7 @@ function arrivalOf(
       lane: event.lane,
       laneSpan: footprintOf(data, event.kind).lanes,
       ...(event.mover === undefined ? {} : { mover: { path: event.mover, since: 0 } }),
+      ...(event.skin === undefined ? {} : { skin: event.skin }),
       y: geometry.roadTop - height,
     },
   };

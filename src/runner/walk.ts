@@ -107,6 +107,7 @@ import {
   type PickupKind,
   type WalkItem,
   type WalkItemKind,
+  type WalkSpawn,
 } from "./walkItems";
 
 export type WalkData = Pick<
@@ -139,7 +140,7 @@ export interface Road {
   items: readonly WalkItem[];
   nextItemId: number;
   path: readonly PathRow[];
-  pending: readonly SpawnEvent<WalkItemKind>[];
+  pending: readonly WalkSpawn[];
   planned: readonly PlannedCount[];
   speedFactor: number;
 }
@@ -208,7 +209,7 @@ export interface MinorBump {
   change: HeartChange | null;
   dodged: boolean;
   dog: DogId;
-  item: MoverItem<MinorObstacleId>;
+  item: MoverItem<MinorObstacleId> & Pick<WalkItem, "skin">;
 }
 
 // A treat the pack grabbed, and what it did (grabTreat): the hearts its owner gained, or with
@@ -823,6 +824,7 @@ export function stepWalk(
       ...(event.mover === undefined
         ? {}
         : { mover: { path: event.mover, since: zoneDistance - event.distance } }),
+      ...(event.skin === undefined ? {} : { skin: event.skin }),
       y: geometry.roadTop - height + (zoneDistance - event.distance),
     };
   });

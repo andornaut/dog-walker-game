@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import manifest from "../../public/art/manifest.json";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { SHOP_GEAR } from "../data/shop";
+import type { MinorLookId, MinorObstacle, SkinId } from "../data/types";
 import { WORLD } from "../data/world";
 import { animationSpecs } from "./asepriteAnimations";
 import {
@@ -90,13 +91,18 @@ describe("key names", () => {
 });
 
 describe("the art manifest", () => {
-  it("has the art every gear item, minor obstacle and zone names, and the mover cues' tags", () => {
+  it("has the art every gear item, minor obstacle look and zone names, and the mover cues' tags", () => {
     const missing = [
       ...keysOf(SHOP_GEAR)
         .map(gearIconKey)
         .filter((key) => !images.has(key)),
       ...[
-        ...keysOf(MINOR_OBSTACLES).map((id) => minorObstacleSpriteKey(id)),
+        ...keysOf(MINOR_OBSTACLES)
+          .flatMap((id): MinorLookId[] => {
+            const entry: MinorObstacle = MINOR_OBSTACLES[id];
+            return "skins" in entry ? (keysOf(entry.skins) as SkinId[]) : [id as MinorLookId];
+          })
+          .map(minorObstacleSpriteKey),
         SKUNK_CLOUD_KEY,
         CARD_FRAME_KEY,
       ].filter((key) => !spriteKeys.has(key)),

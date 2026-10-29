@@ -12,6 +12,7 @@ import type {
   TallyId,
   Threshold,
 } from "../data/types";
+import { minorObstacleNames } from "../runner/obstacleLooks";
 import type { SaveDocument, SaveStats } from "../save/schema";
 import { lifetimeEarnedNet, timesFired, walksFinished, walksPlayed } from "../save/stats";
 import type { RunState } from "../state/runState";
@@ -380,7 +381,9 @@ export function achievementConditionText(
 ): string {
   switch (condition.kind) {
     case "bumps": {
-      const names = condition.kinds.map((kind) => data.minorObstacles[kind].name.toLowerCase());
+      const names = condition.kinds
+        .flatMap((kind) => minorObstacleNames(data, kind))
+        .map((name) => name.toLowerCase());
       return `${condition.count} landed bumps in total, by any of: ${names.join(", ")}`;
     }
     case "cleanZones":

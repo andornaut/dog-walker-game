@@ -2192,15 +2192,6 @@
       "spriteKey": "hopscotch-kid"
     },
     {
-      "id": "hotDogCart",
-      "name": "Hot dog cart",
-      "shape": {
-        "lanes": 2,
-        "rows": 1
-      },
-      "spriteKey": "hot-dog-cart"
-    },
-    {
       "id": "iceCreamBike",
       "movement": {
         "factor": 0.7,
@@ -2486,18 +2477,6 @@
       "spriteKey": "pedicab"
     },
     {
-      "id": "picnicBlanket",
-      "name": "Picnic blanket",
-      "shape": {
-        "lanes": 2,
-        "rows": 1
-      },
-      "zones": [
-        "highPark"
-      ],
-      "spriteKey": "picnic-blanket"
-    },
-    {
       "id": "pigeons",
       "movement": {
         "kind": "dart",
@@ -2708,6 +2687,53 @@
         "distilleryDistrict"
       ],
       "spriteKey": "stilt-walker"
+    },
+    {
+      "id": "streetCart",
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "skins": {
+        "flowerCart": {
+          "name": "Flower cart",
+          "zones": [
+            "cabbagetown"
+          ],
+          "spriteKey": "flower-cart"
+        },
+        "fruitCart": {
+          "name": "Fruit cart",
+          "zones": [
+            "kensingtonMarket"
+          ],
+          "spriteKey": "fruit-cart"
+        },
+        "hotDogCart": {
+          "name": "Hot dog cart",
+          "zones": [
+            "highPark",
+            "kensingtonMarket",
+            "yongeStreet"
+          ],
+          "spriteKey": "hot-dog-cart"
+        },
+        "iceCreamCart": {
+          "name": "Ice cream cart",
+          "zones": [
+            "distilleryDistrict",
+            "theBeaches"
+          ],
+          "spriteKey": "ice-cream-cart"
+        },
+        "newspaperCart": {
+          "name": "Newspaper cart",
+          "zones": [
+            "yongeStreet"
+          ],
+          "spriteKey": "newspaper-cart"
+        }
+      }
     },
     {
       "id": "streetcar",
@@ -3345,7 +3371,6 @@
           "hedge": 0,
           "hen": 0,
           "hopscotchKid": 0,
-          "hotDogCart": 0,
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
           "ironFence2": 0,
@@ -3365,7 +3390,6 @@
           "patioRail": 0,
           "patrolBuggy": 0,
           "pedicab": 0,
-          "picnicBlanket": 2.5,
           "pigeons": 0,
           "porchSteps": 0,
           "produceCrates": 0,
@@ -3379,6 +3403,7 @@
           "segwayTourRider": 0,
           "signSpinner": 0,
           "stiltWalker": 0,
+          "streetCart": 4,
           "streetcar": 0,
           "streetcarPlatform": 0,
           "stroller": 3,
@@ -3469,7 +3494,6 @@
           "hedge": 3.5,
           "hen": 1.5,
           "hopscotchKid": 2,
-          "hotDogCart": 0,
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
           "ironFence2": 3.5,
@@ -3489,7 +3513,6 @@
           "patioRail": 0,
           "patrolBuggy": 0,
           "pedicab": 0,
-          "picnicBlanket": 0,
           "pigeons": 0,
           "porchSteps": 3.75,
           "produceCrates": 0,
@@ -3503,6 +3526,7 @@
           "segwayTourRider": 0,
           "signSpinner": 0,
           "stiltWalker": 0,
+          "streetCart": 4,
           "streetcar": 0,
           "streetcarPlatform": 0,
           "stroller": 4.5,
@@ -3593,7 +3617,6 @@
           "hedge": 0,
           "hen": 0,
           "hopscotchKid": 2,
-          "hotDogCart": 0,
           "iceCreamBike": 0,
           "iceCreamTruck": 1,
           "ironFence2": 0,
@@ -3613,7 +3636,6 @@
           "patioRail": 0,
           "patrolBuggy": 0,
           "pedicab": 0,
-          "picnicBlanket": 0,
           "pigeons": 2.25,
           "porchSteps": 0,
           "produceCrates": 9.75,
@@ -3627,6 +3649,7 @@
           "segwayTourRider": 0,
           "signSpinner": 0,
           "stiltWalker": 2,
+          "streetCart": 4,
           "streetcar": 0,
           "streetcarPlatform": 0,
           "stroller": 0,
@@ -3689,7 +3712,7 @@
           "ball": 1.5,
           "barrelStack": 0,
           "beachUmbrella": 3.75,
-          "bench": 3.75,
+          "bench": 0,
           "breweryDray": 0,
           "bunny": 0,
           "busker": 0,
@@ -3717,7 +3740,6 @@
           "hedge": 3.75,
           "hen": 0,
           "hopscotchKid": 0,
-          "hotDogCart": 3.75,
           "iceCreamBike": 2,
           "iceCreamTruck": 0,
           "ironFence2": 0,
@@ -3737,7 +3759,6 @@
           "patioRail": 0,
           "patrolBuggy": 2,
           "pedicab": 0,
-          "picnicBlanket": 0,
           "pigeons": 0,
           "porchSteps": 0,
           "produceCrates": 0,
@@ -3751,6 +3772,7 @@
           "segwayTourRider": 0,
           "signSpinner": 0,
           "stiltWalker": 0,
+          "streetCart": 7.5,
           "streetcar": 0,
           "streetcarPlatform": 0,
           "stroller": 2,
@@ -3841,7 +3863,6 @@
           "hedge": 0,
           "hen": 0,
           "hopscotchKid": 0,
-          "hotDogCart": 4,
           "iceCreamBike": 0,
           "iceCreamTruck": 0,
           "ironFence2": 0,
@@ -3861,7 +3882,6 @@
           "patioRail": 6,
           "patrolBuggy": 0,
           "pedicab": 5,
-          "picnicBlanket": 0,
           "pigeons": 3,
           "porchSteps": 0,
           "produceCrates": 0,
@@ -3875,6 +3895,7 @@
           "segwayTourRider": 6,
           "signSpinner": 0,
           "stiltWalker": 3,
+          "streetCart": 4,
           "streetcar": 0,
           "streetcarPlatform": 0,
           "stroller": 0,
@@ -3965,7 +3986,6 @@
           "hedge": 0,
           "hen": 0,
           "hopscotchKid": 0,
-          "hotDogCart": 7,
           "iceCreamBike": 0,
           "iceCreamTruck": 3,
           "ironFence2": 0,
@@ -3985,7 +4005,6 @@
           "patioRail": 0,
           "patrolBuggy": 0,
           "pedicab": 5,
-          "picnicBlanket": 0,
           "pigeons": 2,
           "porchSteps": 0,
           "produceCrates": 0,
@@ -3999,6 +4018,7 @@
           "segwayTourRider": 0,
           "signSpinner": 2,
           "stiltWalker": 0,
+          "streetCart": 7,
           "streetcar": 5,
           "streetcarPlatform": 3,
           "stroller": 0,

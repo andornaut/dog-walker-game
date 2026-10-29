@@ -121,9 +121,9 @@ export interface PlannedSpawns<Kind extends string> {
   path: PathRow[];
 }
 
-interface DueSpawns<Kind extends string> {
-  due: SpawnEvent<Kind>[];
-  pending: readonly SpawnEvent<Kind>[];
+interface DueSpawns<Event> {
+  due: Event[];
+  pending: readonly Event[];
 }
 
 // Rows minSpacing apart, leaving at least minSpacing clear at both ends of the zone.
@@ -513,10 +513,10 @@ export function blockingPlace(
 
 // Spawns become due once the distance travelled reaches them. Most steps have none due, and
 // keep the pending list as it is.
-export function takeDueSpawns<Kind extends string>(
+export function takeDueSpawns<Event extends SpawnEvent<string>>(
   distance: number,
-  events: readonly SpawnEvent<Kind>[],
-): DueSpawns<Kind> {
+  events: readonly Event[],
+): DueSpawns<Event> {
   if (!events.some((event) => event.distance <= distance)) {
     return { due: [], pending: events };
   }

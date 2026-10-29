@@ -8,6 +8,7 @@ import { type FaceText, fillFaceText, ownerFaceText } from "../hud/faceText";
 import type { MessageLine } from "../hud/messageStrip";
 import { STRIP_LINE_FIELDS } from "../hud/runText";
 import { debuffLines } from "../hud/stripLines";
+import { minorObstacleNames } from "../runner/obstacleLooks";
 
 // Every line the strip can say: each hint and badge, and each of the walk's lines for every dog,
 // owner and obstacle as each neighbourhood names it, with two-digit counts and the largest
@@ -21,7 +22,11 @@ export function everyStripLine(): (FaceText & Pick<MessageLine, "names">)[] {
     owner: ownerFaceText(gameData, "neutral", id),
   }));
   const obstacles = [
-    ...new Set(Object.values(gameData.minorObstacles).map(({ name }) => name.toLowerCase())),
+    ...new Set(
+      keysOf(gameData.minorObstacles)
+        .flatMap((id) => minorObstacleNames(gameData, id))
+        .map((name) => name.toLowerCase()),
+    ),
   ];
   const amount = "$9,999";
   return [

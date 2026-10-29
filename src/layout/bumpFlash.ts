@@ -1,6 +1,6 @@
 import { insetRect, type Rect, ringRects } from "@andornaut/game-kit/rect";
 
-import type { EncounterId, MinorObstacleId } from "../data/types";
+import type { EncounterId, MinorLookId } from "../data/types";
 
 // Every bump flashes the screen in the bump's colour and nudges the road: a minor obstacle's
 // hit, a mover's included and one that costs cash while Spotlight lasts, and a card or contact
@@ -64,8 +64,9 @@ const STRIP_BORDERS: Readonly<Record<FlashColour, BorderColour>> = {
   sky: "cyan",
 };
 
-// Each minor obstacle's border: its sprite's main colour, the outline and dark shading aside.
-const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>> = {
+// Each minor obstacle look's border (minorLook): its sprite's main colour, the outline and dark
+// shading aside.
+const MINOR_FLASH_COLOURS: Readonly<Record<MinorLookId, BorderColour>> = {
   artSculpture: "orange",
   ball: "red",
   barrelStack: "tan",
@@ -89,8 +90,10 @@ const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>> = {
   ducklings: "yellow",
   fallenLog: "tan",
   ferrets: "cream",
+  flowerCart: "mauve",
   foodCartVendor: "mauve",
   frisbeeDog: "red",
+  fruitCart: "green",
   garbageTruck: "green",
   gardener: "green",
   goose: "white",
@@ -100,6 +103,7 @@ const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>> = {
   hopscotchKid: "pink",
   hotDogCart: "amber",
   iceCreamBike: "white",
+  iceCreamCart: "cyan",
   iceCreamTruck: "pink",
   ironFence2: "lightGrey",
   ironFence3: "lightGrey",
@@ -113,12 +117,12 @@ const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>> = {
   marketStall2: "cyan",
   marketStall3: "cyan",
   newspaperBox: "red",
+  newspaperCart: "white",
   parkRangersCart: "green",
   parkedCar: "cyan",
   patioRail: "green",
   patrolBuggy: "red",
   pedicab: "cyan",
-  picnicBlanket: "red",
   pigeons: "lightGrey",
   porchSteps: "red",
   produceCrates: "tan",
@@ -148,10 +152,10 @@ const MINOR_FLASH_COLOURS: Readonly<Record<MinorObstacleId, BorderColour>> = {
   volleyballPlayer: "red",
 };
 
-// What was bumped: a minor obstacle, or an encounter that is an obstacle.
+// What was bumped: a minor obstacle as it looks, or an encounter that is an obstacle.
 export type BumpSource =
   | { readonly encounter: EncounterId; readonly kind: "encounter" }
-  | { readonly kind: "minor"; readonly obstacle: MinorObstacleId };
+  | { readonly kind: "minor"; readonly look: MinorLookId };
 
 // An encounter with no flash colour flashes amber, as its edge flash does.
 export function encounterFlashColour(encounter: EncounterId): FlashColour {
@@ -166,7 +170,7 @@ interface BumpFlash {
 export function bumpFlash(still: boolean, source: BumpSource): BumpFlash {
   const name =
     source.kind === "minor"
-      ? MINOR_FLASH_COLOURS[source.obstacle]
+      ? MINOR_FLASH_COLOURS[source.look]
       : STRIP_BORDERS[encounterFlashColour(source.encounter)];
   return { colour: name, nudge: !still };
 }

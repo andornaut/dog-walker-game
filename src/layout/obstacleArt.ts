@@ -7,7 +7,8 @@ import {
   ROAD_SPRITE_SIZE,
   SKUNK_CLOUD_KEY,
 } from "../assets/spriteKeys";
-import type { EncounterId, GameData, MinorObstacleId } from "../data/types";
+import type { EncounterId, GameData, MinorObstacleId, SkinId } from "../data/types";
+import { minorLook } from "../runner/obstacleLooks";
 import type { Silhouette } from "./packFormation";
 
 // What an obstacle draws on the road, which is what it collides as: each of its sprites and that
@@ -45,7 +46,9 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   "escaped-capybara": { above: 33, left: -23, right: 23 },
   "fallen-log": { above: 34, left: -55, right: 54 },
   ferrets: { above: 25, left: -48, right: 47 },
+  "flower-cart": { above: 65, left: -50, right: 50 },
   "food-cart-vendor": { above: 67, left: -22, right: 23 },
+  "fruit-cart": { above: 65, left: -50, right: 50 },
   gardener: { above: 66, left: -23, right: 24 },
   goose: { above: 43, left: -22, right: 22 },
   "granny-cart-shopper": { above: 65, left: -24, right: 24 },
@@ -55,6 +58,7 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   "hopscotch-kid": { above: 63, left: -23, right: 23 },
   "hot-dog-cart": { above: 65, left: -50, right: 50 },
   "ice-cream-bike": { above: 71, left: -24, right: 23 },
+  "ice-cream-cart": { above: 65, left: -50, right: 50 },
   "ice-cream-truck": { above: 59, left: -28, right: 28 },
   "iron-fence-2": { above: 35, left: -56, right: 56 },
   "iron-fence-3": { above: 35, left: -88, right: 88 },
@@ -70,6 +74,7 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   "market-stall-3": { above: 47, left: -88, right: 88 },
   "minor-scooter": { above: 68, left: -19, right: 19 },
   "newspaper-box": { above: 37, left: -24, right: 24 },
+  "newspaper-cart": { above: 65, left: -50, right: 50 },
   "other-dog": { above: 40, left: -14, right: 18 },
   "other-dog-owner": { above: 65, left: -17, right: 19 },
   "park-rangers-cart": { above: 70, left: -23, right: 24 },
@@ -77,7 +82,6 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   "patio-rail": { above: 33, left: -87, right: 87 },
   "patrol-buggy": { above: 62, left: -55, right: 55 },
   pedicab: { above: 69, left: -24, right: 24 },
-  "picnic-blanket": { above: 30, left: -55, right: 55 },
   "porch-cat": { above: 32, left: -24, right: 20 },
   "porch-steps": { above: 38, left: -24, right: 24 },
   pothole: { above: 43, left: -54, right: 54 },
@@ -156,10 +160,10 @@ const part = (key: string, overrides: Partial<Omit<ObstaclePart, "key">> = {}): 
 
 type ObstacleData = Pick<GameData, "minorObstacles">;
 
-// An obstacle's road sprite: its kind's art.
-function roadArt(data: ObstacleData, kind: EncounterId | MinorObstacleId): string {
+// An obstacle's road sprite: its kind's art, or a minor obstacle's skin's (minorLook).
+function roadArt(data: ObstacleData, kind: EncounterId | MinorObstacleId, skin?: SkinId): string {
   return Object.hasOwn(data.minorObstacles, kind)
-    ? minorObstacleSpriteKey(kind as MinorObstacleId)
+    ? minorObstacleSpriteKey(minorLook(data, kind as MinorObstacleId, skin))
     : encounterSpriteKey(kind as EncounterId);
 }
 
@@ -169,31 +173,33 @@ export function moverBodyArt(
   data: ObstacleData,
   has: HasArt,
   kind: EncounterId | MinorObstacleId,
+  skin?: SkinId,
 ): string {
-  const art = roadArt(data, kind);
+  const art = roadArt(data, kind, skin);
   const sprite = MOVER_SPRITE_KEYS[art];
   return sprite !== undefined && has(sprite) ? sprite : art;
 }
 
-// The sprites an obstacle draws, standing or moving. Each stands at the near edge of the item's
-// hit box, however many rows it covers. A flat encounter, such as a puddle, lies flat under the
-// rest, and a skunk stands just inside the front of its spray cloud, which lies flat too and goes
-// with it when it moves; any other mover draws its body alone. The other dog's owner stands
-// beside it.
+// The sprites an obstacle draws, standing or moving, in its skin if it wears one. Each stands at
+// the near edge of the item's hit box, however many rows it covers. A flat encounter, such as a
+// puddle, lies flat under the rest, and a skunk stands just inside the front of its spray cloud,
+// which lies flat too and goes with it when it moves; any other mover draws its body alone. The
+// other dog's owner stands beside it.
 export function obstacleParts(
   data: ObstacleData,
   has: HasArt,
   kind: EncounterId | MinorObstacleId,
   moving: boolean,
+  skin?: SkinId,
 ): ObstaclePart[] {
   if (kind === "skunk") {
     const body = moving ? moverBodyArt(data, has, kind) : roadArt(data, kind);
     return [part(SKUNK_CLOUD_KEY, { flat: true }), part(body, { behind: SKUNK_IN_CLOUD })];
   }
   if (moving) {
-    return [part(moverBodyArt(data, has, kind))];
+    return [part(moverBodyArt(data, has, kind, skin))];
   }
-  const art = roadArt(data, kind);
+  const art = roadArt(data, kind, skin);
   const owner = `${art}-owner`;
   if (kind === "otherDog" && has(owner)) {
     return [part(art, { dx: OTHER_DOG_DX }), part(owner, { dx: OTHER_DOG_OWNER_DX })];

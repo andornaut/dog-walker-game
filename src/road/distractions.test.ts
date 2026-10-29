@@ -14,6 +14,7 @@ import { currentZone } from "../rules/route";
 import { read } from "../rules/units";
 import { DART_VERGE_LANES } from "../runner/moverPlanning";
 import { moverPlace } from "../runner/movers";
+import { minorLook } from "../runner/obstacleLooks";
 import { screenRoadGeometry } from "../runner/screenGeometry";
 import {
   chooseCard,
@@ -140,7 +141,10 @@ describe("distractionKinds", () => {
         const { onFoot, shape } = gameData.minorObstacles[id];
         return weight > 0 && onFoot === true && shape.lanes === 1;
       })
-      .map(([id, weight]): [string, number] => [minorObstacleSpriteKey(id), weight])
+      .map(([id, weight]): [string, number] => [
+        minorObstacleSpriteKey(minorLook(gameData, id)),
+        weight,
+      ])
       .filter(([key]) => drawable(key));
     expect(kinds.length).toBeGreaterThan(0);
     expect(kinds).toEqual(expected);

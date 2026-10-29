@@ -45,6 +45,18 @@ export type DogId = keyof typeof DOGS;
 export type GearId = keyof typeof SHOP_GEAR;
 export type HintId = keyof typeof HINTS;
 export type MinorObstacleId = keyof typeof MINOR_OBSTACLES;
+// A minor obstacle that comes in skins (MinorObstacle), and each skin's id.
+export type SkinnedObstacleId = {
+  [Id in MinorObstacleId]: (typeof MINOR_OBSTACLES)[Id] extends { readonly skins: object }
+    ? Id
+    : never;
+}[MinorObstacleId];
+export type SkinId = {
+  [Id in SkinnedObstacleId]: keyof (typeof MINOR_OBSTACLES)[Id]["skins"] & string;
+}[SkinnedObstacleId];
+// What a minor obstacle on the road looks like: its skin, or the obstacle itself when it has one
+// look. Art, names and bump flash colours are keyed by it.
+export type MinorLookId = Exclude<MinorObstacleId, SkinnedObstacleId> | SkinId;
 export type UpgradeId = keyof typeof UPGRADES;
 export type WalkerId = keyof typeof WALKERS;
 export type WalkerPerkId = keyof typeof WALKER_PERKS;
@@ -518,13 +530,30 @@ export type Encounter = {
 // weighted in each and 0 in every other. One with a movement comes as a mover at the zone's
 // moverShare. One onFoot is a person or an animal, not a vehicle or a thing, which the
 // distraction movers are drawn from.
-export interface MinorObstacle {
-  readonly movement?: Movement;
+// One with skins never moves and has a look per neighbourhood instead of one name and look: each
+// skin names the zones it appears in, and the obstacle appears in every zone a skin names. Each
+// spawn picks one of its zone's skins, evenly, and is drawn, named and flashed as that skin.
+export type MinorObstacle =
+  | {
+      readonly movement?: Movement;
+      readonly name: string;
+      readonly onFoot?: true;
+      readonly shape: Shape;
+      // Zone ids, as an obstacle encounter's zones are.
+      readonly zones?: NeighbourhoodZones;
+    }
+  | {
+      readonly movement?: never;
+      readonly onFoot?: never;
+      readonly shape: Shape;
+      readonly skins: Readonly<Record<string, ObstacleSkin>>;
+    };
+
+// One look of a minor obstacle with skins: its name and the zones it appears in.
+export interface ObstacleSkin {
   readonly name: string;
-  readonly onFoot?: true;
-  readonly shape: Shape;
   // Zone ids, as an obstacle encounter's zones are.
-  readonly zones?: NeighbourhoodZones;
+  readonly zones: NeighbourhoodZones;
 }
 
 // How long an upgrade card's effects last: applied at once, through the next zone, or for

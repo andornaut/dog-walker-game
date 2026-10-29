@@ -31,6 +31,7 @@ import type {
 import { sizeHearts } from "../rules/dogs";
 import { effectText } from "../rules/effectText";
 import { faceMood } from "../rules/treats";
+import { minorLook, obstacleSkins } from "../runner/obstacleLooks";
 
 // The game data art's tools read, as shared/export/game-data.json. Every entry spreads its
 // data module's fields as they are, so a field added to the data shows up here unchanged,
@@ -168,7 +169,20 @@ export function gameDataExport(data: GameData) {
     help: data.help,
     minorObstacles: entries<MinorObstacleId, GameData["minorObstacles"][MinorObstacleId]>(
       data.minorObstacles,
-    ).map(([id, obstacle]) => ({ id, ...obstacle, spriteKey: minorObstacleSpriteKey(id) })),
+    ).map(([id, obstacle]) =>
+      "skins" in obstacle
+        ? {
+            id,
+            ...obstacle,
+            skins: Object.fromEntries(
+              obstacleSkins(data, id).map((skin) => [
+                skin,
+                { ...obstacle.skins[skin], spriteKey: minorObstacleSpriteKey(skin) },
+              ]),
+            ),
+          }
+        : { id, ...obstacle, spriteKey: minorObstacleSpriteKey(minorLook(data, id)) },
+    ),
     tuning,
     upgrades: entries<UpgradeId, GameData["upgrades"][UpgradeId]>(data.upgrades).map(
       ([id, upgrade]) => ({ id, ...upgrade }),

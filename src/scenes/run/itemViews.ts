@@ -23,6 +23,7 @@ import { herringNow } from "../../road/herrings";
 import { type KeptScenery, struckBy, struckNow } from "../../road/struckScenery";
 import { goesToVerge, vergeNow } from "../../road/vergeScenery";
 import { moverTell } from "../../runner/movers";
+import { minorLooks } from "../../runner/obstacleLooks";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import type { SpawnEvent } from "../../runner/spawning";
 import { type RoadGeometry, type Walk, type WalkStep } from "../../runner/walk";
@@ -76,8 +77,8 @@ interface VergeView {
   readonly view: ItemView;
 }
 
-// A box for each minor obstacle, gear drop and the skunk's cloud whose art is missing, from its
-// shape in the data, a drop one lane wide.
+// A box for each minor obstacle look, gear drop and the skunk's cloud whose art is missing, from
+// its shape in the data, a drop one lane wide.
 export function ensureRoadPlaceholders(scene: Scene): void {
   const pack = { dogs: [], walker: gameData.defaultWalker };
   const { cell } = walkGeometry(LANE_COUNT, pack, PROJECTION, LAYOUT.road);
@@ -87,9 +88,10 @@ export function ensureRoadPlaceholders(scene: Scene): void {
       height: PLACEHOLDER_HEIGHT,
       width: lanes * cell.length - (cell.length - ROAD_SPRITE_SIZE),
     });
-  for (const [id, obstacle] of Object.entries(gameData.minorObstacles)) {
-    const art = minorObstacleSpriteKey(id as MinorObstacleId);
-    add(art, obstacle.shape.lanes);
+  for (const id of keysOf(gameData.minorObstacles)) {
+    for (const look of minorLooks(gameData, id)) {
+      add(minorObstacleSpriteKey(look), gameData.minorObstacles[id].shape.lanes);
+    }
   }
   for (const gear of keysOf(gameData.shopGear)) {
     add(gearDropSpriteKey(gear), 1);
@@ -312,7 +314,8 @@ export class ItemViews {
     } else if (category === "gear") {
       parts = [part(gearDropSpriteKey(item.kind as GearId))];
     } else {
-      parts = obstacleParts(gameData, has, item.kind as EncounterId | MinorObstacleId, false).map(
+      const kind = item.kind as EncounterId | MinorObstacleId;
+      parts = obstacleParts(gameData, has, kind, false, item.skin).map(
         ({ behind, dx, flat, key }) =>
           part(key, { dx, flat, footY: (shown) => itemBottom(shown) - behind }),
       );

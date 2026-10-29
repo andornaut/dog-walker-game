@@ -86,11 +86,12 @@ import {
   walkWith,
   withHearts,
 } from "../testing/walk";
-import { TEST_WORLD } from "../testing/world";
+import { TEST_WORLD, weighedUp } from "../testing/world";
 import { cents, clampHearts } from "../units";
 import { approachOutcomes } from "./approach";
 import { stillInLane } from "./laneMotion";
 import { hasLeftRoad, laneAt, type MoverPath, moverPlace } from "./movers";
+import { zoneSkins } from "./obstacleLooks";
 import { shyOutcomes } from "./shy";
 import { WIDE_LANES, zoneRows } from "./spawning";
 import {
@@ -276,6 +277,21 @@ describe("planZone", { timeout: 60_000 }, () => {
         ).toEqual([]);
       }
     }
+  });
+
+  // The real world with the street cart weighed up (weighedUp), so every zone plans some.
+  it.each(ZONE_IDS)("dresses every street cart planned in %s in a skin naming it", (zone) => {
+    const walk = walkWith(["kilo"]);
+    const real = weighedUp("streetCart", { ...data, world: WORLD });
+    const run = inZone(walk.run, zone, 0);
+    const skins: string[] = zoneSkins(real, zone, "streetCart");
+    const carts = [1, 2, 3].flatMap((seed) =>
+      planZone(real, geometry, plannerStreams(seed), { ...walk, run }).road.pending.filter(
+        ({ kind }) => kind === "streetCart",
+      ),
+    );
+    expect(carts.length).toBeGreaterThan(0);
+    expect(carts.filter(({ skin }) => skin === undefined || !skins.includes(skin))).toEqual([]);
   });
 
   it("weighs the obstacles by the zone the route is in", () => {
@@ -624,6 +640,15 @@ describe("stepWalk", () => {
     ]);
     expect(after.road.pending).toEqual([]);
     expect(after.run.zoneDistance).toBeCloseTo(4);
+  });
+
+  it("brings a street cart into view in the skin its spawn picked", () => {
+    const walk = walkWith(["kilo"]);
+    const pending = [{ distance: 0.5, kind: "streetCart", lane: 1, skin: "fruitCart" }] as const;
+    const { walk: after } = step({ ...walk, road: { ...walk.road, pending } }, 0.05);
+    expect(after.road.items.map(({ kind, skin }) => ({ kind, skin }))).toEqual([
+      { kind: "streetCart", skin: "fruitCart" },
+    ]);
   });
 
   it("collects a tip the pack walks into, worth what tips pay now, with its item", () => {

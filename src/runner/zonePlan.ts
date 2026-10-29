@@ -19,6 +19,7 @@ import { zoneStats } from "../rules/zones";
 import type { RunState } from "../state/runState";
 import type { PlannerStreams } from "./moverPlanning";
 import { moverMovement, moverSpec } from "./moverSpecs";
+import { pickSkin } from "./obstacleLooks";
 import type { SpawnQuota } from "./spawning";
 import { spacedStretch } from "./stretches";
 import {
@@ -30,7 +31,15 @@ import {
   walkScrollSpeed,
   zoneLength,
 } from "./walk";
-import { blocksLane, footprintOf, movementOf, opensACard, type WalkItemKind } from "./walkItems";
+import {
+  blocksLane,
+  footprintOf,
+  isMinorObstacle,
+  movementOf,
+  opensACard,
+  type WalkItemKind,
+  type WalkSpawn,
+} from "./walkItems";
 import { planSpawns } from "./zonePlanner";
 
 // The entries of a zone's weights above 0, in the data's order.
@@ -169,7 +178,8 @@ export function spawnQuotas(
 }
 
 // Plans the run's current zone: its spawns, each obstacle and lucky encounter drawn by the
-// zone's weights.
+// zone's weights. Last, each minor obstacle with skins picks its skin (pickSkin) from the spawns
+// stream, after every spawn is placed, so the picks move no spawn.
 export function planZone(
   data: WalkData,
   geometry: Pick<
@@ -257,5 +267,12 @@ export function planZone(
     movement: mover?.movement ?? null,
   }));
   const { events, herrings, path } = planSpawns(streams, plan);
-  return { road: { ...road, herrings, path, pending: events, planned }, run };
+  const zone = currentZone(data, run).id;
+  const pending = events.map((event): WalkSpawn => {
+    const skin = isMinorObstacle(data, event.kind)
+      ? pickSkin(data, streams.spawns, zone, event.kind)
+      : undefined;
+    return skin === undefined ? event : { ...event, skin };
+  });
+  return { road: { ...road, herrings, path, pending, planned }, run };
 }

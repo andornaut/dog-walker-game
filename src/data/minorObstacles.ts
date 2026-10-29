@@ -2,9 +2,9 @@ import type { MinorObstacle } from "./types";
 
 // Obstacles that open no card. Shapes are lanes across by rows along the road; each zone
 // weighs how often they appear there, in world.ts, and one with zones appears only in those.
-// Each obstacle has one look everywhere. An obstacle with a movement comes as a mover at the
-// zone's mover share, and stands still otherwise. onFoot marks a person or an animal, not a
-// vehicle or a thing.
+// An obstacle has one look everywhere, or, with skins, a look per neighbourhood: each spawn picks
+// one of its zone's skins evenly. An obstacle with a movement comes as a mover at the zone's mover
+// share, and stands still otherwise. onFoot marks a person or an animal, not a vehicle or a thing.
 export const MINOR_OBSTACLES = {
   artSculpture: {
     name: "Art sculpture",
@@ -204,7 +204,6 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
     zones: ["cabbagetown", "kensingtonMarket"],
   },
-  hotDogCart: { name: "Hot dog cart", shape: { lanes: 2, rows: 1 } },
   iceCreamBike: {
     movement: {
       factor: 0.7,
@@ -302,7 +301,6 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 2 },
     zones: ["yongeStreet", "distilleryDistrict"],
   },
-  picnicBlanket: { name: "Picnic blanket", shape: { lanes: 2, rows: 1 }, zones: ["highPark"] },
   pigeons: {
     movement: { kind: "dart", stopShare: 0, tilt: { max: -0.3, min: -0.3 }, turnBackShare: 0 },
     name: "Pigeons",
@@ -365,6 +363,16 @@ export const MINOR_OBSTACLES = {
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
     zones: ["kensingtonMarket", "distilleryDistrict"],
+  },
+  streetCart: {
+    shape: { lanes: 2, rows: 1 },
+    skins: {
+      flowerCart: { name: "Flower cart", zones: ["cabbagetown"] },
+      fruitCart: { name: "Fruit cart", zones: ["kensingtonMarket"] },
+      hotDogCart: { name: "Hot dog cart", zones: ["highPark", "kensingtonMarket", "yongeStreet"] },
+      iceCreamCart: { name: "Ice cream cart", zones: ["distilleryDistrict", "theBeaches"] },
+      newspaperCart: { name: "Newspaper cart", zones: ["yongeStreet"] },
+    },
   },
   streetcar: {
     movement: { factor: 0.7, kind: "inLane" },

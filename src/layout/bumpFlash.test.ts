@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
+import { minorLook } from "../runner/obstacleLooks";
 import { BUMP_FLASH, bumpBorder, bumpFlash, type BumpSource, FLASH_COLOURS } from "./bumpFlash";
 
 const MINOR_OBSTACLES = keysOf(gameData.minorObstacles);
@@ -16,7 +17,10 @@ const BUMPED_ENCOUNTERS = keysOf(gameData.encounters).filter((id) => {
 // A minor obstacle and a bumped encounter: the flash reads its colour the same way for every
 // kind of each.
 const SOURCES: readonly BumpSource[] = [
-  ...MINOR_OBSTACLES.slice(0, 1).map((obstacle): BumpSource => ({ kind: "minor", obstacle })),
+  ...MINOR_OBSTACLES.slice(0, 1).map((obstacle): BumpSource => ({
+    kind: "minor",
+    look: minorLook(gameData, obstacle),
+  })),
   ...BUMPED_ENCOUNTERS.slice(0, 1).map((encounter): BumpSource => ({
     encounter,
     kind: "encounter",

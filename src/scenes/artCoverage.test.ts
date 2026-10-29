@@ -50,6 +50,7 @@ import { SCALE_STEPS } from "../layout/projection";
 import { cardFor } from "../rules/choices";
 import { hitLabel } from "../rules/encounters";
 import { faceMood } from "../rules/treats";
+import { minorLooks } from "../runner/obstacleLooks";
 import type { PullPose } from "../runner/pulls";
 import { testState } from "../testing/runState";
 import { clampHearts } from "../units";
@@ -449,11 +450,13 @@ describe("road object art", () => {
       entry: gameData.encounters[kind],
       kind,
     })),
-    ...MINOR_OBSTACLES.map((kind) => ({
-      art: minorObstacleSpriteKey(kind),
-      entry: gameData.minorObstacles[kind],
-      kind,
-    })),
+    ...MINOR_OBSTACLES.flatMap((kind) =>
+      minorLooks(gameData, kind).map((look) => ({
+        art: minorObstacleSpriteKey(look),
+        entry: gameData.minorObstacles[kind],
+        kind,
+      })),
+    ),
   ];
   const isLucky = (kind: string) =>
     Object.hasOwn(gameData.encounters, kind) &&

@@ -75,6 +75,7 @@ import { walkLength } from "../../rules/route";
 import { walkEarnings } from "../../rules/run";
 import { spareTreatGiver, spareTreatSource } from "../../rules/spareTreats";
 import { read } from "../../rules/units";
+import { minorLook, minorObstacleName } from "../../runner/obstacleLooks";
 import type { PullStep } from "../../runner/pulls";
 import type { EncounterCard, MinorBump, WalkStep } from "../../runner/walk";
 import type { WalkItem } from "../../runner/walkItems";
@@ -342,8 +343,8 @@ export class RunMoments {
     // A bump costs the owner of the dog it landed on; the dog may dodge it.
     for (const bump of step.bumps) {
       const moment = { depth: DEPTH.fx, still: this.deps.still() };
-      const { kind } = bump.item;
-      bumpLines(gameData, bump, gameData.minorObstacles[kind].name).forEach((said) => {
+      const { kind, skin } = bump.item;
+      bumpLines(gameData, bump, minorObstacleName(gameData, kind, skin)).forEach((said) => {
         this.say(said);
       });
       if (bump.dodged) {
@@ -742,7 +743,7 @@ export class RunMoments {
       const side = tipSide(body.sprite.x, pack.x);
       moveObstacle(this.scene, body, obstacleMotion(still, hit, side));
     }
-    this.flashBump({ kind: "minor", obstacle: item.kind });
+    this.flashBump({ kind: "minor", look: minorLook(gameData, item.kind, item.skin) });
   }
 
   // A bump's border round the screen, flashed by the HUD in the bump's colour, and the road's

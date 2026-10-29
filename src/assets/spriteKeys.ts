@@ -5,7 +5,7 @@ import type {
   EncounterId,
   GameData,
   GearId,
-  MinorObstacleId,
+  MinorLookId,
   MovementKind,
   Size,
   WalkerId,
@@ -80,8 +80,8 @@ export function dogCardTag(data: Pick<GameData, "dogs">, dog: DogId | null): str
   return dog === null ? "empty" : data.dogs[dog].art;
 }
 
-// Minor obstacles whose sprite key is not their id in kebab case.
-const MINOR_OBSTACLE_SPRITES: Readonly<Partial<Record<MinorObstacleId, string>>> = {
+// Minor obstacle looks whose sprite key is not their id in kebab case.
+const MINOR_OBSTACLE_SPRITES: Readonly<Partial<Record<MinorLookId, string>>> = {
   ball: "ball-bounce",
   bunny: "chase-rabbit",
   car: "parked-car",
@@ -101,8 +101,10 @@ const MINOR_OBSTACLE_SPRITES: Readonly<Partial<Record<MinorObstacleId, string>>>
   volleyballNet3: "volleyball-net-3",
 };
 
-export function minorObstacleSpriteKey(obstacle: MinorObstacleId): string {
-  return MINOR_OBSTACLE_SPRITES[obstacle] ?? kebabCase(obstacle);
+// A minor obstacle look's sprite: an obstacle with one look by its id, one with skins by the
+// skin's (minorLook).
+export function minorObstacleSpriteKey(look: MinorLookId): string {
+  return MINOR_OBSTACLE_SPRITES[look] ?? kebabCase(look);
 }
 
 // Whether the art manifest has a key.

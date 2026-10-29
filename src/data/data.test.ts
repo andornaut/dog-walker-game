@@ -273,16 +273,22 @@ describe("run, world and walkers", () => {
     expect(Object.values(counts).every((count) => count >= 0)).toBe(true);
   });
 
-  // Every obstacle kind that names its zones, with the weights table that draws it in each zone.
+  // Every obstacle kind that names its zones, with the weights table that draws it in each zone. An
+  // obstacle with skins names each zone a skin names.
   const zoneKinds = [
     ...Object.entries(encounters).flatMap(([id, encounter]) =>
       encounter.kind === "obstacle" && "zones" in encounter && encounter.zones !== undefined
         ? [{ id, table: "obstacles" as const, zones: encounter.zones }]
         : [],
     ),
-    ...Object.entries(minorObstacles).flatMap(([id, minor]) =>
-      "zones" in minor ? [{ id, table: "minorObstacles" as const, zones: minor.zones }] : [],
-    ),
+    ...Object.entries(minorObstacles).flatMap(([id, minor]) => {
+      if ("skins" in minor) {
+        const named = new Set(Object.values(minor.skins).flatMap(({ zones }) => zones));
+        const zones: readonly string[] = [...named];
+        return [{ id, table: "minorObstacles" as const, zones }];
+      }
+      return "zones" in minor ? [{ id, table: "minorObstacles" as const, zones: minor.zones }] : [];
+    }),
   ];
   const zoneIds = world.zones.map(({ id }) => id);
 
@@ -306,16 +312,27 @@ describe("run, world and walkers", () => {
     expect(offenders).toEqual([]);
   });
 
-  // So the neighbourhoods stay distinct, no mover or plain obstacle appears in more than 3. One
-  // test lists every obstacle over the limit, with the zones that weigh it.
-  it("weighs every mover and plain obstacle above 0 in at most 3 zones", () => {
-    const over = Object.keys(minorObstacles).flatMap((id) => {
-      const weighted = world.zones.flatMap((each) =>
-        ((each.weights.minorObstacles as Readonly<Record<string, number>>)[id] ?? 0) > 0
-          ? [each.id]
-          : [],
+  // So the neighbourhoods stay distinct, no mover or plain obstacle appears in more than 3, each
+  // skin of one with skins counting as its own by the zones it names. One test lists every
+  // obstacle or skin over the limit, with its zones.
+  it("weighs every mover and plain obstacle above 0 in at most 3 zones, each skin on its own", () => {
+    const over = Object.entries(minorObstacles).flatMap(([id, minor]) => {
+      const looks =
+        "skins" in minor
+          ? Object.entries(minor.skins).map(([skin, { zones }]) => ({ id: skin, zones }))
+          : [
+              {
+                id,
+                zones: world.zones.flatMap((each) =>
+                  ((each.weights.minorObstacles as Readonly<Record<string, number>>)[id] ?? 0) > 0
+                    ? [each.id]
+                    : [],
+                ),
+              },
+            ];
+      return looks.flatMap((look) =>
+        look.zones.length > 3 ? [`${look.id}: ${look.zones.join(", ")}`] : [],
       );
-      return weighted.length > 3 ? [`${id}: ${weighted.join(", ")}`] : [];
     });
     expect(Object.keys(minorObstacles).length).toBeGreaterThan(0);
     expect(over).toEqual([]);

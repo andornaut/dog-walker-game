@@ -3,8 +3,10 @@ import { readFileSync } from "node:fs";
 import { decodePng } from "@andornaut/game-kit/art/png";
 import { describe, expect, it } from "vitest";
 
+import { minorObstacleSpriteKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import type { EncounterId, MinorObstacleId } from "../data/types";
+import type { EncounterId, MinorObstacleId, SkinId } from "../data/types";
+import { obstacleSkins } from "../runner/obstacleLooks";
 import { spriteSource } from "../tools/atlas/atlasLayout";
 import { OBSTACLE_SILHOUETTES, obstacleParts, POSE_SILHOUETTES } from "./obstacleArt";
 
@@ -52,6 +54,15 @@ const KINDS = [
     .map(([id]) => id),
 ] as (EncounterId | MinorObstacleId)[];
 const inManifest = (key: string) => FEET.has(key);
+// Each skin of each minor obstacle that has skins.
+const SKINS = (Object.keys(gameData.minorObstacles) as MinorObstacleId[]).flatMap((kind) =>
+  obstacleSkins(gameData, kind).map((skin) => ({ kind, skin })),
+);
+// Each obstacle as it may look: in each of its skins, or as itself.
+const LOOKS: { kind: EncounterId | MinorObstacleId; skin?: SkinId }[] = KINDS.flatMap((kind) => {
+  const skins = SKINS.filter((look) => look.kind === kind);
+  return skins.length > 0 ? skins : [{ kind }];
+});
 
 describe("OBSTACLE_SILHOUETTES", () => {
   it("measures every obstacle on its art", () => {
@@ -74,15 +85,29 @@ describe("OBSTACLE_SILHOUETTES", () => {
     expect(silhouette.right).toBeLessThanOrEqual(whole?.right ?? -Infinity);
   });
 
-  // Each obstacle, standing and moving, as the art loaded draws it.
+  // Each obstacle, standing and moving, in each of its skins, as the art loaded draws it.
   it("holds exactly the obstacle sprites the art draws", () => {
     const drawn = new Set(
-      KINDS.flatMap((kind) =>
+      LOOKS.flatMap(({ kind, skin }) =>
         [false, true].flatMap((moving) =>
-          obstacleParts(gameData, inManifest, kind, moving).map(({ key }) => key),
+          obstacleParts(gameData, inManifest, kind, moving, skin).map(({ key }) => key),
         ),
       ),
     );
     expect(Object.keys(OBSTACLE_SILHOUETTES).sort()).toEqual([...drawn].sort());
+  });
+
+  // A spawn draws its skin's sprite, and every skin of an obstacle has the same silhouette, so
+  // the planner, which picks no skin, spaces and hits each the same.
+  it.each(SKINS)("draws a $kind in its $skin skin, as wide and tall as its others", (look) => {
+    const { kind, skin } = look;
+    const key = minorObstacleSpriteKey(skin);
+    expect(obstacleParts(gameData, inManifest, kind, false, skin).map((part) => part.key)).toEqual([
+      key,
+    ]);
+    const [first] = obstacleSkins(gameData, kind);
+    const silhouette = OBSTACLE_SILHOUETTES[key];
+    expect(silhouette).toBeDefined();
+    expect(silhouette).toEqual(OBSTACLE_SILHOUETTES[minorObstacleSpriteKey(first ?? skin)]);
   });
 });

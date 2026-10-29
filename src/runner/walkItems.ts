@@ -5,14 +5,17 @@ import type {
   GearId,
   MinorObstacleId,
   Movement,
+  SkinId,
 } from "../data/types";
 import type { MoverItem } from "./movers";
-import { type Footprint, SINGLE_CELL } from "./spawning";
+import { type Footprint, SINGLE_CELL, type SpawnEvent } from "./spawning";
 
 export type PickupKind = "tip" | "treat";
 // A road item's kind: an encounter, a minor obstacle, a pickup, or a gear drop by its gear.
 export type WalkItemKind = EncounterId | GearId | MinorObstacleId | PickupKind;
-export type WalkItem = MoverItem<WalkItemKind>;
+// skin is the look a minor obstacle with skins wears (pickSkin), picked as its zone is planned.
+export type WalkItem = MoverItem<WalkItemKind> & { readonly skin?: SkinId };
+export type WalkSpawn = SpawnEvent<WalkItemKind> & { readonly skin?: SkinId };
 // What a road item is to the rules: an obstacle hit by accident, a minor obstacle that opens
 // no card, a lucky encounter, a gear drop, or a pickup.
 export type ItemCategory = "gear" | "lucky" | "minor" | "obstacle" | PickupKind;

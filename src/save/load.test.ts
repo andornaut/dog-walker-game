@@ -455,6 +455,19 @@ describe("saveContextFrom", () => {
     expect([...context.known.zones]).toEqual(gameData.world.zones.map(({ id }) => id));
   });
 
+  // A retired obstacle's bumps load dropped; a skin is no obstacle id, so none move to the street
+  // cart.
+  it.each(["hotDogCart", "picnicBlanket"])("loads a save with bumps by %s, dropping them", (id) => {
+    const { save, status } = loadSave(
+      saveFormat(context),
+      withChanges((document) => {
+        document.stats.bumpsByKind = { [id]: 2, pigeons: 3 };
+      }),
+    );
+    expect(status).toBe("loaded");
+    expect(save.stats.bumpsByKind).toEqual({ pigeons: 3 });
+  });
+
   it("refuses game data with no starter dog, or a default walker locked at the start", () => {
     const dogs = Object.fromEntries(
       Object.entries(gameData.dogs).map(([id, dog]) => [id, { ...dog, unlock: "shop" as const }]),
