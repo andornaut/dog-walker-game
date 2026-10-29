@@ -116,9 +116,11 @@ function depthArtsOf(scene: Scene, key: string): DepthArt[] {
 
 // Shows a road sprite at its projected scale by depthDraw, the one rule for every road
 // sprite: on its art's feet line or, with feet "bottom", its frame's bottom. A changed
-// texture carries on the same tag from the same frame. Its corners snap to whole pixels, as
-// Phaser snaps only unscaled sprites: a scaled sprite left on a fractional corner samples its
-// art from a different phase each frame as it moves, and its pixels shimmer.
+// texture carries on the same tag from the same frame, or from its first frame when the new
+// art's tag has no such frame: a pooled sprite handed to another mover's art can be past the end
+// of the new art's tag, and Phaser throws on a start frame past the end. Its corners snap to
+// whole pixels, as Phaser snaps only unscaled sprites: a scaled sprite left on a fractional
+// corner samples its art from a different phase each frame as it moves, and its pixels shimmer.
 export function showAtDepth(
   sprite: GameObjects.Sprite,
   key: string,
@@ -136,7 +138,11 @@ export function showAtDepth(
     sprite.setOrigin(0.5, feet === "bottom" ? 1 : drawn.originY);
     const next = tag === undefined ? undefined : animationKey(drawn.key, tag);
     if (next !== undefined && sprite.scene.anims.exists(next)) {
-      sprite.play({ key: next, startFrame: Math.max(0, startFrame) });
+      const length = sprite.scene.anims.get(next)?.frames.length ?? 0;
+      sprite.play({
+        key: next,
+        startFrame: startFrame > 0 && startFrame < length ? startFrame : 0,
+      });
       if (paused) {
         sprite.anims.pause();
       }

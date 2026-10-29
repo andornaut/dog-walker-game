@@ -2,7 +2,7 @@ import type { GameObjects } from "phaser";
 import { describe, expect, it } from "vitest";
 
 import { animationKey } from "../assets/asepriteAnimations";
-import { playTag, playTagOnce } from "./sprites";
+import { playTag, playTagOnce, showAtDepth } from "./sprites";
 
 const KEY = "dog-kilo";
 
@@ -44,6 +44,57 @@ function fakeSprite() {
     stop: () => emit("animationstop"),
   };
 }
+
+// Two ambient movers' art, each with a fly tag.
+const FLYING_FROM = "ambient-geese";
+const FLYING_TO = "ambient-bats";
+
+// A pooled sprite playing FLYING_FROM's fly, on frame `on` of its eight, as handed to
+// FLYING_TO's art, whose fly has newFrames frames. Records the start frame each play asks for.
+function pooledSprite(on: number, newFrames: number) {
+  const frames = Array.from({ length: 8 }, (_, index) => ({ index }));
+  const startFrames: number[] = [];
+  const sprite = {
+    anims: {
+      currentAnim: { frames, key: animationKey(FLYING_FROM, "fly") },
+      currentFrame: frames[on],
+      isPaused: false,
+    },
+    play(config: { startFrame: number }) {
+      startFrames.push(config.startFrame);
+      return sprite;
+    },
+    scene: {
+      anims: { exists: () => true, get: () => ({ frames: Array.from({ length: newFrames }) }) },
+      textures: { exists: () => false },
+    },
+    setOrigin: () => sprite,
+    setScale: () => sprite,
+    setTexture(key: string) {
+      sprite.texture.key = key;
+      return sprite;
+    },
+    setVertexRoundMode: () => sprite,
+    texture: { key: FLYING_FROM },
+  };
+  return { sprite: sprite as unknown as GameObjects.Sprite, startFrames };
+}
+
+describe("showAtDepth", () => {
+  it.each([
+    [2, 4, 2],
+    [3, 4, 3],
+    [4, 4, 0],
+    [7, 3, 0],
+  ])(
+    "carries a pooled sprite on frame %i into new art whose tag has %i frames from frame %i",
+    (on, newFrames, startFrame) => {
+      const { sprite, startFrames } = pooledSprite(on, newFrames);
+      showAtDepth(sprite, FLYING_TO, 1);
+      expect(startFrames).toEqual([startFrame]);
+    },
+  );
+});
 
 type Between = "again" | "nothing" | "otherTag" | "stop";
 
