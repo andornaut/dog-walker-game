@@ -12,7 +12,7 @@ a small padlock), dark enough that it never reads as silver. Where an emblem's e
 face, the face beside it takes a 1px keyline: plum (9.42:1 on cream, 6.49:1 on
 tan), teal for green (eau-de-skunk).
 fx-confetti: 64x64, the burst behind a badge as it is earned (tag play, 10
-frames at 80ms), plum-rimmed so it reads on the Stats wood and the cream end panel.
+frames at 80ms), plum-rimmed so it reads on the Logbook's and the end screen's cream panels.
 fx-confetti-bit: 6x6, one bit of the zone celebration's falling confetti, a tag per colour
 (amber, cyan, green, pink, white, yellow), each 4 frames at 100ms tumbling face on, edge on,
 turning and edge on the other way, in the same plum rim. The game drops them down the dimmed
