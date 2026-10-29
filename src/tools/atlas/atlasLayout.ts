@@ -52,7 +52,8 @@ export interface PageLayout {
   blits: Blit[];
   group: AtlasGroup;
   height: number;
-  png: string;
+  // The page's path under /art/, less the extension its file format gives it.
+  name: string;
   width: number;
 }
 
@@ -275,7 +276,7 @@ export function layoutAtlases(
           tags === undefined ? { frames, key, page } : { frames, key, page, tags },
         );
       }
-      layout.pages.push({ blits, group, height, png: `${ATLAS_DIR}/${group}-${index}.png`, width });
+      layout.pages.push({ blits, group, height, name: `${ATLAS_DIR}/${group}-${index}`, width });
     });
   }
   return layout;

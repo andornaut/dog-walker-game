@@ -97,7 +97,7 @@ export function atlasPageBytes(scene: Scene): Map<string, number> {
 function queuePage(scene: Scene, atlas: AtlasManifest, page: number): void {
   const key = atlasPageKey(page);
   if (!scene.textures.exists(key)) {
-    scene.load.image(key, artUrl(itemAt(atlas.pages, page).png));
+    scene.load.image(key, artUrl(itemAt(atlas.pages, page).file));
   }
 }
 

@@ -21,6 +21,7 @@ import {
 import { ATLAS_MAX_SIZE } from "./atlasLayout";
 import type { RgbaImage } from "./atlasPixels";
 import { COLOUR_TYPE_INDEXED } from "./indexedPng";
+import { decodeWebp, WEBP_PAGES } from "./webp";
 
 const ART_DIR = new URL("../../../public/art/", import.meta.url);
 const readArt = async (path: string) => new Uint8Array(await readFile(new URL(path, ART_DIR)));
@@ -91,13 +92,16 @@ describe("the shipped art's atlases", () => {
   // Packing every page is the slow part, so it runs once, with room to spare on a loaded machine.
   beforeAll(async () => {
     build = await buildAtlases(readArt, {
-      encode: (page) => {
-        drawn.push(page);
-        return encodePng(page);
+      pages: {
+        encode: (page) => {
+          drawn.push(page);
+          return encodePng(page);
+        },
+        extension: "png",
       },
     });
-    pages = build.manifest.pages.map(({ png }) =>
-      decodePng(build.pngs.get(png) ?? new Uint8Array()),
+    pages = build.manifest.pages.map(({ file }) =>
+      decodePng(build.files.get(file) ?? new Uint8Array()),
     );
     const decoder = new TextDecoder();
     await Promise.all([
@@ -130,7 +134,7 @@ describe("the shipped art's atlases", () => {
   // Byte 25 of a PNG is IHDR's colour type.
   it("writes every page as an indexed PNG that decodes to the pixels drawn", () => {
     const misfits = build.manifest.pages
-      .map(({ png }, index) => ({ bytes: build.pngs.get(png), drawn: drawn[index], png }))
+      .map(({ file }, index) => ({ bytes: build.files.get(file), drawn: drawn[index], file }))
       .filter(({ bytes, drawn: rgba }) => {
         const decoded = bytes === undefined ? undefined : decodePng(bytes);
         return (
@@ -141,8 +145,26 @@ describe("the shipped art's atlases", () => {
           Buffer.compare(decoded.data, rgba.data) !== 0
         );
       })
-      .map(({ png }) => png);
+      .map(({ file }) => file);
     expect(misfits).toEqual([]);
+  });
+
+  // A build ships the pages as WebPs, so each must decode to exactly the pixels its PNG holds.
+  it("encodes every page as a lossless WebP that decodes to its PNG's pixels", async () => {
+    const decoded = await Promise.all(
+      drawn.map(async (page) => decodeWebp(await WEBP_PAGES.encode(page))),
+    );
+    const differing = decoded.flatMap((webp, index) => {
+      const png = pages[index];
+      const same =
+        png !== undefined &&
+        webp.width === png.width &&
+        webp.height === png.height &&
+        Buffer.compare(webp.data, png.data) === 0;
+      return same ? [] : [build.manifest.pages[index]?.file ?? `page ${index}`];
+    });
+    expect(decoded.length).toBe(build.manifest.pages.length);
+    expect(differing).toEqual([]);
   });
 
   it("writes a manifest the runtime parses", () => {

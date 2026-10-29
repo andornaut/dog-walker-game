@@ -6,6 +6,7 @@ import { nodeArtFiles, writeIfChanged } from "../files";
 import { buildAtlases } from "./atlasBuild";
 import type { RgbaImage } from "./atlasPixels";
 import { ART_FILES_MODULE, hashGameArt } from "./hashedArt";
+import { WEBP_PAGES } from "./webp";
 
 // Vite's prefix for a module id that names no file.
 const RESOLVED_ART_FILES_MODULE = `\0${ART_FILES_MODULE}`;
@@ -17,7 +18,7 @@ interface AtlasPluginApi {
 
 // Writes /art/manifest.json from the files under public/art/ first, so the build copies and
 // packs what is on disk. Then packs every image and sprite frame it lists into a few atlas
-// pages, with an atlas manifest mapping each key and frame to its page and rect. Every file the
+// pages, lossless WebPs, with an atlas manifest mapping each key and frame to its page and rect. Every file the
 // game loads (both manifests, the pages, the fonts, the sounds and any key the atlas leaves
 // out) goes to the build output under a content-hashed name (src/tools/atlas/hashedArt.ts),
 // and the game reads the names from the ART_FILES_MODULE map. The dev server's map is empty.
@@ -39,12 +40,14 @@ export function atlasPlugin(): Plugin & { api: AtlasPluginApi } {
       if (await writeIfChanged(`${artDir}/${ART_MANIFEST}`, artManifestText(art))) {
         this.info(`wrote ${ART_DIR}/${ART_MANIFEST} from the files on disk`);
       }
-      const atlas = await buildAtlases(readArt, { decoded, manifest: art });
+      const atlas = await buildAtlases(readArt, { decoded, manifest: art, pages: WEBP_PAGES });
       for (const warning of atlas.warnings) {
         this.warn(`atlas: ${warning}, so it loads from its own files`);
       }
-      for (const { bytes, group, height, png, width } of atlas.manifest.pages) {
-        logger.info(`atlas: ${png} ${width}x${height}, ${(bytes / 1024).toFixed(1)} kB (${group})`);
+      for (const { bytes, file, group, height, width } of atlas.manifest.pages) {
+        logger.info(
+          `atlas: ${file} ${width}x${height}, ${(bytes / 1024).toFixed(1)} kB (${group})`,
+        );
       }
       const hashed = await hashGameArt(readArt, art, atlas);
       for (const { fileName, source } of hashed) {

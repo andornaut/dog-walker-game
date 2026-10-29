@@ -25,7 +25,7 @@ function gameArtPaths(manifest: AssetManifest, atlas: AtlasManifest): string[] {
   const paths = [
     ART_MANIFEST,
     ATLAS_MANIFEST_PATH,
-    ...atlas.pages.map(({ png }) => png),
+    ...atlas.pages.map(({ file }) => file),
     ...manifest.fonts.flatMap((font) => (own(font) ? [font.fnt, font.png] : [font.fnt])),
     ...manifest.images.filter(own).map(({ png }) => png),
     ...manifest.sounds.flatMap(({ m4a, ogg }) => [m4a, ogg]),
@@ -61,9 +61,9 @@ export interface HashedArtFile {
 export async function hashGameArt(
   readArt: (path: string) => Promise<Uint8Array>,
   manifest: AssetManifest,
-  { manifest: atlas, pngs }: Pick<AtlasBuild, "manifest" | "pngs">,
+  { files, manifest: atlas }: Pick<AtlasBuild, "files" | "manifest">,
 ): Promise<HashedArtFile[]> {
-  const built = new Map(pngs).set(
+  const built = new Map(files).set(
     ATLAS_MANIFEST_PATH,
     new TextEncoder().encode(JSON.stringify(atlas)),
   );

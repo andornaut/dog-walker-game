@@ -39,7 +39,7 @@ describe("contentHash", () => {
 // or else its PNG.
 function loadedPaths(atlas: AtlasManifest, kind: keyof AssetManifest): Map<string, string[]> {
   const pageOf = new Map(
-    atlas.textures.map(({ key, page }) => [key, atlas.pages[page]?.png ?? `page ${page}`]),
+    atlas.textures.map(({ key, page }) => [key, atlas.pages[page]?.file ?? `page ${page}`]),
   );
   const atlasedOr = (key: string, own: string[]) => {
     const page = pageOf.get(key);

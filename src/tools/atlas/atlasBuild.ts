@@ -20,9 +20,9 @@ import { blankImage, blitExtruded, opaqueRect, type RgbaImage } from "./atlasPix
 import { encodeIndexedPng } from "./indexedPng";
 
 export interface AtlasBuild {
+  // Each page's file, by its path relative to the art directory.
+  files: Map<string, Uint8Array>;
   manifest: AtlasManifest;
-  // Each page's PNG, by its path relative to the art directory.
-  pngs: Map<string, Uint8Array>;
   // Keys left to load from their own files, and why.
   warnings: string[];
 }
@@ -103,13 +103,20 @@ function disabledCopy(images: Map<string, RgbaImage>, texture: SourceTexture): S
   return { ...texture, key: disabledArtKey(texture.key), png };
 }
 
+// How each page's pixels become its file, and the file's extension.
+export interface PageFormat {
+  encode: (page: RgbaImage) => Uint8Array | Promise<Uint8Array>;
+  extension: string;
+}
+
+export const PNG_PAGES: PageFormat = { encode: encodePng, extension: "png" };
+
 // What a caller has already read: the art manifest, else read from manifest.json, and PNGs
-// decoded by their paths.
+// decoded by their paths. Pages are PNGs unless pages names another format.
 interface AtlasInputs {
   decoded?: ReadonlyMap<string, RgbaImage>;
-  // How each page's pixels become its PNG: encodePng unless given.
-  encode?: (page: RgbaImage) => Uint8Array;
   manifest?: AssetManifest;
+  pages?: PageFormat;
 }
 
 // Packs every image, font PNG and sprite frame of the art manifest into atlas pages, with a
@@ -170,18 +177,22 @@ export async function buildAtlases(
     .map((texture) => disabledCopy(images, texture));
   const layout = layoutAtlases([...packed, ...disabled]);
   warnings.push(...layout.skipped.map((key) => `${key} has a frame too large for an atlas page`));
-  const build: AtlasBuild = {
-    manifest: { pages: [], textures: layout.textures },
-    pngs: new Map(),
+  const { encode, extension } = inputs.pages ?? PNG_PAGES;
+  const files = await Promise.all(
+    layout.pages.map(async (page) => {
+      const { group, height, name, width } = page;
+      const bytes = await encode(drawPage(images, page));
+      return {
+        bytes,
+        page: { bytes: bytes.length, file: `${name}.${extension}`, group, height, width },
+      };
+    }),
+  );
+  return {
+    files: new Map(files.map(({ bytes, page }) => [page.file, bytes])),
+    manifest: { pages: files.map(({ page }) => page), textures: layout.textures },
     warnings,
   };
-  for (const page of layout.pages) {
-    const { group, height, png, width } = page;
-    const bytes = (inputs.encode ?? encodePng)(drawPage(images, page));
-    build.pngs.set(png, bytes);
-    build.manifest.pages.push({ bytes: bytes.length, group, height, png, width });
-  }
-  return build;
 }
 
 // A page's pixels, each blit copied from its source PNG in images, by path.
