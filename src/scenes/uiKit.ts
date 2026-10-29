@@ -109,6 +109,8 @@ const SLICES = {
   "ui-strip-well": { bottom: 8, left: 8, right: 8, top: 8 },
   // A walker, dog or gear tile's face, tagged by its interaction state.
   "ui-tile": { bottom: 4, left: 4, right: 4, top: 4 },
+  // The walk's neighbourhood pill: a three-slice with 4px ends.
+  "ui-zone-pill": { bottom: 0, left: 4, right: 4, top: 0 },
 } as const;
 export type SliceKey = keyof typeof SLICES;
 

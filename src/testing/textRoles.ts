@@ -51,6 +51,7 @@ import { MONEY_LABEL } from "../hud/moneyLabels";
 import { NOTE_PLATE, PAUSE_NOTE_LINES, PAUSE_NOTE_WIDTH } from "../hud/pauseMenu";
 import { DOG_CARD, WALK_BAR } from "../hud/walkHud";
 import { celebrationText } from "../hud/zoneCelebration";
+import { zonePillNameRoom } from "../hud/zonePill";
 import {
   boxStyle,
   CARD_LAYOUT,
@@ -402,6 +403,19 @@ function cashRole(): TextRoleCase[] {
   ];
 }
 
+// The neighbourhood pill's names, each beside the widest count a walk of up to nine zones could
+// show, the pill inside the screen.
+function zonePillRoles(): TextRoleCase[] {
+  const digits = Array.from({ length: 9 }, (_, i) => String(i + 1));
+  const counts = digits.flatMap((n) =>
+    digits.map((total) => fillNames(gameData.runText.zoneProgress, { n, total })),
+  );
+  const widest = Math.max(...counts.map((count) => inkWidth("font-body", { scale: 1 }, count)));
+  const room = zonePillNameRoom(SCREEN_LAYOUT.screen, widest);
+  const names = gameData.world.zones.map((zone) => zone.name);
+  return plainRole("neighbourhood pill's name", "font-body", { room, style: { scale: 1 } }, names);
+}
+
 // The zone celebration's earnings line at its widest: the fullest pack's pay, alone and with
 // tips up to a million dollars.
 function zoneEarningsRoles(): TextRoleCase[] {
@@ -514,6 +528,7 @@ export function textRoleCases(): TextRoleCase[] {
     ...cashRole(),
     ...pauseNoteRoles(),
     ...zoneEarningsRoles(),
+    ...zonePillRoles(),
     ...plainRole(
       "walk card's dog name",
       "font-title",

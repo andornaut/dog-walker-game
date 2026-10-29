@@ -67,13 +67,16 @@ import {
   walkBarLayout,
   ZONE_PROGRESS,
   zoneProgressLayout,
+  zoneProgressText,
   zoneShare,
 } from "../hud/walkHud";
+import { zonePillLayout } from "../hud/zonePill";
 import type { Point, Rect } from "../lib/rect";
 import { type Cents, cents } from "../lib/units";
 import { ownerMaxHearts } from "../rules/dogs";
 import { debuffLasting } from "../rules/durations";
 import { hintFor, hintJumpsQueue } from "../rules/hints";
+import { currentZone } from "../rules/route";
 import { walkEarnings } from "../rules/run";
 import { faceMood } from "../rules/treats";
 import { read } from "../rules/units";
@@ -130,6 +133,7 @@ import { soundboardOf } from "./soundboard";
 import { playTag } from "./sprites";
 import { TimedGroup } from "./timedGroup";
 import {
+  addNineSlice,
   addTagImage,
   artFits,
   fadeAway,
@@ -160,6 +164,7 @@ interface ShowingTip {
 }
 
 const NOT_EXPLAINED = { key: "", layer: undefined };
+const NO_PILL = { key: "", parts: [] };
 // An owner's tab shows this long on a heart change.
 const HEART_TAB_MS = 1200;
 // A card holds one row of hearts, as many as the most an owner can have.
@@ -237,6 +242,8 @@ export class HudScene extends Scene {
   private run: HudRun | undefined;
   private tip: ShowingTip | undefined;
   private zoneFill: GameObjects.Graphics | undefined;
+  // The neighbourhood pill's parts, and the zone and debuff bar count they show for.
+  private zonePill: { key: string; parts: GameObjects.GameObject[] } = NO_PILL;
   private zoneFillWidth: number | undefined;
 
   // key names a second HUD, such as the help's picture of one.
@@ -263,6 +270,7 @@ export class HudScene extends Scene {
     this.tip = undefined;
     this.cashSlots = new Set();
     this.explained = NOT_EXPLAINED;
+    this.zonePill = NO_PILL;
     this.messages = new MessageStrip();
     this.moneyInFlight = 0;
     this.labels = new TimedGroup();
@@ -523,6 +531,7 @@ export class HudScene extends Scene {
     const overlay = this.overlayScene();
     this.showExplanation(view, overlay);
     this.showDebuffBars(view.run);
+    this.showZonePill(view.run);
     this.showZoneProgress(view.run);
     const depth = overlay === this ? HUD_DEPTH.message : HUD_DEPTH.messageOverlay;
     // The strip's lines wait under an explanation's detail card, and hide, waiting, while a card
@@ -602,6 +611,31 @@ export class HudScene extends Scene {
     }
     const at = spareTreatPipAt(well);
     this.spareTreatPip = this.add.sprite(at.x, at.y, SPARE_TREAT_PIP_KEY).setOrigin(0);
+  }
+
+  // The neighbourhood pill under the walk bar and any debuff bars, redrawn as the zone or the
+  // number of debuff bars changes.
+  private showZonePill(run: RunState): void {
+    const key = `${run.zoneIndex} ${run.debuffs.length}`;
+    if (this.zonePill.key === key) {
+      return;
+    }
+    this.zonePill.parts.forEach((part) => part.destroy());
+    const textDepth = HUD_DEPTH.zonePill + HUD_DEPTH.overPart;
+    const name = addPixelText(this, 0, 0, currentZone(gameData, run).name, {
+      colour: PALETTE.cream,
+    }).setDepth(textDepth);
+    const count = addPixelText(this, 0, 0, zoneProgressText(gameData, run.zoneIndex), {
+      colour: PALETTE.lightGrey,
+    }).setDepth(textDepth);
+    const nameInk = inkSpan(name);
+    const countInk = inkSpan(count);
+    const ink = { count: countInk.right - countInk.left, name: nameInk.right - nameInk.left };
+    const layout = zonePillLayout(LAYOUT.topBar, LAYOUT.screen, run.debuffs.length, ink);
+    placePixelText(name, layout.nameLeft - nameInk.left, layout.capsY);
+    placePixelText(count, layout.countRight - countInk.right, layout.capsY);
+    const pill = addNineSlice(this, "ui-zone-pill", layout.pill)?.setDepth(HUD_DEPTH.zonePill);
+    this.zonePill = { key, parts: [...(pill === undefined ? [] : [pill]), name, count] };
   }
 
   // A bar per debuff under the walk bar, in the order they began, rebuilt as they come and go;
