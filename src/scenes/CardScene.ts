@@ -273,6 +273,11 @@ export class CardScene extends Scene {
     });
   }
 
+  // Whether a hold shows a card enlarged.
+  holding(): boolean {
+    return this.enlarged.length > 0;
+  }
+
   // Ends a hold: the enlarged card goes and the row shows again.
   private shrink(): void {
     this.hold = undefined;

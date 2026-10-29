@@ -5,7 +5,7 @@ import { dogCardTag, dogFaceKey, ownerCardFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { AchievementId, DebuffId, DogId, HintTrigger } from "../data/types";
-import { shortDollarAmountText } from "../home/home";
+import { dollarAmountText } from "../home/home";
 import {
   effectIconKey,
   type EffectItem,
@@ -103,6 +103,7 @@ import {
 import { arcFlight } from "./arcFlight";
 import { addCharm, glintWell } from "./buffCharm";
 import { BumpBorder } from "./bumpBorder";
+import { CardScene } from "./CardScene";
 import { changeLabelColour } from "./changeLabelColours";
 import { DEBUFF_COLOURS } from "./debuffColours";
 import { HudFeedback } from "./feedbackMoments";
@@ -528,9 +529,11 @@ export class HudScene extends Scene {
     this.showDebuffBars(view.run);
     this.showZoneProgress(view.run);
     const depth = overlay === this ? HUD_DEPTH.message : HUD_DEPTH.messageOverlay;
-    // The strip's lines wait under an explanation's detail card.
+    // The strip's lines wait under an explanation's detail card, and hide, waiting, while a card
+    // is held enlarged.
     const aged = held || pause.hold ? 0 : delta;
-    this.messages.update(aged, overlay, depth, this.debuffBars.length);
+    const hidden = overlay instanceof CardScene && overlay.holding();
+    this.messages.update(aged, overlay, depth, this.debuffBars.length, hidden);
     const effects = effectItems(gameData, view.run);
     // The run state is immutable, so a changed pack or modifier list is a new array.
     const state: Record<string, unknown> = {
@@ -710,7 +713,7 @@ export class HudScene extends Scene {
     }
     const { run } = view;
     g.clear();
-    this.showMoney(shortDollarAmountText(this.shownMoney(run)));
+    this.showMoney(dollarAmountText(this.shownMoney(run)));
     const zone = currentZone(gameData, run);
     if (this.zoneLabel !== undefined) {
       setPixelText(this.zoneLabel, zone.name);

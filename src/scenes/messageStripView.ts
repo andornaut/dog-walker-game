@@ -80,7 +80,12 @@ export class MessageStrip {
     this.state = add(messageTiming(gameData), line, this.state);
   }
 
-  update(dtMs: number, scene: Scene, depth: number, bars: number): void {
+  // hidden: the strip draws nothing, its lines held as they are, none aged, shown or dropped.
+  update(dtMs: number, scene: Scene, depth: number, bars: number, hidden = false): void {
+    if (hidden) {
+      this.clear();
+      return;
+    }
     const shown = this.current(dtMs);
     const drawn = this.drawn;
     const stale =
