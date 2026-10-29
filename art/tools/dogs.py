@@ -484,6 +484,9 @@ def archie_road(q):
 
 # Archie's brown coat lit where its silhouette faces up or left, so it holds on the dslate road.
 ARCHIE_RIM = {"brown": ("tan", None), "dbrown": ("skin2", None)}
+# Archie's face's eyes: each 3x3 iris's left column and its colour, far eye first, and their top row.
+ARCHIE_EYES = ((10, "sky"), (19, "amber"))
+ARCHIE_EYE_Y = 14
 
 
 def archie_face(mood):
@@ -510,13 +513,15 @@ def archie_face(mood):
     g.rect(9, 18, 2, 2, "ochre")
     g.rect(22, 18, 2, 2, "ochre")
     g.cel(16, 20.5, 5, 3.5, "white", "lgrey")
-    eyes(g, 10, 19, 14, iris="sky", mood=mood)
+    (lx, _), (rx, _) = ARCHIE_EYES
+    y = ARCHIE_EYE_Y
+    eyes(g, lx, rx, y, iris="sky", mood=mood)
     # odd eyes, the far one sky and the near one amber, drawn alike so they look the same way: the shine at
     # the iris's top left and the pupil at its lower right
-    for x, iris in ((10, "sky"), (19, "amber")):
-        g.rect(x, 14, 3, 3, iris)
-        g.rect(x + 1, 15, 2, 2, "ink")
-        g.p(x, 14, "white")
+    for x, iris in ARCHIE_EYES:
+        g.rect(x, y, 3, 3, iris)
+        g.rect(x + 1, y + 1, 2, 2, "ink")
+        g.p(x, y, "white")
     # a liver nose
     g.rect(14, 18, 4, 2, "plum")
     g.p(14, 18, "dbrown")

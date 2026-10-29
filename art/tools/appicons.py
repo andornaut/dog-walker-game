@@ -19,11 +19,15 @@ square crops less than that circle, so the 180 shows him whole.
 
 The favicons are drawn at their own size, a tile with its corners cut:
 
-  favicon.png             32x32    Archie's happy face (public/art/sprites/face-dog-archie.png,
-                                   frame 0) at 1x, its inked area centred, on sky; the corners
-                                   cut by 2px
-  favicon-16.png          16x16    the face drawn again at half size (ARCHIE_16) on sky; the
-                                   corners cut by 1px
+  favicon.png             32x32    Archie's happy face (archie_face in dogs.py) drawn at
+                                   FAVICON_SIDE over 32 of its design and cropped to 32x32
+                                   from the ear tips down, centred across, so his head fills
+                                   the tile to the top of the bandana; its eyes, which that
+                                   scale draws unevenly, drawn again alike (FAVICON_EYE); on
+                                   sky, the corners cut by 2px
+  favicon-16.png          16x16    the face drawn again close at half size (ARCHIE_16), the
+                                   head filling the tile above the top of the bandana; on sky,
+                                   the corners cut by 1px
 
 Usage:
   appicons.py preview OUT.png   every icon at its native size on ink, the maskable icon cropped to a
@@ -33,7 +37,7 @@ Usage:
                                 64x64: what the 192 and 512 show), art/favicon-32.aseprite and
                                 art/favicon-16.aseprite
 
-Run from the repository root after portraits.py and dogs.py: the icons read Archie's exported art. The
+Run from the repository root after portraits.py: the app icons read Archie's exported portrait. The
 icons are not in public/art/manifest.json: the pages and the web app manifest link them by path. A
 build overwrites the .aseprite sources, so change this file or Archie's art, not the sources.
 """
@@ -47,10 +51,10 @@ import tempfile
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
+from minis import scaled  # noqa: E402
 from pixel import K, PALETTE64  # noqa: E402
 
 PORTRAIT = "public/art/images/portrait-dog-archie.png"
-FACE = "public/art/sprites/face-dog-archie.png"  # frame 0, the happy face, is its first 32x32
 BACKGROUND = "sky"  # ui-detail-well's face, behind his portrait on the detail card
 SAFE = 0.4  # the maskable safe zone: a circle of radius 40% of the icon size
 MASTER = 64
@@ -65,26 +69,31 @@ ICONS = {
     "icon-maskable-512": (512, 8),
 }
 
-# The happy face at half size: the ears' dbrown folds, the blaze into the muzzle, the sky and amber
-# eyes drawn alike (the iris down the left column, the pupil down the right), ochre cheeks, the plum
-# nose, the tongue, and the bandana with the ruff at its ends.
+# The 32 favicon: the face drawn at FAVICON_SIDE over 32, and each eye drawn again as the inside of the
+# portrait's eye (k ink, w white, i the iris): the shine at the top left, the pupil at the right.
+FAVICON_SIDE = 36
+FAVICON_EYE = ["wwi", "wkk", "ikk", "iii"]
+
+# The happy face at half size and close, the head filling the tile above the top of the bandana: the
+# ears' dbrown folds in the top corners, the blaze into the muzzle, the sky and amber eyes drawn alike
+# (the iris down the left column, the pupil down the right), ochre cheeks, the plum nose and the tongue.
 ARCHIE_16 = [
-    "................",
-    "..kk........kk..",
-    ".kDDk......kDDk.",
-    ".kDbbkkkkkkbbDk.",
-    "..kssbbwwbbbbk..",
-    "..ksbbbwwbbbDk..",
-    "..ksSkbwwbakDk..",
-    "..kbSkwwwwakDk..",
-    "..kobwwppwwbok..",
-    "...kbwwppwlDk...",
-    "...kbwkPPklDk...",
-    "....kDlPmlDk....",
+    ".kk..........kk.",
+    "kDDk........kDDk",
+    "kDbbkkkkkkkkbbDk",
+    ".kssbbbwwbbbbbk.",
+    ".ksbbbbwwbbbbDk.",
+    ".ksbSkbwwbakbDk.",
+    ".ksbSkwwwwakbDk.",
+    ".kobbwwwwwwbbok.",
+    ".kbbwwwppwwwbDk.",
+    "..kbwwwppwwlDk..",
+    "..kbwwkPPkwlDk..",
+    "...kDwlPmllDk...",
+    "...kkDDllDDkk...",
     "..kRRRRRRRRRRk..",
-    "..kwrrrrRRRRlk..",
-    "...klrrrRRRlk...",
-    "....kkkkkkkk....",
+    ".kwrrrrrRRRRRlk.",
+    ".kwlrrrrRRRRllk.",
 ]
 INK = dict(k="ink", D="dbrown", b="brown", s="skin2", w="white", l="lgrey", o="ochre", p="plum", S="sky",
            a="amber", P="pink", m="mauve", r="red", R="dred")
@@ -161,10 +170,28 @@ def tile(n, px, bg, cut):
 
 
 def favicon_32():
-    face = opaque(Image.open(FACE).crop((0, 0, 32, 32)))
-    cx, cy = centre(face)
-    dx, dy = int(16 - cx), int(16 - cy)
-    return tile(32, {(x + dx, y + dy): c for (x, y), c in face.items()}, ground, 2)
+    """The happy face at FAVICON_SIDE over 32, its eyes drawn again alike, cropped to 32x32 from its top
+    row and centred across."""
+    import dogs
+    import minis
+
+    s = FAVICON_SIDE / 32
+    px = minis.small(dogs, s, dogs.archie_face, "happy").outlined()
+    top = scaled(dogs.ARCHIE_EYE_Y, s)
+    for i, (x, iris) in enumerate(dogs.ARCHIE_EYES):
+        # the scaled 3x3 eye back to coat, then FAVICON_EYE set against the blaze: the far eye at the
+        # right of its box, the near one at the left
+        x0, x1 = scaled(x, s), scaled(x + 3, s)
+        for y in range(top, scaled(dogs.ARCHIE_EYE_Y + 3, s)):
+            px[y][x0:x1] = [K[dogs.COAT[0]]] * (x1 - x0)
+        ex = x1 - len(FAVICON_EYE[0]) if i == 0 else x0
+        for dy, row in enumerate(FAVICON_EYE):
+            for dx, ch in enumerate(row):
+                px[top + dy][ex + dx] = K[{"k": "ink", "w": "white", "i": iris}[ch]]
+    face = {(x, y): rgb(c) for y, row in enumerate(px) for x, c in enumerate(row) if c}
+    xs = [x for x, _ in face]
+    dx, dy = 16 - (min(xs) + max(xs) + 1) // 2, -min(y for _, y in face)
+    return tile(32, {(x + dx, y + dy): c for (x, y), c in face.items() if 0 <= y + dy < 32}, ground, 2)
 
 
 def favicon_16():
