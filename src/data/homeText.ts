@@ -74,7 +74,7 @@ export const HOME_TEXT = {
   gearBought: "Got the {gear}!",
   newerSave: {
     button: "Update now",
-    title: "Newer save found",
+    title: "Newer save",
   },
   noticePackFull: "The pack is full. Tap a picked dog to take it out.",
   noticeSoundOff: "Sound off.",
