@@ -3238,7 +3238,7 @@
   "walkers": [
     {
       "id": "ada",
-      "agility": 1.3,
+      "agility": 1.4,
       "greeting": "Tidy lane work. May I walk with you?",
       "name": "Ada",
       "perk": "quickRecovery",

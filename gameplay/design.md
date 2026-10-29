@@ -267,7 +267,7 @@ Walk-only boosts, one on each fork path, from a pool of 6. Each fork draws one p
 
 Four walkers. You start with Casey; each other walker unlocks the first time you finish their neighbourhood (see New walker): Mr. B Cabbagetown, Ada The Beaches and Trista Yonge Street. Every walker walks the same road at the same speed, and a walker's effects stack with the Pocket item and upgrade cards.
 
-**Agility** sets how fast the pack changes lanes, as a multiple of the base lane-change speed. Walkers spread from 1.0 to 1.3, Running shoes add 1.0 and each large dog in the pack takes 0.1 off, never below 0.9. Players never see the word agility, and see it only as a percentage against the base: walker cards say "+30% lane change speed" (Ada) or "+10% lane change speed" (Casey), and a walker at the default speed (Mr. B) shows no lane-change line at all, Running shoes "+100% lane change speed" and a large dog "−10% lane change speed", in the same words, amount first. The slowest pack's lane move (the 0.9 floor) sets the row spacing.
+**Agility** sets how fast the pack changes lanes, as a multiple of the base lane-change speed. Walkers spread from 1.0 to 1.4, Running shoes add 1.0 and each large dog in the pack takes 0.1 off, never below 0.9. Players never see the word agility, and see it only as a percentage against the base: walker cards say "+30% lane change speed" (Ada) or "+10% lane change speed" (Casey), and a walker at the default speed (Mr. B) shows no lane-change line at all, Running shoes "+100% lane change speed" and a large dog "−10% lane change speed", in the same words, amount first. The slowest pack's lane move (the 0.9 floor) sets the row spacing.
 
 Each walker has one **perk**:
 
