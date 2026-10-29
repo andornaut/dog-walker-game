@@ -22,7 +22,7 @@ import { read } from "../rules/units";
 import { laneControlIn } from "../runner/laneControl";
 import { laneMotionX } from "../runner/laneMotion";
 import type { Walk } from "../runner/walk";
-import { colourFromHex, PALETTE } from "../ui/phaser/palette";
+import { colourFromHex } from "../ui/phaser/palette";
 import type { CardSceneData } from "./CardScene";
 import type { HudSceneData } from "./HudScene";
 import type { HudWalk } from "./hudWalk";
@@ -48,7 +48,6 @@ interface PackDraw {
 // it.
 interface DragPlay {
   readonly frameMs: readonly number[];
-  readonly graphics: GameObjects.Graphics;
   readonly loop: DragLoop;
   readonly pack: PackDraw;
   readonly picture: HelpPicture;
@@ -63,9 +62,6 @@ const ROAD_TEXTURE = "help-road";
 const STILL_FRAMES: Readonly<Record<string, number>> = {
   [animationKey("fx-heart-loss", "pop")]: 1,
 };
-// The pack's move after a drag: 2x2 dots every 4px, then a chevron of two 8-row strokes 3px
-// thick meeting at its tip, each piece over an ink rect outline px larger on every side.
-const MOVE = { chevron: 8, dot: 2, outline: 1, pitch: 4, stroke: 3 };
 
 export interface HelpPictureData {
   // Where the picture shows on the help screen.
@@ -108,7 +104,6 @@ export class HelpPictureScene extends Scene {
       const frameMs = swipe?.frames.map((shown) => shown.duration) ?? [];
       const play: DragPlay = {
         frameMs,
-        graphics: this.add.graphics().setDepth(DEPTH.fx),
         loop: drag,
         pack: packDraw,
         picture,
@@ -187,8 +182,7 @@ export class HelpPictureScene extends Scene {
     return dragMomentAt(play.frameMs, swipeStart, play.loop, play.seconds);
   }
 
-  // The drag at its moment: the pack in its lane or gliding, the touch hint and, held still,
-  // the move's marks.
+  // The drag at its moment: the pack in its lane or gliding, and the touch hint.
   private drawDrag(play: DragPlay, moment: DragMoment): void {
     const { walk } = play.picture;
     play.pack.draw({ ...walk, road: { ...walk.road, control: laneControlIn(moment.motion) } });
@@ -203,35 +197,6 @@ export class HelpPictureScene extends Scene {
       const { anchor } = TOUCH_DRAG;
       const start = play.loop.touchStart;
       touch.setFrame(frame).setPosition(start.x - anchor.x, start.y - anchor.y);
-    }
-    this.drawPackMove(play.graphics, moment);
-  }
-
-  // Amber dots from the lane the pack left toward the one it moved to, then a chevron, outlined
-  // in ink so they read on any ground.
-  private drawPackMove(g: GameObjects.Graphics, moment: DragMoment): void {
-    g.clear();
-    const move = moment.packMove;
-    if (move === null) {
-      return;
-    }
-    const rects: Rect[] = [];
-    for (let x = move.fromX; x < move.toX; x += MOVE.pitch) {
-      rects.push({ height: MOVE.dot, width: MOVE.dot, x, y: move.y });
-    }
-    for (let i = 0; i < MOVE.chevron; i++) {
-      const x = move.chevronX + i - MOVE.chevron / 2;
-      rects.push({ height: 1, width: MOVE.stroke, x, y: move.y + 1 - MOVE.chevron + i });
-      rects.push({ height: 1, width: MOVE.stroke, x, y: move.y + 1 + MOVE.chevron - i });
-    }
-    const edge = MOVE.outline;
-    g.fillStyle(PALETTE.ink);
-    for (const { height, width, x, y } of rects) {
-      g.fillRect(x - edge, y - edge, width + 2 * edge, height + 2 * edge);
-    }
-    g.fillStyle(PALETTE.amber);
-    for (const { height, width, x, y } of rects) {
-      g.fillRect(x, y, width, height);
     }
   }
 

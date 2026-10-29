@@ -155,13 +155,11 @@ describe("dragMomentAt", () => {
     const moment = at(ms);
     expect(moment.touch).toEqual({ index, tag });
     expect(moment.motion.kind === "still" ? moment.motion.lane : "moving").toBe(lane);
-    expect(moment.packMove).toBeNull();
   });
 
-  it("holds the still swipe with the pack in its new lane and the move's marks", () => {
+  it("holds the still swipe with the pack in its new lane", () => {
     const still = stillDragMoment(loop);
     expect(still.touch).toEqual({ index: 0, tag: "still" });
     expect(still.motion).toEqual({ kind: "still", lane: toLane });
-    expect(still.packMove).toEqual(loop.packMove);
   });
 });

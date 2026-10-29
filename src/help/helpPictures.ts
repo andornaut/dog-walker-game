@@ -63,29 +63,17 @@ export const TOUCH_DRAG = {
 
 export type TouchTag = keyof typeof TOUCH_DRAG.tags;
 
-// The pack's move on a drag right: dots along row y from fromX, stopping at toX, then a
-// chevron pointing right at chevronX.
-export interface PackMove {
-  readonly chevronX: number;
-  readonly fromX: number;
-  readonly toX: number;
-  readonly y: number;
-}
-
 // The lanes page's drag: a swipe right from touchStart moves the pack from fromLane to toLane,
 // then a swipe left brings it back, in a loop.
 export interface DragLoop {
   readonly fromLane: number;
-  // The marks of the move right, shown only with reduced motion.
-  readonly packMove: PackMove;
   readonly toLane: number;
   readonly touchStart: Point;
 }
 
-// One moment of the drag: the touch frame, the pack's lane motion and the move's marks.
+// One moment of the drag: the touch frame and the pack's lane motion.
 export interface DragMoment {
   readonly motion: LaneMotion;
-  readonly packMove: PackMove | null;
   readonly touch: { readonly index: number; readonly tag: TouchTag };
 }
 
@@ -121,10 +109,6 @@ export const HELP_SCENES = {
     glideFrames: 3,
     lane: 3,
     mover: { distance: 190, kind: "cat" },
-    // The pack's move from the lane it left: dots from dotsFrom past that lane's centre,
-    // stopping dotsShort before the pack's, and the chevron chevronInset before it, on the
-    // row rise above the walker's feet.
-    packMove: { chevronInset: 26, dotsFrom: 4, dotsShort: 30, rise: 12 },
     // The drag right starts on lane fromLane's centre, rise rows above the walker's feet.
     touch: { fromLane: 1, rise: 144 },
     // A neighbourhood where cats cross, its grey road setting off the touch hint.
@@ -223,7 +207,7 @@ const STILL: Omit<HelpPicture, "strips" | "walk"> = {
 };
 
 function lanes(data: GameData): HelpPicture {
-  const { dogs, lane, mover, packMove, touch, zone } = HELP_SCENES.lanes;
+  const { dogs, lane, mover, touch, zone } = HELP_SCENES.lanes;
   const run: RunState = { ...startRun(data, dogs), route: [zone] };
   // A mover about to dart across from the left, showing its cue.
   const kind: MinorObstacleId = mover.kind;
@@ -251,12 +235,6 @@ function lanes(data: GameData): HelpPicture {
     ...STILL,
     drag: {
       fromLane: lane - 1,
-      packMove: {
-        chevronX: itemAt(LANES, lane) - packMove.chevronInset,
-        fromX: itemAt(LANES, lane - 1) + packMove.dotsFrom,
-        toX: itemAt(LANES, lane) - packMove.dotsShort,
-        y: PROJECTION.footY - packMove.rise,
-      },
       toLane: lane,
       touchStart: { x: itemAt(LANES, touch.fromLane), y: PROJECTION.footY - touch.rise },
     },
@@ -265,12 +243,10 @@ function lanes(data: GameData): HelpPicture {
   };
 }
 
-// The drag held still, for reduced motion: the swipe right done, the pack in its new lane and
-// the move's marks.
+// The drag held still, for reduced motion: the swipe right done, the pack in its new lane.
 export function stillDragMoment(loop: DragLoop): DragMoment {
   return {
     motion: stillInLane(loop.toLane),
-    packMove: loop.packMove,
     touch: { index: 0, tag: "still" },
   };
 }
@@ -326,7 +302,6 @@ export function dragMomentAt(
         : { duration, elapsed, from, kind: "moving", to };
   return {
     motion,
-    packMove: null,
     touch: { index: frameAt(frameMs, into), tag: right ? "right" : "left" },
   };
 }
