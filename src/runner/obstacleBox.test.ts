@@ -10,11 +10,13 @@ import { type DepthArt, depthDraw } from "../layout/depthScale";
 import { obstacleParts } from "../layout/obstacleArt";
 import { everyPack, PART_INSET } from "../layout/packFormation";
 import { project, SCALE_STEPS, screenYAt } from "../layout/projection";
+import { itemAt } from "../lib/arrays";
+import { getOrInsertComputed } from "../lib/maps";
 import { keysOf } from "../lib/records";
 import { testState } from "../testing/runState";
 import { decodePng } from "../tools/atlas/atlasBuild";
 import { spriteSource } from "../tools/atlas/atlasLayout";
-import { hitDog, type ScaledBox } from "./collision";
+import { type DogBox, hitDog, type LanedBox, type ScaledBox } from "./collision";
 import { stillInLane } from "./laneMotion";
 import { drawnObstacleBox } from "./obstacleBox";
 import { screenRoadGeometry } from "./screenGeometry";
@@ -25,6 +27,7 @@ import {
   obstacleOnRoad,
   packBoxes,
   plannedCellInset,
+  type RoadGeometry,
 } from "./walk";
 import { walkProjection } from "./walkGeometry";
 import { footprintOf } from "./walkItems";
@@ -235,46 +238,89 @@ describe("a standing obstacle's hit box", () => {
   });
 });
 
+// A pack's part, a dog's or the walker's hit rectangle, settled in a lane, with the first pack
+// that places it there.
+interface SettledPart {
+  pack: string;
+  packLane: number;
+  part: DogBox<DogId>;
+}
+
 describe("a pack settled in a lane", () => {
   // Every walker with every pack, against every obstacle beside its lane, the obstacle's near
-  // edge anywhere from the pack's top to past the walker's feet.
-  const WALKERS = keysOf(gameData.walkers);
+  // edge anywhere from the pack's top to past the walker's feet. An obstacle touches a pack
+  // exactly where it touches one of its parts (hitDog), and many packs place the same part on
+  // the same band, so each part is checked once for each band it is placed on, through the
+  // same near edges as each pack on that band.
   const PACKS = everyPack();
-  it("never touches an obstacle in another lane, walked by any walker", () => {
-    for (const walker of WALKERS) {
-      const touched: string[] = [];
+  it.each(keysOf(gameData.walkers))(
+    "never touches an obstacle in another lane, walked by %s",
+    (walker) => {
+      const bands = new Map<string, { geometry: RoadGeometry; parts: Map<string, SettledPart> }>();
       for (const dogs of PACKS) {
         const run = testState(Object.fromEntries(dogs.map((dog: DogId) => [dog, 3])), { walker });
         const geometry = screenRoadGeometry(run);
-        const { packBand } = geometry;
+        const band = getOrInsertComputed(
+          JSON.stringify(geometry.packBand),
+          () => ({ geometry, parts: new Map<string, SettledPart>() }),
+          bands,
+        );
         for (let packLane = 0; packLane < LANE_COUNT; packLane++) {
           const pack = packBoxes(geometry, stillInLane(packLane), run);
+          const { dog } = itemAt(pack.dogs, 0);
+          for (const { bottom, left, right, scale, top } of [pack.walker, ...pack.dogs]) {
+            const box = { bottom, left, right, scale, top };
+            const settled = { pack: dogs.join(","), packLane, part: { ...box, dog } };
+            getOrInsertComputed(`${packLane} ${JSON.stringify(box)}`, () => settled, band.parts);
+          }
+        }
+      }
+      const touched: string[] = [];
+      for (const { geometry, parts: settledParts } of bands.values()) {
+        const { packBand } = geometry;
+        // Each obstacle's hit boxes in a lane, near edge by near edge, made once for the band.
+        const made = new Map<string, LanedBox[]>();
+        const boxesOf = (kind: Kind, moving: boolean, lanes: number, lane: number) =>
+          getOrInsertComputed(
+            `${kind} ${moving} ${lane}`,
+            () => {
+              const parts = obstacleOnRoad(gameData, geometry, kind, moving);
+              const height = itemHeight(gameData, geometry, kind, moving);
+              const x = (lane + lanes / 2) * cell.length;
+              const span = { left: lane * cell.length, right: (lane + lanes) * cell.length };
+              const boxes: LanedBox[] = [];
+              for (let feetY = packBand.top; feetY < packBand.bottom + height; feetY += 4) {
+                const box = drawnObstacleBox(geometry.lens, PART_INSET, parts, { feetY, x });
+                boxes.push({ ...box, lanes: span });
+              }
+              return boxes;
+            },
+            made,
+          );
+        for (const { pack, packLane, part } of settledParts.values()) {
+          // The part alone, as hitDog sees a pack of it.
+          const alone = {
+            centreX: geometry.lens.centreX,
+            dogs: [part],
+            outline: part,
+            walker: part,
+          };
           for (const { kind, moving } of LOOKS) {
             const lanes = moving ? 1 : footprintOf(gameData, kind).lanes;
-            const parts = obstacleOnRoad(gameData, geometry, kind, moving);
-            const height = itemHeight(gameData, geometry, kind, moving);
             for (const lane of [packLane - lanes, packLane + 1]) {
               if (lane < 0 || lane + lanes > LANE_COUNT) {
                 continue;
               }
-              const x = (lane + lanes / 2) * cell.length;
-              const span = { left: lane * cell.length, right: (lane + lanes) * cell.length };
-              for (let feetY = packBand.top; feetY < packBand.bottom + height; feetY += 4) {
-                const box = {
-                  ...drawnObstacleBox(lens, PART_INSET, parts, { feetY, x }),
-                  lanes: span,
-                };
-                if (hitDog(pack, box) !== null) {
-                  touched.push(`${dogs.join(",")} in ${packLane}: ${kind} in ${lane}`);
-                }
+              if (boxesOf(kind, moving, lanes, lane).some((box) => hitDog(alone, box) !== null)) {
+                touched.push(`${pack} in ${packLane}: ${kind} in ${lane}`);
               }
             }
           }
         }
       }
       expect(touched).toEqual([]);
-    }
-  });
+    },
+  );
 
   it("is touched by an obstacle in its own lane level with it", () => {
     const run = testState({ kilo: 3 });
