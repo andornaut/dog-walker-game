@@ -114,7 +114,7 @@ export const ENCOUNTERS = {
       options: [
         {
           art: "card-escaped-capybara-help",
-          effects: [{ debuff: "muddy", kind: "debuff" }],
+          effects: [{ amount: -1, kind: "hearts", target: { kind: "lead" } }],
           id: "help",
           name: "Help the keeper",
         },
@@ -237,7 +237,7 @@ export const ENCOUNTERS = {
         },
         {
           art: "card-porch-cat-bolt",
-          effects: [{ debuff: "zoomies", kind: "debuff" }],
+          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
           id: "bolt",
           name: "Bolt past",
         },

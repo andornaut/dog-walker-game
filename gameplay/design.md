@@ -153,16 +153,16 @@ Size shows at a glance: on the road, medium dogs are drawn 48 px, large dogs 54 
 
 ### Encounters and debuffs
 
-Ten card obstacles open a choice card: the cheese crates, the other dog, the skunk and the thief, each in several neighbourhoods, and one of each neighbourhood's own, which appears only there (the wedding photo shoot also at The Beaches). No neighbourhood has two cards that bring the same debuff. A card offers the same options, with the same effects, in every neighbourhood it appears in. Each option costs one thing: money, hearts or a debuff. The one trade is the other dog's Let them sniff, money (missed tips) for hearts. Every money option costs $20. Most hearts options cost each walking dog's owner 1♥; the porch cat's Stand your ground costs only the lead dog's owner.
+Ten card obstacles open a choice card: the cheese crates, the other dog, the skunk and the thief, each in several neighbourhoods, and one of each neighbourhood's own, which appears only there (the wedding photo shoot also at The Beaches). No neighbourhood has two cards that bring the same debuff. A card offers the same options, with the same effects, in every neighbourhood it appears in. Each option costs one thing: money, hearts or a debuff. The one trade is the other dog's Let them sniff, money (missed tips) for hearts. Every money option costs $20. Most hearts options cost each walking dog's owner 1♥; the capybara's Help the keeper and the porch cat's Stand your ground cost only the lead dog's owner.
 
-| Neighbourhood       | Card                | Options                                                                  |
-| ------------------- | ------------------- | ------------------------------------------------------------------------ |
-| High Park           | Escaped capybara    | Help the keeper (Muddy), Call the zoo ($20), Drag them away (−1♥ each)   |
-| Cabbagetown         | Porch cat           | Stand your ground (−1♥ lead dog), Treat bribe ($20), Bolt past (Zoomies) |
-| Kensington Market   | Green bin spill     | Wade through (Muddy), Pay for cleanup ($20), Hurry past (−1♥ each)       |
-| The Beaches         | Dropped ice cream   | Let them lick it (Muddy), Buy a new cone ($20), Walk on by (−1♥ each)    |
-| Distillery District | Wedding photo shoot | Pose (Spotlight), Walk around (−1♥ each), Pay for a reshoot ($20)        |
-| Yonge Street        | Big screen promo    | Wave hello (Spotlight), Buy the merch ($20), Push through (−1♥ each)     |
+| Neighbourhood       | Card                | Options                                                                       |
+| ------------------- | ------------------- | ----------------------------------------------------------------------------- |
+| High Park           | Escaped capybara    | Help the keeper (−1♥ lead dog), Call the zoo ($20), Drag them away (−1♥ each) |
+| Cabbagetown         | Porch cat           | Stand your ground (−1♥ lead dog), Treat bribe ($20), Bolt past (−1♥ each)     |
+| Kensington Market   | Green bin spill     | Wade through (Muddy), Pay for cleanup ($20), Hurry past (−1♥ each)            |
+| The Beaches         | Dropped ice cream   | Let them lick it (Muddy), Buy a new cone ($20), Walk on by (−1♥ each)         |
+| Distillery District | Wedding photo shoot | Pose (Spotlight), Walk around (−1♥ each), Pay for a reshoot ($20)             |
+| Yonge Street        | Big screen promo    | Wave hello (Spotlight), Buy the merch ($20), Push through (−1♥ each)          |
 
 The cards found in several neighbourhoods:
 
@@ -177,9 +177,9 @@ The thief snatches the walker's tip pouch: Let the tips go loses it, Grab it bac
 
 A puddle opens no card: hitting one costs no heart and makes the pack _Muddy_, with a plain obstacle's hit stop. Kensington Market, the Distillery and Yonge Street have potholes in its place: a water-filled pothole looks and sounds its own but is a puddle in every rule, Raincoats included.
 
-Four plain obstacles bring a debuff on contact: each is a puddle in every rule but its debuff, so the hit costs no heart and keeps a plain obstacle's hit stop. The frisbee dog (Cabbagetown) and the sign spinner (Yonge Street) bring Zoomies, the seagull (The Beaches, Yonge Street) Stinky, and the stilt walker (Kensington Market, the Distillery) Spotlight. No neighbourhood has two contact sources of one debuff. Raincoats block only puddles and potholes.
+Six plain obstacles bring a debuff on contact: each is a puddle in every rule but its debuff, so the hit costs no heart and keeps a plain obstacle's hit stop. The frisbee dog (Cabbagetown) and the sign spinner (Yonge Street) bring Zoomies, the seagull (The Beaches, Yonge Street) and barrel stacks (the Distillery) Stinky, and the stilt walker (Kensington Market, the Distillery) and the busker (Yonge Street) Spotlight. No neighbourhood has two contact sources of one debuff. Raincoats block only puddles and potholes.
 
-Debuffs come from puddles, potholes, contact obstacles and card options. Cards add to what contact gives: Muddy from the capybara's Help the keeper, the dropped ice cream's Let them lick it (sticky paws) or the green bin's Wade through (slippery scraps); Stinky from the skunk's Quick rinse or the cheese crates' Have a sniff; Zoomies from the other dog's Pull away, the porch cat's Bolt past or the thief's Dogs give chase; Spotlight from the wedding shoot's Pose or the promo's Wave hello. Cabbagetown and High Park have no Spotlight; every other neighbourhood has all four. Debuffs are mild. Each lasts 60 seconds of walking (Zoomies 40), or until the neighbourhood ends, whichever comes first. Nothing on the road cures one; it runs out. Applying one the pack already has restarts its time; none stacks. Each is announced in the message strip when it starts and when it ends. While it lasts, a bar in the debuff's own colour runs the full width of the game just below the top bar, over the clouds, with the debuff's icon and name, and drains over its time; two active debuffs show as two bars. Hold a bar to see what the debuff does.
+Debuffs come from puddles, potholes, contact obstacles and card options. Cards add to what contact gives: Muddy from the dropped ice cream's Let them lick it (sticky paws) or the green bin's Wade through (slippery scraps); Stinky from the skunk's Quick rinse or the cheese crates' Have a sniff; Zoomies from the other dog's Pull away or the thief's Dogs give chase; Spotlight from the wedding shoot's Pose or the promo's Wave hello. Cabbagetown and High Park have no Spotlight; every other neighbourhood has all four. Debuffs are mild. Each lasts 60 seconds of walking (Zoomies 40), or until the neighbourhood ends, whichever comes first. Nothing on the road cures one; it runs out. Applying one the pack already has restarts its time; none stacks. Each is announced in the message strip when it starts and when it ends. While it lasts, a bar in the debuff's own colour runs the full width of the game just below the top bar, over the clouds, with the debuff's icon and name, and drains over its time; two active debuffs show as two bars. Hold a bar to see what the debuff does.
 
 - **Muddy:** the pack's lane changes take about three times as long (67% slower). Bumps cost what they always do
 - **Spotlight:** a bump costs $10 of cash on top of its hearts; with less on hand it takes what's left, and at $0 nothing. Second chance may forgive the heart, never the cash. A Spotlight bump keeps a bump's hit stop and grace window and counts toward bumps, bump-free neighbourhoods and bump badges

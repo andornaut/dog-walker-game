@@ -127,7 +127,7 @@
         "id": "escapedCapybara",
         "kind": "encounter"
       },
-      "text": "Muddy: slower for 60s",
+      "text": "−1♥ to the lead dog's owner",
       "title": "Escaped capybara"
     },
     {
@@ -257,7 +257,7 @@
         "id": "porchCat",
         "kind": "encounter"
       },
-      "text": "Zoomies: drifts for 40s",
+      "text": "−1♥ each",
       "title": "Porch cat"
     },
     {
@@ -1027,8 +1027,11 @@
             "art": "card-escaped-capybara-help",
             "effects": [
               {
-                "debuff": "muddy",
-                "kind": "debuff"
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "lead"
+                }
               }
             ],
             "id": "help",
@@ -1265,8 +1268,11 @@
             "art": "card-porch-cat-bolt",
             "effects": [
               {
-                "debuff": "zoomies",
-                "kind": "debuff"
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
               }
             ],
             "id": "bolt",
@@ -1677,6 +1683,14 @@
     },
     {
       "id": "barrelStack",
+      "contact": {
+        "effects": [
+          {
+            "debuff": "stinky",
+            "kind": "debuff"
+          }
+        ]
+      },
       "name": "Barrel stack",
       "shape": {
         "lanes": 1,
@@ -1760,6 +1774,14 @@
     },
     {
       "id": "busker",
+      "contact": {
+        "effects": [
+          {
+            "debuff": "spotlight",
+            "kind": "debuff"
+          }
+        ]
+      },
       "name": "Busker",
       "onFoot": true,
       "shape": {
