@@ -2547,14 +2547,6 @@
     },
     {
       "id": "rollerblader",
-      "contact": {
-        "effects": [
-          {
-            "debuff": "zoomies",
-            "kind": "debuff"
-          }
-        ]
-      },
       "movement": {
         "factor": 2,
         "kind": "inLane"

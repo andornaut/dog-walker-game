@@ -322,7 +322,6 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   rollerblader: {
-    contact: { effects: [{ debuff: "zoomies", kind: "debuff" }] },
     movement: { factor: 2.0, kind: "inLane" },
     name: "Rollerblader",
     shape: { lanes: 1, rows: 1 },
