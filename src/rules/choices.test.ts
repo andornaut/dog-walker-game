@@ -515,7 +515,12 @@ describe("skip option", () => {
       options: [optionOf("otherDog", "debuff"), fullGroom, optionOf("skunk", "debuff")],
       replaced: 1,
     },
-    { encounter: "otherDog", name: "no option of a card with two", replaced: null },
+    {
+      encounter: "skunk",
+      name: "no option of a card with two",
+      options: [fullGroom, holdYourNose],
+      replaced: null,
+    },
   ])("takes the place of $name ($encounter)", ({ encounter: id, options, replaced }) => {
     const shown = options ?? cardOptions(id);
     const withOptions = {
