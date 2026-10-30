@@ -139,7 +139,7 @@ Names are `PALETTE` names in `src/ui/palette.ts`, or `K` names for the neutral g
 - Fonts: `font-body` (Tiny5 a row taller, mixed case) for body text, quips and floating labels; `font-title` (Silkscreen, capitals) for titles, numbers and buttons. Floating numbers use the font, not sprites.
 - Text keeps one size per role everywhere: never step a font down to fit a line, a label or a name into its box. Where text doesn't fit, the box grows (taller, or a second line) or the words get shorter.
 - A label over its help text (a settings row's title over its note, a detail card's heading over its line) leaves 10 rows of clear space between the label's lowest ink and the help text's capitals, so the two read as separate lines.
-- A count ("0/40 earned", "1 of 5 owned") is right-aligned at its list's right text edge, with or without a heading beside it.
+- A count ("0/41 earned", "1 of 5 owned") is right-aligned at its list's right text edge, with or without a heading beside it.
 - Display lettering, the yard sign's letters (yellow fill, 1px ink outline, solid dred shadow), is for big words only, never body text: zone names on `ui-zone-banner`, "WHICH WAY?", "FIRED!", "NEW BEST!", the end screen title and hit labels, in `font-display` (yellow) or `font-display-cream`, colours baked in, drawn untinted. In-art signs use the same letters at 1× with a 1px shadow. `ui-pet-shop`'s PET SHOP board is a button, not a sign: the letter shapes at 2× filled ink with no outline or shadow.
 - `font-comic` holds the comic words' letters, colours baked in, drawn untinted; each glyph's advance is its width plus 1, so the next ring lands on the 1px gap and merges.
 - The gate scene's street sign (300,72 54×11) holds `homeText.gateSign` in `font-body` at 1×, white, centred at 327,75, inside the 52px face. `ui-pet-shop`'s glint bob stays at 2px or less so the board stays clear of it.
@@ -253,7 +253,7 @@ After zones 1 to 3, over the road view dimmed as under a card: the walker cheers
 
 ## Badges
 
-`badge-<achievement>` medals are 32×32: a ring in the tier colour around a cream face with the goal's emblem (`art/tools/badges.py`). No two badges share a motif, so all 40 read apart at 1× on the badge wall's cream panel. Each emblem is one object, with no scene or filler round it, and shows only what is in the game.
+`badge-<achievement>` medals are 32×32: a ring in the tier colour around a cream face with the goal's emblem (`art/tools/badges.py`). No two badges share a motif, so all 41 read apart at 1× on the badge wall's cream panel. Each emblem is one object, with no scene or filler round it, and shows only what is in the game.
 
 - Tiers: firsts bronze, mastery silver, collection gold, legend purple with gold studs, silly pink. Legend is the one hardest badge, Legend of the Leash. Silly is the joke tier, earned by mishaps and running gags; pink marks a joke, never a rank.
 - Every ring is a base, a shade on its lower right, a light on its upper left and twelve rivets in the shade. The face is flat cream with a 1px tan crescent along its lower right, so the emblem stands on one quiet colour.

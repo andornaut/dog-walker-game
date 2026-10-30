@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draw the 40 achievement badges and the celebration burst.
+"""Draw the 41 achievement badges and the celebration burst.
 
 badge-<achievement>: 32x32 medals, rimmed by category (firsts bronze, mastery
 silver, collection gold, legend purple with gold studs for the one hardest badge,
@@ -199,6 +199,28 @@ def _(g):
     for x0, y0 in ((6, 9), (13, 8), (20, 9), (9, 17), (17, 17)):
         bitmap(g, x0, y0, STAR, {"x": "yellow"})
         g.rect(x0 + 2, y0 + 4, 3, 1, "amber")
+
+
+# A 3x7 $ for a coin too small for Big Payday's.
+DOLLAR_S = [".1.", "111", "1..", "111", "..1", "111", ".1."]
+
+
+@icon("payday")
+def _(g):
+    """A white pay envelope, its back flap open behind one gold coin tucked into it, the mouth a dbrown slit
+    and the front's folds meeting below it: one coin to Big Payday's three."""
+    g.tri((7, 15), (25, 15), (16, 6), "lgrey")
+    g.tri((9, 15), (23, 15), (16, 8), "white")
+    g.ell(16, 11, 5.5, 5.5, "orange", "rust")
+    g.ell(16, 11, 3.5, 3.5, "amber", "orange", "yellow")
+    bitmap(g, 14, 8, DOLLAR_S, {"1": "dbrown"})
+    g.p(14.5, 9.5, "white")
+    g.rect(7, 16, 18, 9, "white")
+    g.rect(7, 15, 18, 1, "dbrown")
+    g.rect(7, 24, 18, 1, "lgrey")
+    g.rect(24, 16, 1, 9, "lgrey")
+    line(g, (7, 16), (15, 21), "lgrey")
+    line(g, (24, 16), (16, 21), "lgrey")
 
 
 @icon("big-payday")
@@ -725,8 +747,8 @@ BADGES = {
     "double-leash": "firsts", "pack-leader": "firsts", "round-trip": "firsts",
     "legend-of-the-leash": "legend",
     "big-payday": "mastery", "clean-paws": "mastery", "dodge-ball": "mastery", "everybody-home": "mastery",
-    "five-star-service": "mastery", "marathon": "mastery", "not-a-scratch": "mastery", "tip-jar": "mastery",
-    "twenty-grand": "mastery",
+    "five-star-service": "mastery", "marathon": "mastery", "not-a-scratch": "mastery", "payday": "mastery",
+    "tip-jar": "mastery", "twenty-grand": "mastery",
     "full-kennel": "collection", "kitted-out": "collection", "local-favourite": "collection",
     "tag-team": "collection", "whole-city": "collection",
     "big-screen": "silly", "bird-brain": "silly", "burned-bridges": "silly", "cat-whisperer": "silly",

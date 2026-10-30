@@ -1219,6 +1219,11 @@
       "json": "sprites/badge-paparazzi.json"
     },
     {
+      "key": "badge-payday",
+      "png": "sprites/badge-payday.png",
+      "json": "sprites/badge-payday.json"
+    },
+    {
       "key": "badge-popular-pack",
       "png": "sprites/badge-popular-pack.png",
       "json": "sprites/badge-popular-pack.json"
