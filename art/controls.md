@@ -117,6 +117,8 @@ The switch's `on` tag means sound is enabled for the sound row and reduced motio
 
 Gold frame/face and `ui-check` identify picked items. Selected tabs retain their selected frame and lift without a check badge; their `ui-select` holds its first frame and does not pulse. Generic selected controls use the existing lift/shadow feedback; the approved start-screen card treatment keeps the ground outside the individual cards clear. A pack-full tile and an unowned tile can share a grey face while retaining different actions: an unowned item can open the shop, while a full pack requires a dog to be removed first.
 
+The active shop row uses `ui-shop-focus`: a 3px cyan band between 1px ink keylines, with cream corner marks alternating between 12px and 7px every 600ms. This focus frame does not indicate ownership or affordability. Keep the row's lock, grey appearance, price and unavailable feedback unchanged. Draw it at the existing 3px outset; reduced motion holds the longer first phase.
+
 Source contracts: [`interaction.ts`](../src/ui/interaction.ts), [`home.ts`](../src/home/home.ts), [`walkers.ts`](../src/home/walkers.ts), [`sections.ts`](../src/home/sections.ts) and [`SettingsScene.ts`](../src/scenes/SettingsScene.ts).
 
 ## Interaction and accessibility
@@ -141,6 +143,7 @@ The game shell supplies an accessible game label and control instructions. Indiv
 | `ui-check`, `ui-select` | Existing count/tick and selection tags                                                               | Preserve item-card details; state is not inferred from colour alone           |
 | `ui-icon-button`        | `normal`, `pressed`                                                                                  | Icon face token; the existing glyph is a separate image                       |
 | `ui-section`            | `complete` 0, `neutral` 1, `neutral-walker` 2, `neutral-dogs` 3, `neutral-pocket` 4                  | 24×32; one still frame per tag, 1000ms; fallback `neutral` uses dog purple    |
+| `ui-shop-focus`         | `pulse`: two 600ms frames; 32×32 nine-slice with 13px caps on every side                             | Active shop row only; 3px outset; reduced motion holds frame 0                |
 | `ui-switch`             | `on`, `off`                                                                                          | Preserve 32×16 visual, knob position and tick/cross                           |
 
 The `ui-section` exports and `HOME_LAYOUT.sectionLooks` use the same section tags and colours. Existing `ui-cork`, `ui-plaid` and `ui-denim` keys are retained as solid backing exports; runtime stops the fabric/stitch treatment. The start-screen backdrop preserves the hero through row 195, has quiet ground on rows 196–197, a continuous plum divider on row 198 and flat dbrown below it.

@@ -27,7 +27,8 @@ Sprites: ui-dog-card (120x70, one of three cards in the walk's card row; a tag p
 `empty`, then heart-loss: 4 frames, 60, 60, 80 and 80ms, an overlay drawn over the card and under
 the game's faces, hearts and text), ui-dog-card-warn (120x70, the low-hearts rim drawn over
 ui-dog-card; tags pulse, static), ui-debuff-bar (360x16, one active debuff's bar under the walk bar;
-tags muddy, stinky, zoomies, spotlight), ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24
+tags muddy, stinky, zoomies, spotlight), ui-select (24x24 nine-slice, 8px corners; tag pulse),
+ui-shop-focus (32x32 nine-slice, 13px corners; tag pulse, two 600ms phases), ui-afford (24x24
 nine-slice, 8px corners; tag glint), ui-check (16x16; tags 1, 2, 3, tick), ui-section (24x32
 nine-slice, 3px sides and bottom, 24px top; tags complete, neutral, neutral-walker, neutral-dogs, neutral-pocket), fx-tap and fx-dust (16x16; tag
 play), ui-heart (8x7; tags full, empty, and full-dark and empty-dark for the navy ui-dog-card),
@@ -816,6 +817,28 @@ def select_frame(glow):
     return g
 
 
+def shop_focus_frame(short):
+    """32x32 nine-slice (13px corners), drawn 3px outside the active shop row. A 3px cyan band
+    sits between 1px ink keylines; cream corner marks alternate between 12px and 7px without
+    moving the row or changing its availability. Reduced motion holds the first, longer phase.
+    The 5px ring covers only the row's first two border pixels inside its edge."""
+    g = Grid(32, 32)
+    g.rect(0, 0, 32, 32, "ink")
+    g.rect(1, 1, 30, 30, "cyan")
+    g.rect(4, 4, 24, 24, "ink")
+    g.rect(5, 5, 22, 22, None)
+    length = 7 if short else 12
+    for right in (False, True):
+        for bottom in (False, True):
+            x, y = (31 - length if right else 1), (28 if bottom else 1)
+            g.rect(x, y, length, 3, "cream")
+            x, y = (28 if right else 1), (31 - length if bottom else 1)
+            g.rect(x, y, 3, length, "cream")
+    for x, y in ((0, 0), (31, 0), (0, 31), (31, 31)):
+        g.p(x, y, None)
+    return g
+
+
 def check_badge(label):
     """16x16: the green badge on a selected tile, numbered by pick order, or a tick."""
     g = Grid(16, 16)
@@ -1594,6 +1617,8 @@ def sprites():
     yield "ui-dog-card-warn", [("pulse", card_warn, 400), ("static", [card_warn[1]], 1000)]
     yield "ui-debuff-bar", [(d, [debuff_bar(d).outlined(False)], 1000) for d in DEBUFF_LOOKS]
     yield "ui-select", [("pulse", [select_frame(False).outlined(False), select_frame(True).outlined(False)], 450)]
+    yield "ui-shop-focus", [("pulse", [shop_focus_frame(False).outlined(False),
+                                      shop_focus_frame(True).outlined(False)], 600)]
     yield "ui-check", [(lb, [check_badge(lb).outlined()], 1000) for lb in ("1", "2", "3", "tick")]
     yield "ui-afford", [("glint", [afford_frame(i).outlined(False) for i in (0, 0, 1, 2)], 400)]
     yield "ui-section", [(s, [section(s).outlined(False)], 1000) for s in SECTION_FACES]
