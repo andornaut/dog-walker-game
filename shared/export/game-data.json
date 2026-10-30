@@ -88,7 +88,7 @@
         "id": "droppedIceCream",
         "kind": "encounter"
       },
-      "text": "Muddy: slower for 60s",
+      "text": "Zoomies: drifts for 40s",
       "title": "Dropped ice cream"
     },
     {
@@ -335,7 +335,7 @@
         "id": "thief",
         "kind": "encounter"
       },
-      "text": "Spotlight: bumps cost $10 for 60s",
+      "text": "−1♥ to the lead dog's owner",
       "title": "Thief"
     },
     {
@@ -963,7 +963,7 @@
             "art": "card-dropped-ice-cream-lick",
             "effects": [
               {
-                "debuff": "muddy",
+                "debuff": "zoomies",
                 "kind": "debuff"
               }
             ],
@@ -1462,8 +1462,11 @@
             "art": "card-thief-give-chase",
             "effects": [
               {
-                "debuff": "spotlight",
-                "kind": "debuff"
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "lead"
+                }
               }
             ],
             "id": "giveChase",
@@ -1530,7 +1533,8 @@
         "rows": 1
       },
       "zones": [
-        "theBeaches"
+        "theBeaches",
+        "distilleryDistrict"
       ],
       "spriteKey": "wedding-photo-shoot"
     }
@@ -3953,7 +3957,7 @@
         },
         "obstacles": {
           "bigScreenPromo": 0,
-          "cheeseCrates": 3.1,
+          "cheeseCrates": 1.1,
           "droppedIceCream": 0,
           "escapedCapybara": 0,
           "greenBinSpill": 0,
@@ -3964,7 +3968,7 @@
           "skunk": 0,
           "squirrel": 1,
           "thief": 1.1,
-          "weddingPhotoShoot": 0
+          "weddingPhotoShoot": 2
         }
       },
       "keys": {

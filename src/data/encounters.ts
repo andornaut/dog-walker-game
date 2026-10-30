@@ -81,7 +81,7 @@ export const ENCOUNTERS = {
       options: [
         {
           art: "card-dropped-ice-cream-lick",
-          effects: [{ debuff: "muddy", kind: "debuff" }],
+          effects: [{ debuff: "zoomies", kind: "debuff" }],
           id: "lick",
           name: "Let them lick it",
         },
@@ -335,7 +335,7 @@ export const ENCOUNTERS = {
         },
         {
           art: "card-thief-give-chase",
-          effects: [{ debuff: "spotlight", kind: "debuff" }],
+          effects: [{ amount: -1, kind: "hearts", target: { kind: "lead" } }],
           id: "giveChase",
           name: "Dogs give chase",
         },
@@ -372,6 +372,6 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 2, rows: 1 },
-    zones: ["theBeaches"],
+    zones: ["theBeaches", "distilleryDistrict"],
   },
 } as const satisfies Record<EncounterId, Encounter>;

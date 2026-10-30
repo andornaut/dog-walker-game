@@ -549,7 +549,7 @@ export const WORLD = {
         },
         obstacles: {
           bigScreenPromo: 0,
-          cheeseCrates: 3.1,
+          cheeseCrates: 1.1,
           droppedIceCream: 0,
           escapedCapybara: 0,
           greenBinSpill: 0,
@@ -560,7 +560,7 @@ export const WORLD = {
           skunk: 0,
           squirrel: 1,
           thief: 1.1,
-          weddingPhotoShoot: 0,
+          weddingPhotoShoot: 2,
         },
       },
     },
