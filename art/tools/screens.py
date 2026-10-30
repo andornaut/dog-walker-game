@@ -39,12 +39,13 @@ reads on them.
   107,2) and the summary panel (24,112 to 336,412), the front of the brick
   cottage the pack comes home to: the logo stands on its slate roof's ridge
   (END_RIDGE, row 43), a low centre gable trimmed in white rises from the
-  ridge with a small lit arched window, two lit sash windows flank
+  ridge with a small lit arched window, two lit four-pane sash windows flank
   the front door (171,73 18x23) under its lit transom, which opens onto a step
   (164,96 32x4), and a flagstone path (168,100 24x12) runs down behind the
-  panel's top edge. Bay-and-gables stand either side, their lamps lit behind
-  orange curtains, and the CN Tower rises lit over the right ones (END_CN). The
-  lawn from y 96 gives the waving owners room either side, feet on y 110.
+  panel's top edge. Bay-and-gables stand either side, with shaded eaves, tan bay
+  ledges and varied room lights behind orange curtains; the CN Tower rises lit
+  over the right ones (END_CN). The moss lawn from y 96 stays quiet behind the
+  returning pack and gives the waving owners room either side, feet on y 110.
   Cabbagetown's dusk bands (DUSK_SKY) fill the sky twice: behind the house down
   to its lawn, and behind the panel down to the far rooftops and towers in
   mauve (y 450). Then the street's bay-and-gables and canopy trees (from y
@@ -766,6 +767,75 @@ END_RIDGE = 43  # the house's roof ridge on screen-end, under the logo's foot
 END_LOGO_AT = ((W - LOGO_W) // 2, END_RIDGE - LOGO_H)  # where EndScene draws the logo, 107,2
 
 
+def end_window(cv, x, y, w, h, lit=True, trim="tan"):
+    """An end-screen sash: warm glass behind orange curtains, or a room left dark, in a shaded frame."""
+    cv.fill(x - 1, y - 1, w + 2, h + 2, "plum")
+    cv.fill(x, y, w, h, trim)
+    cv.fill(x + 1, y + 1, w - 2, h - 2, "amber" if lit else "dslate")
+    if lit:
+        cv.fill(x + 2, y + 2, max(2, w - 4), h - 4, "gold")
+        cv.fill(x + 1, y + 1, 2, h - 2, "orange")
+        cv.fill(x + w - 3, y + 1, 2, h - 2, "orange")
+    elif w >= 6:
+        cv.fill(x + 2, y + 2, 2, h - 4, "ash")
+    cv.fill(x + 1, y + h // 2, w - 2, 1, trim)
+    if w >= 12:
+        cv.fill(x + w // 2, y + 1, 1, h - 2, trim)
+    cv.fill(x - 1, y + h, w + 2, 1, "tan" if lit else "stone")
+
+
+def end_house(cv, cx, w, wall, roof, door, base):
+    """An end-screen bay-and-gable with defined eaves and bay ledges, each room lit separately."""
+    bd.bay_gable(cv, cx, w, wall, roof, door, base, trim="cream", curtains="orange")
+    x = cx - w // 2
+    top, roof_h = base - 50, 22
+    wy = top + roof_h
+    bx, bw = x + 2, w // 2 - 1
+    cv.fill(x - 2, wy + 1, w + 4, 2, "coal")
+    cv.fill(bx - 1, wy + 3, bw + 2, 1, "tan")
+    for storey, yy in enumerate((wy + 4, wy + 16)):
+        for k in range(3):
+            wx = bx + 1 + k * (bw - 2) // 3
+            ww = max(3, (bw - 2) // 3 - 1)
+            lit = not (storey == 0 and (cx == 114 or (cx == 300 and k == 1)))
+            end_window(cv, wx, yy, ww, 8, lit)
+    end_window(cv, x + w - 12, wy + 4, 8, 10, cx != 354)
+    cv.fill(bx - 1, wy + 15, bw + 2, 1, "tan")
+    cv.fill(x + w - 14, top + 5, 2, 6, "clay")
+
+
+def end_cottage_face(cv):
+    """Quiet brick clusters and four-pane sashes around the cottage's gable, doorway and flower beds."""
+    rects = ((154, 43, 206, 55), (167, 63, 200, 96), (124, 90, 164, 96), (196, 90, 236, 96))
+    details = [(rect, cv.img.crop(rect)) for rect in rects]
+    cv.fill(124, 53, 112, 43, "brick")
+    cv.fill(233, 53, 3, 43, "dbrick")
+    for y in range(57, 96, 8):
+        for x in range(126 + (y // 8 % 2) * 8, 232, 18):
+            cv.fill(x, y, 2, 1, "dbrick")
+    for wx in (134, 208):
+        cv.fill(wx - 2, 58, 22, 3, "stone")
+        end_window(cv, wx, 62, 18, 24, True, "cream")
+    for rect, detail in details:
+        cv.img.paste(detail, rect)
+
+
+def end_lawns(cv):
+    """Moss and olive lawns keep the foreground figures clear, with no tufts across their central stage."""
+    px = cv.img.load()
+    colours = {sn.rgb("green"): sn.rgb("moss"), sn.rgb("dgreen"): sn.rgb("olive")}
+    for y in (*range(96, 112), *range(END_STREET + 104, END_STREET + END_WALK)):
+        for x in range(W):
+            if px[x, y] in colours:
+                px[x, y] = colours[px[x, y]]
+    for i in range(30):
+        x, y = (i * 41) % W, 98 + (i * 7) % 13
+        if 80 <= x <= 300:
+            for row in (y, y + 1):
+                if px[x, row] == sn.rgb("olive"):
+                    px[x, row] = sn.rgb("moss")
+
+
 def end():
     cv = sn.Canvas(W, H)
     # Cabbagetown's dusk, twice: behind the house down to its lawn, and behind the panel down to the far
@@ -786,7 +856,7 @@ def end():
     # the neighbours either side: bay-and-gables with their lamps lit behind the curtains
     for cx, wall, roof, door in ((6, "brick", "dslate", "navy"), (60, "dbrick", "shale", "forest"),
                                  (300, "brick", "shale", "ttc"), (354, "dbrick", "dslate", "forest")):
-        bd.bay_gable(cv, cx, 46, wall, roof, door, 96, trim="cream", curtains="orange")
+        end_house(cv, cx, 46, wall, roof, door, 96)
     # the house the pack comes home to, between the logo and the panel: a brick Cabbagetown cottage whose
     # slate roof's ridge (END_RIDGE) the logo stands on, a low centre gable trimmed in white over the door
     for i in range(49 - END_RIDGE):
@@ -841,6 +911,7 @@ def end():
     cv.fill(184, 107, 1, 5, "brown")
     cv.fill(167, 100, 1, 12, "dgreen")
     cv.fill(192, 100, 1, 12, "dgreen")
+    end_cottage_face(cv)
     # the rest of the city, far off: rooftops and towers in mauve against the glow
     bd.roofline(cv, END_STREET + 110, ((8, 22, 30), (50, 40, 26), (118, 36, 28), (178, 44, 24), (250, 38, 30),
                                        (314, 38, 26)), "mauve")
@@ -861,7 +932,7 @@ def end():
         bd.tree(strip, cx, top, "canopy", "pine", "bark", r=16)
     for cx, wall, roof, door in ((60, "brick", "shale", "forest"), (114, "cream", "slate", "ttc"),
                                  (246, "dbrick", "dslate", "navy"), (300, "brick", "shale", "ttc")):
-        bd.bay_gable(strip, cx, 46, wall, roof, door, 104, trim="white", curtains="orange")
+        end_house(strip, cx, 46, wall, roof, door, 104)
     bd.ground(strip, yard=END_YARD)
     bd.flowers(strip, 40, 84, END_WALK - 13, ("orange", "yellow", "red"))
     bd.flowers(strip, 226, 270, END_WALK - 12, ("orange", "yellow", "red"))
@@ -876,6 +947,7 @@ def end():
     tile = tile.crop((64, 5, 127, 5 + H - END_ROAD))
     for x in range(W - tile.width, -tile.width, -tile.width):
         cv.img.paste(tile, (x, END_ROAD))
+    end_lawns(cv)
     return cv
 
 
