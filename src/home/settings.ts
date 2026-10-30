@@ -7,7 +7,7 @@ import type { Settings } from "../save/schema";
 import { type CloseControl, closeControl } from "../ui/closeControl";
 import { helpCapDy, LABEL_HELP_GAP } from "../ui/labelHelpGap";
 import { TEXT_SCALE, textOnLines } from "../ui/textFit";
-import { cardBand, HOME_LAYOUT } from "./homeLayout";
+import { HOME_LAYOUT } from "./homeLayout";
 
 // The settings screen moves a volume in 5% steps, from 0 to 1.
 export const VOLUME_STEPS = 20;
@@ -81,9 +81,6 @@ export interface SettingsRowLayout {
 }
 
 export interface SettingsLayout {
-  // The title band across the card's top, its title placed beside the close control
-  // (barTitleLeft).
-  band: Rect;
   // The build label's capitals' top; the label is centred across the panel.
   buildLabelY: number;
   close: CloseControl;
@@ -139,9 +136,9 @@ export function noteDy(title: FontMetrics): number {
 }
 
 const PANEL = { width: 344 };
-// The first row starts at the band's bottom edge, as each later row starts at its separator, so
-// its icon and label are as far under the band as a later row's are under its separator.
-const ROWS_TOP = HOME_LAYOUT.card.band.inset + HOME_LAYOUT.card.band.height;
+// The first row starts at the title row's bottom edge, as each later row starts at its separator,
+// so its icon and label are as far under the title row as a later row's are under its separator.
+const ROWS_TOP = HOME_LAYOUT.card.titleRow.inset + HOME_LAYOUT.card.titleRow.height;
 const SEPARATOR_INSET = 4;
 
 // The build label (BUILD_LABEL) closes the card in 1x dark brown body text, centred across the
@@ -197,7 +194,7 @@ function rowInkBottom(fonts: SettingsFonts, shape: SettingsRowShape): number {
   );
 }
 
-// The rows on a card centred on the screen, under its title band with the close control in it,
+// The rows on a card centred on the screen, under its title row with the close control in it,
 // and the build label under them. Settings covers the screen wherever it opens from.
 export function settingsLayout(
   fonts: SettingsFonts,
@@ -209,7 +206,7 @@ export function settingsLayout(
   const heights = shapes.map((shape, i) =>
     i === shapes.length - 1 ? lastInk + Math.floor(LABEL_HELP_GAP / 2) : rowHeight(fonts, shape),
   );
-  // From the panel's top: the last row's lowest ink (the band's bottom with no rows), and the
+  // From the panel's top: the last row's lowest ink (the title row's bottom with no rows), and the
   // build label's capitals.
   const rowsInk = ROWS_TOP + heights.slice(0, -1).reduce((sum, rows) => sum + rows, 0) + lastInk;
   const labelDy = rowsInk + LABEL_HELP_GAP;
@@ -231,10 +228,8 @@ export function settingsLayout(
     };
   });
   const panel = { ...PANEL, height, x, y };
-  const band = cardBand(panel);
   const { pad, track } = SETTINGS_ROW;
   return {
-    band,
     buildLabelY: y + labelDy,
     close: closeControl(panel),
     panel,
@@ -250,8 +245,8 @@ export function settingsLayout(
 }
 
 // The install steps for a browser's own menu: a detail card, wide enough for its title clear of
-// the close control, centred on the screen, with its title band and close control, and under the
-// band the 16x16 glyph of the browser's button, centred on the first line's capitals (icon.dy
+// the close control, centred on the screen, with its title and close control, and under the
+// title row the 16x16 glyph of the browser's button, centred on the first line's capitals (icon.dy
 // from their top), then the steps in body text, wrapped to up to lines lines a linePitch apart.
 export const INSTALL_STEPS = {
   foot: 14,
@@ -271,7 +266,6 @@ export const INSTALL_STEPS_FIT = {
 };
 
 export interface InstallStepsLayout {
-  band: Rect;
   card: Rect;
   close: CloseControl;
   // The button glyph's top-left corner.
@@ -292,11 +286,9 @@ export function installStepsLayout(
     x: Math.round((screen.width - INSTALL_STEPS.width) / 2),
     y: Math.round((screen.height - height) / 2),
   };
-  const band = cardBand(card);
   const { icon, pad, stepsDy } = INSTALL_STEPS;
   const stepsY = card.y + ROWS_TOP + stepsDy;
   return {
-    band,
     card,
     close: closeControl(card),
     icon: { x: card.x + pad, y: stepsY + icon.dy },

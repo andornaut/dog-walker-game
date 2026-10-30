@@ -62,7 +62,7 @@ import { addRampDim } from "../ui/phaser/rampDim";
 import { GREYED } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
 import { listenHomeBar } from "./homeBarPress";
-import { addCardTitle, addDetailCard } from "./homePanels";
+import { addModalCard } from "./homePanels";
 import { listenOnePress } from "./onePress";
 import {
   BAR_MUTED_EVENT,
@@ -78,7 +78,6 @@ import { soundboardOf } from "./soundboard";
 import { listenTargetPress, sameByValue } from "./targetPress";
 import {
   addBodyText,
-  addCloseButton,
   addMenuButton,
   addNineSlice,
   addSelectTile,
@@ -489,10 +488,10 @@ export class SettingsScene extends Scene {
   private render(): void {
     clearScene(this, this.dimmed);
     const settings = currentSettings(this);
-    const { band, close, panel } = this.layout;
-    // The card and its title band.
-    addDetailCard(this, this.add.container(0, 0), panel, band);
-    addCardTitle(this, panel, gameData.menuText.settings.title);
+    const { close, panel } = this.layout;
+    addModalCard(this, this.add.container(0, 0), panel, gameData.menuText.settings.title, {
+      pressed: this.pressed?.kind === "close",
+    });
     const rows = this.add.container(0, 0);
     for (const row of this.rows) {
       if (hasNote(row)) {
@@ -505,7 +504,6 @@ export class SettingsScene extends Scene {
     // Over the rows, since a switch row's face covers its top row.
     const separators = this.add.graphics();
     this.layout.separators.forEach((rect) => fillRect(separators, PALETTE.tan, rect));
-    addCloseButton(this, this.add.container(0, 0), close, this.pressed?.kind === "close");
     if (this.focus !== null && this.steps === undefined) {
       const focused =
         this.focus.row < this.rows.length ? this.rowRect(this.focus.row) : closeFace(close);
@@ -528,25 +526,20 @@ export class SettingsScene extends Scene {
     placePixelText(label, left - ink.left, buildLabelY);
   }
 
-  // The install steps' card over the dimmed settings: its title in the band, its close control,
-  // and the browser's button glyph and steps under the band, the glyph left out while missing.
+  // The install steps' card over the dimmed settings: its title, its close control, and the
+  // browser's button glyph and steps under the title, the glyph left out while missing.
   private drawSteps(steps: OpenSteps): void {
     const words = gameData.menuText.settings.installSteps[steps.browser];
     const icon = STEPS_ICONS[steps.browser];
     addDim(this, this.dim);
-    addDetailCard(this, this.add.container(0, 0), steps.card, steps.band);
-    addCardTitle(this, steps.card, words.title);
+    addModalCard(this, this.add.container(0, 0), steps.card, words.title, {
+      pressed: this.pressed?.kind === "stepsClose",
+    });
     if (this.textures.exists(icon)) {
       this.add.image(steps.icon.x, steps.icon.y, icon).setOrigin(0);
     }
     const text = addBodyText(this, undefined, steps.steps, words.steps);
     fitPixelText(text, INSTALL_STEPS_FIT, steps.steps.x, steps.steps.y);
-    addCloseButton(
-      this,
-      this.add.container(0, 0),
-      steps.close,
-      this.pressed?.kind === "stepsClose",
-    );
   }
 
   // A switch or install row: a normal row that dips while pressed, with its icon, label and note,

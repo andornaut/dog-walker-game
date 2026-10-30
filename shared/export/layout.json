@@ -1663,11 +1663,6 @@
         "scale": 2
       },
       "card": {
-        "band": {
-          "height": 24,
-          "inset": 6,
-          "titleY": 7
-        },
         "besideDy": 4,
         "besideX": 90,
         "owner": {
@@ -1678,6 +1673,11 @@
         },
         "pad": 12,
         "rowGap": 8,
+        "titleRow": {
+          "height": 24,
+          "inset": 6,
+          "titleY": 7
+        },
         "well": {
           "picture": 2,
           "size": 68,
@@ -2343,12 +2343,6 @@
       "titleY": 133
     },
     "settings": {
-      "band": {
-        "height": 24,
-        "width": 332,
-        "x": 14,
-        "y": 107
-      },
       "buildLabelY": 445,
       "close": {
         "hit": {

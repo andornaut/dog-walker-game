@@ -26,7 +26,7 @@ import {
 import {
   BANK_ROOM,
   bankAmountText,
-  cardBand,
+  cardTitleRow,
   detailCardRect,
   DOG_TILE_TEXT_ROOM,
   HOME_LAYOUT,
@@ -490,7 +490,7 @@ function questionPanelRoles(): TextRoleCase[] {
   ];
 }
 
-// A card with a title band and a close control, and every title the data puts on it.
+// A card with a title row and a close control, and every title the data puts on it.
 export interface CardTitles {
   readonly card: Rect;
   readonly role: string;
@@ -522,13 +522,13 @@ export function cardTitles(): CardTitles[] {
   ];
 }
 
-// Each card's titles in the room its band leaves them beside its close control.
+// Each card's titles in the room its title row leaves them beside its close control.
 function cardTitleRoles(): TextRoleCase[] {
   return cardTitles().flatMap(({ card, role, titles }) =>
     plainRole(
       role,
       "font-title",
-      { room: barTitleRoom(cardBand(card), closeControl(card)), style: TEXT_STYLE },
+      { room: barTitleRoom(cardTitleRow(card), closeControl(card)), style: TEXT_STYLE },
       titles,
     ),
   );

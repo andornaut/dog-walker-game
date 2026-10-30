@@ -93,6 +93,7 @@ describe("interaction-state colours", () => {
         TEXT,
       ],
       ["a card's cost on its plaque", PALETTE.plum, PALETTE.cream, TEXT],
+      ["a modal card's title on the card", PALETTE.plum, PALETTE.cream, TEXT],
       ...keysOf(CHANGE_COLOURS).map((kind): [string, number, number, number] => [
         `a ${kind} change label on its chip`,
         CHANGE_COLOURS[kind],

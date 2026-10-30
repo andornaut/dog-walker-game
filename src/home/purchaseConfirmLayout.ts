@@ -4,11 +4,11 @@ import { type FontMetrics } from "@andornaut/game-kit/text/bitmapFont";
 import { SCREEN_CONFIG } from "../data/screen";
 import { helpCapDy } from "../ui/labelHelpGap";
 import { overlayRegion } from "./homeBar";
-import { cardBand, HOME_LAYOUT } from "./homeLayout";
+import { cardTitleRow, HOME_LAYOUT } from "./homeLayout";
 import type { ConfirmChoice } from "./purchaseConfirm";
 
 // The purchase confirm: the shop dimmed under the lit top bar (overlayRegion), and a card centred
-// on the screen with its title band, the item's picture in a well, the price and the bank it
+// on the screen with its title, the item's picture in a well, the price and the bank it
 // would leave centred under it, the bank's capitals LABEL_HELP_GAP clear rows under the title
 // font's lowest ink (confirmLeftCapTop), and Cancel then Buy along its bottom, each 44 tall and
 // 132 wide, with 12 between them and at the card's sides.
@@ -23,7 +23,7 @@ const card: Rect = {
   y: (SCREEN_CONFIG.height - HEIGHT) / 2,
 };
 const centreX = card.x + WIDTH / 2;
-const band = cardBand(card);
+const titleRow = cardTitleRow(card);
 const well: Rect = {
   height: CARD.well.size,
   width: CARD.well.size,
@@ -39,7 +39,6 @@ const button = (i: number): Rect => ({
 });
 
 export const PURCHASE_CONFIRM_LAYOUT = {
-  band,
   buttons: { buy: button(1), cancel: button(0) } satisfies Readonly<Record<ConfirmChoice, Rect>>,
   card,
   dim: overlayRegion("home"),
@@ -49,7 +48,14 @@ export const PURCHASE_CONFIRM_LAYOUT = {
   // The picture sits in the well picture pixels in from its corner.
   picture: { x: well.x + CARD.well.picture, y: well.y + CARD.well.picture },
   price: { capTop: well.y + well.height + 10, centreX, font: "title", room: WIDTH - 2 * CARD.pad },
-  title: { capTop: band.y + CARD.band.titleY, centreX, font: "title", room: band.width - 16 },
+  // The title, centred across its row as a card with no close control's is (addModalCard).
+  title: {
+    capTop: titleRow.y + CARD.titleRow.titleY,
+    centreX,
+    font: "title",
+    room: titleRow.width - 16,
+  },
+  titleRow,
   well,
 } as const;
 

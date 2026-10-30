@@ -1,13 +1,12 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { SCREEN_CONFIG } from "../data/screen";
-import { cardBand } from "../home/homeLayout";
 import { SHOP_LAYOUT, shopTabFace, shopTabRects } from "../home/shopLayout";
 import { PALETTE } from "../ui/palette";
 import { fillRect } from "../ui/phaser/draw";
 import { inkSpan, placePixelText } from "../ui/phaser/pixelText";
-import { addCardTitle, addDetailCard } from "./homePanels";
-import { addBodyText, addCloseButton, addGraphicsIn, addTab } from "./uiKit";
+import { addModalCard } from "./homePanels";
+import { addBodyText, addGraphicsIn, addTab } from "./uiKit";
 
 // The page the Pet shop and the Logbook share, under the home screen's top bar.
 
@@ -34,9 +33,7 @@ export function addShopPage(
     x: 0,
     y: PANEL.y - 4,
   });
-  addDetailCard(scene, parent, PANEL, cardBand(PANEL));
-  parent.add(addCardTitle(scene, PANEL, title));
-  addCloseButton(scene, parent, SHOP_LAYOUT.close, closePressed);
+  addModalCard(scene, parent, PANEL, title, { pressed: closePressed });
 }
 
 // Moves a label so its ink ends at right, its capitals' top at y.

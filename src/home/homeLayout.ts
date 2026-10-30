@@ -105,8 +105,8 @@ export const HOME_LAYOUT = {
   // with its top rise above the text's capitals.
   bonus: { countGap: 14, gap: 4, heartInk: 7, rise: 1, scale: 2 },
   // The detail card that opens over the screen, centred and as tall as what it shows, in card
-  // pixels: the paper starts 2px in, the band runs across its top 6px in with the title's caps 7px
-  // below the band's top, and the well sits under the band, on a dog's card with its bottom row
+  // pixels: the paper starts 2px in, the title row (no bar is drawn) runs across its top 6px in
+  // with the title's caps 7px below the row's top, and the well sits under the row, on a dog's card with its bottom row
   // level with the owner's photo's. Rows of 2x body text, each wrapped within the card less pad,
   // rowGap between rows: a detail card's subtitle beside the well from besideX, besideDy under
   // well.y, and its status or price last under the well, at pad. A dog's card puts its owner's
@@ -117,12 +117,12 @@ export const HOME_LAYOUT = {
   // where the walk card's name is tan, because this card's paper is cream and the walk card's is
   // navy; the role is in owner.roleColour.
   card: {
-    band: { height: 24, inset: 6, titleY: 7 },
     besideDy: 4,
     besideX: 90,
     owner: { face: 32, gap: 6, nameColour: "plum", roleColour: "darkBrown" },
     pad: 12,
     rowGap: 8,
+    titleRow: { height: 24, inset: 6, titleY: 7 },
     well: { picture: 2, size: 68, x: 12, y: 36 },
     width: 300,
   },
@@ -494,10 +494,11 @@ function cardRows(
   return { bottom, tops };
 }
 
-// The title band across the top of a card drawn as the detail card is, card.band.inset inside
-// its top and sides.
-export function cardBand(card: Rect): Rect {
-  const { height, inset } = HOME_LAYOUT.card.band;
+// The row a modal card's title sits on across the card's top, card.titleRow.inset inside its top
+// and sides, the close control at its right end. Nothing is drawn under it: the card has no title
+// bar.
+export function cardTitleRow(card: Rect): Rect {
+  const { height, inset } = HOME_LAYOUT.card.titleRow;
   return { height, width: card.width - 2 * inset, x: card.x + inset, y: card.y + inset };
 }
 

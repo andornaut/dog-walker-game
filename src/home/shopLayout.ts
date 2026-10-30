@@ -10,7 +10,7 @@ import { SELECT_OUTSET } from "../ui/selection";
 import { TEXT_SCALE, TEXT_STYLE } from "../ui/textFit";
 
 // The Pet shop page under the home screen's top bar, which stays in view with the bank:
-// a card with its title band and close control, the Dogs and Gear tabs, and each tab's
+// a card with its title and close control, the Dogs and Gear tabs, and each tab's
 // lists. Rows are hit areas at least 44 tall; tabs draw 28 tall in a 44-tall hit area. The
 // lists scroll in the list area under the tabs, laid out here as they sit scrolled to the top.
 // The Logbook wears the same page (src/home/statsLayout.ts).
@@ -21,7 +21,7 @@ const ROW_WIDTH = 328;
 const ROW_SCROLL_WIDTH = 314;
 const TAB = { drawHeight: 28, drawY: 85, gap: 8, height: 44, span: ROW_WIDTH, x: ROW_X, y: 77 };
 // A selected tab's ui-select frame and its shadow end SELECT_OUTSET under its face. TAB_GAP clear
-// rows lie between the selected tab and the title band over it, and between it and the list.
+// rows lie between the selected tab and the title row over it, and between it and the list.
 const TAB_BOTTOM = TAB.drawY + TAB.drawHeight + SELECT_OUTSET;
 const TAB_GAP = 6;
 // The list area: from TAB_GAP under the tabs to the card's inner edge, from the card's 8px frame

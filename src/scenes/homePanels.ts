@@ -7,7 +7,7 @@ import { SCREEN_LAYOUT } from "../data/screen";
 import { type DetailCard, type DetailPart, detailParts, type DetailPicture } from "../home/detail";
 import {
   CARD_TEXT_ROOM,
-  cardBand,
+  cardTitleRow,
   detailCardLayout,
   detailCardRect,
   detailOwner,
@@ -64,8 +64,7 @@ export function addAffordFrame(
 
 const CARD = HOME_LAYOUT.card;
 
-// A dim layer over dim, then the card's frame, title band and close control; the content goes
-// in a container placed at the card.
+// A dim layer over dim, then the modal card; the content goes in a container placed at the card.
 function drawCardFrame(
   scene: Scene,
   parent: GameObjects.Container,
@@ -76,25 +75,47 @@ function drawCardFrame(
   content: GameObjects.Container,
 ): void {
   parent.add(addDim(scene, dim));
-  addDetailCard(scene, parent, rect, cardBand(rect));
+  addModalCard(scene, parent, rect, title, { pressed: closePressed });
   content.setPosition(rect.x, rect.y);
-  parent.add([content, addCardTitle(scene, rect, title)]);
-  addCloseButton(scene, parent, closeControl(rect), closePressed);
+  parent.add(content);
 }
 
-// The title of a card drawn as the detail card is: white 2x title text in its band, the
-// capitals card.band.titleY under the band's top and the ink where barTitleLeft puts it beside
-// the card's close control.
-export function addCardTitle(scene: Scene, card: Rect, title: string): GameObjects.BitmapText {
-  const band = cardBand(card);
+// Every modal card's frame, in one layout: the ui-detail-card with no title bar, its title in
+// plum on the card's title row (addCardTitle), and, for a card that closes, the close control in
+// its top-right corner. close: whether that control shows pressed, or undefined for a card
+// without one.
+export function addModalCard(
+  scene: Scene,
+  parent: GameObjects.Container,
+  card: Rect,
+  title: string,
+  close: { readonly pressed: boolean } | undefined,
+): void {
+  addDetailCard(scene, parent, card);
+  parent.add(addCardTitle(scene, card, title, close !== undefined));
+  if (close !== undefined) {
+    addCloseButton(scene, parent, closeControl(card), close.pressed);
+  }
+}
+
+// A modal card's title: plum 2x title text, its capitals card.titleRow.titleY under the title
+// row's top, the ink centred where barTitleLeft puts it: beside the close control on a card that
+// closes, else across the card.
+function addCardTitle(
+  scene: Scene,
+  card: Rect,
+  title: string,
+  closes: boolean,
+): GameObjects.BitmapText {
+  const row = cardTitleRow(card);
   const label = addPixelText(scene, 0, 0, title, {
-    colour: PALETTE.white,
+    colour: PALETTE.plum,
     font: "title",
     scale: TEXT_SCALE,
   });
   const ink = inkSpan(label);
-  const x = barTitleLeft(band, closeControl(card), ink.right - ink.left);
-  placePixelText(label, x, band.y + CARD.band.titleY);
+  const x = barTitleLeft(row, closes ? closeControl(card) : undefined, ink.right - ink.left);
+  placePixelText(label, x, row.y + CARD.titleRow.titleY);
   return label;
 }
 
@@ -116,22 +137,12 @@ function addFramedSlice(
   parent.add(g);
 }
 
-// The ui-detail-card over card with its ui-detail-band over band, or a framed cream card and a
-// forest band while the art is missing. The detail cards, the shop, settings and the purchase
-// confirm all wear it.
-export function addDetailCard(
-  scene: Scene,
-  parent: GameObjects.Container,
-  card: Rect,
-  band: Rect,
-): void {
+// The ui-detail-card over card, or a framed cream card while the art is missing. The detail
+// cards, the shop, settings and the purchase confirm all wear it (addModalCard).
+function addDetailCard(scene: Scene, parent: GameObjects.Container, card: Rect): void {
   addFramedSlice(scene, parent, "ui-detail-card", card, {
     border: PALETTE.darkBrown,
     fill: PALETTE.cream,
-  });
-  addFramedSlice(scene, parent, "ui-detail-band", band, {
-    border: PALETTE.forest,
-    fill: PALETTE.forest,
   });
 }
 

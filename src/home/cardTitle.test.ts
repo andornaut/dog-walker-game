@@ -7,7 +7,7 @@ import { BAR_TITLE, barTitleLeft } from "../ui/barTitle";
 import { type CloseControl, closeControl } from "../ui/closeControl";
 import { plainMarks } from "../ui/pixelFont";
 import { TEXT_STYLE } from "../ui/textFit";
-import { cardBand } from "./homeLayout";
+import { cardTitleRow } from "./homeLayout";
 
 // The clear space left of a title's ink, from the bar's left edge, and right of it, to the close
 // control's face.
@@ -31,7 +31,7 @@ function expectPlaced(bar: Rect, close: CloseControl, width: number): void {
 
 describe("barTitleLeft", () => {
   const card: Rect = { height: 100, width: 300, x: 30, y: 0 };
-  const bar = cardBand(card);
+  const bar = cardTitleRow(card);
   const close = closeControl(card);
   const room = close.x - bar.x;
 
@@ -55,7 +55,7 @@ describe("barTitleLeft", () => {
 });
 
 describe.each(cardTitles())("the $role", ({ card, titles }) => {
-  const bar = cardBand(card);
+  const bar = cardTitleRow(card);
   const close = closeControl(card);
 
   it.each(titles)("places %s centred beside the close control, or at the inset", (title) => {

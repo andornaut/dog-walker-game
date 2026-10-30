@@ -14,6 +14,7 @@ import { inside } from "../testing/rects";
 import { SETTINGS_EXPORT_ROWS } from "../tools/layoutExport";
 import { closeFace } from "../ui/closeControl";
 import { LABEL_HELP_GAP } from "../ui/labelHelpGap";
+import { cardTitleRow } from "./homeLayout";
 import { MENU_TEXT_FIELDS } from "./menuText";
 import {
   INSTALL_STEPS,
@@ -31,6 +32,12 @@ import {
   volumeStepForKey,
   volumeSteps,
 } from "./settings";
+
+// The first pixel row under a card's title row.
+const belowTitleRow = (card: Rect): number => {
+  const row = cardTitleRow(card);
+  return row.y + row.height;
+};
 
 const TRACK: SliderTrack = { knobWidth: 10, width: 216, x: 112 };
 
@@ -177,8 +184,9 @@ function rowParts(i: number): [string, Rect][] {
 }
 
 describe("the settings card", () => {
-  const { band, close, panel, rows } = layout;
-  const bandBottom = band.y + band.height;
+  const { close, panel, rows } = layout;
+  const titleRow = cardTitleRow(panel);
+  const titleRowBottom = titleRow.y + titleRow.height;
 
   it("exports the rows the shipped notes wrap to", () => {
     expect(SETTINGS_EXPORT_ROWS).toEqual(shapes);
@@ -186,8 +194,8 @@ describe("the settings card", () => {
 
   it.each<[string, Rect, Rect]>([
     ["the card with every row", panel, screen],
-    ["the band", band, panel],
-    ["the close control's face", closeFace(close), band],
+    ["the title row", titleRow, panel],
+    ["the close control's face", closeFace(close), titleRow],
     ["the close control's hit area", close.hit, panel],
     ...rows.map(({ rect }, i): [string, Rect, Rect] => [`row ${i + 1}`, rect, panel]),
     ...rows.flatMap(({ rect }, i) =>
@@ -197,11 +205,11 @@ describe("the settings card", () => {
     expect(inside(inner, outer)).toBe(true);
   });
 
-  // Each row starts on the edge over it: the first at the band's bottom, each later one at its
+  // Each row starts on the edge over it: the first at the title row's bottom, each later one at its
   // separator.
-  it("starts each row on the band or the separator over it", () => {
+  it("starts each row on the title row or the separator over it", () => {
     expect(rows.map(({ rect }) => rect.y)).toEqual([
-      bandBottom,
+      titleRowBottom,
       ...layout.separators.map(({ y }) => y),
     ]);
   });
@@ -307,10 +315,7 @@ describe.each(keysOf(gameData.menuText.settings.installSteps))(
     const { steps: installSteps } = gameData.menuText.settings.installSteps[browser];
     const { room, style } = INSTALL_STEPS_FIT;
     const fitted = fitInFont("font-body", style, room, installSteps);
-    const { band, card, close, icon, steps } = installStepsLayout(
-      SCREEN_CONFIG,
-      fitted.lines.length,
-    );
+    const { card, close, icon, steps } = installStepsLayout(SCREEN_CONFIG, fitted.lines.length);
     const body = fontFileMetrics("font-body");
     // From the first line's capitals to the last line's lowest ink, at 2x.
     const stepsHeight =
@@ -320,8 +325,8 @@ describe.each(keysOf(gameData.menuText.settings.installSteps))(
 
     it.each<[string, Rect, Rect]>([
       ["the card", card, screen],
-      ["the band", band, card],
-      ["the close control's face", closeFace(close), band],
+      ["the title row", cardTitleRow(card), card],
+      ["the close control's face", closeFace(close), cardTitleRow(card)],
       ["the close control's hit area", close.hit, card],
       ["the steps", { height: stepsHeight, width: room, x: steps.x, y: steps.y }, card],
       ["the button glyph", glyph, card],
@@ -329,14 +334,14 @@ describe.each(keysOf(gameData.menuText.settings.installSteps))(
       expect(inside(inner, outer)).toBe(true);
     });
 
-    it("starts the steps under the band", () => {
-      expect(steps.y).toBeGreaterThan(band.y + band.height);
+    it("starts the steps under the title row", () => {
+      expect(steps.y).toBeGreaterThan(belowTitleRow(card));
     });
 
     it("centres the button glyph on the first line's capitals, left of the steps", () => {
       expect(2 * (icon.y - steps.y) + size).toBe(body.capHeight * 2);
       expect(icon.x + size).toBeLessThan(steps.x);
-      expect(glyph.y).toBeGreaterThan(band.y + band.height);
+      expect(glyph.y).toBeGreaterThan(belowTitleRow(card));
     });
   },
 );

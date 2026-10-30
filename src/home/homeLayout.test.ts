@@ -38,7 +38,7 @@ import {
   bankAmountText,
   bankWell,
   CARD_TEXT_ROOM,
-  cardBand,
+  cardTitleRow,
   detailCardLayout,
   detailCardRect,
   detailOwner,
@@ -460,7 +460,7 @@ const fitsScreen = (height: number) =>
 
 // Every dog's, gear item's and walker's detail card, owned or not, wraps its rows on the body font
 // and stays on screen. A dog's card sets its owner's photo and name between its breed and status,
-// inside the card's padding, clear of the band, the well, each other and every row of text.
+// inside the card's padding, clear of the title row, the well, each other and every row of text.
 describe("a detail card", () => {
   const dogs = keysOf(gameData.dogs);
   const gear = keysOf(gameData.shopGear);
@@ -578,12 +578,12 @@ describe("a detail card", () => {
         x: spot.role.x,
         y: spot.role.y + i * spot.role.pitch,
       }));
-      const band = cardBand({ height: layout.height, width, x: 0, y: 0 });
+      const titleRow = cardTitleRow({ height: layout.height, width, x: 0, y: 0 });
       const room = {
-        height: layout.height - pad - (band.y + band.height),
+        height: layout.height - pad - (titleRow.y + titleRow.height),
         width: width - 2 * pad,
         x: pad,
-        y: band.y + band.height,
+        y: titleRow.y + titleRow.height,
       };
       // Each row of text's ink, across its room.
       const textRows = (x: number, roomWidth: number, counts: DetailRow[], tops: number[]) =>
@@ -593,7 +593,7 @@ describe("a detail card", () => {
             : [],
         );
       const others: Rect[] = [
-        band,
+        titleRow,
         { height: well.size, width: well.size, x: well.x, y: layout.wellY },
         ...textRows(besideX, CARD_TEXT_ROOM.beside, rows.beside, layout.beside),
         ...textRows(pad, CARD_TEXT_ROOM.full, rows.below, layout.below),

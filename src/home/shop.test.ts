@@ -19,7 +19,7 @@ import { TEXT_SCALE } from "../ui/textFit";
 import { cents } from "../units";
 import { FEEDBACK } from "./feedback";
 import { gearByPrice, type Purchase } from "./home";
-import { cardBand } from "./homeLayout";
+import { cardTitleRow } from "./homeLayout";
 import {
   dogRows,
   gearRows,
@@ -351,13 +351,13 @@ describe("the shop's headings", () => {
   });
 });
 
-// A selected tab, lifted and framed, keeps 6px of card clear under the title band, and as much
+// A selected tab, lifted and framed, keeps 6px of card clear under the title row, and as much
 // over the list.
 describe("the shop's tabs", () => {
-  it("clear the title band and the list by 6px when selected", () => {
+  it("clear the title row and the list by 6px when selected", () => {
     const { list, panel, tab } = SHOP_LAYOUT;
-    const band = cardBand(panel);
-    const above = tab.drawY - FEEDBACK.liftPx - SELECT_OUTSET - (band.y + band.height);
+    const row = cardTitleRow(panel);
+    const above = tab.drawY - FEEDBACK.liftPx - SELECT_OUTSET - (row.y + row.height);
     const below = list.rect.y - (tab.drawY + tab.drawHeight + SELECT_OUTSET);
     expect(above).toBeGreaterThanOrEqual(6);
     expect(below).toBe(above);

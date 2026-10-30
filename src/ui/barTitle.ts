@@ -15,8 +15,10 @@ export function barTitleRoom(bar: Rect, close: CloseControl): number {
   return close.x - BAR_TITLE.closeGap - (bar.x + BAR_TITLE.inset);
 }
 
-// The first column of the title's ink, for ink inkWidth wide.
-export function barTitleLeft(bar: Rect, close: CloseControl, inkWidth: number): number {
-  const clear = Math.floor((close.x - bar.x - inkWidth) / 2);
+// The first column of the title's ink, for ink inkWidth wide, close undefined for a bar with no
+// close control.
+export function barTitleLeft(bar: Rect, close: CloseControl | undefined, inkWidth: number): number {
+  const right = close === undefined ? bar.x + bar.width : close.x;
+  const clear = Math.floor((right - bar.x - inkWidth) / 2);
   return bar.x + Math.max(clear, BAR_TITLE.inset);
 }

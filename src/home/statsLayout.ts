@@ -17,7 +17,7 @@ export const DOG_STATS: readonly DogStat[] = ["walks", "zones", "fired"];
 // the first.
 export const STATS_TABS: readonly StatsTab[] = ["badges", "dogs", "runs"];
 
-// The Logbook wears the Pet shop's page: its card, title band, close control and tab span,
+// The Logbook wears the Pet shop's page: its card, title, close control and tab span,
 // and every tab's content scrolling in the shop's list area beside the shop's scrollbar.
 const PANEL = SHOP_LAYOUT.panel;
 const VIEW = SHOP_LAYOUT.list.rect;

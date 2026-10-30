@@ -31,7 +31,7 @@ describe("the purchase confirm's layout", () => {
     expect(cancel.x + cancel.width).toBeLessThan(buy.x);
   });
 
-  it.each(["band", "well"] as const)("keeps the %s on the card", (part) => {
+  it.each(["titleRow", "well"] as const)("keeps the %s on the card", (part) => {
     expect(inside(LAYOUT[part], LAYOUT.card)).toBe(true);
   });
 
@@ -46,20 +46,25 @@ describe("the purchase confirm's layout", () => {
     },
   ] as const;
 
-  it("keeps the title's capitals in its band", () => {
+  it("keeps the title's capitals in its row", () => {
     const capHeight = fontFileMetrics("font-title").capHeight * 2;
-    expect(LAYOUT.title.capTop).toBeGreaterThanOrEqual(LAYOUT.band.y);
-    expect(LAYOUT.title.capTop + capHeight).toBeLessThanOrEqual(LAYOUT.band.y + LAYOUT.band.height);
-    expect(LAYOUT.title.room).toBeLessThanOrEqual(LAYOUT.band.width);
+    const row = LAYOUT.titleRow;
+    expect(LAYOUT.title.capTop).toBeGreaterThanOrEqual(row.y);
+    expect(LAYOUT.title.capTop + capHeight).toBeLessThanOrEqual(row.y + row.height);
+    expect(LAYOUT.title.room).toBeLessThanOrEqual(row.width);
   });
 
-  // Top to bottom: the band, the well, the price, the bank after and the buttons, each starting
+  // Top to bottom: the title row, the well, the price, the bank after and the buttons, each starting
   // below the one before it ends.
   const inkBottom = ({ font, place }: (typeof texts)[number]) =>
     place.capTop + inkRowsFromCapTop(fontFileMetrics(font)) * 2;
   const [, price, left] = texts;
   const stack = [
-    { bottom: LAYOUT.band.y + LAYOUT.band.height, name: "band", top: LAYOUT.band.y },
+    {
+      bottom: LAYOUT.titleRow.y + LAYOUT.titleRow.height,
+      name: "title row",
+      top: LAYOUT.titleRow.y,
+    },
     { bottom: LAYOUT.well.y + LAYOUT.well.height, name: "well", top: LAYOUT.well.y },
     { bottom: inkBottom(price), name: "price", top: LAYOUT.price.capTop },
     { bottom: inkBottom(left), name: "bank after", top: left.place.capTop },

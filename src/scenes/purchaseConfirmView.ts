@@ -8,7 +8,7 @@ import { PALETTE } from "../ui/palette";
 import { addDim } from "../ui/phaser/draw";
 import { addPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
 import { TEXT_SCALE } from "../ui/textFit";
-import { addDetailCard, addDetailWell } from "./homePanels";
+import { addDetailWell, addModalCard } from "./homePanels";
 import { addMenuButton } from "./uiKit";
 
 // Everything the purchase confirm draws from. The scene that opens it routes its taps and keys
@@ -30,8 +30,8 @@ export interface PurchaseConfirmHits {
 
 const LAYOUT = PURCHASE_CONFIRM_LAYOUT;
 
-// The confirm over everything the scene drew before it: the shop dimmed, the ui-detail-card
-// with its band and "Buy {name}?", the picture in its well, the price and the bank it would
+// The confirm over everything the scene drew before it: the shop dimmed, the modal card titled
+// "Buy {name}?" with no close control (Cancel closes it), the picture in its well, the price and the bank it would
 // leave, then Cancel and Buy. Returns where it is tapped.
 export function drawPurchaseConfirm(
   scene: Scene,
@@ -40,7 +40,7 @@ export function drawPurchaseConfirm(
 ): PurchaseConfirmHits {
   const { lines, picture, pressed } = input;
   layer.add(addDim(scene, LAYOUT.dim));
-  addDetailCard(scene, layer, LAYOUT.card, LAYOUT.band);
+  addModalCard(scene, layer, LAYOUT.card, lines.title, undefined);
   const centred = (
     at: { capTop: number; centreX: number; font: "body" | "title" },
     value: string,
@@ -54,7 +54,6 @@ export function drawPurchaseConfirm(
     });
     layer.add(label);
   };
-  centred(LAYOUT.title, lines.title, PALETTE.white);
   addDetailWell(scene, layer, LAYOUT.well);
   if (scene.textures.exists(picture.key)) {
     const at = LAYOUT.picture;
