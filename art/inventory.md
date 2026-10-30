@@ -149,6 +149,8 @@ Road sprites have depth variants `<key>@94`, `@88`, `@81`, `@75`, `@69`, `@62`, 
 | `ui-hit-flash-<colour>` | sprite | 16×64            | `play`            | amber, mauve, orange, pink, sky; left edge strip, mirrored for right                                                                                                          |
 | `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`, `lucky` | Stretched to 176×32                                                                                                                                                           |
 
+Each contact-debuff burst also shows its matching existing 16×16 HUD icon at 2× on a 40×40 `ui-panel` cream badge, inset 4px, for the same 720ms. The badge starts 26px right and 52px above the burst's centre, clamped 4px inside the road viewport. Badge and icon stay still with reduced motion too. No duplicate icon image is exported.
+
 ## Pulls and firing
 
 | Key               | Type   | Size  | Tags                     | Note                                                             |
