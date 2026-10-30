@@ -11,7 +11,7 @@ export const WORLD = {
   zones: [
     {
       art: "high-park",
-      density: { cards: 1.06, luckyFinds: 1.25, minorObstacles: 0.66, tips: 1 },
+      density: { cards: 1.12, luckyFinds: 1.25, minorObstacles: 0.66, tips: 1 },
       difficulty: 1,
       difficultyName: "Easiest",
       id: "highPark",
@@ -122,7 +122,7 @@ export const WORLD = {
     },
     {
       art: "cabbagetown",
-      density: { cards: 1.07, luckyFinds: 1, minorObstacles: 0.84, tips: 1 },
+      density: { cards: 1.23, luckyFinds: 1, minorObstacles: 0.84, tips: 1 },
       difficulty: 2,
       difficultyName: "Easy",
       id: "cabbagetown",
@@ -233,7 +233,7 @@ export const WORLD = {
     },
     {
       art: "kensington-market",
-      density: { cards: 0.94, luckyFinds: 1, minorObstacles: 0.85, tips: 1.2 },
+      density: { cards: 1.08, luckyFinds: 1, minorObstacles: 0.85, tips: 1.2 },
       difficulty: 3,
       difficultyName: "Normal",
       id: "kensingtonMarket",
@@ -344,7 +344,7 @@ export const WORLD = {
     },
     {
       art: "the-beaches",
-      density: { cards: 1.05, luckyFinds: 1.25, minorObstacles: 0.95, tips: 1 },
+      density: { cards: 1.21, luckyFinds: 1.25, minorObstacles: 0.95, tips: 1 },
       difficulty: 3,
       difficultyName: "Normal",
       id: "theBeaches",
@@ -392,7 +392,7 @@ export const WORLD = {
           iceCreamTruck: 0,
           ironFence2: 0,
           ironFence3: 0,
-          jogger: 5,
+          jogger: 3,
           kegDollyWorker: 0,
           kidOnABike: 2,
           leafPile: 0,
@@ -416,7 +416,7 @@ export const WORLD = {
           sandcastle: 3.75,
           sandwichBoard: 0,
           scooter: 0,
-          seagull: 3,
+          seagull: 5,
           segwayTourRider: 0,
           signSpinner: 0,
           stiltWalker: 0,
@@ -455,7 +455,7 @@ export const WORLD = {
     },
     {
       art: "distillery-district",
-      density: { cards: 0.97, luckyFinds: 1, minorObstacles: 1.25, tips: 1 },
+      density: { cards: 1.12, luckyFinds: 1, minorObstacles: 1.25, tips: 1 },
       difficulty: 4,
       difficultyName: "Hard",
       id: "distilleryDistrict",
@@ -566,7 +566,7 @@ export const WORLD = {
     },
     {
       art: "yonge-street",
-      density: { cards: 1.02, luckyFinds: 1, minorObstacles: 1.18, tips: 1 },
+      density: { cards: 1.17, luckyFinds: 1, minorObstacles: 1.3, tips: 1 },
       difficulty: 5,
       difficultyName: "Hardest",
       id: "yongeStreet",

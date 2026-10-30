@@ -3386,7 +3386,7 @@
     {
       "art": "high-park",
       "density": {
-        "cards": 1.06,
+        "cards": 1.12,
         "luckyFinds": 1.25,
         "minorObstacles": 0.66,
         "tips": 1
@@ -3509,7 +3509,7 @@
     {
       "art": "cabbagetown",
       "density": {
-        "cards": 1.07,
+        "cards": 1.23,
         "luckyFinds": 1,
         "minorObstacles": 0.84,
         "tips": 1
@@ -3632,7 +3632,7 @@
     {
       "art": "kensington-market",
       "density": {
-        "cards": 0.94,
+        "cards": 1.08,
         "luckyFinds": 1,
         "minorObstacles": 0.85,
         "tips": 1.2
@@ -3755,7 +3755,7 @@
     {
       "art": "the-beaches",
       "density": {
-        "cards": 1.05,
+        "cards": 1.21,
         "luckyFinds": 1.25,
         "minorObstacles": 0.95,
         "tips": 1
@@ -3807,7 +3807,7 @@
           "iceCreamTruck": 0,
           "ironFence2": 0,
           "ironFence3": 0,
-          "jogger": 5,
+          "jogger": 3,
           "kegDollyWorker": 0,
           "kidOnABike": 2,
           "leafPile": 0,
@@ -3831,7 +3831,7 @@
           "sandcastle": 3.75,
           "sandwichBoard": 0,
           "scooter": 0,
-          "seagull": 3,
+          "seagull": 5,
           "segwayTourRider": 0,
           "signSpinner": 0,
           "stiltWalker": 0,
@@ -3878,7 +3878,7 @@
     {
       "art": "distillery-district",
       "density": {
-        "cards": 0.97,
+        "cards": 1.12,
         "luckyFinds": 1,
         "minorObstacles": 1.25,
         "tips": 1
@@ -4001,9 +4001,9 @@
     {
       "art": "yonge-street",
       "density": {
-        "cards": 1.02,
+        "cards": 1.17,
         "luckyFinds": 1,
-        "minorObstacles": 1.18,
+        "minorObstacles": 1.3,
         "tips": 1
       },
       "difficulty": 5,
