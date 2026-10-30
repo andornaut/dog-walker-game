@@ -11,8 +11,7 @@ strip), icon-stinky; icon-dog-slot (32x32, a pack slot for sale in the shop: a d
 green plus badge, as the shop's item-<gear> art, outlined with icon_edge); ui-panel (24x24
 nine-slice, 4px corners), ui-hint (24x24 nine-slice, 8px corners), ui-hint-tail
 (8x6), ui-new-best (72x20 ribbon, text baked in with font-title); the start screen's ui-detail-card
-(24x24 nine-slice, 8px corners), ui-detail-band (24x22 nine-slice, 8px caps and 2px top and bottom,
-drawn 24 tall) and ui-detail-well (68x68); the shop list's ui-scroll-track (8x24) and
+(24x24 nine-slice, 8px corners) and ui-detail-well (68x68); the shop list's ui-scroll-track (8x24) and
 ui-scroll-thumb (6x24, three-slices with 3px caps); the walker section's ui-cork (32x32 seamless corkboard tile), the dogs section's ui-plaid
 (16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h
 (8x2) and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the card rows'
@@ -903,21 +902,6 @@ def detail_card():
     return chrome(Grid(24, 24), 0, 0, 24, 24, 2)
 
 
-def detail_band():
-    """24x22 nine-slice (8px caps, 2px top and bottom; the middle columns and navy rows tile):
-    the title band across the top of the detail card's paper and the Pet shop's card, navy over
-    an ink line like ui-section's heading band, in a 1px ink edge with its corners cut. The game
-    draws it 24 rows tall, so the 20x20 close control fits its right end with 2px clear above,
-    right and below, and writes the name in font-title x2, white (13.89:1), caps 7px below the
-    band's top."""
-    g = Grid(24, 22)
-    g.rect(1, 0, 22, 22, "ink")
-    g.rect(0, 1, 24, 20, "ink")
-    g.rect(1, 1, 22, 19, "navy")
-    g.rect(1, 1, 22, 1, "dslate")
-    return g
-
-
 def scroll_track():
     """8x24 three-slice (3px caps; the middle rows tile): the shop list's scrollbar track, a navy
     groove in a 1px ink edge with its corners cut, as tall as the list. Navy holds 9.59:1 on the
@@ -1640,7 +1624,6 @@ IMAGES = {
     "ui-lead-tag": lead_tag,
     "ui-owner-tab": lambda: to_image(owner_tab().outlined(False)),
     "ui-detail-card": lambda: to_image(detail_card().outlined(False)),
-    "ui-detail-band": lambda: to_image(detail_band().outlined(False)),
     "ui-detail-well": lambda: to_image(detail_well().outlined(False)),
     "ui-scroll-thumb": lambda: to_image(scroll_thumb().outlined(False)),
     "ui-scroll-track": lambda: to_image(scroll_track().outlined(False)),

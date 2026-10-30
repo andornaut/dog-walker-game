@@ -121,20 +121,19 @@ Names are `PALETTE` names in `src/ui/palette.ts`, or `K` names for the neutral g
 | `ui-zone-pips` on cream        | 3.0+  | `todo` dashed; `<zone>` and `<zone>-done` rimmed darker than their well; `-done` ticked                                     |
 | walnut on tan                  | 7.48  | Muddy's name on its pill                                                                                                    |
 | white on darkBrown             | 8.48  | Filled page dot                                                                                                             |
-| white on darkRed, blue, purple | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`                                                                                |
+| white on darkRed, blue, purple | 7.34+ | `ui-hit-label`, `ui-fired-plate`                                                                                            |
 | white on forest                | 7.80  | The purchase confirmation's title                                                                                           |
-| white on navy                  | 13.89 | `ui-detail-band` title                                                                                                      |
 | white over the dimmed road     | 4.5+  | Card subtitle                                                                                                               |
 | yellow on navy                 | 11.13 | `ui-scroll-thumb` in `ui-scroll-track`                                                                                      |
 
 ## UI
 
 - One chrome for every panel, bubble, plate, tile and card frame: a cream face in a 1px ink outer line and a 1px plum inner line, with a tan lip along its bottom and right (`chrome` in `art/tools/ui.py`); `ui-dog-card` takes a navy face with an ink inner line and lip instead. Corners are cut 1px (panels, cards), 2px (hints, detail cards) or 3px (quips). A coloured plate (`ui-hit-label`, `ui-fired-plate`) puts its face 4px in, inside a 2px cream band. Tails are cream in an ink line, laid over their bubble's ink row. No plain white boxes.
-- Wood is background only: full-screen backgrounds (dbrown with plum seams) and `ui-dog-card-band`. Navy bands (`ui-section`, `ui-detail-band`) head sections and cards; the zone banner's ribbon ends are navy.
+- Wood is background only: full-screen backgrounds (dbrown with plum seams) and `ui-dog-card-band`. Navy bands (`ui-section`) head the start screen's sections; the zone banner's ribbon ends are navy.
 - No overlay tips over the play area: no tutorial hands, arrows or hint panels drawn over the road. Teaching lives on the help pages and in the message strip.
 - A list longer than its view scrolls beside `ui-scroll-track` (8px wide, the list area's height): a navy groove in an ink edge, with `ui-scroll-thumb` (6px wide, yellow, amber lip) drawn 1px inside it. The rows and the track sit as one group with equal margins: the track's right edge is as far from the paper's edge as the rows' left edge is, and the rows narrow to leave the track 6px clear of them.
-- The close control is `ui-icon-button` with `icon-close` (the X centred on the navy face both ways, 4px of navy each side and 3px above and below). On a card or panel it sits 8px in from the frame's top and right edges, so it fills the right end of `ui-detail-band`, drawn 24 rows tall, with 2px clear above, right and below. On a full-screen page it takes the rightmost top-bar button's spot, 333,9.
-- A card or panel title is centred between its band's left edge and the close X, with at least 6px clear on each side; a title too wide for that starts 6px in and may run to 4px short of the X. A band with no X centres its title across the band.
+- The close control is `ui-icon-button` with `icon-close` (the X centred on the navy face both ways, 4px of navy each side and 3px above and below). On a card or panel it sits on the cream, 8px in from the frame's top and right edges. On a full-screen page it takes the rightmost top-bar button's spot, 333,9.
+- Cards and panels have no title band: the title sits on the cream at the top, centred across the card, clear of the close X at the top right. The choice cards' frames (`card-frame`, `card-frame-large`) keep those rows plain cream.
 - `ui-section` frames each start screen section: `neutral` (ink frame, navy band, cream heading) while nothing in it is chosen, `complete` (amber border and band, ink text) once something is. Each section has its own seamless fill under its tiles, repeated with TileSprite: `ui-cork` (walker), `ui-plaid` (dogs) and `ui-denim` ringed by `ui-stitch-h` and `ui-stitch-v` (the Pocket).
 - Fonts: `font-body` (Tiny5 a row taller, mixed case) for body text, quips and floating labels; `font-title` (Silkscreen, capitals) for titles, numbers and buttons. Floating numbers use the font, not sprites.
 - Text keeps one size per role everywhere: never step a font down to fit a line, a label or a name into its box. Where text doesn't fit, the box grows (taller, or a second line) or the words get shorter.
@@ -186,7 +185,7 @@ The walk HUD's layout is in `src/hud/walkHud.ts` and `topBar.ts`, and each piece
 
 ### Choice cards
 
-- Band colour by what opened the card: dred for an obstacle's encounter, purple for a fork's route.
+- The frame has no title band, and its `encounter` (an obstacle's card) and `route` (a fork's) tags are alike: the title sits centred on the cream above the art window.
 - Illustrations are road sprites at 1× on a scrap of the zone's ground, with no walker: a leash runs off the bottom edge. The ground keeps only its paving and joints, with no lane marks or flecks, and a path card's ground has no lone pixels. Each picture has one subject, usually Archie and the one thing he meets, with at most two small accents (hearts, a !, an arrow).
 - An encounter in more than one neighbourhood takes a setting that fits each of them: `card-cheese-crates-<option>` sets its crate at a brick shopfront's wooden door over stone paving.
 - The thief carries the walker's tip pouch he snatches, a green cloth drawstring pouch with a yellow coin on it, on his road sprite, his cards and `fx-hit-thief`, never the snatchers' grey-brown loot bundle. On the road it dangles by its drawstring from his fist inside his outline, so it never reads as a pickup, and is never smaller than 7×9, so it reads at `@50`.
