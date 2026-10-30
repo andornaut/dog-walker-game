@@ -70,7 +70,7 @@ function element<K extends keyof HTMLElementTagNameMap>(
 function pill(key: string, label: string, pressed: boolean, value: string): HTMLButtonElement {
   const button = element("button", label);
   button.type = "button";
-  button.className = "pill";
+  button.className = "pill app-button";
   button.dataset.key = key;
   button.dataset.value = value;
   button.setAttribute("aria-pressed", String(pressed));

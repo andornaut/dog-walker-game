@@ -16,13 +16,13 @@ import { devInSearch } from "../dev/runSetup";
 
 const colour = (name: keyof typeof palette) => `#${palette[name].hex}`;
 
-// The button copies the canvas buttons: amber face, orange lip, plum text.
+// Reload uses the same green primary face and forest lip as canvas actions.
 export const CRASH_SCREEN = installCrashScreen({
   buildLabel: BUILD_LABEL,
   colours: {
     background: colour("plum"),
-    buttonFace: colour("amber"),
-    buttonLip: colour("orange"),
+    buttonFace: colour("green"),
+    buttonLip: colour("forest"),
     ink: colour("ink"),
     text: colour("cream"),
   },

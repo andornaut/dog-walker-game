@@ -4,7 +4,7 @@
    --inset-* ones, on the turned frame's own edges. */
 
 :root {
-  --dev-bar-height: 24px;
+  --dev-bar-height: 44px;
 }
 
 /* The kit's frameTurnPortraitGame.css sizes the page: html no taller than the visible area

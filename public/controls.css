@@ -1,0 +1,136 @@
+/* Shared DOM counterparts of the canvas action and icon controls. */
+.app-button,
+.crash .crash-button {
+  --button-face: #ead4aa;
+  --button-text: #3e2731;
+  --button-lip: #e4a672;
+  --button-highlight: #ffffff;
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 128px;
+  max-width: 100%;
+  height: 44px;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 8px 4px;
+  border: 1px solid #181425;
+  border-radius: 0;
+  background: var(--button-face);
+  box-shadow:
+    inset 0 -4px 0 var(--button-lip),
+    inset 0 1px 0 var(--button-highlight);
+  color: var(--button-text);
+  font: inherit;
+  line-height: 1.1;
+  text-align: center;
+  text-decoration: none;
+  white-space: normal;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+:is(.app-button--primary, .crash-panel > .crash-button) {
+  --button-face: #63c74d;
+  --button-text: #181425;
+  --button-lip: #265c42;
+  --button-highlight: #fee761;
+}
+
+:is(.app-button--wide, .crash-panel > .crash-button) {
+  width: 296px;
+}
+
+.app-button:active:not(:disabled),
+.crash .crash-button:active:not(:disabled) {
+  padding-top: 2px;
+  padding-bottom: 2px;
+  box-shadow: inset 0 -2px 0 var(--button-lip);
+}
+
+.app-button:disabled,
+.crash .crash-button:disabled {
+  padding-top: 2px;
+  padding-bottom: 2px;
+  background: #a4a4a4;
+  box-shadow: none;
+  color: #4a4a4a;
+  opacity: 1;
+  cursor: default;
+}
+
+.app-button:focus-visible,
+.crash .crash-button:focus-visible {
+  outline: 2px solid #2ce8f5;
+  outline-offset: 3px;
+}
+
+.app-button[aria-pressed="true"] {
+  --button-face: #fee761;
+  --button-text: #3e2731;
+  --button-lip: #feae34;
+  font-weight: 600;
+}
+
+.app-button--icon {
+  position: relative;
+  width: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #ead4aa;
+}
+
+.app-button--icon::before {
+  position: absolute;
+  top: calc(50% - 10px);
+  left: calc(50% - 10px);
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #e4a672;
+  background: #262b44;
+  box-shadow:
+    inset 0 -2px 0 #b86f50,
+    inset 0 1px 0 #3a4466;
+  content: "";
+}
+
+.app-button--icon svg {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-1px);
+  fill: currentColor;
+  shape-rendering: crispEdges;
+}
+
+.app-button--icon:active:not(:disabled) {
+  padding: 0;
+  box-shadow: none;
+}
+
+.app-button--icon:active:not(:disabled)::before {
+  height: 18px;
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 0 #3a4466;
+}
+
+.app-button--icon:active:not(:disabled) svg {
+  transform: translateY(1px);
+}
+
+.app-button[hidden],
+.crash .crash-button[hidden] {
+  display: none;
+}
+
+/* Keep the wide Reload control inside the card at phone widths. */
+.crash .crash-panel {
+  padding-inline: 12px;
+}

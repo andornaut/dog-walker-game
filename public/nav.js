@@ -63,7 +63,7 @@
   const LONG = 2;
   const toTop = document.createElement("button");
   toTop.type = "button";
-  toTop.className = "to-top";
+  toTop.className = "to-top app-button app-button--icon";
   toTop.hidden = true;
   toTop.setAttribute("aria-label", "Scroll to top");
   toTop.title = "Scroll to top";

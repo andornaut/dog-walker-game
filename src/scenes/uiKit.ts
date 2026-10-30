@@ -199,14 +199,32 @@ const BUTTON_TAGS: Readonly<Record<ButtonLook, readonly string[]>> = {
 // The ui-button's face sinks this far into its lip when pressed, as the art draws it.
 export const BUTTON_PRESS_PX = BUTTON_SIZE.press;
 
-// A disabled button drawn in code: a flat grey face in an ink line at the pressed depth with
-// no lip, so it never looks raised.
-function drawDisabledButton(g: GameObjects.Graphics, rect: Rect): void {
-  drawFramedRect(
-    g,
-    { border: PALETTE.ink, fill: PALETTE[GREYED.face] },
-    { ...rect, height: rect.height - BUTTON_LIP_PX, y: rect.y + BUTTON_PRESS_PX },
-  );
+// The exported button's one-pixel ink outline, raised highlight and lip, or flat sunk face.
+function drawButtonChrome(
+  g: GameObjects.Graphics,
+  look: ButtonLook,
+  pressed: boolean,
+  rect: Rect,
+): void {
+  const { face, lip } = BUTTON_COLOURS[look];
+  const top = pressed || lip === null ? BUTTON_PRESS_PX : 0;
+  const drawn = { ...rect, height: rect.height - top, y: rect.y + top };
+  fillCutRect(g, PALETTE.ink, drawn, 1);
+  fillRect(g, PALETTE[face], insetRect(1, drawn));
+  if (top === 0 && lip !== null) {
+    fillRect(g, PALETTE[lip], {
+      height: BUTTON_LIP_PX,
+      width: rect.width - 2,
+      x: rect.x + 1,
+      y: rect.y + rect.height - BUTTON_LIP_PX - 1,
+    });
+    fillRect(g, look === "primary" ? PALETTE.yellow : PALETTE.white, {
+      height: 1,
+      width: rect.width - 2,
+      x: rect.x + 1,
+      y: rect.y + 1,
+    });
+  }
 }
 
 export interface MenuButton {
@@ -221,7 +239,6 @@ export function buttonFaces(
   rect: Rect,
   look: ButtonLook,
 ): (GameObjects.Graphics | GameObjects.NineSlice)[] {
-  const { face: faceColour, lip } = BUTTON_COLOURS[look];
   return BUTTON_TAGS[look].map((tag, i) => {
     const artTag = look === "disabled" && primary ? "go-disabled" : tag;
     const slice = addNineSlice(scene, "ui-button", rect, artTag);
@@ -229,16 +246,7 @@ export function buttonFaces(
       return slice;
     }
     const g = scene.add.graphics();
-    if (lip === null) {
-      drawDisabledButton(g, rect);
-      return g;
-    }
-    const pressed = i === 1;
-    const face = { ...rect, height: rect.height - BUTTON_LIP_PX };
-    if (!pressed) {
-      fillRect(g, PALETTE[lip], rect);
-    }
-    fillRect(g, PALETTE[faceColour], { ...face, y: face.y + (pressed ? BUTTON_PRESS_PX : 0) });
+    drawButtonChrome(g, look, i === 1, rect);
     return g;
   });
 }
@@ -373,11 +381,13 @@ export function addIconButton(
     const g = scene.add.graphics();
     const top = tag === "pressed" ? ICON_BUTTON.pressPx : 0;
     const size = ICON_BUTTON.size;
-    drawFramedRect(
-      g,
-      { border: PALETTE.ink, fill: PALETTE.navy },
-      { height: size - top, width: size, x, y: y + top },
-    );
+    if (top === 0) {
+      fillCutRect(g, PALETTE.brown, { height: 4, width: size, x, y: y + size - 4 }, 1);
+    }
+    const face = { height: size - 2, width: size, x, y: y + top };
+    fillCutRect(g, PALETTE.tan, face, 1);
+    fillRect(g, PALETTE.navy, insetRect(1, face));
+    fillRect(g, PALETTE.darkSlate, { height: 1, width: size - 3, x: x + 1, y: y + top + 1 });
     return g;
   });
   parent.add(faces);

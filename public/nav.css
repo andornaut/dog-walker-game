@@ -1,3 +1,5 @@
+@import url("/controls.css");
+
 /* The site navigation bar that public/nav.js builds: one row on every page, which scrolls
    sideways when its links are wider than the screen. */
 .art-nav {
@@ -83,42 +85,12 @@
   outline: 2px solid #feae34;
   outline-offset: -2px;
 }
-/* The scroll to top button that public/nav.js adds to long pages: a 44px square in the bar's
-   colours, 16px inside the bottom right corner of the safe area. */
+/* The shared icon control, fixed inside the safe area on long pages. */
 .to-top {
   position: fixed;
   right: calc(16px + env(safe-area-inset-right, 0px));
   bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   z-index: 20;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  margin: 0;
-  padding: 0;
-  color: #c0cbdc;
-  background: #181425;
-  border: 1px solid #3a4466;
-  border-radius: 4px;
-  box-shadow: 0 2px 0 #3e2731;
-  cursor: pointer;
-}
-.to-top[hidden] {
-  display: none;
-}
-.to-top svg {
-  width: 24px;
-  height: 24px;
-  fill: currentColor;
-  shape-rendering: crispEdges;
-}
-.to-top:hover {
-  color: #feae34;
-  border-color: #feae34;
-}
-.to-top:focus-visible {
-  outline: 2px solid #feae34;
-  outline-offset: 2px;
 }
 .to-top-spacer {
   height: calc(76px + env(safe-area-inset-bottom, 0px));

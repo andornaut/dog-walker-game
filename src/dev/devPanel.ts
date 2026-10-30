@@ -72,7 +72,11 @@ function el<K extends keyof HTMLElementTagNameMap>(
 }
 
 function button(text: string, onClick: () => void, className = "dev-button"): HTMLButtonElement {
-  const element = el("button", { className, textContent: text, type: "button" });
+  const element = el("button", {
+    className: `${className} app-button`,
+    textContent: text,
+    type: "button",
+  });
   element.addEventListener("click", onClick);
   return element;
 }
@@ -165,7 +169,7 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
   const barLabel = el("span");
   const bar = el(
     "button",
-    { className: "dev-bar", type: "button" },
+    { className: "dev-bar app-button app-button--wide", type: "button" },
     barLabel,
     el("span", { className: "dev-version", textContent: BUILD_LABEL }),
   );
@@ -231,7 +235,11 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
   );
   const saveCheats = SAVE_CHEATS.map(({ edit, label }) => button(label, () => editSave(edit)));
   const cancel = button("Cancel", () => stage({ kind: "cancel" }));
-  const apply = button("Apply", () => applyAndGo(state), "dev-button dev-primary");
+  const apply = button(
+    "Apply",
+    () => applyAndGo(state),
+    "dev-button dev-primary app-button--primary",
+  );
   const reset = button(
     "Reset save",
     () => {

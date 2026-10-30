@@ -11,6 +11,7 @@ import { CACHE_POLICY } from "./cachePolicy";
 
 // The kit tests the strategies; these test the game's policy on its own files.
 const precached = new Set([
+  "/controls.css",
   "/play/",
   "/nav.css",
   "/nav.js",
@@ -22,6 +23,7 @@ const fetchOf = (pathname: string) =>
 
 describe("the game's cache policy", () => {
   it.each([
+    ["the shared controls stylesheet", "/controls.css", "network-first"],
     ["the art manifest", "/art/manifest.json", "network-first"],
     ["the web app manifest", "/manifest.webmanifest", "network-first"],
     ["hashed build output, precached or not", "/assets/play-abc.js", "cache-first"],

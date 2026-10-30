@@ -133,78 +133,23 @@
       .actions {
         display: flex;
         justify-content: center;
-        gap: 16px;
+        gap: 12px;
         width: 100%;
-        max-width: 336px;
+        max-width: 296px;
         margin-top: 4px;
       }
-      /* The primary button: a raised green face on a forest lip, ink label. */
       .play {
-        display: block;
-        flex: 1 1 0;
-        min-width: 0;
-        max-width: 288px;
-        padding: 12px 24px;
         font-family: var(--f-display);
         font-size: 32px;
-        line-height: 1;
-        text-align: center;
-        text-decoration: none;
-        color: var(--ink);
-        background: var(--green);
-        border: 2px solid var(--ink);
-        box-shadow:
-          0 0 0 2px var(--cream),
-          0 6px 0 2px var(--forest);
-        position: relative;
-        top: 0;
       }
-      .play:hover {
-        background: #74d55e;
-      }
-      .play:active {
-        top: 4px;
-        box-shadow:
-          0 0 0 2px var(--cream),
-          0 2px 0 2px var(--forest);
-      }
-      .play:focus-visible,
-      .install:focus-visible,
-      .steps-close:focus-visible {
-        outline: 3px solid var(--yellow);
-        outline-offset: 6px;
-      }
-      /* The secondary button: Play's shape and height with a cream face on a tan lip. */
       .install,
       .steps-close {
-        flex: 0 0 auto;
-        padding: 18px 12px;
         font-family: var(--f-display);
         font-size: 20px;
-        line-height: 1;
-        color: var(--ink);
-        background: var(--cream);
-        border: 2px solid var(--ink);
-        box-shadow:
-          0 0 0 2px var(--cream),
-          0 6px 0 2px var(--tan);
-        position: relative;
-        top: 0;
-        cursor: pointer;
       }
-      .install[hidden] {
-        display: none;
-      }
-      .install:hover,
-      .steps-close:hover {
-        background: #f4e3c1;
-      }
-      .install:active,
-      .steps-close:active {
-        top: 4px;
-        box-shadow:
-          0 0 0 2px var(--cream),
-          0 2px 0 2px var(--tan);
+      /* A visible Install control makes Play and Install a compact pair. */
+      .actions:has(.install:not([hidden])) .play {
+        width: 128px;
       }
       /* The install steps for the browser's own menu (iOS, Firefox for Android), one browser's
          shown: a highlight's chrome and band over the dimmed page. */
@@ -437,8 +382,8 @@
           A cozy pixel-art lane runner for your phone. Four neighbourhoods a walk, about 8 minutes.
         </p>
         <div class="actions">
-          <a class="play" href="/play/">Play</a>
-          <button class="install" id="install" type="button" hidden>Install</button>
+          <a class="play app-button app-button--primary app-button--wide" href="/play/">Play</a>
+          <button class="install app-button" id="install" type="button" hidden>Install</button>
         </div>
         <p class="keys">Drag or tap to steer, or use the arrow keys.</p>
       </div>
@@ -574,7 +519,7 @@
           <h2 id="install-steps-ios">Add to Home Screen</h2>
           <p>Tap Share, then Add to Home Screen.</p>
         </div>
-        <button class="steps-close" type="button">Close</button>
+        <button class="steps-close app-button" type="button">Close</button>
       </div>
     </dialog>
   </body>

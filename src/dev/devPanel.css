@@ -18,24 +18,9 @@
 
 .dev-bar {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  width: 100%;
-  height: var(--dev-bar-height);
-  padding: 0 max(12px, var(--inset-left));
-  border: 0;
-  border-top: 1px solid var(--dev-line);
-  background: var(--dev-bg);
-  color: var(--dev-text);
+  margin-inline: auto;
   font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.dev-bar:hover,
-.dev-bar:focus-visible {
-  color: var(--dev-accent);
 }
 
 .dev-version {
@@ -144,30 +129,10 @@
   accent-color: var(--dev-accent);
 }
 
-.dev-button {
-  min-height: 36px;
-  padding: 6px 12px;
-  border: 1px solid var(--dev-accent);
-  border-radius: 4px;
-  background: transparent;
-  color: var(--dev-accent);
-  font: inherit;
-  cursor: pointer;
-}
-
-.dev-button:disabled {
-  cursor: default;
-  opacity: 0.4;
-}
-
-.dev-danger {
-  border-color: var(--dev-warn);
-  color: var(--dev-warn);
-}
-
 .dev-actions {
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-top: 8px;
 }
 
@@ -177,31 +142,15 @@
   border-top: 1px solid var(--dev-line);
 }
 
-/* One row of equal buttons, narrow enough for a 360px screen. */
+/* Standard compact controls wrap rather than compress their labels. */
 .dev-save {
   display: flex;
-  gap: 6px;
-}
-
-.dev-save .dev-button {
-  flex: 1 1 0;
-  min-width: 0;
-  padding-inline: 4px;
-  white-space: nowrap;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 /* The storage line under the save cheats. */
 .dev-note {
   margin: 12px 0 0;
   opacity: 0.7;
-}
-
-.dev-actions .dev-primary {
-  flex: 1;
-}
-
-.dev-primary {
-  background: var(--dev-accent);
-  color: var(--dev-bg);
-  font-weight: 700;
 }
