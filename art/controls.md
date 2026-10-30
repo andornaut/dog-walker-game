@@ -1,6 +1,6 @@
 # Controls
 
-The normal-form specification for in-game controls. The [style guide](style-guide.md) owns the wider art direction, and the [inventory](inventory.md) owns exported asset sizes and tags.
+The normal-form specification for in-game controls. [`gameplay/design.md`](../gameplay/design.md) is canonical for gameplay semantics and player wording. The [style guide](style-guide.md) owns the wider art direction, and the [inventory](inventory.md) owns exported asset sizes and tags.
 
 **Implemented** means verified in the control primitives and input handlers. **Approved target** means an approved design requirement; integration and deployment must be verified separately. **Proposed pending** means a choice has not been approved. No proposed colours, sizes or control types are introduced here.
 
@@ -8,14 +8,16 @@ The normal-form specification for in-game controls. The [style guide](style-guid
 
 This guide covers the Phaser canvas game: actions, navigation icons, item selection, settings switches, sliders and their labels. The website, data browser and developer panel have separate DOM controls.
 
-| Control                       | Reason for exception                                                   | Retained rules                                                                                                  |
-| ----------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Choice cards                  | Tall illustrated choices carry art, prices and consequences            | Preserve their card geometry, readable text, selection feedback and explicit activation                         |
-| Home and walk top bars        | Buttons and cash/effect wells share a 360px-wide, 40px-tall bar        | Approved 34×44 hits; 20×20 navy faces, 16×16 glyphs, 2px press; no second row                                   |
-| Joystick                      | Not applicable: this game uses lane gestures and keys                  | No joystick asset, state or input contract is defined                                                           |
-| Pause menu                    | Controls sit inside a pause overlay with Resume and navigation actions | Apply ordinary primary/secondary roles and text-button targets; preserve pause and close behaviour              |
-| Pet shop                      | The building and its board form one bespoke control                    | Preserve its building hit area, green board and press feedback; do not force building art into a compact button |
-| Settings switches and sliders | A small indicator is activated through its whole labelled row          | Keep the row hit area, labels, keyboard behaviour and non-colour state cues                                     |
+| Control                       | Reason for exception                                                   | Retained rules                                                                                                                    |
+| ----------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Choice cards                  | Tall illustrated choices carry art, prices and consequences            | Preserve card geometry, readable text and selection feedback; tap release chooses, a hold enlarges, and outside taps never choose |
+| Hold to explain               | A still hold requests details rather than activation                   | Keep hold and tap-release distinct; pause the walk for its detail card and consume the dismissing tap                             |
+| Home and walk top bars        | Buttons and cash/effect wells share a 360px-wide, 40px-tall bar        | Approved 34×44 hits; 20×20 navy faces, 16×16 glyphs, 2px press; no second row                                                     |
+| Joystick                      | Not applicable: this game uses lane gestures and keys                  | No joystick asset, state or input contract is defined                                                                             |
+| Lane steering                 | Road input is a movement gesture, not a button                         | Preserve immediate road taps, release-classified doghouse-row taps, lane drags and existing keys; top-bar taps never steer        |
+| Pause menu                    | Controls sit inside a pause overlay with Resume and navigation actions | Apply ordinary primary/secondary roles and text-button targets; preserve pause and close behaviour                                |
+| Pet shop                      | The building and its board form one bespoke control                    | Preserve its building hit area, green board and press feedback; do not force building art into a compact button                   |
+| Settings switches and sliders | A small indicator is activated through its whole labelled row          | Keep the row hit area, labels, keyboard behaviour and non-colour state cues                                                       |
 
 ## Design tokens
 
@@ -90,9 +92,13 @@ Text-button chrome and disabled rendering are implemented in [`selection.ts`](..
 
 Use `font-title` for buttons, headings and numbers, and `font-body` for body/help text. [`textFit.ts`](../src/ui/textFit.ts) fixes role scales: never shrink a label to fit. Keep the label/help ink gap, centre an action label on its face, and move the label with the pressed face.
 
+All player-facing strings, including names, labels, prices, goals, unavailable reasons and explanations, come from the text data in [`src/data/`](../src/data/). Follow the rulebook's [Voice](../gameplay/design.md#voice): Canadian spelling and one consistent name and label per thing. Reword the data consistently or grow the box; never shrink text or use a local shortened alias.
+
 A chrome glyph sits at +2,+1 inside `ui-icon-button`, or +2,+3 while pressed. Settings, Exit and Home retain their established shapes. Content icons use their outlined art; chrome glyphs use their flat cream/tan palette. A gear item keeps its colours at every exported size.
 
 Disabled pictures use the existing neutral-grey copy and nslate art box. An affordable, unowned item keeps its full-colour picture on nlgrey, with a bill and buy plate. A short item uses a padlock and short-price plate; a goal-locked walker uses the goal plate. Labels, badges and plate shapes supplement colour. A selected picture uses its existing deepAmber box; unselected owned pictures use tan.
+
+Unavailable controls keep their readable price, goal or reason and the existing feedback. A full pack reports that it is full; a goal-locked walker shakes and explains its goal; an unowned item retains its shop action; an incomplete Start walk keeps its missing-choice feedback. A grey face does not erase these distinctions or make every unavailable tile inert.
 
 ## Selection controls
 
@@ -105,6 +111,8 @@ These are canvas controls. Checkbox-like and radio-like describe their game sema
 | Walker tile, clearable exclusive selection | Zero or one owned walker; a second activation clears it; empty prevents starting            | Normal, selected, disabled/goal-locked                                              | Existing portrait/perk tile         | Walker name and locked goal                                | Existing 77×44 grid cell                | Arrows move focus; Enter/Space activates; arrows alone do not select | Implemented canvas control |
 | Settings switch                            | Sound and reduced motion change and save immediately                                        | On/off with knob side plus tick/cross; no mixed or generic disabled switch tag      | Existing 32×16 `ui-switch`          | Whole row includes title, note and matching on/off icon    | Whole measured settings row, 328px wide | Up/Down focuses row; Enter/Space toggles                             | Implemented canvas control |
 
+Walkers, dogs and Pocket items share the same pick toggle: activating a picked item again clears it. The Pocket is optional; a walker and at least one dog are required to start. Keep picked, available, for-sale, goal-locked and pack-full states plainly distinct through the picture, readable label/plate, badge and feedback. The picked state uses both a gold frame and a checkmark, so selection never relies on colour alone.
+
 The switch's `on` tag means sound is enabled for the sound row and reduced motion is enabled for the motion row. Volume controls are sliders, not switches: drag the row, or use Left/Right, Home and End while focused; muted sliders are disabled.
 
 Gold frame/face and `ui-check` identify picked items. Selected tabs retain their selected frame and lift without a check badge; their `ui-select` holds its first frame and does not pulse. Generic selected controls use the existing lift/shadow feedback; the approved start-screen card treatment keeps the ground outside the individual cards clear. A pack-full tile and an unowned tile can share a grey face while retaining different actions: an unowned item can open the shop, while a full pack requires a dog to be removed first.
@@ -116,7 +124,9 @@ Source contracts: [`interaction.ts`](../src/ui/interaction.ts), [`home.ts`](../s
 - Show press feedback at once: `fx-tap` bursts under the finger. A modal opened by the press opens immediately, and the burst finishes on top of it. Text and chrome move together, and a cancelled press does not activate its former target.
 - Keep keyboard focus distinct from selection. Start-screen arrow keys move the visible focus ring; Enter or Space activates. Settings use the row focus described above. These are custom canvas handlers, not a native Tab sequence.
 - Escape or P closes the current overlay/pause level; M toggles sound. Retain the existing context-specific shortcuts and browser-back behaviour in [`keyBindings.ts`](../src/input/keyBindings.ts).
-- A hold on an item opens its explanation; a tap selects or opens the appropriate action. Do not require hover for information.
+- UI tap actions activate on release over the matching target. A recognized hold opens details or enlarges a card, and its release must not also toggle or choose. Do not require hover for information; preserve the bespoke steering exception above.
+- Preserve modal tap guards. A tap that dismisses a panel is consumed: it must not select, buy, steer or activate content underneath. The top bar retains only its deliberate actions under the rulebook's panel conventions. Choice cards wait for an explicit choice; outside taps do nothing.
+- Retain the existing keyboard bindings and default choices. In confirmations, key 1 keeps the walk going or keeps playing, as the rulebook defines; it must not become the destructive alternative. This does not turn choice-card key 1 into an automatic or default choice.
 - Essential labels hold 4.5:1 contrast, or 3:1 at 2× and larger; essential icons hold 3:1. Inactive controls retain their existing exemption. State also uses text, glyphs, shape or position.
 - Reduced motion preserves visible selection and readable static feedback while skipping movement. Sound is supplementary; it cannot be the sole action/state cue.
 
@@ -139,10 +149,11 @@ Edit generators in [`art/tools/ui.py`](tools/ui.py) and [`art/tools/screens.py`]
 
 ## Review checklist
 
-- Check the control's role, semantic state and availability separately.
+- Check the control's role, semantic state and availability separately, including its readable price, goal or unavailable reason.
 - Use an approved geometry token or document a concrete exception; verify non-overlapping hit areas.
-- Check text at its fixed role size, including the longest label and the disabled state.
-- Check normal, pressed, disabled, selected and keyboard-focus feedback where each is implemented; do not invent absent states.
+- Check text at its full role size, including the longest label and the disabled state; verify canonical player wording and Canadian spelling in the text data.
+- Check normal, pressed, disabled, selected and keyboard-focus feedback where each is implemented; do not invent absent states. Verify gold frame plus checkmark and the shared pick-again-to-clear behaviour.
+- Check tap release, hold/detail separation, consumed modal dismissals and existing safe continuation defaults.
 - Check the same control by touch/pointer, keyboard and reduced motion; test only the changed behaviour locally, with the combined gate owned by the release process.
 - Show one- or two-item visual changes in context before committing; large batches may use a grouped review.
 - Match generator output, code fallback, source layout and this guide before describing a target as implemented. Confirm deployment separately.
