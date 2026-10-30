@@ -11,7 +11,7 @@ export const WORLD = {
   zones: [
     {
       art: "high-park",
-      density: { cards: 0.89, luckyFinds: 1.25, minorObstacles: 0.66, tips: 1 },
+      density: { cards: 0.96, luckyFinds: 1.25, minorObstacles: 0.66, tips: 1 },
       difficulty: 1,
       difficultyName: "Easiest",
       id: "highPark",
@@ -122,7 +122,7 @@ export const WORLD = {
     },
     {
       art: "cabbagetown",
-      density: { cards: 0.76, luckyFinds: 1, minorObstacles: 0.84, tips: 1 },
+      density: { cards: 0.87, luckyFinds: 1, minorObstacles: 0.84, tips: 1 },
       difficulty: 2,
       difficultyName: "Easy",
       id: "cabbagetown",
@@ -233,7 +233,7 @@ export const WORLD = {
     },
     {
       art: "kensington-market",
-      density: { cards: 0.99, luckyFinds: 1, minorObstacles: 0.7, tips: 1.2 },
+      density: { cards: 0.85, luckyFinds: 1, minorObstacles: 0.7, tips: 1.2 },
       difficulty: 3,
       difficultyName: "Normal",
       id: "kensingtonMarket",
@@ -344,7 +344,7 @@ export const WORLD = {
     },
     {
       art: "the-beaches",
-      density: { cards: 0.81, luckyFinds: 1.25, minorObstacles: 1.02, tips: 1 },
+      density: { cards: 0.95, luckyFinds: 1.25, minorObstacles: 1.02, tips: 1 },
       difficulty: 3,
       difficultyName: "Normal",
       id: "theBeaches",
@@ -455,7 +455,7 @@ export const WORLD = {
     },
     {
       art: "distillery-district",
-      density: { cards: 1.11, luckyFinds: 1, minorObstacles: 1.25, tips: 1 },
+      density: { cards: 0.88, luckyFinds: 1, minorObstacles: 1.25, tips: 1 },
       difficulty: 4,
       difficultyName: "Hard",
       id: "distilleryDistrict",
@@ -566,7 +566,7 @@ export const WORLD = {
     },
     {
       art: "yonge-street",
-      density: { cards: 0.94, luckyFinds: 1, minorObstacles: 1.18, tips: 1 },
+      density: { cards: 0.93, luckyFinds: 1, minorObstacles: 1.18, tips: 1 },
       difficulty: 5,
       difficultyName: "Hardest",
       id: "yongeStreet",

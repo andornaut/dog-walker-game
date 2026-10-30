@@ -3386,7 +3386,7 @@
     {
       "art": "high-park",
       "density": {
-        "cards": 0.89,
+        "cards": 0.96,
         "luckyFinds": 1.25,
         "minorObstacles": 0.66,
         "tips": 1
@@ -3509,7 +3509,7 @@
     {
       "art": "cabbagetown",
       "density": {
-        "cards": 0.76,
+        "cards": 0.87,
         "luckyFinds": 1,
         "minorObstacles": 0.84,
         "tips": 1
@@ -3632,7 +3632,7 @@
     {
       "art": "kensington-market",
       "density": {
-        "cards": 0.99,
+        "cards": 0.85,
         "luckyFinds": 1,
         "minorObstacles": 0.7,
         "tips": 1.2
@@ -3755,7 +3755,7 @@
     {
       "art": "the-beaches",
       "density": {
-        "cards": 0.81,
+        "cards": 0.95,
         "luckyFinds": 1.25,
         "minorObstacles": 1.02,
         "tips": 1
@@ -3878,7 +3878,7 @@
     {
       "art": "distillery-district",
       "density": {
-        "cards": 1.11,
+        "cards": 0.88,
         "luckyFinds": 1,
         "minorObstacles": 1.25,
         "tips": 1
@@ -4001,7 +4001,7 @@
     {
       "art": "yonge-street",
       "density": {
-        "cards": 0.94,
+        "cards": 0.93,
         "luckyFinds": 1,
         "minorObstacles": 1.18,
         "tips": 1
