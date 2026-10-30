@@ -2,6 +2,7 @@ import type { Random } from "@andornaut/game-kit/random";
 import type { Point, Rect } from "@andornaut/game-kit/rect";
 import type { Scene } from "phaser";
 
+import { debuffIconKey } from "../../assets/iconKeys";
 import { choiceCues, pullCues, stepCues } from "../../audio/stepCues";
 import { gameData } from "../../data";
 import type { DogId, EncounterId, HintId, HintTrigger } from "../../data/types";
@@ -54,8 +55,12 @@ import {
 import { BUFF_POP, CHARM, charmByWalkerRect, charmOverRect } from "../../layout/buffLayout";
 import { bumpFlash, type BumpSource } from "../../layout/bumpFlash";
 import {
+  contactDebuffEffects,
+  DEBUFF_BADGE,
+  debuffBadgeRect,
   DOG_REACTIONS,
   dogReaction,
+  HIT_ART,
   hitEffects,
   obstacleMotion,
   splashEffect,
@@ -99,6 +104,7 @@ import { dogTop } from "../pullSignals";
 import { SCENE_KEYS } from "../sceneKeys";
 import { soundboardOf } from "../soundboard";
 import { playEffect, tagTopY } from "../sprites";
+import { addPanel } from "../uiKit";
 import { flashWhite, moveObstacle, playHitEffects, shakeRoad } from "./hitFx";
 import type { ItemViews } from "./itemViews";
 import type { PackView } from "./packView";
@@ -296,7 +302,7 @@ export class RunMoments {
 
   // Sounds (stepCues), bursts, labels, hints and strip lines for what happened in a step,
   // around the pack at pack.
-  walked(step: WalkStep, pack: Point): void {
+  walked(before: RunState, pack: Point, step: WalkStep): void {
     this.pack = pack;
     this.heartPops = this.hudHeartPops(step);
     const marks = roadMarks(gameData, stepValues(step));
@@ -366,13 +372,49 @@ export class RunMoments {
     // dog's feet, its edge flash and the bump's flash, with a plain obstacle's stop; the walker
     // stumbles and every dog reacts and shakes off. A minor obstacle with contact plays its bump's
     // cues instead (playBumpHit), as the splash, the shake-off and the edge flash strips are a
-    // contact obstacle's own; then each pops its effects' changes.
+    // contact obstacle's own. An applied or refreshed contact debuff adds its own burst above
+    // those cues; then each pops its effects' changes.
+    let beforeContact = before;
     for (const { dog, item, outcome, source } of step.contacts) {
       if (source.kind === "minor") {
         this.playBumpHit(dog, { ...item, kind: source.obstacle }, step, pack);
       } else {
         this.playContactHit(dog, source.encounter, step);
       }
+      const top = this.deps.pack.dogPoint(dog);
+      if (top !== undefined) {
+        const contact =
+          source.kind === "minor"
+            ? gameData.minorObstacles[source.obstacle].contact
+            : gameData.encounters[source.encounter].resolution;
+        const effects = contact !== undefined && "effects" in contact ? contact.effects : [];
+        const bursts = contactDebuffEffects(this.deps.still(), beforeContact, {
+          after: outcome.state,
+          effects,
+          top,
+        });
+        playHitEffects(this.scene, { depth: DEPTH.fx, holdMs: HIT_ART.debuffHoldMs }, bursts);
+        for (const { at, debuff } of bursts) {
+          const key = debuffIconKey(debuff);
+          if (!this.scene.textures.exists(key)) {
+            continue;
+          }
+          const rect = debuffBadgeRect(LAYOUT.roadView, at);
+          const { above, iconInset, iconSize } = DEBUFF_BADGE;
+          const depth = DEPTH.fx + above;
+          const panel = addPanel(this.scene, rect).setDepth(depth);
+          const icon = this.scene.add
+            .image(rect.x + iconInset, rect.y + iconInset, key)
+            .setOrigin(0)
+            .setDisplaySize(iconSize, iconSize)
+            .setDepth(depth + 1);
+          this.scene.time.delayedCall(HIT_ART.debuffHoldMs, () => {
+            panel.destroy();
+            icon.destroy();
+          });
+        }
+      }
+      beforeContact = outcome.state;
       this.addChanges(overPack(pack), outcomeChanges(outcome));
       this.afterOutcome(outcome);
     }

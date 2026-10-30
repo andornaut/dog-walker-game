@@ -2,8 +2,15 @@ import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { MinorObstacleId } from "../data/types";
+import { SCREEN_LAYOUT } from "../data/screen";
+import type { Effect, MinorObstacleId } from "../data/types";
+import { applyInstantEncounter, applyMinorContact } from "../rules/choices";
+import type { RunState } from "../state/runState";
+import { testState } from "../testing/runState";
 import {
+  contactDebuffEffects,
+  DEBUFF_BADGE,
+  debuffBadgeRect,
   dogReaction,
   type FlashCue,
   HIT_ART,
@@ -27,6 +34,36 @@ const struck = (kind: HitKind, obstacle: MinorObstacleId | null): StruckDog => (
 const STANDING_HAZARD = keysOf(gameData.minorObstacles).find(
   (id) => "movement" in gameData.minorObstacles[id] && OBSTACLE_HITS[id] === undefined,
 );
+
+const CONTACTS = [
+  ...keysOf(gameData.minorObstacles).flatMap((id) => {
+    const { contact } = gameData.minorObstacles[id];
+    return contact === undefined
+      ? []
+      : [
+          {
+            apply: (state: RunState) => applyMinorContact(gameData, state, id, ["archie"]),
+            effects: contact.effects,
+            name: id,
+          },
+        ];
+  }),
+  ...keysOf(gameData.encounters).flatMap((id) => {
+    const { resolution } = gameData.encounters[id];
+    return resolution.kind !== "contact"
+      ? []
+      : [
+          {
+            apply: (state: RunState) => applyInstantEncounter(gameData, state, id, ["archie"]),
+            effects: resolution.effects,
+            name: id,
+          },
+        ];
+  }),
+];
+
+const debuffsIn = (effects: readonly Effect[]) =>
+  effects.flatMap((effect) => (effect.kind === "debuff" ? [effect.debuff] : []));
 
 // Which of the obstacle's angle, dx and dy its motion moves, and the angle it ends at.
 function motionOf(steps: readonly MotionStep[]): { ends: number; moves: string[] } {
@@ -133,6 +170,92 @@ describe("hit effects with reduced motion", () => {
     expect(obstacleMotion(true, struck(kind, obstacle), 1)).toEqual([]);
     expect(dogReaction(true, "hit")).toEqual([]);
     expect(dogReaction(true, "splash")).toEqual([]);
+  });
+});
+
+describe("contact debuff bursts", () => {
+  it.each(CONTACTS)(
+    "shows the applied debuffs for $name above its hit cues",
+    ({ apply, effects }) => {
+      const before = testState({ archie: 3 });
+      const { state: after } = apply(before);
+      const bursts = contactDebuffEffects(false, before, { after, effects, top: TOP });
+      expect(bursts.map(({ key }) => key)).toEqual(
+        debuffsIn(effects).map((debuff) => HIT_ART.debuffs[debuff].key),
+      );
+      const hit = hitEffects(false, struck("plain", "hedge"));
+      expect(
+        bursts.every(({ above }) => above > Math.max(...hit.map((effect) => effect.above))),
+      ).toBe(true);
+      expect(bursts.map(({ at }) => at)).toEqual(bursts.map(() => hit[0]?.at));
+      expect(bursts.every(({ frame }) => frame === null)).toBe(true);
+    },
+  );
+
+  it.each(CONTACTS)("shows an unchanged-duration refresh for $name", ({ apply, effects }) => {
+    const { state: before } = apply(testState({ archie: 3 }));
+    const { state: after } = apply(before);
+    expect(after.debuffs).toEqual(before.debuffs);
+    expect(
+      contactDebuffEffects(false, before, { after, effects, top: TOP }).map(({ key }) => key),
+    ).toEqual(debuffsIn(effects).map((debuff) => HIT_ART.debuffs[debuff].key));
+  });
+
+  it.each(CONTACTS)("shows no debuff burst when $name applies nothing", ({ apply, effects }) => {
+    const { state: before } = apply(testState({ archie: 3 }));
+    expect(contactDebuffEffects(false, before, { after: before, effects, top: TOP })).toEqual([]);
+  });
+
+  it.each(CONTACTS)(
+    "holds the applied debuff peaks with reduced motion for $name",
+    ({ apply, effects }) => {
+      const before = testState({ archie: 3 });
+      const { state: after } = apply(before);
+      const bursts = contactDebuffEffects(true, before, { after, effects, top: TOP });
+      expect(bursts.map(({ frame }) => frame)).toEqual(
+        debuffsIn(effects).map((debuff) => HIT_ART.debuffs[debuff].peak),
+      );
+    },
+  );
+
+  it("does not attribute another effect's application to a contact", () => {
+    const first = CONTACTS[0];
+    const other = CONTACTS.find(
+      ({ effects }) => debuffsIn(effects)[0] !== debuffsIn(first?.effects ?? [])[0],
+    );
+    expect(first).toBeDefined();
+    expect(other).toBeDefined();
+    if (first === undefined || other === undefined) {
+      return;
+    }
+    const before = testState({ archie: 3 });
+    const { state: after } = first.apply(before);
+    expect(
+      contactDebuffEffects(false, before, { after, effects: other.effects, top: TOP }),
+    ).toEqual([]);
+  });
+});
+
+describe("contact debuff badges", () => {
+  const view = SCREEN_LAYOUT.roadView;
+
+  it("places an unclamped badge beside the burst's upper right", () => {
+    const rect = debuffBadgeRect(view, TOP);
+    expect(rect.x - TOP.x).toBe(DEBUFF_BADGE.x);
+    expect(rect.y - TOP.y).toBe(DEBUFF_BADGE.y);
+  });
+
+  it.each([
+    ["left", { x: view.x - view.width, y: TOP.y }],
+    ["right", { x: view.x + view.width, y: TOP.y }],
+    ["top", { x: TOP.x, y: view.y - view.height }],
+    ["bottom", { x: TOP.x, y: view.y + view.height * 2 }],
+  ])("keeps the whole badge inside the road at the %s edge", (_, centre) => {
+    const rect = debuffBadgeRect(view, centre);
+    expect(rect.x).toBeGreaterThanOrEqual(view.x + DEBUFF_BADGE.viewInset);
+    expect(rect.y).toBeGreaterThanOrEqual(view.y + DEBUFF_BADGE.viewInset);
+    expect(rect.x + rect.width).toBeLessThanOrEqual(view.x + view.width - DEBUFF_BADGE.viewInset);
+    expect(rect.y + rect.height).toBeLessThanOrEqual(view.y + view.height - DEBUFF_BADGE.viewInset);
   });
 });
 

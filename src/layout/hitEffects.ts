@@ -1,9 +1,10 @@
-import type { Point } from "@andornaut/game-kit/rect";
+import type { Point, Rect } from "@andornaut/game-kit/rect";
 
-import type { MinorObstacleId } from "../data/types";
+import type { DebuffId, Effect, MinorObstacleId } from "../data/types";
+import type { RunState } from "../state/runState";
 
-// The cues of a plain obstacle's hit, a mover's hit and a contact obstacle's splash, all over
-// the road at its fx depth. They are cosmetic: nothing here reads or changes the walk.
+// Cosmetic cues for hits and applied contact debuffs, over the road at its fx depth. Debuff
+// bursts read outcome application counts; no cue changes the walk.
 
 // A plain hit is on a standing obstacle; a moving hit is on a mover.
 export type HitKind = "moving" | "plain";
@@ -12,13 +13,20 @@ type Debris = "leaves" | "litter";
 // wide obstacle shakes sideways.
 type ObstacleMotion = "rock" | "shake" | "tip";
 
-// Every effect plays its art's play tag once. peak is the frame reduced motion holds for the
-// stop. The splash's ground point, where the dog's feet meet the water, is on groundRow of its
+// Every effect plays its art's play tag once. peak is the frame reduced motion holds.
+// The splash's ground point, where the dog's feet meet the water, is on groundRow of its
 // height-pixel frame.
 export const HIT_ART = {
   bump: { key: "fx-bump", peak: 1 },
   bumpBig: { key: "fx-bump-big", peak: 1 },
   debris: { leaves: { key: "fx-debris-leaves" }, litter: { key: "fx-debris-litter" } },
+  debuffHoldMs: 720,
+  debuffs: {
+    muddy: { key: "fx-debuff-muddy", peak: 2 },
+    spotlight: { key: "fx-debuff-spotlight", peak: 2 },
+    stinky: { key: "fx-debuff-stinky", peak: 2 },
+    zoomies: { key: "fx-debuff-zoomies", peak: 2 },
+  } satisfies Record<DebuffId, { readonly key: string; readonly peak: number }>,
   splash: { groundRow: 40, height: 48, key: "fx-splash", peak: 2 },
   tag: "play",
 } as const;
@@ -55,6 +63,34 @@ export interface HitEffect {
   readonly key: string;
 }
 
+export interface DebuffHitEffect extends HitEffect {
+  readonly debuff: DebuffId;
+}
+
+// The existing 16px HUD icon at 2x, inset in a cream badge beside its burst.
+export const DEBUFF_BADGE = {
+  above: 3,
+  iconInset: 4,
+  iconSize: 32,
+  size: 40,
+  viewInset: 4,
+  x: 26,
+  y: -52,
+} as const;
+
+// Keep the whole badge inside the road viewport; its icon moves with it.
+export function debuffBadgeRect(view: Rect, centre: Point): Rect {
+  const { size, viewInset, x, y } = DEBUFF_BADGE;
+  const left = view.x + viewInset;
+  const top = view.y + viewInset;
+  return {
+    height: size,
+    width: size,
+    x: Math.min(view.x + view.width - viewInset - size, Math.max(left, Math.round(centre.x + x))),
+    y: Math.min(view.y + view.height - viewInset - size, Math.max(top, Math.round(centre.y + y))),
+  };
+}
+
 export interface StruckDog {
   readonly kind: HitKind;
   readonly obstacle: MinorObstacleId | null;
@@ -75,6 +111,32 @@ export function hitEffects(still: boolean, hit: StruckDog): HitEffect[] {
     return [bump];
   }
   return [bump, { above: 1, at, frame: null, key: HIT_ART.debris[debris].key }];
+}
+
+// A contact's debuffs that actually applied, including a refresh with an unchanged timer.
+// Its burst sits above the bump and debris; prevention leaves the application count unchanged.
+export function contactDebuffEffects(
+  still: boolean,
+  before: Pick<RunState, "debuffsGot">,
+  contact: {
+    readonly after: Pick<RunState, "debuffsGot">;
+    readonly effects: readonly Effect[];
+    readonly top: Point;
+  },
+): DebuffHitEffect[] {
+  const applied = new Set(
+    contact.effects.flatMap((effect) =>
+      effect.kind === "debuff" &&
+      (contact.after.debuffsGot[effect.debuff] ?? 0) > (before.debuffsGot[effect.debuff] ?? 0)
+        ? [effect.debuff]
+        : [],
+    ),
+  );
+  const at = { x: contact.top.x, y: contact.top.y - BUMP_ABOVE };
+  return [...applied].map((debuff) => {
+    const { key, peak } = HIT_ART.debuffs[debuff];
+    return { above: 2, at, debuff, frame: still ? peak : null, key };
+  });
 }
 
 // fx-splash with its ground point on the touching dog's feet; with reduced motion it holds its

@@ -388,7 +388,13 @@ describe("hit moment art", () => {
 });
 
 describe("plain and moving hit art", () => {
-  const effects = [HIT_ART.bump, HIT_ART.bumpBig, HIT_ART.splash, ...Object.values(HIT_ART.debris)];
+  const effects = [
+    HIT_ART.bump,
+    HIT_ART.bumpBig,
+    HIT_ART.splash,
+    ...Object.values(HIT_ART.debris),
+    ...Object.values(HIT_ART.debuffs),
+  ];
   const framesOf = (key: string) =>
     animationSpecs(key, sheetOf(key)).find((spec) => spec.key === animationKey(key, HIT_ART.tag))
       ?.frames.length ?? 0;
@@ -398,7 +404,12 @@ describe("plain and moving hit art", () => {
   });
 
   it("holds a peak frame inside its effect's tag for reduced motion", () => {
-    const peaks = [HIT_ART.bump, HIT_ART.bumpBig, HIT_ART.splash];
+    const peaks = [
+      HIT_ART.bump,
+      HIT_ART.bumpBig,
+      HIT_ART.splash,
+      ...Object.values(HIT_ART.debuffs),
+    ];
     expect(peaks.filter(({ key, peak }) => peak >= framesOf(key)).map(({ key }) => key)).toEqual(
       [],
     );

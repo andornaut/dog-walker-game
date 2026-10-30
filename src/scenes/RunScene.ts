@@ -529,7 +529,7 @@ export class RunScene extends Scene implements HudRun {
       } else if (event.kind === "zoneEnded") {
         celebration = this.endZone(event);
       } else {
-        this.react(event);
+        this.react(before ?? step.session.walk.run, event);
       }
     }
     const { run } = step.session.walk;
@@ -605,7 +605,10 @@ export class RunScene extends Scene implements HudRun {
   }
 
   // An event's sounds, bursts, hints and labels, and the input log.
-  private react(event: Exclude<SessionEvent, { kind: "cardOpened" | "zoneEnded" }>): void {
+  private react(
+    before: RunState,
+    event: Exclude<SessionEvent, { kind: "cardOpened" | "zoneEnded" }>,
+  ): void {
     const world = this.world;
     if (world === undefined) {
       return;
@@ -631,7 +634,7 @@ export class RunScene extends Scene implements HudRun {
         moments.pulled(event.step);
         return;
       case "walked":
-        moments.walked(event.step, packPoint(event.step.walk));
+        moments.walked(before, packPoint(event.step.walk), event.step);
         return;
       case "zonePlanned":
         if (this.session !== undefined) {
