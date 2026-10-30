@@ -10,6 +10,7 @@ import type { SaveDocument } from "../save/schema";
 import { defined } from "../testing/defined";
 import { inkWidth } from "../testing/fontInk";
 import { newPlayerSave } from "../testing/saves";
+import { closeControl, closeFace } from "../ui/closeControl";
 import { TEXT_SCALE } from "../ui/textFit";
 import { cents, dollarsToCents } from "../units";
 import {
@@ -19,8 +20,11 @@ import {
   badgeStrip,
   badgeStripRows,
   badgeWall,
+  CELEBRATION_PANEL,
   earnedBadges,
   earnedText,
+  panelBadgeStrip,
+  stripUnderClose,
   wallCell,
   wallCellLines,
   wallRects,
@@ -303,4 +307,25 @@ describe("badgeRowCounts", () => {
   ])("splits %i rows of %i badges as evenly as can be, fuller rows first", (rows, count, split) => {
     expect(badgeRowCounts(rows, count)).toEqual(split);
   });
+});
+
+// The badge celebration's badges clear its close control's face, however many share the rows.
+describe("stripUnderClose", () => {
+  const panel = { ...CELEBRATION_PANEL, height: CELEBRATION_PANEL.badgesHeight, y: 100 };
+  const face = closeFace(closeControl(panel));
+  const { badgeSize, maxRows, perRow } = BADGE_STRIP;
+  it.each(Array.from({ length: maxRows * perRow }, (_, i) => i + 1))(
+    "keeps %i badges clear of the face and inside the panel",
+    (count) => {
+      const strip = stripUnderClose(panel);
+      const rows = badgeStripRows(count);
+      for (const slot of panelBadgeStrip(strip, rows, count).slots) {
+        const left = slot.centreX - badgeSize / 2;
+        const top = strip.y + slot.top;
+        const besideFace = left + badgeSize > face.x && left < face.x + face.width;
+        expect(besideFace && top < face.y + face.height).toBe(false);
+        expect(top + badgeSize).toBeLessThanOrEqual(panel.y + panel.height);
+      }
+    },
+  );
 });

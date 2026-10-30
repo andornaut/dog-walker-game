@@ -1,16 +1,17 @@
 import { itemAt } from "@andornaut/game-kit/arrays";
 import { sentences } from "@andornaut/game-kit/lines";
-import { insetRect, type Rect } from "@andornaut/game-kit/rect";
+import { containsPoint, insetRect, type Rect } from "@andornaut/game-kit/rect";
 import type { Scene } from "phaser";
 
 import { NOTE_PLATE, notePartTops, PAUSE_NOTE_WIDTH, type pauseMenuLayout } from "../hud/pauseMenu";
 import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
 import { withKeyNumber } from "../input/keyNumbers";
+import { closeControl } from "../ui/closeControl";
 import { rectIndexAt } from "../ui/grid";
 import { PALETTE } from "../ui/palette";
 import { fillRect } from "../ui/phaser/draw";
 import { addPixelText, pixelFontMetrics, wrapPixelText } from "../ui/phaser/pixelText";
-import { TEXT_SCALE } from "../ui/textFit";
+import { addCardClose, addCardTitle } from "./homePanels";
 import { listenTargetPress } from "./targetPress";
 import { addMenuButton, addRimmedPanel, addTapBurst, type MenuButton } from "./uiKit";
 
@@ -27,6 +28,8 @@ export interface PanelNotePart {
 }
 
 export interface QuestionPanel {
+  // What the close control in the panel's top-right corner does, as a tap outside the panel does.
+  readonly close: () => void;
   // Top to bottom, the first the call to action and key 1.
   readonly entries: readonly PanelEntry[];
   // pauseMenuLayout, the buttons then the note, or homeQuestionLayout, the note first.
@@ -39,9 +42,11 @@ export interface QuestionPanel {
 }
 
 // The pause menu's panel, and each question laid out as it is (the Home question, Quit?), centred
-// in area: its title, the buttons, and the note plate. A press counts where it began and ended on
-// the same button, so the release that closes the panel is never what is under it. Returns what
-// a tap outside the panel must miss: the panel and the buttons' hit areas.
+// in area: its title beside the close control in its top-right corner, as on every modal card,
+// the buttons, and the note plate. A press counts where it began and ended on the same button or
+// the close control, which wins where their tap areas meet, so the release that closes the panel
+// is never what is under it. Returns what a tap outside the panel must miss: the panel and the
+// buttons' hit areas.
 export function addQuestionPanel(scene: Scene, area: Rect, question: QuestionPanel): Rect[] {
   const { entries } = question;
   const noteWidth = PAUSE_NOTE_WIDTH - 2 * NOTE_PLATE.padX;
@@ -58,12 +63,9 @@ export function addQuestionPanel(scene: Scene, area: Rect, question: QuestionPan
 
   addRimmedPanel(scene, panel);
   const centre = panel.x + panel.width / 2;
-  addPixelText(scene, centre, layout.titleY, question.title, {
-    colour: PALETTE.plum,
-    font: "title",
-    originX: 0.5,
-    scale: TEXT_SCALE,
-  });
+  addCardTitle(scene, panel, question.title, true, layout.titleY);
+  const close = closeControl(panel);
+  const closeButton = addCardClose(scene, scene.add.container(0, 0), panel, false);
   const buttons: MenuButton[] = entries.map((entry, i) =>
     addMenuButton(scene, itemAt(layout.buttons, i), withKeyNumber(i + 1, entry.label), {
       available: true,
@@ -86,13 +88,16 @@ export function addQuestionPanel(scene: Scene, area: Rect, question: QuestionPan
     });
   }
 
-  listenTargetPress<number>(scene, {
+  // A button by its index, or the close control.
+  type Target = number | "close";
+  listenTargetPress<Target>(scene, {
     onDown: (pointer) => addTapBurst(scene, pointer.x, pointer.y),
     onPressed: (pressed) => {
       buttons.forEach((button, i) => button.setPressed(i === pressed));
+      closeButton.setPressed(pressed === "close");
     },
-    onTap: (target) => entries[target]?.press(),
-    targetAt: (x, y) => rectIndexAt(layout.hits, x, y),
+    onTap: (target) => (target === "close" ? question.close() : entries[target]?.press()),
+    targetAt: (x, y) => (containsPoint(close.hit, x, y) ? "close" : rectIndexAt(layout.hits, x, y)),
   });
   scene.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
     const number = cardNumberForKey(entries.length, event.key);

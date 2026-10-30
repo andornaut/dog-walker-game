@@ -16,9 +16,9 @@ const PANEL_WIDTH = 232;
 const TITLE_Y = 16;
 const BUTTON = { gap: 8, height: 40, width: 200, x: 16, y: 40 };
 
-// The width a panel's title has, as wide as the buttons, and a button's label, its key number
-// included, 4px in from each side.
-export const PANEL_TEXT_ROOM = { label: BUTTON.width - 8, title: BUTTON.width } as const;
+// The width a button's label has, its key number included, 4px in from each side. The panel's
+// title is placed beside its close control, as on every modal card (addCardTitle).
+export const PANEL_TEXT_ROOM = { label: BUTTON.width - 8 } as const;
 // The note plate is as wide as the buttons, gap under the last one. The note is body text at
 // scale, wrapped to the plate's width less padX each side, its first line's capitals padTop
 // under the plate's top, a line of the body font apart, and the last line's lowest ink

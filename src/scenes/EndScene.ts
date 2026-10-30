@@ -293,7 +293,7 @@ export class EndScene extends Scene {
     });
 
     if (celebrating) {
-      this.badges = addBadgeCelebration(this, reduced, strip, badgeRows, earned);
+      this.badges = addBadgeCelebration(this, reduced, strip, badgeRows, earned, false);
       // After a new best's fanfare, so the two do not play over each other.
       this.time.delayedCall(newBest ? BADGE_SOUND_AFTER_BEST_MS : 0, () =>
         soundboardOf(this).play("badge"),

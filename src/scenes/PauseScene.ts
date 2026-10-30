@@ -83,6 +83,7 @@ export class PauseScene extends Scene {
       walkView,
       data.mode === "homeQuestion"
         ? {
+            close: onResume,
             entries,
             layout: homeQuestionLayout,
             note: data.note.map((line) => ({ colour: NOTE_COLOURS[line.kind], text: line.text })),
@@ -90,6 +91,7 @@ export class PauseScene extends Scene {
             title: question.title,
           }
         : {
+            close: onResume,
             entries,
             layout: pauseMenuLayout,
             note: [{ colour: PALETTE.plum, text: data.note }],
@@ -97,9 +99,9 @@ export class PauseScene extends Scene {
             title: menu.title,
           },
     );
-    // A tap anywhere around the panel resumes, as Resume and Keep walking do, the walk bar's
-    // empty area and the dog cards included, though they are not dimmed. The walk bar's buttons
-    // keep their own taps.
+    // The close control and a tap anywhere around the panel resume, as Resume and Keep walking
+    // do, the walk bar's empty area and the dog cards included, though they are not dimmed. The
+    // walk bar's buttons keep their own taps.
     const outside = regionOutside(exitShown(), "walk", covered);
     listenOutsideTap(this, () => outside, onResume);
     const overlay = data.mode === "menu" ? data.overlay : undefined;

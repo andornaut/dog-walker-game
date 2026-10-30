@@ -403,11 +403,12 @@ export function addCloseButton(
   parent: GameObjects.Container,
   control: CloseControl,
   pressed: boolean,
-): void {
+): IconButton {
   const button = addIconButton(scene, parent, control.x, control.y, (x, y) =>
     imageIconOr(scene, "icon-close", x, y, "X"),
   );
   button.setPressed(pressed);
+  return button;
 }
 
 // An image icon by key, or nothing while the art is missing.

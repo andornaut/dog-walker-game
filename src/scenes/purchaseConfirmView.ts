@@ -4,6 +4,7 @@ import type { GameObjects, Scene } from "phaser";
 import type { DetailPicture } from "../home/detail";
 import type { ConfirmChoice, ConfirmLines } from "../home/purchaseConfirm";
 import { confirmLeftCapTop, PURCHASE_CONFIRM_LAYOUT } from "../home/purchaseConfirmLayout";
+import { closeControl } from "../ui/closeControl";
 import { PALETTE } from "../ui/palette";
 import { addDim } from "../ui/phaser/draw";
 import { addPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
@@ -14,6 +15,8 @@ import { addMenuButton } from "./uiKit";
 // Everything the purchase confirm draws from. The scene that opens it routes its taps and keys
 // through the model in home/purchaseConfirm; the view only draws.
 interface PurchaseConfirmViewInput {
+  // Whether the close control is under a finger, drawn pressed.
+  readonly closePressed: boolean;
   readonly lines: ConfirmLines;
   // The item's picture in the well, as a detail card's.
   readonly picture: DetailPicture;
@@ -21,26 +24,27 @@ interface PurchaseConfirmViewInput {
   readonly pressed: ConfirmChoice | undefined;
 }
 
-// Where the confirm's card lies, and where each answer is tapped. A tap off the card cancels;
-// one on the card off its answers does nothing.
+// Where the confirm's card lies, and where each answer and its close control are tapped. A tap
+// on the close control or off the card cancels; one on the card off its answers does nothing.
 export interface PurchaseConfirmHits {
   readonly buttons: Readonly<Record<ConfirmChoice, Rect>>;
   readonly card: Rect;
+  readonly close: Rect;
 }
 
 const LAYOUT = PURCHASE_CONFIRM_LAYOUT;
 
 // The confirm over everything the scene drew before it: the shop dimmed, the modal card titled
-// "Buy {name}?" with no close control (Cancel closes it), the picture in its well, the price and the bank it would
-// leave, then Cancel and Buy. Returns where it is tapped.
+// "Buy {name}?" with its close control, which cancels as Cancel does, the picture in its well,
+// the price and the bank it would leave, then Cancel and Buy. Returns where it is tapped.
 export function drawPurchaseConfirm(
   scene: Scene,
   layer: GameObjects.Container,
   input: PurchaseConfirmViewInput,
 ): PurchaseConfirmHits {
-  const { lines, picture, pressed } = input;
+  const { closePressed, lines, picture, pressed } = input;
   layer.add(addDim(scene, LAYOUT.dim));
-  addModalCard(scene, layer, LAYOUT.card, lines.title, undefined);
+  addModalCard(scene, layer, LAYOUT.card, lines.title, { pressed: closePressed });
   const centred = (
     at: { capTop: number; centreX: number; font: "body" | "title" },
     value: string,
@@ -73,5 +77,5 @@ export function drawPurchaseConfirm(
       layer,
     ).setPressed(pressed === choice);
   }
-  return { buttons: LAYOUT.buttons, card: LAYOUT.card };
+  return { buttons: LAYOUT.buttons, card: LAYOUT.card, close: closeControl(LAYOUT.card).hit };
 }

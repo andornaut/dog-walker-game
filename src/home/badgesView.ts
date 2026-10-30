@@ -7,6 +7,7 @@ import type { AchievementCondition, AchievementId, GameData } from "../data/type
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { achievementProgress } from "../rules/achievements";
 import type { SaveDocument } from "../save/schema";
+import { closeControl, closeFace } from "../ui/closeControl";
 import { GREYED } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
 import { dollarsToCents } from "../units";
@@ -304,6 +305,18 @@ export function badgeStripHits(rect: Rect, rows: number, count: number): Rect[] 
 
 // The panel of badges earned away from a walk's end, as tall as badgesHeight, then a row of
 // faces facesHeight tall when owners cheer.
+// Rows clear between a celebration's close control's face and the badges' tops under it.
+const CLOSE_CLEAR = 2;
+
+// The rect a celebration's badge strip is laid out on, given its panel: the panel itself, moved
+// down where its close control's face would reach the badges' tops, so a full row's last badge
+// clears it.
+export function stripUnderClose(panel: Rect): Rect {
+  const face = closeFace(closeControl(panel));
+  const shift = Math.max(0, face.y + face.height + CLOSE_CLEAR - (panel.y + BADGE_STRIP.badgeTop));
+  return { ...panel, height: panel.height - shift, y: panel.y + shift };
+}
+
 export const CELEBRATION_PANEL = {
   badgesHeight: 118,
   facesHeight: 44,

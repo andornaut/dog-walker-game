@@ -36,6 +36,7 @@ import {
   addLoopingFrame,
   addNineSlice,
   BODY_TEXT,
+  type IconButton,
   selectOuter,
   type SliceKey,
 } from "./uiKit";
@@ -92,20 +93,23 @@ export function addModalCard(
   close: { readonly pressed: boolean } | undefined,
 ): void {
   addDetailCard(scene, parent, card);
-  parent.add(addCardTitle(scene, card, title, close !== undefined));
+  const row = cardTitleRow(card);
+  const label = addCardTitle(scene, card, title, close !== undefined, row.y + CARD.titleRow.titleY);
+  parent.add(label);
   if (close !== undefined) {
-    addCloseButton(scene, parent, closeControl(card), close.pressed);
+    addCardClose(scene, parent, card, close.pressed);
   }
 }
 
-// A modal card's title: plum 2x title text, its capitals card.titleRow.titleY under the title
-// row's top, the ink centred where barTitleLeft puts it: beside the close control on a card that
-// closes, else across the card.
-function addCardTitle(
+// A modal card's title, on any card's background: plum 2x title text, its capitals at capTop,
+// the ink centred where barTitleLeft puts it on the card's title row: beside the close control
+// on a card that closes, else across the card.
+export function addCardTitle(
   scene: Scene,
   card: Rect,
   title: string,
   closes: boolean,
+  capTop: number,
 ): GameObjects.BitmapText {
   const row = cardTitleRow(card);
   const label = addPixelText(scene, 0, 0, title, {
@@ -115,8 +119,18 @@ function addCardTitle(
   });
   const ink = inkSpan(label);
   const x = barTitleLeft(row, closes ? closeControl(card) : undefined, ink.right - ink.left);
-  placePixelText(label, x, row.y + CARD.titleRow.titleY);
+  placePixelText(label, x, capTop);
   return label;
+}
+
+// A modal card's close control in its top-right corner (closeControl), on any card's background.
+export function addCardClose(
+  scene: Scene,
+  parent: GameObjects.Container,
+  card: Rect,
+  pressed: boolean,
+): IconButton {
+  return addCloseButton(scene, parent, closeControl(card), pressed);
 }
 
 // A nine-slice in parent, or the rect framed in code while its art is missing.

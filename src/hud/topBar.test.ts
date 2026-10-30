@@ -31,7 +31,7 @@ describe("the walk bar in each pause state", () => {
     // The pause button's icon, and whether lane moves act.
     icon: "icon-pause" | "icon-play";
     gameplay: boolean;
-    // What the walk's presses do: steer, only hold to explain, or nothing.
+    // What the walk's presses do: steer, or nothing.
     presses: PressMode;
     // Whether the walk is paused, and whether by the player, which ducks the music.
     paused: boolean;
@@ -77,15 +77,8 @@ describe("the walk bar in each pause state", () => {
     settings: undefined,
     sound: undefined,
   } as const;
-  // An explanation's detail card takes every tap on the bar to close it; the keys act.
-  const detail = {
-    ...walking,
-    help: undefined,
-    pause: undefined,
-    paused: true,
-    settings: undefined,
-    sound: undefined,
-  } as const;
+  // Under an explanation's detail card the bar's buttons act as with nothing open.
+  const detail = { ...walking, paused: true } as const;
 
   it("pauses, covers and routes the bar's presses as each state calls for", () => {
     const cases: [string, RunPause, Expected][] = [
@@ -103,11 +96,7 @@ describe("the walk bar in each pause state", () => {
       ["in the menu over a card", { ...CARD, menu: "open" }, menu],
       ["in the menu over the hit stop", { ...HIT_STOP, menu: "open" }, menu],
       ["asking the Home question over a card", { ...CARD, menu: "confirmHome" }, menu],
-      [
-        "under an explanation's detail card over the menu",
-        { ...HOLD, menu: "open" },
-        { ...menu, help: undefined, pause: undefined, settings: undefined, sound: undefined },
-      ],
+      ["under an explanation's detail card over the menu", { ...HOLD, menu: "open" }, menu],
       ["under help, which mutes on M", { ...NOTHING_PAUSED, menu: "help" }, cover],
       [
         "under settings, which leave the bar lit and take P and M themselves",

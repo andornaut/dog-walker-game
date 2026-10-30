@@ -125,10 +125,11 @@ export interface ShopClosed {
 
 // While a detail card is open, a press anywhere on the shop's panel is dismiss: its tap closes
 // the card. While the purchase confirm is open, so is a press on the panel off the confirm's
-// card: its tap cancels.
+// card: its tap cancels, as the confirm's own close control's does.
 type Target =
   | { choice: ConfirmChoice; kind: "confirm" }
   | { kind: "close" }
+  | { kind: "confirmClose" }
   | { kind: "dismiss" }
   | { id: string; kind: "row" }
   | { kind: "tab"; tab: ShopTab };
@@ -258,7 +259,11 @@ export class ShopScene extends Scene {
         if (this.detail === undefined && this.confirm === undefined) {
           return this.targetAt(x, y);
         }
-        const card = this.confirm === undefined ? undefined : this.confirmHits?.card;
+        const hits = this.confirm === undefined ? undefined : this.confirmHits;
+        if (hits !== undefined && containsPoint(hits.close, x, y)) {
+          return { kind: "confirmClose" };
+        }
+        const card = hits?.card;
         if (card !== undefined && containsPoint(card, x, y)) {
           return undefined;
         }
@@ -542,6 +547,9 @@ export class ShopScene extends Scene {
       case "confirm":
         this.answer(target.choice);
         return;
+      case "confirmClose":
+        this.answer("cancel");
+        return;
       case "dismiss":
         this.back();
         return;
@@ -678,6 +686,7 @@ export class ShopScene extends Scene {
   private drawConfirm(pending: PendingPurchase): void {
     const pressed = this.pressed?.kind === "confirm" ? this.pressed.choice : undefined;
     this.confirmHits = drawPurchaseConfirm(this, this.add.container(0, 0), {
+      closePressed: this.pressed?.kind === "confirmClose",
       lines: confirmLines(gameData, pending),
       picture: purchasePicture(pending.purchase),
       pressed,

@@ -30,6 +30,7 @@ export class QuitScene extends Scene {
       exitGame();
     };
     const covered = addQuestionPanel(this, area, {
+      close: keepPlaying,
       entries: QUIT_QUESTION_ANSWERS.map((answer) => ({
         label: words[answer],
         press: answer === "quit" ? quit : keepPlaying,

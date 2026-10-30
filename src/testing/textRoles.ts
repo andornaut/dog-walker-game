@@ -8,7 +8,13 @@ import { type TextFitStyle } from "@andornaut/game-kit/text/textFit";
 
 import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
-import { BADGE_NAME_STYLE, BADGE_STRIP, badgeStrip } from "../home/badgesView";
+import {
+  BADGE_NAME_STYLE,
+  BADGE_STRIP,
+  badgeStrip,
+  CELEBRATION_PANEL,
+  celebrationTitle,
+} from "../home/badgesView";
 import {
   breakdownLabelRoom,
   END_LAYOUT,
@@ -62,6 +68,7 @@ import {
   PAUSE_MENU_ITEMS,
   PAUSE_NOTE_LINES,
   PAUSE_NOTE_WIDTH,
+  pauseMenuLayout,
   QUIT_QUESTION_ANSWERS,
 } from "../hud/pauseMenu";
 import { DOG_CARD, WALK_BAR } from "../hud/walkHud";
@@ -463,8 +470,8 @@ function pauseNoteRoles(): TextRoleCase[] {
   return plainRole("pause menu's note", "font-body", fit, notes);
 }
 
-// The pause menu's, the Home question's and Quit?'s titles, and their buttons' labels with the
-// number key that picks each.
+// The pause menu's, the Home question's and Quit?'s buttons' labels with the number key that
+// picks each; their titles are cardTitles'.
 function questionPanelRoles(): TextRoleCase[] {
   const { pause } = gameData.menuText;
   const home = gameData.runText.homeQuestion;
@@ -475,12 +482,6 @@ function questionPanelRoles(): TextRoleCase[] {
     QUIT_QUESTION_ANSWERS.map((answer) => quit[answer]),
   ];
   return [
-    ...plainRole(
-      "pause menu's and questions' title",
-      "font-title",
-      { room: PANEL_TEXT_ROOM.title, style: TEXT_STYLE },
-      [pause.title, home.title, quit.title],
-    ),
     ...plainRole(
       "pause menu's and questions' button",
       "font-title",
@@ -500,7 +501,29 @@ export interface CardTitles {
 export function cardTitles(): CardTitles[] {
   const screen = SCREEN_LAYOUT.screen;
   const { installSteps, title } = gameData.menuText.settings;
+  const questions = pauseMenuLayout(BODY, screen, {
+    buttonCount: PAUSE_MENU_ITEMS.length,
+    noteLines: 0,
+  });
+  const badgeCounts = Array.from(
+    { length: Object.keys(gameData.achievements).length },
+    (_, i) => i + 1,
+  );
   return [
+    {
+      card: { ...CELEBRATION_PANEL, height: CELEBRATION_PANEL.badgesHeight, y: 0 },
+      role: "badge celebration's title",
+      titles: badgeCounts.map((count) => celebrationTitle(gameData, count)),
+    },
+    {
+      card: questions.panel,
+      role: "pause menu's and questions' title",
+      titles: [
+        gameData.menuText.pause.title,
+        gameData.runText.homeQuestion.title,
+        gameData.homeText.quit.title,
+      ],
+    },
     {
       card: detailCardRect(screen, screen.height),
       role: "detail card's title",

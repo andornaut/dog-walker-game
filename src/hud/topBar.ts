@@ -90,16 +90,13 @@ export type TopBarAction =
 // menu, the question or the settings are up. Over the settings, Help opens help in their place
 // and Settings closes them, as a home page's own top bar button does. Help covers the bar, so a
 // tap there is its, and so are P and Escape, which close it; M still mutes under it. The
-// settings take P, Escape and M themselves. A tap while an explanation's detail card is up only
-// closes it, so it presses no button.
+// settings take P, Escape and M themselves. Under an explanation's detail card a tap on a button
+// presses it as with nothing open, and its release closes the card, as any tap does.
 export function topBarAction(
   pause: RunPause,
   via: "key" | "tap",
   button: WalkBarButtonId,
 ): TopBarAction | undefined {
-  if (pause.hold && via === "tap") {
-    return undefined;
-  }
   if (pause.menu === "help") {
     return via === "key" && button === "sound" ? "mute" : undefined;
   }

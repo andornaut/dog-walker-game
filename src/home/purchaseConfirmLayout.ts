@@ -2,6 +2,8 @@ import type { Rect } from "@andornaut/game-kit/rect";
 import { type FontMetrics } from "@andornaut/game-kit/text/bitmapFont";
 
 import { SCREEN_CONFIG } from "../data/screen";
+import { barTitleRoom } from "../ui/barTitle";
+import { closeControl } from "../ui/closeControl";
 import { helpCapDy } from "../ui/labelHelpGap";
 import { overlayRegion } from "./homeBar";
 import { cardTitleRow, HOME_LAYOUT } from "./homeLayout";
@@ -48,12 +50,11 @@ export const PURCHASE_CONFIRM_LAYOUT = {
   // The picture sits in the well picture pixels in from its corner.
   picture: { x: well.x + CARD.well.picture, y: well.y + CARD.well.picture },
   price: { capTop: well.y + well.height + 10, centreX, font: "title", room: WIDTH - 2 * CARD.pad },
-  // The title, centred across its row as a card with no close control's is (addModalCard).
+  // The title, beside the close control as on every modal card (addModalCard).
   title: {
     capTop: titleRow.y + CARD.titleRow.titleY,
-    centreX,
     font: "title",
-    room: titleRow.width - 16,
+    room: barTitleRoom(titleRow, closeControl(card)),
   },
   titleRow,
   well,

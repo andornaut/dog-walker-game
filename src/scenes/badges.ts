@@ -15,6 +15,7 @@ import {
   celebrationTitle,
   earnedBadges,
   panelBadgeStrip,
+  stripUnderClose,
 } from "../home/badgesView";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import { DETAIL_TEXT_WIDTH, detailPanel, detailTextTops, STATS_LAYOUT } from "../home/statsLayout";
@@ -30,6 +31,7 @@ import {
   wrapPixelText,
 } from "../ui/phaser/pixelText";
 import { TEXT_SCALE } from "../ui/textFit";
+import { addCardTitle } from "./homePanels";
 import { playTag, playTagOnce } from "./sprites";
 import { addBodyText, addCloseButton, addPanel, BODY_TEXT, tagFrame } from "./uiKit";
 
@@ -108,22 +110,21 @@ export function addConfetti(
 // Badges just earned, side by side in rows rows of a panel with confetti behind each: they pop
 // in one after another, or with reduced motion are simply there over a still frame of confetti.
 // Every name under its badge is set in one style for the row (badgeRowNames), centred on its
-// slot. Returns the badges in their slots' order.
+// slot. closes: the panel is a modal card with a close control in its top-right corner, which
+// the caller draws: the title is placed beside it (addCardTitle) and the badges clear it
+// (stripUnderClose). Returns the badges in their slots' order.
 export function addBadgeCelebration(
   scene: Scene,
   reduced: boolean,
-  rect: Rect,
+  panel: Rect,
   rows: number,
   ids: readonly AchievementId[],
+  closes: boolean,
 ): BadgeView[] {
-  addPanel(scene, rect);
-  const centre = rect.x + rect.width / 2;
-  addPixelText(scene, centre, rect.y + BADGE_STRIP.titleY, celebrationTitle(gameData, ids.length), {
-    colour: PALETTE.plum,
-    font: "title",
-    originX: 0.5,
-    scale: TEXT_SCALE,
-  });
+  addPanel(scene, panel);
+  const title = celebrationTitle(gameData, ids.length);
+  addCardTitle(scene, panel, title, closes, panel.y + BADGE_STRIP.titleY);
+  const rect = closes ? stripUnderClose(panel) : panel;
   const badges = earnedBadges(gameData, ids);
   const strip = panelBadgeStrip(rect, rows, badges.length);
   const style = { colour: PALETTE.plum, originX: 0.5, scale: TEXT_SCALE };
