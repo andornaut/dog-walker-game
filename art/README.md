@@ -4,6 +4,7 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 
 | Doc                                | What it holds                                                       |
 | ---------------------------------- | ------------------------------------------------------------------- |
+| [`controls.md`](controls.md)       | Control tokens, roles, states, input and approved exceptions        |
 | [`inventory.md`](inventory.md)     | Every asset: key, type, size, tags                                  |
 | [`style-guide.md`](style-guide.md) | The rules: layout, palette, contrast, proportions, animation, sound |
 

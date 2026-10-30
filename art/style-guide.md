@@ -134,7 +134,7 @@ Names are `PALETTE` names in `src/ui/palette.ts`, or `K` names for the neutral g
 - A list longer than its view scrolls beside `ui-scroll-track` (8px wide, the list area's height): a navy groove in an ink edge, with `ui-scroll-thumb` (6px wide, yellow, amber lip) drawn 1px inside it. The rows and the track sit as one group with equal margins: the track's right edge is as far from the paper's edge as the rows' left edge is, and the rows narrow to leave the track 6px clear of them.
 - The close control is `ui-icon-button` with `icon-close` (the X centred on the navy face both ways, 4px of navy each side and 3px above and below). On a card or panel it sits on the cream, 8px in from the frame's top and right edges. On a full-screen page it takes the rightmost top-bar button's spot, 333,9.
 - Cards and panels have no title band: the title sits on the cream at the top, centred across the card, clear of the close X at the top right. The choice cards' frames (`card-frame`, `card-frame-large`) keep those rows plain cream.
-- `ui-section` frames each start screen section with one 1px plum rim. `complete` uses an amber heading with ink text. Neutral headings are lighter versions of their section: `neutral-walker` tan with ink title and note; `neutral-dogs` purple with cream title and amber note; `neutral-pocket` sky with ink title and note. `neutral` retains the dogs' purple as a fallback. The fills under the detailed cards are solid brown for walkers, plum for dogs and blue for the Pocket; no fabric texture or stitching.
+- Start-screen section art follows the [control guide](controls.md#sizing-and-spacing): thin outer frames, solid backing and lighter neutral headings, with the detailed individual cards retained.
 - Fonts: `font-body` (Tiny5 a row taller, mixed case) for body text, quips and floating labels; `font-title` (Silkscreen, capitals) for titles, numbers and buttons. Floating numbers use the font, not sprites.
 - Text keeps one size per role everywhere: never step a font down to fit a line, a label or a name into its box. Where text doesn't fit, the box grows (taller, or a second line) or the words get shorter.
 - A label over its help text (a settings row's title over its note, a detail card's heading over its line) leaves 10 rows of clear space between the label's lowest ink and the help text's capitals, so the two read as separate lines.
@@ -145,33 +145,11 @@ Names are `PALETTE` names in `src/ui/palette.ts`, or `K` names for the neutral g
 
 ### Interaction states
 
-Every tile, button, card, tab and switch row is in one of four states, drawn the same way everywhere. `ui-tile` (insets 4) draws the first three; `ui-button` (insets 3, 3, 3, 5) draws all four.
-
-| State    | When                                                                          | Look                                                                        | Label                    |
-| -------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------ |
-| normal   | Available, not chosen                                                         | Cream face, ink and plum lines, tan lip (brown on a tile)                   | plum (9.42:1)            |
-| selected | Picked, equipped, toggled on, the open tab or page                            | Gold: ink line, amber band, orange line, yellow face                        | plum (10.92:1)           |
-| disabled | Cannot be chosen now: not owned and short, the pack full, not available       | Flat ngrey face, ink and nslate lines, no lip                               | ndslate (3.56:1, exempt) |
-| primary  | The call to action: Start walk, Resume, Got it, Nice!, and the Pet shop board | Raised green face on a forest lip (`ui-button` `go`; `ui-pet-shop`'s board) | ink (8.41:1)             |
-
-- Art inside a disabled tile draws from its grey copy in the neutral ramp, each colour at the step nearest its brightness, on an nslate box; a normal tile's box is tan, a selected one's deepAmber. The padlock and the bill keep their colours, and an affordable item's picture keeps its colours on an nlgrey box, lighter than the tile, where a short one's grey copy sits on the darker nslate (see below). A normal tile's lip is brown, not the chrome's tan, so the tan box sits apart from it.
-- An item for sale is owned (no badge, no plate), affordable (`icon-bill` and the green buy plate) or short (`icon-lock` and the nlgrey short plate), told apart by badge shape and plate, never by colour alone. An item not owned draws on a `disabled` tile or row, with its name, on the start screen and in the Pet shop: its portrait or icon in full colour while the bank covers it, from its grey copy while short. A walker not owned and a slot that needs the one before it are short whatever the bank holds, with the goal plate.
-- The primary green marks a screen's call to action. Start walk is inset at 32,510, sized 296×44, with 6px below and about 4px above. `go-disabled` matches `disabled`; `secondary` and `secondary-pressed` match `normal` and `pressed`.
-- The update notice's Update now button is the one exception to a single green call to action per screen: it shows on the start screen beside Start walk only while an update waits.
-- Cards follow the same states: a disabled card is redrawn in the grey ramp, the selected one is outlined in amber.
-
-Text buttons use two sizes: wide 296×44 and compact 128×44, with a 12px gap when paired. Primary is green, secondary cream and disabled neutral grey; presses sink the face and label 2px. Icon chrome stays navy. The individual item cards keep their detailed borders and selection marks, with clean ground outside them.
-
-### Feedback and selected state
-
-- A press shows at once: the item dips 2px (a button into its lip) and `fx-tap` bursts under the finger. A modal the press opens opens at once, and the burst plays to its end on top of it.
-- Anything picked, equipped, toggled on or active shows three cues: the selected state's gold frame and yellow face (or a yellow face inside `ui-select`), a 2px lift onto a plum shadow, and a `ui-check` badge at its top-left. A picked tab (the Pet shop's and the Logbook's) shows only the first two, and its `ui-select` frame holds its first frame instead of pulsing.
-- `ui-afford` goes 2px outside the Pet shop building while something in the shop is affordable; no tile or shop row takes it.
-- With reduced motion, highlights stay and movement is skipped.
+The [control guide](controls.md) defines control tokens, role/state palettes, selection semantics, press feedback and approved geometry. It distinguishes implemented primitives from approved layout targets. Keep item cards' detailed chrome and the approved clean section backgrounds; control changes follow that guide's review checklist.
 
 ### Icon buttons and top bars
 
-- Each `ui-icon-button` face is 20×20 and holds its 16×16 icon at +2,+1 (+2,+3 pressed), centred in a 44×44 hit. The home and walk bars keep 34×44 hits as an explicit exception: their buttons and cash/effect wells share a 360px-wide, 40px-tall bar, so 44px-wide targets would overlap. Positions are `walkBar.buttons` and `scenes.home` in `shared/export/layout.json`.
+- Chrome sizing, icon placement and the compact top-bar exception follow [Controls](controls.md#sizing-and-spacing).
 - `icon-settings` (a cog), `icon-exit` (a doorway with an arrow leaving it to the right) and `icon-home` (a house) keep the shapes the sibling duck-platformer game uses for the same buttons; each game colours them in its own palette.
 - `icon-sound`: `on` is a speaker with two waves, `off` the same speaker with a pink X. Settings rows lead with their `-panel` icon (`off` adds a dred X).
 - Every top bar (the start screen's, the walk bar, `ui-walk-bar`, and Help's) is 360×40 of flat plum with one trim: a dbrown line on row 1 and its last three rows brown, dbrown and ink. Its wells and buttons sit 3 rows clear of the trim, or are centred between it. The start screen's top bar and the walk bar show the bank in an ink well with no coin: an amber "$" (9.71:1 on ink) then the amount in cream (12.44:1). Their icon buttons line up: the start screen's Logbook, Help, Sound, Settings and Exit run left to right to the bar's right edge, Help, Sound and Settings over the walk bar's Help, Sound and Settings, Exit over its Pause and Logbook one column left of its Help. Where Exit is hidden (an installed app whose window the game cannot close, such as an iPhone or iPad Home Screen app), the other four move one column right, over the walk bar's four.
