@@ -1414,9 +1414,13 @@
       },
       "button": {
         "height": 44,
-        "width": 264,
-        "x": 48,
-        "y": 512
+        "width": 352,
+        "x": 4,
+        "y": 514
+      },
+      "buttonLabel": {
+        "readyY": 12,
+        "scale": 3
       },
       "logo": {
         "x": 107,

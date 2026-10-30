@@ -28,6 +28,7 @@ import {
   endTargetAt,
   zonePips,
 } from "../home/endView";
+import { bobOffset } from "../home/feedback";
 import { signedShortDollarText } from "../home/home";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import {
@@ -132,6 +133,8 @@ export class EndScene extends Scene {
   private hold: { readonly badge: number; readonly press: HoldPress } | undefined;
   private presses: TargetPressListener | undefined;
   private reduced = false;
+  // Back to title, which bobs as Start walk does, and still while pressed.
+  private button: { readonly container: GameObjects.Container; pressed: boolean } | undefined;
   private returnHomeStep: (() => void) | undefined;
 
   constructor() {
@@ -145,6 +148,7 @@ export class EndScene extends Scene {
     const walk = save.stats.lastWalk;
     const goHome = () => this.scene.start(SCENE_KEYS.start);
     this.returnHomeStep = undefined;
+    this.button = undefined;
     this.badges = [];
     this.card = undefined;
     this.hold = undefined;
@@ -296,7 +300,15 @@ export class EndScene extends Scene {
       );
     }
 
-    const button = addMenuButton(this, BUTTON, words.headHome, { available: true, primary: true });
+    const container = this.add.container(0, 0);
+    const button = addMenuButton(
+      this,
+      BUTTON,
+      words.headHome,
+      { available: true, labelAt: END_LAYOUT.buttonLabel, primary: true },
+      container,
+    );
+    this.button = { container, pressed: false };
     const badgeHits = badgeStripHits(strip, badgeRows, this.badges.length);
     // Badges have no tap action of their own, so a tap opens a badge's card as a hold does.
     // With a card open, a tap anywhere closes it.
@@ -317,7 +329,11 @@ export class EndScene extends Scene {
         }
       },
       onPressed: (target) => {
-        button.setPressed(target === "home");
+        const pressed = target === "home";
+        button.setPressed(pressed);
+        if (this.button !== undefined) {
+          this.button.pressed = pressed;
+        }
         if (target === undefined) {
           this.hold = undefined;
         }
@@ -437,6 +453,10 @@ export class EndScene extends Scene {
 
   override update(): void {
     this.returnHomeStep?.();
+    if (this.button !== undefined) {
+      const { container, pressed } = this.button;
+      container.setY(pressed ? 0 : bobOffset(this.reduced, this.time.now, true));
+    }
     if (this.hold !== undefined) {
       const { fire, press } = tickHold(this.time.now, this.hold.press);
       this.hold = { ...this.hold, press };

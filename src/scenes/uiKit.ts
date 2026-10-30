@@ -245,6 +245,9 @@ interface MenuButtonInput extends Pick<InteractionInput, "available" | "primary"
   // The number key that presses the button, drawn like the label and MENU_BUTTON_KEY_GAP
   // before it, the two inks centred together as one group.
   readonly keyNumber?: string;
+  // A label at scale with its capitals' top readyY rows under the button's top, as Start walk's
+  // is, in place of a 2x label centred on the face.
+  readonly labelAt?: { readonly readyY: number; readonly scale: number };
   // An available button that is not primary wears the secondary look, as a card's own
   // controls do, in place of normal.
   readonly secondary?: boolean;
@@ -288,11 +291,12 @@ export function addMenuButton(
   const look: ButtonLook = state === "normal" && input.secondary === true ? "secondary" : state;
   const faces = buttonFaces(scene, input.primary, rect, look);
   const disabled = state === "disabled";
+  const { labelAt } = input;
   const style = {
     colour: PALETTE[BUTTON_COLOURS[look].label],
     font: "title",
-    originY: 0.5,
-    scale: TEXT_SCALE,
+    originY: labelAt === undefined ? 0.5 : 0,
+    scale: labelAt?.scale ?? TEXT_SCALE,
   } as const;
   const centreX = rect.x + rect.width / 2;
   const labels =
@@ -309,8 +313,14 @@ export function addMenuButton(
         up?.setVisible(!pressed);
         down.setVisible(pressed);
       }
-      const y = Math.round(centreY + (disabled || pressed ? BUTTON_PRESS_PX : 0));
-      labels.forEach((text) => text.setY(y));
+      const press = disabled || pressed ? BUTTON_PRESS_PX : 0;
+      labels.forEach((text) =>
+        text.setY(
+          labelAt === undefined
+            ? Math.round(centreY + press)
+            : rect.y + labelAt.readyY + press - (text.getData("capTop") as number),
+        ),
+      );
     },
   };
   button.setPressed(false);

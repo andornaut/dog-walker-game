@@ -5,10 +5,10 @@ import {
   inkRowsOfLines,
 } from "@andornaut/game-kit/text/bitmapFont";
 
-import { WIDE_BUTTON } from "../layout/screenLayout";
 import { helpCapDy } from "../ui/labelHelpGap";
 import { TEXT_SCALE } from "../ui/textFit";
 import { badgeStripMinHeight, badgeStripRows } from "./badgesView";
+import { HOME_LAYOUT } from "./homeLayout";
 
 // The end screen's geometry, with every text at 2x.
 const PANEL = { height: 304, width: 312, x: 24, y: 112 };
@@ -17,7 +17,10 @@ const RIBBON = { x: 144, y: 102 };
 export const END_LAYOUT = {
   badges: { height: 92, width: 344, x: 8, y: 419 },
   breakdown: { amountRight: 196, label: 40, pitch: 18, top: PANEL.y + 42 },
-  button: { ...WIDE_BUTTON, y: 512 },
+  // Back to title takes Start walk's rect on the home screen.
+  button: HOME_LAYOUT.startButton,
+  // And Start walk's label, at its size and on its caps.
+  buttonLabel: HOME_LAYOUT.startLabel,
   logo: { x: 107, y: 2 },
   panel: PANEL,
   // An owner's row, mirroring the home screen's bubble: a speech bubble from x with its tail
