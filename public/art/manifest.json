@@ -5883,6 +5883,26 @@
       "json": "sprites/fx-debris-litter.json"
     },
     {
+      "key": "fx-debuff-muddy",
+      "png": "sprites/fx-debuff-muddy.png",
+      "json": "sprites/fx-debuff-muddy.json"
+    },
+    {
+      "key": "fx-debuff-spotlight",
+      "png": "sprites/fx-debuff-spotlight.png",
+      "json": "sprites/fx-debuff-spotlight.json"
+    },
+    {
+      "key": "fx-debuff-stinky",
+      "png": "sprites/fx-debuff-stinky.png",
+      "json": "sprites/fx-debuff-stinky.json"
+    },
+    {
+      "key": "fx-debuff-zoomies",
+      "png": "sprites/fx-debuff-zoomies.png",
+      "json": "sprites/fx-debuff-zoomies.json"
+    },
+    {
       "key": "fx-dodge",
       "png": "sprites/fx-dodge.png",
       "json": "sprites/fx-dodge.json"
