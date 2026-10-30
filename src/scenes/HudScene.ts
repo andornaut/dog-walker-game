@@ -6,6 +6,7 @@ import { dogCardTag, dogFaceKey, ownerCardFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG, SCREEN_LAYOUT } from "../data/screen";
 import type { AchievementId, DebuffId, DogId, HintTrigger } from "../data/types";
+import { FEEDBACK as MENU_FEEDBACK } from "../home/feedback";
 import { dollarAmountText } from "../home/home";
 import {
   effectIconKey,
@@ -134,10 +135,12 @@ import { soundboardOf } from "./soundboard";
 import { playTag } from "./sprites";
 import { TimedGroup } from "./timedGroup";
 import {
+  addIconButton,
   addNineSlice,
   addTagImage,
   artFits,
   fadeAway,
+  type IconButton,
   imageIcon,
   setDollarAmount,
   settingsIcon,
@@ -218,6 +221,9 @@ export class HudScene extends Scene {
   private debuffFills: GameObjects.Graphics | undefined;
   private dollar: GameObjects.BitmapText | undefined;
   private drawn: Record<string, unknown> = {};
+  private barButtons = new Map<WalkBarButtonId, IconButton>();
+  private barGlyphs = new Map<WalkBarButtonId, GameObjects.Container>();
+  private barPressActive: (() => boolean) | undefined;
   private dynamic: GameObjects.Graphics | undefined;
   private effectParts: GameObjects.GameObject[] = [];
   // What the open explanation explains, and its detail card as drawn, if any.
@@ -296,19 +302,31 @@ export class HudScene extends Scene {
       topBarRects(topBar).forEach(({ colour, rect }) => fillRect(g, PALETTE[colour], rect));
       fillRect(g, PALETTE.ink, WALK_BAR.cash.well);
     }
-    WALK_BAR_BUTTONS.forEach((id) => this.addButton(TOP_BAR_BUTTONS[id]));
-    // A container holds the icon's place in the draw order while it is swapped.
-    this.soundHolder = this.add.container(0, 0);
+    this.barButtons = new Map();
+    this.barGlyphs = new Map();
+    this.barPressActive = undefined;
+    WALK_BAR_BUTTONS.forEach((id) => this.addButton(id, TOP_BAR_BUTTONS[id]));
+    // Glyph containers retain their pressed offset when sound or pause artwork changes.
+    this.soundHolder = this.barGlyphs.get("sound");
     this.showSoundIcon(isMuted(this));
     const help = buttonIcon(TOP_BAR_BUTTONS.help);
-    if (imageIcon(this, "icon-help", help.x, help.y).length === 0) {
-      addPixelText(this, help.x + 8, help.y + 4, "?", { colour: PALETTE.cream, originX: 0.5 });
-    }
+    const helpParts = imageIcon(this, "icon-help", help.x, help.y);
+    this.barGlyphs.get("help")?.add(
+      helpParts.length === 0
+        ? [
+            addPixelText(this, help.x + 8, help.y + 4, "?", {
+              colour: PALETTE.cream,
+              originX: 0.5,
+            }),
+          ]
+        : helpParts,
+    );
     const settings = buttonIcon(TOP_BAR_BUTTONS.settings);
-    settingsIcon(this, settings.x, settings.y);
+    this.barGlyphs.get("settings")?.add(settingsIcon(this, settings.x, settings.y));
     const pauseIcon = buttonIcon(TOP_BAR_BUTTONS.pause);
     this.pauseIcon = this.add.image(pauseIcon.x, pauseIcon.y, "__DEFAULT").setOrigin(0);
     this.pauseGlyph = this.add.graphics();
+    this.barGlyphs.get("pause")?.add([this.pauseIcon, this.pauseGlyph]);
 
     const title = { font: "title" } as const;
     this.dollar = addPixelText(this, 0, 0, "$", { colour: PALETTE.amber, ...title });
@@ -355,14 +373,17 @@ export class HudScene extends Scene {
       down: (pointer) => {
         const button = topBarButtonAt(pointer.x, pointer.y);
         if (button !== undefined) {
+          this.setBarPressed(button, () => pointer.isDown);
           this.press("tap", button);
         }
       },
-      up: () => undefined,
+      up: () => this.setBarPressed(undefined),
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       const button = topBarButtonForKey(event.repeat, event.key);
       if (button !== undefined) {
+        const until = this.time.now + MENU_FEEDBACK.pressDipMs;
+        this.setBarPressed(button, () => this.time.now < until);
         this.press("key", button);
       }
     });
@@ -420,20 +441,23 @@ export class HudScene extends Scene {
     }
   }
 
-  // A 20x20 button face on the bar, drawn when the art is missing.
-  private addButton(button: BarButton): void {
-    const { x, y } = button.face;
-    if (this.textures.exists("ui-icon-button")) {
-      const face = this.add.sprite(x, y, "ui-icon-button").setOrigin(0);
-      playTag(face, "ui-icon-button", "normal");
-      return;
-    }
-    const g = this.add.graphics();
-    drawFramedRect(
-      g,
-      { border: PALETTE.darkBrown, fill: PALETTE.navy },
-      { height: 20, width: 20, x, y },
+  // The shared chrome moves its whole glyph container, including dynamically replaced icons.
+  private addButton(id: WalkBarButtonId, button: BarButton): void {
+    const glyph = this.add.container(0, 0);
+    this.barGlyphs.set(id, glyph);
+    const parent = this.add.container(0, 0);
+    this.barButtons.set(
+      id,
+      addIconButton(this, parent, button.face.x, button.face.y, () => [glyph]),
     );
+  }
+
+  private setBarPressed(
+    button: WalkBarButtonId | undefined,
+    active: () => boolean = () => false,
+  ): void {
+    this.barPressActive = button === undefined ? undefined : active;
+    this.barButtons.forEach((control, id) => control.setPressed(id === button));
   }
 
   // icon-sound's on or off frame on the sound button's face, for M and Settings too.
@@ -516,6 +540,10 @@ export class HudScene extends Scene {
   }
 
   override update(_time: number, delta: number): void {
+    // An overlay can consume the release; the shared pointer still records that it lifted.
+    if (this.barPressActive !== undefined && !this.barPressActive()) {
+      this.setBarPressed(undefined);
+    }
     const run = this.walk();
     const view = run.hudView();
     if (view === undefined) {
