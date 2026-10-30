@@ -12,8 +12,8 @@ green plus badge, as the shop's item-<gear> art, outlined with icon_edge); ui-pa
 nine-slice, 4px corners), ui-hint (24x24 nine-slice, 8px corners), ui-hint-tail
 (8x6), ui-new-best (72x20 ribbon, text baked in with font-title); the start screen's ui-detail-card
 (24x24 nine-slice, 8px corners) and ui-detail-well (68x68); the shop list's ui-scroll-track (8x24) and
-ui-scroll-thumb (6x24, three-slices with 3px caps); the walker section's ui-cork (32x32 seamless corkboard tile), the dogs section's ui-plaid
-(16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h
+ui-scroll-thumb (6x24, three-slices with 3px caps); the walker section's ui-cork (32x32 solid brown tile), the dogs section's ui-plaid
+(16x16 solid plum tile), the Pocket section's ui-denim (16x16 solid blue tile), ui-stitch-h
 (8x2) and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the card rows'
 ui-strip-well (24x24 nine-slice, the band behind a card row's subtitle), ui-quip (24x24 nine-slice,
 8px corners), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6), ui-celebrate-burst (148x132, the
@@ -29,7 +29,7 @@ the game's faces, hearts and text), ui-dog-card-warn (120x70, the low-hearts rim
 ui-dog-card; tags pulse, static), ui-debuff-bar (360x16, one active debuff's bar under the walk bar;
 tags muddy, stinky, zoomies, spotlight), ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24
 nine-slice, 8px corners; tag glint), ui-check (16x16; tags 1, 2, 3, tick), ui-section (24x32
-nine-slice, 3px sides and bottom, 24px top; tags complete, neutral), fx-tap and fx-dust (16x16; tag
+nine-slice, 3px sides and bottom, 24px top; tags complete, neutral, neutral-walker, neutral-dogs, neutral-pocket), fx-tap and fx-dust (16x16; tag
 play), ui-heart (8x7; tags full, empty, and full-dark and empty-dark for the navy ui-dog-card),
 ui-button (24x24 nine-slice, 3px corners and a 5px bottom; tags normal, pressed, disabled,
 secondary, secondary-pressed, go, go-pressed, go-disabled), ui-icon-button (20x20, the face under a
@@ -943,99 +943,51 @@ def detail_well():
 
 
 SECTION_W, SECTION_H = 24, 32
-SECTION_BAND = 21  # band rows, its bottom line included, under the 3px frame
+SECTION_FACES = {"complete": "amber", "neutral": "purple", "neutral-walker": "tan", "neutral-dogs": "purple", "neutral-pocket": "sky"}
 
 
 def section(state):
     """24x32 nine-slice (3px left, right and bottom, 24px top): one start screen section (walker,
-    dogs, Pocket) framed as a unit, its heading band across the top over transparent space for the
-    tiles. A 1px ink edge, then a 2px border: ink for neutral (nothing in the section chosen yet), so
-    dividers between sections read dark; amber for complete (something chosen). The band fills rows
-    3 to 23 between the side borders: navy over an ink line, or amber over an orange line when
-    complete. The game writes, in font-title x2 with caps in rows 8 to 17: the heading 9px from the
-    left, cream on navy (9.59:1) or ink on amber (9.71:1), and when complete the choice right-aligned
-    9px from the right in ink."""
-    lit = state == "complete"
+    dogs, Pocket) with a single plum rim and heading rows 1 to 22. The solid section fill sits
+    1px inside the rim below the 24px heading. Complete is amber; neutral is the dogs' purple,
+    neutral-walker tan, neutral-dogs purple and neutral-pocket sky. The game writes its title and note in rows 8 to 17:
+    ink on amber, tan and sky; cream title and amber note on purple. Existing tag indices and
+    nine-slice caps stay fixed."""
     g = Grid(SECTION_W, SECTION_H)
-    g.rect(0, 0, SECTION_W, SECTION_H, "ink")
-    g.rect(3, 3, SECTION_W - 6, SECTION_H - 6, None)
-    if lit:
-        g.rect(1, 1, SECTION_W - 2, 2, "amber")
-        g.rect(1, SECTION_H - 3, SECTION_W - 2, 2, "amber")
-        g.rect(1, 1, 2, SECTION_H - 2, "amber")
-        g.rect(SECTION_W - 3, 1, 2, SECTION_H - 2, "amber")
-    g.rect(3, 3, SECTION_W - 6, SECTION_BAND - 1, "amber" if lit else "navy")
-    g.rect(3, 2 + SECTION_BAND, SECTION_W - 6, 1, "orange" if lit else "ink")
+    g.rect(0, 0, SECTION_W, SECTION_H, "plum")
+    g.rect(1, 1, SECTION_W - 2, SECTION_H - 2, None)
+    g.rect(1, 1, SECTION_W - 2, 22, SECTION_FACES[state])
+    g.rect(1, 23, SECTION_W - 2, 1, "plum")
     return g
 
 
-# The side of the seamless fabric tiles, ui-denim and ui-plaid.
+# The retained fill tile sizes for ui-denim and ui-plaid.
 FABRIC = 16
 STITCH_DASH, STITCH_GAP = 5, 3
 
 
 def denim():
-    """16x16 seamless tile: the Pocket section's jeans-pocket fill, repeated (TileSprite) over the
-    section's tile area. Blue twill: dslate diagonals rising to the right every 4px, with no flecks
-    between them. Blue holds apart from the band's navy and the dogs section's plaid, and the tiles'
-    ink edges hold on it."""
+    """16x16 solid blue tile under the Pocket's cards."""
     g = Grid(FABRIC, FABRIC)
     g.rect(0, 0, FABRIC, FABRIC, "blue")
-    for y in range(FABRIC):
-        for x in range(FABRIC):
-            if (x + y) % 4 == 0:
-                g.p(x, y, "dslate")
     return g
 
 
-# The cork's tile side: twice the denim's, so its scattered granules repeat too far apart to show a grid.
+# The retained ui-cork tile side.
 CORK = 32
 
 
 def cork():
-    """32x32 seamless tile: the walker section's corkboard, repeated (TileSprite) over its tile area,
-    where the walkers' cards are pinned. Brown with sparse 2x2 ochre and clay granules, close to it in
-    value so the fill stays quiet; the cream tiles' ink edges hold on it, and it holds apart from the
-    Pocket's blue and the dogs' plaid."""
+    """32x32 solid brown tile under the walker cards."""
     g = Grid(CORK, CORK)
     g.rect(0, 0, CORK, CORK, "brown")
-    for x, y, c in CORK_GRAINS:
-        g.p(x, y, c)
     return g
 
 
-def cork_grains(seed=11, gap=7, tries=8000):
-    """The cork's granules: blue noise on the CORK x CORK torus (no two closer than gap, measured across the
-    tile's wrap too), so the repeated tile scatters evenly with no lattice. Each is a 2x2 block of ochre or
-    clay, so no grain turns to a lone fleck."""
-    import random
-
-    r, seeds = random.Random(seed), []
-    for _ in range(tries):
-        x, y = r.randrange(CORK), r.randrange(CORK)
-        if all(min(abs(x - a), CORK - abs(x - a)) ** 2 + min(abs(y - b), CORK - abs(y - b)) ** 2 >= gap * gap
-               for a, b in seeds):
-            seeds.append((x, y))
-    pts = []
-    for x, y in seeds:
-        c = "clay" if r.random() < 0.5 else "ochre"
-        pts += [((x + dx) % CORK, (y + dy) % CORK, c) for dx in (0, 1) for dy in (0, 1)]
-    return pts
-
-
-CORK_GRAINS = cork_grains()
-
-
 def plaid():
-    """16x16 seamless tile: the dogs section's dog-blanket tartan, repeated (TileSprite) over its tile
-    area. A dred ground crossed each way by a 2px plum band and, halfway between, a 1px plum thread, so a
-    plum line runs about every 8px: quiet enough that the dog tiles stay the loudest thing on it."""
+    """16x16 solid plum tile under the dog cards."""
     g = Grid(FABRIC, FABRIC)
-    for y in range(FABRIC):
-        for x in range(FABRIC):
-            band = x < 2 or y < 2
-            thread = x == 9 or y == 9
-            g.p(x, y, "plum" if band or thread else "dred")
+    g.rect(0, 0, FABRIC, FABRIC, "plum")
     return g
 
 
@@ -1173,7 +1125,7 @@ def zone_pill():
 
 # The dog card: 120x70 in its slot, the chrome on x 1 to 118 and rows 0 to 69, so a 1px gap runs
 # down each side and the card's foot sits on the band's last row, over the neighbourhood progress
-# line. The cards are navy, as a neutral ui-section, so the eye stays on the road and the dogs'
+# line. The cards are navy, so the eye stays on the road and the dogs'
 # photos and hearts carry the row.
 DOG_CARD = (120, 70)
 DOG_CARD_FRAME = (1, 0, 118, 70)
@@ -1644,7 +1596,7 @@ def sprites():
     yield "ui-select", [("pulse", [select_frame(False).outlined(False), select_frame(True).outlined(False)], 450)]
     yield "ui-check", [(lb, [check_badge(lb).outlined()], 1000) for lb in ("1", "2", "3", "tick")]
     yield "ui-afford", [("glint", [afford_frame(i).outlined(False) for i in (0, 0, 1, 2)], 400)]
-    yield "ui-section", [(s, [section(s).outlined(False)], 1000) for s in ("complete", "neutral")]
+    yield "ui-section", [(s, [section(s).outlined(False)], 1000) for s in SECTION_FACES]
     yield "fx-tap", [("play", [tap_burst(i).outlined(False) for i in range(4)], 60)]
     yield "fx-dust", [("play", [dust(i).outlined(False) for i in range(4)], 80)]
     yield "ui-heart", [("full", [heart(True).outlined(False)], 1000), ("empty", [heart(False).outlined(False)], 1000),

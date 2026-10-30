@@ -24,7 +24,7 @@ reads on them.
   of mums inside it, open at the gate between two brick piers (152 and 202). The
   front yard is pale driftwood flagstones, the front path (x 164 to 195) red
   brick in basket weave, with fallen leaves, the yard sign, a stone urn of
-  mums in the corner and the porch deck from y 198 under the walker, dogs and
+  mums in the corner and the flat dark-brown backing from y 199 under the walker, dogs and
   Pocket sections and Start walk. The street sign's board (300,72 54x11, a
   52x9 navy face) sits at the right edge, clear of the walker's speech bubble;
   the game prints homeText.gateSign on it in font-body, white, centred at
@@ -565,10 +565,10 @@ def home():
     cv.fill(251, 177, 1, 1, "pink")
     cv.fill(253, 179, 1, 1, "dred")
     cv.fill(254, 178, 1, 1, "dred")
-    # the porch: a step nosing, then the deck under the panels
-    cv.fill(0, 196, W, 1, "tan")
-    cv.fill(0, 197, W, 1, "brown")
-    planks(cv, 0, 198, W, H - 198, 11, seed=3)
+    # Two quiet ground rows below the feet, then a continuous divider and flat panel backing.
+    cv.fill(0, 196, W, 2, "brown")
+    cv.fill(0, 198, W, H - 198, "dbrown")
+    cv.fill(0, 198, W, 1, "plum")
     return cv
 
 
@@ -1391,7 +1391,7 @@ def ui(cv, key):
 
     if key == "screen-home":
         # The gate scene at 40..196, then StartScene's walker, dog and gear rows and Start walk on the deck,
-        # which is plain planks so any arrangement of them works.
+        # which has a flat dark-brown backing.
         sn.text(cv, "$385", 26, 15, "cream", 2)
         for x in (216, 268):
             panel(x, 10, 20, 20, "tan")
