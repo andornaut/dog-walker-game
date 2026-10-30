@@ -33,7 +33,9 @@ reads on them.
   in the sign letters at 2x, yellow, the letters centred on its face. The
   yard's right lot is left for ui-pet-shop. The scene holds no strong green, so
   the Pet shop's board and Start walk stand out.
-- screen-end: a Cabbagetown street at dusk. Between the logo (END_LOGO_AT
+- screen-end: a Cabbagetown street at dusk, with plain lower sky bands and a
+  repeating interior road footer from row 511, free of lane edges and dashes.
+  Between the logo (END_LOGO_AT
   107,2) and the summary panel (24,112 to 336,412), the front of the brick
   cottage the pack comes home to: the logo stands on its slate roof's ridge
   (END_RIDGE, row 43), a low centre gable trimmed in white rises from the
@@ -48,7 +50,7 @@ reads on them.
   mauve (y 450). Then the street's bay-and-gables and canopy trees (from y
   370), iron fences, the yards, the sidewalk (rows 491 to 505) with two
   heritage lamps, the curb, and from END_ROAD (511) Kensington Market's brick
-  road under the button (4,514 352x44), which bobs 1px up, so at least 2 rows of
+  road under the button (32,514 296x44), which bobs 1px up, so at least 2 rows of
   road show above and below it. The houses,
   trees and fences stay within x 8 to 352, so beside the badges panel (8,416
   344x92) the margins show only sky, lawn and sidewalk.
@@ -770,7 +772,9 @@ def end():
     # rooftops of the street below; the CN Tower lit over the roofs at the right
     cv.fill(0, 0, W, 520, DUSK_SKY[-1])
     bd.bands(cv, 0, 96, DUSK_SKY)
-    bd.bands(cv, 112, END_STREET + 80, DUSK_SKY)
+    # Plain lower sky bands keep the open area behind the results calm.
+    for (top, bottom), colour in zip(bd.band_rows(112, END_STREET + 80, len(DUSK_SKY), 0.7), DUSK_SKY):
+        cv.fill(0, top, W, bottom - top, colour)
     for x, y in ((40, 6), (92, 14), (262, 4), (348, 20), (20, 30)):
         cv.fill(x, y, 1, 1, "white")
     cn_tower(cv, *END_CN)
@@ -866,14 +870,12 @@ def end():
     for x in (150, 210):
         bd.gas_lamp(strip, x, END_WALK + 14)
     cv.paste(strip.img, 0, END_STREET)
-    # Kensington Market's brick road under the button, from the tile's row 5: its lane dashes (rows 0 to 2,
-    # 24 to 34 and 56 to 63, x 64k-1) then fall under the button or off the screen's right edge, and the road's
-    # rows above and below the button show none. The tile's columns 64 to 126 fill the right of the screen, so
-    # its dark left edge (columns 0 to 4) shows only at the screen's left edge.
+    # Repeat the road's interior columns 64 to 126 across the footer, without lane edges or dashes.
+    # Anchor the repeats at the right edge so the rightmost strip keeps its texture phase.
     tile = sn.TILES[next(z for z, v in sn.ZONES.items() if v["art"] == "kensington-market")]
-    tile = tile.crop((0, 5, tile.width, 5 + H - END_ROAD))
-    cv.img.paste(tile, (0, END_ROAD))
-    cv.img.paste(tile.crop((64, 0, 127, tile.height)), (W - 63, END_ROAD))
+    tile = tile.crop((64, 5, 127, 5 + H - END_ROAD))
+    for x in range(W - tile.width, -tile.width, -tile.width):
+        cv.img.paste(tile, (x, END_ROAD))
     return cv
 
 
