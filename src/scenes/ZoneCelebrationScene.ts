@@ -3,6 +3,7 @@ import { type GameObjects, Math as PhaserMath, Scene } from "phaser";
 
 import { ZONE_CELEBRATION_ART as ART } from "../assets/spriteKeys";
 import { gameData } from "../data";
+import { regionOutside } from "../home/homeBar";
 import {
   CELEBRATION_LAYOUT as LAYOUT,
   GREETING_FIT,
@@ -19,6 +20,7 @@ import {
 } from "../hud/zoneCelebration";
 import { cardNumberForKey, isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
+import { exitShown } from "../pwa";
 import { PALETTE } from "../ui/palette";
 import { addDisplayText } from "../ui/phaser/displayText";
 import { fillRect } from "../ui/phaser/draw";
@@ -109,8 +111,9 @@ export class ZoneCelebrationScene extends Scene {
     if (text.kind === "zoneDone") {
       this.addPlate(text);
       this.addButton(version.button, text.button, finish);
-      // A tap anywhere else on the dim, or on the page beside the game, moves on too.
-      const area = { covered: [version.button], dim: LAYOUT.dim };
+      // A tap anywhere else but the walk bar's buttons, the dog cards included, or on the page
+      // beside the game, moves on too.
+      const area = regionOutside(exitShown(), "walk", [version.button]);
       listenOutsideTap(this, () => area, finish);
       return;
     }

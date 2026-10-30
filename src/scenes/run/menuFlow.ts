@@ -206,9 +206,9 @@ export class MenuFlow {
   }
 
   // An explanation's detail card takes every press until a tap closes it, so the overlay it opens
-  // over (the settings, the pause menu or the Home question, a card or the zone celebration)
-  // pauses under it and goes on as it was, the walk still paused, once it closes, unless another
-  // overlay has opened over it meanwhile. Called each frame with whether one is open.
+  // over (a card or the zone celebration) pauses under it and goes on as it was, the walk still
+  // paused, once it closes, unless another overlay, such as the pause menu, has opened over it
+  // meanwhile. Called each frame with whether one is open.
   coverOverlay(explaining: boolean): void {
     const { scene } = this.scene;
     if (explaining && this.covered === undefined) {

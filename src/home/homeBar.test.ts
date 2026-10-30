@@ -1,8 +1,10 @@
+import { isOutside } from "@andornaut/game-kit/input/outsideTap";
 import { containsPoint, type Rect } from "@andornaut/game-kit/rect";
 import { describe, expect, it } from "vitest";
 
 import { SCREEN_LAYOUT } from "../data/screen";
-import { isOutside } from "../input/outsideTap";
+import { TOP_BAR_BUTTONS } from "../hud/topBar";
+import { walkBarLayout } from "../hud/walkHud";
 import {
   homeBackAction,
   type HomeBarAction,
@@ -47,12 +49,20 @@ describe.each([true, false])("the top bar with Exit shown %s", (exit) => {
     y: BAR_BOTTOM + 1,
   };
   const underBank = { x: HOME_LAYOUT.topBar.well.x, y: BAR_BOTTOM + 1 };
+  const onBank = { x: HOME_LAYOUT.topBar.well.x + 1, y: HOME_LAYOUT.topBar.mid };
+  const { dogSlots, topBar } = SCREEN_LAYOUT;
+  const firstWell = walkBarLayout(topBar).effectWells[0] ?? topBar;
 
+  // Anywhere on the screen but the panel and the top bar's buttons is outside.
   it.each([
     ["home: under the top bar, clear of its buttons", "home", underBank, true],
     ["home: on a button's tap area under the top bar", "home", underSettings, false],
-    ["home: on the top bar", "home", centres.help ?? underBank, false],
+    ["home: on a top bar button", "home", centres.help ?? underBank, false],
+    ["home: on the top bar's bank", "home", onBank, true],
     ["walk: in the walk view", "walk", centre(SCREEN_LAYOUT.walkView), true],
+    ["walk: on a dog card", "walk", centre(dogSlots[0] ?? topBar), true],
+    ["walk: on a walk bar well", "walk", centre(firstWell), true],
+    ["walk: on a walk bar button", "walk", centre(TOP_BAR_BUTTONS.pause.hit), false],
   ] as const)("regionOutside, %s", (_, region, point, outside) => {
     expect(isOutside(regionOutside(exit, region, []), point)).toBe(outside);
   });

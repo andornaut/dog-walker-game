@@ -1,15 +1,17 @@
+import type { OutsideArea } from "@andornaut/game-kit/input/outsideTap";
 import { containsPoint, type Rect } from "@andornaut/game-kit/rect";
 
 import { SCREEN_LAYOUT } from "../data/screen";
-import type { OutsideArea } from "../input/outsideTap";
+import { walkBarLayout } from "../hud/walkHud";
+import { screenArea } from "../input/outsideTap";
 import { HOME_LAYOUT, type HomeBarButton, homeBarButtons } from "./homeLayout";
 
 // Where an overlay sits: on a home page (the start screen, the Pet shop, the Logbook), or on a
 // walk.
 export type OverlayRegion = "home" | "walk";
 
-// What an overlay dims, and where a tap outside its panel counts: everything under the top bar,
-// which stays lit with its buttons working, as the walk's pause menu leaves the walk bar lit.
+// What an overlay dims: everything under the top bar, which stays lit with its buttons working,
+// as the walk's pause menu leaves the walk bar lit.
 export function overlayRegion(region: OverlayRegion): Rect {
   if (region === "walk") {
     return SCREEN_LAYOUT.walkView;
@@ -22,20 +24,24 @@ export function overlayRegion(region: OverlayRegion): Rect {
 export type HomeBarAction = "close" | "exit" | "mute" | "openHelp" | "openLogbook" | "openSettings";
 
 // Every top bar button's tap area, Exit's among them where exit is true (homeBarButtons).
-export function homeBarHits(exit: boolean): Rect[] {
+function homeBarHits(exit: boolean): Rect[] {
   return homeBarButtons(exit).map(([, { hit }]) => hit);
 }
 
-// Where a tap outside an overlay's panel and covered counts in region: in overlayRegion, off
-// the home top bar's buttons as shown (exit: whether Exit is among them), whose tap areas reach
-// a little below the bar.
+// Where a tap outside an overlay's panel and covered counts in region: anywhere on the screen,
+// the top bar's empty area and the dog cards included, but on the top bar's buttons, which keep
+// their own taps: the home top bar's as shown (exit: whether Exit is among them), whose tap areas
+// reach a little below the bar, or the walk bar's.
 export function regionOutside(
   exit: boolean,
   region: OverlayRegion,
   covered: readonly Rect[],
 ): OutsideArea {
-  const bar = region === "home" ? homeBarHits(exit) : [];
-  return { covered: [...covered, ...bar], dim: overlayRegion(region) };
+  const bar =
+    region === "home"
+      ? homeBarHits(exit)
+      : Object.values(walkBarLayout(SCREEN_LAYOUT.topBar).buttons).map(({ hit }) => hit);
+  return screenArea([...covered, ...bar]);
 }
 
 // The top bar button a press at (x, y) lands on, if any, with Exit among the buttons where exit

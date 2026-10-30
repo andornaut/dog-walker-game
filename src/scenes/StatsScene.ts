@@ -16,7 +16,7 @@ import {
 } from "../home/badgesView";
 import { FEEDBACK } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
-import { homeBarHits, overlayRegion } from "../home/homeBar";
+import { overlayRegion, regionOutside } from "../home/homeBar";
 import {
   badgesBottom,
   DOG_STATS,
@@ -47,7 +47,6 @@ import {
   scrollMax,
   stepScroll,
 } from "../input/listScroll";
-import { screenArea } from "../input/outsideTap";
 import { exitShown } from "../pwa";
 import { rectIndexAt } from "../ui/grid";
 import { PALETTE } from "../ui/palette";
@@ -213,7 +212,7 @@ export class StatsScene extends Scene {
     const exit = exitShown();
     listenDismiss(
       this,
-      screenArea([PANEL, ...homeBarHits(exit)]),
+      regionOutside(exit, "home", [PANEL]),
       () => this.close(),
       () => this.back(),
     );

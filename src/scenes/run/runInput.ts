@@ -139,9 +139,10 @@ export class RunInput {
 
   // A press on the canvas or on the page beside it, at point in game pixels. onButton: it went
   // down on a walk-bar button. The run scene keeps running while a card, the zone celebration or
-  // the pause menu covers the walk, and the press is theirs then, but for what explains itself
-  // in what they leave in view. A press on what opens on a tap bursts as it lands, as a button's
-  // does, and its tap opens the explanation at once, the burst playing on over it.
+  // the pause menu covers the walk, and the press is theirs then, but under a card or the
+  // celebration for what explains itself in what they leave in view (walkPresses). A press on
+  // what opens on a tap bursts as it lands, as a button's does, and its tap opens the
+  // explanation at once, the burst playing on over it.
   private onPress(phase: PointerPhase, press: Press, point: Point, onButton: boolean): void {
     const presses = this.presses();
     const context = this.context(presses);

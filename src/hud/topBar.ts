@@ -68,16 +68,18 @@ export function playerPaused(pause: Pick<RunPause, "menu">): boolean {
   return pause.menu !== "closed";
 }
 
-// What the walk's presses do. A card, the zone celebration, the pause menu, the Home question and
-// the settings dim only the walk view, so what explains itself outside it, on the walk bar and
-// the dog cards, still opens its explanation over them; help covers the whole screen and takes
-// every press. A hit stop covers nothing, and an explanation's detail card takes its presses
-// itself: the walk's input closes it on the next tap.
+// What the walk's presses do. A card and the zone celebration dim only the walk view, so what
+// explains itself outside it, on the walk bar and the dog cards, still opens its explanation
+// over them where the overlay leaves the press to the walk (Neighbourhood done takes a tap
+// anywhere but its button and the walk bar's buttons). The pause menu, the Home question and the
+// settings close on a tap anywhere but their panel and the walk bar's buttons, and help covers
+// the whole screen, so each takes every press. A hit stop covers nothing, and an explanation's
+// detail card takes its presses itself: the walk's input closes it on the next tap.
 export function walkPresses(pause: RunPause): PressMode {
-  if (pause.menu === "help") {
+  if (pause.menu !== "closed") {
     return "none";
   }
-  return pause.card || pause.menu !== "closed" ? "explain" : "steer";
+  return pause.card ? "explain" : "steer";
 }
 
 // Lane moves act only while nothing pauses the walk or holds it in a hit stop.

@@ -295,10 +295,11 @@ export class SettingsScene extends Scene {
         this.render();
       },
     });
-    // The back button and the dimmed screen around the card close it, as the close control in
-    // its band does; the lit top bar, and over the walk the dog cards, are not around it. While
-    // the steps' card is open, the back button and the dim around that card close it, the
-    // settings card included. As listenDismiss, with the area read as each press lands.
+    // The back button and a tap anywhere around the card close it, as the close control in its
+    // band does: the dim, the lit top bar's empty area and, over the walk, the dog cards; the top
+    // bar's buttons keep their own taps. While the steps' card is open, the back button and a
+    // tap around that card close it, the settings card included. As listenDismiss, with the area
+    // read as each press lands.
     onBackPressed(this, () => this.back());
     const exit = exitShown();
     listenOutsideTap(

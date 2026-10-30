@@ -1,17 +1,15 @@
+import {
+  type OutsideArea,
+  type OutsidePress,
+  outsidePressMove,
+} from "@andornaut/game-kit/input/outsideTap";
+import { catchOutsideTaps } from "@andornaut/game-kit/input/phaser/catchOutsideTaps";
 import type { Events, Scene } from "phaser";
 
 import { gameData } from "../data";
 import { openGuard } from "../input/openGuard";
-import {
-  type OutsideArea,
-  type OutsidePress,
-  outsidePressDown,
-  outsidePressMove,
-  outsideTapped,
-} from "../input/outsideTap";
 import { PHONE_EVENTS } from "../pwa";
 import { read } from "../rules/units";
-import { listenOnePress } from "./onePress";
 import { listenPagePresses } from "./pagePresses";
 import type { SceneKey } from "./sceneKeys";
 
@@ -100,10 +98,12 @@ export function listenDismiss(
   listenOutsideTap(scene, () => area, close);
 }
 
-// Calls onTap on a tap on the dimmed area outside the overlay's panel, or on the bare page
-// beside the game, as its close control or Resume would. A press that travels past the tap
-// distance is a drag and taps nothing. area is read as each press lands: undefined while no
-// panel is open, so the press taps nothing.
+// Calls onTap on a tap in area outside the overlay's panel, or on the bare page beside the game,
+// as its close control or Resume would. A press that travels past the tap distance is a drag and
+// taps nothing. A press that lands outside on the canvas never reaches the scenes under the
+// overlay (the kit's catchOutsideTaps), so the tap that closes it selects and presses nothing
+// there. area is read as each press lands: undefined while no panel is open, so the press taps
+// nothing.
 export function listenOutsideTap(
   scene: Scene,
   area: () => OutsideArea | undefined,
@@ -111,32 +111,7 @@ export function listenOutsideTap(
 ): void {
   const tapMaxDistance = read(gameData.tuning, "pixels", "tapMaxDistance");
   listenPageTap(scene, tapMaxDistance, () => area() !== undefined, onTap);
-  let press: { readonly area: OutsideArea; readonly press: OutsidePress } | undefined;
-  listenOnePress(scene, {
-    down: (pointer) => {
-      const open = area();
-      const landed =
-        open === undefined ? undefined : outsidePressDown(open, { x: pointer.x, y: pointer.y });
-      press =
-        open === undefined || landed === undefined ? undefined : { area: open, press: landed };
-    },
-    move: (pointer) => {
-      if (press !== undefined) {
-        const moved = outsidePressMove(tapMaxDistance, { x: pointer.x, y: pointer.y }, press.press);
-        press = { ...press, press: moved };
-      }
-    },
-    up: (pointer, cancelled) => {
-      const point = { x: pointer.x, y: pointer.y };
-      const tapped =
-        press !== undefined &&
-        outsideTapped(press.area, tapMaxDistance, cancelled, press.press, point);
-      press = undefined;
-      if (tapped) {
-        onTap();
-      }
-    },
-  });
+  catchOutsideTaps(tapMaxDistance, scene, area, onTap);
 }
 
 // Calls onTap on a tap on the bare page beside the game's canvas (listenPagePresses) while scene

@@ -8,7 +8,7 @@ import { dogDetail, gearDetail } from "../home/detail";
 import { FEEDBACK, shakeOffset } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
 import { dollarText, type Purchase } from "../home/home";
-import { homeBarHits, overlayRegion } from "../home/homeBar";
+import { overlayRegion, regionOutside } from "../home/homeBar";
 import { type HomeAction, messageLine } from "../home/homeLines";
 import {
   answerPurchase,
@@ -60,7 +60,6 @@ import {
   scrollToShow,
   stepScroll,
 } from "../input/listScroll";
-import { screenArea } from "../input/outsideTap";
 import { exitShown } from "../pwa";
 import type { SaveDocument } from "../save/schema";
 import type { ArtLook } from "../ui/interaction";
@@ -283,7 +282,7 @@ export class ShopScene extends Scene {
     const exit = exitShown();
     listenDismiss(
       this,
-      screenArea([PANEL, ...homeBarHits(exit)]),
+      regionOutside(exit, "home", [PANEL]),
       () => (this.confirm === undefined ? this.close() : this.back()),
       () => this.back(),
     );

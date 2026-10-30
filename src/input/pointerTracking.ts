@@ -15,7 +15,7 @@ import { type HoldPress, type HoldRule, moveHold, releaseHold, startHold, tickHo
 export type PointerPhase = "cancel" | "down" | "move" | "up";
 
 // What the walk's presses do. steer: they drive the gestures, and a hold explains. explain: only
-// a hold explains, while a menu pauses the walk but leaves what explains itself in view. none:
+// a hold explains, while a card pauses the walk but leaves what explains itself in view. none:
 // an overlay takes every press.
 export type PressMode = "explain" | "none" | "steer";
 

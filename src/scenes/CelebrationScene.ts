@@ -75,7 +75,8 @@ export class CelebrationScene extends Scene {
         close();
       }
     });
-    // The dim around the panel and Nice! closes, as Nice! does; the top bar keeps its buttons.
+    // A tap anywhere around the panel and Nice!, the top bar's empty area included, closes, as
+    // Nice! does; the top bar's buttons keep their own taps.
     const exit = exitShown();
     listenDismiss(this, regionOutside(exit, "home", [panel, buttonRect]), close);
     listenHomeBar(this, exit, close);

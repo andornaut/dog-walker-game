@@ -47,9 +47,7 @@ const NOTE_COLOURS: Readonly<Record<HomeNoteLine["kind"], number>> = {
 
 // The pause menu over the dimmed band and road: resume, help, settings or end the walk; or the
 // Home button's question, keep walking or end the walk. The HUD keeps running under it, so the top
-// bar's buttons and their keys (P, Escape and M) stay with it, and a hold on a walk-bar well or
-// a dog card opens its explanation over the panel, with this scene paused until it closes
-// (MenuFlow.coverOverlay).
+// bar's buttons and their keys (P, Escape and M) stay with it.
 export class PauseScene extends Scene {
   constructor() {
     super(SCENE_KEYS.pause);
@@ -99,8 +97,9 @@ export class PauseScene extends Scene {
             title: menu.title,
           },
     );
-    // The dimmed band and road around the panel resume, as Resume and Keep walking do. The top
-    // bar and dog cards are not dimmed and keep their own taps.
+    // A tap anywhere around the panel resumes, as Resume and Keep walking do, the walk bar's
+    // empty area and the dog cards included, though they are not dimmed. The walk bar's buttons
+    // keep their own taps.
     const outside = regionOutside(exitShown(), "walk", covered);
     listenOutsideTap(this, () => outside, onResume);
     const overlay = data.mode === "menu" ? data.overlay : undefined;

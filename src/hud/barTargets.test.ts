@@ -7,9 +7,10 @@ import { HOME_LAYOUT, homeBarButtons } from "../home/homeLayout";
 import { NOTHING_PAUSED, type RunPause, topBarAction, topBarButtonAt, walkPresses } from "./topBar";
 import { type ExplainShown, explainTargetAt, opensOnTap, WALK_BAR, walkBarLayout } from "./walkHud";
 
-// Every target on a top bar acts as it does with nothing open, under every card and overlay
-// that leaves the bar lit: a button does what its action says, and a well that explains itself
-// opens its explanation. Help alone covers the walk bar.
+// Every button on a top bar acts as it does with nothing open, under every card and overlay
+// that leaves the bar lit. Under a card a well that explains itself opens its explanation; under
+// the pause menu, the Home question and the settings a tap there closes them instead
+// (regionOutside), so it explains nothing. Help alone covers the walk bar.
 
 const centre = (rect: Rect): Point => ({ x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 });
 
@@ -81,6 +82,14 @@ const WALK_BASE: Readonly<Record<WalkTarget, string | undefined>> = {
   upgradeIcon: "explainOnTap",
 };
 
+// What a tap outside the panel closes in place of explaining.
+const CLOSES_ON_TAP = {
+  dogCard: undefined,
+  gearIcon: undefined,
+  perkIcon: undefined,
+  upgradeIcon: undefined,
+} as const;
+
 const WALK_CHANGES: Readonly<Record<string, Partial<Record<WalkTarget, string | undefined>>>> = {
   "a card or the zone celebration": {},
   help: {
@@ -94,11 +103,11 @@ const WALK_CHANGES: Readonly<Record<string, Partial<Record<WalkTarget, string | 
     upgradeIcon: undefined,
   },
   nothing: {},
-  "the Home question over a card": { pause: "resume" },
-  "the pause menu": { pause: "resume" },
-  "the pause menu over a card": { pause: "resume" },
-  "the settings": { pause: "resume", settings: "closeSettings" },
-  "the settings over a card": { pause: "resume", settings: "closeSettings" },
+  "the Home question over a card": { ...CLOSES_ON_TAP, pause: "resume" },
+  "the pause menu": { ...CLOSES_ON_TAP, pause: "resume" },
+  "the pause menu over a card": { ...CLOSES_ON_TAP, pause: "resume" },
+  "the settings": { ...CLOSES_ON_TAP, pause: "resume", settings: "closeSettings" },
+  "the settings over a card": { ...CLOSES_ON_TAP, pause: "resume", settings: "closeSettings" },
 };
 
 describe("the walk bar's and dog cards' targets under each overlay", () => {

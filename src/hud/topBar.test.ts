@@ -58,8 +58,9 @@ describe("the walk bar in each pause state", () => {
     settings: "openSettings",
     sound: "mute",
   } as const;
-  // A card, the menu and the Home question dim the walk view only: a hold on the bar's wells
-  // explains.
+  // A card dims the walk view only: a hold on the bar's wells explains. The menu and the Home
+  // question close on a tap anywhere but their panel and the bar's buttons, so they take every
+  // other press.
   const card = { ...walking, paused: true, presses: "explain" } as const;
   const menu = {
     ...walking,
@@ -68,14 +69,13 @@ describe("the walk bar in each pause state", () => {
     pauseKey: "resume",
     paused: true,
     player: true,
-    presses: "explain",
+    presses: "none",
   } as const;
   const cover = {
     ...menu,
     help: undefined,
     pause: undefined,
     pauseKey: undefined,
-    presses: "none",
     settings: undefined,
     sound: undefined,
   } as const;
