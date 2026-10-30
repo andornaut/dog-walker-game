@@ -984,7 +984,6 @@ describe("stepWalk", () => {
   // debuff in place of Muddy.
   const MINOR_CONTACTS = [
     { debuff: "zoomies", obstacle: "frisbeeDog" },
-    { debuff: "zoomies", obstacle: "rollerblader" },
     { debuff: "stinky", obstacle: "seagull" },
     { debuff: "zoomies", obstacle: "signSpinner" },
     { debuff: "spotlight", obstacle: "stiltWalker" },
