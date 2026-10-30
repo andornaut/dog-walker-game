@@ -53,13 +53,13 @@ export type ChoiceData = CauseData & Pick<GameData, "dogs" | "homeText" | "tunin
 // title.
 export type CardData = ChoiceData & Pick<GameData, "runText" | "upgrades">;
 
-// A fork's path: the zone it leads to, the upgrade it carries, and what a path card shows of
-// them.
+// A fork's path: the zone it leads to, the upgrade it carries or null for none, and what a path
+// card shows of them.
 interface PathView {
   readonly difficulty: Difficulty;
   readonly difficultyName: string;
   readonly side: PathSide;
-  readonly upgrade: UpgradeId;
+  readonly upgrade: UpgradeId | null;
   readonly zone: ZoneId;
 }
 
@@ -100,9 +100,13 @@ export interface OptionView {
 }
 
 // Whether a card shows a plaque at its foot: an option that costs cash shows its price there,
-// and a fork's path card how long its upgrade lasts. A free option and the Skip card have none.
+// and a fork's path card how long its upgrade lasts. A free option, a path card with no upgrade
+// and the Skip card have none.
 export function hasPlaque(option: OptionView | undefined): option is OptionView {
-  return option !== undefined && (option.path !== undefined || option.cost > 0);
+  return (
+    option !== undefined &&
+    (option.path === undefined ? option.cost > 0 : option.path.upgrade !== null)
+  );
 }
 
 // The most options a card shows.
@@ -197,6 +201,20 @@ function walkingHearts(state: RunState): Map<DogId, Hearts> {
   );
 }
 
+// An outcome that changes nothing.
+function unchanged(state: RunState): ChoiceOutcome {
+  return {
+    fired: [],
+    heartChanges: [],
+    modified: [],
+    moneyChanges: [],
+    moneyDelta: cents(0),
+    quips: [],
+    spareTreat: null,
+    state,
+  };
+}
+
 // Applies effects, then gives a held spare treat back to an owner they cost hearts, then owners
 // at 0 hearts fire you; with no dogs left the run ends.
 function outcomeOf(
@@ -286,14 +304,38 @@ export function firesText(
 }
 
 // A fork's card: one free path card per path, left to right, each naming its zone, with the
-// zone's difficulty, and the upgrade the path carries: its effect, how long
-// it lasts, and the changes it would make now.
+// zone's difficulty, and the upgrade the path carries: its effect, how long it lasts, and the
+// changes it would make now; or the card's noUpgrade line for a path with none.
 export function forkCard(data: CardData, state: RunState, source: ForkSource): CardView {
   const options = source.paths.map((id, index): OptionView => {
     const zone = zoneById(data, id);
-    const upgrade = source.upgrades[index] ?? source.upgrades[0];
+    const upgrade = source.upgrades[index];
     if (upgrade === undefined) {
-      throw new Error("A fork carries an upgrade on every path");
+      throw new Error("A fork says on every path whether it carries an upgrade");
+    }
+    const path = {
+      difficulty: zone.difficulty,
+      difficultyName: zone.difficultyName,
+      side: pathSide(index, source.paths.length),
+      upgrade,
+      zone: id,
+    };
+    const shared = {
+      art: cardZoneKey(zone),
+      availability: { enabled: true },
+      cost: cents(0),
+      index,
+      label: zone.name,
+      path,
+    } as const;
+    if (upgrade === null) {
+      return {
+        ...shared,
+        breakdown: [],
+        fires: [],
+        modified: [],
+        text: data.runText.card.noUpgrade,
+      };
     }
     const { duration, effects } = data.upgrades[upgrade];
     const preview = outcomeOf(
@@ -303,22 +345,11 @@ export function forkCard(data: CardData, state: RunState, source: ForkSource): C
       state,
     );
     return {
-      art: cardZoneKey(zone),
-      availability: { enabled: true },
+      ...shared,
       breakdown: breakdownOf(data, preview),
-      cost: cents(0),
       duration,
       fires: preview.fired,
-      index,
-      label: zone.name,
       modified: preview.modified,
-      path: {
-        difficulty: zone.difficulty,
-        difficultyName: zone.difficultyName,
-        side: pathSide(index, source.paths.length),
-        upgrade,
-        zone: id,
-      },
       text: `${data.upgrades[upgrade].name}: ${data.upgrades[upgrade].effect}`,
     };
   });
@@ -422,32 +453,36 @@ export function openCard(source: CardSource, state: RunState): RunState {
   return { ...state, phase: { kind: "card", source } };
 }
 
-// count upgrades drawn at random from those not yet picked this run, with at most one
-// trade-off: a second trade-off drawn is set aside and another card drawn instead.
+// What count paths carry, in order: one path of a fork with more than one, drawn at random,
+// carries none, so a fork with one path always offers an upgrade; the others carry upgrades
+// drawn at random from those not yet picked this run, none twice, with at most one trade-off:
+// a second trade-off drawn is set aside and another card drawn instead.
 export function offerUpgrades(
   data: Pick<GameData, "upgrades">,
   random: Random,
   count: number,
   state: Pick<RunState, "upgradesPicked">,
-): UpgradeId[] {
+): (UpgradeId | null)[] {
+  const bare = count > 1 ? randomInt(random, 0, count) : -1;
+  const wanted = bare < 0 ? count : count - 1;
   const pool = keysOf(data.upgrades).filter((id) => !state.upgradesPicked.includes(id));
   const isTradeOff = (id: UpgradeId) => data.upgrades[id].kind === "tradeOff";
   const offered: UpgradeId[] = [];
-  while (offered.length < count && pool.length > 0) {
+  while (offered.length < wanted && pool.length > 0) {
     const [picked] = pool.splice(randomInt(random, 0, pool.length), 1);
     if (picked !== undefined && !(isTradeOff(picked) && offered.some(isTradeOff))) {
       offered.push(picked);
     }
   }
-  if (offered.length < count) {
-    throw new Error(`Fewer than ${count} upgrades are left in the pool`);
+  if (offered.length < wanted) {
+    throw new Error(`Fewer than ${wanted} upgrades are left in the pool`);
   }
-  return offered;
+  return bare < 0 ? offered : [...offered.slice(0, bare), null, ...offered.slice(bare)];
 }
 
 // The fork after the run's current zone: its paths are up to three zones not yet walked,
-// drawn at random from forks, easiest on the left, each carrying one upgrade drawn from
-// upgrades.
+// drawn at random from forks, easiest on the left, each carrying an upgrade or none, drawn from
+// upgrades (offerUpgrades).
 export function offerFork(
   data: Pick<GameData, "upgrades" | "world">,
   random: { readonly forks: Random; readonly upgrades: Random },
@@ -461,8 +496,8 @@ export function offerFork(
   };
 }
 
-// Taking a fork's path takes its upgrade, then adds its zone to the route, as the next zone
-// walked.
+// Taking a fork's path takes its upgrade, if it carries one, then adds its zone to the route, as
+// the next zone walked.
 function takePath(
   data: CardData,
   state: RunState,
@@ -473,6 +508,9 @@ function takePath(
   const upgrade = choice === "skip" ? undefined : source.upgrades[choice];
   if (zone === undefined || upgrade === undefined) {
     throw new RangeError(`Path ${choice} is not on the fork`);
+  }
+  if (upgrade === null) {
+    return unchanged({ ...state, phase: { kind: "walking" }, route: [...state.route, zone] });
   }
   const outcome = outcomeOf(
     data,

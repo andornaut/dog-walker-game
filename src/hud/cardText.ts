@@ -16,8 +16,8 @@ import { RUN_TEXT_FIELDS } from "./runText";
 
 // What a card's plaque may say, longest first: the first that fits its room is shown. A path
 // card's plaque shows how long its upgrade lasts instead of a cost; another option's, its
-// price, greyed with the card when the player cannot afford it. A free option and Skip show no
-// plaque.
+// price, greyed with the card when the player cannot afford it. A free option, a path card
+// with no upgrade and Skip show no plaque.
 export function plaqueTexts(data: Pick<GameData, "runText">, option: OptionView): string[] {
   const text = data.runText.card;
   if (option.path !== undefined) {
@@ -52,16 +52,17 @@ export function largeBodyText(
 }
 
 // What a card's small effect says, its effects' names in their pills: its effect, or for a path
-// card its upgrade's name over its cardEffect, which the enlarged card says in full; Skip's
-// line for the skip card.
+// card with an upgrade its name over its cardEffect, which the enlarged card says in full;
+// Skip's line for the skip card.
 function smallEffectText(data: Pick<GameData, "runText"> & PillData, option?: OptionView): string {
   if (option === undefined) {
     return data.runText.card.skipEffect;
   }
-  const upgrade = option.path === undefined ? undefined : data.upgrades[option.path.upgrade];
+  const id = option.path?.upgrade ?? null;
+  const upgrade = id === null ? null : data.upgrades[id];
   return withNamePills(
     data,
-    upgrade === undefined ? option.text : `${upgrade.name}: ${upgrade.cardEffect}`,
+    upgrade === null ? option.text : `${upgrade.name}: ${upgrade.cardEffect}`,
   );
 }
 

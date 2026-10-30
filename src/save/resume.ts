@@ -178,7 +178,11 @@ function resumeSchema(data: ResumeData) {
   );
   const cardSource = v.variant("kind", [
     v.object({ affected: v.array(dog), encounter, kind: v.literal("encounter") }),
-    v.object({ kind: v.literal("fork"), paths: v.array(zone), upgrades: v.array(upgrade) }),
+    v.object({
+      kind: v.literal("fork"),
+      paths: v.array(zone),
+      upgrades: v.array(v.nullable(upgrade)),
+    }),
   ]);
   const slot = v.variant("status", [
     v.object({
@@ -319,7 +323,9 @@ function resumeSchema(data: ResumeData) {
   const draws = v.pipe(count, v.maxValue(MAX_DRAWS));
   return v.pipe(
     v.object({
-      draws: v.object({ cards: draws, forks: draws }),
+      // CLEANUP (added 2026-10-29): a walk saved before the upgrades stream has no count for it;
+      // remove the default once no saved walk can predate it.
+      draws: v.object({ cards: draws, forks: draws, upgrades: v.optional(draws, 0) }),
       seed: v.pipe(count, v.maxValue(MAX_SEED)),
       session,
     }),

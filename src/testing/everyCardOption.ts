@@ -9,7 +9,7 @@ import { testState } from "./runState";
 
 // Every card option the data can deal: each encounter's card for each dog alone and for the
 // three longest-named dogs together, on their last heart (so options fire them) and on five,
-// with the bank full and empty; and each zone's path card with each upgrade.
+// with the bank full and empty; and each zone's path card with each upgrade and with none.
 function everyOption(): OptionView[] {
   const dogs = keysOf(gameData.dogs);
   const longest = [...dogs]
@@ -27,7 +27,7 @@ function everyOption(): OptionView[] {
     (id) => gameData.encounters[id].resolution.kind === "card",
   );
   const zones = gameData.world.zones.map(({ id }) => id as ZoneId);
-  const upgrades = keysOf(gameData.upgrades);
+  const upgrades = [...keysOf(gameData.upgrades), null];
   const first = states[0] ?? testState({ kilo: 5 });
   return [
     ...states.flatMap((state) =>

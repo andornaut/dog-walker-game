@@ -18,7 +18,7 @@ A cozy pixel-art lane runner: you are a dog walker walking a pack of dogs throug
 
 - **Before a walk:** pick a walker, your dogs (one per owned dog slot) and up to one owned gear item for your Pocket.
 - **During a walk:** walk 4 of the 6 neighbourhoods, starting in High Park and ending on Yonge Street. The street scrolls toward you; switch lanes to dodge obstacles and grab pickups. A plain obstacle costs a heart; a card obstacle opens a choice card.
-- **Between neighbourhoods:** a neighbourhood celebration that banks the pay, then a fork: each path leads to a neighbourhood and carries one upgrade card, so one pick sets both.
+- **Between neighbourhoods:** a neighbourhood celebration that banks the pay, then a fork: each path leads to a neighbourhood and most carry an upgrade card, so one pick sets both.
 - **After a walk:** bank your cash and spend your earnings at the Pet shop: dogs, dog slots and gear.
 
 Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run structure, loadout, meta progression), Vampire Survivors (choices along the way), Slay the Spire (choices as cards).
@@ -92,7 +92,7 @@ Every dog pulls toward squirrels. A squirrel is no hit and opens no card: touchi
 
 - A walk is 4 neighbourhoods of Toronto. Each neighbourhood is the same distance and takes about 2 minutes; a full walk takes about 8 minutes
 - After neighbourhoods 1 to 3, the neighbourhood celebration, then a fork. Neighbourhood 4 has no fork
-- **Forks:** the road meets a cross street; after neighbourhoods 1 and 2 a fork card offers three paths (left, straight, right), each leading to a neighbourhood you haven't walked this walk other than Yonge Street, sorted easiest on the left to hardest on the right. The fork after neighbourhood 3 leads only to Yonge Street, so it shows one path. Each path card shows the neighbourhood's name and difficulty, and the one upgrade card it carries: the upgrade's name over a few words on what it does, said in full on the enlarged card. Picking a path picks the next neighbourhood and its upgrade at once. A Return home button under the paths ends the walk there (see Return home)
+- **Forks:** the road meets a cross street; after neighbourhoods 1 and 2 a fork card offers three paths (left, straight, right), each leading to a neighbourhood you haven't walked this walk other than Yonge Street, sorted easiest on the left to hardest on the right. The fork after neighbourhood 3 leads only to Yonge Street, so it shows one path. Each path card shows the neighbourhood's name and difficulty, and the upgrade card it carries: the upgrade's name over a few words on what it does, said in full on the enlarged card. At a fork with more than one path, one path, drawn at random, carries no upgrade, and its card says "No upgrade" with no plaque; Yonge Street's path after neighbourhood 3 always carries one. The fork card's subtitle reads "Most paths bring an upgrade". Picking a path picks the next neighbourhood and its upgrade, if any, at once. A Return home button under the paths ends the walk there (see Return home)
 - **Neighbourhoods** (6, each walk visits 4 with no repeats):
 
 Each neighbourhood also has its own card obstacle (see Encounters and debuffs) and a few obstacles and movers found nowhere else; no mover or plain obstacle but the squirrel appears in more than 3 neighbourhoods, each street cart look counting as its own (see Moving hazards).
@@ -259,7 +259,7 @@ After each of neighbourhoods 1 to 3, before the fork, a short celebration plays 
 
 ### Upgrade cards
 
-Walk-only boosts, one on each fork path, from a pool of 6. Each fork draws one per path at random from the remaining pool. Picking a path takes its upgrade, which leaves the pool for the rest of the walk; "next neighbourhood" is the one that path leads to. Effects without "now" or "next neighbourhood" last the rest of the walk.
+Walk-only boosts on the fork paths, from a pool of 6. Each fork draws its upgrades from the walk's seed, never from how the walk went: one path of a fork with more than one, at random, carries none, and every other path carries one drawn at random from the remaining pool, none twice and at most one trade-off. Picking a path takes its upgrade, which leaves the pool for the rest of the walk; "next neighbourhood" is the one that path leads to. Effects without "now" or "next neighbourhood" last the rest of the walk.
 
 - Belly rubs: +1♥ to every owner now, up to their max
 - Big tipper: every tip is worth $1 more in the next neighbourhood

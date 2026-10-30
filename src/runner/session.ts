@@ -38,23 +38,26 @@ import { stepZoomies } from "./zoomies";
 export type SessionData = CardData & PullData & WalkData;
 
 // The run's random streams, each named from the seed, so a seed replays the same walk however
-// the walk is driven. Each zone is planned from streams of its own, spawns-<zone index> and
-// movers-<zone index>. draws counts what each stream has drawn, so a resumed walk can take its
-// streams up where they were (runStreams).
+// the walk is driven. forks draws a fork's paths and upgrades what they carry, which the walk
+// never draws from, so a seed offers the same forks however the walk goes. Each zone is planned
+// from streams of its own, spawns-<zone index> and movers-<zone index>. draws counts what each
+// stream has drawn, so a resumed walk can take its streams up where they were (runStreams).
 export interface RunStreams {
   readonly cards: Random;
   draws(): StreamDraws;
   readonly forks: Random;
   readonly seed: number;
+  readonly upgrades: Random;
 }
 
 // How many numbers each of a run's streams has drawn.
 export interface StreamDraws {
   readonly cards: number;
   readonly forks: number;
+  readonly upgrades: number;
 }
 
-export const NO_DRAWS: StreamDraws = { cards: 0, forks: 0 };
+export const NO_DRAWS: StreamDraws = { cards: 0, forks: 0, upgrades: 0 };
 
 // The road's geometry for the run's pack, which changes when an owner fires you.
 type SessionGeometry = (run: RunState) => RoadGeometry;
@@ -134,11 +137,13 @@ function countedStream(seed: number, name: string, skip: number) {
 export function runStreams(seed: number, drawn: StreamDraws = NO_DRAWS): RunStreams {
   const cards = countedStream(seed, "cards", drawn.cards);
   const forks = countedStream(seed, "forks", drawn.forks);
+  const upgrades = countedStream(seed, "upgrades", drawn.upgrades);
   return {
     cards: cards.random,
-    draws: () => ({ cards: cards.drawn(), forks: forks.drawn() }),
+    draws: () => ({ cards: cards.drawn(), forks: forks.drawn(), upgrades: upgrades.drawn() }),
     forks: forks.random,
     seed,
+    upgrades: upgrades.random,
   };
 }
 
@@ -392,7 +397,7 @@ function endZone(
   if (run.phase.kind === "ended") {
     return { events, session: ended };
   }
-  const fork: CardSource = offerFork(data, { forks: streams.forks, upgrades: streams.cards }, run);
+  const fork: CardSource = offerFork(data, streams, run);
   return continueWalk(data, streams, geometry, events, {
     ...ended,
     distanceBeforeZone: session.distanceBeforeZone + zoneLength(data),

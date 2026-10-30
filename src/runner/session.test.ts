@@ -1,16 +1,20 @@
+import { itemAt } from "@andornaut/game-kit/arrays";
 import { STEP_SECONDS } from "@andornaut/game-kit/clock/fixedStep";
+import { keysOf } from "@andornaut/game-kit/records";
 import { pixels } from "@andornaut/game-kit/units";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { CardSource, WalkerId } from "../data/types";
+import type { CardSource, WalkerId, ZoneId } from "../data/types";
 import { firingTimeline } from "../hud/moments";
 import type { LaneDirection } from "../layout/lanes";
-import { cardFor, openCard } from "../rules/choices";
+import { cardFor, offerFork, openCard } from "../rules/choices";
+import { firstZoneId, walkLength } from "../rules/route";
 import { read } from "../rules/units";
 import { mapPack } from "../state/pack";
 import { newRun, type PackDogs } from "../state/runState";
 import { TEST_ROAD_GEOMETRY } from "../testing/packGeometry";
+import { testState } from "../testing/runState";
 import { clampHearts } from "../units";
 import { laneControlIn } from "./laneControl";
 import { stillInLane } from "./laneMotion";
@@ -57,20 +61,26 @@ const kinds = (events: readonly SessionEvent[]) => events.map(({ kind }) => kind
 describe("runStreams", () => {
   it("names each stream from the seed, so a seed repeats them and another seed does not", () => {
     const draws = (seed: number) => {
-      const { cards, forks } = runStreams(seed);
-      return [take(5, cards), take(5, forks)];
+      const { cards, forks, upgrades } = runStreams(seed);
+      return [take(5, cards), take(5, forks), take(5, upgrades)];
     };
     expect(draws(3)).toEqual(draws(3));
     expect(draws(4)).not.toEqual(draws(3));
   });
 
-  // A card's draws never shift the fork offers, so a card tuning change keeps same-seed routes.
-  it("keeps the fork stream apart from the card stream", () => {
-    const [cards, forks] = [take(5, runStreams(3).cards), take(5, runStreams(3).forks)];
+  // A card's draws never shift the fork offers, so a card tuning change or another way of
+  // walking keeps same-seed routes and upgrades.
+  it("keeps the fork and upgrade streams apart from the card stream and each other", () => {
+    const fresh = runStreams(3);
+    const [cards, forks, upgrades] = [
+      take(5, fresh.cards),
+      take(5, fresh.forks),
+      take(5, fresh.upgrades),
+    ];
     const drawn = runStreams(3);
     take(50, drawn.cards);
-    expect(take(5, drawn.forks)).toEqual(forks);
-    expect(forks).not.toEqual(cards);
+    expect([take(5, drawn.forks), take(5, drawn.upgrades)]).toEqual([forks, upgrades]);
+    expect(new Set([cards, forks, upgrades].map((draws) => JSON.stringify(draws))).size).toBe(3);
   });
 
   // A resumed walk's streams go on from where the saved walk's had drawn to.
@@ -78,13 +88,101 @@ describe("runStreams", () => {
     const drawn = runStreams(3);
     take(5, drawn.cards);
     take(2, drawn.forks);
-    expect(drawn.draws()).toEqual({ cards: 5, forks: 2 });
+    take(3, drawn.upgrades);
+    expect(drawn.draws()).toEqual({ cards: 5, forks: 2, upgrades: 3 });
     const resumed = runStreams(3, drawn.draws());
-    expect([take(4, resumed.cards), take(4, resumed.forks)]).toEqual([
+    expect([take(4, resumed.cards), take(4, resumed.forks), take(4, resumed.upgrades)]).toEqual([
       take(4, drawn.cards),
       take(4, drawn.forks),
+      take(4, drawn.upgrades),
     ]);
-    expect(resumed.draws()).toEqual({ cards: 9, forks: 6 });
+    expect(resumed.draws()).toEqual({ cards: 9, forks: 6, upgrades: 7 });
+  });
+});
+
+// A walk's forks from its seed: each fork's offer, taking the path at the seed's own index
+// (seed mod the fork's paths) to the next.
+function seedForks(seed: number): ForkOffer[] {
+  const streams = runStreams(seed);
+  const offers: ForkOffer[] = [];
+  let state = testState({ kilo: 5 }, { route: [firstZoneId(gameData)] });
+  while (state.route.length < walkLength(gameData)) {
+    const fork = offerFork(gameData, streams, state);
+    offers.push(fork);
+    const index = seed % fork.paths.length;
+    const upgrade = fork.upgrades[index] ?? null;
+    state = {
+      ...state,
+      route: [...state.route, itemAt(fork.paths, index)],
+      upgradesPicked: [...state.upgradesPicked, ...(upgrade === null ? [] : [upgrade])],
+    };
+  }
+  return offers;
+}
+
+type ForkOffer = ReturnType<typeof offerFork>;
+
+const SEEDS = Array.from({ length: 400 }, (_, index) => index + 1);
+const OFFERS = new Map(SEEDS.map((seed) => [seed, seedForks(seed)]));
+const offersOf = (seed: number) => OFFERS.get(seed) ?? [];
+
+describe("a walk's forks, drawn from its seed", () => {
+  it.each(SEEDS.slice(0, 40))("offers the same upgrades every time for seed %i", (seed) => {
+    expect(seedForks(seed)).toEqual(offersOf(seed));
+  });
+
+  it.each(SEEDS.slice(0, 40))(
+    "for seed %i, bares one path of a fork with several; the rest carry upgrades, none twice or picked, one trade-off",
+    (seed) => {
+      const picked = new Set<string>();
+      for (const fork of offersOf(seed)) {
+        const upgrades = fork.upgrades.filter((id) => id !== null);
+        expect(fork.upgrades).toHaveLength(fork.paths.length);
+        expect(upgrades.length).toBeGreaterThan(0);
+        expect(fork.paths.length - upgrades.length).toBe(fork.paths.length > 1 ? 1 : 0);
+        expect(new Set(upgrades).size).toBe(upgrades.length);
+        expect(upgrades.filter((id) => picked.has(id))).toEqual([]);
+        expect(
+          upgrades.filter((id) => gameData.upgrades[id].kind === "tradeOff").length,
+        ).toBeLessThanOrEqual(1);
+        const taken = fork.upgrades[seed % fork.paths.length] ?? null;
+        if (taken !== null) {
+          picked.add(taken);
+        }
+      }
+    },
+  );
+
+  it("varies with the seed", () => {
+    const distinct = new Set(SEEDS.map((seed) => JSON.stringify(offersOf(seed)[0])));
+    expect(distinct.size).toBeGreaterThan(SEEDS.length / 4);
+  });
+
+  it("offers every upgrade, and leaves every zone a fork offers without one, on some seed", () => {
+    const forks = SEEDS.flatMap(offersOf);
+    const offered = new Set(forks.flatMap(({ upgrades }) => upgrades));
+    expect([...offered].sort()).toEqual([...keysOf(gameData.upgrades), null].sort());
+    const bare = new Set(
+      forks.flatMap(({ paths, upgrades }) => paths.filter((_, index) => upgrades[index] === null)),
+    );
+    const offeredZones = new Set(forks.flatMap(({ paths }) => paths));
+    offeredZones.delete(gameData.world.lastZone as ZoneId);
+    expect([...bare].sort()).toEqual([...offeredZones].sort());
+  });
+
+  // A fork with more than one path leaves exactly one bare, any of them; the last fork's one
+  // path always carries an upgrade.
+  it("leaves one path of each fork with several bare, at every position, and never the last fork's", () => {
+    const forks = SEEDS.flatMap(offersOf);
+    const bareAt = (upgrades: readonly unknown[]) => upgrades.indexOf(null);
+    const multi = forks.filter(({ paths }) => paths.length > 1);
+    expect(
+      multi.filter(({ upgrades }) => upgrades.filter((id) => id === null).length !== 1),
+    ).toEqual([]);
+    expect(new Set(multi.map(({ upgrades }) => bareAt(upgrades)))).toEqual(new Set([0, 1, 2]));
+    expect(
+      forks.filter(({ paths, upgrades }) => paths.length === 1 && upgrades.includes(null)),
+    ).toEqual([]);
   });
 });
 

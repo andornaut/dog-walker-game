@@ -64,7 +64,7 @@ const ZONE_START: ResumeWalk = (() => {
   const walk = { road: startRoad(LANE_COUNT), run: zoneStartRun() };
   const session = unplannedStart(walk);
   return {
-    draws: { cards: 41, forks: 3 },
+    draws: { cards: 41, forks: 3, upgrades: 4 },
     seed: 1234,
     session: {
       ...session,
@@ -86,14 +86,12 @@ const ZONE_START: ResumeWalk = (() => {
   };
 })();
 
-// The walk at the fork after zone 1, its path not yet picked.
+// The walk at the fork after zone 1, its path not yet picked, one path carrying no upgrade.
 const AT_FORK: ResumeWalk = {
   ...ZONE_START,
   session: {
     ...ZONE_START.session,
-    queue: [
-      { kind: "fork", paths: [SECOND, "theBeaches"], upgrades: ["sweetTalker", "bigTipper"] },
-    ],
+    queue: [{ kind: "fork", paths: [SECOND, "theBeaches"], upgrades: ["sweetTalker", null] }],
     walk: { ...ZONE_START.session.walk, run: { ...zoneStartRun(), route: [FIRST] } },
   },
 };
@@ -163,6 +161,17 @@ describe("encodeResume and launchWalk", () => {
     expect(launchWalk(gameData, true, checkpointFor(walk))).toEqual({
       kind: "resume",
       walk: asStored(walk),
+    });
+  });
+
+  // CLEANUP (added 2026-10-29): remove with the schema's default for draws.upgrades.
+  it("resumes a walk saved before the upgrades stream with that stream undrawn", () => {
+    const old = edited(AT_FORK, (stored) => {
+      delete (stored.draws as Record<string, unknown>).upgrades;
+    });
+    expect(launchWalk(gameData, true, old)).toEqual({
+      kind: "resume",
+      walk: asStored({ ...AT_FORK, draws: { ...AT_FORK.draws, upgrades: 0 } }),
     });
   });
 

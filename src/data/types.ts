@@ -63,7 +63,8 @@ export type WalkerPerkId = keyof typeof WALKER_PERKS;
 export type ZoneId = (typeof WORLD)["zones"][number]["id"];
 
 // What opened a card: an obstacle the pack hit, with the dogs it affected, or a fork, whose
-// paths are the zones it leads to, left to right, each carrying the upgrade at its index.
+// paths are the zones it leads to, left to right, each carrying the upgrade at its index, or
+// none where it is null.
 export type CardSource =
   | {
       readonly affected: readonly DogId[];
@@ -73,7 +74,7 @@ export type CardSource =
   | {
       readonly kind: "fork";
       readonly paths: readonly ZoneId[];
-      readonly upgrades: readonly UpgradeId[];
+      readonly upgrades: readonly (UpgradeId | null)[];
     };
 
 type EncounterOfKind<Kind extends Encounter["kind"]> = {
@@ -894,6 +895,8 @@ export interface RunText {
     readonly heartsEach: string;
     // A money option's plaque, with its price.
     readonly need: string;
+    // A fork's path card's effect where the path carries no upgrade, on its face and when held.
+    readonly noUpgrade: string;
     readonly pickOne: string;
     readonly skip: string;
     // The Skip card's effect on its face, and in its body when held.

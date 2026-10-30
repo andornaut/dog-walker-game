@@ -422,17 +422,34 @@ describe("offerUpgrades", () => {
     for (let draw = 0; draw < 1; draw += 0.1) {
       const offer = offerUpgrades(data, () => draw, 3, picked);
       expect(offer).toHaveLength(3);
-      expect(offer.filter((id) => all.slice(0, 2).includes(id))).toEqual([]);
+      expect(offer.filter((id) => id !== null && all.slice(0, 2).includes(id))).toEqual([]);
     }
   });
 
   it("offers the only ones left when the rest are picked, and fails with fewer", () => {
     const all = keysOf(UPGRADES);
-    const left = testState({ kilo: 5 }, { upgradesPicked: all.slice(0, all.length - 3) });
-    expect([...offerUpgrades(data, () => 0.5, 3, left)].sort()).toEqual(all.slice(-3).sort());
-    const fewer = testState({ kilo: 5 }, { upgradesPicked: all.slice(0, all.length - 2) });
-    expect(() => offerUpgrades(data, () => 0, 3, fewer)).toThrow("Fewer than 3");
+    const left = testState({ kilo: 5 }, { upgradesPicked: all.slice(0, all.length - 2) });
+    const offer = offerUpgrades(data, () => 0.5, 3, left);
+    expect(offer.filter((id) => id !== null).sort()).toEqual(all.slice(-2).sort());
+    const fewer = testState({ kilo: 5 }, { upgradesPicked: all.slice(0, all.length - 1) });
+    expect(() => offerUpgrades(data, () => 0, 3, fewer)).toThrow("Fewer than 2");
   });
+
+  // Each path as U, carrying an upgrade, or -, carrying none.
+  it.each([
+    { count: 1, draw: 0, expected: "U" },
+    { count: 2, draw: 0, expected: "-U" },
+    { count: 2, draw: 0.99, expected: "U-" },
+    { count: 3, draw: 0, expected: "-UU" },
+    { count: 3, draw: 0.5, expected: "U-U" },
+    { count: 3, draw: 0.99, expected: "UU-" },
+  ])(
+    "leaves of $count paths the one its first draw $draw names bare",
+    ({ count, draw, expected }) => {
+      const offer = offerUpgrades(data, () => draw, count, testState({ kilo: 5 }));
+      expect(offer.map((id) => (id === null ? "-" : "U")).join("")).toBe(expected);
+    },
+  );
 });
 
 describe("skip option", () => {

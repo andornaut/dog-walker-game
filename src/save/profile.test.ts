@@ -267,7 +267,7 @@ const bankedPart: Checkpoint = {
   route: leftAt.route,
   zonesFinished: leftAt.zonesFinished,
 };
-const WALK = { draws: { cards: 0, forks: 0 }, seed: 1 } as unknown as ResumeWalk;
+const WALK = { draws: { cards: 0, forks: 0, upgrades: 0 }, seed: 1 } as unknown as ResumeWalk;
 
 describe("a walk left unfinished", () => {
   async function openedWith(decision: LaunchWalk) {
