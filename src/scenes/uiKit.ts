@@ -102,6 +102,8 @@ const SLICES = {
   // The home screen's section frames: the top slice holds the frame and the heading band.
   "ui-section": { bottom: 3, left: 3, right: 3, top: 24 },
   "ui-select": { bottom: 8, left: 8, right: 8, top: 8 },
+  // The shop's focused row, independent of selected cards and tabs.
+  "ui-shop-focus": { bottom: 13, left: 13, right: 13, top: 13 },
   // A three-slice: 4px caps and a middle that stretches.
   "ui-slider": { bottom: 0, left: 4, right: 4, top: 0 },
   // The band behind a choice card row's subtitle.
@@ -545,6 +547,40 @@ export function addSelectFrame(
       drawRing(g, PALETTE.ink, rect, 1);
     }
   });
+}
+
+// The shop's focus outline uses its own asset; selected tabs and cards keep ui-select.
+export function addShopFocusFrame(
+  scene: Scene,
+  parent: GameObjects.Container,
+  rect: Rect,
+  reducedMotion: boolean,
+): void {
+  const outer = selectOuter(rect);
+  addLoopingFrame(
+    scene,
+    parent,
+    { key: "ui-shop-focus", outer, tag: "pulse" },
+    reducedMotion,
+    (g) => {
+      const band = 3;
+      const corner = 12;
+      const pulse = insetRect(1, outer);
+      drawRing(g, PALETTE.ink, outer, 1);
+      drawRing(g, PALETTE.cyan, pulse, band);
+      drawRing(g, PALETTE.ink, insetRect(1 + band, outer), 1);
+      for (const y of [pulse.y, pulse.y + pulse.height - band]) {
+        for (const x of [pulse.x, pulse.x + pulse.width - corner]) {
+          fillRect(g, PALETTE.cream, { height: band, width: corner, x, y });
+        }
+      }
+      for (const y of [pulse.y, pulse.y + pulse.height - corner]) {
+        for (const x of [pulse.x, pulse.x + pulse.width - band]) {
+          fillRect(g, PALETTE.cream, { height: corner, width: band, x, y });
+        }
+      }
+    },
+  );
 }
 
 // The ui-check mark at rect's top-left corner: tag is its art's tag, such as "tick". While the

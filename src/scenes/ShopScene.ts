@@ -97,8 +97,8 @@ import {
   addBodyText,
   addGraphicsIn,
   addPanel,
-  addSelectFrame,
   addSelectTile,
+  addShopFocusFrame,
   addTagImage,
   addTapBurst,
   clearScene,
@@ -756,7 +756,7 @@ export class ShopScene extends Scene {
   }
 
   // A row: its art in a box, its name and line, and its price plate or Owned at the right,
-  // each as SHOP_ROW_VIEWS sets for its look. The framed one wears ui-select.
+  // each as SHOP_ROW_VIEWS sets for its look. The focused row wears ui-shop-focus.
   private drawRow(root: GameObjects.Container, save: SaveDocument, placed: PlacedRow): void {
     const { rect, row } = placed;
     this.placed.push(placed);
@@ -806,7 +806,7 @@ export class ShopScene extends Scene {
       y: mid + tops.line,
     });
     if (this.focusId === row.id) {
-      addSelectFrame(this, holder, rect, reducedMotion);
+      addShopFocusFrame(this, holder, rect, reducedMotion);
     }
   }
 
