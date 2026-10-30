@@ -2945,6 +2945,14 @@
     },
     {
       "id": "trashCan",
+      "contact": {
+        "effects": [
+          {
+            "debuff": "stinky",
+            "kind": "debuff"
+          }
+        ]
+      },
       "name": "Trash can",
       "shape": {
         "lanes": 1,
