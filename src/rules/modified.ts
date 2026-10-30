@@ -25,7 +25,7 @@ export type ModifiedSubject =
   | { readonly kind: "squirrelPulls" };
 
 // A value that modifiers changed, such as a bump's hearts that Second chance forgave or a
-// card's cost that Sweet talker waived, so a view can show the modifiers' icons: before is the
+// card's cost that Charmer waived, so a view can show the modifiers' icons: before is the
 // value without them, after the value with them, and by each modifier's share of the difference,
 // in the order applied. A meter or the money held at a limit is left out: after is the value
 // before the limit holds it.

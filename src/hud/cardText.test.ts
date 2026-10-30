@@ -1,14 +1,19 @@
+import { keysOf } from "@andornaut/game-kit/records";
 import { inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
-import type { TextFitStyle } from "@andornaut/game-kit/text/textFit";
+import { fitsRoom, type TextFitStyle } from "@andornaut/game-kit/text/textFit";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import type { ZoneId } from "../data/types";
 import { CARD_LAYOUT, cardEffectArea, plaqueRoom } from "../layout/cardLayout";
-import { hasPlaque, type OptionView } from "../rules/choices";
+import { cardFor, hasPlaque, type OptionView } from "../rules/choices";
+import { defined } from "../testing/defined";
 import { everyCardOption } from "../testing/everyCardOption";
 import { fontFileMetrics, inkWidth } from "../testing/fontInk";
+import { testState } from "../testing/runState";
 import { plainMarks } from "../ui/pixelFont";
 import { plaqueTexts, smallCardText } from "./cardText";
+import { withNamePills } from "./effectNames";
 
 const BODY = fontFileMetrics("font-body");
 const ONE: TextFitStyle = { scale: 1 };
@@ -71,4 +76,27 @@ describe("every card the data can deal", () => {
       }),
     ).toEqual([]);
   });
+});
+
+// Any fork may offer any upgrade not yet picked, so each one's path card says what it does
+// (each fits its box: ui/textRoles.test.ts).
+describe("a path card", () => {
+  const zone = defined(gameData.world.zones[0]).id as ZoneId;
+  it.each(keysOf(gameData.upgrades))(
+    "carrying %s shows the upgrade's name in its pill over its cardEffect on the small card",
+    (upgrade) => {
+      const { cardEffect: line, name } = gameData.upgrades[upgrade];
+      expect(line.trim()).not.toBe("");
+      const option = defined(
+        cardFor(gameData, testState({ kilo: 5 }), {
+          kind: "fork",
+          paths: [zone],
+          upgrades: [upgrade],
+        }).options[0],
+      );
+      const { effect } = smallCardText(gameData, BODY, bodyWidth, option);
+      expect(effect.lines.join(" ")).toBe(withNamePills(gameData, `${name}: ${line}`));
+      expect(fitsRoom(bodyWidth, CARD_LAYOUT.effect.width, effect)).toBe(true);
+    },
+  );
 });

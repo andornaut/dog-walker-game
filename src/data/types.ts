@@ -574,7 +574,10 @@ export type UpgradeDuration = "nextZone" | "now" | "run";
 export interface Upgrade {
   // Key of the card's illustration in the art manifest's images.
   readonly art: string;
+  // Its effect in a few words, under its name on a fork's path card.
+  readonly cardEffect: string;
   readonly duration: UpgradeDuration;
+  // Its effect in full, on the enlarged path card, its effect icon's hold and the message strip.
   readonly effect: string;
   readonly effects: NonEmptyEffects;
   readonly kind: "boost" | "tradeOff";
@@ -882,7 +885,7 @@ export interface RunText {
     readonly fires: string;
     readonly forkSubtitle: string;
     readonly forkTitle: string;
-    // A plaque whose cost a modifier, such as Sweet talker, waived; and the plaque of the Skip a
+    // A plaque whose cost a modifier, such as Charmer, waived; and the plaque of the Skip a
     // modifier, such as Hall pass, offers.
     readonly free: string;
     // In an option's text, in place of a dog's heart loss Second chance would forgive; it may
@@ -950,7 +953,7 @@ export interface RunText {
   readonly lowHearts: string;
   // A debuff's length in seconds on a road chip, such as the "4s" Quick recovery leaves.
   readonly seconds: string;
-  // The road chip over a buff's charm when it waived a card option's cost, as Sweet talker does.
+  // The road chip over a buff's charm when it waived a card option's cost, as Charmer does.
   readonly waivedCost: string;
   // The zone celebration as a walker joins, the first time a walk finishes the zone that
   // unlocks them: its headline (a big title of about 14 characters over a subtitle of about

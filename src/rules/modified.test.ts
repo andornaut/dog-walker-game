@@ -148,7 +148,7 @@ describe("a card option's modified values", () => {
 
   it.each([
     [
-      "Sweet talker waives the cost",
+      "Charmer waives the cost",
       () => optionModified("thief", thiefPays.index, runWith(PLAIN, null, ["sweetTalker"])),
       [
         {

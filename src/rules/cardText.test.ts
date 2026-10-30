@@ -123,7 +123,7 @@ describe("a card's text for the dogs it catches", () => {
     });
   });
 
-  describe("with Sweet talker", () => {
+  describe("with Charmer", () => {
     const sweetTalker = activeModifier(
       { kind: "upgrade", upgrade: "sweetTalker" },
       { by: "sweetTalkerFreeCards", operation: "add", stat: "freeCards" },
@@ -150,7 +150,7 @@ describe("a card's text for the dogs it catches", () => {
         large: `−$${encounterHigh}`,
         modifiers: [],
         text: `−$${encounterHigh}`,
-        why: "a cost without Sweet talker says its price",
+        why: "a cost without Charmer says its price",
       },
     ])("$why, on the small and large card", ({ cardsThisZone, large, modifiers, text }) => {
       const run = testState(

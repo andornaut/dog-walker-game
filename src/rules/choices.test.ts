@@ -398,7 +398,7 @@ describe("chooseOption", () => {
     expect(() => chooseOption(data, outcome.state, card, nose)).toThrow("ended");
   });
 
-  it("makes the zone's first card free with Sweet talker, and the next one not", () => {
+  it("makes the zone's first card free with Charmer, and the next one not", () => {
     const sweetTalker = activeModifier(
       { kind: "upgrade", upgrade: "sweetTalker" },
       { by: "sweetTalkerFreeCards", operation: "add", stat: "freeCards" },
@@ -442,7 +442,7 @@ describe("skip option", () => {
     expect(cardFor(data, state, source).skip).toBe(true);
     const skipped = choose(state, source, "skip");
     expect(heartsByDog(skipped.state)).toEqual(heartsByDog(state));
-    // The card counts toward the zone's, so a Sweet talker free card is used up by it.
+    // The card counts toward the zone's, so a Charmer free card is used up by it.
     expect(skipped.state).toMatchObject({
       cardsThisZone: state.cardsThisZone + 1,
       money: state.money,

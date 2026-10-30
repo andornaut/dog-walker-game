@@ -336,7 +336,7 @@ function cardHeartsText(
   return names.length === 0 ? undefined : names.join(", ");
 }
 
-// Whether a modifier, such as Sweet talker, waived a cost to nothing.
+// Whether a modifier, such as Charmer, waived a cost to nothing.
 function isWaived(modified: ModifiedValue | null): boolean {
   return modified !== null && modified.before < 0 && modified.after === 0;
 }

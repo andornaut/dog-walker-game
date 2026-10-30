@@ -2,11 +2,13 @@ import type { Upgrade } from "./types";
 
 // Run-only boosts offered between zones. A picked card leaves the pool for the rest of the run.
 // duration is how long its effects last, which its plaque shows: now, the next zone, or the
-// whole run.
+// whole run. cardEffect is the effect in a few words, the line under the name on a path card;
+// effect says it in full where there is room.
 // art is a key into the art manifest's images.
 export const UPGRADES = {
   bellyRubs: {
     art: "card-belly-rubs",
+    cardEffect: "+1♥ each",
     duration: "now",
     effect: "+1♥ each",
     effects: [{ amount: 1, kind: "hearts", target: { kind: "all" } }],
@@ -15,6 +17,7 @@ export const UPGRADES = {
   },
   bigTipper: {
     art: "card-big-tipper",
+    cardEffect: "+$1 per tip",
     duration: "nextZone",
     effect: "+$1 per tip",
     effects: [
@@ -31,6 +34,7 @@ export const UPGRADES = {
   },
   goodLeash: {
     art: "card-good-leash",
+    cardEffect: "No pulls",
     duration: "run",
     effect: "No pulls",
     effects: [
@@ -47,6 +51,7 @@ export const UPGRADES = {
   },
   raincoats: {
     art: "card-raincoats",
+    cardEffect: "Puddle-safe",
     duration: "run",
     effect: "No Muddy from puddles or potholes",
     effects: [
@@ -58,6 +63,7 @@ export const UPGRADES = {
   },
   rushHour: {
     art: "card-rush-hour",
+    cardEffect: "More of all",
     duration: "nextZone",
     effect: "Tips, treats ×2, more obstacles",
     effects: [
@@ -88,6 +94,7 @@ export const UPGRADES = {
   },
   sweetTalker: {
     art: "card-sweet-talker",
+    cardEffect: "Free $ card",
     duration: "run",
     effect: "First card: cash options free",
     effects: [
@@ -100,6 +107,6 @@ export const UPGRADES = {
       },
     ],
     kind: "boost",
-    name: "Sweet talker",
+    name: "Charmer",
   },
 } as const satisfies Record<string, Upgrade>;

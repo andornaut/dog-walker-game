@@ -41,7 +41,7 @@ export const TUNING = {
     // Every row of spawns leaves at least this many lanes free of obstacles.
     openLanesPerRowMin: 2,
     packSizeMax: 3,
-    // Sweet talker makes this many encounter cards each zone cost no money.
+    // Charmer makes this many encounter cards each zone cost no money.
     sweetTalkerFreeCards: 1,
     tipsFirstZone: 31,
     tipsGainPerZone: -3,

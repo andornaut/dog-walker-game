@@ -259,7 +259,7 @@ describe("resolveEffects: changes and their causes", () => {
     });
   });
 
-  it("waives a free card's cost, naming Sweet talker, and makes no money change", () => {
+  it("waives a free card's cost, naming Charmer, and makes no money change", () => {
     const towel: Effect = {
       amount: "encounterLow",
       change: "lose",
@@ -296,22 +296,17 @@ describe("moneyCost and applyEffects: money", () => {
     kind: "money",
   };
 
-  // Sweet talker, with cardsThisZone cards resolved this zone.
+  // Charmer, with cardsThisZone cards resolved this zone.
   const talked = (slots: Parameters<typeof testState>[0], cardsThisZone = 0) =>
     testState(slots, { cardsThisZone, modifiers: [sweetTalker] });
   const low = read(TEST_TUNING, "money", "encounterLow");
   const letGoCost = read(TEST_TUNING, "money", "thiefLetGo");
 
-  it("charges a cost once, nothing on the zone's first card with Sweet talker", () => {
+  it("charges a cost once, nothing on the zone's first card with Charmer", () => {
     for (const [, effect, state, cost] of [
       ["a cost once, whatever the pack", towel, testState({ ginger: 5, kilo: 5, reggie: 5 }), low],
       ["another cost once too", letGo, testState({ ginger: 5, kilo: 5 }), letGoCost],
-      [
-        "nothing on the zone's first card with Sweet talker",
-        towel,
-        talked({ ginger: 5, kilo: 5 }),
-        0,
-      ],
+      ["nothing on the zone's first card with Charmer", towel, talked({ ginger: 5, kilo: 5 }), 0],
       ["a flat cost free too on that card", letGo, talked({ ginger: 5 }), 0],
       ["in full on the zone's next card", towel, talked({ ginger: 5, kilo: 5 }, 1), low],
       ["nothing for a gain", gain, testState({ ginger: 5, kilo: 5 }), 0],

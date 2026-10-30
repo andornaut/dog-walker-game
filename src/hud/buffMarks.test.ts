@@ -77,7 +77,7 @@ describe("optionMarks", () => {
     },
     {
       expected: { charms: [charm(sweetTalker, "freeCards")], forgiven: null, plaque: card.free },
-      name: "a cost Sweet talker waived, as FREE alone",
+      name: "a cost Charmer waived, as FREE alone",
       view: option([waived]),
     },
     {
@@ -219,7 +219,7 @@ describe("roadMarks", () => {
       ],
     },
     {
-      name: "a card option's cost Sweet talker waived, with its charm and the waived cost's chip",
+      name: "a card option's cost Charmer waived, with its charm and the waived cost's chip",
       popped: {
         bump: false,
         dog: null,

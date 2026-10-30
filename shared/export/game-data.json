@@ -525,7 +525,7 @@
       "frame": "route",
       "id": "sweetTalker",
       "index": null,
-      "name": "Sweet talker",
+      "name": "Charmer",
       "source": {
         "id": "sweetTalker",
         "kind": "upgrade"
@@ -3208,6 +3208,7 @@
     {
       "id": "bellyRubs",
       "art": "card-belly-rubs",
+      "cardEffect": "+1♥ each",
       "duration": "now",
       "effect": "+1♥ each",
       "effects": [
@@ -3225,6 +3226,7 @@
     {
       "id": "bigTipper",
       "art": "card-big-tipper",
+      "cardEffect": "+$1 per tip",
       "duration": "nextZone",
       "effect": "+$1 per tip",
       "effects": [
@@ -3242,6 +3244,7 @@
     {
       "id": "goodLeash",
       "art": "card-good-leash",
+      "cardEffect": "No pulls",
       "duration": "run",
       "effect": "No pulls",
       "effects": [
@@ -3259,6 +3262,7 @@
     {
       "id": "raincoats",
       "art": "card-raincoats",
+      "cardEffect": "Puddle-safe",
       "duration": "run",
       "effect": "No Muddy from puddles or potholes",
       "effects": [
@@ -3279,6 +3283,7 @@
     {
       "id": "rushHour",
       "art": "card-rush-hour",
+      "cardEffect": "More of all",
       "duration": "nextZone",
       "effect": "Tips, treats ×2, more obstacles",
       "effects": [
@@ -3310,6 +3315,7 @@
     {
       "id": "sweetTalker",
       "art": "card-sweet-talker",
+      "cardEffect": "Free $ card",
       "duration": "run",
       "effect": "First card: cash options free",
       "effects": [
@@ -3322,7 +3328,7 @@
         }
       ],
       "kind": "boost",
-      "name": "Sweet talker"
+      "name": "Charmer"
     }
   ],
   "walkers": [

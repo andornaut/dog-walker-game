@@ -78,7 +78,7 @@ interface MoneyParts {
   readonly base: number;
 }
 
-// The freeCards modifier that waives this zone's next card's costs, such as Sweet talker's
+// The freeCards modifier that waives this zone's next card's costs, such as Charmer's
 // for the first card each zone, or undefined once the zone's free cards are used.
 function freeCardModifier(
   data: RulesData,
@@ -108,7 +108,7 @@ function moneyParts(data: RulesData, state: RunState, effect: MoneyEffect): Mone
   return { adjustments: [], amount: roundDollars(amount), base: -amount };
 }
 
-// What an option's effects would take from the player before modifiers, such as Sweet talker's
+// What an option's effects would take from the player before modifiers, such as Charmer's
 // free card.
 export function baseMoneyCost(data: Pick<GameData, "tuning">, effects: readonly Effect[]): Cents {
   return cents(

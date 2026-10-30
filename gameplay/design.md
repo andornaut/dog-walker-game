@@ -92,7 +92,7 @@ Every dog pulls toward squirrels. A squirrel is no hit and opens no card: touchi
 
 - A walk is 4 neighbourhoods of Toronto. Each neighbourhood is the same distance and takes about 2 minutes; a full walk takes about 8 minutes
 - After neighbourhoods 1 to 3, the neighbourhood celebration, then a fork. Neighbourhood 4 has no fork
-- **Forks:** the road meets a cross street; after neighbourhoods 1 and 2 a fork card offers three paths (left, straight, right), each leading to a neighbourhood you haven't walked this walk other than Yonge Street, sorted easiest on the left to hardest on the right. The fork after neighbourhood 3 leads only to Yonge Street, so it shows one path. Each path card shows the neighbourhood's name and difficulty, and the one upgrade card it carries. Picking a path picks the next neighbourhood and its upgrade at once. A Return home button under the paths ends the walk there (see Return home)
+- **Forks:** the road meets a cross street; after neighbourhoods 1 and 2 a fork card offers three paths (left, straight, right), each leading to a neighbourhood you haven't walked this walk other than Yonge Street, sorted easiest on the left to hardest on the right. The fork after neighbourhood 3 leads only to Yonge Street, so it shows one path. Each path card shows the neighbourhood's name and difficulty, and the one upgrade card it carries: the upgrade's name over a few words on what it does, said in full on the enlarged card. Picking a path picks the next neighbourhood and its upgrade at once. A Return home button under the paths ends the walk there (see Return home)
 - **Neighbourhoods** (6, each walk visits 4 with no repeats):
 
 Each neighbourhood also has its own card obstacle (see Encounters and debuffs) and a few obstacles and movers found nowhere else; no mover or plain obstacle but the squirrel appears in more than 3 neighbourhoods, each street cart look counting as its own (see Moving hazards).
@@ -117,11 +117,11 @@ The street cart, a 2-lane obstacle that never moves, stands in every neighbourho
 
 - Used for encounters and forks. Up to three across, art-led: an illustration plus a one-line effect; hold to enlarge for details
 - Every card hits the whole pack. No card opens without a collision, except the fork card. A hit that opens a card costs nothing until you choose
-- Each option's outcome is fixed and shown on the card, with hearts per dog ("−1♥ Ginger, −1♥ Kilo"); a card for three dogs reads "−1♥ each", and its enlarged view names each dog. A perk, gear item or upgrade that changes an option shows its charm centred just under that option's card: the item's icon on the left and, beside it, the item's name over what it did to that option (Hall pass's skip "Free skip", Quick recovery "Half time", Second chance "Safe", Sweet talker "Free"), with two charms stacked, the enlarged card included, never on the card, so the card keeps its full text box. The card row (title, cards and charms) rises to the 2/3 line of the walk view. Choices only, no minigames
+- Each option's outcome is fixed and shown on the card, with hearts per dog ("−1♥ Ginger, −1♥ Kilo"); a card for three dogs reads "−1♥ each", and its enlarged view names each dog. A perk, gear item or upgrade that changes an option shows its charm centred just under that option's card: the item's icon on the left and, beside it, the item's name over what it did to that option (Hall pass's skip "Free skip", Quick recovery "Half time", Second chance "Safe", Charmer "Free"), with two charms stacked, the enlarged card included, never on the card, so the card keeps its full text box. The card row (title, cards and charms) rises to the 2/3 line of the walk view. Choices only, no minigames
 - A money option shows its price on its plate, greyed out when you can't afford it, so cash never goes below $0; every card keeps at least one option that costs no money, and its plate is blank. Money options are charged once per card, whatever the pack size; heart options cost each owner, so a bigger pack has more owners who can fire you. Slower options cost money (missed tips) instead of time
 - An option says what it would do before you pick: a debuff option states its stake ("Quick rinse → Stinky: tips pay nothing for 60s"), an option that would fire an owner says so ("Fires Jason"), and a heart Second chance would forgive reads as safe
 - A fork's path card shows its upgrade's duration (Now, Next or All walk) where other cards show a price
-- A card shows at most 3 options. Hall pass offers "Skip (Hall pass)" (a free option that skips the card) on every card until it's used in that neighbourhood; the skip replaces the option that costs the most hearts when a card already has 3 (the most expensive of those if they tie). Sweet talker and Hall pass can both apply to the same card: its money options are free and the skip is offered, and the player chooses; Sweet talker is used up by that card whichever option is picked
+- A card shows at most 3 options. Hall pass offers "Skip (Hall pass)" (a free option that skips the card) on every card until it's used in that neighbourhood; the skip replaces the option that costs the most hearts when a card already has 3 (the most expensive of those if they tie). Charmer and Hall pass can both apply to the same card: its money options are free and the skip is offered, and the player chooses; Charmer is used up by that card whichever option is picked
 - After a card choice, each owner whose hearts changed reacts with a quip in the message strip
 
 ### Teaching, sound and settings
@@ -266,7 +266,7 @@ Walk-only boosts, one on each fork path, from a pool of 6. Each fork draws one p
 - Good leash: no dog pulls toward squirrels
 - Raincoats: puddles and potholes don't make the pack Muddy: no Muddy and no hit stop. A card's Muddy still applies
 - Rush hour (trade-off): twice the tips and treats and more obstacles in the next neighbourhood
-- Sweet talker: the first card in each neighbourhood has free money options (hearts and debuffs still cost; see Choice cards)
+- Charmer: the first card in each neighbourhood has free money options (hearts and debuffs still cost; see Choice cards)
 
 ### Walkers
 
