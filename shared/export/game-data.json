@@ -3106,9 +3106,9 @@
         "visit": 0.6
       },
       "shyHopperShare": 0.5,
-      "smallDodgeChance": 0.25,
+      "smallDodgeChance": 0.2,
       "touristTrainHerringShare": 0.33,
-      "whistleDodgeChance": 0.25
+      "whistleDodgeChance": 0.2
     },
     "seconds": {
       "approachFirstDelayMax": 0.5,

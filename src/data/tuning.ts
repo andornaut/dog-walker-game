@@ -211,13 +211,13 @@ export const TUNING = {
     // About this share of the movers of a shy hopping kind hop shy, drawn per mover.
     shyHopperShare: 0.5,
     // A hit that would land on a small dog misses it this often, costing nothing.
-    smallDodgeChance: 0.25,
+    smallDodgeChance: 0.2,
     // About this share of the tourist trains a neighbourhood plans are red herrings, crossing far
     // up the road with no bell and blocking nothing, drawn per train.
     touristTrainHerringShare: 0.33,
     // With the Whistle, a hit that would land on a medium or large dog misses it this often,
     // costing nothing.
-    whistleDodgeChance: 0.25,
+    whistleDodgeChance: 0.2,
   },
   seconds: {
     // A stalker's first step's cue begins a delay drawn per stalker between these after it is
