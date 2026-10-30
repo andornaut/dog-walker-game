@@ -94,7 +94,7 @@ export const TUNING = {
       buddy: 600,
       // The second and third dog slots; every player starts with one.
       dogSlot2: 1000,
-      dogSlot3: 2000,
+      dogSlot3: 3000,
       fannyPack: 500,
       ginger: 200,
       hallPass: 800,
