@@ -90,12 +90,14 @@ const CASES: readonly Case[] = [
     meeting: { dogs: [SMALL_DOG], draw: 0 },
     name: "a dodged bump",
   },
-  ...(["frisbeeDog", "seagull", "stiltWalker"] as const).map((id): Case => ({
-    cue: "bump",
-    item: atPack(id),
-    meeting: {},
-    name: `${id}'s contact`,
-  })),
+  ...(["frisbeeDog", "rollerblader", "seagull", "signSpinner", "stiltWalker"] as const).map(
+    (id): Case => ({
+      cue: "bump",
+      item: atPack(id),
+      meeting: {},
+      name: `${id}'s contact`,
+    }),
+  ),
   ...keysOf(ENCOUNTERS)
     .filter((id) => ENCOUNTERS[id].resolution.kind !== "pull")
     .map((id): Case => ({
