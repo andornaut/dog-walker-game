@@ -1195,9 +1195,9 @@
         "y": 134
       },
       "forkHome": {
-        "gap": 6,
         "height": 44,
-        "width": 160
+        "width": 128,
+        "gap": 6
       },
       "height": 153,
       "large": {
@@ -1333,8 +1333,8 @@
         },
         "button": {
           "height": 44,
-          "width": 264,
-          "x": 48,
+          "width": 296,
+          "x": 32,
           "y": 413
         },
         "greeting": {
@@ -1385,16 +1385,16 @@
         },
         "button": {
           "height": 44,
-          "width": 264,
-          "x": 48,
+          "width": 296,
+          "x": 32,
           "y": 396
         },
         "earningsInset": 8,
         "earningsY": 363,
         "plate": {
           "height": 32,
-          "width": 264,
-          "x": 48,
+          "width": 296,
+          "x": 32,
           "y": 356
         }
       }
@@ -1414,8 +1414,8 @@
       },
       "button": {
         "height": 44,
-        "width": 352,
-        "x": 4,
+        "width": 296,
+        "x": 32,
         "y": 514
       },
       "buttonLabel": {
@@ -1622,14 +1622,14 @@
       },
       "next": {
         "height": 44,
-        "width": 110,
-        "x": 242,
+        "width": 128,
+        "x": 186,
         "y": 504
       },
       "previous": {
         "height": 44,
-        "width": 110,
-        "x": 8,
+        "width": 128,
+        "x": 46,
         "y": 504
       },
       "screen": {
@@ -1781,42 +1781,10 @@
         },
         "origin": {
           "x": 14,
-          "y": 462
+          "y": 459
         },
         "priceY": 28,
         "tileInset": 1
-      },
-      "pocketLining": {
-        "denim": {
-          "height": 50,
-          "width": 346,
-          "x": 7,
-          "y": 459
-        },
-        "stitchBottom": {
-          "height": 2,
-          "width": 342,
-          "x": 9,
-          "y": 506
-        },
-        "stitchLeft": {
-          "height": 48,
-          "width": 2,
-          "x": 9,
-          "y": 460
-        },
-        "stitchRight": {
-          "height": 48,
-          "width": 2,
-          "x": 349,
-          "y": 460
-        },
-        "stitchTop": {
-          "height": 2,
-          "width": 342,
-          "x": 9,
-          "y": 460
-        }
       },
       "porchDogOffset": {
         "dx": -12,
@@ -1834,10 +1802,33 @@
         "walker": "ui-cork"
       },
       "sectionFrame": {
-        "band": 20,
-        "edge": 3
+        "band": 22,
+        "edge": 1
       },
       "sectionGap": 2,
+      "sectionLooks": {
+        "dogs": {
+          "fill": "plum",
+          "heading": "cream",
+          "neutral": "purple",
+          "neutralTag": "neutral-dogs",
+          "note": "amber"
+        },
+        "pocket": {
+          "fill": "blue",
+          "heading": "ink",
+          "neutral": "sky",
+          "neutralTag": "neutral-pocket",
+          "note": "ink"
+        },
+        "walker": {
+          "fill": "brown",
+          "heading": "ink",
+          "neutral": "tan",
+          "neutralTag": "neutral-walker",
+          "note": "ink"
+        }
+      },
       "sections": {
         "dogs": {
           "height": 159,
@@ -1846,7 +1837,7 @@
           "y": 274
         },
         "pocket": {
-          "height": 77,
+          "height": 71,
           "width": 352,
           "x": 4,
           "y": 435
@@ -1910,16 +1901,17 @@
       },
       "startButton": {
         "height": 44,
-        "width": 352,
-        "x": 4,
-        "y": 514
+        "width": 296,
+        "x": 32,
+        "y": 510
       },
+      "startGap": 4,
       "startLabel": {
         "readyY": 12,
         "scale": 3
       },
       "startLoading": {
-        "room": 328
+        "room": 272
       },
       "streetSign": {
         "x": 327,
@@ -1949,35 +1941,27 @@
           "right": "ui-home-cash-well-right"
         }
       },
-      "updatePlate": {
+      "updateModal": {
         "button": {
-          "height": 28,
+          "height": 44,
           "width": 128,
-          "x": 218,
-          "y": 47
+          "x": 116,
+          "y": 282
         },
         "hit": {
-          "height": 42,
+          "height": 44,
           "width": 128,
-          "x": 218,
-          "y": 44
+          "x": 116,
+          "y": 282
         },
-        "icon": {
-          "size": 16,
-          "x": 14
-        },
-        "iconKey": "icon-update",
         "labelPad": 8,
         "panel": {
-          "height": 42,
-          "width": 352,
-          "x": 4,
-          "y": 40
+          "height": 116,
+          "width": 328,
+          "x": 16,
+          "y": 222
         },
-        "titleColour": "plum",
-        "titleX": 36,
-        "capY": 54,
-        "iconY": 51
+        "capY": 297
       },
       "walkerAtGate": {
         "footY": 196,
@@ -2197,31 +2181,31 @@
           "height": 44,
           "width": 60,
           "x": 14,
-          "y": 462
+          "y": 459
         },
         {
           "height": 44,
           "width": 60,
           "x": 82,
-          "y": 462
+          "y": 459
         },
         {
           "height": 44,
           "width": 60,
           "x": 150,
-          "y": 462
+          "y": 459
         },
         {
           "height": 44,
           "width": 60,
           "x": 218,
-          "y": 462
+          "y": 459
         },
         {
           "height": 44,
           "width": 60,
           "x": 286,
-          "y": 462
+          "y": 459
         }
       ],
       "walkerRects": [
@@ -2278,87 +2262,87 @@
       ],
       "buttons": [
         {
-          "height": 40,
-          "width": 200,
-          "x": 80,
-          "y": 157
+          "height": 44,
+          "width": 296,
+          "x": 32,
+          "y": 149
         },
         {
-          "height": 40,
-          "width": 200,
-          "x": 80,
-          "y": 205
+          "height": 44,
+          "width": 296,
+          "x": 32,
+          "y": 201
         },
         {
-          "height": 40,
-          "width": 200,
-          "x": 80,
+          "height": 44,
+          "width": 296,
+          "x": 32,
           "y": 253
         },
         {
-          "height": 40,
-          "width": 200,
-          "x": 80,
-          "y": 301
+          "height": 44,
+          "width": 296,
+          "x": 32,
+          "y": 305
         }
       ],
       "hits": [
         {
           "height": 44,
-          "width": 200,
-          "x": 80,
-          "y": 155
+          "width": 296,
+          "x": 32,
+          "y": 149
         },
         {
           "height": 44,
-          "width": 200,
-          "x": 80,
-          "y": 203
+          "width": 296,
+          "x": 32,
+          "y": 201
         },
         {
           "height": 44,
-          "width": 200,
-          "x": 80,
-          "y": 251
+          "width": 296,
+          "x": 32,
+          "y": 253
         },
         {
           "height": 44,
-          "width": 200,
-          "x": 80,
-          "y": 299
+          "width": 296,
+          "x": 32,
+          "y": 305
         }
       ],
       "notePlate": {
         "height": 44,
-        "width": 200,
-        "x": 80,
-        "y": 345
+        "width": 296,
+        "x": 32,
+        "y": 353
       },
       "panel": {
-        "height": 289,
-        "width": 232,
-        "x": 64,
-        "y": 117
+        "height": 305,
+        "width": 328,
+        "x": 16,
+        "y": 109
       },
-      "titleY": 133
+      "titleY": 125
     },
     "settings": {
-      "buildLabelY": 445,
+      "buildLabelY": 447,
       "close": {
         "hit": {
           "height": 44,
           "width": 44,
           "x": 308,
-          "y": 101
+          "y": 99
         },
         "x": 324,
-        "y": 109
+        "y": 107
       },
       "panel": {
         "width": 344,
-        "height": 359,
+        "height": 363,
         "x": 8,
-        "y": 101
+        "y": 99
       },
       "rows": [
         {
@@ -2366,14 +2350,14 @@
             "height": 16,
             "width": 32,
             "x": 304,
-            "y": 153
+            "y": 151
           },
-          "noteY": 165,
+          "noteY": 163,
           "rect": {
             "height": 62,
             "width": 328,
             "x": 16,
-            "y": 131
+            "y": 129
           }
         },
         {
@@ -2383,7 +2367,7 @@
             "height": 56,
             "width": 328,
             "x": 16,
-            "y": 193
+            "y": 191
           }
         },
         {
@@ -2393,7 +2377,7 @@
             "height": 56,
             "width": 328,
             "x": 16,
-            "y": 249
+            "y": 247
           }
         },
         {
@@ -2401,29 +2385,29 @@
             "height": 16,
             "width": 32,
             "x": 304,
-            "y": 337
+            "y": 335
           },
-          "noteY": 339,
+          "noteY": 337,
           "rect": {
             "height": 82,
             "width": 328,
             "x": 16,
-            "y": 305
+            "y": 303
           }
         },
         {
           "control": {
-            "height": 24,
-            "width": 80,
-            "x": 256,
-            "y": 405
+            "height": 44,
+            "width": 128,
+            "x": 208,
+            "y": 393
           },
-          "noteY": 421,
+          "noteY": 419,
           "rect": {
-            "height": 53,
+            "height": 57,
             "width": 328,
             "x": 16,
-            "y": 387
+            "y": 385
           }
         }
       ],
@@ -2432,25 +2416,25 @@
           "height": 1,
           "width": 320,
           "x": 20,
-          "y": 193
+          "y": 191
         },
         {
           "height": 1,
           "width": 320,
           "x": 20,
-          "y": 249
+          "y": 247
         },
         {
           "height": 1,
           "width": 320,
           "x": 20,
-          "y": 305
+          "y": 303
         },
         {
           "height": 1,
           "width": 320,
           "x": 20,
-          "y": 387
+          "y": 385
         }
       ],
       "track": {

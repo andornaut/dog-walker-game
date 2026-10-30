@@ -8,6 +8,9 @@ import {
 import type { DogId } from "../data/types";
 import { ownerPhotoRect, WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
 import type { PackPlacement } from "../layout/packFormation";
+import { barTitleRoom } from "../ui/barTitle";
+import { BUTTON_SIZE } from "../ui/buttonGeometry";
+import { closeControl } from "../ui/closeControl";
 import type { GridSpec } from "../ui/grid";
 import { helpCapDy } from "../ui/labelHelpGap";
 import { hasPill, PILL_IMAGE_GAP, pillDropUnderInk, pillRiseOverCaps } from "../ui/namePills";
@@ -22,20 +25,24 @@ const GAP = 8;
 // The gate scene in the screen-home art: the street, the yard and the path to the gate.
 const GATE = { height: 156, y: 40 };
 
-// The update plate joins the top bar's bottom edge, its button centred down it.
-const UPDATE_PANEL = { height: 42, width: 352, x: 4, y: TOP_BAR_HEIGHT };
-const UPDATE_BUTTON = { height: 28, width: 128, x: 218 };
+// The dismissible update notice uses the same card and compact control as other home modals.
+const UPDATE_PANEL = { height: 116, width: 328, x: 16, y: 222 };
+const UPDATE_BUTTON = {
+  ...BUTTON_SIZE.compact,
+  x: UPDATE_PANEL.x + (UPDATE_PANEL.width - BUTTON_SIZE.compact.width) / 2,
+  y: UPDATE_PANEL.y + UPDATE_PANEL.height - 12 - BUTTON_SIZE.compact.height,
+};
 
 // The separator bar under the gate scene: 3 rows (the gate scene's last row is 195).
 const GATE_BAR = { height: 3, y: GATE.y + GATE.height };
-// Every gap between the bar, the three sections, Start walk and the screen's bottom.
+// The gap between the divider and sections, and between sections.
 const SECTION_GAP = 2;
-// A section's tiles start this far below its top: the frame's 3px, the band's 20 rows and its
-// 1px rule.
+// A section's tiles start below its 1px rim, 22px heading and 1px rule.
 const TILE_OFFSET = 24;
-// The Pocket's denim carries a 2px stitch at its top, and its cells sit under that, 1px apart.
-const POCKET_CELLS_OFFSET = TILE_OFFSET + 3;
-const START_BUTTON: Rect = { height: 44, width: 352, x: 4, y: 514 };
+// The Pocket cells start under its header, without a stitched lining.
+const POCKET_CELLS_OFFSET = TILE_OFFSET;
+const START_BUTTON: Rect = { ...BUTTON_SIZE.wide, x: 32, y: 510 };
+const START_GAP = 4;
 // A walker tile's cells, its portrait box, and the row a locked walker's plate and an owned
 // one's name put their caps on.
 const WALKER_TILES = { cellHeight: 44, cellWidth: 77, columns: 4, gapX: GAP, gapY: 0 } as const;
@@ -60,39 +67,16 @@ const DOGS_SECTION: Rect = {
   y: WALKER_SECTION.y + WALKER_SECTION.height + SECTION_GAP,
 };
 const POCKET_SECTION: Rect = {
-  height: START_BUTTON.y - SECTION_GAP - (DOGS_SECTION.y + DOGS_SECTION.height + SECTION_GAP),
+  height: START_BUTTON.y - START_GAP - (DOGS_SECTION.y + DOGS_SECTION.height + SECTION_GAP),
   width: 352,
   x: 4,
   y: DOGS_SECTION.y + DOGS_SECTION.height + SECTION_GAP,
 };
 
-// A section's tile area inside its frame, under the band: the rect its fill's TileSprite covers.
+// The solid backing inside a section's one-pixel rim, below its header.
 export function sectionFill(section: Rect): Rect {
   const { height, width, x, y } = section;
-  return { height: height - 27, width: width - 6, x: x + 3, y: y + TILE_OFFSET };
-}
-
-// The Pocket's lining inside its section frame, each piece a TileSprite whose tile origin is
-// its own top-left: the denim fill under the band, then the tan stitch 2px inside the fill's
-// edge on the left, right, top and bottom.
-export function pocketLining(section: Rect) {
-  const { height, width, x, y } = section;
-  const fill = sectionFill(section);
-  const stitchInset = 2;
-  const stitchThickness = 2;
-  const stitchTop = fill.y + 1;
-  const stitchBottom = y + height - 6;
-  const stitchLeft = fill.x + stitchInset;
-  const stitchRight = x + width - 7;
-  const stitchSpanX = stitchRight + stitchThickness - stitchLeft;
-  const stitchSpanY = stitchBottom + stitchThickness - stitchTop;
-  return {
-    denim: fill,
-    stitchBottom: { height: stitchThickness, width: stitchSpanX, x: stitchLeft, y: stitchBottom },
-    stitchLeft: { height: stitchSpanY, width: stitchThickness, x: stitchLeft, y: stitchTop },
-    stitchRight: { height: stitchSpanY, width: stitchThickness, x: stitchRight, y: stitchTop },
-    stitchTop: { height: stitchThickness, width: stitchSpanX, x: stitchLeft, y: stitchTop },
-  } as const satisfies Record<string, Rect>;
+  return { height: height - TILE_OFFSET - 1, width: width - 2, x: x + 1, y: y + TILE_OFFSET };
 }
 
 // The home screen's geometry, in screen pixels. Each icon button is drawn at its icon spot
@@ -177,7 +161,6 @@ export const HOME_LAYOUT = {
     priceY: 28,
     tileInset: 1,
   },
-  pocketLining: pocketLining(POCKET_SECTION),
   porchDogOffset: { dx: -12, footDy: 3 },
   // Before the first walk the starter dog's owner waits in the yard left of the path, behind
   // the yard sign, with their dog at their feet. Feet positions, by dog; a starter dog with no
@@ -185,11 +168,34 @@ export const HOME_LAYOUT = {
   porchSpots: {
     archie: { footY: 145, x: 120 },
   },
-  // The seamless image each section's fill tiles, drawn over its tile area.
+  // Solid backing images retained under their existing asset keys.
   sectionFillKeys: { dogs: "ui-plaid", pocket: "ui-denim", walker: "ui-cork" },
-  // A section's 3px frame, and its band's 20 rows and 1px rule inside the frame's top.
-  sectionFrame: { band: 20, edge: 3 },
+  // The image retains its nine-slice caps; the visible outer rim is one pixel.
+  sectionFrame: { band: 22, edge: 1 },
   sectionGap: SECTION_GAP,
+  sectionLooks: {
+    dogs: {
+      fill: "plum",
+      heading: "cream",
+      neutral: "purple",
+      neutralTag: "neutral-dogs",
+      note: "amber",
+    },
+    pocket: {
+      fill: "blue",
+      heading: "ink",
+      neutral: "sky",
+      neutralTag: "neutral-pocket",
+      note: "ink",
+    },
+    walker: {
+      fill: "brown",
+      heading: "ink",
+      neutral: "tan",
+      neutralTag: "neutral-walker",
+      note: "ink",
+    },
+  },
   // Under the gate, three framed sections top to bottom (walker, dogs, pocket), each a
   // heading band over its tiles; then Start walk.
   sections: {
@@ -239,6 +245,7 @@ export const HOME_LAYOUT = {
     top: 6,
   },
   startButton: START_BUTTON,
+  startGap: START_GAP,
   // Start walk's label caps on its raised face; the label sinks with the face.
   startLabel: { readyY: 12, scale: 3 },
   // The pressed face's label while the walk waits for its art: the ready label's, at its size
@@ -278,28 +285,13 @@ export const HOME_LAYOUT = {
       right: "ui-home-cash-well-right",
     },
   },
-  // The update plate under the top bar while a newer version waits or wrote the save (gateTop's
-  // modes, one at a time): a ui-panel across the gate scene's top, joining the top bar with no
-  // street showing between them, over the street sign and clear of the Pet shop's board, in
-  // place of the walker's bubble, with the button centred down it. On one row: iconKey's 16x16
-  // icon at icon.x, the title in 2x title text in titleColour, its ink starting at titleX, and
-  // the ui-button's go look at button with its label, centred, at least labelPad inside either
-  // side. The label's capitals are centred on the button's face (the button less its lip), the
-  // title's share their row, and the icon is centred on that row (updatePlateText). The tap area
-  // is hit, 42 tall between the top bar's hit areas and the Pet shop's board, about 45 CSS
-  // pixels on a phone.
-  updatePlate: {
-    button: {
-      ...UPDATE_BUTTON,
-      y: UPDATE_PANEL.y + (UPDATE_PANEL.height - UPDATE_BUTTON.height) / 2,
-    },
-    hit: { height: 42, width: 128, x: 218, y: 44 },
-    icon: { size: 16, x: 14 },
-    iconKey: "icon-update",
+  // The update notice's modal card and primary button. The existing home close and outside
+  // controls dismiss it; accepting keeps the PWA update action unchanged.
+  updateModal: {
+    button: UPDATE_BUTTON,
+    hit: UPDATE_BUTTON,
     labelPad: 8,
     panel: UPDATE_PANEL,
-    titleColour: "plum",
-    titleX: 36,
   },
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
   walkerOrigin: { x: WALKER_ORIGIN_X, y: WALKER_SECTION.y + TILE_OFFSET },
@@ -326,7 +318,7 @@ export const HOME_LAYOUT = {
   sectionFillKeys: Readonly<Record<SectionId, string>>;
   sections: Readonly<Record<SectionId, Rect>>;
   slotSign: { readonly [key: string]: unknown; board: Rect; hit: Rect };
-  updatePlate: { readonly [key: string]: unknown; button: Rect; hit: Rect; panel: Rect };
+  updateModal: { readonly [key: string]: unknown; button: Rect; hit: Rect; panel: Rect };
   walkerTiles: GridSpec;
   yardSign: Rect;
 };
@@ -595,19 +587,15 @@ export function slotSignText(body: FontMetrics): {
   return { cream, headCapY, priceCapY: headCapY + linePitch, x: cream.x + cream.width / 2 };
 }
 
-// How wide the update plate's title and button label may be: the title from titleX to GAP
-// short of the button, the label inside the button less labelPad either side.
-export const UPDATE_PLATE_ROOM = {
-  label: HOME_LAYOUT.updatePlate.button.width - 2 * HOME_LAYOUT.updatePlate.labelPad,
-  title: HOME_LAYOUT.updatePlate.button.x - GAP - HOME_LAYOUT.updatePlate.titleX,
+// The update modal's title beside its close control, and the compact button's label.
+export const UPDATE_MODAL_ROOM = {
+  label: HOME_LAYOUT.updateModal.button.width - 2 * HOME_LAYOUT.updateModal.labelPad,
+  title: barTitleRoom(cardTitleRow(UPDATE_PANEL), closeControl(UPDATE_PANEL)),
 } as const;
 
-// The update plate's row, from the 2x title font's metrics: the capitals' top for the title
-// and the button's label, centred on the button's face, and the icon's top, centred on the
-// capitals.
-export function updatePlateText(title: FontMetrics): { capY: number; iconY: number } {
-  const { button, icon } = HOME_LAYOUT.updatePlate;
+// The compact button label's capitals, centred on the raised face above its lip.
+export function updateModalText(title: FontMetrics): { capY: number } {
+  const { button } = HOME_LAYOUT.updateModal;
   const caps = title.capHeight * 2;
-  const capY = button.y + Math.floor((button.height - BUTTON_LIP_PX - caps) / 2);
-  return { capY, iconY: capY + Math.floor((caps - icon.size) / 2) };
+  return { capY: button.y + Math.floor((button.height - BUTTON_LIP_PX - caps) / 2) };
 }

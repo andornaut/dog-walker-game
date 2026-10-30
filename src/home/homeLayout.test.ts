@@ -12,11 +12,13 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { WalkerId } from "../data/types";
 import { ownerPhotoRect, WALK_BAR } from "../hud/walkHud";
+import { MIN_TAP_SIZE } from "../layout/screenLayout";
 import { unlockPrice } from "../rules/shop";
 import type { Owned } from "../save/schema";
 import { bodyTextWidth } from "../testing/bodyFont";
 import { fontFileMetrics, fontInk, fontInkRows, inkWidth } from "../testing/fontInk";
 import { inside } from "../testing/rects";
+import { closeControl } from "../ui/closeControl";
 import { gridRects } from "../ui/grid";
 import { MARK_OFFSET } from "../ui/mark";
 import { plainMarks } from "../ui/pixelFont";
@@ -49,11 +51,9 @@ import {
   HOME_BAR_LAST_FACE,
   HOME_LAYOUT,
   homeBarButtons,
-  pocketLining,
   sectionFill,
   slotSignText,
-  UPDATE_PLATE_ROOM,
-  updatePlateText,
+  updateModalText,
 } from "./homeLayout";
 
 const { dogOrigin, dogTiles, sectionFrame, sections, startButton, walkerOrigin, walkerTiles } =
@@ -74,41 +74,34 @@ const rows = [
 ] as const;
 
 describe("home layout", () => {
-  it("spaces the bar, the sections, Start walk and the screen's bottom by the same gap", () => {
-    const { gateBar, sectionGap } = HOME_LAYOUT;
-    const stack = [
-      { bottom: gateBar.y + gateBar.height, top: gateBar.y },
-      ...[sections.walker, sections.dogs, sections.pocket, startButton].map((rect) => ({
-        bottom: rect.y + rect.height,
-        top: rect.y,
-      })),
-      { bottom: SCREEN_CONFIG.height, top: SCREEN_CONFIG.height },
-    ];
-    const gaps = stack.slice(1).map((item, i) => item.top - (stack[i]?.bottom ?? 0));
-    expect(gaps).toEqual(gaps.map(() => sectionGap));
-    expect(sectionGap).toBeGreaterThan(0);
+  it("spaces the sections evenly and leaves the inset start button clear of them and the screen edge", () => {
+    const { gateBar, sectionGap, startGap } = HOME_LAYOUT;
+    const stack = [gateBar, sections.walker, sections.dogs, sections.pocket];
+    for (let i = 1; i < stack.length; i += 1) {
+      const above = stack[i - 1];
+      const below = stack[i];
+      expect((below?.y ?? 0) - ((above?.y ?? 0) + (above?.height ?? 0))).toBe(sectionGap);
+    }
+    expect(startButton.y - sections.pocket.y - sections.pocket.height).toBe(startGap);
+    expect(SCREEN_CONFIG.height - startButton.y - startButton.height).toBeGreaterThan(startGap);
   });
 
   it("puts the tiles directly under each band, at the same offset in every section", () => {
     const { tileOffset } = HOME_LAYOUT;
     const [pocketCell] = gridRects(pocket.cells, 1, pocket.origin);
-    const lining = pocketLining(sections.pocket);
     expect(walkerOrigin.y - sections.walker.y).toBe(tileOffset);
     expect(dogOrigin.y - sections.dogs.y).toBe(tileOffset);
     expect(sectionFill(sections.walker).y).toBe(walkerOrigin.y);
     expect(sectionFill(sections.dogs).y).toBe(dogOrigin.y);
-    // The Pocket's denim starts at the same offset; its cells sit under the top stitch.
-    expect(lining.denim.y - sections.pocket.y).toBe(tileOffset);
-    expect(pocketCell?.y).toBe(lining.stitchTop.y + lining.stitchTop.height);
+    expect(pocketCell?.y).toBe(sectionFill(sections.pocket).y);
   });
 
   it.each(Object.entries(sections))(
-    "section %s shares the Start walk button's edges",
+    "section %s contains the centred inset Start walk span",
     (_, rect) => {
-      expect({ width: rect.width, x: rect.x }).toEqual({
-        width: startButton.width,
-        x: startButton.x,
-      });
+      expect(rect.x).toBeLessThan(startButton.x);
+      expect(rect.x + rect.width).toBeGreaterThan(startButton.x + startButton.width);
+      expect(rect.x + rect.width / 2).toBe(startButton.x + startButton.width / 2);
     },
   );
 
@@ -144,42 +137,6 @@ describe("home layout", () => {
   });
 });
 
-describe("pocket lining", () => {
-  const { pocketLining: lining, sections: all } = HOME_LAYOUT;
-  const frame = all.pocket;
-  const { band, edge } = sectionFrame;
-  const inner = {
-    bottom: frame.y + frame.height - edge,
-    left: frame.x + edge,
-    right: frame.x + frame.width - edge,
-    top: frame.y + edge + band + 1,
-  };
-
-  it.each(Object.entries(lining))("%s lies inside the frame, under the band", (_, rect) => {
-    expect(rect.x).toBeGreaterThanOrEqual(inner.left);
-    expect(rect.x + rect.width).toBeLessThanOrEqual(inner.right);
-    expect(rect.y).toBeGreaterThanOrEqual(inner.top);
-    expect(rect.y + rect.height).toBeLessThanOrEqual(inner.bottom);
-  });
-
-  it.each(Object.entries(lining).filter(([name]) => name !== "denim"))(
-    "%s lies within the denim",
-    (_, rect) => {
-      expect(inside(rect, lining.denim)).toBe(true);
-    },
-  );
-
-  it("keeps the tiles clear of the stitch", () => {
-    const { cells, origin, tileInset } = pocket;
-    const tiles = gridRects(cells, cells.columns, origin).map((cell) => insetRect(tileInset, cell));
-    const { stitchLeft, stitchRight } = lining;
-    for (const tile of tiles) {
-      expect(tile.x).toBeGreaterThanOrEqual(stitchLeft.x + stitchLeft.width);
-      expect(tile.x + tile.width).toBeLessThanOrEqual(stitchRight.x);
-    }
-  });
-});
-
 describe("the Pocket's tiles", () => {
   const { box, cells, icon, origin, tileInset } = pocket;
   const gear = Object.keys(gameData.shopGear).length;
@@ -194,11 +151,11 @@ describe("the Pocket's tiles", () => {
     expect(span(gridRects(cells, cells.columns, origin))).toEqual(span(walkers));
   });
 
-  it("hold every gear on one row inside the stitch", () => {
-    const { stitchBottom } = HOME_LAYOUT.pocketLining;
+  it("hold every gear on one row inside the flat backing", () => {
+    const fill = sectionFill(sections.pocket);
     expect(gear).toBeLessThanOrEqual(cells.columns);
     for (const tile of tiles) {
-      expect(tile.y + tile.height).toBeLessThanOrEqual(stitchBottom.y);
+      expect(inside(tile, fill)).toBe(true);
     }
   });
 
@@ -765,62 +722,33 @@ describe("the dog slot sign", () => {
   });
 });
 
-describe("the update plate", () => {
-  const { button, hit, icon, panel, titleX } = HOME_LAYOUT.updatePlate;
-  const { petShop, topBar } = HOME_LAYOUT;
+describe("the update modal", () => {
+  const { button, hit, panel } = HOME_LAYOUT.updateModal;
   const TITLE = fontFileMetrics("font-title");
-  const { capY, iconY } = updatePlateText(TITLE);
+  const { capY } = updateModalText(TITLE);
 
-  it("lies inside the screen, joining the top bar and clear of the Pet shop's board", () => {
+  it("keeps its card below the live top bar and inside the screen", () => {
     expect(
       inside(panel, { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 }),
     ).toBe(true);
-    expect(panel.y).toBe(topBar.height);
-    expect(rectsOverlap(panel, petShop.board)).toBe(false);
+    expect(panel.y).toBeGreaterThan(HOME_LAYOUT.topBar.height);
   });
 
-  it("centres the button down the plate", () => {
-    const above = button.y - panel.y;
-    expect(panel.y + panel.height - (button.y + button.height)).toBe(above);
+  it("centres the button inside the modal, clear of its title and close control", () => {
+    expect(inside(button, panel)).toBe(true);
+    expect(button.x + button.width / 2).toBe(panel.x + panel.width / 2);
+    const close = closeControl(panel).hit;
+    expect(rectsOverlap(hit, close)).toBe(false);
+    expect(button.y).toBeGreaterThan(cardTitleRow(panel).y + cardTitleRow(panel).height);
   });
 
-  it.each([
-    ["the button", button],
-    ["the icon", { height: icon.size, width: icon.size, x: icon.x, y: iconY }],
-  ])("holds %s inside the plate", (_, rect) => {
-    expect(inside(rect, panel)).toBe(true);
-  });
-
-  // The one tap area under 44 tall: 42 game pixels, about 45 CSS pixels on a phone, is all the
-  // room between the top bar's hit areas and the Pet shop's board.
-  it("covers the button with a tap area at least 42 tall", () => {
-    expect(hit.height).toBeGreaterThanOrEqual(42);
+  it("covers the standard button with its full tap target", () => {
+    expect(hit.height).toBeGreaterThanOrEqual(MIN_TAP_SIZE);
     expect(inside(button, hit)).toBe(true);
   });
 
-  const clear: readonly (readonly [string, Rect])[] = [
-    ...[true, false].flatMap((exit) =>
-      homeBarButtons(exit).map(
-        ([id, { hit }]) => [`the ${id} button's, Exit shown ${exit}`, hit] as const,
-      ),
-    ),
-    ["the Pet shop's", petShop],
-    ["the Pet shop board's", petShop.board],
-  ];
-  it.each(clear)("keeps the tap area clear of %s", (_, rect) => {
-    expect(rectsOverlap(hit, rect)).toBe(false);
-  });
-
-  it("leaves the title's room between the icon and the button", () => {
-    expect(titleX).toBeGreaterThan(icon.x + icon.size);
-    expect(titleX + UPDATE_PLATE_ROOM.title).toBeLessThan(button.x);
-  });
-
-  it("puts the capitals on the button's face, the icon on their row", () => {
-    const caps = TITLE.capHeight * TEXT_SCALE;
+  it("keeps the fixed-size button label inside its face", () => {
     expect(capY).toBeGreaterThanOrEqual(button.y);
-    expect(capY + caps).toBeLessThanOrEqual(button.y + button.height);
-    expect(iconY).toBeLessThanOrEqual(capY);
-    expect(iconY + icon.size).toBeGreaterThanOrEqual(capY + caps);
+    expect(capY + TITLE.capHeight * TEXT_SCALE).toBeLessThanOrEqual(button.y + button.height);
   });
 });

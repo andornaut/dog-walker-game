@@ -4,6 +4,7 @@ import type { GameObjects, Scene, Tweens } from "phaser";
 
 import { SCREEN_LAYOUT } from "../data/screen";
 import { FEEDBACK, loopFrame } from "../home/feedback";
+import { BUTTON_SIZE } from "../ui/buttonGeometry";
 import type { CloseControl } from "../ui/closeControl";
 import {
   type ArtLook,
@@ -194,7 +195,7 @@ const BUTTON_TAGS: Readonly<Record<ButtonLook, readonly string[]>> = {
 };
 
 // The ui-button's face sinks this far into its lip when pressed, as the art draws it.
-export const BUTTON_PRESS_PX = 2;
+export const BUTTON_PRESS_PX = BUTTON_SIZE.press;
 
 // A disabled button drawn in code: a flat grey face in an ink line at the pressed depth with
 // no lip, so it never looks raised.
@@ -342,7 +343,12 @@ type Placed = GameObjects.GameObject & GameObjects.Components.Transform;
 
 // The 20x20 ui-icon-button: its face sinks 2px when pressed, and the 16x16 icon on it sits at
 // +2,+1, or +2,+3 when pressed.
-const ICON_BUTTON = { iconX: 2, iconY: 1, pressPx: 2, size: 20 } as const;
+const ICON_BUTTON = {
+  iconX: 2,
+  iconY: 1,
+  pressPx: BUTTON_SIZE.press,
+  size: BUTTON_SIZE.icon.face,
+} as const;
 
 export interface IconButton {
   setPressed(pressed: boolean): void;
@@ -365,7 +371,11 @@ export function addIconButton(
     const g = scene.add.graphics();
     const top = tag === "pressed" ? ICON_BUTTON.pressPx : 0;
     const size = ICON_BUTTON.size;
-    drawFramedRect(g, CREAM_PANEL_COLOURS, { height: size - top, width: size, x, y: y + top });
+    drawFramedRect(
+      g,
+      { border: PALETTE.ink, fill: PALETTE.navy },
+      { height: size - top, width: size, x, y: y + top },
+    );
     return g;
   });
   parent.add(faces);

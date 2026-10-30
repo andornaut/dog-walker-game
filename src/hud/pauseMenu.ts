@@ -1,6 +1,8 @@
 import type { Rect } from "@andornaut/game-kit/rect";
 import { type FontMetrics, inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
 
+import { BUTTON_SIZE } from "../ui/buttonGeometry";
+
 // The menu's buttons, top to bottom; each one's label is menuText.pause[item].
 export const PAUSE_MENU_ITEMS = ["resume", "help", "settings", "headHome"] as const;
 export type PauseMenuItem = (typeof PAUSE_MENU_ITEMS)[number];
@@ -11,10 +13,10 @@ export const HOME_QUESTION_ANSWERS = ["keepWalking", "headHome"] as const;
 // The Quit question's answers, top to bottom, as the Home question's: the safe one first.
 export const QUIT_QUESTION_ANSWERS = ["keepPlaying", "quit"] as const;
 
-const PANEL_WIDTH = 232;
+const PANEL_WIDTH = BUTTON_SIZE.wide.width + 32;
 // Offsets from the panel's top-left corner, and the room under the last part.
 const TITLE_Y = 16;
-const BUTTON = { gap: 8, height: 40, width: 200, x: 16, y: 40 };
+const BUTTON = { ...BUTTON_SIZE.wide, gap: 8, x: 16, y: 40 };
 
 // The width a button's label has, its key number included, 4px in from each side. The panel's
 // title is placed beside its close control, as on every modal card (addCardTitle).
@@ -35,7 +37,7 @@ function notePlateHeight(body: FontMetrics, lines: number): number {
 }
 const BOTTOM = 17;
 // Each button's hit area reaches this far above and below its face.
-const HIT_REACH = 2;
+const HIT_REACH = 0;
 
 interface PauseMenuLayout {
   buttons: Rect[];

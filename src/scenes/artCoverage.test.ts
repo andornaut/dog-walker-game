@@ -256,10 +256,7 @@ describe("image art", () => {
             })),
           ].map(walkBarIconKey),
       ],
-      [
-        "every section's fill and the Pocket's stitch",
-        () => [...Object.values(HOME_LAYOUT.sectionFillKeys), "ui-stitch-h", "ui-stitch-v"],
-      ],
+      ["every section's solid fill", () => Object.values(HOME_LAYOUT.sectionFillKeys)],
     ];
     expect(lists.flatMap(([, keys]) => missingImages(keys()))).toEqual([]);
   });

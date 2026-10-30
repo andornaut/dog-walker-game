@@ -173,7 +173,7 @@ export function messageLine(text: HomeText, action: HomeAction): string | null {
 }
 
 // The line said first in the walker's bubble for each storage state, or null for none. A newer
-// version's save shows on the plate instead (gateTop), which hides the bubble.
+// version's save opens an update modal instead (gateTop).
 const STORAGE_NOTICES: Readonly<Record<StorageState, "unsaved" | null>> = {
   available: null,
   newer: null,
@@ -218,13 +218,13 @@ export function bubbleSpeech(
     : { owner, paragraphs: [quip] };
 }
 
-// The plate under the top bar, by what it offers: a newer version waiting, or a save on this
+// The update notice, by what it offers: a newer version waiting, or a save on this
 // device from a newer version. Its title and button are homeText's entry of the same name.
 export const PLATE_MODES = ["newerSave", "update"] as const;
 export type PlateMode = (typeof PLATE_MODES)[number];
 
-// What the gate scene's top shows: the plate while a newer version waits or wrote the save,
-// which hides the walker's bubble, else the bubble. A waiting update wins, so one plate shows.
+// Which update notice is eligible: a newer version waiting or a save from a newer version.
+// A waiting update wins; bubble means no notice.
 export function gateTop(updateWaiting: boolean, storage: StorageState): "bubble" | PlateMode {
   if (updateWaiting) {
     return "update";

@@ -417,10 +417,14 @@ export class EndScene extends Scene {
       const placement = { dx: x - walkerAt.x, footDy: y - walkerAt.y };
       return { dog, feet: { footY: y, x }, placement, rank };
     });
-    figures.standInYard(shadows, scene.path, {
-      dogs: standing,
-      walker: { footY: walkerAt.y, x: walkerAt.x },
-    });
+    figures.standInYard(
+      shadows,
+      { path: scene.path, shadows: true },
+      {
+        dogs: standing,
+        walker: { footY: walkerAt.y, x: walkerAt.x },
+      },
+    );
     pack.add(figures.layers());
 
     // The game loop's time: in create, the scene clock still reads the time the scene booted

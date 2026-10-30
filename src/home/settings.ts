@@ -4,6 +4,7 @@ import { type FontMetrics, inkRowsOfLines } from "@andornaut/game-kit/text/bitma
 
 import { laneDirectionForKey } from "../input/keyBindings";
 import type { Settings } from "../save/schema";
+import { BUTTON_SIZE } from "../ui/buttonGeometry";
 import { type CloseControl, closeControl } from "../ui/closeControl";
 import { helpCapDy, LABEL_HELP_GAP } from "../ui/labelHelpGap";
 import { TEXT_SCALE, textOnLines } from "../ui/textFit";
@@ -106,7 +107,7 @@ export interface SettingsFonts {
 // note's lowest ink. A slider row is slider.height tall, with its percentage on the label's
 // line, ending pad in from the row's right, and its track under them, pad in from either side.
 export const SETTINGS_ROW = {
-  button: { height: 24, width: 80 },
+  button: BUTTON_SIZE.compact,
   // Between a note's room and the control beside it.
   controlGap: 10,
   icon: { dx: 6, dy: 9 },

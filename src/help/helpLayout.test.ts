@@ -89,8 +89,8 @@ describe("helpActionAt", () => {
   it("maps a tap on each target to its action, and one outside them to none", () => {
     const taps: [number, number, HelpAction | undefined][] = [
       [330, 20, { kind: "close" }],
-      [20, 520, { kind: "previous" }],
-      [300, 520, { kind: "advance" }],
+      [HELP_LAYOUT.previous.x, HELP_LAYOUT.previous.y, { kind: "previous" }],
+      [HELP_LAYOUT.next.x, HELP_LAYOUT.next.y, { kind: "advance" }],
       [26, 458, { kind: "goTo", page: 0 }],
       [333, 482, { kind: "goTo", page: 6 }],
       [180, 200, undefined],

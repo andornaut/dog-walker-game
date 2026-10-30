@@ -1,10 +1,12 @@
 import type { Rect } from "@andornaut/game-kit/rect";
 
+import { BUTTON_SIZE } from "../ui/buttonGeometry";
+
 // The smallest tap target each way, in game pixels: 48 CSS pixels on a 390px-wide phone.
-export const MIN_TAP_SIZE = 44;
+export const MIN_TAP_SIZE = BUTTON_SIZE.icon.target;
 
 // An overlay's full-width button, centred on the screen.
-export const WIDE_BUTTON = { height: MIN_TAP_SIZE, width: 264, x: 48 } as const;
+export const WIDE_BUTTON = { ...BUTTON_SIZE.wide, x: 32 } as const;
 
 // How far the walker's feet stand above the bottom of the road.
 const WALKER_FEET_ABOVE_ROAD_BOTTOM = 4;

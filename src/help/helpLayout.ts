@@ -4,6 +4,7 @@ import { SCREEN_LAYOUT } from "../data/screen";
 import { HOME_BAR_LAST_FACE, HOME_LAYOUT } from "../home/homeLayout";
 import { TITLE_CAP_ROWS } from "../hud/walkHud";
 import { MIN_TAP_SIZE } from "../layout/screenLayout";
+import { BUTTON_SIZE } from "../ui/buttonGeometry";
 import { pageCloseControl } from "../ui/closeControl";
 import { rectIndexAt } from "../ui/grid";
 import { TEXT_SCALE } from "../ui/textFit";
@@ -37,8 +38,12 @@ export const HELP_LAYOUT = {
   dots: { centreX: width / 2, size: 8, spacing: MIN_TAP_SIZE, y: height - 84 },
   heading: { x: 12, y: HOME_BAR.mid - (TITLE_CAP_ROWS * TEXT_SCALE) / 2 },
   illustration: ILLUSTRATION,
-  next: { height: MIN_TAP_SIZE, width: 110, x: 242, y: height - 56 },
-  previous: { height: MIN_TAP_SIZE, width: 110, x: 8, y: height - 56 },
+  next: { ...BUTTON_SIZE.compact, x: width / 2 + BUTTON_SIZE.pairGap / 2, y: height - 56 },
+  previous: {
+    ...BUTTON_SIZE.compact,
+    x: width / 2 - BUTTON_SIZE.pairGap / 2 - BUTTON_SIZE.compact.width,
+    y: height - 56,
+  },
   screen: SCREEN,
   title: { scale: 2, x: 12, y: TITLE_Y },
   topBar: TOP_BAR,

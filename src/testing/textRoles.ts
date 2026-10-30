@@ -36,7 +36,7 @@ import {
   detailCardRect,
   DOG_TILE_TEXT_ROOM,
   HOME_LAYOUT,
-  UPDATE_PLATE_ROOM,
+  UPDATE_MODAL_ROOM,
 } from "../home/homeLayout";
 import { messageLine, PLATE_MODES } from "../home/homeLines";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
@@ -629,15 +629,15 @@ export function textRoleCases(): TextRoleCase[] {
       [gameData.homeText.startWalk, gameData.homeText.startLoading],
     ),
     ...plainRole(
-      "update plate's title",
+      "update modal's title",
       "font-title",
-      { room: UPDATE_PLATE_ROOM.title, style: TEXT_STYLE },
+      { room: UPDATE_MODAL_ROOM.title, style: TEXT_STYLE },
       PLATE_MODES.map((mode) => gameData.homeText[mode].title),
     ),
     ...plainRole(
-      "update plate's button",
+      "update modal's button",
       "font-title",
-      { room: UPDATE_PLATE_ROOM.label, style: TEXT_STYLE },
+      { room: UPDATE_MODAL_ROOM.label, style: TEXT_STYLE },
       PLATE_MODES.map((mode) => gameData.homeText[mode].button),
     ),
     ...endRoles(),

@@ -6,6 +6,7 @@ import {
 } from "@andornaut/game-kit/text/bitmapFont";
 import { type TextFitStyle } from "@andornaut/game-kit/text/textFit";
 
+import { BUTTON_SIZE } from "../ui/buttonGeometry";
 import { CARD_HEADER, cardRowRects, type CardRowSpec } from "../ui/cardRow";
 import { PILL_IMAGE_GAP, pillRiseOverCaps } from "../ui/namePills";
 import { TEXT_SCALE } from "../ui/textFit";
@@ -30,7 +31,7 @@ export const CARD_LAYOUT = {
   effect: { plaqueGap: 1, width: 100, x: 6 },
   fires: { inkTop: 1, size: 16, x: 18, y: 134 },
   // A fork card's End walk button, centred under the paths, gap rows below their charms.
-  forkHome: { gap: 6, height: 44, width: 160 },
+  forkHome: { ...BUTTON_SIZE.compact, gap: 6 },
   height: 153,
   // The enlarged card's body, the frame's rows that grow with it: a firing warning in the title
   // font at 1x, warningGap over the changes, which take the rest of the body and bodyGap rows

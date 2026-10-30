@@ -13,7 +13,7 @@ import {
 import type { GameData } from "../data/types";
 import { dotRects, HELP_LAYOUT } from "../help/helpLayout";
 import { END_LAYOUT } from "../home/endLayout";
-import { HOME_LAYOUT, homeBarButtons, updatePlateText } from "../home/homeLayout";
+import { HOME_LAYOUT, homeBarButtons, updateModalText } from "../home/homeLayout";
 import { settingsLayout, type SettingsRowShape } from "../home/settings";
 import { SHOP_TABS } from "../home/shop";
 import { SHOP_LAYOUT, shopTabRects } from "../home/shopLayout";
@@ -248,11 +248,10 @@ export function layoutExport(
           Object.keys(data.shopGear).length,
           HOME_LAYOUT.pocket.origin,
         ),
-        // The update plate with its row: the capitals' top for the title and button label, and
-        // the icon's top.
-        updatePlate: {
-          ...HOME_LAYOUT.updatePlate,
-          ...updatePlateText(title),
+        // The update modal and its button label's capitals.
+        updateModal: {
+          ...HOME_LAYOUT.updateModal,
+          ...updateModalText(title),
         },
         walkerRects: gridRects(
           HOME_LAYOUT.walkerTiles,

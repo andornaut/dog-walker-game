@@ -63,7 +63,6 @@ import {
   homeBarButtons,
   sectionFill,
   slotSignText,
-  updatePlateText,
 } from "../home/homeLayout";
 import {
   bubbleSpeech,
@@ -135,7 +134,14 @@ import {
   itemTileLook,
 } from "../ui/interaction";
 import { PALETTE } from "../ui/palette";
-import { drawFocusRing, drawFramedRect, drawRing, drawShadow, fillRect } from "../ui/phaser/draw";
+import {
+  addDim,
+  drawFocusRing,
+  drawFramedRect,
+  drawRing,
+  drawShadow,
+  fillRect,
+} from "../ui/phaser/draw";
 import {
   addPixelText,
   type FontRole,
@@ -155,7 +161,7 @@ import { addNamePills } from "./effectNameColours";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { exitGame, HOME_PAGE_OPENING_EVENT, openHomePage } from "./homeBarPress";
-import { addAffordFrame, drawDetailCard } from "./homePanels";
+import { addAffordFrame, addModalCard, drawDetailCard } from "./homePanels";
 import {
   addPlate,
   addTileBadge,
@@ -202,6 +208,7 @@ import {
   addBodyText,
   addGraphicsIn,
   addIconButton,
+  addMenuButton,
   addNineSlice,
   addPanel,
   addSelectTile,
@@ -237,7 +244,6 @@ const TOP_BAR = HOME_LAYOUT.topBar;
 const PET_SHOP: Rect = HOME_LAYOUT.petShop;
 const PET_SHOP_BOARD: Rect = HOME_LAYOUT.petShop.board;
 const SLOT_SIGN = HOME_LAYOUT.slotSign;
-const POCKET_LINING = HOME_LAYOUT.pocketLining;
 const SECTION_FILL_KEYS = HOME_LAYOUT.sectionFillKeys;
 const POCKET = HOME_LAYOUT.pocket;
 const SECTION_RECTS: Readonly<Record<SectionId, Rect>> = HOME_LAYOUT.sections;
@@ -256,7 +262,7 @@ const START_BUTTON: Rect = HOME_LAYOUT.startButton;
 const WAITING_ALPHA = 0.6;
 const START_LABEL = HOME_LAYOUT.startLabel;
 const GEAR_BADGE: Rect = HOME_LAYOUT.gearBadge;
-const UPDATE_PLATE = HOME_LAYOUT.updatePlate;
+const UPDATE_MODAL = HOME_LAYOUT.updateModal;
 // The keyboard ring sits outside the ui-select frame.
 const FOCUS_OUTSET = 5;
 
@@ -290,7 +296,6 @@ type Target =
   | { kind: "settings" }
   | { kind: "slotSign" }
   | { kind: "start" }
-  | { kind: "update" }
   | { kind: "walker"; walker: WalkerId };
 
 // One key per tappable thing, for its feedback timers.
@@ -340,15 +345,13 @@ interface Focusable {
   target: Target;
 }
 
-// The keyboard's rows, top to bottom as the screen shows them: the plate's Update now button
-// while it shows, the dog slot sign while it shows and the Pet shop, the walkers, the dog rows,
+// The keyboard's rows, top to bottom as the screen shows them: the dog slot sign while it
+// shows and the Pet shop, the walkers, the dog rows,
 // the Pocket and Start walk.
-function focusRows(shown: { plate: boolean; sign: boolean }): Focusable[][] {
+function focusRows(shown: { sign: boolean }): Focusable[][] {
   const walkers = walkerTiles();
   const sign: Focusable = { rect: SLOT_SIGN.board, target: { kind: "slotSign" } };
-  const update: Focusable = { rect: UPDATE_PLATE.button, target: { kind: "update" } };
   const rows: Focusable[][] = [
-    ...(shown.plate ? [[update]] : []),
     [...(shown.sign ? [sign] : []), { rect: PET_SHOP, target: { kind: "petShop" } }],
     walkerIds().map((walker, i): Focusable => ({
       rect: itemAt(walkers, i),
@@ -374,12 +377,8 @@ function focusRows(shown: { plate: boolean; sign: boolean }): Focusable[][] {
   return rows;
 }
 
-// What is open over the screen: a held tile's detail card. rect is the card, so a tap on it
-// or outside it closes it.
-interface Overlay {
-  rect: Rect | undefined;
-  target: DetailTarget;
-}
+// A held item's detail card or the dismissible update notice, above the home screen.
+type Overlay = { rect: Rect | undefined } & ({ mode: PlateMode } | { target: DetailTarget });
 
 // A tile that reacts to taps: its container moves for the dip, lift and shake, its face hops,
 // and its mark pops.
@@ -412,8 +411,8 @@ const LAST_VISIT_WALKERS_KEY = "homeLastVisitWalkers";
 
 // The screen before a walk: the bank at the top bar's left and Logbook, Help, Sound, Settings
 // and Exit at its right (Exit where exitShown); the walker and pack at the gate beside the Pet
-// shop; the Walker, Dogs and Pocket sections and Start walk. While a newer version of the game waits, the update plate
-// under the top bar takes the walker's bubble's place until tapped. Buying happens only in the
+// shop; the Walker, Dogs and Pocket sections and Start walk. A waiting game update opens a
+// dismissible modal. Buying happens only in the
 // shop: tapping the building opens it, and tapping a locked dog, gear item or the dog slot sign
 // opens it on that item. Holding a dog or gear tile opens its detail card.
 // The arrow keys move a focus ring, Enter or Space picks, Escape, P or back closes a card, ?
@@ -446,6 +445,7 @@ export class StartScene extends Scene {
   private quips = new Map<DogId, string>();
   private root: GameObjects.Container | undefined;
   private shakes = new Map<string, number>();
+  private shownUpdate: PlateMode | undefined;
   private startButton:
     | {
         container: GameObjects.Container;
@@ -477,6 +477,7 @@ export class StartScene extends Scene {
     this.hold = undefined;
     this.overlay = undefined;
     this.overlayPress = undefined;
+    this.shownUpdate = undefined;
     this.pending = new Set();
     this.pops = new Map();
     this.press = undefined;
@@ -521,7 +522,7 @@ export class StartScene extends Scene {
           homeBarButtonAt(this.exit, pointer.x, pointer.y) === undefined
         ) {
           this.overlayPress = { x: pointer.x, y: pointer.y };
-          if (this.closePressed()) {
+          if (this.closePressed() || this.updatePressed()) {
             this.render();
           }
           return;
@@ -548,7 +549,7 @@ export class StartScene extends Scene {
       },
       up: (pointer, cancelled) => {
         const down = this.overlayPress;
-        const controlDown = this.closePressed();
+        const controlDown = this.closePressed() || this.updatePressed();
         this.overlayPress = undefined;
         if (down !== undefined) {
           if (!cancelled) {
@@ -627,7 +628,7 @@ export class StartScene extends Scene {
     onSceneEvent(this, this.game.events, SHOP_CLOSED_EVENT, (closed: ShopClosed) =>
       this.shopClosed(closed),
     );
-    // The update plate shows on the home screen while a newer version waits.
+    // A newer version can open the home update modal.
     onWindowEvent(this, PHONE_EVENTS.updatePlate, () => this.render());
     // A tap made while another tap's act opened help, settings or stats over this screen is
     // dropped, so it cannot act once the screen resumes, as is a press waiting for the art and
@@ -661,7 +662,9 @@ export class StartScene extends Scene {
 
   private onKey(key: string): void {
     if (this.overlay !== undefined) {
-      if (isPauseKey(key) || isConfirmKey(key)) {
+      if (isConfirmKey(key) && "mode" in this.overlay) {
+        acceptUpdate();
+      } else if (isPauseKey(key) || isConfirmKey(key)) {
         this.closeOverlay();
       }
       return;
@@ -717,14 +720,14 @@ export class StartScene extends Scene {
     return slotSign(gameData, owned, bankCents) !== null;
   }
 
-  // What the gate scene's top shows: the plate in either mode, or the walker's bubble.
+  // Which update notice is eligible, or the normal home screen.
   private gateTop(): ReturnType<typeof gateTop> {
     return gateTop(updatePlateShown(), storageState(this));
   }
 
-  // The controls that come and go: the dog slot sign and the plate under the top bar.
-  private shownControls(): { plate: boolean; sign: boolean } {
-    return { plate: this.gateTop() !== "bubble", sign: this.signShown() };
+  // The dog slot sign comes and goes while a slot is for sale.
+  private shownControls(): { sign: boolean } {
+    return { sign: this.signShown() };
   }
 
   // A focused dog or gear item in words, so a keyboard player has what a hold shows, and a
@@ -770,11 +773,34 @@ export class StartScene extends Scene {
     );
   }
 
-  // A tap anywhere on an open detail card closes it, as it has no other controls, as on the
-  // shop and Stats. A tap outside it is listenOutsideTap's.
+  private updatePressed(): boolean {
+    const down = this.overlayPress;
+    return (
+      this.overlay !== undefined &&
+      "mode" in this.overlay &&
+      down !== undefined &&
+      containsPoint(UPDATE_MODAL.hit, down.x, down.y)
+    );
+  }
+
+  // Detail cards close on their body. The update notice acts only on its own controls.
   private releaseOnOverlay(down: { x: number; y: number }, x: number, y: number): void {
-    const rect = this.overlay?.rect;
-    if (rect !== undefined && containsPoint(rect, down.x, down.y) && containsPoint(rect, x, y)) {
+    const overlay = this.overlay;
+    const rect = overlay?.rect;
+    if (overlay === undefined || rect === undefined) {
+      return;
+    }
+    if ("mode" in overlay) {
+      const close = closeControl(rect).hit;
+      if (containsPoint(close, down.x, down.y) && containsPoint(close, x, y)) {
+        this.closeOverlay();
+      } else if (
+        containsPoint(UPDATE_MODAL.hit, down.x, down.y) &&
+        containsPoint(UPDATE_MODAL.hit, x, y)
+      ) {
+        acceptUpdate();
+      }
+    } else if (containsPoint(rect, down.x, down.y) && containsPoint(rect, x, y)) {
       this.closeOverlay();
     }
   }
@@ -792,14 +818,10 @@ export class StartScene extends Scene {
     if (walker !== undefined) {
       return { kind: "walker", walker: itemAt(walkerIds(), walker) };
     }
-    const update: readonly [Rect, Target][] = this.shownControls().plate
-      ? [[UPDATE_PLATE.hit, { kind: "update" }]]
-      : [];
     const bar = homeBarButtons(this.exit).map(([kind, { hit }]): [Rect, Target] => [hit, { kind }]);
     const fixed: readonly [Rect, Target][] = [
       [START_BUTTON, { kind: "start" }],
       ...bar,
-      ...update,
       [PET_SHOP, { kind: "petShop" }],
     ];
     if (this.signShown() && containsPoint(SLOT_SIGN.hit, x, y)) {
@@ -904,7 +926,6 @@ export class StartScene extends Scene {
       case "bubble":
       case "mute":
       case "start":
-      case "update":
       case "walker":
         return false;
       default:
@@ -987,9 +1008,6 @@ export class StartScene extends Scene {
         return;
       case "start":
         this.startWalk();
-        return;
-      case "update":
-        acceptUpdate();
         return;
       default:
         target satisfies never;
@@ -1177,6 +1195,12 @@ export class StartScene extends Scene {
       fillRect(g, PALETTE.lightGrey, { height: 34, width: SCREEN.width, x: 0, y: 92 });
       fillRect(g, PALETTE.green, { height: 70, width: SCREEN.width, x: 0, y: 126 });
       fillRect(g, PALETTE.tan, { height: 70, width: PATH.width, x: PATH.x, y: 126 });
+      fillRect(g, PALETTE.brown, {
+        height: HOME_LAYOUT.gateBar.height - 1,
+        width: SCREEN.width,
+        x: 0,
+        y: HOME_LAYOUT.gateBar.y,
+      });
     }
     const sign = HOME_LAYOUT.streetSign;
     addPixelText(this, sign.x, sign.y, gameData.homeText.gateSign, {
@@ -1201,13 +1225,25 @@ export class StartScene extends Scene {
     this.drawPetShop(root, save);
     this.drawSlotSign(root, save);
     const top = this.gateTop();
-    this.drawPackAtGate(root, g, save, top === "bubble");
-    if (top !== "bubble") {
-      this.drawPlate(root, top);
+    if (this.overlay !== undefined && "mode" in this.overlay && this.overlay.mode !== top) {
+      this.overlay = undefined;
     }
+    if (top === "bubble") {
+      this.shownUpdate = undefined;
+    } else if (this.overlay === undefined && this.shownUpdate !== top) {
+      this.overlay = { mode: top, rect: UPDATE_MODAL.panel };
+      this.shownUpdate = top;
+    }
+    this.drawPackAtGate(root, g, save, true);
+    fillRect(addGraphicsIn(this, root), PALETTE.plum, {
+      height: 1,
+      width: SCREEN.width,
+      x: 0,
+      y: HOME_LAYOUT.gateBar.y + HOME_LAYOUT.gateBar.height - 1,
+    });
     const sections = this.sections(save);
     for (const id of SECTION_IDS) {
-      const note = this.drawSection(root, SECTION_RECTS[id], sections[id]);
+      const note = this.drawSection(root, id, SECTION_RECTS[id], sections[id]);
       if (id === "dogs") {
         this.drawPackBonus(root, SECTION_RECTS[id], note);
       }
@@ -1227,30 +1263,15 @@ export class StartScene extends Scene {
     return homeSections(gameData, save.owned, { loadout: this.loadout, walker: save.walker });
   }
 
-  // Each section's fill over its tile area, then the Pocket's tan stitch, under the tiles. Each
-  // piece is a TileSprite with its tile origin at its own top-left; a missing texture leaves
-  // the frame bare.
+  // Flat solid backings fill each section below its header, under the unchanged cards.
   private drawSectionFills(root: GameObjects.Container): void {
-    const { stitchBottom, stitchLeft, stitchRight, stitchTop } = POCKET_LINING;
-    const fills = SECTION_IDS.map((id): [string, Rect] => [
-      SECTION_FILL_KEYS[id],
-      sectionFill(SECTION_RECTS[id]),
-    ]);
-    const pieces: readonly [string, Rect][] = [
-      ...fills,
-      ["ui-stitch-v", stitchLeft],
-      ["ui-stitch-v", stitchRight],
-      ["ui-stitch-h", stitchTop],
-      ["ui-stitch-h", stitchBottom],
-    ];
-    for (const [key, rect] of pieces) {
+    for (const id of SECTION_IDS) {
+      const key = SECTION_FILL_KEYS[id];
+      const rect = sectionFill(SECTION_RECTS[id]);
       if (this.textures.exists(key)) {
-        root.add(
-          this.add
-            .tileSprite(rect.x, rect.y, rect.width, rect.height, key)
-            .setOrigin(0)
-            .setTilePosition(0, 0),
-        );
+        root.add(this.add.tileSprite(rect.x, rect.y, rect.width, rect.height, key).setOrigin(0));
+      } else {
+        fillRect(addGraphicsIn(this, root), PALETTE[HOME_LAYOUT.sectionLooks[id].fill], rect);
       }
     }
   }
@@ -1282,17 +1303,18 @@ export class StartScene extends Scene {
     this.text(root, heartLeft - gap, y, line, PALETTE.ink, { font: "title", originX: 1 });
   }
 
-  // A section's ui-section frame and band by its state, with the heading on the band's left
-  // and its note on the right: ink on the lit (complete) band, cream and amber on the dark
-  // (neutral) one. Returns the note's label, or null with none.
+  // A one-pixel section frame with its heading and note: amber when selected, or its
+  // lighter section colour while neutral. Returns the note label, or null with none.
   private drawSection(
     root: GameObjects.Container,
+    id: SectionId,
     rect: Rect,
     section: Section,
   ): GameObjects.BitmapText | null {
-    const frame = addNineSlice(this, "ui-section", rect, section.state);
+    const tag = section.state === "complete" ? "complete" : HOME_LAYOUT.sectionLooks[id].neutralTag;
+    const frame = addNineSlice(this, "ui-section", rect, tag);
     if (frame === undefined) {
-      this.drawSectionFrame(root, rect, section.state);
+      this.drawSectionFrame(root, id, rect, section.state);
     } else {
       root.add(frame);
     }
@@ -1303,7 +1325,7 @@ export class StartScene extends Scene {
       rect.x + BAND_TEXT.inset,
       y,
       section.heading,
-      lit ? PALETTE.ink : PALETTE.cream,
+      lit ? PALETTE.ink : PALETTE[HOME_LAYOUT.sectionLooks[id].heading],
       {
         font: "title",
       },
@@ -1312,29 +1334,38 @@ export class StartScene extends Scene {
     if (section.note === "") {
       return null;
     }
-    return this.text(root, right, y, section.note, lit ? PALETTE.ink : PALETTE.amber, {
-      font: "title",
-      originX: 1,
-    });
+    return this.text(
+      root,
+      right,
+      y,
+      section.note,
+      lit ? PALETTE.ink : PALETTE[HOME_LAYOUT.sectionLooks[id].note],
+      {
+        font: "title",
+        originX: 1,
+      },
+    );
   }
 
-  // The ui-section art drawn in code while it is missing: complete is an ink outline round a
-  // gold frame and a lit amber band over an orange rule; neutral is an ink frame and rule
-  // round a navy band. The tiles' area is left open.
-  private drawSectionFrame(root: GameObjects.Container, rect: Rect, state: SectionState): void {
+  // The same thin rim and section-specific header while ui-section is missing.
+  private drawSectionFrame(
+    root: GameObjects.Container,
+    id: SectionId,
+    rect: Rect,
+    state: SectionState,
+  ): void {
     const g = addGraphicsIn(this, root);
     const lit = state === "complete";
     const { band, edge } = SECTION_FRAME;
-    drawRing(g, PALETTE.ink, rect, 1);
-    drawRing(g, lit ? PALETTE.amber : PALETTE.ink, insetRect(1, rect), edge - 1);
+    drawRing(g, PALETTE.plum, rect, 1);
     const width = rect.width - edge * 2;
-    fillRect(g, lit ? PALETTE.amber : PALETTE.navy, {
+    fillRect(g, lit ? PALETTE.amber : PALETTE[HOME_LAYOUT.sectionLooks[id].neutral], {
       height: band,
       width,
       x: rect.x + edge,
       y: rect.y + edge,
     });
-    fillRect(g, lit ? PALETTE.orange : PALETTE.ink, {
+    fillRect(g, PALETTE.plum, {
       height: 1,
       width,
       x: rect.x + edge,
@@ -1351,6 +1382,10 @@ export class StartScene extends Scene {
     layer.removeAll(true);
     const overlay = this.overlay;
     if (overlay === undefined) {
+      return;
+    }
+    if ("mode" in overlay) {
+      this.drawUpdateModal(layer, overlay.mode);
       return;
     }
     const { target } = overlay;
@@ -1551,7 +1586,7 @@ export class StartScene extends Scene {
       walkerKey,
       this.loadout.dogs,
     );
-    figures.standInYard(g, PATH, { dogs, walker: { footY, x } });
+    figures.standInYard(g, { path: PATH, shadows: false }, { dogs, walker: { footY, x } });
     root.add(figures.layers());
     const walkerSprite = figures.walker?.sprite;
     this.bubbleHits = bubble && walkerSprite !== undefined ? [walkerSprite.getBounds()] : [];
@@ -1681,36 +1716,21 @@ export class StartScene extends Scene {
     }
   }
 
-  // The plate under the top bar while a newer version waits or wrote the save, in mode's text:
-  // the icon (none while its art is missing), the title, and the Update now button, whose face
-  // sinks while pressed and which takes the newer version (acceptUpdate).
-  private drawPlate(root: GameObjects.Container, mode: PlateMode): void {
-    const { button, icon, iconKey, panel, titleColour, titleX } = UPDATE_PLATE;
+  // A waiting version or a newer save opens once per home visit or change of notice mode.
+  // Closing leaves the home screen usable; Update now keeps the existing acceptUpdate action.
+  private drawUpdateModal(root: GameObjects.Container, mode: PlateMode): void {
+    const { button, panel } = UPDATE_MODAL;
     const text = gameData.homeText[mode];
-    root.add(addPanel(this, panel));
-    const { capY, iconY } = updatePlateText(pixelFontMetrics(this, "title"));
-    root.add(imageIcon(this, iconKey, icon.x, iconY));
-    this.text(root, titleX, capY, text.title, PALETTE[titleColour], { font: "title" });
-    const view = this.tileView(root, "update");
-    const faces = buttonFaces(this, true, button, "primary");
-    view.container.add(faces);
-    const centreX = button.x + button.width / 2;
-    const label = this.text(
-      view.container,
-      centreX,
-      capY,
+    root.add(addDim(this, HOME_REGION));
+    addModalCard(this, root, panel, text.title, { pressed: this.closePressed() });
+    const control = addMenuButton(
+      this,
+      button,
       text.button,
-      PALETTE[BUTTON_COLOURS.primary.label],
-      { font: "title", originX: 0.5 },
+      { available: true, primary: true },
+      root,
     );
-    view.iconButton = {
-      setPressed(pressed) {
-        faces[0]?.setVisible(!pressed);
-        faces[1]?.setVisible(pressed);
-        placePixelText(label, centreX, capY + (pressed ? BUTTON_PRESS_PX : 0));
-      },
-    };
-    view.iconButton.setPressed(false);
+    control.setPressed(this.updatePressed());
   }
 
   // The Pet shop on the yard's right lot: ui-pet-shop, its front sinking while pressed, with

@@ -3,6 +3,7 @@ import { type FontMetrics } from "@andornaut/game-kit/text/bitmapFont";
 
 import { SCREEN_CONFIG } from "../data/screen";
 import { barTitleRoom } from "../ui/barTitle";
+import { BUTTON_SIZE } from "../ui/buttonGeometry";
 import { closeControl } from "../ui/closeControl";
 import { helpCapDy } from "../ui/labelHelpGap";
 import { overlayRegion } from "./homeBar";
@@ -13,11 +14,11 @@ import type { ConfirmChoice } from "./purchaseConfirm";
 // on the screen with its title, the item's picture in a well, the price and the bank it
 // would leave centred under it, the bank's capitals LABEL_HELP_GAP clear rows under the title
 // font's lowest ink (confirmLeftCapTop), and Cancel then Buy along its bottom, each 44 tall and
-// 132 wide, with 12 between them and at the card's sides.
+// 128 wide, with 12 between them and equal margins at the card's sides.
 const CARD = HOME_LAYOUT.card;
 const WIDTH = CARD.width;
 const HEIGHT = 220;
-const BUTTON = { gap: 12, height: 44, width: 132 } as const;
+const BUTTON = { ...BUTTON_SIZE.compact, gap: BUTTON_SIZE.pairGap } as const;
 const card: Rect = {
   height: HEIGHT,
   width: WIDTH,
@@ -36,7 +37,7 @@ const buttonsY = card.y + HEIGHT - BUTTON.gap - BUTTON.height;
 const button = (i: number): Rect => ({
   height: BUTTON.height,
   width: BUTTON.width,
-  x: card.x + BUTTON.gap + i * (BUTTON.width + BUTTON.gap),
+  x: centreX - BUTTON.width - BUTTON.gap / 2 + i * (BUTTON.width + BUTTON.gap),
   y: buttonsY,
 });
 

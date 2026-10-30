@@ -17,8 +17,8 @@ const RIBBON = { x: 144, y: 102 };
 export const END_LAYOUT = {
   badges: { height: 92, width: 344, x: 8, y: 419 },
   breakdown: { amountRight: 196, label: 40, pitch: 18, top: PANEL.y + 42 },
-  // Back to title takes Start walk's rect on the home screen.
-  button: HOME_LAYOUT.startButton,
+  // The wide return button stays below the badge strip.
+  button: { ...HOME_LAYOUT.startButton, y: 514 },
   // And Start walk's label, at its size and on its caps.
   buttonLabel: HOME_LAYOUT.startLabel,
   logo: { x: 107, y: 2 },
