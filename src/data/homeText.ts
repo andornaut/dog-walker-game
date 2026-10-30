@@ -110,7 +110,7 @@ export const HOME_TEXT = {
   },
   slotBought: "{slot} is open.",
   slotSign: "Walk more dogs!",
-  startLoading: "Grabbing leashes...",
+  startLoading: "Leashing up...",
   startWalk: "Start walk",
   unsaved: "Progress won't be saved.",
   update: {
