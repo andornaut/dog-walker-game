@@ -322,6 +322,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   rollerblader: {
+    contact: { effects: [{ debuff: "zoomies", kind: "debuff" }] },
     movement: { factor: 2.0, kind: "inLane" },
     name: "Rollerblader",
     shape: { lanes: 1, rows: 1 },
@@ -354,6 +355,7 @@ export const MINOR_OBSTACLES = {
     zones: ["distilleryDistrict"],
   },
   signSpinner: {
+    contact: { effects: [{ debuff: "zoomies", kind: "debuff" }] },
     movement: { hops: { max: 4, min: 2 }, kind: "bounce", pauseSeconds: 0.6 },
     name: "Sign spinner",
     onFoot: true,

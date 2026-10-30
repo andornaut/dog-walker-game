@@ -255,7 +255,7 @@ export const ENCOUNTERS = {
       kind: "contact",
     },
     shape: { lanes: 2, rows: 1 },
-    zones: ["kensingtonMarket", "yongeStreet"],
+    zones: ["kensingtonMarket", "distilleryDistrict", "yongeStreet"],
   },
   puddle: {
     kind: "obstacle",
@@ -335,7 +335,7 @@ export const ENCOUNTERS = {
         },
         {
           art: "card-thief-give-chase",
-          effects: [{ debuff: "zoomies", kind: "debuff" }],
+          effects: [{ amount: -1, kind: "hearts", target: { kind: "lead" } }],
           id: "giveChase",
           name: "Dogs give chase",
         },
@@ -372,6 +372,6 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 2, rows: 1 },
-    zones: ["theBeaches", "distilleryDistrict"],
+    zones: ["theBeaches"],
   },
 } as const satisfies Record<EncounterId, Encounter>;

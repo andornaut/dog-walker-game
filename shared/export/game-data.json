@@ -335,7 +335,7 @@
         "id": "thief",
         "kind": "encounter"
       },
-      "text": "Zoomies: drifts for 40s",
+      "text": "−1♥ to the lead dog's owner",
       "title": "Thief"
     },
     {
@@ -1303,6 +1303,7 @@
       },
       "zones": [
         "kensingtonMarket",
+        "distilleryDistrict",
         "yongeStreet"
       ],
       "spriteKey": "pothole"
@@ -1461,8 +1462,11 @@
             "art": "card-thief-give-chase",
             "effects": [
               {
-                "debuff": "zoomies",
-                "kind": "debuff"
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "lead"
+                }
               }
             ],
             "id": "giveChase",
@@ -1529,8 +1533,7 @@
         "rows": 1
       },
       "zones": [
-        "theBeaches",
-        "distilleryDistrict"
+        "theBeaches"
       ],
       "spriteKey": "wedding-photo-shoot"
     }
@@ -1624,7 +1627,7 @@
     },
     {
       "art": "cards",
-      "body": "Skunks, thieves, dogs and more open cards. Each option costs cash, hearts or a debuff, and at least one is free of cash. Puddles and potholes make the pack Muddy. Debuffs wear off in time. Hold anything for details.",
+      "body": "Skunks, thieves, dogs and more open cards. Each option costs cash, hearts or a debuff, and at least one is free of cash. Puddles and a few others give a debuff, not a bump. Debuffs wear off in time. Hold anything for details.",
       "title": "Some obstacles bring cards"
     },
     {
@@ -2546,6 +2549,14 @@
     },
     {
       "id": "rollerblader",
+      "contact": {
+        "effects": [
+          {
+            "debuff": "zoomies",
+            "kind": "debuff"
+          }
+        ]
+      },
       "movement": {
         "factor": 2,
         "kind": "inLane"
@@ -2663,6 +2674,14 @@
     },
     {
       "id": "signSpinner",
+      "contact": {
+        "effects": [
+          {
+            "debuff": "zoomies",
+            "kind": "debuff"
+          }
+        ]
+      },
       "movement": {
         "hops": {
           "max": 4,
@@ -3572,8 +3591,8 @@
           "droppedIceCream": 0,
           "escapedCapybara": 0,
           "greenBinSpill": 0,
-          "otherDog": 1.1,
-          "porchCat": 1,
+          "otherDog": 0,
+          "porchCat": 2.1,
           "pothole": 0,
           "puddle": 1,
           "skunk": 1.8,
@@ -3691,7 +3710,7 @@
         },
         "obstacles": {
           "bigScreenPromo": 0,
-          "cheeseCrates": 1,
+          "cheeseCrates": 2.8,
           "droppedIceCream": 0,
           "escapedCapybara": 0,
           "greenBinSpill": 1,
@@ -3699,7 +3718,7 @@
           "porchCat": 0,
           "pothole": 1,
           "puddle": 0,
-          "skunk": 1.8,
+          "skunk": 0,
           "squirrel": 1,
           "thief": 2.2,
           "weddingPhotoShoot": 0
@@ -3815,17 +3834,17 @@
         "obstacles": {
           "bigScreenPromo": 0,
           "cheeseCrates": 0,
-          "droppedIceCream": 1,
+          "droppedIceCream": 1.9,
           "escapedCapybara": 0,
           "greenBinSpill": 0,
           "otherDog": 0,
           "porchCat": 0,
           "pothole": 0,
           "puddle": 3,
-          "skunk": 1.8,
+          "skunk": 0,
           "squirrel": 1,
           "thief": 1.1,
-          "weddingPhotoShoot": 1.5
+          "weddingPhotoShoot": 2.4
         }
       },
       "keys": {
@@ -3937,18 +3956,18 @@
         },
         "obstacles": {
           "bigScreenPromo": 0,
-          "cheeseCrates": 1.1,
+          "cheeseCrates": 3.1,
           "droppedIceCream": 0,
           "escapedCapybara": 0,
           "greenBinSpill": 0,
           "otherDog": 1.1,
           "porchCat": 0,
-          "pothole": 0,
+          "pothole": 1,
           "puddle": 0,
           "skunk": 0,
           "squirrel": 1,
           "thief": 1.1,
-          "weddingPhotoShoot": 2
+          "weddingPhotoShoot": 0
         }
       },
       "keys": {
@@ -4038,7 +4057,7 @@
           "sandcastle": 0,
           "sandwichBoard": 6,
           "scooter": 5,
-          "seagull": 0,
+          "seagull": 6,
           "segwayTourRider": 0,
           "signSpinner": 2,
           "stiltWalker": 0,
@@ -4059,7 +4078,7 @@
           "volleyballPlayer": 0
         },
         "obstacles": {
-          "bigScreenPromo": 2,
+          "bigScreenPromo": 3.1,
           "cheeseCrates": 0,
           "droppedIceCream": 0,
           "escapedCapybara": 0,
@@ -4068,7 +4087,7 @@
           "porchCat": 0,
           "pothole": 1,
           "puddle": 0,
-          "skunk": 1.1,
+          "skunk": 0,
           "squirrel": 1,
           "thief": 1.1,
           "weddingPhotoShoot": 0
