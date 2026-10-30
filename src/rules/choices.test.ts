@@ -240,18 +240,18 @@ describe("applyInstantEncounter", () => {
 });
 
 describe("chooseOption", () => {
-  // Raincoats keep only a puddle's Muddy off: the Escaped capybara's Help the keeper muddies the pack
+  // Raincoats keep only a puddle's Muddy off: the Green bin spill's Wade through muddies the pack
   // with them or without.
   it.each([{ raincoats: false }, { raincoats: true }])(
-    "muddies the pack helping the escaped capybara's keeper, with Raincoats: $raincoats",
+    "muddies the pack wading through the green bin spill, with Raincoats: $raincoats",
     ({ raincoats }) => {
       const coats = {
         encounter: "puddle",
         source: { kind: "upgrade", upgrade: "raincoats" },
       } as const;
       const state = testState({ kilo: 5 }, raincoats ? { immunities: [coats] } : {});
-      const help = optionWith("escapedCapybara", "debuff");
-      const { state: after } = choose(state, encounter("escapedCapybara", ["kilo"]), help);
+      const wade = optionWith("greenBinSpill", "debuff");
+      const { state: after } = choose(state, encounter("greenBinSpill", ["kilo"]), wade);
       expect(after.debuffs.map(({ debuff }) => debuff)).toEqual(["muddy"]);
     },
   );

@@ -90,7 +90,9 @@ const CASES: readonly Case[] = [
     meeting: { dogs: [SMALL_DOG], draw: 0 },
     name: "a dodged bump",
   },
-  ...(["frisbeeDog", "seagull", "signSpinner", "stiltWalker"] as const).map((id): Case => ({
+  ...(
+    ["barrelStack", "busker", "frisbeeDog", "seagull", "signSpinner", "stiltWalker"] as const
+  ).map((id): Case => ({
     cue: "bump",
     item: atPack(id),
     meeting: {},

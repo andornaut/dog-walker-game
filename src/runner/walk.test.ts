@@ -945,7 +945,7 @@ describe("stepWalk", () => {
     source: RAINCOATS,
   }));
 
-  // Raincoats keep every contact obstacle's Muddy off; the Escaped capybara's Help the keeper muddies the
+  // Raincoats keep every contact obstacle's Muddy off; the Green bin spill's Wade through muddies the
   // pack anyway (chooseOption). Without them, the next test muddies the pack.
   it.each(CONTACTS)("keeps a %s's Muddy off with Raincoats", (encounter) => {
     const walk = walkWith(["kilo"], [atPack(encounter)]);
@@ -983,6 +983,8 @@ describe("stepWalk", () => {
   // Every minor obstacle with contact, with the debuff it starts. It is met as a puddle is, its
   // debuff in place of Muddy.
   const MINOR_CONTACTS = [
+    { debuff: "stinky", obstacle: "barrelStack" },
+    { debuff: "spotlight", obstacle: "busker" },
     { debuff: "zoomies", obstacle: "frisbeeDog" },
     { debuff: "stinky", obstacle: "seagull" },
     { debuff: "zoomies", obstacle: "signSpinner" },
