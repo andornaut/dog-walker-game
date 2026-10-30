@@ -2,15 +2,16 @@
 """Draw the choice card frame and compose the card illustrations.
 
 - card-frame: a 112x153 sprite, one frame per card type (tags encounter for an
-  obstacle's card, route for a fork's path cards). The game draws the title
-  in the band, the effect text in the body and the cost in the badge. Layout,
-  in card pixels:
-    band 2..12 (title), art window 17,15 to 93,72 (illustration at 18,16, 75x56), centred
+  obstacle's card, route for a fork's path cards; the two frames are alike).
+  The game draws the title centred over the art window with the close X at the
+  top right, the effect text in the body and the cost in the badge. Layout, in
+  card pixels:
+    title rows 2..12, art window 17,15 to 93,72 (illustration at 18,16, 75x56), centred
     with cream face either side,
     body 6..105 x 76..130, badge spot 20,134, 71x13 (plain face; card-cost goes there on a paid option).
 - card-frame-large: a 166x280 sprite with the same tags, for the tap-to-enlarge
   view: the 83x140 layout (art window 3,15, body 6..76 x 76..117, badge spot 6,121)
-  doubled with 1px detail. Band 4..24 (title line from row 9), art window 6,30,
+  doubled with 1px detail. Title rows 4..24, art window 6,30,
   154x116 (illustration at 2x at 8,32), body 12..153 x 152..233, badge spot 12,242,
   142x26.
 - card-cost: a 71x13 image, the cost plaque laid over the badge (at 2x on the
@@ -59,9 +60,8 @@ ART_X, ART_Y = (CW - AW) // 2, 16
 BADGE_X, BADGE_Y = (CW - 71) // 2, 134
 # card-frame-large keeps the 83x140 layout doubled.
 LBW, LBH = 83, 140
-# Band colours hold white labels at 7:1 or more. The game draws encounter for an obstacle and route for a
-# fork.
-BANDS = {"encounter": ("dred", "plum"), "route": ("purple", "plum")}
+# The frame's tags: the game draws encounter for an obstacle and route for a fork.
+KINDS = ("encounter", "route")
 # A card's ground keeps only the road strip's colours that cover this share of its scrap: the paving and
 # its joints.
 GROUND_KEEP = 0.04
@@ -70,14 +70,11 @@ GROUND_KEEP = 0.04
 # ---------- the frame ----------
 
 def card_frame(kind):
-    """ui.py's chrome around the card: the ink and plum lines, the cream face with its tan lip,
-    the band in the card type's colour over its shade line and a recessed art window (an ink line
-    over its top in shadow, plum on the other sides). The badge spot stays the cream face: the game
-    lays card-cost there only on an option that costs cash."""
+    """ui.py's chrome around the card: the ink and plum lines, the cream face with its tan lip, the
+    title's rows plain face, and a recessed art window (an ink line over its top in shadow, plum on the
+    other sides). The badge spot stays the cream face: the game lays card-cost there only on an option
+    that costs cash. Every kind is alike."""
     g = chrome(Grid(CW, CH), 0, 0, CW, CH)
-    band, band_sh = BANDS[kind]
-    g.rect(2, 2, CW - 4, 11, band)
-    g.rect(2, 12, CW - 4, 1, band_sh)
     # recessed art window
     g.rect(ART_X - 1, ART_Y - 1, AW + 2, AH + 2, "plum")
     g.rect(ART_X - 1, ART_Y - 1, AW + 2, 1, "ink")
@@ -93,13 +90,10 @@ def card_frame_large(kind):
     illustration shows at 2x and the body has room for the modifiers behind the numbers. The
     chrome's lines and lip are 2px."""
     g = Grid(LW, LH)
-    band, band_sh = BANDS[kind]
     small = chrome(Grid(LBW, LBH), 0, 0, LBW, LBH).px
     for y in range(LH):
         for x in range(LW):
             g.px[y][x] = small[y // 2][x // 2]
-    g.rect(4, 4, LW - 8, 21, band)
-    g.rect(4, 23, LW - 8, 2, band_sh)
     # recessed art window, the illustration at 2x
     g.rect(6, 30, 2 * AW + 4, 2 * AH + 4, "plum")
     g.rect(6, 30, 2 * AW + 4, 2, "ink")
@@ -1224,8 +1218,8 @@ def card_kind(key):
 
 
 def frame_sprite():
-    yield "card-frame", [(kind, [card_frame(kind).outlined(False)], 1000) for kind in BANDS]
-    yield "card-frame-large", [(kind, [card_frame_large(kind).outlined(False)], 1000) for kind in BANDS]
+    yield "card-frame", [(kind, [card_frame(kind).outlined(False)], 1000) for kind in KINDS]
+    yield "card-frame-large", [(kind, [card_frame_large(kind).outlined(False)], 1000) for kind in KINDS]
 
 
 def mock_card(kind, key, large=False):
