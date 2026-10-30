@@ -29,7 +29,7 @@ function headHomeLoss(data: Pick<GameData, "tuning">, run: RunState): Cents {
   return pay.reduce((sum, change) => addCents(sum, change.amount), lost);
 }
 
-// The pause menu's note: how much of the cash Return home keeps, or that it keeps all of it.
+// The pause menu's note: how much of the cash End walk keeps, or that it keeps all of it.
 export function pauseNote(data: Pick<GameData, "menuText">, run: RunState): string {
   const fields = MENU_TEXT_FIELDS.pause;
   const words = data.menuText.pause;

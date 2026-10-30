@@ -28,7 +28,7 @@ interface MenuFlowHost {
   homeNote: () => readonly HomeNoteLine[];
   // Whether the walk is over or not yet started, when the menu stays shut.
   over: () => boolean;
-  // What the pause menu's note says Return home keeps.
+  // What the pause menu's note says End walk keeps.
   pauseNote: () => string;
 }
 
@@ -103,7 +103,7 @@ export class MenuFlow {
     this.cardView = view;
   }
 
-  // A fork card's Return home button asks the Home question over it.
+  // A fork card's End walk button asks the Home question over it.
   showCard(view: CardView, onChoose: (choice: Choice) => void): void {
     soundboardOf(this.scene).play("cardOpen");
     const data: CardSceneData = {

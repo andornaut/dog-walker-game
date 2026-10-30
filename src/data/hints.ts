@@ -20,7 +20,7 @@ export const HINTS = {
     trigger: { kind: "fork" },
   },
   homeButton: {
-    text: "Return home anytime from the pause menu.",
+    text: "End the walk anytime from the pause menu.",
     trigger: { kind: "homeButton" },
   },
   luckyFind: {

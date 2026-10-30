@@ -141,10 +141,10 @@ describe("endTargetAt", () => {
   it.each<[string, boolean, number, number, EndTarget | undefined]>([
     ["the first badge", false, 20, 420, { badge: 0 }],
     ["the second badge", false, 150, 459, { badge: 1 }],
-    ["Head home", false, 60, 510, "home"],
+    ["Back to title", false, 60, 510, "home"],
     ["the panel's title, above the badges", false, 60, 399, undefined],
     ["a badge, with a card open", true, 20, 420, "dismiss"],
-    ["Head home, with a card open", true, 60, 510, "dismiss"],
+    ["Back to title, with a card open", true, 60, 510, "dismiss"],
     ["bare screen, with a card open", true, 5, 5, "dismiss"],
   ])("a press on %s (card open: %s) lands on its target", (_, cardOpen, x, y, target) => {
     expect(endTargetAt({ badgeHits, button, cardOpen }, x, y)).toEqual(target);

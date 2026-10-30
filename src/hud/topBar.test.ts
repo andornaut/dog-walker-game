@@ -104,7 +104,7 @@ describe("the walk bar in each pause state", () => {
       ],
       ["in the menu over a card", { ...CARD, menu: "open" }, menu],
       ["in the menu over the hit stop", { ...HIT_STOP, menu: "open" }, menu],
-      ["asking whether to return home over a card", { ...CARD, menu: "confirmHome" }, menu],
+      ["asking the Home question over a card", { ...CARD, menu: "confirmHome" }, menu],
       [
         "under an explanation's detail card over the menu",
         { ...HOLD, menu: "open" },

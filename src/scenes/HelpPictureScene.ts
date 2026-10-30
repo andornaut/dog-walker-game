@@ -125,7 +125,7 @@ export class HelpPictureScene extends Scene {
     if (picture.card !== null) {
       const data: CardSceneData = {
         onChoose: () => undefined,
-        // Left out: the fork picture's frame ends partway down the Return home button.
+        // Left out: the fork picture's frame ends partway down the End walk button.
         onHeadHome: null,
         picture: view,
         view: picture.card,

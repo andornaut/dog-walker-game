@@ -121,7 +121,7 @@ function amountColour(amount: number): number {
 // The walk's result, already banked: what made up the total, zones walked, the bank, a ribbon
 // for a new best walk, and a closing line from each owner. Badges the run earned burst in
 // under the panel while the owners still walking cheer, and a tap or a hold on one opens its
-// card, as on the Logbook. Head home returns to the start screen. The screen takes no input
+// card, as on the Logbook. Back to title returns to the start screen. The screen takes no input
 // until seconds.screenTapGuard after its first frame, so a steering tap never answers it.
 export class EndScene extends Scene {
   // The badges just earned, in their slots' order.
@@ -341,7 +341,7 @@ export class EndScene extends Scene {
       () => (this.card === undefined ? undefined : screenArea([SCREEN_LAYOUT.screen])),
       () => this.closeCard(),
     );
-    // Head home is the page's way out, so Escape and back take it too, once any open card has
+    // Back to title is the page's way out, so Escape and back take it too, once any open card has
     // closed. P does not: a player pausing as the walk ends would skip the page. A key's
     // auto-repeat does nothing.
     const back = () => (this.card === undefined ? goHome() : this.closeCard());

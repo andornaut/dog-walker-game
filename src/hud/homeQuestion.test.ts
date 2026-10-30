@@ -71,14 +71,14 @@ describe("pauseNote", () => {
   it.each([
     ["with nothing earned since the last zone's end", zoneEnd],
     ["after card costs spent below the last zone's end money", zoneEnd - tip],
-  ])("says Return home keeps all the cash %s", (_name, money) => {
+  ])("says End walk keeps all the cash %s", (_name, money) => {
     const run = testState({ ginger: 5 }, holding(money));
     expect(pauseNote(gameData, run)).toBe(
       fillNames(words.noteAll, { cash: dollarText(cents(money)) }),
     );
   });
 
-  it("says how much of the cash Return home keeps once the zone has earned some", () => {
+  it("says how much of the cash End walk keeps once the zone has earned some", () => {
     const run = testState({ ginger: 5 }, holding(zoneEnd + tip));
     expect(pauseNote(gameData, run)).toBe(
       fillNames(words.note, { cash: dollarText(run.money), kept: dollarText(zoneEnd) }),

@@ -56,7 +56,7 @@ export const HELP_PAGES = [
     body:
       "Walk {walkLength} neighbourhoods of {world}; at a fork, most paths bring an upgrade. " +
       "Bring every dog home for the {walkBonus} Walk bonus. " +
-      "Heading home, or losing every dog, keeps only " +
+      "Ending the walk, or losing every dog, keeps only " +
       "what each finished neighbourhood earned.",
     title: "Neighbourhoods",
   },

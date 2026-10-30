@@ -83,7 +83,7 @@ const WALK = SCREEN.walkView;
 const bottom = (rect: Rect) => rect.y + rect.height;
 const right = (rect: Rect) => rect.x + rect.width;
 
-// Each count of cards, and each card in it, with the fork's Return home under the row.
+// Each count of cards, and each card in it, with the fork's End walk under the row.
 const ROWS = cardRows(MAX_CARD_OPTIONS, WALK);
 const SMALL_CARDS = ROWS.flatMap((row) => row.map((card) => ({ card, row })));
 const HEAD_HOME = forkHomeRect(itemAt(itemAt(ROWS, 0), 0), WALK.x + WALK.width / 2);
@@ -105,7 +105,7 @@ describe("the card row's block", () => {
     },
   );
 
-  it("puts Return home under the charms' rows, inside the walk view", () => {
+  it("puts End walk under the charms' rows, inside the walk view", () => {
     const cards = itemAt(itemAt(ROWS, 0), 0);
     expect(HEAD_HOME.y).toBe(bottom(cards) + CARD_CHARMS_HEIGHT + CARD_LAYOUT.forkHome.gap);
     expect(inside(HEAD_HOME, WALK)).toBe(true);
@@ -150,8 +150,8 @@ describe("a card's charms", () => {
   });
 
   const cases = Array.from({ length: CHARM.card.most }, (_, i) => i + 1).flatMap((count) => [
-    // The row's cards, Skip among them, and Return home stay in view beside a small card's charms;
-    // the enlarged card hides them.
+    // The row's cards, Skip among them, and End walk stay in view beside a small card's
+    // charms; the enlarged card hides them.
     ...SMALL_CARDS.map(({ card, row }) => ({
       card,
       controls: [HEAD_HOME],

@@ -24,7 +24,7 @@ export const MENU_TEXT = {
       tips: "Tips",
     },
     firedYou: "{owner} fired you!",
-    headHome: "Head home",
+    headHome: "Back to title",
     newBest: "New best!",
     titles: {
       finished: "What a walk!",
@@ -41,10 +41,10 @@ export const MENU_TEXT = {
     previous: "Previous",
   },
   pause: {
-    headHome: "Return home",
+    headHome: "End walk",
     help: "Help",
-    note: "Heading home keeps {kept} of {cash}.",
-    noteAll: "Heading home keeps all {cash}.",
+    note: "Ending now keeps {kept} of {cash}.",
+    noteAll: "Ending now keeps all {cash}.",
     resume: "Resume",
     settings: "Settings",
     title: "Paused",

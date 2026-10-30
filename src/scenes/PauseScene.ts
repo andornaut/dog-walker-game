@@ -28,9 +28,9 @@ export interface PauseOverlay {
   readonly open: "help" | "settings";
 }
 
-// menu is the pause menu, its note saying what Return home keeps; homeQuestion asks whether to
-// return home, for the pause menu's and a fork card's Return home, its note saying what going
-// home gives up.
+// menu is the pause menu, its note saying what End walk keeps; homeQuestion asks whether to
+// end the walk, for the pause menu's and a fork card's End walk, its note saying what
+// going home gives up.
 export type PauseSceneData = {
   onHeadHome: () => void;
   onResume: () => void;
@@ -45,8 +45,8 @@ const NOTE_COLOURS: Readonly<Record<HomeNoteLine["kind"], number>> = {
   zonesLeft: PALETTE.plum,
 };
 
-// The pause menu over the dimmed band and road: resume, help, settings or return home; or the Home
-// button's question, keep walking or return home. The HUD keeps running under it, so the top
+// The pause menu over the dimmed band and road: resume, help, settings or end the walk; or the
+// Home button's question, keep walking or end the walk. The HUD keeps running under it, so the top
 // bar's buttons and their keys (P, Escape and M) stay with it, and a hold on a walk-bar well or
 // a dog card opens its explanation over the panel, with this scene paused until it closes
 // (MenuFlow.coverOverlay).
