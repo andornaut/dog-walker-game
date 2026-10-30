@@ -20,7 +20,7 @@ import { noteKeyPress } from "./input/keyNumbers";
 import { lostTouches } from "./input/touches";
 import {
   noteWalkStarted,
-  pageFrameTurn,
+  pageFrameWatch,
   setOnHomeScreen,
   setupPhoneApp,
   storagePersistence,
@@ -76,12 +76,6 @@ const GAME_PARENT_ID = "game";
 // Boot runs first and starts the start screen. The canvas clears to the page's ink, so launch
 // shows no rectangle before the loading screen's art; the walk fills its own ink.
 function bootGame(): Game {
-  // The dev bar shows before the game measures #game: Phaser sizes the canvas as it boots and
-  // can miss a change to #game's height made just after, leaving the canvas clipped.
-  const devPanel = devToolsOn() ? document.getElementById("dev-panel") : null;
-  if (devPanel !== null) {
-    devPanel.hidden = false;
-  }
   const game = new Game({
     backgroundColor: "#181425",
     height: SCREEN_CONFIG.height,
@@ -129,17 +123,17 @@ function bootGame(): Game {
     game.sound.pauseAll();
     stopResuming(game);
   });
-  // Phaser fits, places and reads pointers through the page frame's turn, and refits as #game
-  // changes size.
+  // Phaser fits, places and reads pointers through the page frame's turn, and refits as #game,
+  // the visible area or the turn changes, the dev bar showing under #game after boot included.
   const parent = document.getElementById(GAME_PARENT_ID);
   if (parent !== null) {
-    followFrameTurn(game, parent, pageFrameTurn, SCREEN_CONFIG);
+    followFrameTurn(game, parent, pageFrameWatch(), SCREEN_CONFIG);
   }
   // Menus draw at most about 60 frames a second; a walk (RunScene) draws every frame.
   capFrameRate(MENU_FPS, () => game.scene.isActive(SCENE_KEYS.run), game);
   // The installed app has no dev panel, so its #dev-panel stays hidden and no cheat is set.
   if (devToolsOn()) {
-    mountDevPanel(devPanelHost(game), devPanel);
+    mountDevPanel(devPanelHost(game), document.getElementById("dev-panel"));
   }
 
   // Captured before the scenes see it, so the key that opens a menu already shows its numbers.

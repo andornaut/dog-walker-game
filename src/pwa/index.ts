@@ -57,7 +57,6 @@ export function browserSoundFormat(): SoundFormat | undefined {
 let leaveOffered = false;
 let installFlow: InstallFlow | undefined;
 let installNudge: InstallNudge | undefined;
-let frameTurn: FrameTurnWatch | undefined;
 let persistence: Promise<StoragePersistence> = Promise.resolve("unsupported");
 let screenWakeLock: ScreenWakeLock | undefined;
 let updateFlow: UpdateFlow | undefined;
@@ -123,7 +122,7 @@ export function setupPhoneApp(): void {
   // On a touch screen in landscape the page frame turns onto its side, so the portrait game
   // stays upright for the device (the kit's frameTurnPortraitGame.css, imported by main.ts).
   // Where the browser allows it, the installed app holds the screen in portrait instead.
-  frameTurn = watchFrameTurn(window, "portrait");
+  pageFrameWatch();
   lockGameOrientation(screen, "portrait");
   // Read before the guard pushes any entry. An installed app that cannot close its window keeps
   // its own back, so the game never asks Quit? there.
@@ -164,14 +163,22 @@ export function exitShown(): boolean {
   return leaveOffered;
 }
 
+let frameWatch: FrameTurnWatch | undefined;
+
+// The page frame's turn, watched from its first use (setupPhoneApp) for the page's life.
+export function pageFrameWatch(): FrameTurnWatch {
+  frameWatch ??= watchFrameTurn(window, "portrait");
+  return frameWatch;
+}
+
 // The page frame's turn now: 0 upright, or -90 or 90 on a touch screen in landscape.
 export function pageFrameTurn(): FrameTurn {
-  return frameTurn?.turn() ?? 0;
+  return pageFrameWatch().turn();
 }
 
 // Calls listener on each change of the page frame's turn, until the returned function is called.
 export function onFrameTurnChange(listener: (turn: FrameTurn) => void): () => void {
-  return frameTurn?.onChange(listener) ?? (() => undefined);
+  return pageFrameWatch().onChange(listener);
 }
 
 // Keep the screen on while the game is visible.

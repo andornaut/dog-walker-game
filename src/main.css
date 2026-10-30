@@ -7,10 +7,11 @@
   --dev-bar-height: 24px;
 }
 
+/* The kit's frameTurnPortraitGame.css sizes the page: html no taller than the visible area
+   (--page-height), and body filling it, or turned onto its side across it. */
 html,
 body {
   margin: 0;
-  height: 100%;
   overflow: hidden;
   /* Ink around the game, set apart from the top bars' plum. The manifest and the theme-color
      meta match it (src/pwa/pageColours.test.ts). */
