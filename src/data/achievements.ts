@@ -72,9 +72,16 @@ export const ACHIEVEMENTS = [
     shortGoal: "10 calm walks in a row",
   },
   {
+    badgeLine: "Rent's covered this month.",
+    conditions: [{ dollars: 400, kind: "earnings" }],
+    goal: "Earn $400 in one walk",
+    id: "payday",
+    name: "Payday",
+  },
+  {
     badgeLine: "Treats are on you.",
-    conditions: [{ dollars: 450, kind: "earnings" }],
-    goal: "Earn $450 in one walk",
+    conditions: [{ dollars: 500, kind: "earnings" }],
+    goal: "Earn $500 in one walk",
     id: "bigPayday",
     name: "Big Payday",
   },
