@@ -46,8 +46,10 @@ reads on them.
   Cabbagetown's dusk bands (DUSK_SKY) fill the sky twice: behind the house down
   to its lawn, and behind the panel down to the far rooftops and towers in
   mauve (y 450). Then the street's bay-and-gables and canopy trees (from y
-  370), iron fences, the yards, the sidewalk with two heritage lamps and
-  Kensington Market's brick road under the button (48,512 264x44). The houses,
+  370), iron fences, the yards, the sidewalk (rows 491 to 505) with two
+  heritage lamps, the curb, and from END_ROAD (511) Kensington Market's brick
+  road under the button (4,514 352x44), which bobs 1px up, so at least 2 rows of
+  road show above and below it. The houses,
   trees and fences stay within x 8 to 352, so beside the badges panel (8,416
   344x92) the margins show only sky, lawn and sidewalk.
 - screen-loading: a Toronto street at night, shown while the game loads, seen
@@ -750,6 +752,11 @@ NIGHT_SKY = ("navy", "purple", "mauve")
 # ---------- screen-end ----------
 
 END_STREET = 370  # top of the street strip on screen-end
+# The street strip's front yards, the lawn from its row 104; the sidewalk, curb and gutter's 20 rows follow, so
+# the road starts on screen row END_ROAD, 3 rows over the button's top (514) and 2 over its 1px bob
+END_YARD = 17
+END_WALK = 104 + END_YARD  # the strip's first sidewalk row
+END_ROAD = END_STREET + END_WALK + 20
 # Cabbagetown's dusk, top to horizon, as its backdrop: lilac over pink and peach to a gold glow.
 DUSK_SKY = ("lilac", "pink", "peach", "gold")
 END_CN = (306, 96, 4)  # the CN Tower's centre column, foot and mast tip on screen-end
@@ -851,19 +858,22 @@ def end():
     for cx, wall, roof, door in ((60, "brick", "shale", "forest"), (114, "cream", "slate", "ttc"),
                                  (246, "dbrick", "dslate", "navy"), (300, "brick", "shale", "ttc")):
         bd.bay_gable(strip, cx, 46, wall, roof, door, 104, trim="white", curtains="orange")
-    bd.ground(strip)
-    bd.flowers(strip, 40, 84, 110, ("orange", "yellow", "red"))
-    bd.flowers(strip, 226, 270, 112, ("orange", "yellow", "red"))
+    bd.ground(strip, yard=END_YARD)
+    bd.flowers(strip, 40, 84, END_WALK - 13, ("orange", "yellow", "red"))
+    bd.flowers(strip, 226, 270, END_WALK - 12, ("orange", "yellow", "red"))
     for x0, x1 in ((8, 52), (72, 106), (126, 236), (258, 292), (312, 352)):
-        bd.iron_fence(strip, 120, x0, x1)
+        bd.iron_fence(strip, END_WALK - 10, x0, x1)
     for x in (150, 210):
-        bd.gas_lamp(strip, x, 144)
+        bd.gas_lamp(strip, x, END_WALK + 14)
     cv.paste(strip.img, 0, END_STREET)
-    # Kensington Market's brick road, its top rows under the button. The tile's lane dashes (x 64k-1) fall
-    # under the button or off the screen's right edge, so none shows beside it.
+    # Kensington Market's brick road under the button, from the tile's row 5: its lane dashes (rows 0 to 2,
+    # 24 to 34 and 56 to 63, x 64k-1) then fall under the button or off the screen's right edge, and the road's
+    # rows above and below the button show none. The tile's columns 64 to 126 fill the right of the screen, so
+    # its dark left edge (columns 0 to 4) shows only at the screen's left edge.
     tile = sn.TILES[next(z for z, v in sn.ZONES.items() if v["art"] == "kensington-market")]
-    cv.img.paste(tile, (0, END_STREET + 150))
-    cv.img.paste(tile, (W - 63, END_STREET + 150))
+    tile = tile.crop((0, 5, tile.width, 5 + H - END_ROAD))
+    cv.img.paste(tile, (0, END_ROAD))
+    cv.img.paste(tile.crop((64, 0, 127, tile.height)), (W - 63, END_ROAD))
     return cv
 
 

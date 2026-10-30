@@ -188,15 +188,18 @@ def sun(cv, cx, cy, r, col, low=None):
                 cv.fill(cx + dx, cy + dy, 1, 1, col)
 
 
-def ground(cv, lawn="green"):
-    cv.fill(0, 104, W, 26, lawn)
+def ground(cv, lawn="green", yard=26):
+    """The lawn yard rows deep from row 104, then the sidewalk (15 rows, slabs every 24px), the curb and
+    the gutter: 24 rows in all."""
+    cv.fill(0, 104, W, yard, lawn)
     for i in range(70):
-        cv.fill((i * 37) % W, 106 + (i * 11) % 22, 1, 2, dk(lawn))
-    cv.fill(0, 130, W, 15, "lgrey")
+        cv.fill((i * 37) % W, 106 + (i * 11) % (yard - 4), 1, 2, dk(lawn))
+    walk = 104 + yard
+    cv.fill(0, walk, W, 15, "lgrey")
     for x in range(0, W, 24):
-        cv.fill(x, 130, 1, 15, "grey")
-    cv.fill(0, 145, W, 3, "grey")
-    cv.fill(0, 148, W, 2, "slate")
+        cv.fill(x, walk, 1, 15, "grey")
+    cv.fill(0, walk + 15, W, 3, "grey")
+    cv.fill(0, walk + 18, W, 2, "slate")
 
 
 # A house's windows and door: the window frame's offset below the eaves, its width and height,
