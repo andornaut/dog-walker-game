@@ -81,7 +81,7 @@ export const ENCOUNTERS = {
       options: [
         {
           art: "card-dropped-ice-cream-lick",
-          effects: [{ debuff: "zoomies", kind: "debuff" }],
+          effects: [{ debuff: "muddy", kind: "debuff" }],
           id: "lick",
           name: "Let them lick it",
         },
@@ -335,7 +335,7 @@ export const ENCOUNTERS = {
         },
         {
           art: "card-thief-give-chase",
-          effects: [{ amount: -1, kind: "hearts", target: { kind: "lead" } }],
+          effects: [{ debuff: "zoomies", kind: "debuff" }],
           id: "giveChase",
           name: "Dogs give chase",
         },

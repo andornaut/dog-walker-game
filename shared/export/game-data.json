@@ -88,7 +88,7 @@
         "id": "droppedIceCream",
         "kind": "encounter"
       },
-      "text": "Zoomies: drifts for 40s",
+      "text": "Muddy: slower for 60s",
       "title": "Dropped ice cream"
     },
     {
@@ -335,7 +335,7 @@
         "id": "thief",
         "kind": "encounter"
       },
-      "text": "−1♥ to the lead dog's owner",
+      "text": "Zoomies: drifts for 40s",
       "title": "Thief"
     },
     {
@@ -963,7 +963,7 @@
             "art": "card-dropped-ice-cream-lick",
             "effects": [
               {
-                "debuff": "zoomies",
+                "debuff": "muddy",
                 "kind": "debuff"
               }
             ],
@@ -1462,11 +1462,8 @@
             "art": "card-thief-give-chase",
             "effects": [
               {
-                "amount": -1,
-                "kind": "hearts",
-                "target": {
-                  "kind": "lead"
-                }
+                "debuff": "zoomies",
+                "kind": "debuff"
               }
             ],
             "id": "giveChase",
@@ -3714,14 +3711,14 @@
           "cheeseCrates": 2.8,
           "droppedIceCream": 0,
           "escapedCapybara": 0,
-          "greenBinSpill": 1,
+          "greenBinSpill": 3.2,
           "otherDog": 1.1,
           "porchCat": 0,
           "pothole": 1,
           "puddle": 0,
           "skunk": 0,
           "squirrel": 1,
-          "thief": 2.2,
+          "thief": 0,
           "weddingPhotoShoot": 0
         }
       },
@@ -3961,14 +3958,14 @@
           "droppedIceCream": 0,
           "escapedCapybara": 0,
           "greenBinSpill": 0,
-          "otherDog": 1.1,
+          "otherDog": 0,
           "porchCat": 0,
           "pothole": 1,
           "puddle": 0,
           "skunk": 0,
           "squirrel": 1,
           "thief": 1.1,
-          "weddingPhotoShoot": 2
+          "weddingPhotoShoot": 3.1
         }
       },
       "keys": {
