@@ -60,13 +60,13 @@ Use the wide token for a screen or modal's main text action and the compact toke
 
 Start walk has 32px side margins, about 4px above and 6px below. Back to title keeps its approved `end.button.y` and existing bob; the end background is unchanged. Icon artwork stays centred in its target. The visible icon face and the hit target are separate rectangles.
 
-The start-screen section outline is one plum pixel. Keep the existing `ui-section` nine-slice caps: left/right 3px, top 24px, bottom 3px. Fill section backing to a 1px inset. Solid backing and lighter neutral headings use the approved treatment:
+The start-screen section outline is one plum pixel. Keep the existing `ui-section` nine-slice caps: left/right 3px, top 24px, bottom 3px. Fill section backing to a 1px inset. Solid backing and distinct neutral headings use the approved treatment:
 
 | Section | Backing         | Neutral heading  | Neutral title | Neutral note |
 | ------- | --------------- | ---------------- | ------------- | ------------ |
 | Dogs    | plum `#3e2731`  | purple `#68386c` | cream         | amber        |
 | Pocket  | blue `#124e89`  | sky `#0099db`    | ink           | ink          |
-| Walker  | brown `#b86f50` | tan `#e4a672`    | ink           | ink          |
+| Walker  | brown `#b86f50` | dbrown `#733e39` | cream         | amber        |
 
 A complete section has an amber heading and ink title/note. Dogs show their count even while empty. The empty Pocket uses its existing note, and is optional; Start walk requires a walker and at least one dog. Individual item cards retain their detailed borders and checkmarks. Ground outside them stays clean, without fabric, stitching or extra selected-dog lines.
 
