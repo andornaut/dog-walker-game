@@ -132,14 +132,18 @@ export class ZoneCelebrationScene extends Scene {
     atLineTop(addDisplayText(this, centreX, 0, text.subtitle, subtitle), version.subtitleY);
   }
 
-  // The walker's cheer at 2x, its frame's bottom centre on the feet line. A new walker hops in
-  // from past the right edge, and fx-confetti bursts as they land. Reduced motion shows the
-  // cheer's first frame, in place.
+  // The walker's celebration at 2x, its frame's bottom centre on the feet line. Mr. B's welcome
+  // prefers his phone animation. A new walker hops in from past the right edge, and fx-confetti
+  // bursts as they land. Reduced motion shows the selected tag's first frame, in place.
   private addWalker(celebration: ZoneCelebration, reduced: boolean, feetY: number): void {
     const { centreX, runIn, walkerScale } = LAYOUT;
     const key = walkerSpriteKey(this, celebration.walker);
     const sprite = this.add.sprite(centreX, feetY, key).setOrigin(0.5, 1).setScale(walkerScale);
-    playFirstTag(sprite, key, ART.walkerTags, reduced);
+    const tags =
+      celebration.kind === "newWalker" && celebration.walker === "mrB"
+        ? ["phone", ...ART.walkerTags]
+        : ART.walkerTags;
+    playFirstTag(sprite, key, tags, reduced);
     if (reduced || celebration.kind === "zoneDone") {
       return;
     }
