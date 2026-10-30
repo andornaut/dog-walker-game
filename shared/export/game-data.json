@@ -2048,6 +2048,14 @@
     },
     {
       "id": "frisbeeDog",
+      "contact": {
+        "effects": [
+          {
+            "debuff": "zoomies",
+            "kind": "debuff"
+          }
+        ]
+      },
       "movement": {
         "kind": "dive",
         "slide": 0.4,
@@ -2612,6 +2620,14 @@
     },
     {
       "id": "seagull",
+      "contact": {
+        "effects": [
+          {
+            "debuff": "stinky",
+            "kind": "debuff"
+          }
+        ]
+      },
       "movement": {
         "kind": "dart",
         "stopShare": 0,
@@ -2668,6 +2684,14 @@
     },
     {
       "id": "stiltWalker",
+      "contact": {
+        "effects": [
+          {
+            "debuff": "spotlight",
+            "kind": "debuff"
+          }
+        ]
+      },
       "movement": {
         "kind": "sway",
         "pauseSeconds": 0.25,

@@ -4,7 +4,7 @@ import type { Scene } from "phaser";
 
 import { choiceCues, pullCues, stepCues } from "../../audio/stepCues";
 import { gameData } from "../../data";
-import type { DogId, HintId, HintTrigger } from "../../data/types";
+import type { DogId, EncounterId, HintId, HintTrigger } from "../../data/types";
 import {
   type BuffPop,
   heartPopDogs,
@@ -353,7 +353,7 @@ export class RunMoments {
           .forEach((sprite) => playDodge(this.scene, moment, sprite));
         continue;
       }
-      this.playBumpHit(bump, step, pack);
+      this.playBumpHit(bump.dog, bump.item, step, pack);
       this.addChanges(
         overPack(pack),
         [bump.change, bump.cash].flatMap((change) => (change === null ? [] : [change])),
@@ -364,22 +364,15 @@ export class RunMoments {
     this.spareTreatSpent(step.spareTreat, step.walk.run);
     // A contact obstacle, such as a puddle, plays its own hit sound, a splash at the touching
     // dog's feet, its edge flash and the bump's flash, with a plain obstacle's stop; the walker
-    // stumbles and every dog reacts and shakes off.
-    for (const { dog, encounter, outcome } of step.contacts) {
-      const still = this.deps.still();
-      const { kind } = gameData.encounters[encounter];
-      const feet = this.deps.pack.dogFeet(dog);
-      if (feet !== undefined) {
-        const moment = { depth: DEPTH.fx, holdMs: stopMs(step) };
-        playHitEffects(this.scene, moment, [splashEffect(still, feet)]);
+    // stumbles and every dog reacts and shakes off. A minor obstacle with contact plays its bump's
+    // cues instead (playBumpHit), as the splash, the shake-off and the edge flash strips are a
+    // contact obstacle's own; then each pops its effects' changes.
+    for (const { dog, item, outcome, source } of step.contacts) {
+      if (source.kind === "minor") {
+        this.playBumpHit(dog, { ...item, kind: source.obstacle }, step, pack);
+      } else {
+        this.playContactHit(dog, source.encounter, step);
       }
-      const { flash } = hitLook(kind, encounter);
-      if (flash !== null) {
-        const moment = { depth: DEPTH.popup, field: hitField(), still };
-        playEdgeFlash(this.scene, moment, flash);
-      }
-      this.flashBump({ encounter, kind: "encounter" });
-      this.deps.pack.stumble(still, DOG_REACTIONS.splash);
       this.addChanges(overPack(pack), outcomeChanges(outcome));
       this.afterOutcome(outcome);
     }
@@ -722,28 +715,46 @@ export class RunMoments {
 
   // A plain or moving hit's cues: its bump and debris over the struck dog, the dog reacting
   // and flashing white, the struck obstacle's motion, and the bump's flash.
-  private playBumpHit(bump: MinorBump, step: WalkStep, pack: Point): void {
+  private playBumpHit(dog: DogId, item: MinorBump["item"], step: WalkStep, pack: Point): void {
     const still = this.deps.still();
-    const { item } = bump;
     const hit = {
       kind: item.mover === undefined ? "plain" : "moving",
       obstacle: item.kind,
     } as const;
-    const top = this.deps.pack.dogPoint(bump.dog);
+    const top = this.deps.pack.dogPoint(dog);
     if (top !== undefined) {
       const moment = { depth: DEPTH.fx, holdMs: stopMs(step) };
       playHitEffects(this.scene, moment, hitEffects(still, { ...hit, top }));
     }
-    for (const sprite of this.deps.pack.sprites([bump.dog])) {
+    for (const sprite of this.deps.pack.sprites([dog])) {
       flashWhite(this.scene, sprite, whiteFlash(still));
     }
-    this.deps.pack.dogsReact([bump.dog], dogReaction(still, "hit"));
+    this.deps.pack.dogsReact([dog], dogReaction(still, "hit"));
     const body = this.deps.items.struckBody(item.id);
     if (body !== undefined) {
       const side = tipSide(body.sprite.x, pack.x);
       moveObstacle(this.scene, body, obstacleMotion(still, hit, side));
     }
     this.flashBump({ kind: "minor", look: minorLook(gameData, item.kind, item.skin) });
+  }
+
+  // A contact obstacle's cues: a splash at the touching dog's feet, its edge flash, the bump's
+  // flash, and the walker stumbling as every dog reacts and shakes off.
+  private playContactHit(dog: DogId, encounter: EncounterId, step: WalkStep): void {
+    const still = this.deps.still();
+    const { kind } = gameData.encounters[encounter];
+    const feet = this.deps.pack.dogFeet(dog);
+    if (feet !== undefined) {
+      const moment = { depth: DEPTH.fx, holdMs: stopMs(step) };
+      playHitEffects(this.scene, moment, [splashEffect(still, feet)]);
+    }
+    const { flash } = hitLook(kind, encounter);
+    if (flash !== null) {
+      const moment = { depth: DEPTH.popup, field: hitField(), still };
+      playEdgeFlash(this.scene, moment, flash);
+    }
+    this.flashBump({ encounter, kind: "encounter" });
+    this.deps.pack.stumble(still, DOG_REACTIONS.splash);
   }
 
   // A bump's border round the screen, flashed by the HUD in the bump's colour, and the road's

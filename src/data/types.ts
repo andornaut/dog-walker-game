@@ -526,6 +526,9 @@ export type Encounter = {
 // bumpHearts modifiers change it, and, while a debuff with bumpMoney such as Spotlight lasts and
 // there is cash, that cash too; the dog it lands on may dodge it.
 // The hit stops the road for seconds.minorHitStopSeconds.
+// One with contact is no bump: touching it applies its effects instead, as a contact obstacle
+// such as a puddle does (ContactResolution), with no dodge and no immunity. It counts as no bump,
+// in a zone or toward a bump badge, and stops the road as a bump does.
 // Each zone's weights set how often it appears there; one with zones appears only in those zones,
 // weighted in each and 0 in every other. One with a movement comes as a mover at the zone's
 // moverShare. One onFoot is a person or an animal, not a vehicle or a thing, which the
@@ -535,6 +538,7 @@ export type Encounter = {
 // spawn picks one of its zone's skins, evenly, and is drawn, named and flashed as that skin.
 export type MinorObstacle =
   | {
+      readonly contact?: MinorContact;
       readonly movement?: Movement;
       readonly name: string;
       readonly onFoot?: true;
@@ -543,11 +547,17 @@ export type MinorObstacle =
       readonly zones?: NeighbourhoodZones;
     }
   | {
+      readonly contact?: never;
       readonly movement?: never;
       readonly onFoot?: never;
       readonly shape: Shape;
       readonly skins: Readonly<Record<string, ObstacleSkin>>;
     };
+
+// What touching a minor obstacle with contact does: its effects, as a contact obstacle's.
+export interface MinorContact {
+  readonly effects: NonEmptyEffects;
+}
 
 // One look of a minor obstacle with skins: its name and the zones it appears in.
 export interface ObstacleSkin {

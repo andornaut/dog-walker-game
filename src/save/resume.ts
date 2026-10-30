@@ -150,6 +150,7 @@ function resumeSchema(data: ResumeData) {
     v.object({ encounter, kind: v.literal("encounter"), option: count }),
     v.object({ found: v.exactOptional(v.literal(true)), gear, kind: v.literal("gear") }),
     v.object({ encounter, kind: v.literal("instant") }),
+    v.object({ kind: v.literal("minor"), obstacle: minorObstacle }),
     v.object({ kind: v.literal("upgrade"), upgrade }),
     v.object({ kind: v.literal("walker"), walker }),
   ] as const;

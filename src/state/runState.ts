@@ -47,12 +47,13 @@ export type Pack =
 export type PackDogs = readonly [DogId] | readonly [DogId, DogId] | readonly [DogId, DogId, DogId];
 
 // What a list of effects came from: a card option by its index in the source's data, an
-// instant encounter, gear (found set for a gear drop grabbed on the road, else the Pocket's), an
-// upgrade, or the walker.
+// instant encounter, a minor obstacle with contact, gear (found set for a gear drop grabbed on the
+// road, else the Pocket's), an upgrade, or the walker.
 export type EffectSource =
   | { readonly encounter: EncounterId; readonly kind: "encounter"; readonly option: number }
   | { readonly found?: true; readonly gear: GearId; readonly kind: "gear" }
   | { readonly encounter: EncounterId; readonly kind: "instant" }
+  | { readonly kind: "minor"; readonly obstacle: MinorObstacleId }
   | { readonly kind: "upgrade"; readonly upgrade: UpgradeId }
   | { readonly kind: "walker"; readonly walker: WalkerId };
 

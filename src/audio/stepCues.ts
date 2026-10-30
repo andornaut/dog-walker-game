@@ -29,7 +29,14 @@ const STEP_CUES: Readonly<Record<keyof WalkStep, CuesOf>> = {
   cards: NONE,
   // Each pickup plays from its own list: tips, treats or found.
   collected: NONE,
-  contacts: (data, { contacts }) => encounterCues(data, contacts),
+  // A contact obstacle's own hit sound, or a minor obstacle with contact's bump, as its bump
+  // would play.
+  contacts: (data, { contacts }) =>
+    contacts.map(({ source }): SoundCue =>
+      source.kind === "encounter"
+        ? hitCue(data.encounters[source.encounter].kind, source.encounter)
+        : "bump",
+    ),
   encounterHits: (data, { encounterHits }) => encounterCues(data, encounterHits),
   // A firing plays as its owner leaves (RunMoments), whatever fired them.
   fired: NONE,

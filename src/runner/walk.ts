@@ -19,7 +19,7 @@ import { hasObstacleArt, obstacleParts, obstacleSilhouette } from "../layout/obs
 import { formationOrder, PART_INSET } from "../layout/packFormation";
 import { countBump, countLandedBump, countTally } from "../rules/achievements";
 import { type HeartChange, modifierCauses, type MoneyChange, negatedCauses } from "../rules/causes";
-import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
+import { applyInstantEncounter, applyMinorContact, type ChoiceOutcome } from "../rules/choices";
 import { expireAtZoneEnd, tickDebuffs } from "../rules/durations";
 import { changeHearts } from "../rules/effects";
 import { affectedDogs, hitLabel, opensCard } from "../rules/encounters";
@@ -218,13 +218,19 @@ type TreatGrab = Omit<TreatGrabbed, "state"> & { readonly item: WalkItem };
 
 export type EncounterCard = Extract<CardSource, { kind: "encounter" }>;
 
-// A contact obstacle the pack touched, such as a puddle, the dog the touch landed on, and what
-// its effects did.
+// What a contact came from: a contact obstacle, such as a puddle, or a minor obstacle with
+// contact.
+export type ContactSource =
+  | { readonly encounter: EncounterId; readonly kind: "encounter" }
+  | { readonly kind: "minor"; readonly obstacle: MinorObstacleId };
+
+// An obstacle the pack touched that applies its effects on contact, the dog the touch landed on,
+// and what its effects did.
 interface ContactHit {
   dog: DogId;
-  encounter: EncounterId;
   item: WalkItem;
   outcome: ChoiceOutcome;
+  source: ContactSource;
 }
 
 // A value modifiers changed on the road, at the item it happened at: a bump's hearts, a tip's
@@ -910,6 +916,18 @@ export function stepWalk(
       collected.push(item);
       modifiedAt(item, [grab.change === null ? null : changeModified(grab.change)]);
     } else if (isMinorObstacle(data, kind)) {
+      // One with contact is met as a contact obstacle is: no dodge, and its effects on the pack.
+      if (data.minorObstacles[kind].contact !== undefined) {
+        const affected = affectedDogs(run);
+        if (affected.length === 0) {
+          return;
+        }
+        const outcome = applyMinorContact(data, nextRun, kind, affected);
+        nextRun = outcome.state;
+        contacts.push({ dog, item, outcome, source: { kind: "minor", obstacle: kind } });
+        modifiedAt(item, outcome.modified);
+        return;
+      }
       const minor = { ...item, kind };
       if (dodges(data, random, nextRun, dog)) {
         // Every dog's dodge counts toward the dodges tally, a dodge effect's included.
@@ -953,7 +971,7 @@ export function stepWalk(
             nextRun = countTally(resolution.tally, nextRun);
             instants.push({ encounter: kind, item, outcome });
           } else {
-            contacts.push({ dog, encounter: kind, item, outcome });
+            contacts.push({ dog, item, outcome, source: { encounter: kind, kind: "encounter" } });
           }
           modifiedAt(item, outcome.modified);
           return;

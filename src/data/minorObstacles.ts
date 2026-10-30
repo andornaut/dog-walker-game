@@ -5,6 +5,7 @@ import type { MinorObstacle } from "./types";
 // An obstacle has one look everywhere, or, with skins, a look per neighbourhood: each spawn picks
 // one of its zone's skins evenly. An obstacle with a movement comes as a mover at the zone's mover
 // share, and stands still otherwise. onFoot marks a person or an animal, not a vehicle or a thing.
+// One with contact acts as a puddle does, its effects in place of a bump's.
 export const MINOR_OBSTACLES = {
   artSculpture: {
     name: "Art sculpture",
@@ -150,6 +151,7 @@ export const MINOR_OBSTACLES = {
     zones: ["kensingtonMarket"],
   },
   frisbeeDog: {
+    contact: { effects: [{ debuff: "zoomies", kind: "debuff" }] },
     movement: { kind: "dive", slide: 0.4, speed: 1, tilt: { max: 1.6, min: 0.1 } },
     name: "Frisbee dog",
     onFoot: true,
@@ -339,6 +341,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   seagull: {
+    contact: { effects: [{ debuff: "stinky", kind: "debuff" }] },
     movement: { kind: "dart", stopShare: 0, tilt: { max: 1.6, min: 0.1 }, turnBackShare: 0.33 },
     name: "Seagull",
     onFoot: true,
@@ -358,6 +361,7 @@ export const MINOR_OBSTACLES = {
     zones: ["yongeStreet"],
   },
   stiltWalker: {
+    contact: { effects: [{ debuff: "spotlight", kind: "debuff" }] },
     movement: { kind: "sway", pauseSeconds: 0.25, times: { max: 3, min: 2 } },
     name: "Stilt walker",
     onFoot: true,

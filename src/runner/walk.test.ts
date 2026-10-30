@@ -17,6 +17,7 @@ import type {
   Effect,
   EncounterId,
   GearId,
+  MinorObstacle,
   Size,
   TallyId,
   WalkerId,
@@ -967,7 +968,9 @@ describe("stepWalk", () => {
           : [];
       expect(after.cards).toEqual([]);
       expect(after.encounterHits).toEqual([]);
-      expect(after.contacts.map((contact) => contact.encounter)).toEqual([encounter]);
+      expect(after.contacts.map(({ source }) => source)).toEqual([
+        { encounter, kind: "encounter" },
+      ]);
       // The touching dog, as a plain obstacle in its place would land on.
       const cone = step(walkWith(dogs, [atPack("cone")]));
       expect(after.contacts.map(({ dog }) => dog)).toEqual(cone.bumps.map(({ dog }) => dog));
@@ -976,6 +979,57 @@ describe("stepWalk", () => {
       expect(after.walk.road.hitStop?.seconds).toBe(read(tuning, "seconds", "minorHitStopSeconds"));
     },
   );
+
+  // Every minor obstacle with contact, with the debuff it starts. It is met as a puddle is, its
+  // debuff in place of Muddy.
+  const MINOR_CONTACTS = [
+    { debuff: "zoomies", obstacle: "frisbeeDog" },
+    { debuff: "stinky", obstacle: "seagull" },
+    { debuff: "spotlight", obstacle: "stiltWalker" },
+  ] as const;
+  it("lists every minor obstacle with contact", () => {
+    expect(MINOR_CONTACTS.map(({ obstacle }) => obstacle)).toEqual(
+      keysOf(data.minorObstacles).filter((id) => {
+        const minor: MinorObstacle = data.minorObstacles[id];
+        return minor.contact !== undefined;
+      }),
+    );
+  });
+
+  describe.each(MINOR_CONTACTS)("a $obstacle", ({ debuff, obstacle }) => {
+    const dogs: PackDogs = ["kilo", "ginger"];
+
+    it(`starts ${debuff} on the touching dog's pack, with no heart and a plain obstacle's stop`, () => {
+      const walk = walkWith(dogs, [atPack(obstacle)]);
+      const after = step(walk);
+      const cone = step(walkWith(dogs, [atPack("cone")]));
+      expect(after.bumps).toEqual([]);
+      expect(after.contacts.map(({ dog, source }) => ({ dog, source }))).toEqual(
+        cone.bumps.map(({ dog }) => ({ dog, source: { kind: "minor", obstacle } })),
+      );
+      expect(after.walk.run.debuffs.map((active) => active.debuff)).toEqual([debuff]);
+      expect(heartsByDog(after.walk.run)).toEqual(heartsByDog(walk.run));
+      expect(after.walk.road.hitStop?.seconds).toBe(read(tuning, "seconds", "minorHitStopSeconds"));
+      expect(after.walk.road.items).toEqual([]);
+    });
+
+    it(`starts ${debuff} through Raincoats`, () => {
+      const walk = walkWith(dogs, [atPack(obstacle)]);
+      const coated = { ...walk, run: { ...walk.run, immunities: COATED } };
+      expect(step(coated).walk.run.debuffs.map((active) => active.debuff)).toEqual([debuff]);
+    });
+
+    it("counts toward bumps as a puddle does: none in the zone, and none toward a bump badge", () => {
+      const counted = (kind: WalkItem["kind"]) => {
+        const walk = walkWith(dogs, [atPack(kind)]);
+        const { bumpsByKind, bumpsByZone } = step({ ...walk, run: { ...walk.run, zoneIndex: 1 } })
+          .walk.run;
+        return { bumpsByKind, bumpsByZone };
+      };
+      expect(counted(obstacle)).toEqual(counted("puddle"));
+      expect(counted(obstacle)).toEqual({ bumpsByKind: {}, bumpsByZone: [] });
+    });
+  });
 
   describe("a hit that opens no card", () => {
     const raincoats = (walk: Walk): Walk => ({

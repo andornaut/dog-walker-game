@@ -11,6 +11,7 @@ import type {
   Effect,
   EncounterId,
   GameData,
+  MinorObstacleId,
   QuipMoment,
   UpgradeDuration,
   UpgradeId,
@@ -564,4 +565,24 @@ export function applyInstantEncounter(
   const affected = walkingAmong(state, caught);
   const source = { encounter, kind: "instant" } as const;
   return outcomeOf(data, { affected, source }, resolution.effects, state);
+}
+
+// Applies a minor obstacle's contact effects to the dogs it caught, as applyInstantEncounter
+// applies a contact obstacle's.
+export function applyMinorContact(
+  data: ChoiceData,
+  state: RunState,
+  obstacle: MinorObstacleId,
+  caught: readonly DogId[],
+): ChoiceOutcome {
+  const { contact } = data.minorObstacles[obstacle];
+  if (contact === undefined) {
+    throw new Error(`${obstacle} has no effects on contact`);
+  }
+  if (state.phase.kind === "ended") {
+    throw new Error("The run has ended");
+  }
+  const affected = walkingAmong(state, caught);
+  const source = { kind: "minor", obstacle } as const;
+  return outcomeOf(data, { affected, source }, contact.effects, state);
 }

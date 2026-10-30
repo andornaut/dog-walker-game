@@ -2,6 +2,7 @@ import { assertNever } from "@andornaut/game-kit/assertNever";
 import { fillNames, signedText } from "@andornaut/game-kit/lines";
 
 import type { DogId, GameData, GearId } from "../data/types";
+import { minorObstacleName } from "../runner/obstacleLooks";
 import type { ActiveModifier, EffectSource, ModifierSource } from "../state/runState";
 import { type Cents, type Hearts, roundDollars } from "../units";
 import { heartsChangeText } from "./effectText";
@@ -51,6 +52,7 @@ export type CauseData = Pick<
   | "debuffs"
   | "dogs"
   | "encounters"
+  | "minorObstacles"
   | "runText"
   | "shopGear"
   | "upgrades"
@@ -133,6 +135,8 @@ function effectSourceName(data: CauseData, source: ModifierSource): string {
       return gearSourceName(data, source);
     case "instant":
       return data.encounters[source.encounter].name;
+    case "minor":
+      return minorObstacleName(data, source.obstacle);
     case "upgrade":
       return data.upgrades[source.upgrade].name;
     case "walker":
