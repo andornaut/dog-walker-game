@@ -715,10 +715,10 @@ export class HudScene extends Scene {
     return { debuff, parts, rect };
   }
 
-  // The detail card of what a held press explains, the home screen's, while it is open: over the
-  // HUD, or drawn in the pause menu, over its panel, when the hold opened it there. The walk is
-  // paused under it, so it is drawn once as it opens, and again only in a new overlay or a
-  // restarted one.
+  // The detail card of what a held press explains, the home screen's, while it is open, in the
+  // topmost scene over the walk (overlayScene), which with nothing else open is the HUD: a press
+  // explains nothing under a card or overlay (walkPresses). The walk is paused under it, so it is
+  // drawn once as it opens.
   private showExplanation(view: RunHudView, overlay: Scene): void {
     const target: ExplainTarget | undefined = view.explaining;
     const key = target === undefined ? "" : JSON.stringify(target);

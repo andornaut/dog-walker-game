@@ -357,18 +357,13 @@ export function opensOnTap(target: ExplainTarget): boolean {
   return target.kind === "effect";
 }
 
-// The element under point that explains itself, if any. dimmed: an overlay's dim covers
-// walkView, debuff bars included, and a press there is the overlay's.
+// The element under point that explains itself, if any.
 export function explainTargetAt(
-  layout: Pick<ScreenLayout, "dogSlots" | "topBar" | "walkView">,
+  layout: Pick<ScreenLayout, "dogSlots" | "topBar">,
   shown: ExplainShown,
-  dimmed: boolean,
   point: Point,
 ): ExplainTarget | undefined {
   const { x, y } = point;
-  if (dimmed && containsPoint(layout.walkView, x, y)) {
-    return undefined;
-  }
   const bar = walkBarLayout(layout.topBar);
   const well = bar.effectHolds.findIndex((rect) => containsPoint(rect, x, y));
   if (well >= 0 && well < shown.effects.length) {

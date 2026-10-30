@@ -14,10 +14,9 @@ import { type HoldPress, type HoldRule, moveHold, releaseHold, startHold, tickHo
 // cancel: the browser called the press off (a system gesture, an incoming call).
 export type PointerPhase = "cancel" | "down" | "move" | "up";
 
-// What the walk's presses do. steer: they drive the gestures, and a hold explains. explain: only
-// a hold explains, while a card pauses the walk but leaves what explains itself in view. none:
-// an overlay takes every press.
-export type PressMode = "explain" | "none" | "steer";
+// What the walk's presses do. steer: they drive the gestures, and a hold explains. none: an
+// overlay or card is open, and only the walk bar's buttons, which the HUD takes, act.
+export type PressMode = "none" | "steer";
 
 // One press of a pointer. downTime tells it from the pointer's next press, so the events of a
 // press whose down went to another scene are never taken for the tracked one's.
@@ -117,8 +116,8 @@ function whileOpen<Target>(
 
 // The latest press drives the gestures, so a finger resting on the screen never holds the
 // steering from the one that lands after it. A press on a walk-bar button is the HUD's and
-// drives none. Under none, the press under way is dropped, along with an open explanation; under
-// explain, only a hold acts (holdOnly). A hit stop is no hold: its lane moves are dropped where
+// drives none. Under none, the press under way is dropped, along with an open explanation. A
+// hit stop is no hold: its lane moves are dropped where
 // they act, and the drag goes on. A press on an element that explains itself opens its
 // explanation once it has stayed within the hold's slop for its time (tickTrack), or lifts after
 // that time before a frame ticks; one that moves past the slop, or takes a lane step, steers as
@@ -137,9 +136,6 @@ export function trackPointer<Target>(
     return { actions: [], track: whileOpen(sample, track) };
   }
   const current = endedUnseen(press, track);
-  if (presses === "explain") {
-    return holdOnly(context, sample, current);
-  }
   if (phase === "down") {
     if (sample.onButton) {
       return { actions: [], track: current };
@@ -174,40 +170,6 @@ export function trackPointer<Target>(
     return { actions, tapped: hold.start, track: idleTrack };
   }
   return { actions, track: idleTrack };
-}
-
-// A press while only what explains itself acts: one that goes down on such an element opens its
-// explanation as a hold does, or as a tap does on what opens on a tap. Any other press, or a
-// press that moves past the slop, does nothing, so its release never steers once the walk goes
-// on.
-function holdOnly<Target>(
-  context: TrackContext<Target>,
-  sample: PointerSample,
-  track: PointerTrack<Target>,
-): PointerResult<Target> {
-  const { phase, point, press } = sample;
-  if (phase === "down") {
-    if (sample.onButton || context.explainAt(point) === undefined) {
-      return { actions: [], track: idleTrack };
-    }
-    const hold = startHold(context.hold, point, sample.timeMs);
-    return { actions: [], track: { ...idleTrack, hold, press } };
-  }
-  const { hold } = track;
-  if (hold === undefined || !samePress(track.press, press)) {
-    return { actions: [], track };
-  }
-  if (phase === "move") {
-    const moved = moveHold(point, hold);
-    return { actions: [], track: moved.state === "moved" ? idleTrack : { ...track, hold: moved } };
-  }
-  if (phase === "up" && releaseHold(sample.timeMs, hold) === "hold") {
-    return { actions: [], track: opened(context, hold) };
-  }
-  if (phase === "up" && tapOpens(context, hold, point)) {
-    return { actions: [], tapped: hold.start, track: idleTrack };
-  }
-  return { actions: [], track: idleTrack };
 }
 
 // A hold candidate that moved past its slop, or whose drag took a lane step, steers instead.

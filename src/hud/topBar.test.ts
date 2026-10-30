@@ -58,10 +58,8 @@ describe("the walk bar in each pause state", () => {
     settings: "openSettings",
     sound: "mute",
   } as const;
-  // A card dims the walk view only: a hold on the bar's wells explains. The menu and the Home
-  // question close on a tap anywhere but their panel and the bar's buttons, so they take every
-  // other press.
-  const card = { ...walking, paused: true, presses: "explain" } as const;
+  // Under a card or an overlay only the bar's buttons act: the walk takes no press.
+  const card = { ...walking, paused: true, presses: "none" } as const;
   const menu = {
     ...walking,
     icon: "icon-play",

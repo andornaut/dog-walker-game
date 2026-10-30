@@ -562,29 +562,26 @@ describe("explainTargetAt", () => {
   const stinky: ExplainTarget = { debuff: "stinky", kind: "debuff" };
   const kilo: ExplainTarget = { dog: "kilo", kind: "dog" };
   const lady: ExplainTarget = { dog: "lady", kind: "dog" };
-  // What a press explains on the walk, and under the pause menu's dim, where the debuff bars
-  // are the dim's.
-  it.each<[string, number, Point, ExplainTarget | undefined, ExplainTarget | undefined]>([
-    ["the first effect", 1, holdAt(0), first, first],
+  // What a press explains on the walk.
+  it.each<[string, number, Point, ExplainTarget | undefined]>([
+    ["the first effect", 1, holdAt(0), first],
     [
       "the bar's top row over the first effect",
       1,
       { x: centre(BAR.effectWells[0] ?? topBar).x, y: topBar.y },
       first,
-      first,
     ],
-    ["an empty well", 1, holdAt(1), undefined, undefined],
-    ["the last well with as many effects as wells", WELLS, holdAt(WELLS - 1), last, last],
-    ["the cash well", 1, centre(WALK_BAR.cash.well), undefined, undefined],
-    ["a button", 1, button, undefined, undefined],
-    ["the first debuff bar", 0, centre(bars[0] ?? topBar), muddy, undefined],
-    ["the second debuff bar", 0, centre(bars[1] ?? topBar), stinky, undefined],
-    ["the first card", 0, centre(dogSlots[0] ?? topBar), kilo, kilo],
-    ["the second card", 0, centre(dogSlots[1] ?? topBar), lady, lady],
-    ["a card with no dog", 0, centre(dogSlots[2] ?? topBar), undefined, undefined],
-    ["the road", 0, centre(LAYOUT.road), undefined, undefined],
-  ])("finds what %s explains", (_name, effects, point, walking, dimmed) => {
-    expect(explainTargetAt(LAYOUT, shown(effects), false, point)).toEqual(walking);
-    expect(explainTargetAt(LAYOUT, shown(effects), true, point)).toEqual(dimmed);
+    ["an empty well", 1, holdAt(1), undefined],
+    ["the last well with as many effects as wells", WELLS, holdAt(WELLS - 1), last],
+    ["the cash well", 1, centre(WALK_BAR.cash.well), undefined],
+    ["a button", 1, button, undefined],
+    ["the first debuff bar", 0, centre(bars[0] ?? topBar), muddy],
+    ["the second debuff bar", 0, centre(bars[1] ?? topBar), stinky],
+    ["the first card", 0, centre(dogSlots[0] ?? topBar), kilo],
+    ["the second card", 0, centre(dogSlots[1] ?? topBar), lady],
+    ["a card with no dog", 0, centre(dogSlots[2] ?? topBar), undefined],
+    ["the road", 0, centre(LAYOUT.road), undefined],
+  ])("finds what %s explains", (_name, effects, point, walking) => {
+    expect(explainTargetAt(LAYOUT, shown(effects), point)).toEqual(walking);
   });
 });

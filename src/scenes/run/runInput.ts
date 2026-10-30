@@ -109,7 +109,7 @@ export class RunInput {
   // Each frame: a press held still on an element long enough opens its explanation.
   tick(nowMs: number): void {
     const presses = this.presses();
-    this.pointers = tickTrack(this.context(presses), presses, nowMs, this.pointers);
+    this.pointers = tickTrack(this.context(), presses, nowMs, this.pointers);
   }
 
   // M, P and Escape are the walk bar's keys, which the HUD handles. Phaser hands a key down to
@@ -139,13 +139,12 @@ export class RunInput {
 
   // A press on the canvas or on the page beside it, at point in game pixels. onButton: it went
   // down on a walk-bar button. The run scene keeps running while a card, the zone celebration or
-  // the pause menu covers the walk, and the press is theirs then, but under a card or the
-  // celebration for what explains itself in what they leave in view (walkPresses). A press on
-  // what opens on a tap bursts as it lands, as a button's does, and its tap opens the
-  // explanation at once, the burst playing on over it.
+  // the pause menu covers the walk, and the press is theirs then (walkPresses). A press on what
+  // opens on a tap bursts as it lands, as a button's does, and its tap opens the explanation at
+  // once, the burst playing on over it.
   private onPress(phase: PointerPhase, press: Press, point: Point, onButton: boolean): void {
     const presses = this.presses();
-    const context = this.context(presses);
+    const context = this.context();
     if (phase === "down" && presses !== "none" && this.pointers.open === undefined) {
       const target = context.explainAt(point);
       if (target !== undefined && context.opensOnTap(target)) {
@@ -175,15 +174,15 @@ export class RunInput {
     if (presses === "none" || this.pointers.open !== undefined) {
       return;
     }
-    const open = this.context(presses).explainAt(point);
+    const open = this.context().explainAt(point);
     if (open !== undefined) {
       this.pointers = { ...idleTrack, open };
     }
   }
 
-  private context(presses: PressMode): TrackContext<ExplainTarget> {
+  private context(): TrackContext<ExplainTarget> {
     const stepMoves = (direction: LaneDirection) => this.stepMoves(direction);
-    return trackContext(presses === "explain", this.host.explainShown(), stepMoves);
+    return trackContext(this.host.explainShown(), stepMoves);
   }
 
   // The walk that takes live lane moves now, if any does.
@@ -219,17 +218,15 @@ export class RunInput {
 
 // A tap on a debuff bar does nothing, and a press on anything that explains itself opens its
 // explanation once still for holdSeconds within swipeStartDistance, the drag's first
-// step, or on a tap within it for what opens on a tap (opensOnTap). dimmed: an overlay's dim
-// takes the presses on the walk view.
+// step, or on a tap within it for what opens on a tap (opensOnTap).
 function trackContext(
-  dimmed: boolean,
   shown: ExplainShown,
   stepMoves: (direction: LaneDirection) => boolean,
 ): TrackContext<ExplainTarget> {
   const swipeStartDistance = read(gameData.tuning, "pixels", "swipeStartDistance");
   return {
     config: { laneCount: LANE_COUNT, swipeStartDistance },
-    explainAt: (point) => explainTargetAt(LAYOUT, shown, dimmed, point),
+    explainAt: (point) => explainTargetAt(LAYOUT, shown, point),
     hold: holdRule(gameData.tuning, swipeStartDistance),
     layout: LAYOUT,
     opensOnTap,

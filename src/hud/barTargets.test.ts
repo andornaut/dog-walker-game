@@ -8,9 +8,9 @@ import { NOTHING_PAUSED, type RunPause, topBarAction, topBarButtonAt, walkPresse
 import { type ExplainShown, explainTargetAt, opensOnTap, WALK_BAR, walkBarLayout } from "./walkHud";
 
 // Every button on a top bar acts as it does with nothing open, under every card and overlay
-// that leaves the bar lit. Under a card a well that explains itself opens its explanation; under
-// the pause menu, the Home question and the settings a tap there closes them instead
-// (regionOutside), so it explains nothing. Help alone covers the walk bar.
+// that leaves the bar lit, and nothing else on the walk acts under them: a well or a dog card
+// explains nothing, and a tap there closes what can close (regionOutside) or does nothing. Help
+// alone covers the walk bar.
 
 const centre = (rect: Rect): Point => ({ x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 });
 
@@ -51,7 +51,7 @@ function walkTargetAction(pause: RunPause, point: Point): string | undefined {
   if (presses === "none") {
     return undefined;
   }
-  const target = explainTargetAt(SCREEN_LAYOUT, SHOWN, presses === "explain", point);
+  const target = explainTargetAt(SCREEN_LAYOUT, SHOWN, point);
   if (target === undefined) {
     return undefined;
   }
@@ -82,8 +82,8 @@ const WALK_BASE: Readonly<Record<WalkTarget, string | undefined>> = {
   upgradeIcon: "explainOnTap",
 };
 
-// What a tap outside the panel closes in place of explaining.
-const CLOSES_ON_TAP = {
+// What explains itself with nothing open, and nothing under a card or overlay.
+const EXPLAINS_NOTHING = {
   dogCard: undefined,
   gearIcon: undefined,
   perkIcon: undefined,
@@ -91,7 +91,7 @@ const CLOSES_ON_TAP = {
 } as const;
 
 const WALK_CHANGES: Readonly<Record<string, Partial<Record<WalkTarget, string | undefined>>>> = {
-  "a card or the zone celebration": {},
+  "a card or the zone celebration": EXPLAINS_NOTHING,
   help: {
     dogCard: undefined,
     gearIcon: undefined,
@@ -103,11 +103,11 @@ const WALK_CHANGES: Readonly<Record<string, Partial<Record<WalkTarget, string | 
     upgradeIcon: undefined,
   },
   nothing: {},
-  "the Home question over a card": { ...CLOSES_ON_TAP, pause: "resume" },
-  "the pause menu": { ...CLOSES_ON_TAP, pause: "resume" },
-  "the pause menu over a card": { ...CLOSES_ON_TAP, pause: "resume" },
-  "the settings": { ...CLOSES_ON_TAP, pause: "resume", settings: "closeSettings" },
-  "the settings over a card": { ...CLOSES_ON_TAP, pause: "resume", settings: "closeSettings" },
+  "the Home question over a card": { ...EXPLAINS_NOTHING, pause: "resume" },
+  "the pause menu": { ...EXPLAINS_NOTHING, pause: "resume" },
+  "the pause menu over a card": { ...EXPLAINS_NOTHING, pause: "resume" },
+  "the settings": { ...EXPLAINS_NOTHING, pause: "resume", settings: "closeSettings" },
+  "the settings over a card": { ...EXPLAINS_NOTHING, pause: "resume", settings: "closeSettings" },
 };
 
 describe("the walk bar's and dog cards' targets under each overlay", () => {

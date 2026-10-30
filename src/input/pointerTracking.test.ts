@@ -564,9 +564,6 @@ describe("hold to explain", () => {
   const road = 300;
   // A card held open, its finger lifted.
   const heldCard = [at("down", 0, 100, card), tick(holdMs), at("up", holdMs + 100, 100, card)];
-  // Steps under the pause menu or the Home question, where only a hold acts.
-  const underMenu = (steps: readonly Step[]): Step[] =>
-    steps.map((step): Step => ({ ...step, presses: "explain" }));
 
   it.each<[string, Step[], GestureAction[], string[]]>([
     [
@@ -629,7 +626,7 @@ describe("hold to explain", () => {
       ["card@tick", "closed@up"],
     ],
     [
-      "closes it when a card or a menu takes the press",
+      "closes it when a card or an overlay takes the press",
       [at("down", 0, 100, card), tick(holdMs), { ...at("move", 400, 100, card), presses: "none" }],
       [],
       ["card@tick", "closed@move"],
@@ -696,50 +693,6 @@ describe("hold to explain", () => {
       [],
     ],
     [
-      "under the menu, opens an effect icon held still, and keeps it open after the release",
-      underMenu([at("down", 0, 100, icon), tick(holdMs), at("up", 400, 100, icon)]),
-      [],
-      ["icon@tick"],
-    ],
-    [
-      "under the menu, closes it when a tap on the road lifts, which steers nothing",
-      underMenu([...heldCard, at("down", 500, 100, road), at("up", 550, 100, road)]),
-      [],
-      ["card@tick", "closed@up"],
-    ],
-    [
-      "under the menu, opens a card released past the hold time before a frame ticks",
-      underMenu([at("down", 0, 100, card), at("up", holdMs, 100, card)]),
-      [],
-      ["card@up"],
-    ],
-    [
-      "under the menu, does nothing on a tap on a card",
-      underMenu([at("down", 0, 100, card), at("up", 50, 100, card)]),
-      [],
-      [],
-    ],
-    [
-      "under the menu, opens nothing past the slop",
-      underMenu([
-        at("down", 0, 100, icon),
-        at("move", 50, 200, icon),
-        tick(holdMs),
-        at("up", 400, 200, icon),
-      ]),
-      [],
-      [],
-    ],
-    [
-      "under the menu, never steers from the road, even when its release comes after the menu",
-      [
-        ...underMenu([at("down", 0, 300, road), at("move", 50, 100, road)]),
-        at("up", 100, 100, road),
-      ],
-      [],
-      [],
-    ],
-    [
       "taps a gear icon open",
       [at("down", 0, gearX, icon), at("up", 50, gearX, icon)],
       [],
@@ -772,12 +725,6 @@ describe("hold to explain", () => {
       [at("down", 0, 100, icon), at("up", 50, gearX, icon)],
       [],
       [],
-    ],
-    [
-      "under the menu, taps a gear icon open",
-      underMenu([at("down", 0, gearX, icon), at("up", 50, gearX, icon)]),
-      [],
-      ["tapped gear@up"],
     ],
     [
       "closes an open explanation on a tap on a gear icon, which opens nothing",

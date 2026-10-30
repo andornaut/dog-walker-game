@@ -10,15 +10,6 @@ import type { SettingsScene } from "../SettingsScene";
 import { soundboardOf } from "../soundboard";
 import type { ZoneCelebrationSceneData } from "../ZoneCelebrationScene";
 
-// The overlays over the walk that leave the walk bar and the dog cards in view, topmost first:
-// each opens over the ones after it.
-const COVERABLE: readonly SceneKey[] = [
-  SCENE_KEYS.settings,
-  SCENE_KEYS.pause,
-  SCENE_KEYS.card,
-  SCENE_KEYS.zoneCelebration,
-];
-
 // What the menus need of the run.
 interface MenuFlowHost {
   dropPress: () => void;
@@ -43,8 +34,6 @@ export class MenuFlow {
   private blurred = false;
   private cardView: CardView | undefined;
   private celebrating = false;
-  // The overlay an explanation's detail card covers, paused under it, if any.
-  private covered: SceneKey | undefined;
   // Whether the player's pause holds the run scene's tweens and timers and ducks the music.
   private held = false;
   private hidden = false;
@@ -86,7 +75,7 @@ export class MenuFlow {
   }
 
   // The celebration over the walk, which it holds as a card does, the run scene running under it
-  // so the walk bar's and the dog cards' presses work; onDone runs once it has closed.
+  // so the walk bar's buttons work; onDone runs once it has closed.
   showCelebration(data: ZoneCelebrationSceneData): void {
     const launched: ZoneCelebrationSceneData = {
       ...data,
@@ -205,27 +194,6 @@ export class MenuFlow {
     }
   }
 
-  // An explanation's detail card takes every press until a tap closes it, so the overlay it opens
-  // over (a card or the zone celebration) pauses under it and goes on as it was, the walk still
-  // paused, once it closes, unless another overlay, such as the pause menu, has opened over it
-  // meanwhile. Called each frame with whether one is open.
-  coverOverlay(explaining: boolean): void {
-    const { scene } = this.scene;
-    if (explaining && this.covered === undefined) {
-      this.covered = COVERABLE.find((key) => scene.isActive(key));
-      if (this.covered !== undefined) {
-        scene.pause(this.covered);
-      }
-    } else if (!explaining && this.covered !== undefined) {
-      const covered = this.covered;
-      this.covered = undefined;
-      const top = COVERABLE.find((key) => scene.isActive(key) || scene.isPaused(key));
-      if (top === covered) {
-        scene.resume(covered);
-      }
-    }
-  }
-
   // Resumes the walk from the menu, the question or a page over them; the settings, over the walk
   // bar that resumed, close with them. Help covers the bar, so nothing resumes from under it.
   closePause(): void {
@@ -235,7 +203,6 @@ export class MenuFlow {
     const { scene } = this;
     this.stopSettings();
     scene.scene.stop(SCENE_KEYS.pause);
-    this.covered = undefined;
     this.pauseOpen = false;
     this.hold();
     if (this.cardView !== undefined) {
@@ -276,11 +243,8 @@ export class MenuFlow {
     return open;
   }
 
-  // The menu shown afresh, running: coverOverlay pauses it again while an explanation is open.
+  // The menu shown afresh.
   private restartPause(): void {
-    if (this.covered === SCENE_KEYS.pause) {
-      this.covered = undefined;
-    }
     this.scene.scene.get(SCENE_KEYS.pause).scene.restart(this.pauseData());
   }
 

@@ -434,7 +434,6 @@ export class RunScene extends Scene implements HudRun {
       return;
     }
     this.world?.input.tick(this.game.loop.time);
-    this.world?.menus.coverOverlay(this.world.input.explanation() !== undefined);
     const timeScale = timeScaleOf(this.applyCheats());
     this.time.timeScale = timeScale;
     this.tweens.timeScale = timeScale;
