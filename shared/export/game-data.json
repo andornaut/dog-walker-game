@@ -3386,7 +3386,7 @@
     {
       "art": "high-park",
       "density": {
-        "cards": 0.96,
+        "cards": 1.06,
         "luckyFinds": 1.25,
         "minorObstacles": 0.66,
         "tips": 1
@@ -3422,7 +3422,7 @@
           "cyclist": 3,
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
-          "ducklings": 5,
+          "ducklings": 7.5,
           "fallenLog": 2.5,
           "ferrets": 5.5,
           "foodCartVendor": 0,
@@ -3475,7 +3475,7 @@
           "tourGroup": 0,
           "tourist": 0,
           "touristTrain": 0.75,
-          "trashCan": 4.5,
+          "trashCan": 2,
           "ttcBus": 0,
           "velvetRope": 0,
           "volleyballNet2": 0,
@@ -3509,7 +3509,7 @@
     {
       "art": "cabbagetown",
       "density": {
-        "cards": 0.97,
+        "cards": 1.07,
         "luckyFinds": 1,
         "minorObstacles": 0.84,
         "tips": 1
@@ -3632,9 +3632,9 @@
     {
       "art": "kensington-market",
       "density": {
-        "cards": 0.85,
+        "cards": 0.94,
         "luckyFinds": 1,
-        "minorObstacles": 0.7,
+        "minorObstacles": 0.85,
         "tips": 1.2
       },
       "difficulty": 3,
@@ -3755,9 +3755,9 @@
     {
       "art": "the-beaches",
       "density": {
-        "cards": 0.95,
+        "cards": 1.05,
         "luckyFinds": 1.25,
-        "minorObstacles": 1.02,
+        "minorObstacles": 0.95,
         "tips": 1
       },
       "difficulty": 3,
@@ -3878,7 +3878,7 @@
     {
       "art": "distillery-district",
       "density": {
-        "cards": 0.88,
+        "cards": 0.97,
         "luckyFinds": 1,
         "minorObstacles": 1.25,
         "tips": 1
@@ -4001,7 +4001,7 @@
     {
       "art": "yonge-street",
       "density": {
-        "cards": 0.93,
+        "cards": 1.02,
         "luckyFinds": 1,
         "minorObstacles": 1.18,
         "tips": 1
@@ -4024,7 +4024,7 @@
           "bench": 0,
           "breweryDray": 0,
           "bunny": 0,
-          "busker": 5,
+          "busker": 8,
           "car": 5,
           "cargoBike": 0,
           "cat": 1.5,
@@ -4059,7 +4059,7 @@
           "leafPile": 0,
           "lifeguardChair": 0,
           "littleFreeLibrary": 0,
-          "mailCarrier": 13,
+          "mailCarrier": 10,
           "marketStall2": 0,
           "marketStall3": 0,
           "newspaperBox": 10,
@@ -4077,9 +4077,9 @@
           "sandcastle": 0,
           "sandwichBoard": 6,
           "scooter": 5,
-          "seagull": 4,
+          "seagull": 6,
           "segwayTourRider": 0,
-          "signSpinner": 5,
+          "signSpinner": 8,
           "stiltWalker": 0,
           "streetCart": 7,
           "streetcar": 5,
@@ -4088,7 +4088,7 @@
           "strollingBusker": 0,
           "taxi": 5,
           "tourGroup": 0,
-          "tourist": 10,
+          "tourist": 5,
           "touristTrain": 0,
           "trashCan": 0,
           "ttcBus": 4,
@@ -4105,7 +4105,7 @@
           "greenBinSpill": 0,
           "otherDog": 0,
           "porchCat": 0,
-          "pothole": 0.6,
+          "pothole": 1,
           "puddle": 0,
           "skunk": 0,
           "squirrel": 1,
