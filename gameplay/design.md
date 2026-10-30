@@ -254,7 +254,7 @@ After each of neighbourhoods 1 to 3, before the fork, a short celebration plays 
 
 - **Neighbourhood banner:** each neighbourhood opens with a banner over the road naming the world, the neighbourhood's number and its name; the player never sees the word "zone"
 - **Neighbourhood done:** the walker you're walking with cheers, under a big title and the neighbourhood's name, with the pay it banks and its tips, leaving out a part that is $0. It waits for its Onward! button, a tap anywhere else, or key 1
-- **New walker:** the first time you finish a walk that unlocks a walker (see Walkers), that walker runs in to join before the end screen, with their greeting, agility and perk, and waits for a tap on its button (key 1). When one walk unlocks several walkers, each joins in turn, in unlock order
+- **New walker:** the first time you finish a walk that unlocks a walker (see Walkers), that walker runs in to join before the end screen, with their greeting, agility and perk, and waits for a tap on its button (key 1). Mr. B looks down at his phone, missing the celebration around him. When one walk unlocks several walkers, each joins in turn, in unlock order
 - Confetti plays in both; with reduced motion it doesn't
 
 ### Upgrade cards
