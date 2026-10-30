@@ -7,10 +7,6 @@ export const PHONE_EVENTS = {
   // The Android back gesture or button, or the browser's Back. The page stays on the game, so
   // the scenes decide what back means (pause, close a card, leave a menu).
   backPressed: "back-pressed",
-  // A phone turned on its side: the turn-upright notice covers the game, so pause the run.
-  turnedSideways: "turned-sideways",
-  // The phone is upright again and the notice is gone.
-  turnedUpright: "turned-upright",
   // The home screen's update plate shows or hides: updatePlateShown says which.
   updatePlate: "update-plate",
 } as const;

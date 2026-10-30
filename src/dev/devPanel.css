@@ -23,7 +23,7 @@
   gap: 8px;
   width: 100%;
   height: var(--dev-bar-height);
-  padding: 0 max(12px, env(safe-area-inset-left, 0px));
+  padding: 0 max(12px, var(--inset-left));
   border: 0;
   border-top: 1px solid var(--dev-line);
   background: var(--dev-bg);
@@ -46,8 +46,8 @@
 /* Below the bar, past the bottom of the screen; src/main.css scrolls the page to it. */
 .dev-sheet {
   box-sizing: border-box;
-  padding: 0 max(16px, env(safe-area-inset-right, 0px))
-    calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  padding: 0 max(16px, var(--inset-right)) calc(16px + var(--inset-bottom))
+    max(16px, var(--inset-left));
   border-top: 2px solid var(--dev-accent);
   background: var(--dev-bg);
   /* The page turns these off for the game; the sheet scrolls the page. */

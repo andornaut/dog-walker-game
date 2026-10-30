@@ -20,8 +20,10 @@
   overflow-x: auto;
   scrollbar-width: none;
   padding-block: 11px 7px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  /* The game page's turned frame moves the safe-area insets onto its own edges as --inset-*
+     (the kit's frameTurnPortraitGame.css); other pages have no turn and no --inset-*. */
+  padding-left: max(16px, var(--inset-left, env(safe-area-inset-left, 0px)));
+  padding-right: max(16px, var(--inset-right, env(safe-area-inset-right, 0px)));
   white-space: nowrap;
 }
 .art-nav ul::-webkit-scrollbar {

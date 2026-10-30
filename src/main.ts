@@ -1,9 +1,13 @@
 // First, so the crash screen catches an error thrown while any other module loads.
 import "./crash/install";
+// Turns the page frame on a touch screen in landscape before any script runs; main.css reads its
+// --inset-* safe-area insets.
+import "@andornaut/game-kit/view/frameTurnPortraitGame.css";
 import "./main.css";
 
 import { MENU_FPS } from "@andornaut/game-kit/clock/frameCap";
 import { capFrameRate } from "@andornaut/game-kit/clock/phaser/capFrameRate";
+import { followFrameTurn } from "@andornaut/game-kit/view/phaser/followFrameTurn";
 import { Core, Game, Scale, WEBGL } from "phaser";
 
 import { CRASH_SCREEN } from "./crash/crashScreen";
@@ -14,7 +18,13 @@ import { devToolsOn } from "./dev/devTools";
 import { pageRunSetup } from "./dev/pageRunSetup";
 import { noteKeyPress } from "./input/keyNumbers";
 import { lostTouches } from "./input/touches";
-import { noteWalkStarted, setOnHomeScreen, setupPhoneApp, storagePersistence } from "./pwa";
+import {
+  noteWalkStarted,
+  pageFrameTurn,
+  setOnHomeScreen,
+  setupPhoneApp,
+  storagePersistence,
+} from "./pwa";
 import { BootScene } from "./scenes/BootScene";
 import { CardScene } from "./scenes/CardScene";
 import { CelebrationScene } from "./scenes/CelebrationScene";
@@ -57,6 +67,9 @@ function watchFirstWalk(game: Game): void {
   game.events.on(Core.Events.POST_STEP, check);
 }
 
+// The element in pages/play/index.html that holds the canvas.
+const GAME_PARENT_ID = "game";
+
 // Scenes render in list order: the HUD over the road, cards, the zone celebration and the
 // pause menu over the HUD, help (its page's picture of the walk, HUD and card over it),
 // settings and stats over those, and the dev overlay, which starts itself, over everything.
@@ -74,7 +87,7 @@ function bootGame(): Game {
     height: SCREEN_CONFIG.height,
     // Two touch pointers, so the walk sees a finger that lands while another rests.
     input: { activePointers: 2 },
-    parent: "game",
+    parent: GAME_PARENT_ID,
     pixelArt: true,
     // Phaser's Scale Manager fits the canvas to #game at the largest zoom that fits, fractional
     // included, keeping SCREEN_CONFIG's resolution scaled by CSS and drawn nearest-neighbour
@@ -116,6 +129,12 @@ function bootGame(): Game {
     game.sound.pauseAll();
     stopResuming(game);
   });
+  // Phaser fits, places and reads pointers through the page frame's turn, and refits as #game
+  // changes size.
+  const parent = document.getElementById(GAME_PARENT_ID);
+  if (parent !== null) {
+    followFrameTurn(game, parent, pageFrameTurn, SCREEN_CONFIG);
+  }
   // Menus draw at most about 60 frames a second; a walk (RunScene) draws every frame.
   capFrameRate(MENU_FPS, () => game.scene.isActive(SCENE_KEYS.run), game);
   // The installed app has no dev panel, so its #dev-panel stays hidden and no cheat is set.

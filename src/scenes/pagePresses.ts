@@ -10,6 +10,7 @@ import { pageToGame } from "@andornaut/game-kit/view/pagePoint";
 import type { Scene } from "phaser";
 
 import type { Press } from "../input/pointerTracking";
+import { pageFrameTurn } from "../pwa";
 
 // What a press on the bare page does, at points in game pixels, unclamped. onBare: whether the
 // release came on the bare page.
@@ -31,7 +32,12 @@ export function listenPagePresses(scene: Scene, handlers: PagePressHandlers): vo
   const bare = [document.documentElement, document.body, canvas.parentElement];
   // The game is drawn upright: its frame has no turn.
   const toGame = (event: PagePointerEvent) =>
-    pageToGame(0, canvas.getBoundingClientRect(), scene.scale.gameSize, clientPoint(event));
+    pageToGame(
+      pageFrameTurn(),
+      canvas.getBoundingClientRect(),
+      scene.scale.gameSize,
+      clientPoint(event),
+    );
   const press = ({ downTime, pointerId }: PagePress): Press => ({ downTime, id: -1 - pointerId });
   const remove = listenKitPagePresses(
     (event) => scene.sys.isActive() && scene.input.enabled && onBarePage(bare, event.target),

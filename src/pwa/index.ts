@@ -1,6 +1,6 @@
 // The game as an installed phone app: the service worker and its update plate, the screen wake
-// lock, the back gesture, visibility and orientation events, the turn-upright notice, audio
-// unlock, the install offer and persistent storage. setupPhoneApp runs once from main.ts; the
+// lock, the back gesture, visibility events, the page frame's turn and the orientation lock,
+// audio unlock, the install offer and persistent storage. setupPhoneApp runs once from main.ts; the
 // scenes listen for PHONE_EVENTS on window and call the functions below.
 import { appCannotClose } from "@andornaut/game-kit/pwa/appWindow";
 import {
@@ -24,11 +24,16 @@ import type { UpdateFlow } from "@andornaut/game-kit/pwa/updateReady";
 import { watchVisibility } from "@andornaut/game-kit/pwa/visibility";
 import { createScreenWakeLock, type ScreenWakeLock } from "@andornaut/game-kit/pwa/wakeLock";
 import { localSaveStorage } from "@andornaut/game-kit/save/storage";
+import {
+  type FrameTurnWatch,
+  lockGameOrientation,
+  watchFrameTurn,
+} from "@andornaut/game-kit/view/frameTurn";
+import type { FrameTurn } from "@andornaut/game-kit/view/pagePoint";
 
 import { chooseSoundFormat, type SoundFormat } from "../audio/soundFormat";
 import { dispatchPhoneEvent, PHONE_EVENTS } from "./events";
 import { createInstallNudge, type InstallNudge } from "./installNudge";
-import { type OrientationRelay, relayOrientationEvents, type Viewport } from "./orientation";
 
 export { AUDIO_UNLOCK_EVENTS, unlockAudioOnFirstGesture } from "./audioUnlock";
 export { PHONE_EVENTS } from "./events";
@@ -41,8 +46,6 @@ export {
 export type { StoragePersistence } from "@andornaut/game-kit/pwa/storagePersistence";
 
 const SERVICE_WORKER_URL = "/sw.js";
-// An element in pages/play/index.html.
-const TURN_UPRIGHT_ID = "turn-upright";
 
 // The sound format BootScene loads and the service worker precaches.
 export function browserSoundFormat(): SoundFormat | undefined {
@@ -54,7 +57,7 @@ export function browserSoundFormat(): SoundFormat | undefined {
 let leaveOffered = false;
 let installFlow: InstallFlow | undefined;
 let installNudge: InstallNudge | undefined;
-let orientation: OrientationRelay | undefined;
+let frameTurn: FrameTurnWatch | undefined;
 let persistence: Promise<StoragePersistence> = Promise.resolve("unsupported");
 let screenWakeLock: ScreenWakeLock | undefined;
 let updateFlow: UpdateFlow | undefined;
@@ -99,28 +102,6 @@ function registerServiceWorker(): void {
   ready = play.bootable;
 }
 
-function readViewport(): Viewport {
-  return {
-    coarsePointer: window.matchMedia("(pointer: coarse)").matches,
-    height: window.innerHeight,
-    width: window.innerWidth,
-  };
-}
-
-// The notice covers the game while the phone is on its side; RunScene pauses the walk.
-function showTurnUprightNotice(): void {
-  const notice = document.getElementById(TURN_UPRIGHT_ID);
-  if (notice === null) {
-    return;
-  }
-  window.addEventListener(PHONE_EVENTS.turnedSideways, () => {
-    notice.hidden = false;
-  });
-  window.addEventListener(PHONE_EVENTS.turnedUpright, () => {
-    notice.hidden = true;
-  });
-}
-
 // Sets up the service worker and the phone app's behaviour. The game is constructed at once and
 // waits on launchReady only for its first screen and its save.
 export function setupPhoneApp(): void {
@@ -139,8 +120,11 @@ export function setupPhoneApp(): void {
     window,
     document,
   );
-  showTurnUprightNotice();
-  orientation = relayOrientationEvents(readViewport, window);
+  // On a touch screen in landscape the page frame turns onto its side, so the portrait game
+  // stays upright for the device (the kit's frameTurnPortraitGame.css, imported by main.ts).
+  // Where the browser allows it, the installed app holds the screen in portrait instead.
+  frameTurn = watchFrameTurn(window, "portrait");
+  lockGameOrientation(screen, "portrait");
   // Read before the guard pushes any entry. An installed app that cannot close its window keeps
   // its own back, so the game never asks Quit? there.
   const closeWatcher = backCloseWatcher(navigator.userAgent, browserCloseWatcher());
@@ -180,9 +164,14 @@ export function exitShown(): boolean {
   return leaveOffered;
 }
 
-// Whether the phone is on its side now, with the turn-upright notice over the game.
-export function isPhoneSideways(): boolean {
-  return orientation?.sideways() ?? false;
+// The page frame's turn now: 0 upright, or -90 or 90 on a touch screen in landscape.
+export function pageFrameTurn(): FrameTurn {
+  return frameTurn?.turn() ?? 0;
+}
+
+// Calls listener on each change of the page frame's turn, until the returned function is called.
+export function onFrameTurnChange(listener: (turn: FrameTurn) => void): () => void {
+  return frameTurn?.onChange(listener) ?? (() => undefined);
 }
 
 // Keep the screen on while the game is visible.

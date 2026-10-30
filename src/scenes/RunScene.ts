@@ -34,7 +34,7 @@ import {
   type ZoneCelebration,
   zoneCelebration,
 } from "../hud/zoneCelebration";
-import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
+import { onFrameTurnChange, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
 import { type CardView, type Choice, outcomeChanges } from "../rules/choices";
 import { currentZone, currentZoneId, previousZone, previousZoneId } from "../rules/route";
 import { screenRoadGeometry } from "../runner/screenGeometry";
@@ -222,10 +222,8 @@ export class RunScene extends Scene implements HudRun {
       this.resume(resume);
     }
     this.draw();
-    // A phone already on its side, as when a walk starts from the page's URL, gets no
-    // turned-sideways event, so the walk opens paused under the turn-upright notice. A resumed
-    // walk opens paused, for the player to resume when ready.
-    if (resume !== undefined || isPhoneSideways()) {
+    // A resumed walk opens paused, for the player to resume when ready.
+    if (resume !== undefined) {
       this.openPause();
     }
   }
@@ -339,8 +337,8 @@ export class RunScene extends Scene implements HudRun {
     };
   }
 
-  // A hidden tab or a window out of focus pauses the walk under the pause menu, which stays
-  // when the page comes back, so the walk resumes only on Resume.
+  // A hidden tab, a window out of focus or the page frame turning pauses the walk under the pause
+  // menu, which stays when the page comes back, so the walk resumes only on Resume.
   private listen(): void {
     // The run scene hears back before any overlay launched over it, so it reads the overlays as
     // they were when back was pressed; help and the settings close themselves.
@@ -372,7 +370,6 @@ export class RunScene extends Scene implements HudRun {
       }
     };
     const onVisible = () => this.world?.menus.setPageHidden(false);
-    const onSideways = () => this.openPause();
     const onBlur = () => {
       this.world?.input.dropPress();
       this.world?.menus.setPageBlurred(true);
@@ -384,7 +381,12 @@ export class RunScene extends Scene implements HudRun {
     onWindowEvent(this, PHONE_EVENTS.appHidden, onHidden);
     onWindowEvent(this, PHONE_EVENTS.appVisible, onVisible);
     onWindowEvent(this, PHONE_EVENTS.backPressed, onBack);
-    onWindowEvent(this, PHONE_EVENTS.turnedSideways, onSideways);
+    // The page frame turning (the device turned between portrait and landscape) moves the whole
+    // game on the screen, so the walk pauses as when the page loses focus.
+    this.events.once(
+      "shutdown",
+      onFrameTurnChange(() => this.openPause()),
+    );
     this.events.once("shutdown", () => stopWakeLock());
   }
 

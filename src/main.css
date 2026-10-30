@@ -1,5 +1,7 @@
 /* The game page's layout: the nav bar, the game and the dev panel stacked in one screen. The
-   installed app shows neither the nav bar nor the dev panel. */
+   installed app shows neither the nav bar nor the dev panel. On a touch screen in landscape the
+   kit's frameTurnPortraitGame.css turns body onto its side, so the safe-area insets here are its
+   --inset-* ones, on the turned frame's own edges. */
 
 :root {
   --dev-bar-height: 24px;
@@ -27,7 +29,7 @@ body {
   display: flex;
   flex-direction: column;
   /* The top element, the nav bar or else the game, clears the status bar and notch. */
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: var(--inset-top);
   box-sizing: border-box;
 }
 
@@ -38,7 +40,14 @@ body {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  margin: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
+  margin: 0 var(--inset-right) 0 var(--inset-left);
+}
+
+/* In the turned frame Phaser leaves the canvas's placement to the page: at #game's top, centred
+   across, as Phaser places it upright. */
+html[data-frame-turn] #game > canvas {
+  display: block;
+  margin: 0 auto;
 }
 
 /* The dev panel, under the game: only its bar's height comes out of #game's, and it takes
@@ -47,7 +56,7 @@ body {
 #dev-panel {
   flex: none;
   height: var(--dev-bar-height);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: var(--inset-bottom);
 }
 
 /* The page starts the panel hidden and only a browser tab mounts it. Without it, #game takes
@@ -57,7 +66,7 @@ body {
 }
 
 body:has(#dev-panel[hidden]) #game {
-  margin-bottom: env(safe-area-inset-bottom, 0px);
+  margin-bottom: var(--inset-bottom);
 }
 
 /* With the sheet open, body scrolls down to it. Drags on the game still steer. */
@@ -81,44 +90,4 @@ body:has(.dev-sheet:not([hidden])) #game {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
-}
-
-/* The turn-upright notice covers the whole page, nav bar included, while a phone is on its
-   side. Colours from the game's palette. */
-.turn-upright {
-  position: fixed;
-  inset: 0;
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
-    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
-  background: #181425;
-  color: #ead4aa;
-  font:
-    600 20px/1.3 system-ui,
-    sans-serif;
-  text-align: center;
-}
-
-.turn-upright p {
-  margin: 0;
-}
-
-.turn-upright-phone {
-  width: 48px;
-  height: 80px;
-  fill: #feae34;
-  shape-rendering: crispEdges;
-}
-
-.turn-upright-phone .turn-upright-screen {
-  fill: #3e2731;
-}
-
-.turn-upright[hidden] {
-  display: none;
 }
