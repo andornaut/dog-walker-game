@@ -15,7 +15,7 @@ broken far rim, murky water, a lit near lip with a slab tipped in and lit cracks
 outline; the skunk's stink haze (112x60) is a
 ground decal laid out on an 88x40 design and stretched to its frame on the drawn grid. All
 are chibi and in Endesga 32 with coloured outlines. The walker is seen from behind, like the
-dogs, except in wave and cheer; everything coming down the road faces the player:
+dogs, except in wave, cheer and Mr. B's phone; everything coming down the road faces the player:
 jogger (48x72, run: 4 frames at 100ms, a knee driven up, then that foot passing
 down, each side in turn, the ponytail swinging out from behind the head) wears
 an orange racerback singlet with a white race bib on its front; kid-on-a-bike
@@ -34,8 +34,11 @@ shoes) are on row 68 (Ada's on row 69), and the hands' top rows 20 above them, t
 16 left and 16 right of the centre column (x 24). Then cheer (4 frames, 120ms, looping), drawn at 2x in the
 zone celebration: the front view with the hanging arm taken off and both arms raised from the
 shoulders in a V, the hands 1, 3, 4 and 3 design pixels out; a 2px crouch, a hop 2px and 3px up,
-then a 1px landing. Trista's tote stays on her shoulder. What stands on the road
-is a billboard seen from the walker's eye, as roadside objects in OutRun are: a
+then a 1px landing. Trista's tote stays on her shoulder.
+Mr. B also has phone (4 frames, 400ms, looping), appended after cheer: feet planted,
+head bowed toward a phone held at his chest, breathing and tapping with one thumb.
+His new-walker welcome uses phone while the celebration plays around him.
+What stands on the road is a billboard seen from the walker's eye, as roadside objects in OutRun are: a
 front elevation (the ice cream truck a rear one, like obstacles.parked_car),
 with no top surface and its base on the last opaque row.
 
@@ -641,6 +644,55 @@ def mr_b_front(wave=0, bob=0):
     g.rect(14, 17 + b, 4, 1, "cream")
     g.p(13, 16 + b, "cream")
     g.p(18, 16 + b, "cream")
+    return rim(g, dict(navy=("grey", "grey"), violet=("lilac", None), dbrown=("skin2", "brown"),
+                       plum=("skin2", "brown"), ink=("grey", "slate")))
+
+
+def mr_b_phone(tap=0, bob=0):
+    """Mr. B absorbed in his phone: bowed bald head, eyes down, both elbows bent, feet planted."""
+    g = Grid(32, 48)
+    b = bob
+    for x in (11, 17):
+        g.rect(x, 33 + b, 4, 10 - b, "navy")
+        g.rect(x + (0 if x < 16 else 3), 33 + b, 1, 10 - b, "grey")
+        g.rect(x, 43, 4, 2, "white")
+        g.rect(x, 44, 4, 1, "lgrey")
+        g.rect(x + 1, 43, 2, 1, "red")
+    # The sleeves slope into low elbows; both forearms turn inward to the handset.
+    g.rect(7, 24 + b, 5, 5, "lilac")
+    g.rect(22, 24 + b, 4, 5, "violet")
+    g.rect(9, 23 + b, 14, 11, "lilac")
+    g.rect(20, 23 + b, 3, 11, "violet")
+    g.rect(13, 22 + b, 6, 3, "plum")
+    g.rect(7, 29 + b, 4, 4, "dbrown")
+    g.rect(8, 32 + b, 7, 3, "dbrown")
+    g.rect(9, 34 + b, 6, 1, "plum")
+    g.rect(22, 29 + b, 4, 4, "dbrown")
+    g.rect(21, 32 + b, 4, 3, "dbrown")
+    g.rect(24, 29 + b, 2, 4, "plum")
+    # More scalp above the low-set eyes and the chin tucked into the collar show the downward gaze.
+    g.rect(8, 17 + b, 2, 3, "dbrown")
+    g.rect(22, 17 + b, 2, 3, "plum")
+    face_disc(g, 16, 16 + b, 7, 8, "dbrown", "plum")
+    g.rect(11, 11 + b, 3, 1, "brown")
+    g.p(11, 12 + b, "brown")
+    g.rect(10, 20 + b, 1, 3, "ink")
+    g.rect(21, 20 + b, 1, 3, "ink")
+    g.cel(16, 23 + b, 5.5, 2, "ink")
+    for x in (12, 18):
+        g.rect(x, 19 + b, 3, 1, "plum")
+        g.rect(x + 1, 20 + b, 2, 1, "ink")
+    g.rect(16, 21 + b, 2, 1, "plum")
+    g.rect(15, 23 + b, 3, 1, "dbrown")
+    # A dark case, pale blue screen and earpiece read as a phone without small screen text.
+    g.rect(14, 26 + b, 8, 11, "ink")
+    g.rect(15, 27 + b, 6, 8, "foam")
+    g.rect(15, 32 + b, 6, 3, "shallow")
+    g.rect(16, 27 + b, 3, 1, "dslate")
+    g.rect(17, 36 + b, 2, 1, "grey")
+    g.rect(12, 30 + b, 3, 4, "dbrown")
+    g.rect(21, 30 + b, 3, 4, "dbrown")
+    g.rect(19 - tap, 31 + b, 3, 2, "brown")
     return rim(g, dict(navy=("grey", "grey"), violet=("lilac", None), dbrown=("skin2", "brown"),
                        plum=("skin2", "brown"), ink=("grey", "slate")))
 
@@ -1912,13 +1964,17 @@ def sprites():
         def pose(**q):
             return edged(big(draw, **q))
 
-        yield key, [("walk", frames(pose(**q) for q in WALKER_WALK), 160),
+        tags = [("walk", frames(pose(**q) for q in WALKER_WALK), 160),
                     ("react", frames(pose(**q) for q in WALKER_REACT), 120),
                     ("stumble", frames(lean(pose(**q), k) for k, q in WALKER_STUMBLE), 90),
                     ("idle", frames(pose(**q) for q in WALKER_IDLE), BREATH_MS),
                     ("wave", frames(edged(big(WAVES[key], wave=w)) for w in WALKER_WAVE), WALKER_WAVE_MS),
                     ("cheer", [hopped(edged(big(cheering, key, swing, bob=crouch)).outlined(), hop)
                                for crouch, swing, hop in WALKER_CHEER], WALKER_CHEER_MS)]
+        if key == "walker-mr-b":
+            tags.append(("phone", frames(edged(big(mr_b_phone, tap=tap, bob=bob))
+                                         for tap, bob in ((0, 0), (1, 0), (1, -1), (0, -1))), 400))
+        yield key, tags
     yield "treat", [("idle", frames(big(treat, **q) for q in TREAT_IDLE), 400)]
     yield "tip", [("idle", frames(big(tip, rx) for rx in (5.5, 3.5, 1, 3.5)), 120)]
     yield "skunk", [("idle", frames(big(skunk, **q) for q in SKUNK_IDLE), 300),

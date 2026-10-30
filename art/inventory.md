@@ -20,6 +20,8 @@ Road sprites have depth variants `<key>@94`, `@88`, `@81`, `@75`, `@69`, `@62`, 
 | `portrait-walker-<name>` | image  | 64×64               |                                                     | Walker detail card; ada, casey, mr-b, trista                                                                                                                          |
 | `walker-<name>`          | sprite | 48×72               | `walk`, `react`, `stumble`, `idle`, `wave`, `cheer` | ada, casey, mr-b, trista; `wave` and `cheer` face the camera; `cheer` is the zone celebration's, drawn at 2×                                                          |
 
+`walker-mr-b` also has `phone`: 4 frames at 400ms, drawn at 2× for his new-walker welcome. He looks down at the phone in his hands while the celebration plays around him.
+
 ## Road objects
 
 | Key                              | Type   | Size   | Tags                                             | Note                                                                                                                                                 |

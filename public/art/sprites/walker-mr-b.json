@@ -158,6 +158,38 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
     "sourceSize": { "w": 48, "h": 72 },
     "duration": 120
+   },
+   "walker-mr-b 20.aseprite": {
+    "frame": { "x": 960, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 400
+   },
+   "walker-mr-b 21.aseprite": {
+    "frame": { "x": 1008, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 400
+   },
+   "walker-mr-b 22.aseprite": {
+    "frame": { "x": 1056, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 400
+   },
+   "walker-mr-b 23.aseprite": {
+    "frame": { "x": 1104, "y": 0, "w": 48, "h": 72 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 72 },
+    "sourceSize": { "w": 48, "h": 72 },
+    "duration": 400
    }
  },
  "meta": {
@@ -165,7 +197,7 @@
   "version": "1.2.30-x64",
   "image": "walker-mr-b.png",
   "format": "RGBA8888",
-  "size": { "w": 960, "h": 72 },
+  "size": { "w": 1152, "h": 72 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
@@ -173,7 +205,8 @@
    { "name": "stumble", "from": 6, "to": 9, "direction": "forward" },
    { "name": "idle", "from": 10, "to": 11, "direction": "forward" },
    { "name": "wave", "from": 12, "to": 15, "direction": "forward" },
-   { "name": "cheer", "from": 16, "to": 19, "direction": "forward" }
+   { "name": "cheer", "from": 16, "to": 19, "direction": "forward" },
+   { "name": "phone", "from": 20, "to": 23, "direction": "forward" }
   ]
  }
 }

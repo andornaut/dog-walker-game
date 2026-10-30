@@ -250,6 +250,8 @@ One word per moment, 2 to 7 letters, readable at 1×, built like the yard sign's
 
 After zones 1 to 3, over the road view dimmed as under a card: the walker cheers at 2× in front of `ui-celebrate-burst` while about 60 `fx-confetti-bit` fall, under a big line in `font-display` at 2× and a small one in `font-display-cream`. Text on the bubble and the plate is plum on cream, money forest. The layout is in `src/hud/celebrationLayout.ts`. With reduced motion there is no confetti and the walker shows `cheer` frame 0 in place.
 
+Mr. B's new-walker welcome uses `walker-mr-b`'s `phone` tag at 2×: his feet stay planted, his head bows and his eyes stay on the phone held at his chest, with a small breath and thumb tap. The starburst and confetti celebrate around him. With reduced motion he holds `phone` frame 0.
+
 ## Badges
 
 `badge-<achievement>` medals are 32×32: a ring in the tier colour around a cream face with the goal's emblem (`art/tools/badges.py`). No two badges share a motif, so all 41 read apart at 1× on the badge wall's cream panel. Each emblem is one object, with no scene or filler round it, and shows only what is in the game.
