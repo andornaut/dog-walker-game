@@ -1,12 +1,12 @@
 # Controls
 
-The normal-form specification for in-game controls. [`gameplay/design.md`](../gameplay/design.md) is canonical for gameplay semantics and player wording. The [style guide](style-guide.md) owns the wider art direction, and the [inventory](inventory.md) owns exported asset sizes and tags.
+The normal-form specification for controls across the application: the Phaser game, website, data browser, developer panel, crash screen and art gallery. [`gameplay/design.md`](../gameplay/design.md) is canonical for gameplay semantics and player wording. The [style guide](style-guide.md) owns the wider art direction, and the [inventory](inventory.md) owns exported asset sizes and tags.
 
 **Implemented** means verified in the control primitives and input handlers. **Approved target** means an approved design requirement; integration and deployment must be verified separately. **Proposed pending** means a choice has not been approved. No proposed colours, sizes or control types are introduced here.
 
 ## Scope and exceptions
 
-This guide covers the Phaser canvas game: actions, navigation icons, item selection, settings switches, sliders and their labels. The website, data browser and developer panel have separate DOM controls.
+All surfaces share button roles, palette, borders, raised and pressed feedback, readable disabled states and visible keyboard focus. The Phaser game draws its controls on canvas; the website and tools retain native DOM controls and responsive layouts. Selection controls, colour swatches, switches and sliders preserve their content and semantics instead of becoming ordinary action buttons.
 
 | Control                       | Reason for exception                                                   | Retained rules                                                                                                                    |
 | ----------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -21,7 +21,7 @@ This guide covers the Phaser canvas game: actions, navigation icons, item select
 
 ## Design tokens
 
-Dimensions are base game pixels; the game renders at 360×560 with pixel scaling. Names below identify specification tokens, not additional code constants.
+Canvas dimensions are base game pixels; the game renders at 360×560 with pixel scaling. DOM dimensions are CSS pixels, with responsive widths. Names below identify specification tokens, not additional code constants.
 
 | Name                  | Value             | Unit | Purpose                   | Status      |
 | --------------------- | ----------------- | ---- | ------------------------- | ----------- |
@@ -43,6 +43,7 @@ Palette names and ramps come from [`shared/palette.json`](../shared/palette.json
 | --------------- | ------------- | ------- | -------------------------------------------- | ------------------------------------------------ |
 | compact.height  | 44            | px      | Text-button target height                    | Implemented; approved target                     |
 | compact.width   | 128           | px      | Compact text button                          | Implemented; approved target                     |
+| dom.hit         | 44×44         | CSS px  | Minimum native button/link target            | Approved target; implemented in art gallery      |
 | end.button.y    | 514           | px      | Back to title top; preserves the badge panel | Implemented; approved to retain                  |
 | icon.face       | 20×20         | px      | Navy chrome face                             | Implemented                                      |
 | icon.glyph      | 16×16         | px      | Chrome glyph                                 | Implemented                                      |
@@ -56,9 +57,9 @@ Palette names and ramps come from [`shared/palette.json`](../shared/palette.json
 | wide.height     | 44            | px      | Wide text-button height                      | Implemented                                      |
 | wide.width      | 296           | px      | Wide text button                             | Implemented; approved target                     |
 
-Use the wide token for a screen or modal's main text action and the compact token for secondary or paired text actions. Paired controls use `pair.gap`. Preserve the same text size; grow the available room, wrap where the role allows, or change wording in the text data when necessary.
+Use the wide token for a screen or modal's main text action and the compact token for secondary or paired text actions. Paired controls use `pair.gap`. These fixed rectangles apply to the canvas; DOM controls keep responsive widths and a minimum 44px target while sharing the role colours, border/lip and 2px depression. Preserve the same text size; grow the available room, wrap where the role allows, or change wording in the text data when necessary.
 
-Start walk has 32px side margins, about 4px above and 6px below. Back to title keeps its approved `end.button.y` and existing bob; the end background is unchanged. Icon artwork stays centred in its target. The visible icon face and the hit target are separate rectangles.
+Start walk has 32px side margins, about 4px above and 6px below. Back to title keeps its approved `end.button.y` and existing bob. Icon artwork stays centred in its target. The visible icon face and the hit target are separate rectangles.
 
 The start-screen section outline is one plum pixel. Keep the existing `ui-section` nine-slice caps: left/right 3px, top 24px, bottom 3px. Fill section backing to a 1px inset. Solid backing and distinct neutral headings use the approved treatment:
 
@@ -73,6 +74,8 @@ A complete section has an amber heading and ink title/note. Dogs show their coun
 ## Button roles and states
 
 Role and state are independent. Primary is a role, pressed is a transient state, and selected belongs to selection controls. The code's `normal` button look renders as the secondary cream role.
+
+The table records the canvas primitives. Its role palette and state feedback are also approved for DOM controls; verify each surface's stylesheet rather than inferring its implementation from a shared token.
 
 | Role/state         | Fill                                | Label/icon                            | Border and highlight              | Geometry                          | Status                                 |
 | ------------------ | ----------------------------------- | ------------------------------------- | --------------------------------- | --------------------------------- | -------------------------------------- |
@@ -90,7 +93,7 @@ Text-button chrome and disabled rendering are implemented in [`selection.ts`](..
 
 ## Labels and icons
 
-Use `font-title` for buttons, headings and numbers, and `font-body` for body/help text. [`textFit.ts`](../src/ui/textFit.ts) fixes role scales: never shrink a label to fit. Keep the label/help ink gap, centre an action label on its face, and move the label with the pressed face.
+Use `font-title` for canvas buttons, headings and numbers, and `font-body` for body/help text. [`textFit.ts`](../src/ui/textFit.ts) fixes role scales: never shrink a label to fit. DOM controls retain their existing readable fonts and native labels. Keep the label/help ink gap, centre an action label on its face, and move the label with the pressed face.
 
 All player-facing strings, including names, labels, prices, goals, unavailable reasons and explanations, come from the text data in [`src/data/`](../src/data/). Follow the rulebook's [Voice](../gameplay/design.md#voice): Canadian spelling and one consistent name and label per thing. Reword the data consistently or grow the box; never shrink text or use a local shortened alias.
 
@@ -102,7 +105,7 @@ Unavailable controls keep their readable price, goal or reason and the existing 
 
 ## Selection controls
 
-These are canvas controls. Checkbox-like and radio-like describe their game semantics; they are not native HTML widgets.
+The game controls below are canvas controls. Checkbox-like and radio-like describe their game semantics; they are not native HTML widgets. DOM surfaces retain native buttons, checkboxes, radios and sliders, including their keyboard behaviour and accessible state. A filter's selected state does not turn it into a primary action; palette swatches retain their actual colour samples.
 
 | Control                                    | Value semantics                                                                             | States                                                                              | Drawn size                          | Label and placement                                        | Press area                              | Keyboard                                                             | Status                     |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------- | ---------------------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------- | -------------------------- |
@@ -134,6 +137,8 @@ Source contracts: [`interaction.ts`](../src/ui/interaction.ts), [`home.ts`](../s
 
 The game shell supplies an accessible game label and control instructions. Individual canvas buttons, tiles and switches do not currently expose native DOM roles, checked state, indeterminate state or per-control ARIA semantics. Keyboard support does not imply those capabilities are implemented.
 
+DOM buttons retain native Tab and Enter/Space behaviour, visible focus, meaningful labels, `disabled` where unavailable and `aria-pressed` where they toggle selection. Disabled labels remain readable instead of fading the whole control.
+
 ## Asset and code contract
 
 | Asset                   | Role/state tags                                                                                      | Contract                                                                      |
@@ -150,6 +155,8 @@ The `ui-section` exports and `HOME_LAYOUT.sectionLooks` use the same section tag
 
 Edit generators in [`art/tools/ui.py`](tools/ui.py) and [`art/tools/screens.py`](tools/screens.py), then regenerate their owned exports. [`uiKit.ts`](../src/scenes/uiKit.ts) maps roles to art tags and supplies matching code fallbacks; [`buttonGeometry.ts`](../src/ui/buttonGeometry.ts) owns common sizing, gaps and press offsets. [`pauseMenu.ts`](../src/hud/pauseMenu.ts) and [`purchaseConfirmLayout.ts`](../src/home/purchaseConfirmLayout.ts) are button-layout callers. Layout, hit areas and input belong to their source owners; player wording lives in the text data. Do not bake new control text into art or add a special button shape for a single caller without an approved exception.
 
+The [art gallery](../public/art/index.html) applies the same secondary chrome to its filters, animation tags, copy buttons and action-styled navigation links. Selected filters and tags keep a yellow face, amber inner frame and checkmark. Palette samples and chosen viewing grounds retain their actual colours. DOM styles preserve native button/link semantics and responsive layout; they do not substitute canvas event handlers.
+
 ## Review checklist
 
 - Check the control's role, semantic state and availability separately, including its readable price, goal or unavailable reason.
@@ -165,4 +172,4 @@ Edit generators in [`art/tools/ui.py`](tools/ui.py) and [`art/tools/screens.py`]
 
 No open design decision is recorded for the approved start-screen and button standard. The compact top-bar exception, retained end-button position, modal update notice and shorter loading wording are approved. Deployment verification remains separate.
 
-Native per-control accessibility semantics and additional selection states are not implemented or authorized by this guide. New proposals require a separate decision before implementation.
+Native per-control accessibility semantics for canvas controls and additional canvas selection states are not implemented or authorized by this guide. New proposals require a separate decision before implementation.
