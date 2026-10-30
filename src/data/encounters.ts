@@ -335,7 +335,7 @@ export const ENCOUNTERS = {
         },
         {
           art: "card-thief-give-chase",
-          effects: [{ amount: -1, kind: "hearts", target: { kind: "lead" } }],
+          effects: [{ debuff: "spotlight", kind: "debuff" }],
           id: "giveChase",
           name: "Dogs give chase",
         },

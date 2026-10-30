@@ -335,7 +335,7 @@
         "id": "thief",
         "kind": "encounter"
       },
-      "text": "−1♥ to the lead dog's owner",
+      "text": "Spotlight: bumps cost $10 for 60s",
       "title": "Thief"
     },
     {
@@ -1462,11 +1462,8 @@
             "art": "card-thief-give-chase",
             "effects": [
               {
-                "amount": -1,
-                "kind": "hearts",
-                "target": {
-                  "kind": "lead"
-                }
+                "debuff": "spotlight",
+                "kind": "debuff"
               }
             ],
             "id": "giveChase",
