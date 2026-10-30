@@ -190,10 +190,10 @@ export const HOME_LAYOUT = {
     },
     walker: {
       fill: "brown",
-      heading: "ink",
-      neutral: "tan",
+      heading: "cream",
+      neutral: "darkBrown",
       neutralTag: "neutral-walker",
-      note: "ink",
+      note: "amber",
     },
   },
   // Under the gate, three framed sections top to bottom (walker, dogs, pocket), each a

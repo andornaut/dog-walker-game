@@ -1823,10 +1823,10 @@
         },
         "walker": {
           "fill": "brown",
-          "heading": "ink",
-          "neutral": "tan",
+          "heading": "cream",
+          "neutral": "darkBrown",
           "neutralTag": "neutral-walker",
-          "note": "ink"
+          "note": "amber"
         }
       },
       "sections": {
