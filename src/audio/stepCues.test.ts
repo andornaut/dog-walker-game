@@ -91,7 +91,15 @@ const CASES: readonly Case[] = [
     name: "a dodged bump",
   },
   ...(
-    ["barrelStack", "busker", "frisbeeDog", "seagull", "signSpinner", "stiltWalker"] as const
+    [
+      "barrelStack",
+      "busker",
+      "frisbeeDog",
+      "seagull",
+      "signSpinner",
+      "stiltWalker",
+      "trashCan",
+    ] as const
   ).map((id): Case => ({
     cue: "bump",
     item: atPack(id),

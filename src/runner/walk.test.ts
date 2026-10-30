@@ -989,6 +989,7 @@ describe("stepWalk", () => {
     { debuff: "stinky", obstacle: "seagull" },
     { debuff: "zoomies", obstacle: "signSpinner" },
     { debuff: "spotlight", obstacle: "stiltWalker" },
+    { debuff: "stinky", obstacle: "trashCan" },
   ] as const;
   it("lists every minor obstacle with contact", () => {
     expect(MINOR_CONTACTS.map(({ obstacle }) => obstacle)).toEqual(
