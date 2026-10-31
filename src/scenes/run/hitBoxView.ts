@@ -4,7 +4,7 @@ import { gameData } from "../../data";
 import { project, screenXAt, screenYAt } from "../../layout/projection";
 import type { Box, ScaledBox } from "../../runner/collision";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
-import { obstacleHitBox, packBoxes, type Walk, walkItemBox } from "../../runner/walk";
+import { obstacleHitBoxes, packBoxes, type Walk, walkItemBox } from "../../runner/walk";
 import { isObstacle } from "../../runner/walkItems";
 import { PALETTE } from "../../ui/palette";
 import { DEPTH, LAYOUT, PROJECTION } from "./stage";
@@ -44,7 +44,9 @@ export class HitBoxView {
       if (!isObstacle(gameData, item.kind)) {
         this.onRoad(walkItemBox(geometry, item));
       } else {
-        this.asDrawn(obstacleHitBox(gameData, geometry, item));
+        for (const box of obstacleHitBoxes(gameData, geometry, item)) {
+          this.asDrawn(box);
+        }
       }
     }
   }

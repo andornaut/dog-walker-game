@@ -139,6 +139,86 @@ export function hitDog<Dog extends string>(pack: PackBoxes<Dog>, box: LanedBox):
   return (nearestOf(touched, contactPoint(pack.outline, box)) ?? front).dog;
 }
 
+// The first positive-overlap interval while each boundary moves between its endpoints.
+// Strict inequalities exclude an edge-only contact and a single instantaneous tangent.
+export function sweptOverlapAt(from: readonly number[], to: readonly number[]): number | null {
+  let enter = 0;
+  let leave = 1;
+  for (const [index, before] of from.entries()) {
+    const after = to[index] ?? before;
+    const change = after - before;
+    if (change === 0) {
+      if (before <= 0) {
+        return null;
+      }
+    } else if (change > 0) {
+      enter = Math.max(enter, -before / change);
+    } else {
+      leave = Math.min(leave, -before / change);
+    }
+    if (enter >= leave) {
+      return null;
+    }
+  }
+  return enter;
+}
+
+function contactGaps(centreX: number, part: ScaledBox, box: LanedBox): number[] {
+  const across = (scale: number, x: number) => screenXAt({ centreX }, scale, x);
+  const left = [
+    across(box.scale, box.left),
+    across(part.scale, box.lanes.left),
+    across(part.scale, part.left),
+  ];
+  const right = [
+    across(box.scale, box.right),
+    across(part.scale, box.lanes.right),
+    across(part.scale, part.right),
+  ];
+  return [
+    ...right.flatMap((edge) => left.map((other) => edge - other)),
+    part.bottom - box.top,
+    box.bottom - part.top,
+  ];
+}
+
+// One moving component against the moving pack, without joining separate components or
+// unrelated positions into one rectangle. Call separately for each turn-partitioned sweep.
+export function sweptHitDog<Dog extends string>(
+  before: PackBoxes<Dog>,
+  after: PackBoxes<Dog>,
+  from: LanedBox,
+  to: LanedBox,
+): Dog | null {
+  const initial = hitDog(before, from);
+  if (initial !== null) {
+    return initial;
+  }
+  const front = before.dogs[0];
+  if (front === undefined) {
+    return null;
+  }
+  const parts = [
+    ...before.dogs.map((part, index) => ({
+      after: after.dogs[index] ?? part,
+      before: part,
+      dog: part.dog,
+    })),
+    { after: after.walker, before: before.walker, dog: front.dog },
+  ];
+  let first: { at: number; dog: Dog } | undefined;
+  for (const part of parts) {
+    const at = sweptOverlapAt(
+      contactGaps(before.centreX, part.before, from),
+      contactGaps(after.centreX, part.after, to),
+    );
+    if (at !== null && (first === undefined || at < first.at)) {
+      first = { at, dog: part.dog };
+    }
+  }
+  return first?.dog ?? null;
+}
+
 // graced picks the items, such as obstacles, ignored while the window is open; other items,
 // such as pickups, are always collected. startsInvulnerability is asked once for each graced
 // item hit, in hit order, whether its hit opens the window: a hit that is only scenery does not.

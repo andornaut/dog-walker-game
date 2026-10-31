@@ -22,9 +22,10 @@ import { obstacleParts } from "../../layout/obstacleArt";
 import { herringNow } from "../../road/herrings";
 import { type KeptScenery, struckBy, struckNow } from "../../road/struckScenery";
 import { goesToVerge, vergeNow } from "../../road/vergeScenery";
-import { moverTell } from "../../runner/movers";
+import { type MoverOnRoad, moverTell } from "../../runner/movers";
 import { minorLooks } from "../../runner/obstacleLooks";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
+import { signaturePlace } from "../../runner/signaturePaths";
 import type { SpawnEvent } from "../../runner/spawning";
 import { type RoadGeometry, type Walk, type WalkStep } from "../../runner/walk";
 import { walkGeometry } from "../../runner/walkGeometry";
@@ -195,7 +196,7 @@ export class ItemViews {
       shown.add(herring);
       const view = getOrInsertComputed(
         herring,
-        () => ({ parts: this.moverParts(herring.kind) }),
+        () => ({ parts: this.moverParts(undefined, herring.kind) }),
         this.herrings,
       );
       drawMover(item, view, geometry.roadTop, halted, frame);
@@ -255,7 +256,19 @@ export class ItemViews {
   private drawStruck(walk: Walk, geometry: RoadGeometry, frame: StandFrame): void {
     const { roadBottom, roadTop } = geometry;
     for (const [id, kept] of this.struck) {
-      const item = struckNow(roadBottom, walk.run, kept.struck);
+      const { mover } = kept.struck.item;
+      const route = mover?.path.motion === "signature" ? mover.path.route : undefined;
+      const leader =
+        route === undefined || mover === undefined ? undefined : signaturePlace(route, mover.since);
+      const behind =
+        route === undefined || mover === undefined || leader === undefined
+          ? 0
+          : Math.max(
+              ...route.componentDelays.map(
+                (_, component) => leader.y - signaturePlace(route, mover.since, component).y,
+              ),
+            );
+      const item = struckNow(roadBottom + behind, walk.run, kept.struck);
       const { parts } = kept.view;
       if (item === null) {
         parts.forEach(({ sprite }) => sprite.destroy());
@@ -306,7 +319,7 @@ export class ItemViews {
     const part = this.partMaker(item.kind);
     let parts: ItemPart[];
     if (item.mover !== undefined) {
-      parts = this.moverParts(item.kind);
+      parts = this.moverParts(item.mover, item.kind);
     } else if (item.kind === "tip" || item.kind === "treat") {
       parts = [part(item.kind)];
     } else if (lucky) {
@@ -351,11 +364,24 @@ export class ItemViews {
   }
 
   // A mover's sprites: its body, its cue's sign, arrow and wander mark, then its other parts.
-  private moverParts(item: WalkItemKind): ItemPart[] {
+  private moverParts(mover: MoverOnRoad | undefined, item: WalkItemKind): ItemPart[] {
     const { scene } = this;
     const has = (key: string) => scene.textures.exists(key);
     const part = this.partMaker(item);
     const kind = item as EncounterId | MinorObstacleId;
+    if (mover?.path.motion === "signature" && mover.path.route.profile.kind === "delayedTrail") {
+      const { route } = mover.path;
+      const profile = route.profile;
+      if (profile.kind === "delayedTrail") {
+        return [
+          part(profile.spriteKey),
+          part(WARNING_KEY),
+          part(WARNING_ARROW_KEY),
+          part(WARNING_WANDER_KEY),
+          ...route.componentDelays.slice(1).map(() => part(profile.spriteKey)),
+        ];
+      }
+    }
     const body = moverBodyKey(scene, kind);
     const drawn = obstacleParts(gameData, has, kind, true);
     const behind = drawn.find(({ key }) => key === body)?.behind ?? 0;

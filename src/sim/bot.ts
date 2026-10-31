@@ -5,15 +5,16 @@ import { chance, type Random } from "@andornaut/game-kit/random";
 import type { DebuffId, DogId } from "../data/types";
 import { type LaneDirection, laneMask } from "../layout/lanes";
 import { type RoadProjection, screenXAt } from "../layout/projection";
-import type { LanedBox, ScaledBox } from "../runner/collision";
+import { type LanedBox, type ScaledBox, sweptOverlapAt } from "../runner/collision";
 import { type LaneControl, steerLane } from "../runner/laneControl";
 import { hasLeftRoad, laneAt, type MoverPath, moverPlace, moverY } from "../runner/movers";
 import { moverOutcomes } from "../runner/outcomes";
 import { contactWindow, type PullEvent, type Pulls } from "../runner/pulls";
+import { signatureAlive } from "../runner/signaturePaths";
 import {
   laneMotionConfig,
   laneMoveSeconds,
-  obstacleHitBox,
+  obstacleHitBoxes,
   pickupReach,
   type RoadGeometry,
   steerWalk,
@@ -199,21 +200,12 @@ type Edge = readonly [number, number];
 // Whether, at some moment between two samples, every pair's first edge is before its second, as
 // each edge moves evenly from one sample to the next.
 function holdTogether(pairs: readonly (readonly [Edge, Edge])[]): boolean {
-  let start = 0;
-  let end = 1;
-  for (const [before, after] of pairs) {
-    const gapFrom = after[0] - before[0];
-    const gapTo = after[1] - before[1];
-    if (gapFrom <= 0 && gapTo <= 0) {
-      return false;
-    }
-    if (gapFrom <= 0) {
-      start = Math.max(start, gapFrom / (gapFrom - gapTo));
-    } else if (gapTo <= 0) {
-      end = Math.min(end, gapFrom / (gapFrom - gapTo));
-    }
-  }
-  return start < end;
+  return (
+    sweptOverlapAt(
+      pairs.map(([before, after]) => after[0] - before[0]),
+      pairs.map(([before, after]) => after[1] - before[1]),
+    ) !== null
+  );
 }
 
 // Whether a mover moving from one sample to the next touches a part as drawn at some moment
@@ -327,29 +319,46 @@ function sampleContacts(
   // The contact under way in each lane, by lane. Between lanes, a mover's box can touch the
   // pack standing in either lane it straddles.
   const current = new Map<number, ScrollContact>();
-  let previous: MoverSample | null = null;
+  let previous: readonly MoverSample[] = [];
   for (let since = 0; since < MOVER_SCROLL_MAX; since += MOVER_SAMPLE_SCROLL) {
     const place = moverPlace(laneCount, path, since);
     const y = moverY(roadTop, height, place);
-    if (hasLeftRoad(laneCount, place) || y >= packBand.bottom) {
+    const alive =
+      path.motion === "signature"
+        ? signatureAlive(
+            { laneCount, roadLength: packBand.bottom - roadTop },
+            { height, span: item.laneSpan },
+            path.route,
+            since,
+          )
+        : !hasLeftRoad(laneCount, place) && y < packBand.bottom;
+    if (!alive) {
       break;
     }
-    const sample: MoverSample = {
-      between: Math.abs(place.lanePosition - Math.round(place.lanePosition)) > 1e-9,
-      bottom: y + height,
-      box: obstacleHitBox(road.data, geometry, { ...item, mover: { path, since }, y }),
-      solid: place.solid,
-      top: y,
-    };
+    const samples = obstacleHitBoxes(road.data, geometry, {
+      ...item,
+      mover: { path, since },
+      y,
+    }).map((box): MoverSample => {
+      const lane = box.lanes.left / geometry.cell.length;
+      return {
+        between: Math.abs(lane - Math.round(lane)) > 1e-9,
+        bottom: path.motion === "signature" ? box.bottom : y + height,
+        box,
+        solid: place.solid,
+        top: path.motion === "signature" ? box.top : y,
+      };
+    });
     // Since the sample before: a contact found here may have started any time after it.
-    const from = previous ?? sample;
-    previous = sample;
-    const level =
-      sample.solid &&
-      Math.max(from.bottom, sample.bottom) > packBand.top &&
-      Math.min(from.top, sample.top) < packBand.bottom;
     for (let lane = 0; lane < laneCount; lane++) {
-      const touching = level && touchesPackIn(geometry, lane, from, sample);
+      const touching = samples.some((sample, component) => {
+        const from = previous[component] ?? sample;
+        const level =
+          sample.solid &&
+          Math.max(from.bottom, sample.bottom) > packBand.top &&
+          Math.min(from.top, sample.top) < packBand.bottom;
+        return level && touchesPackIn(geometry, lane, from, sample);
+      });
       const under = current.get(lane);
       if (touching && under !== undefined) {
         under.to = since;
@@ -361,6 +370,7 @@ function sampleContacts(
         current.delete(lane);
       }
     }
+    previous = samples;
   }
   return contacts;
 }

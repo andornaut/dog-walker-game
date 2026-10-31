@@ -13,9 +13,15 @@ import type {
   GearId,
   MinorObstacleId,
   MovementKind,
+  SignatureProfile,
 } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
-import { hasObstacleArt, obstacleParts, obstacleSilhouette } from "../layout/obstacleArt";
+import {
+  COMPONENT_SILHOUETTES,
+  hasObstacleArt,
+  obstacleParts,
+  obstacleSilhouette,
+} from "../layout/obstacleArt";
 import { formationOrder, PART_INSET } from "../layout/packFormation";
 import { countBump, countLandedBump, countTally } from "../rules/achievements";
 import { type HeartChange, modifierCauses, type MoneyChange, negatedCauses } from "../rules/causes";
@@ -71,6 +77,7 @@ import {
   pickupDog,
   type RoadPoint,
   type ScaledBox,
+  sweptHitDog,
   tickInvulnerability,
 } from "./collision";
 import { type HeldStep, type HitStop, hitStopLength, startHitStop, tickHitStop } from "./hitStop";
@@ -78,6 +85,7 @@ import { advanceLaneControl, type LaneControl, laneControlIn, steerLane } from "
 import { type LaneMotion, type LaneMotionConfig, laneMotionX, stillInLane } from "./laneMotion";
 import {
   drawnLanes,
+  facesLeft,
   hasLeftRoad,
   hasStopped,
   isSliding,
@@ -91,6 +99,7 @@ import {
 } from "./movers";
 import { drawnObstacleBox, exitLength, type PlacedPart, type RoadLens } from "./obstacleBox";
 import { awayHop, nextShyChoiceAt, shyChoices, type ShyPath, takeHop } from "./shy";
+import { signatureAlive, signaturePlace, signatureSweeps } from "./signaturePaths";
 import { type PathRow, type SpawnEvent, takeDueSpawns } from "./spawning";
 import {
   blocksLane,
@@ -460,6 +469,23 @@ function drawnHitLength(
   );
 }
 
+// The spacing and runtime height of one independently placed component, using its own art.
+export function componentHitLength(
+  geometry: Pick<RoadGeometry, "lens" | "packBand">,
+  profile: Extract<SignatureProfile, { readonly kind: "delayedTrail" }>,
+): number {
+  const silhouette = COMPONENT_SILHOUETTES[profile.spriteKey];
+  if (silhouette === undefined) {
+    throw new Error(`Missing component silhouette ${profile.spriteKey}`);
+  }
+  return exitLength(
+    geometry.lens,
+    PART_INSET,
+    [{ behind: 0, dx: 0, silhouette }],
+    geometry.packBand.bottom,
+  );
+}
+
 // The planner's inset at each end of a footprint row: whatever lane-blocking obstacle stands in
 // a footprint, standing or moving, its hit length is no more than the footprint's rows less this
 // at each end, so every blocking span it plans covers the obstacle's. A standing obstacle hits
@@ -734,6 +760,10 @@ export function obstacleHitBox(
   if (!isObstacle(data, item.kind)) {
     throw new Error(`${item.kind} is not an obstacle`);
   }
+  const component = componentHitBoxes(geometry, item)?.[0];
+  if (component !== undefined) {
+    return component;
+  }
   const { cell, lens } = geometry;
   const feetY = item.y + item.height;
   const lane = footprintLane(geometry.laneCount, item);
@@ -746,6 +776,135 @@ export function obstacleHitBox(
   const x = (lane + drawn / 2) * cell.length;
   const reach = hitReach(data, geometry, item.kind, moving);
   return { ...drawnObstacleBox(lens, PART_INSET, parts, { feetY, x }, reach), lanes };
+}
+
+function componentHitBoxes(
+  geometry: Pick<RoadGeometry, "cell" | "lens">,
+  item: WalkItem,
+): LanedBox[] | undefined {
+  const { mover } = item;
+  if (mover?.path.motion !== "signature" || mover.path.route.profile.kind !== "delayedTrail") {
+    return undefined;
+  }
+  const { route } = mover.path;
+  const profile = route.profile;
+  if (profile.kind !== "delayedTrail") {
+    return undefined;
+  }
+  const silhouette = COMPONENT_SILHOUETTES[profile.spriteKey];
+  if (silhouette === undefined) {
+    throw new Error(`Missing component silhouette ${profile.spriteKey}`);
+  }
+  const leader = signaturePlace(route, mover.since);
+  return route.componentDelays.map((_, component) => {
+    const point = signaturePlace(route, mover.since, component);
+    const feetY = item.y + item.height + point.y - leader.y;
+    const x = (point.x + 0.5) * geometry.cell.length;
+    const lanes = {
+      left: point.x * geometry.cell.length,
+      right: (point.x + 1) * geometry.cell.length,
+    };
+    const delayed = mover.since - (route.componentDelays[component] ?? 0);
+    const drawn = facesLeft(mover.path, delayed)
+      ? { ...silhouette, left: -silhouette.right, right: -silhouette.left }
+      : silhouette;
+    return {
+      ...drawnObstacleBox(geometry.lens, PART_INSET, [{ behind: 0, dx: 0, silhouette: drawn }], {
+        feetY,
+        x,
+      }),
+      lanes,
+    };
+  });
+}
+
+// A logical obstacle may draw separate components. Their gaps stay outside its hit boxes.
+export function obstacleHitBoxes(
+  data: Pick<GameData, "encounters" | "minorObstacles">,
+  geometry: Pick<RoadGeometry, "cell" | "itemHeights" | "laneCount" | "lens" | "packBand">,
+  item: WalkItem,
+): readonly LanedBox[] {
+  return componentHitBoxes(geometry, item) ?? [obstacleHitBox(data, geometry, item)];
+}
+
+function blendPack(
+  alpha: number,
+  before: PackBoxes<DogId>,
+  after: PackBoxes<DogId>,
+): PackBoxes<DogId> {
+  const blend = <Part extends Box>(a: Part, b: Part): Part => ({
+    ...b,
+    bottom: a.bottom + (b.bottom - a.bottom) * alpha,
+    left: a.left + (b.left - a.left) * alpha,
+    right: a.right + (b.right - a.right) * alpha,
+    top: a.top + (b.top - a.top) * alpha,
+  });
+  return {
+    ...after,
+    dogs: before.dogs.map((part, index) => blend(part, after.dogs[index] ?? part)),
+    outline: blend(before.outline, after.outline),
+    walker: blend(before.walker, after.walker),
+  };
+}
+
+function signatureContact(
+  data: Pick<GameData, "encounters" | "minorObstacles">,
+  geometry: RoadGeometry,
+  before: PackBoxes<DogId>,
+  after: PackBoxes<DogId>,
+  travel: number,
+  item: WalkItem,
+): DogId | null {
+  const { mover } = item;
+  if (mover?.path.motion !== "signature") {
+    return null;
+  }
+  const { path, since } = mover;
+  const first = Math.max(0, since - travel);
+  if (first === since) {
+    return (
+      obstacleHitBoxes(data, geometry, item)
+        .map((box) => hitDog(after, box))
+        .find((dog) => dog !== null) ?? null
+    );
+  }
+  const at = (position: number, component: number): LanedBox => {
+    const place = moverPlace(geometry.laneCount, path, position);
+    const shown = {
+      ...item,
+      mover: { path, since: position },
+      y: moverY(geometry.roadTop, item.height, place),
+    };
+    return itemAt(obstacleHitBoxes(data, geometry, shown), component);
+  };
+  const packAt = (position: number) =>
+    blendPack((position - since + travel) / travel, before, after);
+  const sweeps = signatureSweeps(path.route, first, since).sort((a, b) => a.start - b.start);
+  for (const sweep of sweeps) {
+    const dog = sweptHitDog(
+      packAt(sweep.start),
+      packAt(sweep.end),
+      at(sweep.start, sweep.component),
+      at(sweep.end, sweep.component),
+    );
+    if (dog !== null) {
+      return dog;
+    }
+  }
+  return null;
+}
+
+function signatureOnRoad(geometry: RoadGeometry, item: WalkItem): boolean {
+  const { mover } = item;
+  return (
+    mover?.path.motion !== "signature" ||
+    signatureAlive(
+      { laneCount: geometry.laneCount, roadLength: geometry.roadBottom - geometry.roadTop },
+      { height: item.height, span: item.laneSpan },
+      mover.path.route,
+      mover.since,
+    )
+  );
 }
 
 // The chance a plain hit landing on the dog misses it: probability.smallDodgeChance for a small
@@ -822,7 +981,11 @@ export function stepWalk(
   const due = takeDueSpawns(zoneDistance, road.pending);
   let nextItemId = road.nextItemId;
   const arrived = due.due.map((event): WalkItem => {
-    const height = itemHeight(data, geometry, event.kind, event.mover !== undefined);
+    const profile = event.mover?.motion === "signature" ? event.mover.route.profile : undefined;
+    const height =
+      profile?.kind === "delayedTrail"
+        ? componentHitLength(geometry, profile)
+        : itemHeight(data, geometry, event.kind, event.mover !== undefined);
     return {
       height,
       id: nextItemId++,
@@ -836,7 +999,21 @@ export function stepWalk(
       y: geometry.roadTop - height + (zoneDistance - event.distance),
     };
   });
-  const scrolled = scrolledItems(geometry, travel, road.items, moveMovers(geometry, 0, arrived));
+  const started = arrived.flatMap((item) => {
+    const { mover } = item;
+    if (mover?.path.motion !== "signature") {
+      return moveMovers(geometry, 0, [item]);
+    }
+    const place = moverPlace(geometry.laneCount, mover.path, mover.since);
+    return [
+      {
+        ...item,
+        lane: laneAt(place.lanePosition),
+        y: moverY(geometry.roadTop, item.height, place),
+      },
+    ];
+  });
+  const scrolled = scrolledItems(geometry, travel, road.items, started);
 
   const control = advanceLaneControl(
     laneMotionConfig(data, geometry.laneCount, run),
@@ -851,10 +1028,14 @@ export function stepWalk(
   );
   // Swept from where the last step left the pack to where this one leaves it.
   const pack = sweptPackBoxes(geometry, road.control.motion, control.motion, run);
+  const beforePack = packBoxes(geometry, road.control.motion, run);
+  const afterPack = packBoxes(geometry, control.motion, run);
   // An obstacle hits a part of the pack; a lucky find, as a pickup does, touches its outline.
   const touching = (item: WalkItem) =>
     isObstacle(data, item.kind)
-      ? hitDog(pack, obstacleHitBox(data, geometry, item))
+      ? item.mover?.path.motion === "signature"
+        ? signatureContact(data, geometry, beforePack, afterPack, travel, item)
+        : hitDog(pack, obstacleHitBox(data, geometry, item))
       : pickupDog(pack, walkItemBox(geometry, item));
   const invulnerable = tickInvulnerability(stepSeconds, road.invulnerableSeconds);
   // A pull obstacle, such as a squirrel, passes through the pack: touching it does nothing.
@@ -1052,8 +1233,8 @@ export function stepWalk(
         hitStop,
         invulnerableSeconds,
         items: [
-          ...remaining,
-          ...passing,
+          ...remaining.filter((item) => signatureOnRoad(geometry, item)),
+          ...passing.filter((item) => signatureOnRoad(geometry, item)),
           ...cues,
           ...(pickupsHit.length === 0
             ? pickups
@@ -1098,13 +1279,18 @@ function scrolledItems(
     const since = mover.since + travel;
     const place = moverPlace(laneCount, mover.path, since);
     const y = moverY(roadTop, item.height, place);
-    if (!hasLeftRoad(laneCount, place) && y < roadBottom) {
+    const advanced = { ...item, mover: { ...mover, since }, y };
+    const live =
+      mover.path.motion === "signature"
+        ? signatureOnRoad(geometry, advanced) || signatureOnRoad(geometry, item)
+        : !hasLeftRoad(laneCount, place) && y < roadBottom;
+    if (live) {
       const lane = laneAt(place.lanePosition);
-      sortItem(laneCount, sorted, { ...item, lane, mover: { ...mover, since }, y });
+      sortItem(laneCount, sorted, { ...advanced, lane });
     }
   }
   for (const item of arrived) {
-    if (item.y < roadBottom) {
+    if (item.mover?.path.motion === "signature" || item.y < roadBottom) {
       sortItem(laneCount, sorted, item);
     }
   }

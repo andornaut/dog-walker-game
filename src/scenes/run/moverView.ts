@@ -31,6 +31,7 @@ import {
 import { itemCategory, type WalkItem } from "../../runner/walkItems";
 import { firstTag, playTag, showAtDepth } from "../sprites";
 import type { ItemPart, ItemView } from "./itemViews";
+import { drawSignatureTrail } from "./signatureView";
 import { DEPTH, JUNCTURE_Y, laneX, LAYOUT, PROJECTION, showOnRoad } from "./stage";
 import { type StandFrame, standPart } from "./standPart";
 
@@ -105,7 +106,8 @@ export function drawMover(
   const lucky = itemCategory(gameData, item.kind) === "lucky";
   const tell = lucky ? null : moverTell(path, since);
   const moving = inMotion(path, since);
-  if (body !== undefined) {
+  const trail = drawSignatureTrail(view, halted, frame, item);
+  if (!trail && body !== undefined) {
     const scene = body.sprite.scene;
     const idle = firstTag(scene, body.key, [IDLE_TAG]);
     const shown = place.solid || (path.motion === "cross" && idle !== undefined);

@@ -118,6 +118,12 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   "wedding-photo-shoot": { above: 69, left: -53, right: 56 },
 };
 
+// Independently placed components use their declared baseline rather than the manifest's
+// last opaque row. Bounds are measured over all frames, as for ordinary obstacle sprites.
+export const COMPONENT_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
+  "chase-duckling": { above: 20, left: -8, right: 9 },
+};
+
 // A sprite whose poses differ much in size is hit by its pose's silhouette instead, each over
 // its tag's frames alone, so a mover is hit as its pose is drawn; OBSTACLE_SILHOUETTES still
 // holds its silhouette over every frame, which plans its spacing on the road.
