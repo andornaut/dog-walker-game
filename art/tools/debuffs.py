@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 """Draw the four contact-debuff bursts, at full size over the struck dog.
 
-fx-debuff-muddy, -spotlight, -stinky, -zoomies are 96x96, play (8 frames,
-90ms each, 720ms). Frame 2 is the reduced-motion peak. Their frame centre
-(48,48) sits on the dog's centre column, 6px above its top opaque row.
+fx-debuff-muddy, -spotlight, -stinky, -zoomies are 128x128, play (8 frames,
+150ms each, 1200ms). Frames 2 to 4 hold the readable peak; frame 2 is the
+reduced-motion pose. Their frame centre (64,64) follows the dog's centre
+column, 6px above its top opaque row, with the full frame clamped 4px
+inside the road viewport.
 The lower centre stays clear so the dog remains visible. Every burst shows
-its own motif from frame 0, expands into two peak frames, then shrinks and rises.
+its own motif from frame 0, expands into three peak frames, then shrinks and rises.
 There are no depth variants, baked-in words, shadows or partial alpha.
 
-Muddy throws a dripping brown paw and mud crown; Spotlight's angled lamp
-opens a blue beam in yellow edges; Stinky swells pink-lit mauve gas and
-rising curls; Zoomies circles green motion trails around an amber paw. Each part has a
-1px plum rim for the light roads and a pale fill or highlight for dark roads.
+Muddy throws a dripping ochre paw and mud crown; Spotlight's angled lamp
+opens a sky-blue beam in yellow edges; Stinky swells pink gas and cream
+curls; Zoomies circles lime motion trails around a yellow paw. Each part
+has a 2px plum outline and a 1px cream outer rim for light and dark roads.
+The exact existing HUD icon accompanies each burst at 2x in a 40x40 cream
+badge, 4px outside the frame on the right, or left when the right cannot fit.
+The badge follows the clamped burst and lasts the same 1200ms.
 
 Usage:
   debuffs.py preview OUT.png   every frame on the zone roads
@@ -29,21 +34,23 @@ sys.path.insert(0, os.path.dirname(__file__))
 from fx import rim  # noqa: E402
 from pixel import Grid, main  # noqa: E402
 
-SIDE = 96
-GROW = (0.78, 0.94, 1, 1, 0.96, 0.84, 0.63, 0.38)
-RISE = (0, 0, 0, 0, 1, 3, 6, 9)
-FRAME_MS = 90
+SIDE = 128
+BURST_SCALE = 1.25
+GROW = (0.82, 0.98, 1.04, 1.04, 1.02, 0.86, 0.58, 0.22)
+RISE = (0, 0, 0, 1, 1, 4, 8, 12)
+FRAME_MS = 150
 PEAK = 2
 
 
 def point(step, x, y):
     """A design point as the burst expands about its centre and rises away."""
-    s = GROW[step]
-    return 48 + (x - 48) * s, 48 + (y - 48) * s - RISE[step]
+    s = GROW[step] * BURST_SCALE
+    return SIDE / 2 + (x - 48) * s, SIDE / 2 + (y - 48) * s - RISE[step] * BURST_SCALE
 
 
 def oval(g, step, x, y, rx, ry, fill, shade=None, light=None):
-    g.cel(*point(step, x, y), max(2, rx * GROW[step]), max(2, ry * GROW[step]), fill, shade, light)
+    s = GROW[step] * BURST_SCALE
+    g.cel(*point(step, x, y), max(3, rx * s), max(3, ry * s), fill, shade, light)
 
 
 def stroke(g, points, colour, width=3):
@@ -56,7 +63,7 @@ def stroke(g, points, colour, width=3):
 
 
 def path(g, step, points, colour, width=3):
-    stroke(g, [point(step, x, y) for x, y in points], colour, max(2, round(width * GROW[step])))
+    stroke(g, [point(step, x, y) for x, y in points], colour, max(3, round(width * GROW[step] * BURST_SCALE)))
 
 
 def polygon(g, step, points, colour):
@@ -73,10 +80,12 @@ def polygon(g, step, points, colour):
 
 
 def part(dst, draw):
-    """Keep each overlapping part distinct with the effects' fixed plum rim."""
+    """Keep each part distinct with a 2px plum outline and a 1px cream outer rim."""
     g = Grid(SIDE, SIDE)
     draw(g)
     rim(g)
+    rim(g)
+    rim(g, "cream")
     for y, row in enumerate(g.px):
         for x, c in enumerate(row):
             if c:
@@ -104,25 +113,25 @@ def paw(g, step, fill, shade, light, dx=0):
 
 
 def muddy(step):
-    """A dripping muddy paw above a mud crown rising either side of the dog."""
+    """A dripping ochre paw above a mud crown rising either side of the dog."""
     g = Grid(SIDE, SIDE)
 
     def crown(p):
         polygon(p, step, [(12, 68), (17, 43), (26, 52), (29, 37), (38, 49),
                           (48, 45), (58, 49), (67, 37), (70, 52), (79, 43), (84, 68),
-                          (64, 71), (62, 55), (34, 55), (32, 71)], "brown")
-        polygon(p, step, [(12, 68), (17, 56), (27, 63), (32, 59), (32, 71)], "dbrown")
-        polygon(p, step, [(64, 71), (67, 55), (78, 62), (84, 68)], "dbrown")
-        path(p, step, [(19, 47), (22, 57), (29, 61)], "tan", 4)
-        path(p, step, [(31, 43), (34, 50), (40, 51)], "tan", 4)
-        path(p, step, [(61, 49), (65, 43)], "tan", 4)
-        path(p, step, [(75, 48), (78, 61)], "tan", 4)
+                          (64, 71), (62, 55), (34, 55), (32, 71)], "ochre")
+        polygon(p, step, [(12, 68), (17, 56), (27, 63), (32, 59), (32, 71)], "brown")
+        polygon(p, step, [(64, 71), (67, 55), (78, 62), (84, 68)], "brown")
+        path(p, step, [(19, 47), (22, 57), (29, 61)], "cream", 4)
+        path(p, step, [(31, 43), (34, 50), (40, 51)], "cream", 4)
+        path(p, step, [(61, 49), (65, 43)], "cream", 4)
+        path(p, step, [(75, 48), (78, 61)], "cream", 4)
     part(g, crown)
     for x, y, rx, ry in ((17, 25, 4, 6), (79, 22, 4, 6)):
-        part(g, lambda p, x=x, y=y, rx=rx, ry=ry: oval(p, step, x, y, rx, ry, "brown", "dbrown", "tan"))
-    paw(g, step, "brown", "dbrown", "tan")
-    part(g, lambda p: path(p, step, [(43, 47), (43, 55)], "brown", 4))
-    part(g, lambda p: path(p, step, [(54, 47), (54, 52)], "brown", 4))
+        part(g, lambda p, x=x, y=y, rx=rx, ry=ry: oval(p, step, x, y, rx, ry, "ochre", "brown", "cream"))
+    paw(g, step, "ochre", "brown", "cream")
+    part(g, lambda p: path(p, step, [(43, 47), (43, 55)], "ochre", 4))
+    part(g, lambda p: path(p, step, [(54, 47), (54, 52)], "ochre", 4))
     impact_ticks(g, step, "cream")
     return g
 
@@ -137,17 +146,17 @@ def spotlight(step):
     part(g, pool)
 
     def beam(p):
-        polygon(p, step, [(31, 26), (37, 28), (32, 65), (23, 66)], "blue")
-        polygon(p, step, [(37, 22), (42, 19), (84, 65), (75, 69)], "blue")
+        polygon(p, step, [(31, 26), (37, 28), (32, 65), (23, 66)], "sky")
+        polygon(p, step, [(37, 22), (42, 19), (84, 65), (75, 69)], "sky")
         path(p, step, [(31, 27), (24, 64)], "yellow", 4)
         path(p, step, [(42, 23), (82, 64)], "yellow", 4)
         path(p, step, [(35, 35), (31, 55)], "sky", 3)
     part(g, beam)
     def lamp(p):
-        polygon(p, step, [(15, 14), (25, 4), (43, 20), (32, 32)], "dslate")
-        polygon(p, step, [(16, 14), (25, 5), (29, 9), (20, 19)], "grey")
+        polygon(p, step, [(15, 14), (25, 4), (43, 20), (32, 32)], "slate")
+        polygon(p, step, [(16, 14), (25, 5), (29, 9), (20, 19)], "lgrey")
         path(p, step, [(32, 30), (41, 21)], "white", 4)
-        path(p, step, [(10, 14), (10, 27), (20, 33), (25, 29)], "grey", 3)
+        path(p, step, [(10, 14), (10, 27), (20, 33), (25, 29)], "lgrey", 3)
     part(g, lamp)
     for points in ([(65, 24), (73, 17)], [(79, 41), (89, 39)]):
         part(g, lambda p, points=points: path(p, step, points, "yellow", 4))
@@ -156,38 +165,38 @@ def spotlight(step):
 
 
 def stinky(step):
-    """Pink-lit gas swells in an open arch, with three broad smell curls above it."""
+    """Bright pink gas swells in an open arch, with three broad smell curls above it."""
     g = Grid(SIDE, SIDE)
     for x, y, rx, ry in ((21, 59, 13, 13), (23, 43, 15, 13), (37, 38, 15, 13),
                          (57, 38, 16, 13), (72, 45, 15, 13), (76, 61, 12, 11)):
-        part(g, lambda p, x=x, y=y, rx=rx, ry=ry: oval(p, step, x, y, rx, ry, "mauve", "purple", "pink"))
+        part(g, lambda p, x=x, y=y, rx=rx, ry=ry: oval(p, step, x, y, rx, ry, "pink", "mauve", "cream"))
     for x, top in ((25, 12), (48, 6), (71, 13)):
         sway = (step % 3 - 1) * 2
         points = [(x, top + 20), (x - 4, top + 15), (x - 4, top + 10),
                   (x + 3 + sway, top + 5), (x + 3 + sway, top)]
-        part(g, lambda p, points=points: path(p, step, points, "pink", 4))
+        part(g, lambda p, points=points: path(p, step, points, "cream", 4))
     impact_ticks(g, step, "white")
     return g
 
 
 def zoomies(step):
-    """Two green speed arcs and bold streaks race around the HUD's amber paw."""
+    """Two lime speed arcs and bold streaks race around a yellow paw."""
     g = Grid(SIDE, SIDE)
 
     def arc(p, angles):
         pts = [(48 + math.cos(math.radians(a)) * 35,
                 45 + math.sin(math.radians(a)) * 29) for a in angles]
-        path(p, step, pts, "green", 7)
+        path(p, step, pts, "lime", 7)
         lit = [(x - 1, y - 2) for x, y in pts]
-        path(p, step, lit, "yellow", 3)
+        path(p, step, lit, "cream", 3)
     part(g, lambda p: arc(p, range(150, 281, 5)))
     part(g, lambda p: arc(p, range(-30, 61, 5)))
-    part(g, lambda p: polygon(p, step, [(16, 54), (7, 48), (9, 66), (27, 65)], "green"))
-    part(g, lambda p: polygon(p, step, [(77, 22), (88, 23), (82, 8), (67, 13)], "green"))
+    part(g, lambda p: polygon(p, step, [(16, 54), (7, 48), (9, 66), (27, 65)], "lime"))
+    part(g, lambda p: polygon(p, step, [(77, 22), (88, 23), (82, 8), (67, 13)], "lime"))
 
-    paw(g, step, "amber", "orange", "yellow", dx=5)
+    paw(g, step, "yellow", "amber", "cream", dx=5)
     for points in ([(10, 35), (26, 35)], [(7, 46), (30, 46)], [(12, 57), (26, 57)]):
-        part(g, lambda p, points=points: path(p, step, points, "yellow", 4))
+        part(g, lambda p, points=points: path(p, step, points, "cream", 4))
     impact_ticks(g, step, "white")
     return g
 
