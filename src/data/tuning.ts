@@ -281,8 +281,8 @@ export const TUNING = {
     // Every zone is the same distance: zone 1 takes this long, later zones less as speed rises.
     zoneAtBaseSpeed: 148,
     // Bounds for uniformly random Zoomies drift intervals, in seconds of walking.
-    zoomiesDriftMaxSeconds: 1.4,
-    zoomiesDriftMinSeconds: 0.6,
+    zoomiesDriftMaxSeconds: 1.12,
+    zoomiesDriftMinSeconds: 0.48,
     // Fixed-strategy drift interval, in seconds of walking.
     zoomiesDriftSeconds: 1,
     // How long the Zoomies debuff lasts, in walking time.

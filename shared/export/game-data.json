@@ -560,7 +560,7 @@
       "id": "zoomies",
       "modifiers": [],
       "movement": {
-        "direction": "random",
+        "direction": "steeringOrRandom",
         "interval": {
           "kind": "uniform",
           "max": "zoomiesDriftMaxSeconds",
@@ -3271,8 +3271,8 @@
       "stinkySeconds": 60,
       "stripLineWaitSeconds": 3,
       "zoneAtBaseSpeed": 148,
-      "zoomiesDriftMaxSeconds": 1.4,
-      "zoomiesDriftMinSeconds": 0.6,
+      "zoomiesDriftMaxSeconds": 1.12,
+      "zoomiesDriftMinSeconds": 0.48,
       "zoomiesDriftSeconds": 1,
       "zoomiesSeconds": 40
     }

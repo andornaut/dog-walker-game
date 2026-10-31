@@ -74,7 +74,7 @@ export const RUN_TEXT = {
       muddy: "Muddy! Slower lane changes for {seconds}s.",
       spotlight: "Spotlight! Bumps cost {cash} for {seconds}s.",
       stinky: "Stinky! No tips for {seconds}s.",
-      zoomies: "Zoomies! Random drifts for {seconds}s.",
+      zoomies: "Zoomies! Extra moves for {seconds}s.",
     },
     dodge: "{dog} dodged the {obstacle}!",
     effectStart: "{name}: {effect}",
