@@ -36,6 +36,7 @@ Road sprites have depth variants `<key>@94`, `@88`, `@81`, `@75`, `@69`, `@62`, 
 | `busker`                         | sprite | 48×72  | `idle`                                           | Yonge Street; a fixed busker facing the pack, strumming a guitar behind an open case of sheet music and a sign, no coins                             |
 | `cargo-bike`                     | sprite | 48×72  | `ride`                                           | Minor, Kensington Market, 1 lane by 2 rows; rides at the pack, a box of flowers over its front wheel                                                 |
 | `chase-cat`, `chase-rabbit`      | sprite | 38×38  | `idle`, `run`; the rabbit also `hop`             | The cat and bunny movers                                                                                                                             |
+| `chase-duckling`                 | sprite | 20×24  | `idle`, `run`, `hop`                             | One existing duckling for a leader and two independently positioned followers; unchanged native bird size; component anchors below                   |
 | `chase-ducklings`                | sprite | 38×38  | `idle`, `run`, `hop`                             | The ducklings mover; `hop` crosses the lanes in side view                                                                                            |
 | `chase-pigeons`                  | sprite | 38×38  | `idle`, `run`, `flee`                            | The pigeons mover; `flee` flies off up the road, seen from behind                                                                                    |
 | `cheese-crates`                  | sprite | 48×48  | `idle`                                           | Encounter, Distillery District and Kensington Market; a crate of cheese wheels and a blue wedge at a shop door, stink wisps rising                   |
@@ -130,6 +131,26 @@ Road sprites have depth variants `<key>@94`, `@88`, `@81`, `@75`, `@69`, `@62`, 
 | `wedding-photo-shoot`            | sprite | 112×72 | `idle`                                           | Encounter, Distillery District and The Beaches, 2 lanes; a bride, and a kneeling photographer whose flash fires                                      |
 
 `flower-cart`, `fruit-cart`, `hot-dog-cart`, `ice-cream-cart` and `newspaper-cart` are skins of one street cart obstacle: they share a chassis, a 112×66 frame and opaque extents. A neighbourhood with two skins picks one per spawn.
+
+### Duckling components
+
+`chase-duckling` isolates the existing bird before flock composition, keeping its native 38/32 drawing scale. Use three instances: one leader and two delayed followers, with no adult or new skin. The grouped `chase-ducklings` exports remain available. Do not stretch a component to the grouped 38×38 frame.
+
+Every component depth has `idle` frames 0–1 at 300ms each, `run` frames 2–5 at 80ms each and `hop` frames 6–9 at 100ms each. Front views face the player; `hop` faces right and is mirrored for left. Position and animate each component independently. Gameplay owns the path and collision rules.
+
+Anchors below are `(x,y)` in frame pixels. The baseline is one row below frame 0's last opaque pixel; the runtime manifest's `feetY` names that last opaque row instead. Use the listed frame size and anchor for the selected depth, without enlarging the bird. Opaque union rectangles are `[left,top,right,bottom)`, across all ten frames.
+
+| Key suffix | Frame | Baseline anchor | Manifest `feetY` | Opaque union |
+| ---------- | ----- | --------------- | ---------------- | ------------ |
+| Base       | 20×24 | 10,23           | 22               | 2,3,19,23    |
+| `@94`      | 19×23 | 9.5,23          | 22               | 3,5,19,23    |
+| `@88`      | 18×21 | 9,21            | 20               | 2,4,17,21    |
+| `@81`      | 16×20 | 8,20            | 19               | 2,4,16,20    |
+| `@75`      | 15×18 | 7.5,18          | 17               | 1,3,14,18    |
+| `@69`      | 14×17 | 7,17            | 16               | 1,4,14,17    |
+| `@62`      | 13×15 | 6.5,15          | 14               | 1,3,12,15    |
+| `@56`      | 11×14 | 5.5,14          | 13               | 1,3,11,14    |
+| `@50`      | 10×12 | 5,12            | 11               | 1,2,10,12    |
 
 ## Effects
 

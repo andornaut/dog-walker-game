@@ -22,6 +22,10 @@ motion), run (4 frames, 80ms: down the road at the player).
   chase-ducklings    three ducklings; idle peeps, run waddles; hop (4 frames, 100ms): the brood
                      in a line in side view, crouch, take-off, airborne, landing, each a frame
                      behind the one ahead
+  chase-duckling     one existing duckling, isolated before flock composition; 20x24 at full
+                     size, unchanged bird scale (38/32), baseline anchor (10,23). idle (2x300ms),
+                     run (4x80ms) and hop (4x100ms); front views except right-facing hop,
+                     mirrored for left. The game positions three instances independently.
   chase-rabbit       a white rabbit; idle twitches, run bounds; hop (4 frames, 100ms): side view,
                      crouched with its ears back, leaping stretched, airborne 8 units up, landing
                      on its front paws
@@ -299,6 +303,22 @@ def ducklings_hop(phase):
     g = edged(Grid())
     for k, (x, y) in enumerate(((5.5, 26), (14.5, 27), (24, 28))):
         duckling_side(g, x, y, (phase - (2 - k)) % 4)
+    return lit(g)
+
+
+# One existing bird at the flock's native scale, isolated before birds overlap. Cropping this
+# rectangle from the combined flock would retain other birds or lose occluded pixels.
+DUCKLING_CROP = (9, 12, 20, 24)
+
+
+def duckling_component(peep=False, wing=0, step=0, lift=0, phase=None):
+    """The existing front bird centred at (16,29), or its existing side-view hop. lift is a
+    rendered pixel, as in ducklings(); neither pose changes the bird's native size or design."""
+    g = edged(Grid())
+    if phase is None:
+        duckling(g, 16, 29 - lift / scale_of(g), peep=peep, wing=wing, step=step)
+    else:
+        duckling_side(g, 16, 29, phase)
     return lit(g)
 
 
@@ -808,6 +828,16 @@ def animals(step):
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every animal at depth step step (1 at full
     size), at its frame side / 32 x step."""
     c = CHASE_SIDE / 32 * step
+    def component(**pose):
+        rows = drawn(c, duckling_component, **pose)
+        x, y, w, h = (minis.side(v, step) for v in DUCKLING_CROP)
+        return [row[x:x + w] for row in rows[y:y + h]]
+
+    runs = [dict(wing=q.get("wing", 0), step=q.get("step", 0), lift=q.get("lift", (0, 0, 0))[2])
+            for q in DUCKLINGS_RUN]
+    yield "chase-duckling", [("idle", [component(), component(peep=True)], CHASE_IDLE_MS),
+                             ("run", [component(**q) for q in runs], CHASE_RUN_MS),
+                             ("hop", [component(phase=k) for k in range(4)], 100)]
     for key, (draw, idle, (run, runs), extra) in CHASE.items():
         yield key, [("idle", [drawn(c, draw, **q) for q in idle], CHASE_IDLE_MS),
                     ("run", [drawn(c, run, **q) for q in runs], CHASE_RUN_MS),

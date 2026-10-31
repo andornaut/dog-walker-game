@@ -2043,6 +2043,87 @@
       }
     },
     {
+      "key": "chase-duckling",
+      "png": "sprites/chase-duckling.png",
+      "json": "sprites/chase-duckling.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "chase-duckling@50",
+      "png": "sprites/chase-duckling@50.png",
+      "json": "sprites/chase-duckling@50.json",
+      "anchor": {
+        "feetY": 11,
+        "opaqueWidth": 6
+      }
+    },
+    {
+      "key": "chase-duckling@56",
+      "png": "sprites/chase-duckling@56.png",
+      "json": "sprites/chase-duckling@56.json",
+      "anchor": {
+        "feetY": 13,
+        "opaqueWidth": 7
+      }
+    },
+    {
+      "key": "chase-duckling@62",
+      "png": "sprites/chase-duckling@62.png",
+      "json": "sprites/chase-duckling@62.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 8
+      }
+    },
+    {
+      "key": "chase-duckling@69",
+      "png": "sprites/chase-duckling@69.png",
+      "json": "sprites/chase-duckling@69.json",
+      "anchor": {
+        "feetY": 16,
+        "opaqueWidth": 8
+      }
+    },
+    {
+      "key": "chase-duckling@75",
+      "png": "sprites/chase-duckling@75.png",
+      "json": "sprites/chase-duckling@75.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 9
+      }
+    },
+    {
+      "key": "chase-duckling@81",
+      "png": "sprites/chase-duckling@81.png",
+      "json": "sprites/chase-duckling@81.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 9
+      }
+    },
+    {
+      "key": "chase-duckling@88",
+      "png": "sprites/chase-duckling@88.png",
+      "json": "sprites/chase-duckling@88.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "chase-duckling@94",
+      "png": "sprites/chase-duckling@94.png",
+      "json": "sprites/chase-duckling@94.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 11
+      }
+    },
+    {
       "key": "chase-ducklings",
       "png": "sprites/chase-ducklings.png",
       "json": "sprites/chase-ducklings.json",
