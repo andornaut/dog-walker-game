@@ -17,10 +17,6 @@ wedding-photo-shoot 112x72  card obstacle, 2 lanes: a bride posing in a white go
 velvet-rope         112x36  minor, 2 lanes: three brass stanchions on round bases, a red velvet rope
                             swagged between them. idle (4 frames, 400ms): a glint runs down the left
                             post's highlight on frames 2 and 3
-patio-rail          176x36  minor, 3 lanes: a restaurant patio's low black iron rail between planter
-                            boxes of red geraniums, a chalkboard menu on an A-frame at its middle,
-                            two green bistro chairs showing over it. idle (4 frames, 400ms): a
-                            geranium clump nods 1px at three spots in turn
 rolling-barrel      48x48   minor dart, 1 lane: a whisky barrel on its side rolling across the lanes,
                             seen end-on, its dark oak head's staves and bung turning inside an iron hoop;
                             rolls right, the game mirrors it for left. idle (2 frames, 400ms):
@@ -324,60 +320,6 @@ def velvet_rope(glint=None, w=ob.span(2)):
 
 
 VELVET_IDLE = (None, None, 12, 19), 400
-
-
-# ---------- the patio rail ----------
-
-def patio_rail(nod=(), w=ob.span(3)):
-    """Front elevation, 3 lanes: a low wrought-iron rail in coal, lit grey along its top and down each
-    2px picket's left (5px apart, 8 below obstacles.TEXTURE_MIN), between planter boxes of red geraniums at
-    each end; a chalkboard menu on a bark A-frame at the middle with three chalk lines on it, and the backs of
-    two green bistro chairs over the rail. nod lists the geranium clumps, by index, that dip 1px."""
-    g = edged(Grid(w, ob.ROW))
-    u = unit(g)
-    # the chairs' backs, behind the rail: two uprights and two hoops each
-    for x in (w * 0.3, w * 0.7):
-        g.cel(x, 6, 6, 4, "forest")
-        g.cel(x, 6.5, 4, 2.5, None)
-        g.rect(x - 6, 6, 2, 7, "forest")
-        g.rect(x + 4, 6, 2, 7, "forest")
-        g.rect(x - 4, 8, 8, 1, "forest")
-    # the rail: a top bar and a bottom bar with pickets between
-    g.rect(2, 12, w - 4, 2, "coal")
-    g.rect(2, 12, w - 4, 1, "ash")
-    for x in range(28, round(w) - 28, 5 if scale_of(g) >= ob.TEXTURE_MIN else 8):
-        g.rect(x, 14, 2, 11, "coal")
-    g.rect(2, 25, w - 4, 2, "coal")
-    g.rect(2, 25, w - 4, 1, "ash")
-    # the planters, lit clay along the top and left, the geraniums heaped over them
-    k = 0
-    for x in (2, w - 26):
-        g.rect(x, 14, 24, 14, "clay")
-        g.rect(x + 20, 14, 4, 14, "bark")
-        g.rect(x, 14, 24, 1, "driftwood")
-        g.rect(x, 27, 24, 1, "bark")
-        g.rect(x + 3, 18, 15, 1, "bark")
-        for i in range(5):
-            dy = u if k in nod else 0
-            g.cel(x + 3 + i * 4.5, 11.5 + (i % 2) * 0.5 + dy, 3, 3, "canopy", "pine", "green")
-            k += 1
-        for i in range(5):
-            dy = u if i + (0 if x == 2 else 5) in nod else 0
-            g.rect(x + 2 + i * 4.5, 8.5 + (i % 2) + dy, 2, 2, "red")
-    # the chalkboard menu on its A-frame
-    c = w / 2
-    g.tri((c - 9, 28), (c - 6, 28), (c - 1, 3), "bark")
-    g.tri((c + 6, 28), (c + 9, 28), (c + 1, 3), "bark")
-    g.rect(c - 1, 2, 2, 3, "bark")
-    g.rect(c - 7, 7, 14, 16, "clay")
-    g.rect(c - 6, 8, 12, 14, "coal")
-    for y, ln in ((11, 8), (15, 6), (19, 7)):
-        g.rect(c - 4, y, ln, 1, "lgrey")
-    return lit(g, dict(coal=("grey", None), bark=("clay", None), clay=("driftwood", None),
-                       canopy=("green", None), pine=("green", None)))
-
-
-PATIO_IDLE = ((), (), (1, 6), (3, 8)), 400
 
 
 # ---------- the rolling barrel ----------
@@ -1032,8 +974,6 @@ def road_sprites(s=1):
     yield "wedding-photo-shoot", [("idle", frames(p, wedding_photo_shoot, poses), ms)]
     args, ms = VELVET_IDLE
     yield "velvet-rope", [("idle", frames(o, velvet_rope, [dict(glint=a) for a in args]), ms)]
-    args, ms = PATIO_IDLE
-    yield "patio-rail", [("idle", frames(o, patio_rail, [dict(nod=a) for a in args]), ms)]
     idle, idle_ms = BARREL_IDLE
     run, run_ms = BARREL_RUN
     yield "rolling-barrel", [("idle", frames(p, rolling_barrel, [dict(rock=a) for a, in idle]), idle_ms),
