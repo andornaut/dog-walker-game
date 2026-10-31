@@ -41,7 +41,7 @@ export interface ResumeWalk {
 
 // Raise it when a stored resume point's shape changes; one at any other version banks as
 // heading home.
-export const RESUME_VERSION = 2;
+export const RESUME_VERSION = 1;
 
 // A stream draws a few numbers a card, so a count past this is a corrupt one, and would take
 // too long to draw again.
@@ -311,13 +311,6 @@ function resumeSchema(data: ResumeData) {
   });
   const session = v.object({
     card: v.null(),
-    debuffMovement: v.nullable(
-      v.object({
-        debuff,
-        elapsed: v.pipe(finite, v.minValue(0)),
-        interval: v.pipe(finite, v.minValue(Number.MIN_VALUE)),
-      }),
-    ),
     distanceBeforeZone: finite,
     needsZonePlan: v.literal(true),
     pulls,
@@ -325,11 +318,14 @@ function resumeSchema(data: ResumeData) {
     timeMs: v.pipe(finite, v.minValue(0)),
     walk: v.object({ road, run }),
     zoneEndPending: v.literal(false),
+    zoomiesSeconds: finite,
   });
   const draws = v.pipe(count, v.maxValue(MAX_DRAWS));
   return v.pipe(
     v.object({
-      draws: v.object({ cards: draws, debuffMovement: draws, forks: draws, upgrades: draws }),
+      // CLEANUP (added 2026-10-29): a walk saved before the upgrades stream has no count for it;
+      // remove the default once no saved walk can predate it.
+      draws: v.object({ cards: draws, forks: draws, upgrades: v.optional(draws, 0) }),
       seed: v.pipe(count, v.maxValue(MAX_SEED)),
       session,
     }),
@@ -351,17 +347,25 @@ function resumeSchema(data: ResumeData) {
 // The resume point as stored: the road's plan for the zone before, which the next plan
 // replaces, left out but for the path's last row. The schema leaves out the dev panel's
 // invincibility, which the walk sets again from the panel.
-function storedWalk(walk: ResumeWalk): ResumeWalk {
+function storedWalk(walk: ResumeWalk) {
   const { session } = walk;
   const { road } = session.walk;
   return {
     ...walk,
     session: {
-      ...session,
+      card: session.card,
+      distanceBeforeZone: session.distanceBeforeZone,
+      needsZonePlan: session.needsZonePlan,
+      pulls: session.pulls,
+      queue: session.queue,
+      timeMs: session.timeMs,
       walk: {
         ...session.walk,
         road: { ...road, herrings: [], path: road.path.slice(-1), pending: [], planned: [] },
       },
+      zoneEndPending: session.zoneEndPending,
+      // The legacy field stays in the codec; movement timing exists only during live play.
+      zoomiesSeconds: 0,
     },
   };
 }
@@ -377,7 +381,30 @@ export function resumeFormat(data: ResumeData): SaveFormat<ResumeWalk | null> {
       : { ok: false as const, reason: v.summarize(result.issues) };
   };
   return {
-    decode: (stored) => checked(stored),
+    decode: (stored) => {
+      const result = checked(stored);
+      if (!result.ok) {
+        return result;
+      }
+      const { session } = result.value;
+      return {
+        ok: true,
+        value: {
+          ...result.value,
+          session: {
+            card: session.card,
+            debuffMovement: null,
+            distanceBeforeZone: session.distanceBeforeZone,
+            needsZonePlan: session.needsZonePlan,
+            pulls: session.pulls,
+            queue: session.queue,
+            timeMs: session.timeMs,
+            walk: session.walk,
+            zoneEndPending: session.zoneEndPending,
+          },
+        },
+      };
+    },
     encode: (walk) =>
       walk === null ? { ok: false, reason: "no walk" } : checked(storedWalk(walk)),
     fresh: () => null,

@@ -49,17 +49,14 @@ const DART: WalkItem = {
   y: 140,
 };
 
-// Zone 2 about to start, its fork taken: Kilo and Lady walking with the Fanny pack, Muddy and Zoomies on,
+// Zone 2 about to start, its fork taken: Kilo and Lady walking with the Fanny pack, Muddy on,
 // a dart left on the road from zone 1, and the dev panel's invincibility on.
 function zoneStartRun(): RunState {
   const run = newRun(gameData, 2, { dogs: ["kilo", "lady"], gear: "fannyPack", walker: "casey" });
   return {
     ...run,
-    debuffs: [
-      { debuff: "muddy", secondsLeft: 4.5, untilZone: 1 },
-      { debuff: "zoomies", secondsLeft: 3, untilZone: 1 },
-    ],
-    debuffsGot: { muddy: 1, zoomies: 1 },
+    debuffs: [{ debuff: "muddy", secondsLeft: 4.5, untilZone: 1 }],
+    debuffsGot: { muddy: 1 },
     invincible: true,
     pack: [
       { dog: "kilo", hearts: clampHearts(5, 2), status: "walking" },
@@ -75,11 +72,10 @@ const ZONE_START: ResumeWalk = (() => {
   const walk = { road: startRoad(LANE_COUNT), run: zoneStartRun() };
   const session = unplannedStart(walk);
   return {
-    draws: { cards: 41, debuffMovement: 7, forks: 3, upgrades: 4 },
+    draws: { cards: 41, forks: 3, upgrades: 4 },
     seed: 1234,
     session: {
       ...session,
-      debuffMovement: { debuff: "zoomies", elapsed: 0.35, interval: 0.8 },
       distanceBeforeZone: 9_000,
       timeMs: 61_000,
       walk: {
@@ -176,83 +172,79 @@ describe("encodeResume and launchWalk", () => {
     });
   });
 
-  it.each(["debuffMovement", "upgrades"])(
-    "requires the %s stream count without a migration default",
-    (stream) => {
-      const invalid = edited(AT_FORK, (stored) => {
-        delete (stored.draws as Record<string, unknown>)[stream];
-      });
-      expect(launchWalk(gameData, true, invalid)).toMatchObject({
-        backup: invalid.resume,
-        kind: "bank",
-        reason: expect.stringContaining("draws"),
-      });
-    },
-  );
-
-  it("preserves an oversized-tick remainder and resumes the counted drift RNG", () => {
-    const walk: ResumeWalk = {
-      ...ZONE_START,
-      session: {
-        ...ZONE_START.session,
-        debuffMovement: { debuff: "zoomies", elapsed: 4.25, interval: 0.8 },
-      },
-    };
-    const restored = launchWalk(gameData, true, checkpointFor(walk));
-    expect(restored).toEqual({ kind: "resume", walk: asStored(walk) });
-    if (restored.kind !== "resume") {
-      throw new Error("Expected a resumable walk");
-    }
-    const original = runStreams(walk.seed);
-    for (let draw = 0; draw < walk.draws.debuffMovement; draw++) {
-      original.debuffMovement();
-    }
-    const resumed = runStreams(restored.walk.seed, restored.walk.draws);
-    expect(resumed.debuffMovement()).toBe(original.debuffMovement());
+  // CLEANUP (added 2026-10-29): remove with the schema's default for draws.upgrades.
+  it("resumes a walk saved before the upgrades stream with that stream undrawn", () => {
+    const old = edited(AT_FORK, (stored) => {
+      delete (stored.draws as Record<string, unknown>).upgrades;
+    });
+    expect(launchWalk(gameData, true, old)).toEqual({
+      kind: "resume",
+      walk: asStored({ ...AT_FORK, draws: { ...AT_FORK.draws, upgrades: 0 } }),
+    });
   });
 
   it.each([
-    { name: "unknown debuff", state: { debuff: "haunted", elapsed: 0, interval: 1 } },
-    { name: "negative elapsed", state: { debuff: "zoomies", elapsed: -1, interval: 1 } },
-    { name: "zero interval", state: { debuff: "zoomies", elapsed: 0, interval: 0 } },
-    { name: "negative interval", state: { debuff: "zoomies", elapsed: 0, interval: -1 } },
-  ])("rejects a drift clock with $name", ({ state }) => {
-    const invalid = edited(ZONE_START, (stored) => {
-      (stored.session as Record<string, unknown>).debuffMovement = state;
-    });
-    expect(launchWalk(gameData, true, invalid)).toMatchObject({
-      backup: invalid.resume,
-      kind: "bank",
-    });
-  });
-
-  it.each(["elapsed", "interval"] as const)("refuses to serialize nonfinite drift %s", (field) => {
-    const logged = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    for (const value of [NaN, Infinity, -Infinity]) {
-      const invalid = { debuff: "zoomies" as const, elapsed: 0, interval: 1 };
-      invalid[field] = value;
-      expect(
-        encodeResume(gameData, {
-          ...ZONE_START,
-          session: {
-            ...ZONE_START.session,
-            debuffMovement: invalid,
-          },
-        }),
-      ).toBeUndefined();
+    { name: "walk start", walk: START },
+    { name: "fork", walk: AT_FORK },
+    { name: "zone start", walk: ZONE_START },
+  ])("omits all transient movement state at a $name boundary", ({ walk }) => {
+    const runtime = {
+      ...walk,
+      draws: { ...walk.draws, debuffMovement: 99 },
+      session: {
+        ...walk.session,
+        debuffMovement: { debuff: "zoomies" as const, elapsed: 0.35, interval: 0.8 },
+      },
+    };
+    const encoded = encodeResume(gameData, runtime);
+    expect(encoded).toBeDefined();
+    expect(encoded).not.toContain('"debuffMovement"');
+    const stored = JSON.parse(encoded ?? "null") as {
+      draws: typeof walk.draws;
+      session: { zoomiesSeconds: number };
+      version: number;
+    };
+    expect(stored.draws).toEqual(walk.draws);
+    expect(stored.session.zoomiesSeconds).toBe(0);
+    expect(stored.version).toBe(RESUME_VERSION);
+    const restored = launchWalk(gameData, true, checkpointFor(runtime, encoded));
+    expect(restored.kind).toBe("resume");
+    if (restored.kind !== "resume") {
+      throw new Error("Expected a saved boundary");
     }
-    logged.mockRestore();
+    expect(restored.walk.draws).toEqual(walk.draws);
+    expect(restored.walk.session.debuffMovement).toBeNull();
+    expect(restored.walk.session).not.toHaveProperty("zoomiesSeconds");
   });
 
-  it.each([-1, 0.5, 2_000_000])("rejects an invalid drift draw count %s", (count) => {
-    const invalid = edited(ZONE_START, (stored) => {
-      (stored.draws as Record<string, unknown>).debuffMovement = count;
+  it("reads the original codec without retaining its legacy movement timer", () => {
+    const checkpoint = edited(AT_FORK, (stored) => {
+      (stored.session as Record<string, unknown>).zoomiesSeconds = 1.75;
     });
-    expect(launchWalk(gameData, true, invalid)).toMatchObject({
-      backup: invalid.resume,
-      kind: "bank",
-      reason: expect.stringContaining("draws"),
-    });
+    const restored = launchWalk(gameData, true, checkpoint);
+    expect(restored).toEqual({ kind: "resume", walk: asStored(AT_FORK) });
+    if (restored.kind !== "resume") {
+      throw new Error("Expected a legacy boundary");
+    }
+    const encoded = JSON.parse(encodeResume(gameData, restored.walk) ?? "null") as {
+      session: { zoomiesSeconds: number };
+    };
+    expect(encoded.session.zoomiesSeconds).toBe(0);
+  });
+
+  it("refuses a mid-walk session instead of saving its transient clock", () => {
+    const logged = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    expect(
+      encodeResume(gameData, {
+        ...ZONE_START,
+        session: {
+          ...ZONE_START.session,
+          debuffMovement: { debuff: "zoomies", elapsed: 0.35, interval: 0.8 },
+          needsZonePlan: false,
+        },
+      }),
+    ).toBeUndefined();
+    logged.mockRestore();
   });
 
   it("roundtrips a production signature item through a checkpoint and resumes with its route intact", () => {
