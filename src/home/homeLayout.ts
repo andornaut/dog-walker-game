@@ -14,9 +14,11 @@ import { BUTTON_SIZE } from "../ui/buttonGeometry";
 import { closeControl } from "../ui/closeControl";
 import type { GridSpec } from "../ui/grid";
 import { helpCapDy } from "../ui/labelHelpGap";
+import { MARK_OFFSET } from "../ui/mark";
 import { hasPill, PILL_IMAGE_GAP, pillDropUnderInk, pillRiseOverCaps } from "../ui/namePills";
 import { BUTTON_LIP_PX } from "../ui/selection";
 import { TOP_BAR_FACE, TOP_BAR_HEIGHT, TOP_BAR_MID, TOP_BAR_WELL } from "../ui/topBarTrim";
+import { FEEDBACK } from "./feedback";
 import { MODAL, modalActionWidth, modalRect, modalTitleWidth } from "./modalLayout";
 import type { SectionId } from "./sections";
 
@@ -24,9 +26,6 @@ import type { SectionId } from "./sections";
 // each side, except the top bar's buttons, 34 wide in the walk bar's columns; tiles side by
 // side are 8 apart.
 const GAP = 8;
-// The gate scene in the screen-home art: the street, the yard and the path to the gate.
-const GATE = { height: 156, y: 40 };
-
 // The dismissible update notice uses the same card and compact control as other home modals.
 const UPDATE_PANEL = modalRect({ ...SCREEN_CONFIG, x: 0, y: 0 }, undefined, {
   height: MODAL.header + BUTTON_SIZE.compact.height + MODAL.pad,
@@ -38,45 +37,70 @@ const UPDATE_BUTTON = {
   y: UPDATE_PANEL.y + UPDATE_PANEL.height - MODAL.pad - BUTTON_SIZE.compact.height,
 };
 
-// The separator bar under the gate scene: 3 rows (the gate scene's last row is 195).
-const GATE_BAR = { height: 3, y: GATE.y + GATE.height };
-// The gap between the divider and sections, and between sections.
-const SECTION_GAP = 2;
-// A section's tiles start below its 1px rim, 22px heading and 1px rule.
+// Section padding surrounds visible cards, raised checks, lock badges and tap feedback.
+const SECTION_CONTENT_PADDING = 4;
+const SECTION_EDGE = 1;
+const SECTION_GAP = 0;
 const TILE_OFFSET = 24;
-// The Pocket cells start under its header, without a stitched lining.
-const POCKET_CELLS_OFFSET = TILE_OFFSET;
+const TILE_TOP_REACH = FEEDBACK.liftPx + FEEDBACK.badgePopPx - MARK_OFFSET.y;
 const START_BUTTON: Rect = { ...BUTTON_SIZE.wide, x: 32, y: 510 };
 const START_GAP = 4;
-// A walker tile's cells, its portrait box, and the row a locked walker's plate and an owned
-// one's name put their caps on.
 const WALKER_TILES = { cellHeight: 44, cellWidth: 77, columns: 4, gapX: GAP, gapY: 0 } as const;
-const WALKER_BOX = { dx: 3, dy: 4, size: 34 } as const;
-const WALKER_ORIGIN_X = 14;
-// The Pocket's gear cells: one per gear item on one row, across the walker row's span.
+const DOG_TILES = { cellHeight: 44, cellWidth: 105, columns: 3, gapX: GAP, gapY: 0 } as const;
 const POCKET_TILES = { cellHeight: 44, cellWidth: 60, columns: 5, gapX: GAP, gapY: 0 } as const;
+const TILE_INSET = 1;
+const WALKER_BOX = { dx: 3, dy: 4, size: 34 } as const;
 const WALKER_TEXT_Y = 28;
+const GRID_SPAN = WALKER_TILES.columns * WALKER_TILES.cellWidth + (WALKER_TILES.columns - 1) * GAP;
+const TILE_LEFT_REACH = -MARK_OFFSET.x + FEEDBACK.shakePx;
+const SECTION_WIDTH =
+  GRID_SPAN + TILE_LEFT_REACH + FEEDBACK.shakePx + 2 * (SECTION_CONTENT_PADDING + SECTION_EDGE);
+const SECTION_X = (SCREEN_CONFIG.width - SECTION_WIDTH) / 2;
+// Checks overhang left, while a pressed or shaking card can reach beyond its base rect.
+const GRID_ORIGIN_X = SECTION_X + SECTION_EDGE + SECTION_CONTENT_PADDING + TILE_LEFT_REACH;
 
-// The sections stack from the bar down to Start walk, each SECTION_GAP apart; the Pocket takes
-// the rest.
+function sectionHeight(rows: number, inset: number): number {
+  return (
+    TILE_OFFSET +
+    2 * SECTION_CONTENT_PADDING +
+    TILE_TOP_REACH +
+    rows * WALKER_TILES.cellHeight -
+    2 * inset +
+    FEEDBACK.pressDipPx +
+    SECTION_EDGE
+  );
+}
+
+function sectionTilesY(section: Rect, inset: number): number {
+  return section.y + TILE_OFFSET + SECTION_CONTENT_PADDING + TILE_TOP_REACH - inset;
+}
+
+const WALKER_HEIGHT = sectionHeight(1, 0);
+const DOGS_HEIGHT = sectionHeight(3, TILE_INSET);
+const POCKET_HEIGHT = sectionHeight(1, TILE_INSET);
+// The stack grows upward from Start walk; all cards keep their existing sizes.
 const WALKER_SECTION: Rect = {
-  height: 71,
-  width: 352,
-  x: 4,
-  y: GATE_BAR.y + GATE_BAR.height + SECTION_GAP,
+  height: WALKER_HEIGHT,
+  width: SECTION_WIDTH,
+  x: SECTION_X,
+  y: START_BUTTON.y - START_GAP - WALKER_HEIGHT - DOGS_HEIGHT - POCKET_HEIGHT - 2 * SECTION_GAP,
 };
 const DOGS_SECTION: Rect = {
-  height: 159,
-  width: 352,
-  x: 4,
+  height: DOGS_HEIGHT,
+  width: SECTION_WIDTH,
+  x: SECTION_X,
   y: WALKER_SECTION.y + WALKER_SECTION.height + SECTION_GAP,
 };
 const POCKET_SECTION: Rect = {
-  height: START_BUTTON.y - START_GAP - (DOGS_SECTION.y + DOGS_SECTION.height + SECTION_GAP),
-  width: 352,
-  x: 4,
+  height: POCKET_HEIGHT,
+  width: SECTION_WIDTH,
+  x: SECTION_X,
   y: DOGS_SECTION.y + DOGS_SECTION.height + SECTION_GAP,
 };
+// The existing hero art moves as one image; its lower ground keeps the three-row divider strip.
+const GATE_BAR = { height: 3, y: WALKER_SECTION.y - SECTION_GAP - 3 };
+const GATE = { height: GATE_BAR.y - 40, y: 40 };
+const HERO_OFFSET_Y = GATE_BAR.y - 196;
 
 // The solid backing inside a section's one-pixel rim, below its header.
 export function sectionFill(section: Rect): Rect {
@@ -115,7 +139,7 @@ export const HOME_LAYOUT = {
     well: { picture: 2, size: 68, x: MODAL.pad, y: MODAL.header },
     width: 300,
   },
-  dogOrigin: { x: 14, y: DOGS_SECTION.y + TILE_OFFSET },
+  dogOrigin: { x: GRID_ORIGIN_X + 1, y: sectionTilesY(DOGS_SECTION, TILE_INSET) },
   // A dog tile's face sits face.dx and face.dy inside the drawn tile, on a box 1px wider each
   // side. Its name and a locked dog's price plate start textX in and keep padRight inside its
   // right edge. An owned dog's name has its capitals centred on the face (dogTileNameY); a
@@ -131,9 +155,9 @@ export const HOME_LAYOUT = {
     textX: 39,
   },
   // Each dog tile is drawn this far inside its hit area, leaving 2px between the rows.
-  dogTileInset: 1,
+  dogTileInset: TILE_INSET,
   // The dog rows are hit areas 44 tall with no gap.
-  dogTiles: { cellHeight: 44, cellWidth: 105, columns: 3, gapX: GAP, gapY: 0 },
+  dogTiles: DOG_TILES,
   gap: GAP,
   gate: GATE,
   gateBar: GATE_BAR,
@@ -143,16 +167,17 @@ export const HOME_LAYOUT = {
     { dx: -26, footDy: -14 },
     { dx: 26, footDy: -12 },
   ],
-  gearBadge: { height: 18, width: 18, x: 194, y: 166 },
+  gearBadge: { height: 18, width: 18, x: 194, y: 166 + HERO_OFFSET_Y },
+  heroOffsetY: HERO_OFFSET_Y,
   path: { width: 32, x: 164 },
   // The Pet shop building on the yard's right lot, which opens the shop; its hit area is its
   // frame. board is its PET SHOP board, which the walker's bubble keeps clear of.
   petShop: {
-    board: { height: 22, width: 114, x: 237, y: 86 },
+    board: { height: 22, width: 114, x: 237, y: 86 + HERO_OFFSET_Y },
     height: 108,
     width: 120,
     x: 234,
-    y: 86,
+    y: 86 + HERO_OFFSET_Y,
   },
   // The Pocket's row of gear cells under its section's band, across the walker row's span, each
   // drawing its tile 1px inside. In a tile: the icon box and the art in it, the badge over its
@@ -162,21 +187,22 @@ export const HOME_LAYOUT = {
     box: { dx: 12, dy: 3, size: 34 },
     cells: POCKET_TILES,
     icon: { dx: 13, dy: 4 },
-    origin: { x: WALKER_ORIGIN_X, y: POCKET_SECTION.y + POCKET_CELLS_OFFSET },
+    origin: { x: GRID_ORIGIN_X, y: sectionTilesY(POCKET_SECTION, TILE_INSET) },
     priceY: 28,
-    tileInset: 1,
+    tileInset: TILE_INSET,
   },
   porchDogOffset: { dx: -12, footDy: 3 },
   // Before the first walk the starter dog's owner waits in the yard left of the path, behind
   // the yard sign, with their dog at their feet. Feet positions, by dog; a starter dog with no
   // spot is not drawn.
   porchSpots: {
-    archie: { footY: 145, x: 120 },
+    archie: { footY: 145 + HERO_OFFSET_Y, x: 120 },
   },
+  sectionContentPadding: SECTION_CONTENT_PADDING,
   // Solid backing images retained under their existing asset keys.
   sectionFillKeys: { dogs: "ui-plaid", pocket: "ui-denim", walker: "ui-cork" },
   // The image retains its nine-slice caps; the visible outer rim is one pixel.
-  sectionFrame: { band: 22, edge: 1 },
+  sectionFrame: { band: 22, edge: SECTION_EDGE },
   sectionGap: SECTION_GAP,
   sectionLooks: {
     dogs: {
@@ -216,11 +242,11 @@ export const HOME_LAYOUT = {
   // (slotSignText); pressed, the board drops pressDrop on longer cords and the text with it. The
   // hit area is the board widened to 44 tall.
   slotSign: {
-    art: { x: 255, y: 120 },
-    board: { height: 24, width: 79, x: 256, y: 125 },
+    art: { x: 255, y: 120 + HERO_OFFSET_Y },
+    board: { height: 24, width: 79, x: 256, y: 125 + HERO_OFFSET_Y },
     boardEdge: { frame: 1, lit: 1, shade: 1 },
     headColour: "plum",
-    hit: { height: 44, width: 79, x: 256, y: 115 },
+    hit: { height: 44, width: 79, x: 256, y: 115 + HERO_OFFSET_Y },
     key: "ui-slot-sign",
     linePitch: 9,
     pressDrop: 1,
@@ -258,8 +284,8 @@ export const HOME_LAYOUT = {
   startLoading: { room: START_BUTTON.width - 24 },
   // The street name's centre and caps top on screen-home's street sign, clear of the walker's
   // speech bubble.
-  streetSign: { x: 327, y: 75 },
-  // A section's tiles start this far below its top.
+  streetSign: { x: 327, y: 75 + HERO_OFFSET_Y },
+  // The backing begins this far below the section's top, after its header.
   tileOffset: TILE_OFFSET,
   // A selected tile's ui-select frame sits 1px outside it.
   tileSelectOutset: 1,
@@ -299,11 +325,11 @@ export const HOME_LAYOUT = {
     panel: UPDATE_PANEL,
   },
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
-  walkerOrigin: { x: WALKER_ORIGIN_X, y: WALKER_SECTION.y + TILE_OFFSET },
+  walkerOrigin: { x: GRID_ORIGIN_X, y: sectionTilesY(WALKER_SECTION, 0) },
   // A walker tile: the portrait's box and the portrait in it, the walker's perk icon right of
   // the box at icons.dy (a walker has one perk), a locked walker's badge over the tile's
   // top-left corner, and every walker's name plate, its caps at plateY, centred. The tiles sit
-  // 7px inside the section's inner frame edge, leaving the selected mark's overhang on screen.
+  // inside the shared content padding, including the selected mark's overhang.
   walkerTile: {
     badge: { dx: -2, dy: -3 },
     box: WALKER_BOX,
@@ -313,7 +339,7 @@ export const HOME_LAYOUT = {
   },
   walkerTiles: WALKER_TILES,
   // The yard sign's board, baked into screen-home, which the dog slot sign keeps clear of.
-  yardSign: { height: 38, width: 128, x: 6, y: 138 },
+  yardSign: { height: 38, width: 128, x: 6, y: 138 + HERO_OFFSET_Y },
 } as const satisfies Readonly<Record<string, unknown>> & {
   dogTiles: GridSpec;
   gateSpots: readonly PackPlacement[];

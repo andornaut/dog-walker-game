@@ -85,14 +85,61 @@ describe("home layout", () => {
     expect(SCREEN_CONFIG.height - startButton.y - startButton.height).toBeGreaterThan(startGap);
   });
 
-  it("puts the tiles directly under each band, at the same offset in every section", () => {
-    const { tileOffset } = HOME_LAYOUT;
-    const [pocketCell] = gridRects(pocket.cells, 1, pocket.origin);
-    expect(walkerOrigin.y - sections.walker.y).toBe(tileOffset);
-    expect(dogOrigin.y - sections.dogs.y).toBe(tileOffset);
-    expect(sectionFill(sections.walker).y).toBe(walkerOrigin.y);
-    expect(sectionFill(sections.dogs).y).toBe(dogOrigin.y);
-    expect(pocketCell?.y).toBe(sectionFill(sections.pocket).y);
+  it("leaves the shared content padding around actual card, check and lock pixels", () => {
+    const opaque = (key: string, frame = 0): Rect => {
+      const sprite = key.startsWith("ui-");
+      const png = decodePng(readFileSync(`public/art/${sprite ? "sprites" : "images"}/${key}.png`));
+      const side = key === "ui-check" ? 16 : sprite ? 24 : png.height;
+      const pixels = [];
+      for (let y = 0; y < side; y += 1) {
+        for (let x = 0; x < side; x += 1) {
+          if (png.data[(y * png.width + frame * side + x) * 4 + 3] !== 0) {
+            pixels.push({ x, y });
+          }
+        }
+      }
+      const x = Math.min(...pixels.map((pixel) => pixel.x));
+      const y = Math.min(...pixels.map((pixel) => pixel.y));
+      return {
+        height: Math.max(...pixels.map((pixel) => pixel.y)) + 1 - y,
+        width: Math.max(...pixels.map((pixel) => pixel.x)) + 1 - x,
+        x,
+        y,
+      };
+    };
+    const tick = opaque("ui-check", 3);
+    const badges = [opaque("icon-lock"), opaque("icon-bill")];
+    // Both tile states reach their nine-slice frame edges. ui-select is the missing-tile fallback.
+    for (const key of ["ui-tile", "ui-select"]) {
+      const ink = opaque(key, 1);
+      expect(ink).toEqual({ height: 24, width: 24, x: 0, y: 0 });
+    }
+    for (const [id, section, hits] of rows) {
+      const fill = sectionFill(section);
+      const safe = insetRect(HOME_LAYOUT.sectionContentPadding, fill);
+      for (const hit of hits) {
+        const tile = id === "dogs" ? { ...hit, height: hit.height - 2, y: hit.y + 1 } : hit;
+        const at = (offset: Rect, dx: number, dy: number) => ({
+          ...offset,
+          x: tile.x + offset.x + dx,
+          y: tile.y + offset.y + dy,
+        });
+        const visible = [
+          at({ ...tile, x: 0, y: 0 }, -FEEDBACK.shakePx, FEEDBACK.pressDipPx),
+          at({ ...tile, x: 0, y: 0 }, FEEDBACK.shakePx, FEEDBACK.pressDipPx),
+          at(
+            tick,
+            MARK_OFFSET.x - FEEDBACK.shakePx,
+            MARK_OFFSET.y - FEEDBACK.liftPx - FEEDBACK.badgePopPx,
+          ),
+          ...badges.map((badge) => at(badge, -2 - FEEDBACK.shakePx, -3)),
+          insetRect(-HOME_LAYOUT.tileSelectOutset, { ...tile, y: tile.y - FEEDBACK.liftPx }),
+        ];
+        for (const ink of visible) {
+          expect(inside(ink, safe), `${id}: ${JSON.stringify(ink)}`).toBe(true);
+        }
+      }
+    }
   });
 
   it.each(Object.entries(sections))(

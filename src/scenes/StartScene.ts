@@ -1193,15 +1193,35 @@ export class StartScene extends Scene {
   // The street, yard and porch come from the screen-home art, drawn once; a plain yard
   // stands in while the art is missing.
   private drawGate(): void {
+    fillRect(this.add.graphics(), PALETTE.darkBrown, SCREEN);
     if (this.textures.exists("screen-home")) {
-      this.add.image(0, 0, "screen-home").setOrigin(0);
+      this.add.image(0, HOME_LAYOUT.heroOffsetY, "screen-home").setOrigin(0);
     } else {
       const g = this.add.graphics();
-      fillRect(g, PALETTE.darkBrown, SCREEN);
-      fillRect(g, PALETTE.darkSlate, { height: 52, width: SCREEN.width, x: 0, y: GATE.y });
-      fillRect(g, PALETTE.lightGrey, { height: 34, width: SCREEN.width, x: 0, y: 92 });
-      fillRect(g, PALETTE.green, { height: 70, width: SCREEN.width, x: 0, y: 126 });
-      fillRect(g, PALETTE.tan, { height: 70, width: PATH.width, x: PATH.x, y: 126 });
+      fillRect(g, PALETTE.darkSlate, {
+        height: 52,
+        width: SCREEN.width,
+        x: 0,
+        y: 40 + HOME_LAYOUT.heroOffsetY,
+      });
+      fillRect(g, PALETTE.lightGrey, {
+        height: 34,
+        width: SCREEN.width,
+        x: 0,
+        y: 92 + HOME_LAYOUT.heroOffsetY,
+      });
+      fillRect(g, PALETTE.green, {
+        height: 70,
+        width: SCREEN.width,
+        x: 0,
+        y: 126 + HOME_LAYOUT.heroOffsetY,
+      });
+      fillRect(g, PALETTE.tan, {
+        height: 70,
+        width: PATH.width,
+        x: PATH.x,
+        y: 126 + HOME_LAYOUT.heroOffsetY,
+      });
       fillRect(g, PALETTE.brown, {
         height: HOME_LAYOUT.gateBar.height - 1,
         width: SCREEN.width,
