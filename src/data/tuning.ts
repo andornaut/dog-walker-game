@@ -225,7 +225,7 @@ export const TUNING = {
     // One hop of a bouncing ball, which is only drawn.
     ballBounceSeconds: 0.4,
     // After a hit, obstacles are ignored this long; pickups still count.
-    collisionGrace: 1.2,
+    collisionGrace: 1,
     // An owner who fires you holds the walk still this long while their moment plays.
     firingHoldSeconds: 3,
     // The walk's first zone's first obstacle meets the pack no sooner than this long in, on the

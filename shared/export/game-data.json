@@ -3260,7 +3260,7 @@
       "approachFirstDelayMax": 0.5,
       "approachFirstDelayMin": 0,
       "ballBounceSeconds": 0.4,
-      "collisionGrace": 1.2,
+      "collisionGrace": 1,
       "firingHoldSeconds": 3,
       "firstZoneContact": 2,
       "hitStopSeconds": 1,
