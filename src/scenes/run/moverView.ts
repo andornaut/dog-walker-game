@@ -167,11 +167,12 @@ export function drawMover(
   if (tell.kind === "wander") {
     if (wander !== undefined && body !== undefined) {
       const top = body.sprite.getTopCenter();
+      const cueY = Math.round((top.y ?? 0) + CUE.wander.y);
       wander.sprite
         .setOrigin(0, 0)
         .setPosition(
           Math.round((top.x ?? 0) + CUE.wander.x),
-          Math.round((top.y ?? 0) + CUE.wander.y),
+          path.motion === "signature" ? Math.max(JUNCTURE_Y, cueY) : cueY,
         );
       showBelowJuncture(wander.sprite);
       playTag(wander.sprite, wander.key, WARNING_TAG, still);
