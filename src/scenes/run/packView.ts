@@ -197,8 +197,8 @@ export class PackView {
   // The walker stands on the feet line at scale 1; each dog's feet stand its place in the
   // formation, up the screen and across from where the projection puts the walker's lane on that
   // row, so the pack is drawn as it collides. Lower feet are drawn in front. While the walk is
-  // held, they stand idle. Through the grace window after a hit, the walker, the dogs and the
-  // leashes blink, or stay dimmed with reduced motion (graceAlpha).
+  // held, they stand idle. Through the grace window after a hit, the walker and walking dogs
+  // blink, or stay dimmed with reduced motion (graceAlpha); leashes keep their normal alpha.
   draw(walk: Walk, frame: PackFrame): void {
     const { halted, pulls, shadow, still } = frame;
     const alpha = graceAlpha(
@@ -248,11 +248,11 @@ export class PackView {
       }
     }
     const { walker } = this;
-    // A fired dog's trot fades it with reduced motion.
-    const trotting: ReadonlySet<object> = new Set(this.sprites([...this.leaving.keys()]));
-    for (const layer of this.figures.layers()) {
-      if (!trotting.has(layer)) {
-        layer.setAlpha(alpha);
+    walker.sprite.setAlpha(alpha);
+    // A fired dog's trot owns its alpha while it leaves the pack.
+    for (const [dog, sprite] of this.dogSprites) {
+      if (sprite.visible && !this.leaving.has(dog)) {
+        sprite.setAlpha(alpha);
       }
     }
     if (posed && !this.reacting.has(walker.sprite)) {
