@@ -78,7 +78,6 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
   "other-dog-owner": { above: 65, left: -17, right: 19 },
   "park-rangers-cart": { above: 70, left: -23, right: 24 },
   "parked-car": { above: 41, left: -26, right: 26 },
-  "patio-rail": { above: 33, left: -87, right: 87 },
   "patrol-buggy": { above: 62, left: -55, right: 55 },
   pedicab: { above: 69, left: -24, right: 24 },
   "porch-cat": { above: 32, left: -24, right: 20 },

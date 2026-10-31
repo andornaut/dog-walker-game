@@ -9,7 +9,7 @@ import { unlockPrice } from "../rules/shop";
 import { read } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
 import { gameData } from ".";
-import { SCREEN_CONFIG } from "./screen";
+import { LANE_COUNT, SCREEN_CONFIG } from "./screen";
 import type { CardOption, Effect, EncounterId, ZoneId } from "./types";
 
 // Invariants the rulebook states about the content and numbers, checked on the real data.
@@ -248,17 +248,26 @@ describe("run, world and walkers", () => {
     expect(over).toEqual([]);
   });
 
-  // Every zone weighs obstacles that never move at each width, 1, 2 and 3 lanes, so a fixed one
-  // with no room always has a narrower one to be swapped for, 2 lanes before 1.
-  it.each(world.zones)("weighs fixed obstacles 1, 2 and 3 lanes wide in $name", ({ weights }) => {
-    const weighed = weights.minorObstacles as Readonly<Record<string, number>>;
-    const fixedWidths = new Set(
-      Object.entries(minorObstacles).flatMap(([id, minor]) =>
-        !("movement" in minor) && (weighed[id] ?? 0) > 0 ? [minor.shape.lanes] : [],
-      ),
-    );
-    expect([...fixedWidths].sort()).toEqual([1, 2, 3]);
-  });
+  // Each active wide fixed kind has a narrower replacement and leaves the required lanes open.
+  it.each(world.zones)(
+    "gives wide fixed obstacles a narrower replacement in $name",
+    ({ weights }) => {
+      const weighed = weights.minorObstacles as Readonly<Record<string, number>>;
+      const fixedWidths = new Set(
+        Object.entries(minorObstacles).flatMap(([id, minor]) =>
+          !("movement" in minor) && (weighed[id] ?? 0) > 0 ? [minor.shape.lanes] : [],
+        ),
+      );
+      const widths = [...fixedWidths];
+      const widest = Math.min(3, LANE_COUNT - read(tuning, "counts", "openLanesPerRowMin"));
+      expect(
+        widths.every((width) => Number.isInteger(width) && width >= 1 && width <= widest),
+      ).toBe(true);
+      expect(
+        widths.filter((width) => width > 1).every((width) => widths.some((other) => other < width)),
+      ).toBe(true);
+    },
+  );
 
   it("fits the largest pack in the card row, one dog slot a place, the first free and the rest priced", () => {
     expect(tuning.counts.packSizeMax).toBe(SCREEN_CONFIG.dogSlotCount);

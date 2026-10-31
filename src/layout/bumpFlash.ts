@@ -119,7 +119,6 @@ const MINOR_FLASH_COLOURS: Readonly<Record<MinorLookId, BorderColour>> = {
   newspaperCart: "white",
   parkRangersCart: "green",
   parkedCar: "cyan",
-  patioRail: "green",
   patrolBuggy: "red",
   pedicab: "cyan",
   pigeons: "lightGrey",
