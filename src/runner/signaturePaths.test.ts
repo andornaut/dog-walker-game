@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { MOVEMENT_PROFILES } from "../data/movementProfiles";
 import type { SignatureProfile } from "../data/types";
+import { GAME_ROAD } from "../testing/planner";
 import {
   compileSignature,
   signatureAlive,
@@ -218,6 +220,45 @@ describe("signature paths", () => {
     const remainingSeconds =
       (room.sightLength - signaturePlace(path, path.complete).y) / (room.scrollSpeed * path.tail.y);
     expect(remainingSeconds).toBeGreaterThanOrEqual(profile.finishAheadSeconds);
+  });
+
+  it("admits the slow taxi tail while rejecting less than its actual finish-time margin", () => {
+    const profile = MOVEMENT_PROFILES.twoMerges;
+    if (profile?.kind !== "successiveMerges") {
+      throw new Error("Missing taxi profile");
+    }
+    const room = {
+      cellLength: GAME_ROAD.cell.length,
+      laneCount: GAME_ROAD.laneCount,
+      scrollSpeed: 300,
+      sightLength: GAME_ROAD.sightLength,
+    };
+    const entry = {
+      at: profile.warningSeconds * room.scrollSpeed,
+      lane: 1,
+      span: 1,
+      travel: 2 * room.cellLength,
+    };
+    const path = compileSignature(room, profile, draws, entry);
+    if (path === null) {
+      throw new Error("Expected the complete taxi route with its original footprint entry");
+    }
+    const end = signaturePlace(path, path.complete);
+    const velocity = room.scrollSpeed * path.tail.y;
+    expect((room.sightLength - end.y) / velocity).toBeGreaterThanOrEqual(
+      profile.finishAheadSeconds,
+    );
+    expect(signaturePlace(path, 0).y).toBe(entry.travel);
+    const contactIn = (seconds: number) => ({
+      ...room,
+      sightLength: end.y + seconds * velocity,
+    });
+    expect(
+      compileSignature(contactIn(profile.finishAheadSeconds - 0.01), profile, draws, entry),
+    ).toBeNull();
+    expect(
+      compileSignature(contactIn(profile.finishAheadSeconds + 0.01), profile, draws, entry),
+    ).not.toBeNull();
   });
 
   it("holds the complete entry delay and cue without consuming travel or changing later geometry", () => {

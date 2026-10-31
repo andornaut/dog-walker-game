@@ -1,5 +1,5 @@
 import { type MoverDraws, moverPlacements, type MoverSpec } from "./moverPlanning";
-import { validateSignature } from "./signaturePaths";
+import { signatureFinishClearance, validateSignature } from "./signaturePaths";
 import { blockingLength, rowSpacing, type SpawnPlan } from "./spawning";
 
 // The shortest screen interval among every geometrically legal signature variant. The entry
@@ -39,8 +39,11 @@ export function minimumSignatureOnScreen(plan: SpawnPlan<string>, spec: MoverSpe
       // Each full reflection advances this far down the road. Ignoring the first partial
       // crossing and using the smallest possible body only enlarges the set considered.
       const down = (across * plan.scrollSpeed * profile.downFactor) / profile.lanesPerSecond;
-      const clearance =
-        profile.finishAheadSeconds * plan.scrollSpeed * Math.max(1, profile.downFactor);
+      const clearance = signatureFinishClearance(
+        plan.scrollSpeed,
+        profile.finishAheadSeconds,
+        profile.downFactor,
+      );
       const room = plan.sightLength - clearance - spec.footprint.rows * plan.cellLength;
       last = Math.min(profile.reflections.max, Math.ceil(room / down) + 1);
       break;

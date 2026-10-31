@@ -245,6 +245,16 @@ export function signatureTravelSweeps(
   });
 }
 
+// After the complete route, every component has this constant vertical velocity per unit
+// of scroll. Zero or reversing tails cannot newly reach the pack from above its contact bound.
+export function signatureFinishClearance(
+  scrollSpeed: number,
+  finishAheadSeconds: number,
+  tailY: number,
+): number {
+  return finishAheadSeconds * scrollSpeed * Math.max(0, tailY);
+}
+
 export function compileSignature(
   geometry: SignatureGeometry,
   profile: SignatureProfile,
@@ -365,7 +375,7 @@ export function compileSignature(
     scrollSpeed,
     tail,
   };
-  const clearance = profile.finishAheadSeconds * scrollSpeed * Math.max(1, tail.y);
+  const clearance = signatureFinishClearance(scrollSpeed, profile.finishAheadSeconds, tail.y);
   const points = signatureSweeps(path, origin.at, complete).flatMap((sweep) => [
     sweep.from,
     sweep.to,
