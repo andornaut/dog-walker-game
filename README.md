@@ -44,14 +44,11 @@ CI runs check, lint, test and build, and the AI attributions scan.
 
 - [Cloudflare dashboard](https://dash.cloudflare.com/?to=/:account/workers/services/view/dog-walker-game)
 
-Pushes to `main` deploy through [Cloudflare Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/), which runs `npm run build:deploy` (the build alone) and then `npx wrangler deploy` on Node `24.21.0` (the `NODE_VERSION` build variable). The type check, lint and tests run before each push and in GitHub CI, not in the deploy build. The build watch paths exclude `**/*.md`, `art/**` and `gameplay/**`, which are not build inputs, so a push that changes only those doesn't deploy. Build settings are on the `dog-walker-game` Worker, under Settings → Build in the [Cloudflare dashboard](https://dash.cloudflare.com/?to=/:account/workers/services/view/dog-walker-game).
+Deployments run through a scheduled local bus at :00, :20 and :40 each hour, in Toronto time. Each departure combines ready work into one batch, installs its locked dependencies and runs type checking, lint, tests and the build in isolated containers, capped at four CPUs and four test workers. A batch starts only while the 1-minute host load is below 24. Full validation runs at departure, not separately for each branch.
 
-To deploy by hand, to the account and custom domain set in `wrangler.jsonc`:
+The bus supplies the exact commit as `WORKERS_CI_COMMIT_SHA`, pushes the gated batch to `main` using the regular account's Git authentication, and deploys the same built `dist/` through the project's installed Wrangler and existing account login. It does not rebuild for deployment. GitHub CI starts from that push and the bus monitors its checks in the background. Automatic Cloudflare Workers Builds deployment is disconnected; deployments are not run manually.
 
-```bash
-npx wrangler login
-npm run deploy
-```
+Deployment scope is the complete batch diff. A batch changing only Markdown, `art/` source files or `gameplay/` documentation skips deployment; exported assets under `public/art/` deploy. A failed gate blocks the push. A failed deployment retains its gated artifacts for a later scheduled retry without another build, test run or push. The target account and Worker are pinned in `wrangler.jsonc`.
 
 ## Licence
 
