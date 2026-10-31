@@ -101,7 +101,7 @@ function walkReaching(): { inputs: readonly InputEvent[]; run: RunState; seed: n
 
 // A walk saved between zones and resumed from its checkpoint, as the next launch does, plays the
 // rest of the walk as the walk itself did: the run's streams take up where they were, each zone
-// is planned from the seed as before, and the road, pulls and clocks are as they were saved.
+// is planned from the seed as before, and transient movement timing starts fresh at the boundary.
 describe("a walk resumed from its checkpoint", { timeout: 60_000 }, () => {
   it.each<{ point: Point; zone: number }>([
     { point: "zoneStart", zone: 2 },
@@ -127,6 +127,8 @@ describe("a walk resumed from its checkpoint", { timeout: 60_000 }, () => {
     if (saved === undefined) {
       throw new Error(`the walk was not saved at the ${point} of zone ${zone}`);
     }
+    expect(saved.walk.session.debuffMovement).toBeNull();
+    expect(saved.walk.session.walk.run.debuffs).toEqual([]);
 
     const checkpoint = {
       ...checkpointOf(gameData, saved.walk.session.walk.run),

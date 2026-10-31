@@ -41,10 +41,11 @@ export type SessionData = CardData & PullData & WalkData;
 // the walk is driven. forks draws a fork's paths and upgrades what they carry, which the walk
 // never draws from, so a seed offers the same forks however the walk goes. Each zone is planned
 // from streams of its own, spawns-<zone index> and movers-<zone index>. draws counts what each
-// stream has drawn, so a resumed walk can take its streams up where they were (runStreams).
+// cards, forks and upgrades have drawn for boundary resumes. Movement-debuff streams restart
+// from the seed and zone index without a saved cursor.
 export interface RunStreams {
   readonly cards: Random;
-  readonly debuffMovement: Random;
+  debuffMovement(zone: number): Random;
   draws(): StreamDraws;
   readonly forks: Random;
   readonly seed: number;
@@ -54,12 +55,11 @@ export interface RunStreams {
 // How many numbers each of a run's streams has drawn.
 export interface StreamDraws {
   readonly cards: number;
-  readonly debuffMovement: number;
   readonly forks: number;
   readonly upgrades: number;
 }
 
-export const NO_DRAWS: StreamDraws = { cards: 0, debuffMovement: 0, forks: 0, upgrades: 0 };
+export const NO_DRAWS: StreamDraws = { cards: 0, forks: 0, upgrades: 0 };
 
 // The road's geometry for the run's pack, which changes when an owner fires you.
 type SessionGeometry = (run: RunState) => RoadGeometry;
@@ -84,7 +84,7 @@ export interface Session {
   readonly walk: Walk;
   // The zone's end waits behind the queued cards.
   readonly zoneEndPending: boolean;
-  // The active movement owner's elapsed walking time and previously sampled next interval.
+  // Transient movement timing; neighbourhood boundaries reset the clock.
   readonly debuffMovement: DebuffMovementClock | null;
 }
 
@@ -138,15 +138,23 @@ function countedStream(seed: number, name: string, skip: number) {
 // a resumed walk's count from when it was saved.
 export function runStreams(seed: number, drawn: StreamDraws = NO_DRAWS): RunStreams {
   const cards = countedStream(seed, "cards", drawn.cards);
-  const debuffMovement = countedStream(seed, "debuffMovement", drawn.debuffMovement);
+  const movementStreams = new Map<number, Random>();
+  const debuffMovement = (zone: number): Random => {
+    const existing = movementStreams.get(zone);
+    if (existing !== undefined) {
+      return existing;
+    }
+    const random = randomStream(seed, `debuffMovement-${zone}`);
+    movementStreams.set(zone, random);
+    return random;
+  };
   const forks = countedStream(seed, "forks", drawn.forks);
   const upgrades = countedStream(seed, "upgrades", drawn.upgrades);
   return {
     cards: cards.random,
-    debuffMovement: debuffMovement.random,
+    debuffMovement,
     draws: () => ({
       cards: cards.drawn(),
-      debuffMovement: debuffMovement.drawn(),
       forks: forks.drawn(),
       upgrades: upgrades.drawn(),
     }),
@@ -219,7 +227,7 @@ export function forkPoint(session: Session): Session {
 // The session that just planned a zone as a walk resumes from it: as it stood before the plan,
 // with the walk the zonePlanned event names, so resumeSession plans the zone again.
 export function zoneStartPoint(session: Session, unplanned: Walk): Session {
-  return { ...session, needsZonePlan: true, walk: unplanned };
+  return { ...session, debuffMovement: null, needsZonePlan: true, walk: unplanned };
 }
 
 // One step of seconds: the inputs, the pulls, the Zoomies' drift, the walk, then the step's cards
@@ -254,7 +262,7 @@ export function stepSession(
   const zoomies = stepDebuffMovement(
     data,
     road,
-    streams.debuffMovement,
+    streams.debuffMovement(walk.run.zoneIndex),
     seconds,
     session.debuffMovement,
     pulled.walk,
@@ -413,7 +421,7 @@ function endZone(
   const before = session.walk.run;
   const { fees, run } = finishZone(data, before);
   events.push({ after: run, before, fees, kind: "zoneEnded" });
-  const ended: Session = { ...session, walk: { ...session.walk, run } };
+  const ended: Session = { ...session, debuffMovement: null, walk: { ...session.walk, run } };
   if (run.phase.kind === "ended") {
     return { events, session: ended };
   }

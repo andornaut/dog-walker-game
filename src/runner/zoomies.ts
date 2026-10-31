@@ -8,7 +8,7 @@ import { read } from "../rules/units";
 import { laneBlockedForPull, type PullData, type PullGeometry } from "./pulls";
 import { steerWalk, type Walk } from "./walk";
 
-// One active movement owner shares one walking-time clock and one persisted next interval.
+// One active movement owner shares one walking-time clock and one in-memory next interval.
 export interface DebuffMovementClock {
   readonly debuff: DebuffId;
   readonly elapsed: number;

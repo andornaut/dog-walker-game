@@ -33,6 +33,7 @@ import {
   type SessionStep,
   startSession,
   stepSession,
+  zoneStartPoint,
 } from "./session";
 import { itemHeight, startRoad, zoneLength } from "./walk";
 import { type WalkItem } from "./walkItems";
@@ -62,7 +63,7 @@ describe("runStreams", () => {
   it("names each stream from the seed, so a seed repeats them and another seed does not", () => {
     const draws = (seed: number) => {
       const { cards, debuffMovement, forks, upgrades } = runStreams(seed);
-      return [take(5, cards), take(5, debuffMovement), take(5, forks), take(5, upgrades)];
+      return [take(5, cards), take(5, debuffMovement(0)), take(5, forks), take(5, upgrades)];
     };
     expect(draws(3)).toEqual(draws(3));
     expect(draws(4)).not.toEqual(draws(3));
@@ -86,7 +87,7 @@ describe("runStreams", () => {
   it("keeps debuff movement draws independent of cards, forks and upgrades", () => {
     const baseline = runStreams(3);
     const drifted = runStreams(3);
-    take(100, drifted.debuffMovement);
+    take(100, drifted.debuffMovement(0));
     expect([take(10, drifted.cards), take(10, drifted.forks), take(10, drifted.upgrades)]).toEqual([
       take(10, baseline.cards),
       take(10, baseline.forks),
@@ -107,21 +108,14 @@ describe("runStreams", () => {
     take(5, drawn.cards);
     take(2, drawn.forks);
     take(3, drawn.upgrades);
-    take(6, drawn.debuffMovement);
-    expect(drawn.draws()).toEqual({ cards: 5, debuffMovement: 6, forks: 2, upgrades: 3 });
+    expect(drawn.draws()).toEqual({ cards: 5, forks: 2, upgrades: 3 });
     const resumed = runStreams(3, drawn.draws());
-    expect([
-      take(4, resumed.cards),
-      take(4, resumed.debuffMovement),
-      take(4, resumed.forks),
-      take(4, resumed.upgrades),
-    ]).toEqual([
+    expect([take(4, resumed.cards), take(4, resumed.forks), take(4, resumed.upgrades)]).toEqual([
       take(4, drawn.cards),
-      take(4, drawn.debuffMovement),
       take(4, drawn.forks),
       take(4, drawn.upgrades),
     ]);
-    expect(resumed.draws()).toEqual({ cards: 9, debuffMovement: 10, forks: 6, upgrades: 7 });
+    expect(resumed.draws()).toEqual({ cards: 9, forks: 6, upgrades: 7 });
   });
 });
 
@@ -234,11 +228,14 @@ describe("resumeSession", () => {
 });
 
 describe("stepSession", () => {
-  it("continues the same timed drift sequence from a persisted clock and stream count", () => {
-    const random = runStreams(1);
+  it("replays a neighbourhood's drift from its start independently of earlier movement draws", () => {
+    const uninterrupted = runStreams(1);
+    take(100, uninterrupted.debuffMovement(0));
+    const restored = runStreams(1, uninterrupted.draws());
     const empty = emptyRoad(STARTED);
-    let session: Session = {
+    const fresh = (): Session => ({
       ...empty,
+      debuffMovement: null,
       walk: {
         ...empty.walk,
         run: {
@@ -247,39 +244,31 @@ describe("stepSession", () => {
             {
               debuff: "zoomies",
               secondsLeft: read(gameData.tuning, "seconds", gameData.debuffs.zoomies.seconds),
-              untilZone: 0,
+              untilZone: 1,
             },
           ],
+          zoneIndex: 1,
         },
       },
-    };
-    for (let i = 0; i < 20; i++) {
-      session = stepSession(gameData, random, geometry, STEP_SECONDS, [], session).session;
-    }
-    const restoredRandom = runStreams(1, random.draws());
-    let restored = structuredClone(session);
+    });
+    let original = fresh();
+    let replayed = fresh();
     const drifts: LaneDirection[] = [];
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 220; i++) {
       const inputs: SessionInput[] =
         i % 30 === 0 ? [{ direction: i % 60 === 0 ? -1 : 1, kind: "lane" }] : [];
-      const original = stepSession(gameData, random, geometry, STEP_SECONDS, inputs, session);
-      const replayed = stepSession(
-        gameData,
-        restoredRandom,
-        geometry,
-        STEP_SECONDS,
-        inputs,
-        restored,
-      );
-      expect(replayed).toEqual(original);
-      session = original.session;
-      restored = replayed.session;
+      const next = stepSession(gameData, uninterrupted, geometry, STEP_SECONDS, inputs, original);
+      const replay = stepSession(gameData, restored, geometry, STEP_SECONDS, inputs, replayed);
+      expect(replay).toEqual(next);
+      original = next.session;
+      replayed = replay.session;
       drifts.push(
-        ...original.events.flatMap((event) => (event.kind === "drifted" ? [event.direction] : [])),
+        ...next.events.flatMap((event) => (event.kind === "drifted" ? [event.direction] : [])),
       );
     }
     expect(drifts.length).toBeGreaterThan(0);
-    expect(restoredRandom.draws()).toEqual(random.draws());
+    expect(restored.draws()).toEqual(uninterrupted.draws());
+    expect(Object.keys(restored.draws()).sort()).toEqual(["cards", "forks", "upgrades"]);
   });
 
   it("does nothing while a card is open or the walk has ended", () => {
@@ -347,19 +336,69 @@ describe("stepSession", () => {
     const length = zoneLength(gameData);
     const atEnd: Session = {
       ...walked,
-      walk: { ...walked.walk, run: { ...walked.walk.run, zoneDistance: pixels(length - 0.01) } },
+      debuffMovement: { debuff: "zoomies", elapsed: 0.1, interval: 1 },
+      walk: {
+        ...walked.walk,
+        run: {
+          ...walked.walk.run,
+          debuffs: [{ debuff: "zoomies", secondsLeft: 10, untilZone: 0 }],
+          zoneDistance: pixels(length - 0.01),
+        },
+      },
     };
 
     const end = stepSession(gameData, streams, geometry, STEP_SECONDS, [], atEnd);
     expect(kinds(end.events)).toEqual(["pulled", "walked", "zoneEnded", "cardOpened"]);
     expect(end.session.card?.source.kind).toBe("fork");
     expect(end.session.distanceBeforeZone).toBe(length);
+    expect(end.session.debuffMovement).toBeNull();
+    expect(end.session.walk.run.debuffs).toEqual([]);
 
     const fork = chooseCard(gameData, streams, geometry, 0, end.session);
     expect(kinds(fork.events)).toEqual(["chosen", "zonePlanned"]);
     expect(fork.session.card).toBeNull();
     expect(fork.session.walk.run.zoneIndex).toBe(1);
     expect(fork.session.walk.road.pending.length).toBeGreaterThan(0);
+    expect(fork.session.debuffMovement).toBeNull();
+  });
+
+  it("starts fresh timing when a fork effect grants movement in the next neighbourhood", () => {
+    const data: SessionData = {
+      ...gameData,
+      upgrades: {
+        ...gameData.upgrades,
+        bellyRubs: {
+          ...gameData.upgrades.bellyRubs,
+          effects: [{ debuff: "zoomies", kind: "debuff" }],
+        },
+      },
+    };
+    const source: CardSource = { kind: "fork", paths: ["cabbagetown"], upgrades: ["bellyRubs"] };
+    const empty = emptyRoad(STARTED);
+    const run = openCard(source, { ...empty.walk.run, zoneIndex: 1 });
+    const offered: Session = {
+      ...empty,
+      card: cardFor(data, run, source),
+      needsZonePlan: true,
+      walk: { ...empty.walk, run },
+    };
+    const streams = runStreams(1);
+    take(100, streams.debuffMovement(0));
+    const chosen = chooseCard(data, streams, geometry, 0, offered);
+    expect(chosen.session.debuffMovement).toBeNull();
+    expect(chosen.session.walk.run.debuffs.map(({ debuff }) => debuff)).toEqual(["zoomies"]);
+    const planned = chosen.events.find((event) => event.kind === "zonePlanned");
+    if (planned?.kind !== "zonePlanned") {
+      throw new Error("Expected the chosen neighbourhood to be planned");
+    }
+    const point = zoneStartPoint(chosen.session, planned.unplanned);
+    expect(point.debuffMovement).toBeNull();
+    const restartedStreams = runStreams(1, streams.draws());
+    const restarted = resumeSession(data, restartedStreams, geometry, point).session;
+    const ongoing = stepSession(data, streams, geometry, STEP_SECONDS, [], chosen.session);
+    const replayed = stepSession(data, restartedStreams, geometry, STEP_SECONDS, [], restarted);
+    expect(replayed).toEqual(ongoing);
+    expect(ongoing.session.debuffMovement?.interval).toBeGreaterThan(0);
   });
 });
 

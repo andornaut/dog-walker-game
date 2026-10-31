@@ -1,5 +1,5 @@
 import { STEP_SECONDS } from "@andornaut/game-kit/clock/fixedStep";
-import { randomStream, seededRandom } from "@andornaut/game-kit/random";
+import { seededRandom } from "@andornaut/game-kit/random";
 import { describe, expect, it, vi } from "vitest";
 
 import { gameData } from "../data";
@@ -12,6 +12,7 @@ import { plannerStreams } from "../testing/movers";
 import { laneControlIn } from "./laneControl";
 import { destinationLane, stillInLane } from "./laneMotion";
 import { pullHorizon } from "./pulls";
+import { runStreams } from "./session";
 import { startRoad, steerWalk, stepWalk, type Walk } from "./walk";
 import { walkGeometry, walkProjection } from "./walkGeometry";
 import { type WalkItem } from "./walkItems";
@@ -368,7 +369,7 @@ describe("the Zoomies on every zone's road", { timeout: 120_000 }, () => {
       });
       const random = seededRandom(seed);
       let movementClock: DebuffMovementClock | null = null;
-      const movementRandom = randomStream(seed, "debuffMovement");
+      const movementRandom = runStreams(seed).debuffMovement(run.zoneIndex);
       let clock = 0;
       let drifts = 0;
       let lastDrift: { at: number; horizon: number; to: number } | null = null;
