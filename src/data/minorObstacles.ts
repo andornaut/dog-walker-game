@@ -130,6 +130,13 @@ export const MINOR_OBSTACLES = {
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
   },
+  escapedCapybara: {
+    movement: { kind: "step", steps: { max: 2, min: 1 } },
+    name: "Escaped capybara",
+    onFoot: true,
+    shape: { lanes: 1, rows: 1 },
+    zones: ["highPark"],
+  },
   fallenLog: { name: "Fallen log", shape: { lanes: 2, rows: 1 }, zones: ["highPark"] },
   ferrets: {
     movement: { kind: "dart", stopShare: 0, tilt: { max: 0, min: 0 }, turnBackShare: 0.3 },

@@ -102,39 +102,6 @@ export const ENCOUNTERS = {
     shape: { lanes: 1, rows: 1 },
     zones: ["theBeaches"],
   },
-  // A neighbourhood card obstacle comes only in its zones.
-  escapedCapybara: {
-    hitLabel: "CAPYBARA!",
-    hitWord: "SQUEAK!",
-    kind: "obstacle",
-    movement: { kind: "step", steps: { max: 2, min: 1 } },
-    name: "Escaped capybara",
-    resolution: {
-      kind: "card",
-      options: [
-        {
-          art: "card-escaped-capybara-help",
-          effects: [{ amount: -1, kind: "hearts", target: { kind: "lead" } }],
-          id: "help",
-          name: "Help the keeper",
-        },
-        {
-          art: "card-escaped-capybara-call-zoo",
-          effects: [{ amount: "escapedCapybaraCall", change: "lose", kind: "money" }],
-          id: "callZoo",
-          name: "Call the zoo",
-        },
-        {
-          art: "card-escaped-capybara-drag",
-          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
-          id: "drag",
-          name: "Drag them away",
-        },
-      ],
-    },
-    shape: { lanes: 1, rows: 1 },
-    zones: ["highPark"],
-  },
   friendlyNeighbour: {
     kind: "lucky",
     movement: { kind: "step", steps: { max: 2, min: 1 } },
