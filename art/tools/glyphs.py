@@ -14,12 +14,10 @@ icon-zone-<zone>            cabbagetown (a bay-and-gable house), high-park (a pi
                             kensington-market (a painted house turned shop), the-beaches (the
                             lifeguard station), yonge-street (the CN Tower); each inside a 1px
                             ring for its outline, which holds 3:1 on cream and tan
-icon-muddy                  a debuff beside icon-stinky (ui.py), on its bar and on cream: a
-                            muddy paw print
-icon-zoomies                a debuff's bar and message line: an amber paw print dashing right
-                            off three sky speed lines
+icon-muddy                  a blue water drop entering a broad brown mud splash
+icon-zoomies                a green paw rushing right with a yellow lightning tail
 icon-spotlight              a debuff's bar and message line: a stage spotlight at the top left
-                            throwing a pale beam down onto its yellow pool of light
+                            throwing a yellow beam down onto its white-lit pool
 icon-upgrade-<upgrade>      the shop, the cards and the message strip: belly-rubs (a hand under a heart),
                             big-tipper (coins and an up arrow), good-leash (a calm dog sitting
                             politely), raincoats (a yellow raincoat), rush-hour (an alarm clock),
@@ -266,9 +264,7 @@ def yonge_street():
     return g
 
 
-# ---------- debuffs: icon-muddy beside ui.py's icon-stinky ----------
-# Like icon-stinky, icon-muddy reads on cream by its plum outline (9.42:1) and differs from it by
-# shape: a paw print against stink lines.
+# ---------- debuffs: distinct material silhouettes with a shared plum keyline ----------
 
 def drop(g, cx, top, r, fill, sh=None, li=None):
     """A water drop: a point at (cx, top) over a round base of radius r."""
@@ -277,77 +273,49 @@ def drop(g, cx, top, r, fill, sh=None, li=None):
     g.ell(cx, base, r, r, fill, sh, li)
 
 
-MUDDY = (
-    "................",
-    "................",
-    ".....lb..lb.....",
-    ".....bd..bd.....",
-    ".....bd..bd.....",
-    "..lb........lb..",
-    "..bd........bd..",
-    "..bd........bd..",
-    "......lbbb......",
-    ".....lbbbbd.....",
-    "....lbbbbbbd....",
-    "....bbbbbbbd....",
-    ".....bdbbdd.....",
-    "......d..d......",
-    "......d..d......",
-    ".........d......",
-)
-
-
 def muddy():
-    """A muddy paw print, MUDDY: four toes and a pad in brown, lit tan on their top left and shaded
-    dbrown on the right, in a plum line, with two drips of mud running off the pad."""
+    """A sky-blue drop entering a broad brown mud splash, with a tan front lip."""
     g = Grid(16, 16)
     g.edge = lambda c: K["plum"]
-    bitmap(g, 0, 0, list(MUDDY), {"b": "brown", "d": "dbrown", "l": "tan"})
+    g.tri((7, 1), (3, 7), (10, 7), "sky")
+    g.ell(6.5, 6.5, 3.5, 3.5, "sky", "blue", "cyan")
+    g.ell(8, 12, 6.5, 2.5, "brown", "dbrown", "tan")
+    g.rect(3, 8, 2, 4, "brown")
+    g.rect(11, 8, 2, 4, "brown")
+    g.p(1, 9, "tan")
+    g.p(14, 9, "brown")
+    g.rect(5, 10, 4, 2, "tan")
+    g.p(10, 12, "dbrown")
     return g
 
 
 def zoomies():
-    """A paw print dashing right: four toes and a pad in amber, lit yellow on their top left
-    and shaded orange along their foot, with three sky speed lines streaming off its left."""
+    """A green paw rushing right with a broad yellow lightning tail."""
     g = Grid(16, 16)
-    bitmap(g, 0, 1, ["........yy.yy...",
-                     "........aa.aa...",
-                     "........ao.ao...",
-                     "......yy....yy..",
-                     ".sss..aa....aa..",
-                     "......ao....ao..",
-                     ".........ya.....",
-                     "..ssss..yaaaa...",
-                     "........aaaaao..",
-                     "........aaaaao..",
-                     ".sss.....oooo...",
-                     "................"],
-           {"a": "amber", "y": "yellow", "o": "orange", "s": "sky"})
+    g.edge = lambda c: K["plum"]
+    g.rect(9, 3, 2, 3, "green")
+    g.rect(12, 5, 2, 3, "green")
+    g.ell(10, 10, 3.5, 3.5, "green", "forest", "yellow")
+    g.rect(6, 5, 2, 2, "green")
+    bitmap(g, 1, 2, ["...yy", "..yyy", ".yyy.", "yyyy.", "..yy.", ".yy..", "yy..."],
+           {"y": "yellow"})
+    g.p(10, 9, "yellow")
+    g.p(11, 9, "yellow")
     return g
 
 
-# The stage lamp at the spotlight's top left, aimed down and right: d its dslate can, s slate light on it, g
-# its grey rim and yoke, w the white lens.
-SPOT_LAMP = (".g.....",
-             "gsdd...",
-             ".sdddg.",
-             ".ddddgw",
-             "..dgww.",
-             "...gw..")
-
-
 def spotlight():
-    """A stage spotlight: a dslate lamp at the top left, aimed down and right, its white lens throwing a pale
-    cream beam that widens onto a pool of light, an amber ring round a yellow centre, with a white streak
-    down the beam. Aimed, not hanging straight down, so it never reads as a bell."""
+    """A blue stage lamp throwing a broad yellow beam onto a white-lit pool."""
     g = Grid(16, 16)
-    g.ell(9, 12.6, 6, 2, "amber")
-    g.ell(9, 12.4, 4.2, 1, "yellow")
-    g.tri((4, 6.5), (7, 4.5), (12.5, 12), "cream")
-    g.tri((4, 6.5), (12.5, 12), (6, 12), "cream")
-    for k in range(5):
-        g.p(6.5 + k * 0.9, 7 + k, "white")
-    bitmap(g, 1, 1, list(SPOT_LAMP), {"d": "dslate", "s": "slate", "g": "grey", "w": "white"})
+    g.edge = lambda c: K["plum"]
+    g.tri((5, 5), (7, 5), (14, 13), "yellow")
+    g.tri((5, 5), (14, 13), (5, 13), "yellow")
+    g.ell(9.5, 13, 5, 1.5, "yellow")
+    bitmap(g, 1, 1, [".bbb...", "bbbbbb.", ".bbbbsw", "..bbsww", "...sww."],
+           {"b": "blue", "s": "sky", "w": "white"})
+    g.rect(2, 6, 2, 3, "blue")
+    g.rect(3, 8, 3, 1, "blue")
+    g.rect(7, 11, 3, 1, "white")
     return g
 
 

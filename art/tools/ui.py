@@ -240,20 +240,17 @@ def treat_icon():
 
 
 def stinky():
-    """Three stink lines waving in step out of a small cloud puff, in the skunk's mauve family as
-    skunk-cloud: pink with a plum right side and no outline, so the plum
-    carries the lines on cream (9.42:1) and the pink on its mauve debuff bar. The puff is
-    mauve, shaded purple, in its ramp outline. Returns frame pixels."""
+    """Three broad pink wisps above a mauve gas cloud, with a shared plum keyline."""
     g = Grid(16, 16)
-    for cx, cy, rx, ry in ((4, 12.5, 3, 2.3), (12, 12.5, 3, 2.3), (8, 11, 3.5, 3)):
-        g.ell(cx, cy, rx, ry, "mauve", "purple")
-    g.rect(4, 14, 8, 1, "purple")
-    px = g.outlined()
-    for x0, top in ((2, 1), (7, 0), (12, 1)):
-        for y in range(top, 9):
-            x = x0 + hits.WAVE[(y + 6) % 8]
-            px[y][x], px[y][x + 1] = K["pink"], K["plum"]
-    return px
+    g.edge = lambda c: K["plum"]
+    for x, y in ((2, 10), (7, 9), (12, 10)):
+        g.ell(x + 1, y + 2, 3, 2.5, "mauve", "purple", "pink")
+    g.rect(3, 12, 10, 2, "mauve")
+    for x, top in ((2, 2), (7, 1), (12, 2)):
+        for y, dx in enumerate((1, 0, 0, 1, 2, 2, 1)):
+            g.rect(x + dx, top + y, 2, 1, "pink")
+    g.rect(4, 12, 7, 1, "pink")
+    return g.outlined()
 
 
 def mute_x(g, x, y, col):
