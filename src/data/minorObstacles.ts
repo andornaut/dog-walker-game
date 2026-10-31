@@ -117,7 +117,7 @@ export const MINOR_OBSTACLES = {
     movement: { factor: 1.8, kind: "merge", mergeAt: 0.4, mergeSeconds: 0.4 },
     name: "Delivery cyclist",
     shape: { lanes: 1, rows: 1 },
-    zones: ["kensingtonMarket", "yongeStreet"],
+    zones: ["kensingtonMarket", "distilleryDistrict", "yongeStreet"],
   },
   deliveryTruck: {
     movement: { factor: 1.6, kind: "inLane" },
@@ -198,7 +198,7 @@ export const MINOR_OBSTACLES = {
   hedge: {
     name: "Hedge",
     shape: { lanes: 3, rows: 1 },
-    zones: ["highPark", "cabbagetown", "theBeaches"],
+    zones: ["highPark", "cabbagetown"],
   },
   hen: {
     movement: { kind: "dart", stopShare: 0, tilt: { max: 0, min: 0 }, turnBackShare: 0 },
@@ -212,7 +212,7 @@ export const MINOR_OBSTACLES = {
     name: "Hopscotch kid",
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
-    zones: ["cabbagetown", "kensingtonMarket"],
+    zones: ["cabbagetown", "kensingtonMarket", "distilleryDistrict"],
   },
   iceCreamBike: {
     movement: {
@@ -382,7 +382,7 @@ export const MINOR_OBSTACLES = {
     skins: {
       flowerCart: { name: "Flower cart", zones: ["cabbagetown"] },
       fruitCart: { name: "Fruit cart", zones: ["kensingtonMarket"] },
-      hotDogCart: { name: "Hot dog cart", zones: ["highPark", "kensingtonMarket", "yongeStreet"] },
+      hotDogCart: { name: "Hot dog cart", zones: ["highPark", "kensingtonMarket"] },
       iceCreamCart: { name: "Ice cream cart", zones: ["distilleryDistrict", "theBeaches"] },
       newspaperCart: { name: "Newspaper cart", zones: ["yongeStreet"] },
     },
@@ -428,7 +428,7 @@ export const MINOR_OBSTACLES = {
     name: "Tourist",
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
-    zones: ["yongeStreet", "kensingtonMarket", "distilleryDistrict"],
+    zones: ["theBeaches", "distilleryDistrict", "yongeStreet"],
   },
   touristTrain: {
     movement: {
