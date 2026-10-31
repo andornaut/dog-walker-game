@@ -22,11 +22,11 @@ an orange racerback singlet with a white race bib on its front; kid-on-a-bike
 (48x72, ride: 4 frames at 100ms, the pedals going round, a 1px sway and the
 streamers fluttering) is a kid in a red helmet on a mauve bike with training
 wheels and a lit headlamp. The movers going up the road ahead of the pack are
-seen from behind too: stroller (48x72, walk: 4 frames at 160ms, the walkers' stride and pace)
+seen from behind too: stroller (48x72, walk: 8 frames at 80ms, the walkers' stride and pace)
 is a dad pushing a stroller one-handed, a takeaway coffee in his other hand,
 the stroller rolling beside him on his right.
 
-walker-<name> tags: walk (4 frames, 160ms), react (2, 120ms), stumble (4, 90ms), idle (2,
+walker-<name> tags: walk (8 frames, 80ms), react (2, 120ms), stumble (4, 90ms), idle (2,
 400ms), then wave (4 frames, 150ms, looping): the walker facing the camera, feet on the same rows
 as the back view, the left arm (screen right) raised and swinging from the shoulder, the hand
 1, 3, 4 and 3 design pixels right of it. At rest (idle frame 0) a 48x72 walker's feet (the outline under the
@@ -233,37 +233,69 @@ def walker_arms(g, xs, w, top, parts, arms, flare, reach):
         back_arm(g, x, w, top, parts, side * flare, max(0, fwd) + reach)
 
 
-def casey_back(lf=0, rf=0, bob=0, arms=0, flare=0, reach=0):
-    """Casey from behind: an orange cap over a blue hoodie."""
-    g = Grid(32, 48)
-    b = bob
-    # legs and shoes; lf and rf lift a foot
-    for x, f in ((11, lf), (17, rf)):
-        g.rect(x, 33 + b, 4, 10 + f - b, "blue")
-        g.rect(x + 3, 33 + b, 1, 10 + f - b, "navy")
-        g.rect(x, 43 + f, 4, 2, "white")
-        g.rect(x, 44 + f, 4, 1, "lgrey")
-    # arms swing against the legs
-    walker_arms(g, (5, 23), 4, 22 + b, ((10, "sky", "blue"), (3, "skin1", None)), arms, flare, reach)
-    # hoodie
-    g.rect(9, 21 + b, 14, 13, "sky")
-    g.rect(20, 21 + b, 3, 13, "blue")
-    g.rect(9, 21 + b, 1, 12, "cyan")
-    g.p(9, 21 + b, None)
-    g.p(22, 21 + b, None)
-    g.rect(9, 33 + b, 14, 1, "blue")
-    g.ell(16, 22.5 + b, 6, 2.5, "blue", "navy")
-    # head: hair, ears, cap and a ponytail
-    g.rect(14, 19 + b, 4, 3, "skin1")
-    g.cel(16, 12.5 + b, 8.5, 8.5, "dbrown", "plum", "brown")
-    g.rect(7, 13 + b, 2, 3, "skin1")
-    g.rect(23, 13 + b, 2, 3, "skin1")
-    g.cel(16, 8 + b, 8.5, 5, "amber", "orange", "yellow")
-    g.rect(8, 10 + b, 17, 2, "orange")
-    g.rect(15, 10 + b, 2, 2, "dbrown")
-    g.ell(16, 17 + b, 2.5, 4, "dbrown", "plum")
-    return g
+def limb_bar(g, a, b, width, colour):
+    """A solid limb between joints, rasterized on the drawing's own grid."""
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    length = max(0.001, math.hypot(dx, dy))
+    px, py = -dy * width / (2 * length), dx * width / (2 * length)
+    corners = ((a[0] + px, a[1] + py), (b[0] + px, b[1] + py),
+               (b[0] - px, b[1] - py), (a[0] - px, a[1] - py))
+    g.tri(corners[0], corners[1], corners[2], colour)
+    g.tri(corners[0], corners[2], corners[3], colour)
 
+
+def support_shift(lf, rf):
+    """Move the hips toward the planted leg while the other knee recovers."""
+    return -2 / 3 if rf < lf else 2 / 3 if lf < rf else 0
+
+
+def human_legs(g, lf, rf, bob, legs, shade, shoes, x0=0, top=33, width=4, centres=(13, 19)):
+    """Bent recovery knees and planted support feet; standing feet stay on the existing rows."""
+    shift = support_shift(lf, rf)
+    knee_y = (top + 43) / 2
+    for side, cx, lift in ((-1, centres[0] + x0, lf), (1, centres[1] + x0, rf)):
+        bend = -side if lift < 0 else 0
+        hip = (cx + shift, top + bob)
+        knee = (cx + bend, knee_y + lift * 0.45)
+        ankle = (cx, 43 + lift)
+        limb_bar(g, hip, knee, width, legs)
+        limb_bar(g, knee, ankle, width - 0.5, legs)
+        limb_bar(g, (hip[0] + width / 3, hip[1]), (knee[0] + width / 3, knee[1]), 0.8, shade)
+        limb_bar(g, (knee[0] + width / 3, knee[1]), (ankle[0] + width / 3, ankle[1]), 0.8, shade)
+        g.rect(cx - width / 2, 43 + lift, width, 2, shoes)
+        if shoes == "white":
+            g.rect(cx - width / 2, 44 + lift, width, 1, "lgrey")
+
+
+def casey_back(lf=0, rf=0, bob=0, arms=0, flare=0, reach=0):
+    """Casey's cap and ponytail above a shaped hoodie, with bent elbows and recovery knees."""
+    g = Grid(32, 48)
+    b, shift = bob, support_shift(lf, rf)
+    human_legs(g, lf, rf, b, "blue", "navy", "white")
+    for side in (-1, 1):
+        shoulder = (16 + side * 7 + shift, 23 + b)
+        elbow = (16 + side * (8 + flare / 2), 28 + b + arms * side / 2)
+        hand = (16 + side * (9 + flare), 33.5 - max(0, arms * side) - reach)
+        limb_bar(g, shoulder, elbow, 4, "sky" if side < 0 else "blue")
+        limb_bar(g, elbow, (hand[0], hand[1] - 1.3), 3.5, "sky")
+        g.rect(hand[0] - 1.5, hand[1] - 1, 3, 2.5, "skin1")
+    g.tri((9 + shift, 22 + b), (23 + shift, 22 + b), (21 + shift, 34 + b), "sky")
+    g.tri((9 + shift, 22 + b), (21 + shift, 34 + b), (11 + shift, 34 + b), "sky")
+    g.rect(10 + shift, 25 + b, 12, 8, "sky")
+    g.rect(20 + shift, 24 + b, 2, 9, "blue")
+    g.rect(10 + shift, 25 + b, 1, 7, "cyan")
+    g.rect(11 + shift, 33 + b, 10, 1, "blue")
+    g.ell(16 + shift, 22.5 + b, 6, 2.5, "blue", "navy")
+    hb = b / 2
+    g.rect(14, 19 + hb, 4, 3, "skin1")
+    g.cel(16, 12.5 + hb, 8.5, 8.5, "dbrown", "plum", "brown")
+    g.rect(7, 13 + hb, 2, 3, "skin1")
+    g.rect(23, 13 + hb, 2, 3, "skin1")
+    g.cel(16, 8 + hb, 8.5, 5, "amber", "orange", "yellow")
+    g.rect(8, 10 + hb, 17, 2, "orange")
+    g.rect(15, 10 + hb, 2, 2, "dbrown")
+    g.ell(16 - shift / 2, 17 + hb, 2.5, 4, "dbrown", "plum")
+    return g
 
 # ---------- the other walkers (back view) ----------
 
@@ -272,10 +304,8 @@ def ada_back(lf=0, rf=0, bob=0, arms=0, flare=0, reach=0):
     She stands 4px shorter than the adults: her head and body sit lower and her legs are shorter."""
     g = Grid(32, 48)
     b = bob
+    human_legs(g, lf, rf, b, "brown", "skin2", "white", top=40, width=3, centres=(13.5, 18.5))
     for x, f in ((12, lf), (17, rf)):
-        g.rect(x, 40 + b, 3, 3 + f - b, "brown")
-        g.rect(x, 43 + f, 3, 1, "white")
-        g.rect(x, 44 + f, 3, 1, "lgrey")
         g.rect(x, 45 + f, 3, 1, "pink")
     walker_arms(g, (7, 22), 3, 30 + b, ((3, "yellow", None), (4, "brown", None)), arms, flare, reach)
     g.rect(10, 29 + b, 12, 8, "yellow")
@@ -313,12 +343,8 @@ def mr_b_back(lf=0, rf=0, bob=0, arms=0, flare=0, reach=0):
     sneakers. The tee's lilac is a hue no road has, so he reads on all six."""
     g = Grid(32, 48)
     b = bob
+    human_legs(g, lf, rf, b, "navy", "grey", "white")
     for x, f in ((11, lf), (17, rf)):
-        g.rect(x, 33 + b, 4, 10 + f - b, "navy")
-        # the track pants' stripe runs down the outside of each leg
-        g.rect(x + (3 if x > 16 else 0), 33 + b, 1, 10 + f - b, "grey")
-        g.rect(x, 43 + f, 4, 2, "white")
-        g.rect(x, 44 + f, 4, 1, "lgrey")
         g.rect(x + 1, 43 + f, 2, 1, "red")
     walker_arms(g, (5, 23), 4, 22 + b, ((4, "lilac", "violet"), (6, "dbrown", "plum"), (3, "dbrown", None)), arms,
                 flare, reach)
@@ -343,9 +369,7 @@ def trista_back(lf=0, rf=0, bob=0, arms=0, flare=0, reach=0):
     """Trista, 50, dirty blonde bob to the shoulders, cute: green cardigan, brown skirt, tights, brown flats."""
     g = Grid(32, 48)
     b = bob
-    for x, f in ((11, lf), (17, rf)):
-        g.rect(x + 1, 37 + b, 3, 6 + f - b, "dslate")
-        g.rect(x, 43 + f, 4, 2, "dbrown")
+    human_legs(g, lf, rf, b, "dslate", "navy", "dbrown", top=37, width=3, centres=(13.5, 19.5))
     walker_arms(g, (5, 23), 4, 22 + b, ((10, "dgreen", "forest"), (3, "skin1", None)), arms, flare, reach)
     g.rect(9, 21 + b, 14, 11, "dgreen")
     g.rect(20, 21 + b, 3, 11, "forest")
@@ -403,18 +427,22 @@ WALKERS = {
 }
 
 
-WALKER_WALK = [dict(lf=-2, rf=0, arms=1), dict(lf=-1, rf=-1, bob=-1), dict(lf=0, rf=-2, arms=-1),
-               dict(lf=-1, rf=-1, bob=-1)]
+# Human-only eight-beat gait. Each half stride has a planted support foot and a bent recovery knee.
+HUMAN_WALK = (dict(rf=-3, arms=1), dict(rf=-2, bob=-2 / 3, arms=1), dict(), dict(lf=-1, arms=-1),
+              dict(lf=-3, arms=-1), dict(lf=-2, bob=-2 / 3, arms=-1), dict(), dict(rf=-1, arms=1))
+HUMAN_WALK_MS = 50
+WALKER_WALK = HUMAN_WALK
+WALKER_WALK_MS = 80
 WALKER_REACT = [dict(lf=-4, rf=-4, bob=-4, flare=3, reach=1), dict(lf=-1, rf=-1, bob=-1, flare=1)]
 # A bump: lurch left with the arms up, wobble back, steady (a right lean would push a tote out of the frame).
 # Each pose is (lean, walker args).
-WALKER_STUMBLE = [(-3, dict(lf=-3, rf=0, bob=1, flare=3, reach=1)), (1, dict(lf=0, rf=-3, flare=3, reach=1)),
-                  (-1, dict(lf=-1, rf=0, arms=1)), (0, dict(lf=-1, rf=-1, bob=-1))]
+WALKER_STUMBLE = [(-2, dict(rf=-3, arms=1, flare=2)), (1, dict(lf=-1, arms=-1, flare=3)),
+                  (-1, dict(lf=-2, bob=-2 / 3, arms=-1, flare=1)), (0, dict())]
 # Waiting while the walk pauses: feet planted, arms at rest, a 1px breath.
 WALKER_IDLE = [dict(), dict(bob=-1)]
 # The breathing bob every standing person shares, and its frame duration in ms.
 BREATH, BREATH_MS = (0, -1), 400
-# A person walking down the road at the player, as the walkers walk: the left foot lifted, both feet 1px up
+# Four-beat gait for animals and bespoke performers: the left foot lifted, both feet 1px up
 # as the body passes over them 1px higher, the right foot lifted, passing again; 4 frames at 100ms, a 400ms
 # stride. arms swings the free arms against the legs: 1 takes the screen-left arm back (its hand 1 row up)
 # with the left foot lifted, -1 the screen-right arm with the right foot (see swung).
@@ -1287,14 +1315,17 @@ CORGI_WALK = [dict(fl=1, fr=-1, bl=-1, br=1), dict(bob=-1), dict(fl=-1, fr=1, bl
 CORGI_IDLE = [dict(tail=-1), dict(bob=-1), dict(tail=1, bob=-1), dict(twitch=-1)]
 
 
-def person(top, legs="navy", shoes="ink", lf=0, rf=0, bob=0, arms=0):
+def person(top, legs="navy", shoes="ink", lf=0, rf=0, bob=0, arms=0, grounded=False):
     """A chibi person facing the player: legs and shoes, then the caller's top(g, bob), or top(g, bob, arms)
     for a walk frame whose free arms swing."""
     g = Grid(32, 48)
-    for x, f in ((11, lf), (17, rf)):
-        g.rect(x, 33 + bob, 4, 10 + f - bob, legs)
-        g.rect(x + 3, 33 + bob, 1, 10 + f - bob, DARKER[K[legs]])
-        g.rect(x, 43 + f, 4, 2, shoes)
+    if grounded:
+        human_legs(g, lf, rf, bob, legs, DARKER[K[legs]], shoes)
+    else:
+        for x, f in ((11, lf), (17, rf)):
+            g.rect(x, 33 + bob, 4, 10 + f - bob, legs)
+            g.rect(x + 3, 33 + bob, 1, 10 + f - bob, DARKER[K[legs]])
+            g.rect(x, 43 + f, 4, 2, shoes)
     if arms:
         top(g, bob, arms)
     else:
@@ -1721,7 +1752,7 @@ def mail_top(g, b, arms=0):
 def mail_carrier(**q):
     """The mail carrier facing the player, with a light rim on the dark skin, brim and trousers so they hold
     on the dslate road, and the road outline for the light roads."""
-    g = edged(person(mail_top, **q))
+    g = edged(person(mail_top, grounded=True, **q))
     return rim(g, dict(dbrown=("skin2", "brown"), plum=("skin2", "brown"), navy=("grey", "slate"),
                        ink=("grey", "slate"), sky=("cyan", None), blue=("sky", None)))
 
@@ -1730,8 +1761,8 @@ def mail_carrier(**q):
 
 # Pushing the stroller: the road people's stride, a 1px bob as he passes over each foot; 4 frames at 160ms,
 # the walkers' pace.
-STROLLER_WALK = PERSON_WALK
-STROLLER_WALK_MS = 160
+STROLLER_WALK = HUMAN_WALK
+STROLLER_WALK_MS = 80
 
 
 def stroller(lf=0, rf=0, bob=0, arms=0):
@@ -1768,12 +1799,8 @@ def stroller(lf=0, rf=0, bob=0, arms=0):
     g.rect(16, 26, 16, 1, "ink")
     g.rect(16, 27, 1, 1, "ink")
     g.rect(31, 27, 1, 1, "ink")
-    # the dad, left of the stroller: legs walking and shoes
-    for x, f in ((5, lf), (11, rf)):
-        g.rect(x, 33 + b, 4, 10 + f - b, "blue")
-        g.rect(x + 3, 33 + b, 1, 10 + f - b, "navy")
-        g.rect(x, 43 + f, 4, 2, "brown")
-        g.rect(x, 44 + f, 4, 1, "dbrown")
+    # The dad plants one foot while the other knee recovers beside the steady stroller.
+    human_legs(g, lf, rf, b, "blue", "navy", "brown", x0=-6)
     # the left arm holds the coffee, a column in from the frame's edge so the outline closes round it; the
     # right reaches out to the handlebar
     g.rect(1, 22 + b, 3, 9, "forest")
@@ -1964,7 +1991,7 @@ def sprites():
         def pose(**q):
             return edged(big(draw, **q))
 
-        tags = [("walk", frames(pose(**q) for q in WALKER_WALK), 160),
+        tags = [("walk", frames(pose(**q) for q in WALKER_WALK), WALKER_WALK_MS),
                     ("react", frames(pose(**q) for q in WALKER_REACT), 120),
                     ("stumble", frames(lean(pose(**q), k) for k, q in WALKER_STUMBLE), 90),
                     ("idle", frames(pose(**q) for q in WALKER_IDLE), BREATH_MS),
@@ -1987,26 +2014,26 @@ def sprites():
     yield "other-dog", [("walk", frames(big(corgi, **q) for q in CORGI_WALK), 100),
                         ("idle", frames(big(corgi, **q) for q in CORGI_IDLE), 300)]
     owner = dict(shoes="dbrown")
-    yield "other-dog-owner", [("walk", frames(big(dressed, dog_owner_top, **q, **owner) for q in PERSON_WALK),
-                               PERSON_WALK_MS),
-                              ("idle", frames(big(dressed, dog_owner_top, bob=bb, **owner) for bb in BREATH),
+    yield "other-dog-owner", [("walk", frames(big(dressed, dog_owner_top, grounded=True, **q, **owner) for q in HUMAN_WALK),
+                               HUMAN_WALK_MS),
+                              ("idle", frames(big(dressed, dog_owner_top, grounded=True, bob=bb, **owner) for bb in BREATH),
                                BREATH_MS)]
-    yield "thief", [("walk", frames(big(dressed, thief_top, **q) for q in PERSON_WALK), PERSON_WALK_MS),
+    yield "thief", [("walk", frames(big(dressed, thief_top, grounded=True, **q) for q in HUMAN_WALK), HUMAN_WALK_MS),
                     ("flee", frames(big(thief_fleeing, k) for k in (-1, 1)), 110),
-                    ("idle", frames(big(dressed, thief_top, bob=bb) for bb in BREATH), BREATH_MS)]
+                    ("idle", frames(big(dressed, thief_top, grounded=True, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "lost-wallet", [("idle", frames([big(wallet, False), big(wallet, True)]), 450)]
     neighbour = dict(legs="purple", shoes="dbrown")
-    yield "friendly-neighbour", [("walk", frames(big(dressed, neighbour_top(False, -q.get("bob", 0)), **q, **neighbour)
-                                                 for q in PERSON_WALK), PERSON_WALK_MS),
-                                 ("wave", frames(big(dressed, neighbour_top(True, k), bob=NEIGHBOUR_CROUCH,
+    yield "friendly-neighbour", [("walk", frames(big(dressed, neighbour_top(False, -q.get("bob", 0)), grounded=True, **q, **neighbour)
+                                                 for q in HUMAN_WALK), HUMAN_WALK_MS),
+                                 ("wave", frames(big(dressed, neighbour_top(True, k), grounded=True, bob=NEIGHBOUR_CROUCH,
                                                      **neighbour) for k in (0, 1)), 350),
-                                 ("idle", frames(big(dressed, neighbour_top(False, k), bob=bb, **neighbour)
+                                 ("idle", frames(big(dressed, neighbour_top(False, k), grounded=True, bob=bb, **neighbour)
                                                  for k, bb in enumerate(BREATH)), BREATH_MS)]
     yield "fx-bark", [("pop", frames([bark(False), bark(True)]), 120)]
     drive, drive_ms = TRUCK_DRIVE
     yield "ice-cream-truck", [("idle", frames([drawn(TRUCK_SCALE, ice_cream_truck, f) for f in (0, 1)]), 400),
                               ("drive", frames(drawn(TRUCK_SCALE, ice_cream_truck, 0, r) for r in drive), drive_ms)]
-    yield "mail-carrier", [("walk", frames(big(mail_carrier, **q) for q in PERSON_WALK), PERSON_WALK_MS),
+    yield "mail-carrier", [("walk", frames(big(mail_carrier, **q) for q in HUMAN_WALK), HUMAN_WALK_MS),
                            ("idle", frames(big(mail_carrier, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "stroller", [("walk", frames(big(stroller, **q) for q in STROLLER_WALK), STROLLER_WALK_MS)]
     yield "jogger", [("run", frames(big(jogger, **q) for q in JOGGER_RUN), JOGGER_RUN_MS)]

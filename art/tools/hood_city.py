@@ -137,7 +137,7 @@ import sounds  # noqa: E402
 from minis import STEPS, small, snap  # noqa: E402
 from obstacles import treads, unit  # noqa: E402
 from pixel import Grid, build as build_sprites, depth_settled, edged, preview, raster, scale_of, to_image  # noqa: E402
-from road import BREATH, BREATH_MS, LIT, PERSON_WALK, PERSON_WALK_MS, face_disc, lit, rim  # noqa: E402
+from road import BREATH, BREATH_MS, HUMAN_WALK, HUMAN_WALK_MS, LIT, face_disc, lit, rim  # noqa: E402
 
 SRC = "art/hood-city"
 # The people and riders are laid out on 32x48 and drawn at road.SCALE; the minor obstacles in layout pixels
@@ -1115,9 +1115,9 @@ def sprites():
             ("idle", [person(p, dropped_ice_cream, bob=b, tear=k == 1).outlined() for k, b in enumerate(BREATH)],
              BREATH_MS)]
         yield f"big-screen-promo{suffix}", [
-            ("walk", [depths.dressed(p, promo_top(), legs="navy", shoes="white", **w).outlined()
-                      for w in PERSON_WALK], PERSON_WALK_MS),
-            ("idle", [depths.dressed(p, promo_top(k == 0), legs="navy", shoes="white", bob=b).outlined()
+            ("walk", [depths.dressed(p, promo_top(), legs="navy", shoes="white", grounded=True, **w).outlined()
+                      for w in HUMAN_WALK], HUMAN_WALK_MS),
+            ("idle", [depths.dressed(p, promo_top(k == 0), legs="navy", shoes="white", grounded=True, bob=b).outlined()
                       for k, b in enumerate(BREATH)], BREATH_MS)]
         yield f"rollerblader{suffix}", [("ride", [small(me, p, rollerblader, **posed(q, p)).outlined()
                                                   for q in ROLLER_RIDE], ROLLER_RIDE_MS)]

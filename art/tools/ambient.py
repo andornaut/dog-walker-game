@@ -26,8 +26,8 @@ the road shows between the spokes.
 The lawn animals are laid out on 32x32 and drawn at ANIMAL_SCALE (1.25), 40x40, each
 idle first so frame 0 is its rest pose on the ground.
 
-ambient-pedestrian        48x72  front view, walking toward the walker; walk 4 x 100ms
-ambient-pedestrian-back   48x72  back view, walking away; walk 4 x 100ms
+ambient-pedestrian        48x72  front view, walking toward the walker; walk 8 x 50ms
+ambient-pedestrian-back   48x72  back view, walking away; walk 8 x 50ms
 ambient-car               72x42  an orange sedan; drive 4 x 100ms
 ambient-car-hatchback     63x42  a red hatchback
 ambient-car-van           69x45  a two-tone van, white over green
@@ -194,15 +194,15 @@ LEGS = dict(legs="sky", shoes="white")
 
 
 def walking(s, top, step):
-    """A walk frame at scale s (road.SCALE x the depth step), on road.person's legs in road.PERSON_WALK's pose."""
-    return small(road, s, road.dressed, top, **LEGS, **snap(road.PERSON_WALK[step], s)).outlined()
+    """A walk frame at scale s (road.SCALE x the depth step), on road.person's planted legs in road.HUMAN_WALK's pose."""
+    return small(road, s, road.dressed, top, grounded=True, **LEGS, **snap(road.HUMAN_WALK[step], s)).outlined()
 
 
 def pedestrians(suffix, step):
     """Yield (key, tags) for the pedestrian's front and back views at a depth step."""
     s = road.SCALE * step
     for key, top in (("ambient-pedestrian", student_front), ("ambient-pedestrian-back", student_back)):
-        yield f"{key}{suffix}", [("walk", [walking(s, top, f) for f in range(4)], road.PERSON_WALK_MS)]
+        yield f"{key}{suffix}", [("walk", [walking(s, top, f) for f in range(len(road.HUMAN_WALK))], road.HUMAN_WALK_MS)]
 
 
 # ---------- cars: side elevations, laid out in design units and drawn at road.SCALE ----------

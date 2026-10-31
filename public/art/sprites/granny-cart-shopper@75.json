@@ -5,7 +5,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
     "sourceSize": { "w": 36, "h": 54 },
-    "duration": 100
+    "duration": 50
    },
    "granny-cart-shopper@75 1.aseprite": {
     "frame": { "x": 36, "y": 0, "w": 36, "h": 54 },
@@ -13,7 +13,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
     "sourceSize": { "w": 36, "h": 54 },
-    "duration": 100
+    "duration": 50
    },
    "granny-cart-shopper@75 2.aseprite": {
     "frame": { "x": 72, "y": 0, "w": 36, "h": 54 },
@@ -21,7 +21,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
     "sourceSize": { "w": 36, "h": 54 },
-    "duration": 100
+    "duration": 50
    },
    "granny-cart-shopper@75 3.aseprite": {
     "frame": { "x": 108, "y": 0, "w": 36, "h": 54 },
@@ -29,7 +29,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
     "sourceSize": { "w": 36, "h": 54 },
-    "duration": 100
+    "duration": 50
    },
    "granny-cart-shopper@75 4.aseprite": {
     "frame": { "x": 144, "y": 0, "w": 36, "h": 54 },
@@ -37,7 +37,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
     "sourceSize": { "w": 36, "h": 54 },
-    "duration": 400
+    "duration": 50
    },
    "granny-cart-shopper@75 5.aseprite": {
     "frame": { "x": 180, "y": 0, "w": 36, "h": 54 },
@@ -45,7 +45,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
     "sourceSize": { "w": 36, "h": 54 },
-    "duration": 400
+    "duration": 50
    },
    "granny-cart-shopper@75 6.aseprite": {
     "frame": { "x": 216, "y": 0, "w": 36, "h": 54 },
@@ -53,7 +53,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
     "sourceSize": { "w": 36, "h": 54 },
-    "duration": 150
+    "duration": 50
    },
    "granny-cart-shopper@75 7.aseprite": {
     "frame": { "x": 252, "y": 0, "w": 36, "h": 54 },
@@ -61,10 +61,42 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
     "sourceSize": { "w": 36, "h": 54 },
-    "duration": 150
+    "duration": 50
    },
    "granny-cart-shopper@75 8.aseprite": {
     "frame": { "x": 288, "y": 0, "w": 36, "h": 54 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
+    "sourceSize": { "w": 36, "h": 54 },
+    "duration": 400
+   },
+   "granny-cart-shopper@75 9.aseprite": {
+    "frame": { "x": 324, "y": 0, "w": 36, "h": 54 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
+    "sourceSize": { "w": 36, "h": 54 },
+    "duration": 400
+   },
+   "granny-cart-shopper@75 10.aseprite": {
+    "frame": { "x": 360, "y": 0, "w": 36, "h": 54 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
+    "sourceSize": { "w": 36, "h": 54 },
+    "duration": 150
+   },
+   "granny-cart-shopper@75 11.aseprite": {
+    "frame": { "x": 396, "y": 0, "w": 36, "h": 54 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
+    "sourceSize": { "w": 36, "h": 54 },
+    "duration": 150
+   },
+   "granny-cart-shopper@75 12.aseprite": {
+    "frame": { "x": 432, "y": 0, "w": 36, "h": 54 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
@@ -77,12 +109,12 @@
   "version": "1.2.30-x64",
   "image": "granny-cart-shopper@75.png",
   "format": "RGBA8888",
-  "size": { "w": 324, "h": 54 },
+  "size": { "w": 468, "h": 54 },
   "scale": "1",
   "frameTags": [
-   { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
-   { "name": "idle", "from": 4, "to": 5, "direction": "forward" },
-   { "name": "cue", "from": 6, "to": 8, "direction": "forward" }
+   { "name": "walk", "from": 0, "to": 7, "direction": "forward" },
+   { "name": "idle", "from": 8, "to": 9, "direction": "forward" },
+   { "name": "cue", "from": 10, "to": 12, "direction": "forward" }
   ]
  }
 }

@@ -77,24 +77,24 @@ def own(s):
     p = road.SCALE * s
 
     def walk(top, **q):
-        return ("walk", [dressed(p, top, **w, **q).outlined() for w in road.PERSON_WALK], road.PERSON_WALK_MS)
+        return ("walk", [dressed(p, top, grounded=True, **w, **q).outlined() for w in road.HUMAN_WALK], road.HUMAN_WALK_MS)
 
     owner = dict(shoes="dbrown")
     yield "other-dog-owner", [walk(road.dog_owner_top, **owner),
-                              ("idle", [dressed(p, road.dog_owner_top, bob=b, **owner).outlined() for b in breath], ms)]
+                              ("idle", [dressed(p, road.dog_owner_top, grounded=True, bob=b, **owner).outlined() for b in breath], ms)]
     yield "thief", [walk(road.thief_top),
                     ("flee", [small(road, p, road.thief_fleeing, k).outlined() for k in (-1, 1)], 110),
-                    ("idle", [dressed(p, road.thief_top, bob=b).outlined() for b in breath], ms)]
+                    ("idle", [dressed(p, road.thief_top, grounded=True, bob=b).outlined() for b in breath], ms)]
     neighbour = dict(legs="purple", shoes="dbrown")
     yield "friendly-neighbour", [
-        ("walk", [dressed(p, road.neighbour_top(False, -w.get("bob", 0)), **w, **neighbour).outlined()
-                  for w in road.PERSON_WALK], road.PERSON_WALK_MS),
-        ("wave", [dressed(p, road.neighbour_top(True, k), bob=road.NEIGHBOUR_CROUCH, **neighbour).outlined()
+        ("walk", [dressed(p, road.neighbour_top(False, -w.get("bob", 0)), grounded=True, **w, **neighbour).outlined()
+                  for w in road.HUMAN_WALK], road.HUMAN_WALK_MS),
+        ("wave", [dressed(p, road.neighbour_top(True, k), grounded=True, bob=road.NEIGHBOUR_CROUCH, **neighbour).outlined()
                   for k in (0, 1)], 350),
-        ("idle", [dressed(p, road.neighbour_top(False, k), bob=b, **neighbour).outlined()
+        ("idle", [dressed(p, road.neighbour_top(False, k), grounded=True, bob=b, **neighbour).outlined()
                   for k, b in enumerate(breath)], ms)]
     yield "mail-carrier", [("walk", [small(road, p, road.mail_carrier, **snap(q, p)).outlined()
-                                     for q in road.PERSON_WALK], road.PERSON_WALK_MS),
+                                     for q in road.HUMAN_WALK], road.HUMAN_WALK_MS),
                            ("idle", [small(road, p, road.mail_carrier, **snap(dict(bob=b), p)).outlined()
                                      for b in breath], ms)]
     yield "stroller", [("walk", [small(road, p, road.stroller, **snap(q, p)).outlined() for q in road.STROLLER_WALK],

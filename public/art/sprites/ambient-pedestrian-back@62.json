@@ -5,7 +5,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 45 },
     "sourceSize": { "w": 30, "h": 45 },
-    "duration": 100
+    "duration": 50
    },
    "ambient-pedestrian-back@62 1.aseprite": {
     "frame": { "x": 30, "y": 0, "w": 30, "h": 45 },
@@ -13,7 +13,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 45 },
     "sourceSize": { "w": 30, "h": 45 },
-    "duration": 100
+    "duration": 50
    },
    "ambient-pedestrian-back@62 2.aseprite": {
     "frame": { "x": 60, "y": 0, "w": 30, "h": 45 },
@@ -21,7 +21,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 45 },
     "sourceSize": { "w": 30, "h": 45 },
-    "duration": 100
+    "duration": 50
    },
    "ambient-pedestrian-back@62 3.aseprite": {
     "frame": { "x": 90, "y": 0, "w": 30, "h": 45 },
@@ -29,7 +29,39 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 45 },
     "sourceSize": { "w": 30, "h": 45 },
-    "duration": 100
+    "duration": 50
+   },
+   "ambient-pedestrian-back@62 4.aseprite": {
+    "frame": { "x": 120, "y": 0, "w": 30, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 45 },
+    "sourceSize": { "w": 30, "h": 45 },
+    "duration": 50
+   },
+   "ambient-pedestrian-back@62 5.aseprite": {
+    "frame": { "x": 150, "y": 0, "w": 30, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 45 },
+    "sourceSize": { "w": 30, "h": 45 },
+    "duration": 50
+   },
+   "ambient-pedestrian-back@62 6.aseprite": {
+    "frame": { "x": 180, "y": 0, "w": 30, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 45 },
+    "sourceSize": { "w": 30, "h": 45 },
+    "duration": 50
+   },
+   "ambient-pedestrian-back@62 7.aseprite": {
+    "frame": { "x": 210, "y": 0, "w": 30, "h": 45 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 45 },
+    "sourceSize": { "w": 30, "h": 45 },
+    "duration": 50
    }
  },
  "meta": {
@@ -37,10 +69,10 @@
   "version": "1.2.30-x64",
   "image": "ambient-pedestrian-back@62.png",
   "format": "RGBA8888",
-  "size": { "w": 120, "h": 45 },
+  "size": { "w": 240, "h": 45 },
   "scale": "1",
   "frameTags": [
-   { "name": "walk", "from": 0, "to": 3, "direction": "forward" }
+   { "name": "walk", "from": 0, "to": 7, "direction": "forward" }
   ]
  }
 }

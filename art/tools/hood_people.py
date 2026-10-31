@@ -11,14 +11,14 @@ tourist             48x72   Distillery District, Kensington Market and Yonge Str
                             holiday shirt with a few pink flowers, a silver-topped camera on a strap round
                             the neck, a rust backpack (its straps and its top showing over the shoulders),
                             driftwood shorts and sandals, an open map in the right hand (screen left); walk
-                            (4 frames, 100ms): road.PERSON_WALK, the free arm swinging; idle (2 frames,
+                            (8 frames, 50ms): road.HUMAN_WALK, the free arm swinging; idle (2 frames,
                             400ms): road.BREATH
 couple              112x72  High Park, Kensington Market and The Beaches, 2 lanes; two people strolling arm
                             in arm, a stepper facing the player as the tourist is: on the left a man in a
                             red sweater and grey trousers carrying a kraft shopping bag, on the right a
                             woman with long copper hair and a fringe in a lilac dress with a mauve shoulder
-                            bag, their inner arms hooked together between them; walk (4 frames, 160ms, the
-                            stroller's pace): road.PERSON_WALK, in step, the outer arms swinging; idle (2
+                            bag, their inner arms hooked together between them; walk (8 frames, 80ms, the
+                            stroller's pace): road.HUMAN_WALK, in step, the outer arms swinging; idle (2
                             frames, 400ms): road.BREATH
 busker              48x72   Yonge Street; a fixed busker facing the player,
                             playing an acoustic guitar behind its open case: curly brown hair and a
@@ -142,7 +142,7 @@ tour-group          112x72  Distillery District, 2 lanes; a guided tour, a stepp
                             behind and beside, 2 rows up, a tourist in a wide pink sun hat and a peach tee
                             with a compact camera on a wrist strap, and one in a white bucket hat,
                             sunglasses and an azure tee with a big black camera on a neck strap; walk
-                            (4 frames, 160ms): road.PERSON_WALK, the tourists 2 frames behind the guide,
+                            (8 frames, 80ms): road.HUMAN_WALK, the tourists 4 frames behind the guide,
                             shuffling out of step; idle (2 frames, 400ms): road.BREATH, the flag up; cue
                             (3 frames, 200ms): the flag dips toward the player, half down, all the way
                             (the pennant hanging), half down
@@ -164,7 +164,7 @@ granny-cart-shopper 48x72   Kensington Market; an older market shopper, a steppe
                             wire glasses, a long camel coat, dark tights and plum shoes, a cream cloth
                             tote with a green band in the other hand; the cart a red and green tartan
                             bag on a grey frame, its tires edge-on either side, a baguette, two leeks
-                            and a head of kale out of the top; walk (4 frames, 100ms): road.PERSON_WALK,
+                            and a head of kale out of the top; walk (8 frames, 50ms): road.HUMAN_WALK,
                             the cart tipped back onto its wheels, the tread falling down the tires 1px a
                             frame, the greens dipping 1px on the passing frames; idle (2 frames, 400ms):
                             road.BREATH, the cart stood upright; cue (3 frames, 150ms): tipping the cart
@@ -284,7 +284,7 @@ TOURIST_RIM = {**LIT, "dturq": ("turquoise", None)}
 
 def tourist(**q):
     """The tourist facing the player, with the road outline and the lit rim."""
-    return rim(edged(road.person(tourist_top, **TOURIST, **q)), TOURIST_RIM)
+    return rim(edged(road.person(tourist_top, grounded=True, **TOURIST, **q)), TOURIST_RIM)
 
 
 # ---------- couple: arm in arm, facing the player, two lanes ----------
@@ -293,17 +293,13 @@ def tourist(**q):
 COUPLE_W = 112 / SCALE
 # The left edge of each person's 32-column cell: the man's, then the woman's, their bodies 10 columns apart.
 MAN, WOMAN = COUPLE_W / 2 - 27, COUPLE_W / 2 - 3
-COUPLE_WALK = road.PERSON_WALK
-COUPLE_WALK_MS = 160
+COUPLE_WALK = road.HUMAN_WALK
+COUPLE_WALK_MS = 80
 
 
 def front_legs(g, x0, b, lf, rf, legs, shoes, top=33):
-    """A person's legs and shoes facing the player, as road.person draws them, in the cell at x0: legs (fill,
-    shade) from the hem at row top down."""
-    for x, f in ((x0 + 11, lf), (x0 + 17, rf)):
-        g.rect(x, top + b, 4, 43 - top + f - b, legs[0])
-        g.rect(x + 3, top + b, 1, 43 - top + f - b, legs[1])
-        g.rect(x, 43 + f, 4, 2, shoes)
+    """The group's identity-specific clothing over planted support and bent recovery legs."""
+    road.human_legs(g, lf, rf, b, legs[0], legs[1], shoes, x0=x0, top=top)
 
 
 def couple(lf=0, rf=0, bob=0, arms=0):
@@ -1620,7 +1616,7 @@ TOUR_LEFT, TOUR_RIGHT = GUIDE - 16, GUIDE + 24
 BEHIND = -2
 
 
-def tour_poses(frame, lag=2):
+def tour_poses(frame, lag=4):
     """Walk frame frame for the group: the guide on COUPLE_WALK's frame, each tourist lag frames behind, so
     the group shuffles out of step."""
     walk = COUPLE_WALK
@@ -1631,7 +1627,7 @@ def tour_poses(frame, lag=2):
     return out
 
 
-TOUR_WALK = tuple(tour_poses(f) for f in range(4))
+TOUR_WALK = tuple(tour_poses(f) for f in range(len(COUPLE_WALK)))
 TOUR_WALK_MS = COUPLE_WALK_MS
 # The flag dipping before a step: half down, all the way, half down; 3 frames at 200ms, the mover's cue.
 TOUR_CUE = (dict(dip=2), dict(dip=5), dict(dip=2))
@@ -1939,12 +1935,12 @@ def volleyball_player(pose="run-reach", bob=0, tail=0):
 
 # ---------- granny-cart-shopper: facing the player, pulling a tartan shopping cart ----------
 
-# Walking: road.PERSON_WALK, as the mail carrier wanders, the cart tipped back onto its wheels and rolling
+# Walking: road.HUMAN_WALK, as the mail carrier wanders, the cart tipped back onto its wheels and rolling
 # beside her, the tread falling down its tires a drawn pixel a frame and the greens nodding on the passing
 # frames. Idle: road.BREATH with the cart stood upright. Cue, before each step: tipping the cart back, braced,
 # halfway and over, 3 frames at 150ms.
-GRANNY_WALK = tuple(dict({k: v for k, v in q.items() if k != "arms"}, tip=1, roll=str(n), nod=-q.get("bob", 0))
-                    for n, q in enumerate(road.PERSON_WALK))
+GRANNY_WALK = tuple(dict({k: v for k, v in q.items() if k != "arms"}, tip=1, roll=str(n // 2), nod=-q.get("bob", 0))
+                    for n, q in enumerate(road.HUMAN_WALK))
 GRANNY_IDLE = tuple(dict(bob=b) for b in road.BREATH)
 GRANNY_CUE = (dict(bob=1), dict(tip=1, bob=1), dict(tip=2))
 GRANNY_CUE_MS = 150
@@ -2023,11 +2019,8 @@ def granny_cart_shopper(lf=0, rf=0, bob=0, tip=0, roll="0", nod=0):
     # the frame's toe plate under the bag
     g.rect(BAG_X, BAG_BOTTOM, BAG_W, 1.5, "grey")
     g.rect(BAG_X, BAG_BOTTOM, BAG_W, 0.7, "lgrey")
-    # her legs under the long coat: dark tights and plum shoes
-    for x, f in ((6, lf), (12, rf)):
-        g.rect(x, 37 + b, 4, 6 + f - b, "slate")
-        g.rect(x + 3, 37 + b, 1, 6 + f - b, "dslate")
-        g.rect(x, 43 + f, 4, 2, "plum")
+    # The planted support foot remains under her coat while the recovery knee bends.
+    road.human_legs(g, lf, rf, b, "slate", "dslate", "plum", x0=-5, top=37)
     # the long camel coat, flared to the hem, lit down its left side, three buttons down the front
     g.tri((4, 21 + b), (2.5, 38.5 + b), (11, 21 + b), "tan")
     g.rect(4, 21 + b, 11, 17.5, "tan")
@@ -2203,7 +2196,7 @@ def steps(suffix, s):
         return minis.small(here, p, draw, **posed(q, p)).outlined()
 
     breath = [dict(bob=b) for b in road.BREATH]
-    yield f"tourist{suffix}", [("walk", [person(tourist, q) for q in road.PERSON_WALK], road.PERSON_WALK_MS),
+    yield f"tourist{suffix}", [("walk", [person(tourist, q) for q in road.HUMAN_WALK], road.HUMAN_WALK_MS),
                                ("idle", [person(tourist, q) for q in breath], road.BREATH_MS)]
     yield f"couple{suffix}", [("walk", [own(couple, q) for q in COUPLE_WALK], COUPLE_WALK_MS),
                               ("idle", [own(couple, q) for q in breath], road.BREATH_MS)]
@@ -2272,7 +2265,7 @@ def steps(suffix, s):
         pose = {k: v for k, v in q.items() if k != "roll"}
         return minis.small(here, p, granny_cart_shopper, roll=q.get("roll", "0"), **posed(pose, p)).outlined()
 
-    yield f"granny-cart-shopper{suffix}", [("walk", [shopper(q) for q in GRANNY_WALK], road.PERSON_WALK_MS),
+    yield f"granny-cart-shopper{suffix}", [("walk", [shopper(q) for q in GRANNY_WALK], road.HUMAN_WALK_MS),
                                            ("idle", [shopper(q) for q in GRANNY_IDLE], road.BREATH_MS),
                                            ("cue", [shopper(q) for q in GRANNY_CUE], GRANNY_CUE_MS)]
 
