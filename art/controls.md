@@ -82,6 +82,8 @@ Start walk has 32px side margins, about 4px above and 6px below. Back to title k
 
 The start-screen section outline is one plum pixel. Keep the existing `ui-section` nine-slice caps: left/right 3px, top 24px, bottom 3px. Fill section backing to a 1px inset. Solid backing and distinct neutral headings use the approved treatment:
 
+**Section-content padding.** Walker, Dogs and Pocket share `HOME_LAYOUT.sectionContentPadding = 4` in [`homeLayout.ts`](../src/home/homeLayout.ts): at least 4px clear on every side in neutral and complete states, including selection frames, checks, pop, press, lock-badge and shake extents. Grids stay centred within their content areas; card, font and hit sizes stay unchanged. Sections are 354px wide at x = 3, with no gap: Walker y = 167, height 85; Dogs y = 252, height 171; Pocket y = 423, height 83. Start walk remains `(32,510,296,44)`. This describes the paired source implementation; deployment remains unverified.
+
 | Section | Backing         | Neutral heading  | Neutral title | Neutral note |
 | ------- | --------------- | ---------------- | ------------- | ------------ |
 | Dogs    | plum `#3e2731`  | violet `#6d4bb0` | white         | white        |
@@ -172,7 +174,7 @@ DOM buttons retain native Tab and Enter/Space behaviour, visible focus, meaningf
 | `ui-shop-focus`         | `pulse`: two 600ms frames; 32×32 nine-slice with 13px caps on every side                             | Active shop row only; 3px outset; reduced motion holds frame 0                |
 | `ui-switch`             | `on`, `off`                                                                                          | Preserve 32×16 visual, knob position and tick/cross                           |
 
-The `ui-section` exports and `HOME_LAYOUT.sectionLooks` use the same section tags and colours. Existing `ui-cork`, `ui-plaid` and `ui-denim` keys are retained as solid backing exports; runtime stops the fabric/stitch treatment. The start-screen backdrop preserves the hero through row 195, has quiet ground on rows 196–197, a continuous plum divider on row 198 and flat dbrown below it.
+The `ui-section` exports and `HOME_LAYOUT.sectionLooks` use the same section tags and colours. Existing `ui-cork`, `ui-plaid` and `ui-denim` keys are retained as solid backing exports; runtime stops the fabric/stitch treatment. At runtime, [`StartScene.ts`](../src/scenes/StartScene.ts) translates the existing hero raster and its anchored content up 32px (`HOME_LAYOUT.heroOffsetY = -32`): the hero ends on row 163, quiet ground occupies rows 164–165, the continuous plum divider is on row 166 and flat dbrown continues below it. The exported raster is unchanged.
 
 Edit generators in [`art/tools/ui.py`](tools/ui.py) and [`art/tools/screens.py`](tools/screens.py), then regenerate their owned exports. [`uiKit.ts`](../src/scenes/uiKit.ts) maps roles to art tags and supplies matching code fallbacks; [`buttonGeometry.ts`](../src/ui/buttonGeometry.ts) owns common sizing, gaps and press offsets. [`pauseMenu.ts`](../src/hud/pauseMenu.ts) and [`purchaseConfirmLayout.ts`](../src/home/purchaseConfirmLayout.ts) are button-layout callers. Layout, hit areas and input belong to their source owners; player wording lives in the text data. Do not bake new control text into art or add a special button shape for a single caller without an approved exception.
 
