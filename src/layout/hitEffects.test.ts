@@ -10,6 +10,7 @@ import { testState } from "../testing/runState";
 import {
   contactDebuffBatch,
   contactDebuffEffects,
+  ContactImpactFrame,
   DEBUFF_BADGE,
   debuffBadgeRect,
   dogReaction,
@@ -158,6 +159,25 @@ describe("hit effects with reduced motion", () => {
     expect(obstacleMotion(true, struck(kind, obstacle))).toEqual([]);
     expect(dogReaction(true, "hit")).toEqual([]);
     expect(dogReaction(true, "splash")).toEqual([]);
+  });
+});
+
+describe("physical contact render frames", () => {
+  it("coalesces repeated callbacks by kind until the next visual frame", () => {
+    const puddle = {
+      dog: "kilo",
+      item: { height: 32, id: 1, kind: "puddle", lane: 2, laneSpan: 1, y: 440 },
+      source: { encounter: "puddle", kind: "encounter" },
+    } as const;
+    const pothole = {
+      ...puddle,
+      item: { ...puddle.item, id: 2, kind: "pothole" },
+      source: { encounter: "pothole", kind: "encounter" },
+    } as const;
+    const frame = new ContactImpactFrame();
+    expect(frame.take(10, [puddle])).toEqual([puddle]);
+    expect(frame.take(10, [puddle, pothole])).toEqual([pothole]);
+    expect(frame.take(11, [puddle])).toEqual([puddle]);
   });
 });
 

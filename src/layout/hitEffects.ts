@@ -130,6 +130,31 @@ export function hitEffects(still: boolean, hit: StruckDog): HitEffect[] {
 
 type ContactImpact = Pick<WalkStep["contacts"][number], "dog" | "item" | "source">;
 
+function contactImpactKey({ source }: ContactImpact): string {
+  return source.kind === "minor" ? `minor:${source.obstacle}` : `encounter:${source.encounter}`;
+}
+
+// A render frame may receive several fixed walking steps. Each material attacks visually once.
+export class ContactImpactFrame {
+  private frame: number | undefined;
+  private readonly kinds = new Set<string>();
+
+  take(frame: number, impacts: readonly ContactImpact[]): ContactImpact[] {
+    if (this.frame !== frame) {
+      this.frame = frame;
+      this.kinds.clear();
+    }
+    return impacts.filter((impact) => {
+      const kind = contactImpactKey(impact);
+      if (this.kinds.has(kind)) {
+        return false;
+      }
+      this.kinds.add(kind);
+      return true;
+    });
+  }
+}
+
 // Physical impacts include immune contacts, with one visual attack per material kind per step.
 export function contactImpacts(
   data: Pick<GameData, "encounters">,
@@ -137,9 +162,7 @@ export function contactImpacts(
 ): ContactImpact[] {
   const impacts = new Map<string, ContactImpact>();
   const add = (impact: ContactImpact) => {
-    const { source } = impact;
-    const key =
-      source.kind === "minor" ? `minor:${source.obstacle}` : `encounter:${source.encounter}`;
+    const key = contactImpactKey(impact);
     if (!impacts.has(key)) {
       impacts.set(key, impact);
     }

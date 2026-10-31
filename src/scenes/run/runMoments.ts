@@ -56,6 +56,7 @@ import { BUFF_POP, CHARM, charmByWalkerRect, charmOverRect } from "../../layout/
 import { bumpFlash, type BumpSource } from "../../layout/bumpFlash";
 import {
   contactDebuffBatch,
+  ContactImpactFrame,
   contactImpacts,
   DOG_REACTIONS,
   dogReaction,
@@ -191,6 +192,7 @@ interface RunMomentsDeps {
 export class RunMoments {
   private achievements: AchievementPreview = NOTHING_PREVIEWED;
   private readonly changes: Change[] = [];
+  private readonly contactFrame = new ContactImpactFrame();
   private readonly deps: RunMomentsDeps;
   // How long the end screen waits for a final firing, the cash it lost, or a payout.
   private endMoments = { ...NO_END_MOMENTS };
@@ -378,7 +380,11 @@ export class RunMoments {
     // cues instead (playBumpHit), as the splash, the shake-off and the edge flash strips are a
     // contact obstacle's own. Applied or refreshed debuffs add one whole-pack ground cue and
     // sound per kind in this contact batch; each contact still pops its own changes.
-    for (const { dog, item, source } of contactImpacts(gameData, step)) {
+    const impacts = this.contactFrame.take(
+      this.scene.game.loop.frame,
+      contactImpacts(gameData, step),
+    );
+    for (const { dog, item, source } of impacts) {
       if (source.kind === "minor") {
         this.playBumpHit(dog, { ...item, kind: source.obstacle }, step);
       } else {
