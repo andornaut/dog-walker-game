@@ -102,6 +102,20 @@ LEAN_TAGS = ("pull", "tell")
 # Idle and shake follow the first four tags.
 ROAD_TAGS = [("walk", WALK, 75), ("react", REACT, 60), ("pull", PULL, 80), ("tell", TELL, 125), ("idle", IDLE, 300),
              ("shake", SHAKE, 60)]
+# The heavy Malamute starts on diagonal recovery, so the pack's gaits do not all share one contact beat.
+WALK_PHASE = {"kilo": 2}
+
+
+def road_tags(name):
+    """The breed's complete tag cycles, with an explicit starting phase for its walk."""
+    for tag, poses, ms in ROAD_TAGS:
+        if name == "ginger" and tag == "walk":
+            # Her long ears settle before the next contact instead of holding the lifted pose.
+            poses = poses[:-1] + [dict(poses[-1], flop=0)]
+        phase = WALK_PHASE.get(name, 0) if tag == "walk" else 0
+        yield tag, poses[phase:] + poses[:phase], ms
+
+
 FACE_TAGS = ["happy", "neutral", "upset"]
 
 
@@ -127,13 +141,13 @@ def kilo_road(q):
     sw = ln // 2 + q["pitch"]
     # legs: thick and white, the front pair tucked under the chest, peeking out at its sides, the back pair
     # under the hips
-    g.rect(7 + sw + q["flx"], 16 + o + q["fl"] + b, 3, 4, "white")
-    g.rect(22 + sw + q["frx"], 16 + o + q["fr"] + b, 3, 4, "white")
+    g.rect(8 + sw + q["flx"], 16 + o + q["fl"] + b, 3, 4, "white")
+    g.rect(21 + sw + q["frx"], 16 + o + q["fr"] + b, 3, 4, "white")
     g.rect(8 + q["blx"], 26 + native_row(g) + min(q["bl"], 0), 4, 4, "white")
     g.rect(20 + q["brx"], 26 + native_row(g) + min(q["br"], 0), 4, 4, "white")
     # a heavy barrel: white flanks, a broad grey saddle, the harness across the shoulders
     bx = 16 + sw
-    g.cel(bx, 20.5 + o + b, 8.5, 5.5, "white", "lgrey")
+    g.cel(bx, 20.5 + o + b, 8.5, 6.5, "white", "lgrey")
     g.cel(bx, 19.5 + o + b, 6, 5.5, "slate", "dslate", "grey")
     g.rect(bx - 7, 16 + o + b, 14, 2, "orange")
     g.rect(bx - 7, 17 + o + b, 14, 1, "rust")
@@ -254,8 +268,8 @@ def ginger_road(q):
     # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
     # the front paws peek out under the coat beside the chest, below the ears, stepping as the others' do
-    g.rect(8.5 + sw + q["flx"], 21.5 + q["fl"] + b, 2, 2, "lgrey")
-    g.rect(21 + sw + q["frx"], 21.5 + q["fr"] + b, 2, 2, "lgrey")
+    g.rect(9 + sw + q["flx"], 21.5 + q["fl"] + b, 2, 2, "lgrey")
+    g.rect(20.5 + sw + q["frx"], 21.5 + q["fr"] + b, 2, 2, "lgrey")
     g.rect(12 + q["blx"], 27 + native_row(g) + min(q["bl"], 0), 2, 2, "lgrey")
     g.rect(18 + q["brx"], 27 + native_row(g) + min(q["br"], 0), 2, 2, "lgrey")
     bx = 16 + sw
@@ -271,8 +285,8 @@ def ginger_road(q):
         inlay(g, "lgrey", lambda t, x=x, lift=lift, dx=dx, col=col, shade=shade:
               t.cel(x + dx, 28 + native_row(g) + lift, 1.25, 1.0, col, shade))
     hx, hb = 16 + ln + q["pitch"], b - q["reach"]
-    g.cel(hx - 4.8, 18.4 + hb - q["ears"] + q["flop"], 2, 4.4, "white", "lgrey")
-    g.cel(hx + 4.8, 18.4 + hb - q["ears"] + q["flop"] + q["twitch"], 2, 4.4, "white", "lgrey")
+    g.cel(hx - 4.5, 18.4 + hb - q["ears"] + q["flop"], 2, 4.4, "white", "lgrey")
+    g.cel(hx + 4.5, 18.4 + hb - q["ears"] + q["flop"] + q["twitch"], 2, 4.4, "white", "lgrey")
     # the head inlaid in lgrey over the ears and the back, so it holds apart from the white coat
     inlay(g, "lgrey", lambda t: t.cel(hx, 15.5 + hb, 5.5, 4.5, "white", "lgrey"))
     bow(g, hx, 10 + hb, folds=False)
@@ -947,7 +961,7 @@ def sprites():
     for name, (draw_road, face) in DOGS.items():
         zoom = DOG_ZOOM.get(name, 1)
         yield f"dog-{name}", [(tag, minis.dog_frames(here, draw_road, road_scale(name), DOG_FEET[name], zoom, poses), ms)
-                              for tag, poses, ms in ROAD_TAGS]
+                              for tag, poses, ms in road_tags(name)]
         yield f"face-dog-{name}", [(m, [face_frame(face, m, FACE_SIDE[name])], 1000)
                                    for m in FACE_TAGS]
 

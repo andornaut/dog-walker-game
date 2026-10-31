@@ -396,7 +396,7 @@ def sprites():
             yield f"dog-{name}@{suffix}", [(tag, dog_frames(dogs, draw, dogs.road_scale(name) * s,
                                                             math.ceil(dogs.DOG_FEET[name] * side(32, dogs.road_scale(name) * s) / dogs.DOG_SIZE[name]),
                                                             dogs.DOG_ZOOM.get(name, 1), poses), ms)
-                                           for tag, poses, ms in dogs.ROAD_TAGS]
+                                           for tag, poses, ms in dogs.road_tags(name)]
 
 
 def originals():
