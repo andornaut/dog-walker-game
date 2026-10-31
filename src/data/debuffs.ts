@@ -33,6 +33,6 @@ export const DEBUFFS = {
     },
     name: "Zoomies",
     seconds: "zoomiesSeconds",
-    stake: "random drifts for {seconds}s",
+    stake: "drifts for {seconds}s",
   },
 } as const satisfies Record<string, Debuff>;

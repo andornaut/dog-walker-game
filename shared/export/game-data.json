@@ -179,7 +179,7 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "Zoomies: random drifts for 40s",
+      "text": "Zoomies: drifts for 40s",
       "title": "Other dog"
     },
     {
@@ -309,7 +309,7 @@
         "id": "thief",
         "kind": "encounter"
       },
-      "text": "Zoomies: random drifts for 40s",
+      "text": "Zoomies: drifts for 40s",
       "title": "Thief"
     },
     {
@@ -570,7 +570,7 @@
       },
       "name": "Zoomies",
       "seconds": "zoomiesSeconds",
-      "stake": "random drifts for {seconds}s"
+      "stake": "drifts for {seconds}s"
     }
   ],
   "dogs": [
