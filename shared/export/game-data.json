@@ -3479,7 +3479,7 @@
       "density": {
         "cards": 0.88,
         "luckyFinds": 1.25,
-        "minorObstacles": 0.75,
+        "minorObstacles": 0.8,
         "tips": 1
       },
       "difficulty": 1,

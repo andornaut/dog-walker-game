@@ -11,7 +11,7 @@ export const WORLD = {
   zones: [
     {
       art: "high-park",
-      density: { cards: 0.88, luckyFinds: 1.25, minorObstacles: 0.75, tips: 1 },
+      density: { cards: 0.88, luckyFinds: 1.25, minorObstacles: 0.8, tips: 1 },
       difficulty: 1,
       difficultyName: "Easiest",
       id: "highPark",
