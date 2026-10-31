@@ -8,7 +8,7 @@ import {
 } from "../data/movementProfiles";
 import type { EncounterId, MinorObstacleId, NeighbourhoodId } from "../data/types";
 import { PART_INSET } from "../layout/packFormation";
-import { plannerStreams } from "../testing/movers";
+import { hoppingInstead, plannerStreams } from "../testing/movers";
 import { GAME_ROAD, inZone, REAL, realRun } from "../testing/planner";
 import { assignedMovement } from "./movementAssignments";
 import { type MoverDraws, type MoverGeometry, moverPlacements } from "./moverPlanning";
@@ -82,6 +82,19 @@ describe("production signature recipes", () => {
             ? componentHitLength(GAME_ROAD, profile)
             : itemHeight(gameData, GAME_ROAD, kind, true),
       };
+      const hopped = hoppingInstead(gameData, {
+        kind: "hop",
+        most: 2,
+        times: { max: 2, min: 1 },
+      });
+      const hoppedMovement = assignedMovement(hopped, zone, kind);
+      if (hoppedMovement?.signature === undefined) {
+        throw new Error("Hop stress tuning must retain the configured signature");
+      }
+      const hoppedSpec = {
+        ...moverSpec(hopped, plannerStreams(1), footprintOf(hopped, kind), hoppedMovement),
+        hitLength: spec.hitLength,
+      };
       for (const count of [0, 1]) {
         for (const jitter of [0, 1]) {
           for (const side of [0, 1]) {
@@ -99,6 +112,16 @@ describe("production signature recipes", () => {
               turnAt: 0,
             };
             const placements = moverPlacements(geometry, spec, draws);
+            const routes = (planned: typeof placements) =>
+              planned.map(({ path }) => {
+                if (path.motion !== "signature") {
+                  throw new Error("Expected a configured signature under hop stress tuning");
+                }
+                return path.route;
+              });
+            expect(routes(moverPlacements(geometry, hoppedSpec, draws))).toEqual(
+              routes(placements),
+            );
             expect(
               new Set(placements.map(({ lane }) => lane)).size,
               `count ${count}, jitter ${jitter}, side ${side}`,

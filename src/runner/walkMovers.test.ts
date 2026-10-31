@@ -228,12 +228,14 @@ describe("movers", { timeout: 120_000 }, () => {
 
   // The data with every obstacle that can move moving.
   const everyMover: Real = { ...REAL, world: sharedWorld(WORLD, 1) };
-  // Every stepper and hopper hopping alike, each hop up to 2 spots any way, or sideways only.
+  // Legacy hop algorithm fixtures omit named routes, whose geometry is independent of hop poses.
+  const legacyMovers: Real = { ...everyMover, movementAssignments: {} };
+  // Every legacy stepper and hopper hopping alike, up to 2 spots any way or sideways only.
   const HOPS: readonly HopMovement[] = [
     { kind: "hop", most: 2, times: { max: 2, min: 1 } },
     { kind: "hop", most: 2, sideways: true, times: { max: 2, min: 1 } },
   ];
-  const hopping = HOPS.map((hop) => ({ hop, tuned: hoppingInstead(everyMover, hop) }));
+  const hopping = HOPS.map((hop) => ({ hop, tuned: hoppingInstead(legacyMovers, hop) }));
 
   it("plans the same movers for the same seed", () => {
     const zoned = inZone(realRun(everyMover, FASTEST_WALKER), WORLD.lastZone, WORLD.walkLength - 1);
@@ -974,7 +976,7 @@ describe("movers", { timeout: 120_000 }, () => {
 
   // About half of a shy kind's hoppers hop shy, drawn per mover, across zones and seeds.
   it("hops about half of a shy kind's hoppers shy", () => {
-    const shyHops = hoppingInstead(everyMover, {
+    const shyHops = hoppingInstead(legacyMovers, {
       kind: "hop",
       most: 2,
       shy: true,
