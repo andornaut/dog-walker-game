@@ -3911,7 +3911,7 @@
       "json": "sprites/dog-archie.json",
       "anchor": {
         "feetY": 45,
-        "opaqueWidth": 23
+        "opaqueWidth": 26
       }
     },
     {
@@ -3920,7 +3920,7 @@
       "json": "sprites/dog-archie@50.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 12
+        "opaqueWidth": 13
       }
     },
     {
@@ -3929,7 +3929,7 @@
       "json": "sprites/dog-archie@56.json",
       "anchor": {
         "feetY": 26,
-        "opaqueWidth": 13
+        "opaqueWidth": 15
       }
     },
     {
@@ -3938,7 +3938,7 @@
       "json": "sprites/dog-archie@62.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 14
+        "opaqueWidth": 16
       }
     },
     {
@@ -3947,7 +3947,7 @@
       "json": "sprites/dog-archie@69.json",
       "anchor": {
         "feetY": 31,
-        "opaqueWidth": 16
+        "opaqueWidth": 18
       }
     },
     {
@@ -3956,7 +3956,7 @@
       "json": "sprites/dog-archie@75.json",
       "anchor": {
         "feetY": 34,
-        "opaqueWidth": 17
+        "opaqueWidth": 20
       }
     },
     {
@@ -3965,7 +3965,7 @@
       "json": "sprites/dog-archie@81.json",
       "anchor": {
         "feetY": 37,
-        "opaqueWidth": 19
+        "opaqueWidth": 21
       }
     },
     {
@@ -3974,7 +3974,7 @@
       "json": "sprites/dog-archie@88.json",
       "anchor": {
         "feetY": 40,
-        "opaqueWidth": 20
+        "opaqueWidth": 23
       }
     },
     {
@@ -3983,7 +3983,7 @@
       "json": "sprites/dog-archie@94.json",
       "anchor": {
         "feetY": 43,
-        "opaqueWidth": 21
+        "opaqueWidth": 24
       }
     },
     {
@@ -4073,7 +4073,7 @@
       "json": "sprites/dog-ginger.json",
       "anchor": {
         "feetY": 36,
-        "opaqueWidth": 20
+        "opaqueWidth": 22
       }
     },
     {
@@ -4082,7 +4082,7 @@
       "json": "sprites/dog-ginger@50.json",
       "anchor": {
         "feetY": 18,
-        "opaqueWidth": 10
+        "opaqueWidth": 11
       }
     },
     {
@@ -4091,7 +4091,7 @@
       "json": "sprites/dog-ginger@56.json",
       "anchor": {
         "feetY": 20,
-        "opaqueWidth": 11
+        "opaqueWidth": 12
       }
     },
     {
@@ -4100,7 +4100,7 @@
       "json": "sprites/dog-ginger@62.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 13
+        "opaqueWidth": 14
       }
     },
     {
@@ -4109,7 +4109,7 @@
       "json": "sprites/dog-ginger@69.json",
       "anchor": {
         "feetY": 25,
-        "opaqueWidth": 14
+        "opaqueWidth": 15
       }
     },
     {
@@ -4118,7 +4118,7 @@
       "json": "sprites/dog-ginger@75.json",
       "anchor": {
         "feetY": 28,
-        "opaqueWidth": 15
+        "opaqueWidth": 16
       }
     },
     {
@@ -4127,7 +4127,7 @@
       "json": "sprites/dog-ginger@81.json",
       "anchor": {
         "feetY": 30,
-        "opaqueWidth": 16
+        "opaqueWidth": 18
       }
     },
     {
@@ -4136,7 +4136,7 @@
       "json": "sprites/dog-ginger@88.json",
       "anchor": {
         "feetY": 32,
-        "opaqueWidth": 18
+        "opaqueWidth": 19
       }
     },
     {
@@ -4145,7 +4145,7 @@
       "json": "sprites/dog-ginger@94.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 19
+        "opaqueWidth": 20
       }
     },
     {
@@ -13768,7 +13768,7 @@
       "json": "sprites/walker-casey.json",
       "anchor": {
         "feetY": 68,
-        "opaqueWidth": 35
+        "opaqueWidth": 34
       }
     },
     {
