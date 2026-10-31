@@ -198,7 +198,7 @@ export const MINOR_OBSTACLES = {
   hedge: {
     name: "Hedge",
     shape: { lanes: 3, rows: 1 },
-    zones: ["theBeaches", "cabbagetown"],
+    zones: ["highPark", "cabbagetown", "theBeaches"],
   },
   hen: {
     movement: { kind: "dart", stopShare: 0, tilt: { max: 0, min: 0 }, turnBackShare: 0 },
@@ -257,7 +257,7 @@ export const MINOR_OBSTACLES = {
     name: "Kid on a bike",
     shape: { lanes: 1, rows: 1 },
   },
-  leafPile: { name: "Leaf pile", shape: { lanes: 1, rows: 1 }, zones: ["cabbagetown"] },
+  leafPile: { name: "Leaf pile", shape: { lanes: 1, rows: 1 }, zones: ["highPark", "cabbagetown"] },
   lifeguardChair: {
     name: "Lifeguard chair",
     shape: { lanes: 1, rows: 1 },
