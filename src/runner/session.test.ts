@@ -61,8 +61,8 @@ const kinds = (events: readonly SessionEvent[]) => events.map(({ kind }) => kind
 describe("runStreams", () => {
   it("names each stream from the seed, so a seed repeats them and another seed does not", () => {
     const draws = (seed: number) => {
-      const { cards, forks, upgrades } = runStreams(seed);
-      return [take(5, cards), take(5, forks), take(5, upgrades)];
+      const { cards, debuffMovement, forks, upgrades } = runStreams(seed);
+      return [take(5, cards), take(5, debuffMovement), take(5, forks), take(5, upgrades)];
     };
     expect(draws(3)).toEqual(draws(3));
     expect(draws(4)).not.toEqual(draws(3));
@@ -83,20 +83,38 @@ describe("runStreams", () => {
     expect(new Set([cards, forks, upgrades].map((draws) => JSON.stringify(draws))).size).toBe(3);
   });
 
+  it("keeps debuff movement draws independent of cards, forks and upgrades", () => {
+    const baseline = runStreams(3);
+    const drifted = runStreams(3);
+    take(100, drifted.debuffMovement);
+    expect([take(10, drifted.cards), take(10, drifted.forks), take(10, drifted.upgrades)]).toEqual([
+      take(10, baseline.cards),
+      take(10, baseline.forks),
+      take(10, baseline.upgrades),
+    ]);
+  });
+
   // A resumed walk's streams go on from where the saved walk's had drawn to.
   it("counts each stream's draws, and a count given takes the streams up from there", () => {
     const drawn = runStreams(3);
     take(5, drawn.cards);
     take(2, drawn.forks);
     take(3, drawn.upgrades);
-    expect(drawn.draws()).toEqual({ cards: 5, forks: 2, upgrades: 3 });
+    take(6, drawn.debuffMovement);
+    expect(drawn.draws()).toEqual({ cards: 5, debuffMovement: 6, forks: 2, upgrades: 3 });
     const resumed = runStreams(3, drawn.draws());
-    expect([take(4, resumed.cards), take(4, resumed.forks), take(4, resumed.upgrades)]).toEqual([
+    expect([
+      take(4, resumed.cards),
+      take(4, resumed.debuffMovement),
+      take(4, resumed.forks),
+      take(4, resumed.upgrades),
+    ]).toEqual([
       take(4, drawn.cards),
+      take(4, drawn.debuffMovement),
       take(4, drawn.forks),
       take(4, drawn.upgrades),
     ]);
-    expect(resumed.draws()).toEqual({ cards: 9, forks: 6, upgrades: 7 });
+    expect(resumed.draws()).toEqual({ cards: 9, debuffMovement: 10, forks: 6, upgrades: 7 });
   });
 });
 
@@ -209,6 +227,45 @@ describe("resumeSession", () => {
 });
 
 describe("stepSession", () => {
+  it("continues the same timed drift sequence from a persisted clock and stream count", () => {
+    const random = runStreams(1);
+    const empty = emptyRoad(STARTED);
+    let session: Session = {
+      ...empty,
+      walk: {
+        ...empty.walk,
+        run: { ...empty.walk.run, debuffs: [{ debuff: "zoomies", secondsLeft: 40, untilZone: 0 }] },
+      },
+    };
+    for (let i = 0; i < 20; i++) {
+      session = stepSession(gameData, random, geometry, STEP_SECONDS, [], session).session;
+    }
+    const restoredRandom = runStreams(1, random.draws());
+    let restored = structuredClone(session);
+    const drifts: LaneDirection[] = [];
+    for (let i = 0; i < 200; i++) {
+      const inputs: SessionInput[] =
+        i % 30 === 0 ? [{ direction: i % 60 === 0 ? -1 : 1, kind: "lane" }] : [];
+      const original = stepSession(gameData, random, geometry, STEP_SECONDS, inputs, session);
+      const replayed = stepSession(
+        gameData,
+        restoredRandom,
+        geometry,
+        STEP_SECONDS,
+        inputs,
+        restored,
+      );
+      expect(replayed).toEqual(original);
+      session = original.session;
+      restored = replayed.session;
+      drifts.push(
+        ...original.events.flatMap((event) => (event.kind === "drifted" ? [event.direction] : [])),
+      );
+    }
+    expect(drifts.length).toBeGreaterThan(0);
+    expect(restoredRandom.draws()).toEqual(random.draws());
+  });
+
   it("does nothing while a card is open or the walk has ended", () => {
     for (const { session } of [
       {
@@ -524,7 +581,7 @@ describe("a firing's hold", { timeout: 60_000 }, () => {
           ...session.walk.road,
           hitStop: null,
         });
-        expect([next.pulls, next.zoomiesSeconds]).toEqual([session.pulls, session.zoomiesSeconds]);
+        expect([next.pulls, next.debuffMovement]).toEqual([session.pulls, session.debuffMovement]);
         session = next;
         heldMs += STEP_MS;
       }

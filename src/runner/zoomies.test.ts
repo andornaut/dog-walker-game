@@ -1,10 +1,10 @@
 import { STEP_SECONDS } from "@andornaut/game-kit/clock/fixedStep";
-import { seededRandom } from "@andornaut/game-kit/random";
-import { describe, expect, it } from "vitest";
+import { randomStream, seededRandom } from "@andornaut/game-kit/random";
+import { describe, expect, it, vi } from "vitest";
 
 import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
-import type { GameData, ZoneId } from "../data/types";
+import type { DebuffDriftMovement, GameData, ZoneId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { read } from "../rules/units";
 import { newRun, type RunState } from "../state/runState";
@@ -16,25 +16,52 @@ import { startRoad, steerWalk, stepWalk, type Walk } from "./walk";
 import { walkGeometry, walkProjection } from "./walkGeometry";
 import { type WalkItem } from "./walkItems";
 import { planZone } from "./zonePlan";
-import { debuffDriftProfile, hasDebuffDrift, stepZoomies } from "./zoomies";
+import {
+  debuffDriftProfile,
+  type DebuffMovementClock,
+  hasDebuffDrift,
+  stepDebuffMovement,
+} from "./zoomies";
 
-// The game's road for the pack of three the drift test walks; walkIn's lone Kilo leads it.
 const ROAD = (() => {
   const road = SCREEN_LAYOUT.road;
   const pack = { dogs: ["kilo", "lady", "ginger"], walker: "casey" } as const;
   return walkGeometry(LANE_COUNT, pack, walkProjection(ROAD_CAMERA, road), road);
 })();
-const EVERY = read(gameData.tuning, "seconds", "zoomiesDriftSeconds");
-// Steps between the test player's steers, a little over three drifts.
 const STEER_EVERY = 200;
 const ZOOMIES = { debuff: "zoomies", secondsLeft: 20, untilZone: 0 } as const;
-
+const FIXED: DebuffDriftMovement = {
+  direction: "heading",
+  interval: { kind: "fixed", seconds: "laneMove" },
+  kind: "drift",
+};
+const UNIFORM: DebuffDriftMovement = {
+  direction: "random",
+  interval: { kind: "uniform", max: "zoomiesDriftMaxSeconds", min: "zoomiesDriftMinSeconds" },
+  kind: "drift",
+};
+const configured = (movement: DebuffDriftMovement): GameData => ({
+  ...gameData,
+  debuffs: { ...gameData.debuffs, zoomies: { ...gameData.debuffs.zoomies, movement } },
+});
+const fixed = configured(FIXED);
+const uniform: GameData = {
+  ...configured(UNIFORM),
+  tuning: {
+    ...gameData.tuning,
+    seconds: {
+      ...gameData.tuning.seconds,
+      zoomiesDriftMaxSeconds: 1.4,
+      zoomiesDriftMinSeconds: 0.6,
+    },
+  },
+};
+const EVERY = read(fixed.tuning, "seconds", "laneMove");
 const zoomed = (run: RunState): RunState => ({
   ...run,
   debuffs: [{ ...ZOOMIES, untilZone: run.zoneIndex }],
 });
 
-// A walk in lane, heading heading, with nothing on the road.
 function walkIn(lane: number, heading?: LaneDirection, items: readonly WalkItem[] = []): Walk {
   const run = newRun(gameData, 3, { dogs: ["kilo"], gear: null, walker: "casey" });
   const control = laneControlIn(stillInLane(lane));
@@ -47,159 +74,251 @@ function walkIn(lane: number, heading?: LaneDirection, items: readonly WalkItem[
     run: zoomed(run),
   };
 }
+const boardIn = (lane: number, id: number): WalkItem => ({
+  height: 30,
+  id,
+  kind: "sandwichBoard",
+  lane,
+  laneSpan: 1,
+  y: ROAD.packBand.top - 60,
+});
 
-// The lane the pack heads for after one drift's worth of walking.
 function afterDrift(walk: Walk): number {
-  return destinationLane(stepZoomies(gameData, ROAD, EVERY, 0, walk).walk.road.control.motion);
+  return destinationLane(
+    stepDebuffMovement(fixed, ROAD, () => 0, EVERY, null, walk).walk.road.control.motion,
+  );
 }
 
 describe("debuff movement profiles", () => {
-  const movement = { every: "zoomiesDriftSeconds", kind: "drift" } as const;
-
-  it("moves drift eligibility and its interval with the data assignment", () => {
-    const zoomies = { ...gameData.debuffs.zoomies };
-    delete zoomies.movement;
-    const configured: GameData = {
-      ...gameData,
+  it("moves eligibility and timing with the data assignment", () => {
+    const calm = { ...fixed.debuffs.zoomies };
+    delete calm.movement;
+    const data: GameData = {
+      ...fixed,
       debuffs: {
-        ...gameData.debuffs,
-        stinky: { ...gameData.debuffs.stinky, movement: { ...movement, every: "laneMove" } },
-        zoomies,
+        ...fixed.debuffs,
+        stinky: { ...fixed.debuffs.stinky, movement: FIXED },
+        zoomies: calm,
       },
     };
     const walk = walkIn(2, 1);
-    expect(hasDebuffDrift(configured, walk)).toBe(false);
-    expect(stepZoomies(configured, ROAD, EVERY, 0.5, walk)).toEqual({
+    const random = vi.fn(() => 0);
+    expect(hasDebuffDrift(data, walk)).toBe(false);
+    expect(stepDebuffMovement(data, ROAD, random, EVERY, null, walk)).toEqual({
+      clock: null,
       drifted: null,
-      seconds: 0,
       walk,
     });
+    expect(random).not.toHaveBeenCalled();
     const stinky = {
       ...walk,
       run: { ...walk.run, debuffs: [{ ...ZOOMIES, debuff: "stinky" as const }] },
     };
-    const every = read(configured.tuning, "seconds", "laneMove");
-    const early = stepZoomies(configured, ROAD, every / 2, 0, stinky);
+    const early = stepDebuffMovement(data, ROAD, random, EVERY / 2, null, stinky);
     expect(early.drifted).toBeNull();
-    expect(stepZoomies(configured, ROAD, every / 2, early.seconds, early.walk).drifted).toBe(1);
+    expect(stepDebuffMovement(data, ROAD, random, EVERY / 2, early.clock, early.walk).drifted).toBe(
+      1,
+    );
   });
 
-  it("rejects unsupported movement profiles", () => {
-    const configured = {
-      ...gameData,
-      debuffs: {
-        ...gameData.debuffs,
-        zoomies: { ...gameData.debuffs.zoomies, movement: { ...movement, kind: "teleport" } },
-      },
-    } as unknown as GameData;
-    expect(() => debuffDriftProfile(configured)).toThrow("Unsupported debuff movement profile");
-  });
-
-  it("rejects multiple configured owners of the shared drift clock", () => {
-    const configured: GameData = {
-      ...gameData,
-      debuffs: {
-        ...gameData.debuffs,
-        stinky: { ...gameData.debuffs.stinky, movement },
-        zoomies: { ...gameData.debuffs.zoomies, movement },
-      },
+  it("rejects multiple movement owners", () => {
+    const data: GameData = {
+      ...fixed,
+      debuffs: { ...fixed.debuffs, stinky: { ...fixed.debuffs.stinky, movement: FIXED } },
     };
-    expect(() => debuffDriftProfile(configured)).toThrow("Only one debuff may define movement");
+    expect(() => debuffDriftProfile(data)).toThrow("Only one debuff may define movement");
+  });
+
+  it.each([
+    { ...FIXED, kind: "teleport" },
+    { ...FIXED, direction: "left" },
+    { ...FIXED, interval: { kind: "exponential" } },
+  ])("rejects unsupported strategies %o", (movement) => {
+    expect(() =>
+      debuffDriftProfile(configured(movement as unknown as DebuffDriftMovement)),
+    ).toThrow("Unsupported debuff");
   });
 
   it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
-    "rejects an invalid drift interval %s",
-    (every) => {
-      const configured: GameData = {
-        ...gameData,
-        debuffs: { ...gameData.debuffs, zoomies: { ...gameData.debuffs.zoomies, movement } },
-        tuning: {
-          ...gameData.tuning,
-          seconds: { ...gameData.tuning.seconds, zoomiesDriftSeconds: every },
-        },
+    "rejects invalid fixed interval %s",
+    (seconds) => {
+      const data: GameData = {
+        ...fixed,
+        tuning: { ...fixed.tuning, seconds: { ...fixed.tuning.seconds, laneMove: seconds } },
       };
-      expect(() => debuffDriftProfile(configured)).toThrow(
-        "Debuff drift interval must be positive and finite",
-      );
+      expect(() => debuffDriftProfile(data)).toThrow("positive, finite and ordered");
     },
   );
+
+  it.each([
+    [0, 1],
+    [1, 0.5],
+    [Number.NaN, 1],
+    [1, Number.POSITIVE_INFINITY],
+  ])("rejects invalid uniform interval %s..%s", (min, max) => {
+    const data: GameData = {
+      ...uniform,
+      tuning: {
+        ...uniform.tuning,
+        seconds: {
+          ...uniform.tuning.seconds,
+          zoomiesDriftMaxSeconds: max,
+          zoomiesDriftMinSeconds: min,
+        },
+      },
+    };
+    expect(() => debuffDriftProfile(data)).toThrow("positive, finite and ordered");
+  });
 });
 
-describe("stepZoomies", () => {
-  it("drifts the pack toward its heading, or back from an edge", () => {
-    for (const [, lane, heading, expected] of [
-      ["toward its heading", 2, 1, 3],
-      ["back toward its heading", 2, -1, 1],
-      ["to the right before the pack has moved", 2, undefined, 3],
-      ["back from the right edge", LANE_COUNT - 1, 1, LANE_COUNT - 2],
-      ["back from the left edge", 0, -1, 1],
-    ] satisfies readonly [string, number, LaneDirection | undefined, number][]) {
-      expect(afterDrift(walkIn(lane, heading))).toBe(expected);
+describe("debuff movement schedule", () => {
+  it("retains explicit heading and fixed timing without consuming randomness", () => {
+    const random = vi.fn(() => 0);
+    for (const [lane, heading, expected] of [
+      [2, 1, 3],
+      [2, -1, 1],
+      [2, undefined, 3],
+      [4, 1, 3],
+      [0, -1, 1],
+    ] satisfies readonly [number, LaneDirection | undefined, number][]) {
+      const result = stepDebuffMovement(fixed, ROAD, random, EVERY, null, walkIn(lane, heading));
+      expect(destinationLane(result.walk.road.control.motion)).toBe(expected);
     }
+    expect(random).not.toHaveBeenCalled();
   });
 
-  it("waits zoomiesDriftSeconds of walking between drifts", () => {
-    const walk = walkIn(2, 1);
-    const early = stepZoomies(gameData, ROAD, EVERY / 2, 0, walk);
-    expect(early.drifted).toBeNull();
-    expect(stepZoomies(gameData, ROAD, EVERY / 2, early.seconds, early.walk).drifted).toBe(1);
-  });
-
-  // 90 fixed steps sum to just under 1.5 s.
-  it.each([1, 1.5])("drifts on the fixed step that walks %f s", (every) => {
-    const { tuning } = gameData;
-    const data = {
-      ...gameData,
-      tuning: { ...tuning, seconds: { ...tuning.seconds, zoomiesDriftSeconds: every } },
-    };
-    let stepped = stepZoomies(data, ROAD, STEP_SECONDS, 0, walkIn(2, 1));
-    let steps = 1;
-    while (stepped.drifted === null) {
-      stepped = stepZoomies(data, ROAD, STEP_SECONDS, stepped.seconds, stepped.walk);
-      steps += 1;
-    }
-    expect(steps).toBe(Math.round(every / STEP_SECONDS));
-  });
-
-  it("rests its clock without the Zoomies", () => {
-    const walk = walkIn(2, 1);
-    const calm = { ...walk, run: { ...walk.run, debuffs: [] } };
-    expect(stepZoomies(gameData, ROAD, EVERY, 0.5, calm)).toEqual({
-      drifted: null,
-      seconds: 0,
-      walk: calm,
-    });
-  });
-
-  // A sandwich board close ahead in a lane, as the pulls' rule sees it: too close to react to.
-  const boardIn = (lane: number, id: number): WalkItem => ({
-    height: 30,
-    id,
-    kind: "sandwichBoard",
-    lane,
-    laneSpan: 1,
-    y: ROAD.packBand.top - 60,
-  });
-
-  it("drifts away from obstacles it cannot react to, and nowhere when blocked", () => {
-    for (const [, lane, items, expected] of [
-      ["the other way from an obstacle it can't react to", 2, [boardIn(3, 0)], 1],
-      ["nowhere with both lanes blocked", 2, [boardIn(3, 0), boardIn(1, 1)], 2],
-      [
-        "nowhere at the edge with the lane back blocked",
-        LANE_COUNT - 1,
-        [boardIn(LANE_COUNT - 2, 0)],
-        LANE_COUNT - 1,
-      ],
-    ] satisfies readonly [string, number, WalkItem[], number][]) {
+  it("uses the safe opposite or cancels without moving when neither lane is safe", () => {
+    for (const [lane, items, expected] of [
+      [2, [boardIn(3, 0)], 1],
+      [2, [boardIn(3, 0), boardIn(1, 1)], 2],
+      [4, [boardIn(3, 0)], 4],
+    ] satisfies readonly [number, WalkItem[], number][]) {
       expect(afterDrift(walkIn(lane, 1, items))).toBe(expected);
     }
   });
 
-  it("keeps drifting the other way after turning at the edge", () => {
-    const first = stepZoomies(gameData, ROAD, EVERY, 0, walkIn(LANE_COUNT - 1, 1));
-    expect(first.drifted).toBe(-1);
-    expect(stepZoomies(gameData, ROAD, EVERY, 0, first.walk).drifted).toBe(-1);
+  it.each([0, 0.25, 0.5, 1])("samples uniform interval once at activation with draw %s", (draw) => {
+    const random = vi.fn(() => draw);
+    const first = stepDebuffMovement(uniform, ROAD, random, 0, null, walkIn(2));
+    expect(first.clock?.interval).toBeCloseTo(0.6 + 0.8 * draw);
+    expect(first.clock?.elapsed).toBe(0);
+    let current = first;
+    for (let step = 0; step < 10; step++) {
+      current = stepDebuffMovement(
+        uniform,
+        ROAD,
+        random,
+        STEP_SECONDS,
+        current.clock,
+        current.walk,
+      );
+    }
+    expect(current.clock?.interval).toBe(first.clock?.interval);
+    expect(random).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([0, 0.49, 0.5, 0.999])(
+    "chooses a fresh independent half-probability direction with draw %s",
+    (draw) => {
+      const random = vi
+        .fn()
+        .mockReturnValueOnce(0.5)
+        .mockReturnValueOnce(draw)
+        .mockReturnValue(0.5);
+      const first = stepDebuffMovement(
+        uniform,
+        ROAD,
+        random,
+        0,
+        null,
+        walkIn(2, draw < 0.5 ? 1 : -1),
+      );
+      const attempted = stepDebuffMovement(
+        uniform,
+        ROAD,
+        random,
+        first.clock?.interval ?? 0,
+        first.clock,
+        first.walk,
+      );
+      expect(attempted.drifted).toBe(draw < 0.5 ? -1 : 1);
+      expect(attempted.clock?.elapsed).toBeCloseTo(0);
+      expect(random).toHaveBeenCalledTimes(3);
+    },
+  );
+
+  it("resamples after a blocked attempt and retains the walking-time remainder", () => {
+    const random = vi.fn().mockReturnValueOnce(0).mockReturnValueOnce(0.9).mockReturnValue(1);
+    const walk = walkIn(2, 1, [boardIn(1, 0), boardIn(3, 1)]);
+    const first = stepDebuffMovement(uniform, ROAD, random, 0, null, walk);
+    const blocked = stepDebuffMovement(uniform, ROAD, random, 0.7, first.clock, walk);
+    expect(blocked.drifted).toBeNull();
+    expect(blocked.walk).toBe(walk);
+    expect(blocked.clock?.elapsed).toBeCloseTo(0.1);
+    expect(blocked.clock?.interval).toBeCloseTo(1.4);
+    expect(random).toHaveBeenCalledTimes(3);
+  });
+
+  it.each([1, 1.5])("attempts on the fixed step that completes %s seconds", (seconds) => {
+    const data: GameData = {
+      ...fixed,
+      tuning: { ...fixed.tuning, seconds: { ...fixed.tuning.seconds, laneMove: seconds } },
+    };
+    let current = stepDebuffMovement(data, ROAD, () => 0, 0, null, walkIn(2, 1));
+    let steps = 0;
+    while (current.drifted === null) {
+      current = stepDebuffMovement(data, ROAD, () => 0, STEP_SECONDS, current.clock, current.walk);
+      steps++;
+    }
+    expect(steps).toBe(Math.round(seconds / STEP_SECONDS));
+    expect(current.clock?.elapsed).toBeGreaterThanOrEqual(0);
+  });
+
+  it("freezes clock and random draws during hit stops and cards", () => {
+    const walk = walkIn(2);
+    const clock: DebuffMovementClock = { debuff: "zoomies", elapsed: 0.2, interval: 1 };
+    const random = vi.fn(() => 0.5);
+    const stopped: readonly Walk[] = [
+      {
+        ...walk,
+        road: { ...walk.road, hitStop: { cards: [], firing: false, seconds: 1, zoneEnded: false } },
+      },
+      {
+        ...walk,
+        run: {
+          ...walk.run,
+          phase: {
+            kind: "card",
+            source: { affected: ["kilo"], encounter: "skunk", kind: "encounter" },
+          },
+        },
+      },
+    ];
+    for (const state of stopped) {
+      expect(stepDebuffMovement(uniform, ROAD, random, 1, clock, state)).toEqual({
+        clock,
+        drifted: null,
+        walk: state,
+      });
+      expect(stepDebuffMovement(uniform, ROAD, random, 1, null, state).clock).toBeNull();
+    }
+    expect(random).not.toHaveBeenCalled();
+  });
+
+  it("does not schedule prevented or inactive movement and resets on expiry", () => {
+    const walk = walkIn(2);
+    const calm = { ...walk, run: { ...walk.run, debuffs: [] } };
+    const random = vi.fn(() => 0.5);
+    const result = stepDebuffMovement(
+      uniform,
+      ROAD,
+      random,
+      1,
+      { debuff: "zoomies", elapsed: 0.2, interval: 1 },
+      calm,
+    );
+    expect(result).toEqual({ clock: null, drifted: null, walk: calm });
+    expect(random).not.toHaveBeenCalled();
   });
 });
 
@@ -221,7 +340,8 @@ describe("the Zoomies on every zone's road", { timeout: 120_000 }, () => {
         run,
       });
       const random = seededRandom(seed);
-      let seconds = 0;
+      let movementClock: DebuffMovementClock | null = null;
+      const movementRandom = randomStream(seed, "debuffMovement");
       let clock = 0;
       let drifts = 0;
       let lastDrift: { at: number; horizon: number; to: number } | null = null;
@@ -230,7 +350,7 @@ describe("the Zoomies on every zone's road", { timeout: 120_000 }, () => {
       while (clock < 400) {
         walk = { ...walk, run: zoomed(walk.run) };
         // Every STEER_EVERY steps the player steers once toward the middle lane, turning the
-        // drift around; a hit after a steer is the player's, not the drift's.
+        // movement back toward the middle; a hit after a steer is the player's, not the drift's.
         steps += 1;
         if (steps % STEER_EVERY === 0) {
           const lane = destinationLane(walk.road.control.motion);
@@ -238,8 +358,15 @@ describe("the Zoomies on every zone's road", { timeout: 120_000 }, () => {
           lastDrift = null;
         }
         const from = destinationLane(walk.road.control.motion);
-        const drift = stepZoomies(gameData, ROAD, STEP_SECONDS, seconds, walk);
-        seconds = drift.seconds;
+        const drift = stepDebuffMovement(
+          gameData,
+          ROAD,
+          movementRandom,
+          STEP_SECONDS,
+          movementClock,
+          walk,
+        );
+        movementClock = drift.clock;
         if (drift.drifted !== null) {
           drifts += 1;
           const to = from + drift.drifted;

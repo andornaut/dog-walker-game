@@ -1,28 +1,38 @@
 import { SECONDS_EPSILON } from "@andornaut/game-kit/clock/fixedStep";
+import type { Random } from "@andornaut/game-kit/random";
 import { keysOf } from "@andornaut/game-kit/records";
 
-import type { DebuffId, GameData, SecondsKey } from "../data/types";
+import type { DebuffId, GameData } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { read } from "../rules/units";
 import { laneBlockedForPull, type PullData, type PullGeometry } from "./pulls";
 import { steerWalk, type Walk } from "./walk";
 
-// An active debuff's movement profile drifts one lane toward the pack's last heading, right
-// before it has steered. A blocked lane or road edge reverses the drift; two blocked lanes
-// prevent it. The walk state determines every drift without drawing random numbers.
+// One active movement owner shares one walking-time clock and one persisted next interval.
+export interface DebuffMovementClock {
+  readonly debuff: DebuffId;
+  readonly elapsed: number;
+  readonly interval: number;
+}
 
-// seconds holds walking time since the last drift or the movement profile became active.
-interface ZoomiesStep {
+interface DriftProfile {
+  readonly debuff: DebuffId;
+  readonly direction: "heading" | "random";
+  readonly interval:
+    | { readonly kind: "fixed"; readonly seconds: number }
+    | { readonly kind: "uniform"; readonly max: number; readonly min: number };
+}
+
+interface DebuffMovementStep {
+  readonly clock: DebuffMovementClock | null;
   readonly drifted: LaneDirection | null;
-  readonly seconds: number;
   readonly walk: Walk;
 }
 
-// One configured owner keeps the session's single drift clock unambiguous.
 export function debuffDriftProfile(
   data: Pick<GameData, "debuffs" | "tuning">,
-): { readonly debuff: DebuffId; readonly every: SecondsKey } | null {
-  let profile: { readonly debuff: DebuffId; readonly every: SecondsKey } | null = null;
+): DriftProfile | null {
+  let profile: DriftProfile | null = null;
   for (const debuff of keysOf(data.debuffs)) {
     const movement = data.debuffs[debuff].movement;
     if (movement === undefined) {
@@ -34,15 +44,40 @@ export function debuffDriftProfile(
     if (profile !== null) {
       throw new Error("Only one debuff may define movement");
     }
-    // CLEANUP (added 2026-10-31): replace with strategy evaluation before enabling its data.
-    if (!("every" in movement)) {
-      throw new Error("Debuff drift strategies require their runtime evaluator");
+    // CLEANUP (added 2026-10-31): remove the legacy leaf after movement values adopt strategies.
+    const configured =
+      "every" in movement
+        ? {
+            direction: "heading" as const,
+            interval: { kind: "fixed" as const, seconds: movement.every },
+          }
+        : movement;
+    if (configured.direction !== "heading" && configured.direction !== "random") {
+      throw new Error("Unsupported debuff drift direction");
     }
-    const every = read(data.tuning, "seconds", movement.every);
-    if (!Number.isFinite(every) || every <= 0) {
-      throw new Error("Debuff drift interval must be positive and finite");
+    const interval = configured.interval;
+    if (interval.kind !== "fixed" && interval.kind !== "uniform") {
+      throw new Error("Unsupported debuff drift interval");
     }
-    profile = { debuff, every: movement.every };
+    const min = read(
+      data.tuning,
+      "seconds",
+      interval.kind === "fixed" ? interval.seconds : interval.min,
+    );
+    const max = read(
+      data.tuning,
+      "seconds",
+      interval.kind === "fixed" ? interval.seconds : interval.max,
+    );
+    if (!Number.isFinite(min) || !Number.isFinite(max) || min <= 0 || max < min) {
+      throw new Error("Debuff drift intervals must be positive, finite and ordered");
+    }
+    profile = {
+      debuff,
+      direction: configured.direction,
+      interval:
+        interval.kind === "fixed" ? { kind: "fixed", seconds: min } : { kind: "uniform", max, min },
+    };
   }
   return profile;
 }
@@ -52,11 +87,14 @@ export function hasDebuffDrift(data: Pick<GameData, "debuffs" | "tuning">, walk:
   return profile !== null && walk.run.debuffs.some(({ debuff }) => debuff === profile.debuff);
 }
 
-// The way the pack drifts from its target lane: its heading, else the other way, or null when
-// it stays.
-function driftDirection(data: PullData, geometry: PullGeometry, walk: Walk): LaneDirection | null {
+// The requested one-lane direction, its safe opposite, or no movement when both are blocked.
+function driftDirection(
+  data: PullData,
+  geometry: PullGeometry,
+  heading: LaneDirection,
+  walk: Walk,
+): LaneDirection | null {
   const { control } = walk.road;
-  const heading = control.heading ?? 1;
   const open = (direction: LaneDirection) => {
     const lane = control.target + direction;
     return (
@@ -70,34 +108,47 @@ function driftDirection(data: PullData, geometry: PullGeometry, walk: Walk): Lan
   return open(back) ? back : null;
 }
 
-// The drift clock runs only while its debuff is active and the walk moves without hit stop.
-// Each profile interval drifts one lane. An inactive profile resets the clock.
-export function stepZoomies(
+// Only walking time advances the schedule. Each attempted one-lane drift samples its own
+// direction and next interval, including an attempt whose two candidate lanes are blocked.
+export function stepDebuffMovement(
   data: PullData,
   geometry: PullGeometry,
+  random: Random,
   stepSeconds: number,
-  seconds: number,
+  clock: DebuffMovementClock | null,
   walk: Walk,
-): ZoomiesStep {
+): DebuffMovementStep {
   const profile = debuffDriftProfile(data);
   if (profile === null || !walk.run.debuffs.some(({ debuff }) => debuff === profile.debuff)) {
-    return { drifted: null, seconds: 0, walk };
+    return { clock: null, drifted: null, walk };
   }
   if (walk.run.phase.kind !== "walking" || walk.road.hitStop !== null) {
-    return { drifted: null, seconds, walk };
+    return { clock, drifted: null, walk };
   }
-  const every = read(data.tuning, "seconds", profile.every);
-  const elapsed = seconds + stepSeconds;
-  if (elapsed < every - SECONDS_EPSILON) {
-    return { drifted: null, seconds: elapsed, walk };
+  const nextInterval = () => {
+    const { interval } = profile;
+    return interval.kind === "fixed"
+      ? interval.seconds
+      : interval.min + (interval.max - interval.min) * random();
+  };
+  const current =
+    clock?.debuff === profile.debuff
+      ? clock
+      : { debuff: profile.debuff, elapsed: 0, interval: nextInterval() };
+  const elapsed = current.elapsed + stepSeconds;
+  if (elapsed < current.interval - SECONDS_EPSILON) {
+    return { clock: { ...current, elapsed }, drifted: null, walk };
   }
-  const direction = driftDirection(data, geometry, walk);
-  if (direction === null) {
-    return { drifted: null, seconds: elapsed - every, walk };
-  }
+  const heading =
+    profile.direction === "random" ? (random() < 0.5 ? -1 : 1) : (walk.road.control.heading ?? 1);
+  const direction = driftDirection(data, geometry, heading, walk);
   return {
+    clock: {
+      debuff: profile.debuff,
+      elapsed: Math.max(0, elapsed - current.interval),
+      interval: nextInterval(),
+    },
     drifted: direction,
-    seconds: elapsed - every,
-    walk: steerWalk(data, geometry.laneCount, direction, walk),
+    walk: direction === null ? walk : steerWalk(data, geometry.laneCount, direction, walk),
   };
 }

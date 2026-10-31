@@ -29,7 +29,7 @@ import {
   zoneLength,
 } from "./walk";
 import { planZone } from "./zonePlan";
-import { stepZoomies } from "./zoomies";
+import { type DebuffMovementClock, hasDebuffDrift, stepDebuffMovement } from "./zoomies";
 
 // One walk's step order, shared by the run scene and the simulator: the inputs, the pulls, the
 // Zoomies' drift, the walk, the firing hold, then the queued cards, the zone's end and the next
@@ -44,6 +44,7 @@ export type SessionData = CardData & PullData & WalkData;
 // stream has drawn, so a resumed walk can take its streams up where they were (runStreams).
 export interface RunStreams {
   readonly cards: Random;
+  readonly debuffMovement: Random;
   draws(): StreamDraws;
   readonly forks: Random;
   readonly seed: number;
@@ -53,11 +54,12 @@ export interface RunStreams {
 // How many numbers each of a run's streams has drawn.
 export interface StreamDraws {
   readonly cards: number;
+  readonly debuffMovement: number;
   readonly forks: number;
   readonly upgrades: number;
 }
 
-export const NO_DRAWS: StreamDraws = { cards: 0, forks: 0, upgrades: 0 };
+export const NO_DRAWS: StreamDraws = { cards: 0, debuffMovement: 0, forks: 0, upgrades: 0 };
 
 // The road's geometry for the run's pack, which changes when an owner fires you.
 type SessionGeometry = (run: RunState) => RoadGeometry;
@@ -82,8 +84,8 @@ export interface Session {
   readonly walk: Walk;
   // The zone's end waits behind the queued cards.
   readonly zoneEndPending: boolean;
-  // The Zoomies' clock: walking time since the pack last drifted.
-  readonly zoomiesSeconds: number;
+  // The active movement owner's elapsed walking time and previously sampled next interval.
+  readonly debuffMovement: DebuffMovementClock | null;
 }
 
 // What a step or a choice did, in order. input and chosen are stamped with the run time they
@@ -136,11 +138,18 @@ function countedStream(seed: number, name: string, skip: number) {
 // a resumed walk's count from when it was saved.
 export function runStreams(seed: number, drawn: StreamDraws = NO_DRAWS): RunStreams {
   const cards = countedStream(seed, "cards", drawn.cards);
+  const debuffMovement = countedStream(seed, "debuffMovement", drawn.debuffMovement);
   const forks = countedStream(seed, "forks", drawn.forks);
   const upgrades = countedStream(seed, "upgrades", drawn.upgrades);
   return {
     cards: cards.random,
-    draws: () => ({ cards: cards.drawn(), forks: forks.drawn(), upgrades: upgrades.drawn() }),
+    debuffMovement: debuffMovement.random,
+    draws: () => ({
+      cards: cards.drawn(),
+      debuffMovement: debuffMovement.drawn(),
+      forks: forks.drawn(),
+      upgrades: upgrades.drawn(),
+    }),
     forks: forks.random,
     seed,
     upgrades: upgrades.random,
@@ -166,6 +175,7 @@ export function startSession(
 export function unplannedStart(walk: Walk): Session {
   return {
     card: null,
+    debuffMovement: null,
     distanceBeforeZone: 0,
     needsZonePlan: true,
     pulls: NO_PULLS,
@@ -173,7 +183,6 @@ export function unplannedStart(walk: Walk): Session {
     timeMs: 0,
     walk,
     zoneEndPending: false,
-    zoomiesSeconds: 0,
   };
 }
 
@@ -242,7 +251,14 @@ export function stepSession(
   const road = geometry(walk.run);
   const pulled = stepPulls(data, road, seconds, pressed, session.pulls, walk);
   events.push({ kind: "pulled", step: pulled });
-  const zoomies = stepZoomies(data, road, seconds, session.zoomiesSeconds, pulled.walk);
+  const zoomies = stepDebuffMovement(
+    data,
+    road,
+    streams.debuffMovement,
+    seconds,
+    session.debuffMovement,
+    pulled.walk,
+  );
   if (zoomies.drifted !== null) {
     events.push({ direction: zoomies.drifted, kind: "drifted" });
   }
@@ -256,12 +272,12 @@ export function stepSession(
   ];
   const walked: Session = {
     ...session,
+    debuffMovement: zoomies.clock,
     pulls: pulled.pulls,
     queue: step.cards.length === 0 ? session.queue : [...session.queue, ...step.cards],
     timeMs: session.timeMs + seconds * 1000,
     walk,
     zoneEndPending: session.zoneEndPending || step.zoneEnded,
-    zoomiesSeconds: zoomies.seconds,
   };
   return continueWalk(data, streams, geometry, events, heldForFiring(data, fired, walked));
 }
@@ -357,8 +373,12 @@ function continueWalk(
   streams: RunStreams,
   geometry: SessionGeometry,
   events: SessionEvent[],
-  session: Session,
+  current: Session,
 ): SessionStep {
+  const session =
+    current.debuffMovement !== null && !hasDebuffDrift(data, current.walk)
+      ? { ...current, debuffMovement: null }
+      : current;
   const { walk } = session;
   if (walk.run.phase.kind === "ended") {
     return { events, session };
