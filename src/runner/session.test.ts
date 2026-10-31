@@ -600,9 +600,9 @@ describe("quick lane changes across a row", { timeout: 10_000 }, () => {
     return { ...STARTED, walk: { road: { ...startRoad(5), control, items }, run } };
   };
 
-  // A tap every other step, as quick as a thumb taps, until the pack is taps lanes over, then
-  // steps until the row has passed: every tip in a lane it passes is collected, and a sandwich board in a
-  // lane it passes is hit.
+  // A tap every other running step, pausing through hit stops, until the pack is taps lanes
+  // over, then steps until the row has passed: every tip in a lane it passes is collected,
+  // and a sandwich board in a lane it passes is hit.
   it("meets the row in every lane it passes", () => {
     for (const [name, walker, dogs, kind, taps, lanes] of [
       [
@@ -635,8 +635,14 @@ describe("quick lane changes across a row", { timeout: 10_000 }, () => {
       let session = crossing(walker, dogs, kind, lanes);
       const met: number[] = [];
       const right: SessionInput = { direction: 1, kind: "lane" };
+      let runningFrames = 0;
       for (let frame = 0; frame < 90; frame++) {
-        const inputs = frame % 2 === 0 && frame < taps * 2 ? [right] : [];
+        const running = session.walk.road.hitStop === null;
+        const inputs =
+          running && runningFrames % 2 === 0 && runningFrames < taps * 2 ? [right] : [];
+        if (running) {
+          runningFrames++;
+        }
         const { events, session: next } = stepSession(
           gameData,
           runStreams(1),
