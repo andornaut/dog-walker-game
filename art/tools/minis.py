@@ -250,12 +250,13 @@ def zoomed(f, s, zoom, top):
     return out
 
 
-def dog_frames(draw, poses, s, module=dogs, zoom=1):
+def dog_frames(module, draw, s, feet, zoom, poses):
     """module's draw(q) at scale s of the design grid for each pose in a tag: dogs.road_scale for the full
     size, times the step for a depth variant. zoom draws the dog that much bigger in the same frame, across
     and down ((zx, zy), or one factor for both; see zoomed), for a small dog that fills more of its frame.
     Where two poses round to the same frame (a 2px lean and a 3px one are both 1px at the smallest step), the
-    bigger of the two rounds up instead, so the tag still moves."""
+    bigger of the two rounds up instead, so the tag still moves. feet is the explicit planted row at
+    this native scale; one offset from the neutral pose seats the whole tag without removing its jumps."""
     zx, zy = zoom if isinstance(zoom, tuple) else (zoom, zoom)
     p = (s * zx, s * zy) if zx != zy else s * zx
 
@@ -266,8 +267,8 @@ def dog_frames(draw, poses, s, module=dogs, zoom=1):
 
     # zoomed, the feet of the dog standing square stay on their row at s, or, zoomed taller, go one row lower,
     # onto the frame's spare bottom rows, for headroom, while the frame has a spare row below them
-    feet = zoom != 1 and bottom(drawn({}))
-    top = zoom != 1 and max(feet - bottom(drawn({}, at=s, z=1)) - (zy > 1), feet - side(32, s) + 1)
+    zoom_feet = zoom != 1 and bottom(drawn({}))
+    top = zoom != 1 and max(zoom_feet - bottom(drawn({}, at=s, z=1)) - (zy > 1), zoom_feet - side(32, s) + 1)
 
     def frame(q, up=False):
         f = drawn(q, up)
@@ -287,6 +288,16 @@ def dog_frames(draw, poses, s, module=dogs, zoom=1):
         if frames[i] == frames[i - 1]:
             k = max((i - 1, i), key=lambda j: sum(abs(v) for v in poses[j].values()))
             frames[k] = frame(poses[k], up=True)
+    dy = feet - bottom(frame({}))
+    if dy:
+        shifted = []
+        for f in frames:
+            clipped = f[len(f) - dy:] if dy > 0 else f[:-dy]
+            if any(any(row) for row in clipped):
+                raise ValueError(f"{draw.__name__}: feet alignment would clip a pose at scale {s}")
+            blank = [[None] * len(f[0]) for _ in range(abs(dy))]
+            shifted.append(blank + f[:-dy] if dy > 0 else f[-dy:] + blank)
+        frames = shifted
     return frames
 
 
@@ -382,8 +393,9 @@ def sprites():
             yield f"{key}@{suffix}", tags
     for suffix, s in STEPS:
         for name, (draw, _) in dogs.DOGS.items():
-            yield f"dog-{name}@{suffix}", [(tag, dog_frames(draw, poses, dogs.road_scale(name) * s,
-                                                            zoom=dogs.DOG_ZOOM.get(name, 1)), ms)
+            yield f"dog-{name}@{suffix}", [(tag, dog_frames(dogs, draw, dogs.road_scale(name) * s,
+                                                            math.ceil(dogs.DOG_FEET[name] * side(32, dogs.road_scale(name) * s) / dogs.DOG_SIZE[name]),
+                                                            dogs.DOG_ZOOM.get(name, 1), poses), ms)
                                            for tag, poses, ms in dogs.ROAD_TAGS]
 
 

@@ -9,12 +9,12 @@ Each dog gets two sprites in Endesga 32: a road sprite with coloured outlines an
   Ginger, Reggie), the large dogs drawn DOG_ZOOM narrower and the small dogs DOG_ZOOM larger (more down
   than across). Its drawing functions take 32-unit design coordinates and run on a minis.Mini at
   road_scale(name) (the side / 32), which keeps 1px lines and single pixels 1px; features drawn pixel by
-  pixel take trail(), so they stay unbroken. Tags: walk (4
-  frames, 150ms), react (4, 60ms: a startled hop), pull (4, 80ms, leaning right and scrabbling; the game
+  pixel take trail(), so they stay unbroken. Tags: walk (8
+  frames, 75ms), react (4, 60ms: compression, tuck, landing and settle), pull (4, 80ms, leaning right and scrabbling; the game
   mirrors it for left), tell (4, 125ms, the lean before a pull, head and shoulders pitched toward it and the
   neck stretched; the game adds the fx-bark pop), idle (4, 300ms, standing while the walk pauses: a slow
   tail wag, a 1px breath and a twitch of the right ear) and shake (4, 60ms, a quick shake-off after an
-  encounter hit, throwing droplets).
+  encounter hit, throwing droplets and settling on its centre).
 - face-dog-<name>: the dog's face on its card and in the picker, a 32x32 frame, the face drawn FACE_SIDE
   big and sat on the bottom edge, the size classes one even step apart and the large dogs zoomed to fill it. Tags: happy, neutral,
   upset.
@@ -41,21 +41,24 @@ from road import rim  # noqa: E402
 # times the step. Faces are 32x32 frames, the face drawn at FACE_SIDE / 32.
 ROAD_SIZE = 48
 
-# Road poses. Walk is a 4-beat trot: diagonal leg pairs swap on beats 0 and 2,
-# and the body bobs up on the passing beats 1 and 3, the ears lagging 1px behind it.
+# A 600ms diagonal trot: a planted paw, toe-off, a folded return and contact.
+# Eight distinct phases keep the spine quiet while the paws, tail and ears follow the stride.
 WALK = [
-    dict(fl=-1, fr=1, bl=1, br=-1, bob=0, tail=-1),
-    dict(fl=0, fr=0, bl=0, br=0, bob=-1, tail=0, flop=1),
-    dict(fl=1, fr=-1, bl=-1, br=1, bob=0, tail=1),
-    dict(fl=0, fr=0, bl=0, br=0, bob=-1, tail=0, flop=1),
+    dict(fl=0, fr=0, bl=0, br=0, flx=0, frx=0, blx=0, brx=0, tail=-1, flop=0),
+    dict(fl=-1, fr=0, bl=0, br=-1, flx=0, frx=0, blx=0, brx=0, tail=-1, flop=0),
+    dict(fl=-2, fr=0, bl=0, br=-2, flx=1, frx=0, blx=0, brx=-1, tail=0, flop=1),
+    dict(fl=-1, fr=0, bl=0, br=-1, flx=1, frx=0, blx=0, brx=-1, tail=1, flop=1),
+    dict(fl=0, fr=0, bl=0, br=0, flx=0, frx=0, blx=0, brx=0, tail=1, flop=0),
+    dict(fl=0, fr=-1, bl=-1, br=0, flx=0, frx=0, blx=0, brx=0, tail=1, flop=0),
+    dict(fl=0, fr=-2, bl=-2, br=0, flx=0, frx=-1, blx=1, brx=0, tail=0, flop=-1),
+    dict(fl=0, fr=-1, bl=-1, br=0, flx=0, frx=-1, blx=1, brx=0, tail=-1, flop=-1),
 ]
-# Startled by a hit: a spring up, the top of the jump with the legs tucked, the fall with the ears floating
-# 1px behind, and the landing; 4 frames at 60ms.
+# Compress, tuck, land and settle, with four 60ms poses.
 REACT = [
-    dict(fl=-2, fr=-2, bl=-1, br=-1, bob=-2, tail=0, ears=-1),
-    dict(fl=-4, fr=-4, bl=-3, br=-3, bob=-3, tail=0, ears=-1),
-    dict(fl=-2, fr=-2, bl=-2, br=-2, bob=-2, tail=0, ears=-1, flop=-1),
-    dict(fl=-1, fr=-1, bl=-1, br=-1, bob=-1, tail=0, ears=-1),
+    dict(bob=1, tail=0, ears=1),
+    dict(fl=-3, fr=-3, bl=-3, br=-3, bob=-2, tail=0, ears=-1),
+    dict(fl=-2, fr=-2, bl=-2, br=-2, bob=-1, tail=0, flop=1),
+    dict(tail=0),
 ]
 # Straining at the leash, leaning right: the front paws scrabble one after the other with the hind legs
 # dug in, the lean surging 2 and 3 units with the shoulders following (pitch) and the neck stretched forward
@@ -90,27 +93,28 @@ IDLE = [
 SHAKE = [
     dict(lean=-2, tail=1, ears=-1),
     dict(lean=2, tail=-2, ears=1, twitch=-1, spray=2),
-    dict(lean=-2, tail=2, ears=-1, spray=3.5),
-    dict(lean=2, tail=-1, ears=1),
+    dict(lean=-1, tail=2, ears=-1, spray=3.5),
+    dict(tail=0),
 ]
 # The tags that lean toward a pull. Their depth steps settle apart from the rest (pixel.depth_settled), so a
 # change to a lean never moves the cuts in the other tags.
 LEAN_TAGS = ("pull", "tell")
 # Idle and shake follow the first four tags.
-ROAD_TAGS = [("walk", WALK, 150), ("react", REACT, 60), ("pull", PULL, 80), ("tell", TELL, 125), ("idle", IDLE, 300),
+ROAD_TAGS = [("walk", WALK, 75), ("react", REACT, 60), ("pull", PULL, 80), ("tell", TELL, 125), ("idle", IDLE, 300),
              ("shake", SHAKE, 60)]
 FACE_TAGS = ["happy", "neutral", "upset"]
 
 
 def pose(q):
     """Every pose key with its default. flop lets both ears lag down behind the head (positive is down), as
-    they do on the walk's rising beats; twitch moves the right ear alone (negative is up); spray is how far
+    they do after a paw lifts; twitch moves the right ear alone (negative is up); spray is how far
     the shake-off's droplets have flown from the flanks, 0 for none. lean bends the head across and the
     shoulders and front legs half as far; pitch moves the head, shoulders and front legs further across
     together, over the planted hind legs; reach lifts the head up the screen, away from the walker, as a dog
-    stretches its neck toward what it wants."""
+    stretches its neck toward what it wants. flx/frx/blx/brx move returning paws inward independently
+    of their vertical lift, keeping the planted diagonal pair stable."""
     return dict(dict(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, ears=0, flop=0, lean=0, twitch=0, spray=0, pitch=0,
-                     reach=0), **q)
+                     reach=0, flx=0, frx=0, blx=0, brx=0), **q)
 
 
 # ---------- Kilo: Alaskan Malamute, large, grey and white, blue eyes, orange harness ----------
@@ -123,21 +127,26 @@ def kilo_road(q):
     sw = ln // 2 + q["pitch"]
     # legs: thick and white, the front pair tucked under the chest, peeking out at its sides, the back pair
     # under the hips
-    g.rect(8 + sw, 16 + o + q["fl"] + b, 3, 4, "white")
-    g.rect(21 + sw, 16 + o + q["fr"] + b, 3, 4, "white")
-    g.rect(8, 26 + q["bl"], 4, 4, "white")
-    g.rect(20, 26 + q["br"], 4, 4, "white")
+    g.rect(7 + sw + q["flx"], 16 + o + q["fl"] + b, 3, 4, "white")
+    g.rect(22 + sw + q["frx"], 16 + o + q["fr"] + b, 3, 4, "white")
+    g.rect(8 + q["blx"], 26 + native_row(g) + min(q["bl"], 0), 4, 4, "white")
+    g.rect(20 + q["brx"], 26 + native_row(g) + min(q["br"], 0), 4, 4, "white")
     # a heavy barrel: white flanks, a broad grey saddle, the harness across the shoulders
     bx = 16 + sw
-    g.cel(bx, 20.5 + o + b, 8.5, 6.5, "white", "lgrey")
+    g.cel(bx, 20.5 + o + b, 8.5, 5.5, "white", "lgrey")
     g.cel(bx, 19.5 + o + b, 6, 5.5, "slate", "dslate", "grey")
     g.rect(bx - 7, 16 + o + b, 14, 2, "orange")
     g.rect(bx - 7, 17 + o + b, 14, 1, "rust")
     g.ell(bx, 15 + o + b, 5.5, 1.5, "dslate")
     # the plumed tail curled over the hips: grey on top like the saddle, its white underside in the curl
     tx = 16 + q["tail"]
-    g.cel(tx, 28 + b, 4, 2.2, "slate", "dslate", "grey")
-    g.ell(tx + 0.5, 28.5 + b, 2, 1, "white")
+    g.cel(tx, 28 + min(b, 0), 4, 2.2, "slate", "dslate", "grey")
+    g.ell(tx + 0.5, 28.5 + min(b, 0), 2, 1, "white")
+    # White planted toes / shaded returning toes, articulated clear of the barrel.
+    for x, lift, dx in ((10, min(q["bl"], 0), q["blx"]), (22, min(q["br"], 0), q["brx"])):
+        col, shade = ("white", "lgrey") if lift >= 0 else ("lgrey", "grey")
+        inlay(g, "grey", lambda t, x=x, lift=lift, dx=dx, col=col, shade=shade:
+              t.cel(x + dx, 28 + native_row(g) + lift, 1.7, 1.3, col, shade))
     # a broad head with white cheeks at its sides, which set his ±15 outline, and small ears set wide, their tips rounded
     hx, hb = 16 + ln + q["pitch"], b - q["reach"]
     e = q["ears"] + q["flop"]
@@ -194,13 +203,13 @@ def lady_road(q):
     b, ln = q["bob"], q["lean"]
     # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
-    g.rect(9 + sw, 18 + q["fl"] + b, 2, 3, "white")
-    g.rect(21 + sw, 18 + q["fr"] + b, 2, 3, "white")
-    g.rect(10, 25 + q["bl"], 3, 3, "white")
-    g.rect(19, 25 + q["br"], 3, 3, "white")
+    g.rect(9 + sw + q["flx"], 18 + q["fl"] + b, 2, 3, "white")
+    g.rect(21 + sw + q["frx"], 18 + q["fr"] + b, 2, 3, "white")
+    g.rect(10 + q["blx"], 25 + min(q["bl"], 0), 3, 3, "white")
+    g.rect(19 + q["brx"], 25 + min(q["br"], 0), 3, 3, "white")
     bx = 16 + sw
     # tricolour: a tan coat, the black saddle across the back with tan showing round the rump and hips
-    g.cel(bx, 22 + b, 6.5, 5.5, "ochre", "rust", "tan")
+    g.cel(bx, 22 + b, 6.5, 5, "ochre", "rust", "tan")
     g.cel(bx, 20.5 + b, 5, 3.6, "navy", "ink", "dslate")
     # tail held up, white tip
     tx = 16 + q["tail"]
@@ -210,6 +219,7 @@ def lady_road(q):
     g.rect(bx - 5, 16 + b, 10, 2, "green")
     g.rect(bx - 5, 17 + b, 10, 1, "dgreen")
     # a round head no wider than the body, the long ears hanging from its sides past the collar
+    hind_paws(g, q, ("white", "lgrey"), "lgrey", ((11.5, 27, 1.3, 0.9), (20.5, 27, 1.3, 0.9)))
     hx, hb = 16 + ln + q["pitch"], b - q["reach"]
     g.cel(hx, 11 + hb, 5.5, 5, "ochre", None, "tan")
     g.cel(hx - 5, 13 + hb - q["ears"] + q["flop"], 2, 4.5, "rust", "dbrown")
@@ -244,20 +254,25 @@ def ginger_road(q):
     # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
     # the front paws peek out under the coat beside the chest, below the ears, stepping as the others' do
-    g.rect(9 + sw, 21.5 + q["fl"] + b, 2, 2, "lgrey")
-    g.rect(20.5 + sw, 21.5 + q["fr"] + b, 2, 2, "lgrey")
-    g.rect(12, 27 + q["bl"], 2, 2, "lgrey")
-    g.rect(18, 27 + q["br"], 2, 2, "lgrey")
+    g.rect(8.5 + sw + q["flx"], 21.5 + q["fl"] + b, 2, 2, "lgrey")
+    g.rect(21 + sw + q["frx"], 21.5 + q["fr"] + b, 2, 2, "lgrey")
+    g.rect(12 + q["blx"], 27 + native_row(g) + min(q["bl"], 0), 2, 2, "lgrey")
+    g.rect(18 + q["brx"], 27 + native_row(g) + min(q["br"], 0), 2, 2, "lgrey")
     bx = 16 + sw
-    g.cel(bx, 23.5 + b, 5.5, 4.5, "white", "lgrey")
+    g.cel(bx, 23.5 + b, 5.5, 4.0, "white", "lgrey")
     g.cel(bx - 4.5, 25 + b, 1.6, 2, "white")
     g.ell(bx + 4.5, 25 + b, 1.6, 2, "lgrey")
     g.ell(bx, 20 + b, 4, 1.2, "lgrey")
     tx = 16 + q["tail"]
-    g.cel(tx, 26.5 + b, 3, 2, "white")
+    g.cel(tx, 25.8 + b, 3, 1.5, "white")
+    # Two small paws sit in front of the hem, not under its white mass.
+    for x, lift, dx in ((13, min(q["bl"], 0), q["blx"]), (19, min(q["br"], 0), q["brx"])):
+        col, shade = ("white", "lgrey") if lift >= 0 else ("lgrey", "grey")
+        inlay(g, "lgrey", lambda t, x=x, lift=lift, dx=dx, col=col, shade=shade:
+              t.cel(x + dx, 28 + native_row(g) + lift, 1.25, 1.0, col, shade))
     hx, hb = 16 + ln + q["pitch"], b - q["reach"]
-    g.cel(hx - 4.5, 18 + hb - q["ears"] + q["flop"], 2.2, 4, "white", "lgrey")
-    g.ell(hx + 4.5, 18 + hb - q["ears"] + q["flop"] + q["twitch"], 2.2, 4, "lgrey")
+    g.cel(hx - 4.8, 18.4 + hb - q["ears"] + q["flop"], 2, 4.4, "white", "lgrey")
+    g.cel(hx + 4.8, 18.4 + hb - q["ears"] + q["flop"] + q["twitch"], 2, 4.4, "white", "lgrey")
     # the head inlaid in lgrey over the ears and the back, so it holds apart from the white coat
     inlay(g, "lgrey", lambda t: t.cel(hx, 15.5 + hb, 5.5, 4.5, "white", "lgrey"))
     bow(g, hx, 10 + hb, folds=False)
@@ -288,12 +303,12 @@ def reggie_road(q):
     b, ln = q["bob"], q["lean"]
     # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
-    g.rect(10 + sw, 21 + q["fl"] + b, 2, 2, "skin2")
-    g.rect(20 + sw, 21 + q["fr"] + b, 2, 2, "skin2")
+    g.rect(10 + sw + q["flx"], 21 + q["fl"] + b, 2, 2, "skin2")
+    g.rect(20 + sw + q["frx"], 21 + q["fr"] + b, 2, 2, "skin2")
     bx = 16 + sw
-    g.rect(12, 27 + q["bl"], 2, 2, "skin2")
-    g.rect(18, 27 + q["br"], 2, 2, "skin2")
-    g.cel(bx, 23.5 + b, 5.5, 4.5, "skin1", "skin2", "cream")
+    g.rect(12 + q["blx"], 27 + native_row(g) + min(q["bl"], 0), 2, 2, "skin2")
+    g.rect(18 + q["brx"], 27 + native_row(g) + min(q["br"], 0), 2, 2, "skin2")
+    g.cel(bx, 23.5 + b, 5.5, 4, "skin1", "skin2", "cream")
     # the curly tail, coiled on top of the rump: a skin2 ring round the coat, a skin2 dot at its heart
     tx = 16 + q["tail"]
     g.ell(tx, 24.5 + b, 2.3, 1.9, "skin2")
@@ -301,6 +316,7 @@ def reggie_road(q):
     g.p(tx, 24.5 + b, "skin2")
     g.rect(bx - 4, 19 + b, 8, 1, "red")
     g.rect(bx - 1, 19 + b, 2, 2, "dred")
+    hind_paws(g, q, ("skin1", "skin2"), "skin2", ((13, 28 + native_row(g), 1.2, 0.9), (19, 28 + native_row(g), 1.2, 0.9)))
     hx, hb = 16 + ln + q["pitch"], b - q["reach"]
     g.cel(hx, 15 + hb, 5.5, 4.5, "skin1", "skin2", "cream")
     g.ell(hx - 4.8, 12.3 + hb - q["ears"] + q["flop"], 2, 1.7, "navy")
@@ -335,17 +351,18 @@ def buddy_road(q):
     b, ln = q["bob"], q["lean"]
     # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
-    g.rect(10 + sw, 21 + q["fl"] + b, 2, 3, "white")
-    g.rect(20 + sw, 21 + q["fr"] + b, 2, 3, "white")
-    g.rect(12, 26 + q["bl"], 2, 3, "white")
-    g.rect(18, 26 + q["br"], 2, 3, "white")
+    g.rect(10 + sw + q["flx"], 21 + q["fl"] + b, 2, 3, "white")
+    g.rect(20 + sw + q["frx"], 21 + q["fr"] + b, 2, 3, "white")
+    g.rect(12 + q["blx"], 26 + native_row(g) + min(q["bl"], 0), 2, 3, "white")
+    g.rect(18 + q["brx"], 26 + native_row(g) + min(q["br"], 0), 2, 3, "white")
     bx = 16 + sw
-    g.cel(bx, 23.5 + b, 5, 4.5, "white", "lgrey")
+    g.cel(bx, 23.5 + b, 5, 4, "white", "lgrey")
     g.cel(bx + 1.5, 22.5 + b, 2.5, 2, "ochre", "rust")
     tx = 16 + q["tail"]
     # a short upright tail, white with a tan tip, standing clear of the rump
     g.rect(tx - 1, 27 + b, 2, 2, "white")
     g.rect(tx - 1, 28 + b, 2, 1, "ochre")
+    hind_paws(g, q, ("white", "lgrey"), "lgrey", ((13, 28 + native_row(g), 1.2, 0.9), (19, 28 + native_row(g), 1.2, 0.9)))
     hx, hb = 16 + ln + q["pitch"], b - q["reach"]
     g.rect(bx - 4, 19 + b, 8, 1, "red")
     g.cel(hx, 15 + hb, 5, 4.5, "white", "lgrey")
@@ -399,12 +416,12 @@ def pepe_road(q):
     # a miniature poodle: compact, the head and mane sat D units lower over short legs than a standard's
     D = 1
     # shaved legs, each with a pom-pom bracelet at the paw
-    for x, d in ((10 + sw, q["fl"]), (22 + sw, q["fr"])):
+    for x, d in ((10 + sw + q["flx"], q["fl"]), (22 + sw + q["frx"], q["fr"])):
         g.rect(x - 1, 19 + D + d + b, 2, 1, SHAVED[0])
         puff(g, x, 22 + D + d + b, 1.8, 1.6)
-    for x, d in ((12, q["bl"]), (20, q["br"])):
-        g.rect(x - 1, 26 + d, 2, 2, SHAVED[0])
-        puff(g, x, 28.5 + d, 2, 1.6)
+    for x, d in ((12 + q["blx"], min(q["bl"], 0)), (20 + q["brx"], min(q["br"], 0))):
+        g.rect(x - 1, 26 + native_row(g) + d, 2, 2, SHAVED[0])
+        puff(g, x, 28.5 + native_row(g) + d, 2, 1.6)
     # shaved hindquarters behind a curly mane over the shoulders
     bx = 16 + sw
     g.ell(bx, 24 + b, 3.8, 3.5, *SHAVED)
@@ -475,34 +492,20 @@ def archie_road(q):
     # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
     # white legs with copper points where they meet the coat
-    for x, y, d in ((9 + sw, 17, q["fl"] + b), (21 + sw, 17, q["fr"] + b), (10, 25, q["bl"]),
-                    (19, 25, q["br"])):
+    for x, y, d in ((8 + sw + q["flx"], 18, q["fl"] + b), (22 + sw + q["frx"], 18, q["fr"] + b), (10 + q["blx"], 25 + native_row(g), min(q["bl"], 0)),
+                    (19 + q["brx"], 25 + native_row(g), min(q["br"], 0))):
         g.rect(x, y + d, 3 if y > 20 else 2, 4, "white")
         g.rect(x, y + d, 3 if y > 20 else 2, 1, "ochre")
     # a solid brown coat, as wide as Lady and longer in the coat
     bx = 16 + sw
-    g.cel(bx, 21.5 + b, 7, 6, *COAT)
-    # the fluffy bobtail held up over the rump: a tuft of two locks over a third, the white tip on top, set off from
-    # the coat by a plum line. Drawn at under 1.2px a design unit, the notch between the upper locks and each lock's
-    # shade break into lone pixels, so there the upper locks draw as one, the tuft goes unshaded and the tip is a
-    # block that stays 2px wide.
+    g.cel(bx, 21.5 + b, 6.8, 5.8, *COAT)
+    # A compact bobtail with one white-tipped tuft, separated from the coat by a plum line.
     tx = 16 + q["tail"]
-    big = scale_of(g) >= 1.2
-    sh = COAT[1] if big else None
-    upper = ((tx - 1.5, 1.4), (tx + 1.5, 1.4)) if big else ((tx, 2.6),)
-
-    def tuft(t):
-        for x, rx in upper:
-            t.cel(x, 26.8 + b, rx, 1.3, COAT[0], sh)
-        t.cel(tx, 28 + b, 1.6, 1.3, COAT[0], sh)
-        if big:
-            t.cel(tx, 25.6 + b, 1.2, 1, "white")
-        else:
-            t.rect(tx - 1.6, 24.6 + b, 3.2, 2, "white")
-
-    inlay(g, "plum", tuft)
+    inlay(g, "plum", lambda t: (
+        t.cel(tx, 26.8 + b, 2.8, 1.8, COAT[0], COAT[1]),
+        t.cel(tx - 0.5, 25.5 + b, 1.5, 1, "white")))
     # the fluffy white ruff round the neck, tufted out past the shoulders and down onto the back
-    g.cel(bx, 18.5 + b, 6.5, 2.4, "white", "lgrey")
+    g.cel(bx, 18.5 + b, 6.3, 2.1, "white", "lgrey")
     # its tufts flat white, so the ruff's one shade is its own crescent along the lower right
     for x, y, rx, ry in ((bx - 5.5, 19.5, 1.5, 1.5), (bx + 5.5, 19.5, 1.5, 1.5), (bx - 2.5, 20.5, 2, 1.5),
                          (bx + 2.5, 20.5, 2, 1.5)):
@@ -577,20 +580,21 @@ def sequoia_road(q):
     b, ln, o = q["bob"], q["lean"], 2
     # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
-    g.rect(6 + sw, 15 + o + q["fl"] + b, 4, 4, "white")
-    g.rect(22 + sw, 15 + o + q["fr"] + b, 4, 4, "white")
-    g.rect(8, 26 + q["bl"], 4, 4, "lgrey")
-    g.rect(20, 26 + q["br"], 4, 4, "lgrey")
+    g.rect(6 + sw + q["flx"], 15 + o + q["fl"] + b, 4, 4, "white")
+    g.rect(22 + sw + q["frx"], 15 + o + q["fr"] + b, 4, 4, "white")
+    g.rect(8 + q["blx"], 26 + native_row(g) + min(q["bl"], 0), 4, 4, "lgrey")
+    g.rect(20 + q["brx"], 26 + native_row(g) + min(q["br"], 0), 4, 4, "lgrey")
     # a giant fluffy body, its coat bunched into tufts round the edge
     bx = 16 + sw
-    g.cel(bx, 20.5 + o + b, 9, 6.5, "white", "lgrey")
-    for dx, dy in ((-8, -1), (8, -1), (-7, 3), (7, 3), (-4, 6), (4, 6)):
+    g.cel(bx, 20.5 + o + b, 9, 5.7, "white", "lgrey")
+    for dx, dy in ((-8, -1), (8, -1), (-7, 3), (7, 3), (-4, 4.5), (4, 4.5)):
         g.ell(bx + dx, 20.5 + o + b + dy, 2.2, 2.2, "white")
     g.rect(bx - 7, 16 + o + b, 14, 1, "sky")
     # the plumed tail carried up over the back
     tx = 16 + q["tail"]
     g.cel(tx, 23.5 + o + b, 4.5, 3.5, "white", "lgrey")
     # a broad round head, its drop ears hanging at the sides, marked a soft badger cream
+    hind_paws(g, q, ("white", "lgrey"), "grey", ((10, 28.5 + native_row(g), 1.7, 1.2), (22, 28.5 + native_row(g), 1.7, 1.2)))
     hx, hb = 16 + ln + q["pitch"], b - q["reach"]
     e, t = -q["ears"] + q["flop"], q["twitch"]
     g.cel(hx, 9.5 + o + hb, 7.5, 6.5, "white", "lgrey", power=2.6)
@@ -636,23 +640,24 @@ def penny_road(q):
     # the shoulders and front legs follow the head half as far, and the pitch carries both
     sw = ln // 2 + q["pitch"]
     # solid legs, each shaded down its outer side
-    for x, y, d in ((7 + sw, 15 + o, q["fl"] + b), (22 + sw, 15 + o, q["fr"] + b), (9, 26, q["bl"]),
-                    (20, 26, q["br"])):
+    for x, y, d in ((7 + sw + q["flx"], 15 + o, q["fl"] + b), (22 + sw + q["frx"], 15 + o, q["fr"] + b), (9 + q["blx"], 26, min(q["bl"], 0)),
+                    (20 + q["brx"], 26, min(q["br"], 0))):
         g.rect(x, y + d, 3, 4, GOLD[0])
         g.rect(x + (2 if x > 16 else 0), y + d, 1, 4, GOLD[1])
     # a deep, broad chest and barrel
     bx = 16 + sw
-    gold(g, bx, 20.5 + o + b, 7.5, 6, 2.3)
+    gold(g, bx, 20.5 + o + b, 7.5, 5.5, 2.3)
     g.rect(bx - 6, 16 + o + b, 12, 2, "blue")
     g.rect(bx - 6, 16 + o + b, 12, 1, "sky")
     # a thick otter tail laid over the rump in the shade colour, tapering to a blunt tip and swinging from
     # its root, lit down its left side
-    tx, ty = 16 + q["tail"] * 2, 31 + b
+    tx, ty = 16 + q["tail"] * 2, 31 + min(b, 0)
     for (l, r, tl, tr), c in (((13, 19, -1.5, 1.5), GOLD[1]), ((13, 14.5, -1.5, -0.5), GOLD[0])):
         g.tri((l, 22 + b), (r, 22 + b), (tx + tr, ty), c)
         g.tri((l, 22 + b), (tx + tl, ty), (tx + tr, ty), c)
     # a broad skull with short flat drop ears at its sides, in the shade colour, over a neck as wide as the
     # skull down to the collar, so no road shows between an ear and the collar
+    hind_paws(g, q, (GOLD[0], GOLD[1]), "dbrown", ((10.5, 28.8, 1.3, 1.0), (21.5, 28.8, 1.3, 1.0)))
     hx, hb = 16 + ln + q["pitch"], b - q["reach"]
     left, right = min(hx, bx) - 6.5, max(hx, bx) + 6.5
     g.rect(left, 13 + o + hb, right - left, 3, GOLD[0])
@@ -715,6 +720,20 @@ def inlay(g, line, draw):
             gp[y][x] = K.get(line, line)
     for x, y in shape:
         gp[y][x] = tp[y][x]
+
+
+def native_row(g):
+    """One native output row in the drawing grid's design coordinates."""
+    return 1 / getattr(g, "sy", 1)
+
+
+def hind_paws(g, q, coat, line, feet):
+    """Separate planted toes from shaded returning toes in front of the breed's lower coat."""
+    for (x, y, rx, ry), key in zip(feet, ("bl", "br")):
+        lift, dx = min(q[key], 0), q[key + "x"]
+        col, shade = coat if lift >= 0 else (coat[1], line)
+        inlay(g, line, lambda t, x=x, y=y, rx=rx, ry=ry, lift=lift, dx=dx, col=col, shade=shade:
+              t.cel(x + dx, y + lift, rx, ry, col, shade))
 
 
 # ---------- shared features ----------
@@ -876,6 +895,8 @@ SIZE_CLASS = {"large": 54, "medium": ROAD_SIZE, "small": 38}
 DOG_CLASS = {"kilo": "large", "sequoia": "large", "penny": "large", "archie": "medium", "lady": "medium",
              "pepe": "medium", "ginger": "small", "reggie": "small", "buddy": "small"}
 DOG_SIZE = {name: SIZE_CLASS[DOG_CLASS[name]] for name in DOGS}
+# The planted feet row at full size; Archie and Lady sit one row above the other breeds' frame inset.
+DOG_FEET = {name: size - (3 if name in ("archie", "lady") else 2) for name, size in DOG_SIZE.items()}
 # How much bigger a dog is drawn inside its frame, across and down. The large dogs are drawn narrower, Kilo
 # and Sequoia about 30px wide and Penny 28 at full size; the small dogs fill more of theirs, about 20px wide
 # (Buddy 19) and 31 to 32 tall. So the widths step about 30, 24 and 20.
@@ -925,7 +946,7 @@ def sprites():
     here = sys.modules[__name__]
     for name, (draw_road, face) in DOGS.items():
         zoom = DOG_ZOOM.get(name, 1)
-        yield f"dog-{name}", [(tag, minis.dog_frames(draw_road, poses, road_scale(name), here, zoom), ms)
+        yield f"dog-{name}", [(tag, minis.dog_frames(here, draw_road, road_scale(name), DOG_FEET[name], zoom, poses), ms)
                               for tag, poses, ms in ROAD_TAGS]
         yield f"face-dog-{name}", [(m, [face_frame(face, m, FACE_SIDE[name])], 1000)
                                    for m in FACE_TAGS]
