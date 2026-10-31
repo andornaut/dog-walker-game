@@ -110,6 +110,8 @@ The table records the canvas primitives. Its role palette and state feedback are
 
 Text-button chrome and disabled rendering are implemented in [`selection.ts`](../src/ui/selection.ts) and [`uiKit.ts`](../src/scenes/uiKit.ts). One primary action identifies the main next step. The approved update notice is modal; it does not add a second green action beside Start walk. The loading label change to the approved shorter wording belongs to the text data.
 
+On the website homepage, Install is the secondary action on the left and Play is the primary action on the right. Centre Play when Install is hidden. Retain the approved Dog button styles and sizes and the existing Install eligibility rules.
+
 ## Labels and icons
 
 Use `font-title` for canvas buttons, headings and numbers, and `font-body` for body/help text. [`textFit.ts`](../src/ui/textFit.ts) fixes role scales: never shrink a label to fit. DOM controls retain their existing readable fonts and native labels. Keep the label/help ink gap, centre an action label on its face, and move the label with the pressed face.
