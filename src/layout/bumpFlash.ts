@@ -15,9 +15,9 @@ export const BUMP_FLASH = {
   keyline: 1,
   ms: 280,
   nudgeMs: 150,
-  nudgePx: 4,
+  nudgePx: 5,
   tintAlpha: 0.25,
-  width: 4,
+  width: 5,
 } as const;
 
 // The colours a border may take, each a PALETTE name the scene draws it in: each reads against

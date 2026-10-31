@@ -142,7 +142,7 @@ describe("contact debuff ground cues", () => {
     );
     expect(bursts).toHaveLength(feet.length);
     expect(bursts.map(({ x, y }) => ({ x, y }))).toEqual(feet.map(({ x, y }) => ({ x, y: y - 1 })));
-    expect(bursts.every(({ origin }) => origin[0] === 0.5 && origin[1] === 6 / 7)).toBe(true);
+    expect(bursts.every(({ origin }) => origin[0] === 0.5 && origin[1] === 5 / 6)).toBe(true);
     expect(groups.map(({ depth }) => depth)).toEqual([9.5, 2502]);
     expect(groups.every((group) => group.mask === mask)).toBe(true);
     expect(graphics.fillRect).toHaveBeenCalledWith(view.x, view.y, view.width, view.height);

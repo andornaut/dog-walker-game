@@ -66,7 +66,7 @@ export interface DebuffHitEffect {
 }
 
 // Ground art uses its native frame size, anchored on the feet row.
-export const DEBUFF_GROUND = { groundRow: 24, height: 28, width: 48, yOffset: -1 } as const;
+export const DEBUFF_GROUND = { groundRow: 30, height: 36, width: 60, yOffset: -1 } as const;
 
 // The native HUD icon on a compact cream plate beside the walker's feet.
 export const DEBUFF_BADGE = {
