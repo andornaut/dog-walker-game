@@ -15,7 +15,7 @@ import {
 import { MODAL, modalRect, modalTitleWidth } from "../home/modalLayout";
 import { withNamePills } from "../hud/effectNames";
 import { barTitleLeft } from "../ui/barTitle";
-import { closeControl } from "../ui/closeControl";
+import { type CloseControl, closeControl } from "../ui/closeControl";
 import { PALETTE } from "../ui/palette";
 import { addDim, drawFramedRect, drawRing } from "../ui/phaser/draw";
 import {
@@ -109,16 +109,45 @@ export function addCardTitle(
   closes: boolean,
   capTop: number,
 ): GameObjects.BitmapText {
-  const row = cardTitleRow(card);
+  return titleOnRow(
+    scene,
+    cardTitleRow(card),
+    closes ? closeControl(card) : undefined,
+    title,
+    capTop,
+  );
+}
+
+function titleOnRow(
+  scene: Scene,
+  row: Rect,
+  close: CloseControl | undefined,
+  title: string,
+  capTop: number,
+): GameObjects.BitmapText {
   const label = addPixelText(scene, 0, 0, title, {
     colour: PALETTE.plum,
     font: "title",
     scale: TEXT_SCALE,
   });
   const ink = inkSpan(label);
-  const x = barTitleLeft(row, closes ? closeControl(card) : undefined, ink.right - ink.left);
+  const x = barTitleLeft(row, close, ink.right - ink.left);
   placePixelText(label, x, capTop);
   return label;
+}
+
+// A framed page keeps its existing header clear of its tabs and scrolling content.
+export function addFramedPageCard(
+  scene: Scene,
+  parent: GameObjects.Container,
+  header: { capTop: number; close: CloseControl; row: Rect },
+  card: Rect,
+  title: string,
+  pressed: boolean,
+): void {
+  addDetailCard(scene, parent, card);
+  parent.add(titleOnRow(scene, header.row, header.close, title, header.capTop));
+  addCloseButton(scene, parent, header.close, pressed);
 }
 
 // A modal card's close control in its top-right corner (closeControl), on any card's background.

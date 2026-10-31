@@ -3,6 +3,7 @@ import { type FontMetrics, inkRowsFromCapTop } from "@andornaut/game-kit/text/bi
 
 import { DOG_SLOTS } from "../data/dogSlots";
 import { TITLE_CAP_ROWS } from "../hud/walkHud";
+import { BUTTON_SIZE } from "../ui/buttonGeometry";
 import { closeControl } from "../ui/closeControl";
 import { helpCapDy } from "../ui/labelHelpGap";
 import { type ScrollbarRects, scrollbarRects } from "../ui/scrollbar";
@@ -15,6 +16,13 @@ import { TEXT_SCALE, TEXT_STYLE } from "../ui/textFit";
 // lists scroll in the list area under the tabs, laid out here as they sit scrolled to the top.
 // The Logbook wears the same page (src/home/statsLayout.ts).
 const PANEL = { height: 512, width: 352, x: 4, y: 44 };
+// The framed pages keep their header above the existing tab strip.
+const PAGE_TITLE = { height: 24, width: PANEL.width - 12, x: PANEL.x + 6, y: PANEL.y + 6 };
+const PAGE_CLOSE = {
+  ...closeControl(PANEL),
+  x: PANEL.x + PANEL.width - 8 - BUTTON_SIZE.icon.face,
+  y: PANEL.y + 8,
+};
 const ROW_X = PANEL.x + 12;
 // Rows run to the tabs' right edge, or with a scrollbar stop 6px short of its track.
 const ROW_WIDTH = 328;
@@ -51,7 +59,7 @@ const DOG_HEADING_Y =
   SLOT_ROWS.y + (DOG_SLOTS.length - 1) * SLOT_ROWS.pitch + SLOT_ROWS.height + ROWS_TO_HEADING;
 
 export const SHOP_LAYOUT = {
-  close: closeControl(PANEL),
+  close: PAGE_CLOSE,
   // The Dogs tab: the slot heading and a row for every slot, then the dog heading and rows.
   dogs: {
     dogHeadingY: DOG_HEADING_Y,
@@ -109,6 +117,7 @@ export const SHOP_LAYOUT = {
   // The tabs split span, the rows' width from x, evenly with gap between them, each a hit
   // area height tall at y with its face drawHeight tall at drawY.
   tab: TAB,
+  title: { capTop: PAGE_TITLE.y + 7, row: PAGE_TITLE },
 } as const;
 
 // The message at 2x on one line inside its plate.

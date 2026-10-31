@@ -19,7 +19,6 @@ import { TEXT_SCALE } from "../ui/textFit";
 import { cents } from "../units";
 import { FEEDBACK } from "./feedback";
 import { gearByPrice, type Purchase } from "./home";
-import { cardTitleRow } from "./homeLayout";
 import {
   dogRows,
   gearRows,
@@ -355,8 +354,8 @@ describe("the shop's headings", () => {
 // over the list.
 describe("the shop's tabs", () => {
   it("clear the title row and the list by 6px when selected", () => {
-    const { list, panel, tab } = SHOP_LAYOUT;
-    const row = cardTitleRow(panel);
+    const { list, tab } = SHOP_LAYOUT;
+    const row = SHOP_LAYOUT.title.row;
     const above = tab.drawY - FEEDBACK.liftPx - SELECT_OUTSET - (row.y + row.height);
     const below = list.rect.y - (tab.drawY + tab.drawHeight + SELECT_OUTSET);
     expect(above).toBeGreaterThanOrEqual(6);

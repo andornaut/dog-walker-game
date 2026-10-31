@@ -5,7 +5,7 @@ import { SHOP_LAYOUT, shopTabFace, shopTabRects } from "../home/shopLayout";
 import { PALETTE } from "../ui/palette";
 import { fillRect } from "../ui/phaser/draw";
 import { inkSpan, placePixelText } from "../ui/phaser/pixelText";
-import { addModalCard } from "./homePanels";
+import { addFramedPageCard } from "./homePanels";
 import { addBodyText, addGraphicsIn, addTab } from "./uiKit";
 
 // The page the Pet shop and the Logbook share, under the home screen's top bar.
@@ -33,7 +33,14 @@ export function addShopPage(
     x: 0,
     y: PANEL.y - 4,
   });
-  addModalCard(scene, parent, PANEL, title, { pressed: closePressed });
+  addFramedPageCard(
+    scene,
+    parent,
+    { ...SHOP_LAYOUT.title, close: SHOP_LAYOUT.close },
+    PANEL,
+    title,
+    closePressed,
+  );
 }
 
 // Moves a label so its ink ends at right, its capitals' top at y.
