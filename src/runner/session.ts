@@ -40,7 +40,7 @@ export type SessionData = CardData & PullData & WalkData;
 // The run's random streams, each named from the seed, so a seed replays the same walk however
 // the walk is driven. forks draws a fork's paths and upgrades what they carry, which the walk
 // never draws from, so a seed offers the same forks however the walk goes. Each zone is planned
-// from streams of its own, spawns-<zone index> and movers-<zone index>. draws counts what each
+// from streams of its own, spawns-<zone index> and movers-<zone index>. draws counts the numbers
 // cards, forks and upgrades have drawn for boundary resumes. Movement-debuff streams restart
 // from the seed and zone index without a saved cursor.
 export interface RunStreams {
@@ -206,7 +206,7 @@ export function resumeSession(
   if (!session.needsZonePlan || session.card !== null || session.zoneEndPending) {
     throw new Error("A walk resumes only between zones or at its start");
   }
-  return continueWalk(data, streams, geometry, [], session);
+  return continueWalk(data, streams, geometry, [], { ...session, debuffMovement: null });
 }
 
 // The session at a fork as a walk resumes from it: the fork card closed and queued first again,
