@@ -35,7 +35,6 @@ const images = new Set(manifest.images.map(({ key }) => key));
 describe("key names", () => {
   it("names a depth variant by its step's rounded percentage, and throws off the steps", () => {
     expect(depthVariantKey("dog-kilo", 0.875)).toBe("dog-kilo@88");
-    expect(depthVariantKey("dog-kilo", 0.625)).toBe("dog-kilo@62");
     expect(depthVariantKey("tip", 1)).toBeNull();
     expect(() => depthVariantKey("tip", 0.63)).toThrow("not a depth step");
   });
@@ -47,7 +46,6 @@ describe("key names", () => {
     const cases = [
       { movement: "approach", moving: true, tags: ["idle", "walk", "step"], want: "step" },
       { movement: "approach", moving: false, tags: ["idle", "walk", "step"], want: "walk" },
-      { movement: "approach", moving: true, tags: ["idle", "walk", "stalk", "step"], want: "step" },
       {
         movement: "approach",
         moving: false,

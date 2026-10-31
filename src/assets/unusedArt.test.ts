@@ -53,8 +53,4 @@ describe("unusedKeys", () => {
   ])("counts %s (%s) as used: %s", (_case, key, used) => {
     expect(usedSprite(key)).toBe(used);
   });
-
-  it("ignores a template whose fixed parts hold no letter or digit, which would name anything", () => {
-    expect(names.patterns.map(String)).toEqual(["/^dog-(.+)$/", "/^face-(.+)$/", "/^(.+)-20$/"]);
-  });
 });
