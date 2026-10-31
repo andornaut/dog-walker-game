@@ -248,6 +248,8 @@ Mr. B's new-walker welcome uses `walker-mr-b`'s `phone` tag at 2×: his feet sta
 
 ## Animation
 
+- Picked tiles keep their yellow face, gold frame and check badge. Move cream accents along the frame in two 180ms phases (360ms cycle); keep tab selection static. Shop focus uses the same cadence with cyan framing and diagonal cream corner pairs. Keep footprints, text and availability unchanged; reduced motion holds the first phase.
+
 - Animation names are Aseprite tag names. Keep tag names and order stable; append new tags. A frame-count change shifts later tags and must include matching exports, retained feet anchors and updated render-bound checks in the same integration. Keep authored leash sockets and the existing logical collision, formation, pickup and planning geometry unchanged; measure visual extents separately. Consumers resolve tags instead of hardcoding absolute frame indices. Motion is in whole pixels.
 - Walkers are seen from behind: `walk` has 8 frames at 80ms (640ms per stride), `react` 2, `stumble` 4 and `idle` 2 frames, no gear variants. `wave` and `cheer` face the camera; their existing cadence and Mr. B's phone poses are retained.
 - Generic human walking uses 8 distinct phases: contact, transfer, passing and return on each side. Keep a supporting foot on its baseline while the other returns; lift and swing the joints instead of translating the whole figure. The generic stride remains 400ms (8 frames at 50ms); `couple`, `stroller` and `tour-group` remain 640ms (8 at 80ms). Other human walks retain their full-cycle cadence, and bespoke performances, rides, hops and movement signatures retain their own poses and timing. Walking animals retain their own gait and timing rather than inheriting the human pose array.

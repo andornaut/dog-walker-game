@@ -28,7 +28,7 @@ Sprites: ui-dog-card (120x70, one of three cards in the walk's card row; a tag p
 the game's faces, hearts and text), ui-dog-card-warn (120x70, the low-hearts rim drawn over
 ui-dog-card; tags pulse, static), ui-debuff-bar (360x16, one active debuff's bar under the walk bar;
 tags muddy, stinky, zoomies, spotlight), ui-select (24x24 nine-slice, 8px corners; tag pulse),
-ui-shop-focus (32x32 nine-slice, 13px corners; tag pulse, two 600ms phases), ui-afford (24x24
+ui-shop-focus (32x32 nine-slice, 13px corners; tag pulse, two 180ms phases), ui-afford (24x24
 nine-slice, 8px corners; tag glint), ui-check (16x16; tags 1, 2, 3, tick), ui-section (24x32
 nine-slice, 3px sides and bottom, 24px top; tags complete, neutral, neutral-walker, neutral-dogs, neutral-pocket), fx-tap and fx-dust (16x16; tag
 play), ui-heart (8x7; tags full, empty, and full-dark and empty-dark for the navy ui-dog-card),
@@ -39,7 +39,8 @@ ui-slider (24x10 three-slice, 4px caps; tags filled, empty, filled-disabled, emp
 ui-slider-knob (10x16; tags normal, pressed, disabled), icon-sound (tags on, off),
 icon-sound-panel, icon-music-panel, icon-effects-panel, icon-motion-panel and icon-install-panel (tags on, off),
 ui-zone-pips (18x8; tags todo, and <zone> and <zone>-done for each zone in ZONE_COLOURS), ui-tile
-(24x24 nine-slice, 4px on every side; tags normal, selected, disabled), ui-touch-drag (104x40, the
+(24x24 nine-slice, 4px on every side; normal frame 0, selected-static 1, disabled 2,
+selected 3 to 4 at 180ms), ui-touch-drag (104x40, the
 help screen's swipe, a white glove dragging one lane-width; tags right and left, each a whole swipe of
 15 frames timed per frame (TOUCH_MS) and ending on an empty frame, and still (one frame for reduced
 motion)).
@@ -509,7 +510,7 @@ TILE = 24
 TILE_LIP = "brown"
 
 
-def tile(state):
+def tile(state, phase=None):
     """24x24 nine-slice, 4px on every side: a pickable tile (walker, dog or gear) in one of the
     interaction states. normal is the chrome's ink and plum lines and cream face on a TILE_LIP
     lip 2px deep at the bottom and 1px at the right. selected is the gold of ui-section's complete state: an
@@ -528,6 +529,8 @@ def tile(state):
         g.rect(3, 3, TILE - 6, TILE - 6, face)
         g.rect(3, TILE - 4, TILE - 6, 1, lip)
         g.rect(TILE - 4, 3, 1, TILE - 6, lip)
+        if phase is not None:
+            selection_glints(g, phase)
         return g
     chrome(g, 0, 0, TILE, TILE, face=face, lip=lip or face, line="nslate" if lip is None else "plum")
     if lip:
@@ -801,12 +804,24 @@ def wood(g, top, h):
 
 # ---------- selection and feedback ----------
 
+def selection_glints(g, phase):
+    """Move a two-pixel cream edge accent around a fixed gold frame, never across its face."""
+    gold = {K["amber"], K["orange"]}
+    for y, row in enumerate(g.px):
+        for x, colour in enumerate(row):
+            leading = x < 3 or y < 3
+            trailing = x >= g.w - 3 or y >= g.h - 3
+            if colour in gold and (trailing if phase else leading):
+                g.p(x, y, "cream")
+    return g
+
+
 def select_frame(glow):
     """24x24 nine-slice (8px corners): the frame around a selected tile or active control. An ink
     edge on both sides of a 2px amber band, so it stands out on any background (ink on tan or
-    cream is 9:1 or more); the band pulses between amber and orange, apart from a selected item's yellow face."""
+    cream is 9:1 or more); a cream accent alternates between the top/left and bottom/right gold edges."""
     g = Grid(24, 24)
-    band = "orange" if glow else "amber"
+    band = "amber"
     g.rect(1, 0, 22, 24, "ink")
     g.rect(0, 1, 24, 22, "ink")
     g.rect(1, 1, 22, 22, band)
@@ -814,22 +829,22 @@ def select_frame(glow):
     g.rect(4, 4, 16, 16, None)
     for x, y in ((1, 1), (22, 1), (1, 22), (22, 22)):
         g.p(x, y, "ink")
-    return g
+    return selection_glints(g, glow)
 
 
 def shop_focus_frame(short):
     """32x32 nine-slice (13px corners), drawn 3px outside the active shop row. A 3px cyan band
-    sits between 1px ink keylines; cream corner marks alternate between 12px and 7px without
-    moving the row or changing its availability. Reduced motion holds the first, longer phase.
+    sits between 1px ink keylines; diagonal pairs of cream corner marks exchange 12px and 7px lengths
+    without moving the row or changing its availability. Reduced motion holds the first phase.
     The 5px ring covers only the row's first two border pixels inside its edge."""
     g = Grid(32, 32)
     g.rect(0, 0, 32, 32, "ink")
     g.rect(1, 1, 30, 30, "cyan")
     g.rect(4, 4, 24, 24, "ink")
     g.rect(5, 5, 22, 22, None)
-    length = 7 if short else 12
     for right in (False, True):
         for bottom in (False, True):
+            length = 12 if (right == bottom) != short else 7
             x, y = (31 - length if right else 1), (28 if bottom else 1)
             g.rect(x, y, length, 3, "cream")
             x, y = (28 if right else 1), (31 - length if bottom else 1)
@@ -891,7 +906,7 @@ COIN = ["..PPP..", ".PYYAP.", "PYYAAAP", "PYAAAOP", "PAAAOOP", ".PAOOP.", "..PPP
 def afford_frame(glint):
     """24x24 nine-slice (8px corners), drawn 2px outside the Pet shop building or a shop row the player can
     afford: a plum keyline outside a 1px amber line, with a gold coin stud on each corner. It
-    differs from ui-select (ink, a 2px band pulsing amber to orange, ink, 1px out) by
+    differs from ui-select (ink, a 2px gold band with moving cream edges, ink, 1px out) by
     its thin line, its round studs and its deeper gold, and it does not pulse. Amber holds
     4.57:1 on the dark wood, the plum keyline 6.37:1 on the yard's grass and the studs' plum
     rims 6.49:1 on tan tiles. glint runs a flash along the line over two frames: 1 lights the
@@ -1616,9 +1631,9 @@ def sprites():
     card_warn = [dog_card_warn(i).outlined(False) for i in (0, 1, 2, 1)]
     yield "ui-dog-card-warn", [("pulse", card_warn, 400), ("static", [card_warn[1]], 1000)]
     yield "ui-debuff-bar", [(d, [debuff_bar(d).outlined(False)], 1000) for d in DEBUFF_LOOKS]
-    yield "ui-select", [("pulse", [select_frame(False).outlined(False), select_frame(True).outlined(False)], 450)]
+    yield "ui-select", [("pulse", [select_frame(False).outlined(False), select_frame(True).outlined(False)], 180)]
     yield "ui-shop-focus", [("pulse", [shop_focus_frame(False).outlined(False),
-                                      shop_focus_frame(True).outlined(False)], 600)]
+                                      shop_focus_frame(True).outlined(False)], 180)]
     yield "ui-check", [(lb, [check_badge(lb).outlined()], 1000) for lb in ("1", "2", "3", "tick")]
     yield "ui-afford", [("glint", [afford_frame(i).outlined(False) for i in (0, 0, 1, 2)], 400)]
     yield "ui-section", [(s, [section(s).outlined(False)], 1000) for s in SECTION_FACES]
@@ -1627,7 +1642,11 @@ def sprites():
     yield "ui-heart", [("full", [heart(True).outlined(False)], 1000), ("empty", [heart(False).outlined(False)], 1000),
                        ("full-dark", [heart(True, True).outlined(False)], 1000),
                        ("empty-dark", [heart(False, True).outlined(False)], 1000)]
-    yield "ui-tile", [(s, [tile(s).outlined(False)], 1000) for s in ("normal", "selected", "disabled")]
+    # Keep the existing normal, static selected and disabled frame indices; append the animated tag.
+    yield "ui-tile", [("normal", [tile("normal").outlined(False)], 1000),
+                      ("selected-static", [tile("selected").outlined(False)], 1000),
+                      ("disabled", [tile("disabled").outlined(False)], 1000),
+                      ("selected", [tile("selected", phase=p).outlined(False) for p in (0, 1)], 180)]
     yield "ui-button", [(s, [button(s).outlined(False)], 1000)
                         for s in ("normal", "pressed", "disabled", "secondary", "secondary-pressed", "go", "go-pressed",
                                   "go-disabled")]
