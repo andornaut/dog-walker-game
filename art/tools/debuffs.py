@@ -6,15 +6,18 @@ fx-debuff-muddy, -spotlight, -stinky and -zoomies are 60x36, with play frames
 pose. Each member has one copy: walker and visible dogs, anchored at (30,30)
 on (feetX, feetY-1), origin (0.5,5/6). Follow their feet for the whole cue.
 Draw above ground shadows and below all actors and leashes (road depth 9.5),
-clipped to the road viewport. Nothing floats above a head.
+clipped to the road viewport. These ground effects never float above a head;
+the separate acquisition icon appears above the lead dog.
 
 The sparse mud splats, low gas wisps, rushing arcs and pools of light use
 the exact face, shade, fill and name colours from ui.DEBUFF_LOOKS, plus
 the same ink edge as the bars. No recoloured icon is baked into a sprite.
-The one pack-level native 16px HUD icon sits in a 24x24 cream ui-panel beside
-the walker's feet, with 4px padding: left=walkerX+48, top=walkerFeetY-28,
-or left=walkerX-72 when the right cannot fit the viewport's 4px inset.
-The matching sound plays once per pack acquisition, never per member.
+The shared roadBanners.popUpArt notification draws the native 16px HUD icon
+at 2x as a bare 32x32 image, with no plate. Its bottom starts 4px above the
+actual lead dog's visible head. Snapshot the position, clamp to the viewport
+and fade immediately over 1000ms without rising or following the pack, in
+both motion modes. Only an effect actually acquired or refreshed shows this
+notification and its matching sound, played once for the pack, never per member.
 
 Usage:
   debuffs.py preview OUT.png   every frame on the neighbourhood roads
