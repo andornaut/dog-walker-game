@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Draw the four pack-level contact-debuff effects around each member's feet.
 
-fx-debuff-muddy, -spotlight, -stinky and -zoomies are 48x28, with play frames
+fx-debuff-muddy, -spotlight, -stinky and -zoomies are 60x36, with play frames
 0 to 11 at 100ms each, played once (1200ms). Frame 4 is the reduced-motion
-pose. Each member has one copy: walker and visible dogs, anchored at (24,24)
-on (feetX, feetY-1), origin (0.5,6/7). Follow their feet for the whole cue.
+pose. Each member has one copy: walker and visible dogs, anchored at (30,30)
+on (feetX, feetY-1), origin (0.5,5/6). Follow their feet for the whole cue.
 Draw above ground shadows and below all actors and leashes (road depth 9.5),
 clipped to the road viewport. Nothing floats above a head.
 
@@ -33,7 +33,7 @@ from fx import rim  # noqa: E402
 from pixel import Grid, main  # noqa: E402
 from ui import DEBUFF_LOOKS  # noqa: E402
 
-WIDTH, HEIGHT = 48, 28
+WIDTH, HEIGHT = 60, 36
 FRAME_MS = 100
 PEAK = 4
 ENVELOPE = (0.56, 0.74, 0.92, 1, 1, 0.98, 0.94, 0.86, 0.74, 0.60, 0.42, 0.22)
@@ -42,7 +42,7 @@ ENVELOPE = (0.56, 0.74, 0.92, 1, 1, 0.98, 0.94, 0.86, 0.74, 0.60, 0.42, 0.22)
 def point(step, x, y):
     """Expand around the ground under the feet, never up toward a head."""
     s = ENVELOPE[step]
-    return 24 + (x - 24) * s, 22 + (y - 22) * s
+    return 30 + (x - 30) * s, 29 + (y - 29) * s
 
 
 def oval(g, step, x, y, rx, ry, fill, shade=None, light=None):
@@ -71,71 +71,73 @@ def part(dst, draw):
 
 
 def muddy(step):
-    """A low mud crown, two squelched patches and heavy drops near the ankles."""
+    """Two broad squelches and an outward mud crown stay around the soles and ankles."""
     face, shade, light, _ = DEBUFF_LOOKS["muddy"]
     g = Grid(WIDTH, HEIGHT)
-    for x, y, rx, ry in ((8, 22, 6, 3), (39, 22, 6, 3)):
+    for x, y, rx, ry in ((10, 29, 7.5, 4), (50, 29, 7.5, 4)):
         part(g, lambda p, x=x, y=y, rx=rx, ry=ry: oval(p, step, x, y, rx, ry, face, shade, light))
-    spread = (0, 1, 2, 3, 4, 5, 6, 6, 6, 5, 4, 2)[step]
-    lift = (0, 2, 4, 5, 5, 4, 3, 2, 0, -1, -1, 0)[step]
+    spread = (0, 1, 3, 4, 5, 6, 7, 7, 7, 6, 5, 3)[step]
+    lift = (0, 1, 3, 4, 4, 3, 2, 1, 0, -1, -1, 0)[step]
     for side in (-1, 1):
-        x = 24 + side * (11 + spread)
-        y = 17 - lift
-        part(g, lambda p, x=x, y=y: oval(p, step, x, y, 3, 4, face, shade, light))
-        part(g, lambda p, side=side: path(p, step, [(24 + side * 10, 23),
-                                                     (24 + side * 13, 18),
-                                                     (24 + side * 16, 22)], face, 3))
+        x, y = 30 + side * (14 + spread), 24 - lift
+        part(g, lambda p, x=x, y=y: oval(p, step, x, y, 3.5, 4.5, face, shade, light))
+        part(g, lambda p, side=side: path(p, step, [(30 + side * 12, 30),
+                                                  (30 + side * 17, 23),
+                                                  (30 + side * 21, 29)], face, 4))
     return g
 
 
 def stinky(step):
-    """Low mauve puffs with two broad pink curls rising beside the ankles."""
+    """Low mauve lobes and broad pink curls spread beside the feet, with open ground between."""
     face, shade, light, name = DEBUFF_LOOKS["stinky"]
     g = Grid(WIDTH, HEIGHT)
     rise = (0, 1, 2, 3, 4, 5, 5, 6, 6, 6, 5, 3)[step]
     for side in (-1, 1):
-        x = 24 + side * 16
-        part(g, lambda p, x=x: oval(p, step, x, 22 - rise / 2, 6, 4.5, face, shade, light))
+        x = 30 + side * 20
+        part(g, lambda p, x=x: oval(p, step, x, 29 - rise / 2, 7.5, 5, face, shade, light))
         sway = (0, 0, 1, 2, 2, 1, 0, -1, -1, 0, 0, 0)[step] * side
-        pts = [(x, 21), (x + side * 3, 16 - rise / 2),
-               (x - side * 1 + sway, 12 - rise / 2), (x + side * 2 + sway, 8 - rise / 2)]
-        part(g, lambda p, pts=pts: path(p, step, pts, light))
+        pts = [(x, 29), (x + side * 4, 24 - rise / 2),
+               (x - side * 1 + sway, 20 - rise / 2), (x + side * 2 + sway, 16 - rise / 2)]
+        part(g, lambda p, pts=pts: path(p, step, pts, light, 3))
         if 2 <= step <= 7:
-            part(g, lambda p, x=x, side=side: path(p, step, [(x - side * 2, 19), (x - side * 3, 17)], name))
+            part(g, lambda p, x=x, side=side: path(p, step, [(x - side * 2, 26),
+                                                                          (x - side * 4, 23)], name, 2))
     return g
 
 
 def zoomies(step):
-    """Green rushing arcs and yellow tips sweep once round the feet, with open space between."""
+    """Open green rushing arcs and yellow tips sweep once around the ground footprint."""
     face, shade, light, _ = DEBUFF_LOOKS["zoomies"]
     g = Grid(WIDTH, HEIGHT)
     turn = -35 + step * 19
     for offset in (0, 180):
         angles = range(round(turn + offset), round(turn + offset + 82), 6)
-        pts = [(24 + math.cos(math.radians(a)) * 20, 19 + math.sin(math.radians(a)) * 5) for a in angles]
-        part(g, lambda p, pts=pts: path(p, step, pts, shade, 4))
-        part(g, lambda p, pts=pts: path(p, step, [(x, y - 1) for x, y in pts], face, 3))
-        part(g, lambda p, pts=pts: path(p, step, pts[-3:], light, 2))
+        pts = [(30 + math.cos(math.radians(a)) * 25, 26.5 + math.sin(math.radians(a)) * 5.5)
+               for a in angles]
+        part(g, lambda p, pts=pts: path(p, step, pts, shade, 5))
+        part(g, lambda p, pts=pts: path(p, step, [(x, y - 1) for x, y in pts], face, 4))
+        part(g, lambda p, pts=pts: path(p, step, pts[-3:], light, 3))
     for side in (-1, 1):
-        x = 24 + side * 15
-        part(g, lambda p, x=x, side=side: path(p, step, [(x - side * 3, 12), (x + side * 4, 12)], light))
+        x = 30 + side * 19
+        part(g, lambda p, x=x, side=side: path(p, step, [(x - side * 4, 20),
+                                                                     (x + side * 5, 20)], light, 2))
     return g
 
 
 def spotlight(step):
-    """A blue pool edged in yellow, with two restrained white light marks at the rim."""
+    """A broad blue pool with a yellow rim and low white light marks sits beneath the feet."""
     face, shade, light, name = DEBUFF_LOOKS["spotlight"]
     g = Grid(WIDTH, HEIGHT)
 
     def pool(p):
-        oval(p, step, 24, 21, 21, 5.5, face, shade)
-        oval(p, step, 24, 20, 17, 3.5, light)
-        oval(p, step, 24, 19.5, 12, 1.8, face)
+        oval(p, step, 30, 28, 26, 6.5, face, shade)
+        oval(p, step, 30, 27, 21, 4.5, light)
+        oval(p, step, 30, 26.5, 15, 2.5, face)
     part(g, pool)
     slide = (0, 2, 4, 6, 7, 7, 6, 4, 2, 0, -1, 0)[step]
     for side in (-1, 1):
-        x = 24 + side * (12 + slide / 2)
-        part(g, lambda p, x=x, side=side: path(p, step, [(x, 16), (x + side * 2, 11)], name, 2))
+        x = 30 + side * (16 + slide / 2)
+        part(g, lambda p, x=x, side=side: path(p, step, [(x, 24), (x + side * 3, 18)], name, 3))
     return g
 
 
