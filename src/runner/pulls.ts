@@ -1,6 +1,6 @@
 import { clampIndex } from "@andornaut/game-kit/arrays";
 
-import type { DogId, GameData } from "../data/types";
+import type { DogId, GameData, ObstacleEncounterId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { countTally } from "../rules/achievements";
 import { modifiedStat } from "../rules/modifiers";
@@ -20,11 +20,11 @@ import {
   roadScrollSpeed,
   type Walk,
 } from "./walk";
-import { blocksLane, type WalkItem } from "./walkItems";
+import { blocksLane, isPullObstacle, type WalkItem } from "./walkItems";
 
-// Every dog pulls toward squirrels, and only toward squirrels. One dog strains at a time, the
-// one nearest the squirrel: pullTell seconds with its bubble, an arrow and a line to the
-// squirrel, then the pack lurches one lane toward it. Each squirrel draws its pulls once.
+// Every dog pulls toward encounters whose resolution is pull. One dog strains at a time, the
+// one nearest the target: pullTell seconds with its bubble, an arrow and a line to the
+// target, then the pack lurches one lane toward it. Each target draws its pulls once.
 
 export type PullData = Pick<
   GameData,
@@ -35,7 +35,7 @@ export type PullGeometry = Pick<
   "cell" | "laneCount" | "lens" | "packBand" | "packParts" | "roadTop"
 >;
 
-type PullTargetKind = "squirrel";
+type PullTargetKind = ObstacleEncounterId;
 
 // The dog straining toward a target on the road, toward direction, with tellSeconds of its
 // tell to go. pullsLeft is the pulls the target still draws. blocked is set while the lane it
@@ -173,8 +173,9 @@ function squirrelPulls(data: PullData, walk: Walk): number {
   return Math.round(modifiedStat(data.tuning, walk.run.modifiers, "squirrelPulls", 1));
 }
 
-// The nearest squirrel that has not drawn its pulls, whether or not it draws any.
-function nearestSquirrel(
+// The nearest eligible encounter that has not drawn its pulls, even when it draws none.
+function nearestTarget(
+  data: PullData,
   geometry: PullGeometry,
   spent: readonly number[],
   walk: Walk,
@@ -182,8 +183,10 @@ function nearestSquirrel(
   const lane = destinationLane(walk.road.control.motion);
   let nearest: Target | null = null;
   for (const item of walk.road.items) {
-    const wanted = item.kind === "squirrel" && !spent.includes(item.id);
-    const target = wanted ? targetOf(geometry, lane, "squirrel", item) : null;
+    const target =
+      isPullObstacle(data, item.kind) && !spent.includes(item.id)
+        ? targetOf(geometry, lane, item.kind as ObstacleEncounterId, item)
+        : null;
     if (target !== null && (nearest === null || target.y > nearest.y)) {
       nearest = target;
     }
@@ -383,7 +386,7 @@ export function stepPulls(
     strain = null;
   }
   if (strain === null || target === null) {
-    target = nearestSquirrel(geometry, spent, walk);
+    target = nearestTarget(data, geometry, spent, walk);
     const dog = target === null ? undefined : nearestDog(geometry, target, walk);
     if (target === null || dog === undefined) {
       return { ...NOTHING, failed, pulls: { ...pulls, clock, spent, strain: null }, walk };

@@ -192,10 +192,27 @@ describe("what a dog pulls toward", () => {
     }
   });
 
-  it("never strains toward anything but a squirrel", () => {
+  it("does not strain toward encounters without a pull resolution", () => {
     for (const kind of ["treat", "otherDog", "tip"] as const) {
       expect(after(walkWith(["lady"], [item(kind, 0, 4)]), 2).tells).toEqual([]);
     }
+  });
+
+  it("selects pull targets from encounter data rather than their identity", () => {
+    const configured = {
+      ...data,
+      encounters: {
+        ...data.encounters,
+        otherDog: { ...data.encounters.otherDog, resolution: { kind: "pull" as const } },
+        squirrel: { ...data.encounters.squirrel, resolution: data.encounters.puddle.resolution },
+      },
+    };
+    const walk = walkWith(["kilo"], [item("squirrel", 0, 0), item("otherDog", 1, 4)]);
+    const started = stepPulls(configured, geometry, FRAME, [], NO_PULLS, walk);
+    expect(started.tells).toEqual([{ direction: 1, dog: "kilo", kind: "otherDog" }]);
+    const pulled = stepPulls(configured, geometry, 1, [], started.pulls, started.walk);
+    expect(pulled.pulled).toEqual([{ direction: 1, dog: "kilo", moved: true }]);
+    expect(pulled.walk.road.control.target).toBe(3);
   });
 
   it("never pulls without a target: no random pulls", () => {
