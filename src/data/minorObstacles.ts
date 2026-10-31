@@ -289,7 +289,6 @@ export const MINOR_OBSTACLES = {
     zones: ["highPark"],
   },
   parkedCar: { name: "Parked car", shape: { lanes: 1, rows: 3 } },
-  patioRail: { name: "Patio rail", shape: { lanes: 3, rows: 1 }, zones: ["distilleryDistrict"] },
   patrolBuggy: {
     movement: {
       kind: "stopAndGoAcross",

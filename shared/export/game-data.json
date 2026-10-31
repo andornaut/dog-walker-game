@@ -2375,18 +2375,6 @@
       "spriteKey": "parked-car"
     },
     {
-      "id": "patioRail",
-      "name": "Patio rail",
-      "shape": {
-        "lanes": 3,
-        "rows": 1
-      },
-      "zones": [
-        "distilleryDistrict"
-      ],
-      "spriteKey": "patio-rail"
-    },
-    {
       "id": "patrolBuggy",
       "movement": {
         "kind": "stopAndGoAcross",
@@ -3541,7 +3529,6 @@
           "newspaperBox": 0,
           "parkRangersCart": 2,
           "parkedCar": 0,
-          "patioRail": 0,
           "patrolBuggy": 0,
           "pedicab": 0,
           "pigeons": 0,
@@ -3662,7 +3649,6 @@
           "newspaperBox": 0,
           "parkRangersCart": 0,
           "parkedCar": 1,
-          "patioRail": 0,
           "patrolBuggy": 0,
           "pedicab": 0,
           "pigeons": 0,
@@ -3783,7 +3769,6 @@
           "newspaperBox": 0,
           "parkRangersCart": 0,
           "parkedCar": 0,
-          "patioRail": 0,
           "patrolBuggy": 0,
           "pedicab": 0,
           "pigeons": 3.25,
@@ -3904,7 +3889,6 @@
           "newspaperBox": 0,
           "parkRangersCart": 0,
           "parkedCar": 0,
-          "patioRail": 0,
           "patrolBuggy": 2.5,
           "pedicab": 0,
           "pigeons": 0,
@@ -3977,7 +3961,7 @@
       "speed": 1,
       "weights": {
         "minorObstacles": {
-          "artSculpture": 8.5,
+          "artSculpture": 15,
           "ball": 0,
           "barrelStack": 2.5,
           "beachUmbrella": 0,
@@ -4025,7 +4009,6 @@
           "newspaperBox": 0,
           "parkRangersCart": 0,
           "parkedCar": 0,
-          "patioRail": 6.5,
           "patrolBuggy": 0,
           "pedicab": 5,
           "pigeons": 3,
@@ -4146,7 +4129,6 @@
           "newspaperBox": 11.25,
           "parkRangersCart": 0,
           "parkedCar": 1.25,
-          "patioRail": 0,
           "patrolBuggy": 0,
           "pedicab": 5,
           "pigeons": 2,
