@@ -349,7 +349,7 @@ describe("offerUpgrades", () => {
   it("never offers an upgrade already picked", () => {
     const all = keysOf(UPGRADES);
     const picked = testState({ kilo: 5 }, { upgradesPicked: all.slice(0, 2) });
-    const offer = offerUpgrades(data, () => 0.5, 3, picked);
+    const offer = offerUpgrades(data, () => 0, 3, picked);
     expect(offer).toHaveLength(3);
     expect(offer.filter((id) => id !== null && all.slice(0, 2).includes(id))).toEqual([]);
   });
