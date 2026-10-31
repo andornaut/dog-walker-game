@@ -704,7 +704,7 @@ export type Walker = WalkerUnlock & {
 // as bumpMoney modifiers change it, on top of its hearts: all the cash there is when that is
 // less, and none at $0.
 export interface DebuffDriftMovement {
-  readonly direction: "heading" | "random";
+  readonly direction: "heading" | "random" | "steeringOrRandom";
   readonly interval:
     | { readonly kind: "fixed"; readonly seconds: SecondsKey }
     | { readonly kind: "uniform"; readonly max: SecondsKey; readonly min: SecondsKey };
