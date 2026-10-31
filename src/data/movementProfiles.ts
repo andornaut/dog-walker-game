@@ -16,6 +16,8 @@ export const MOVEMENT_PROFILE_KEYS = [
   "twoMerges",
 ] as const;
 
+// Finish margins use base road-scroll distance. Scale faster profiles by their total
+// down-road factor to retain at least 0.6 seconds after their defining path completes.
 export const MOVEMENT_PROFILES: Readonly<Partial<Record<MovementProfileId, SignatureProfile>>> = {
   cartTurnExit: {
     downSeconds: 0.8,
@@ -48,7 +50,7 @@ export const MOVEMENT_PROFILES: Readonly<Partial<Record<MovementProfileId, Signa
   },
   reflectingRoll: {
     downFactor: 1.15,
-    finishAheadSeconds: 0.6,
+    finishAheadSeconds: 0.69,
     kind: "reflectingDiagonal",
     lanesPerSecond: 2,
     reflections: { max: 2, min: 1 },
@@ -58,7 +60,7 @@ export const MOVEMENT_PROFILES: Readonly<Partial<Record<MovementProfileId, Signa
     arcSeconds: 0.9,
     arcs: { max: 3, min: 2 },
     downFactor: 1.35,
-    finishAheadSeconds: 0.6,
+    finishAheadSeconds: 0.81,
     kind: "alternatingArcs",
     laneStep: 1,
     warningSeconds: 0.6,
@@ -66,7 +68,7 @@ export const MOVEMENT_PROFILES: Readonly<Partial<Record<MovementProfileId, Signa
   twoMerges: {
     count: 2,
     downFactor: 1.6,
-    finishAheadSeconds: 0.6,
+    finishAheadSeconds: 0.96,
     kind: "successiveMerges",
     laneStep: 1,
     mergeSeconds: 0.6,

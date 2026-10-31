@@ -3081,7 +3081,7 @@
     },
     "reflectingRoll": {
       "downFactor": 1.15,
-      "finishAheadSeconds": 0.6,
+      "finishAheadSeconds": 0.69,
       "kind": "reflectingDiagonal",
       "lanesPerSecond": 2,
       "reflections": {
@@ -3097,7 +3097,7 @@
         "min": 2
       },
       "downFactor": 1.35,
-      "finishAheadSeconds": 0.6,
+      "finishAheadSeconds": 0.81,
       "kind": "alternatingArcs",
       "laneStep": 1,
       "warningSeconds": 0.6
@@ -3105,7 +3105,7 @@
     "twoMerges": {
       "count": 2,
       "downFactor": 1.6,
-      "finishAheadSeconds": 0.6,
+      "finishAheadSeconds": 0.96,
       "kind": "successiveMerges",
       "laneStep": 1,
       "mergeSeconds": 0.6,
