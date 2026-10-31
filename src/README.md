@@ -90,6 +90,8 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 - `src/ui/`: the pixel-art UI kit; `phaser/` draws text, panels, the dimmed ramps and the grey copies of disabled art
 - `src/units.ts`: the game's branded units, money and hearts
 
+Shared movement evaluation uses `@andornaut/game-kit/motion`: `progressAt` clamps a segment fraction, `easeProgress` applies linear or sine-in-out easing, and `segmentAt` returns an immutable segment's position. Dog supplies cumulative road scroll as progress. Named movement profiles, seeded planning, cues, lane reservations, collision footprints and route admission remain game-owned; the shared evaluator draws no randomness and advances no clock.
+
 **Boundary:** only `src/main.ts`, `src/scenes/` and the `phaser/` folders may import Phaser or code that does, and only tests may import `src/testing/`. A context listed in `CONTEXTS` (`eslint.config.mjs`) imports only the folders and modules its row lists. No value imports form a cycle (`import-x/no-cycle`); type-only imports are erased, so they may. ESLint enforces all four (the game-kit repository's lint holds the kit to importing nothing from a game), so all game logic runs in unit tests without a renderer.
 
 ### Assets

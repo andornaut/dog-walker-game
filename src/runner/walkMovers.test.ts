@@ -43,7 +43,7 @@ import {
   type MoverStep,
   moverTell,
 } from "./movers";
-import { moverMovement } from "./moverSpecs";
+import { moverMovement, moverSpec } from "./moverSpecs";
 import { itemHeight, startRoad, stepWalk, type Walk, walkScrollSpeed } from "./walk";
 import { blocksLane, footprintOf, isPullObstacle, type WalkItem } from "./walkItems";
 import { planZone } from "./zonePlan";
@@ -176,6 +176,31 @@ describe("movers", { timeout: 120_000 }, () => {
       } else if (movement?.kind === "inLane") {
         expect(movement.factor).toBeGreaterThan(0);
         expect(movement.factor).not.toBe(1);
+      }
+    }
+  });
+
+  it("keeps configured merge and step durations positive throughout their jitter range", () => {
+    for (const kind of OBSTACLE_KINDS) {
+      const movement = movementOf(kind);
+      if (movement === null) {
+        continue;
+      }
+      const { motion, variation } = moverSpec(
+        REAL,
+        plannerStreams(1),
+        footprintOf(REAL, kind),
+        movement,
+      );
+      if (motion.kind === "ride" && motion.merge !== undefined) {
+        expect(Number.isFinite(motion.merge.seconds), kind).toBe(true);
+        expect(motion.merge.seconds, kind).toBeGreaterThan(0);
+      }
+      if (motion.kind === "steps" || motion.kind === "approach") {
+        expect(Number.isFinite(motion.stepSeconds), kind).toBe(true);
+        expect(motion.stepSeconds, kind).toBeGreaterThan(0);
+        expect(variation.lengthShare, kind).toBeGreaterThanOrEqual(0);
+        expect(variation.lengthShare, kind).toBeLessThan(1);
       }
     }
   });

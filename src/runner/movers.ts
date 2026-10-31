@@ -1,4 +1,4 @@
-import { clamp01 } from "@andornaut/game-kit/numbers";
+import { progressAt, segmentAt } from "@andornaut/game-kit/motion";
 
 import type { MovementKind } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
@@ -111,7 +111,7 @@ interface RideMerge {
 // and all of it after.
 function mergedLanes(path: Extract<MoverPath, { motion: "ride" }>, since: number): number {
   const { merge } = path;
-  return merge === undefined ? 0 : merge.lanes * clamp01((since - merge.at) / merge.length);
+  return merge === undefined ? 0 : merge.lanes * progressAt(merge.at, merge.length, since);
 }
 
 // Whether a rider is moving across into its merge lane, since scroll after its cue appeared.
@@ -325,11 +325,6 @@ export function takeMove<
   return { ...path, pending: path.pending.slice(1), steps: [...path.steps, step] };
 }
 
-// How far through a step a mover is, from 0 before it to 1 after it.
-function stepDone(step: MoverStep, since: number): number {
-  return clamp01((since - step.at) / step.length);
-}
-
 export function moverPlace(laneCount: number, path: MoverPath, since: number): MoverPlace {
   const moved = since - path.warning;
   if (path.motion === "ride") {
@@ -343,9 +338,18 @@ export function moverPlace(laneCount: number, path: MoverPath, since: number): M
     let lanePosition = path.lane;
     let travel = since;
     for (const step of path.steps) {
-      const done = stepDone(step, since);
-      lanePosition += step.lanes * done;
-      travel += step.travel * done;
+      const offset = segmentAt(
+        {
+          duration: step.length,
+          easing: "linear",
+          from: { x: 0, y: 0 },
+          start: step.at,
+          to: { x: step.lanes, y: step.travel },
+        },
+        since,
+      );
+      lanePosition += offset.x;
+      travel += offset.y;
     }
     return { lanePosition, solid: true, travel };
   }
