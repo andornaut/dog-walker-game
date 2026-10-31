@@ -96,7 +96,7 @@ card-porch-cat-stand        Archie standing firm on his leash while the cat swip
                             nose, plum-rimmed white claw slashes and a red scratch on his cheek
 card-porch-cat-treat        the cat lounging over a treat under rising hearts, Archie sitting
                             calm beside it
-card-porch-cat-bolt         Archie pulling hard past the lounging cat, speed lines behind it
+card-porch-cat-bolt         Archie splashing through a muddy puddle past the lounging cat
 card-escaped-capybara-help  the zookeeper in an olive shirt and a bush hat leading the capybara
                             off on a rope, a heart over the capybara
 card-escaped-capybara-call-zoo a phone ringing in a callout over the capybara, chewing on the
@@ -1093,15 +1093,26 @@ def porch_cat_treat():
 
 
 def porch_cat_bolt():
-    """Bolt past: Archie pulls hard past the lounging cat, speed lines behind him, the leash taut."""
+    """Splash past: Archie splashes through a muddy puddle beside the lounging calico."""
+    from PIL import ImageDraw
+
     a = cards.Art()
     a.ground(CABBAGETOWN)
-    a.put("porch-cat", "idle", 22, 34)
-    c = a.dog("archie", "pull", 50, 58)
-    a.lead(48, c, 34, 2)
-    speed_lines(a, ((24, 42, 8), (20, 47, 10), (26, 52, 6)))
+    a.put("porch-cat", "idle", 19, 33)
+    d = ImageDraw.Draw(a.img)
+    d.ellipse((29, 39, 73, 55), fill=sn.rgb("dbrown"))
+    d.ellipse((31, 40, 71, 52), fill=sn.rgb("brown"))
+    d.arc((31, 40, 70, 52), 190, 345, fill=sn.rgb("tan"), width=2)
+    c = a.dog("archie", "walk", 51, 57, 1)
+    a.lead(51, c, 38)
+    # Brown jets rising from the pawfall, with a lit edge for the grey paving.
+    for pts in [((34, 49), (28, 42), (29, 36), (33, 40), (36, 46)),
+                ((62, 48), (66, 40), (71, 36), (70, 43), (66, 49))]:
+        d.polygon(pts, fill=sn.rgb("dbrown"))
+        d.line(pts[:3], fill=sn.rgb("tan"), width=2)
+    for box in ((23, 32, 26, 35), (68, 28, 71, 32)):
+        d.ellipse(box, fill=sn.rgb("dbrown"))
     return a
-
 
 def escaped_capybara_help():
     """Help the keeper: the zookeeper in khaki and a bush hat leads the capybara off on a rope, a heart over

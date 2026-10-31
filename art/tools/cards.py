@@ -335,6 +335,30 @@ def other_dog_pull_away():
     return a
 
 
+def broken_heart(a, x, y):
+    rows = [".rrr....rrr.", "rrrrr..rrrrr", "rrrrr..rrrrr", "rrrr...rrrrr",
+            ".rrrr...rrr.", "..rrrr..rr..", "...rr..rr...", "....r..r...."]
+    g = Grid(14, 10)
+    for yy, row in enumerate(rows):
+        for xx, c in enumerate(row):
+            if c == "r":
+                g.p(xx + 1, yy + 1, "red")
+    g.rect(2, 2, 2, 2, "pink")
+    a.paste(to_image(g.outlined("plum")), x, y)
+
+
+def other_dog_keep_moving():
+    """Archie continues on his leash past the waiting corgi under a broken heart."""
+    a = Art()
+    a.ground("highPark")
+    a.fill(0, 0, AW, AH, "tan")
+    a.put("other-dog", "idle", 55, 42)
+    c = a.dog("archie", "walk", 23, 59, 2)
+    a.lead(23, c, 11)
+    broken_heart(a, 6, 3)
+    return a
+
+
 def tip_pouch(far=False):
     """road.py's tip pouch, outlined: road.TIP_POUCH held close, road.FAR_POUCH in a distant hand."""
     return pixmap(road.FAR_POUCH if far else road.TIP_POUCH, road.POUCH_INK)
@@ -1182,6 +1206,7 @@ ILLUSTRATIONS = {
     "card-skunk-ignore": skunk_ignore,
     "card-other-dog-sniff": other_dog_sniff,
     "card-other-dog-pull-away": other_dog_pull_away,
+    "card-other-dog-keep-moving": other_dog_keep_moving,
     "card-thief-let-go": thief_let_go,
     "card-thief-grab-back": thief_grab_back,
     "card-thief-give-chase": thief_give_chase,

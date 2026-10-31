@@ -283,6 +283,8 @@ Placed by the style guide's Roadside table (`shared/roadside.json`): the lawn pr
 
 Card keys use the data keys (`card-skunk-rinse`, `card-belly-rubs`). The neighbour opens no card: `card-friendly-neighbour-take`, her patting a pack dog on the head under rising hearts, is its popup art. Both lucky popups (`card-lost-wallet-keep` too) are cut out on transparency, with no background.
 
+`card-other-dog-keep-moving` shows Archie passing the waiting corgi under a broken heart. `card-porch-cat-bolt` shows Splash past: Archie crossing a muddy puddle beside the lounging cat. Both are 75×56.
+
 ## Screens and home
 
 | Key                                           | Type   | Size                               | Tags                         | Note                                                                                                                                                                                                                               |
