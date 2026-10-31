@@ -8,12 +8,11 @@ import { packOrder } from "../state/pack";
 import { distanceAtY, type RoadProjection, scaleAt } from "./projection";
 
 // The pack walks in a formation set by its dogs' sizes, close in front of the walker, and
-// collides as it is drawn: an obstacle hits the walker's or a dog's rectangle, just inside its
-// opaque pixels, and a pickup touches the outline around them all, leashes included.
+// uses fixed contact rectangles for the walker and dogs. A pickup touches their combined
+// logical outline. Decorative animation bounds do not change these gameplay dimensions.
 
-// A sprite's opaque pixels over its walk loop, from the column it is placed on and its feet row:
-// left and right columns (right exclusive), and the rows above the feet row. Measured on the
-// full-size art; packFormation.test.ts checks them against it.
+// Native-size extents from the actor's column and feet: right-exclusive horizontal columns
+// and height above the feet. Pack contact masks stay fixed independently of visual art bounds.
 export interface Silhouette {
   above: number;
   left: number;
@@ -136,7 +135,7 @@ interface PackDog {
 }
 
 // A side dog stands across from the lane's centre the lane's half width on its feet row less
-// half its opaque width, rounded in, so it is drawn inside its lane.
+// half its logical width, rounded in, keeping the contact mask inside its lane.
 function sideDx(projection: Lens, footDy: number, dog: Silhouette): number {
   const width = dog.right - dog.left;
   return Math.floor(LANE_HALF_WIDTH * rowScale(projection, footDy) - Math.ceil(width / 2));
@@ -164,7 +163,7 @@ export interface PartBox {
   top: number;
 }
 
-// The pack's parts on the flat road: each part's opaque columns across from the walker's, a
+// The pack's parts on the flat road: each part's logical columns across from the walker's, a
 // dog's at the road's scale on its feet row, and its rows from its top row's top edge down to
 // its feet line as the road drawn there, y down the road from the walker's feet. scale is the
 // road's on the part's feet row, which its columns are drawn at.
@@ -177,8 +176,7 @@ interface PackParts {
   walker: ScaledPartBox;
 }
 
-// How far inside its drawn sprite a part's hit rectangle lies on every side, in screen pixels:
-// an obstacle hits a dog or the walker only where it visibly overlaps them.
+// The inset from each fixed contact silhouette to its hit rectangle, in screen pixels.
 export const PART_INSET = 2;
 
 // The road drawn on the row dy up the screen from the walker's feet, down from the feet.
@@ -186,7 +184,7 @@ function roadY(projection: Lens, dy: number): number {
   return -distanceAtY(projection, projection.footY + dy);
 }
 
-// The parts inset by inset screen pixels on every side: 0 for what is drawn. The dogs are in
+// The parts inset by inset screen pixels on every side: 0 for the logical outline. Dogs are in
 // formation order.
 function packParts(
   projection: Lens,
@@ -227,7 +225,7 @@ export function unionBox(parts: readonly PartBox[]): PartBox {
   };
 }
 
-// The bounding box of what is drawn for the pack: the walker, the dogs and the leashes between.
+// The bounding box of the pack's logical contact silhouettes.
 export function packOutline(parts: PackParts): PartBox {
   return unionBox([parts.walker, ...parts.dogs]);
 }

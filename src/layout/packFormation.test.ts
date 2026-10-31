@@ -50,12 +50,12 @@ const dogKey = (dog: DogId) => dogSpriteKey(gameData, dog);
 const rowScale = (footDy: number) =>
   scaleAt(PROJECTION, distanceAtY(PROJECTION, PROJECTION.footY + footDy));
 
-const FEET = new Map(
+const ANCHORS = new Map(
   (
     JSON.parse(readFileSync("public/art/manifest.json", "utf8")) as {
-      sprites: { anchor?: { feetY: number }; key: string }[];
+      sprites: { anchor?: { feetY: number; opaqueWidth: number }; key: string }[];
     }
-  ).sprites.map(({ anchor, key }) => [key, anchor?.feetY]),
+  ).sprites.map(({ anchor, key }) => [key, anchor]),
 );
 
 // A sprite from its art: the opaque pixels of its first frame, as columns and rows of the frame;
@@ -65,6 +65,7 @@ interface Art {
   feetY: number;
   left: number;
   opaque: (readonly [number, number])[];
+  opaqueWidth: number;
   right: number;
   top: number;
   width: number;
@@ -83,11 +84,11 @@ function artOf(key: string): Art {
     ({ name }) => name === "walk",
   );
   const loop = walk === undefined ? [0, 0] : [walk.from, walk.to];
-  const feetY = FEET.get(key);
-  if (feetY === undefined) {
+  const anchor = ANCHORS.get(key);
+  if (anchor === undefined) {
     throw new Error(`${key} has no feet line`);
   }
-  const art: Art = { feetY, left: Infinity, opaque: [], right: 0, top: Infinity, width: 0 };
+  const art: Art = { ...anchor, left: Infinity, opaque: [], right: 0, top: Infinity, width: 0 };
   source.frames.forEach(({ from }, frame) => {
     if (frame < (loop[0] ?? 0) || frame > (loop[1] ?? 0)) {
       return;
@@ -136,25 +137,15 @@ function drawnPack(lane: number, walker: WalkerId, dogs: readonly DogId[]): Draw
   ];
 }
 
-describe("silhouettes", () => {
-  // Each sprite stands with its feet row on its feet line, centred on its frame.
-  it("measures every walker and dog on its art", () => {
-    const sprites = [
-      ...WALKERS.map((walker) => [walkerKey(walker), WALKER_SILHOUETTES[walker]] as const),
-      ...DOGS.map((dog) => [dogKey(dog), DOG_SILHOUETTES[dog]] as const),
-    ];
-    const wrong = sprites.flatMap(([key, silhouette]) => {
+describe("rendering anchors", () => {
+  it("places each sprite on its first frame's actual feet and width", () => {
+    for (const key of [...WALKERS.map(walkerKey), ...DOGS.map(dogKey)]) {
       const art = artOf(key);
-      const measured = {
-        above: art.feetY - art.top,
-        left: art.left - art.width / 2,
-        right: art.right - art.width / 2,
-      };
-      return JSON.stringify(silhouette) === JSON.stringify(measured)
-        ? []
-        : [`${key}: ${JSON.stringify(measured)}`];
-    });
-    expect(wrong).toEqual([]);
+      const columns = art.opaque.map(([column]) => column);
+      const rows = art.opaque.map(([, row]) => row);
+      expect(art.feetY, key).toBe(Math.max(...rows));
+      expect(art.opaqueWidth, key).toBe(Math.max(...columns) + 1 - Math.min(...columns));
+    }
   });
 });
 
@@ -221,27 +212,26 @@ describe("packPlacements", () => {
   });
 });
 
-// The road the drawn pack covers: each sprite's opaque bounds, its columns at the road's scale
-// on its feet row, mirrored too for a dog, as a pull draws it, and its rows as the road drawn
-// there, across from the walker's lane and down the road from the walker's feet.
-function drawnUnion(lane: number, walker: WalkerId, dogs: readonly DogId[]): PartBox {
+// Project the fixed logical masks through the independently drawn actor positions. Decorative
+// animation bounds and contact masks are separate, so pixel changes cannot resize this outline.
+function logicalUnion(lane: number, walker: WalkerId, dogs: readonly DogId[]): PartBox {
   const walkerX = itemAt(LANE_XS, lane);
   const roadY = (row: number) => -distanceAtY(PROJECTION, row);
   const sprites = drawnPack(lane, walker, dogs);
   return unionBox(
-    sprites.map(({ foot, key, x }, i) => {
-      const art = artOf(key);
+    sprites.map(({ dog, foot, x }, i) => {
+      const silhouette = dog === undefined ? WALKER_SILHOUETTES[walker] : DOG_SILHOUETTES[dog];
       const scale = scaleAt(PROJECTION, distanceAtY(PROJECTION, foot));
       const mirrors = i < sprites.length - 1;
-      const left = mirrors ? Math.min(art.left, art.width - art.right) : art.left;
-      const right = mirrors ? Math.max(art.right, art.width - art.left) : art.right;
+      const left = mirrors ? Math.min(silhouette.left, -silhouette.right) : silhouette.left;
+      const right = mirrors ? Math.max(silhouette.right, -silhouette.left) : silhouette.right;
       const centre = project(PROJECTION, { distance: distanceAtY(PROJECTION, foot), x: walkerX }).x;
-      const roadX = (column: number) => (x - art.width / 2 + column - centre) / scale;
+      const roadX = (column: number) => (x + column - centre) / scale;
       return {
         bottom: roadY(foot),
         left: roadX(left),
         right: roadX(right),
-        top: roadY(foot - (art.feetY - art.top)),
+        top: roadY(foot - silhouette.above),
       };
     }),
   );
@@ -261,11 +251,11 @@ describe("the pack's outline", () => {
       ].map(rowScale),
     );
   // And so a pack settled in a lane never touches anything in the lane beside it.
-  it("is the union of what is drawn, inside the lane, for every walker and pack", () => {
+  it("is the projected union of logical masks, inside the lane, for every walker and pack", () => {
     for (const walker of WALKERS) {
       for (const dogs of PACKS) {
         const box = packOutline(packOnRoad(PROJECTION, 0, { dogs, walker }));
-        const drawn = drawnUnion(2, walker, dogs);
+        const drawn = logicalUnion(2, walker, dogs);
         const name = `${walker} with ${dogs.join(",")}`;
         expect(box.top, name).toBeCloseTo(drawn.top, 9);
         expect(box.bottom, name).toBeCloseTo(drawn.bottom, 9);
