@@ -211,7 +211,9 @@ describe("signature admission", () => {
         riderFollowGap: 50,
         stepSeconds: 1 / 60,
       };
-      expect(planSpawns(plannerStreams(1), plan).events).toEqual([]);
+      expect(() => planSpawns(plannerStreams(1), plan)).toThrow(
+        /no legal complete signature variant/,
+      );
     }
   });
 });

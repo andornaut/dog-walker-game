@@ -1,5 +1,6 @@
 import type { MovementKind } from "../data/types";
 import type { MoverSpec } from "./moverPlanning";
+import { minimumSignatureOnScreen } from "./signatureCapacity";
 import type { SpawnPlan } from "./spawning";
 import { rowsWithin } from "./stretches";
 
@@ -50,15 +51,15 @@ export interface AdmissionReport<Kind extends string> {
   readonly substitutions: readonly { readonly from: Kind; readonly to: Kind }[];
 }
 
-// Every admissible placement keeps its cue on screen for its warning. Riders then traverse the
-// road, at no more than their greatest varied speed. Other standing movers traverse at road
-// speed, with their spread only lengthening the interval. These deliberately ignore extra cues,
-// moves and tails, so they remain lower bounds for every retry variant.
+// Signatures use the shortest complete legal variant. Crossers keep their cue on screen for
+// their warning. Riders then traverse at no more than their greatest varied speed. Other standing
+// movers traverse at road speed, with their spread only lengthening the interval. The ordinary
+// mover bounds deliberately omit extra moves and cues, so they hold for every retry variant.
 function minimumOnScreen(plan: SpawnPlan<string>, spec: MoverSpec): number {
   const height = spec.footprint.rows * plan.cellLength;
   switch (spec.motion.kind) {
     case "signature":
-      return spec.motion.profile.warningSeconds * plan.scrollSpeed;
+      return minimumSignatureOnScreen(plan, spec);
     case "cross":
       return spec.warningSeconds * plan.scrollSpeed;
     case "ride":
@@ -79,8 +80,34 @@ export function validateSpawnCapacity(plan: SpawnPlan<string>, rows: number): Sp
       throw new RangeError(`Spawn quota ${kind} count must be a nonnegative safe integer`);
     }
   }
+  const minima = new Map<MoverSpec, number>();
+  const screenMinimum = (spec: MoverSpec) => {
+    let minimum = minima.get(spec);
+    if (minimum === undefined) {
+      minimum = minimumOnScreen(plan, spec);
+      minima.set(spec, minimum);
+    }
+    return minimum;
+  };
+  const signatureLimits: CapacityLimit[] = [];
+  for (const { count, kind, mover } of plan.quotas) {
+    if (count > 0 && mover?.motion.kind === "signature") {
+      const minimum = screenMinimum(mover);
+      if (minimum === Infinity) {
+        throw new RangeError(
+          `Impossible spawn quota: ${kind} has no legal complete signature variant`,
+        );
+      }
+      signatureLimits.push({
+        available: plan.zoneLength,
+        required: minimum,
+        resource: `${kind} signature screen span`,
+      });
+    }
+  }
   const standing = plan.quotas.filter((quota) => quota.mover === undefined);
   const limits: CapacityLimit[] = [
+    ...signatureLimits,
     {
       available: rows * plan.laneCount,
       required: standing.reduce((sum, quota) => sum + quota.count, 0),
@@ -109,6 +136,7 @@ export function validateSpawnCapacity(plan: SpawnPlan<string>, rows: number): Sp
     const spec = quota.mover;
     // A first ordinary mover may stand instead, and a herring takes no screen capacity.
     if (
+      quota.count === 0 ||
       spec === undefined ||
       !quota.blocksLane ||
       (quota.first === true && spec.motion.kind !== "signature") ||
@@ -116,16 +144,17 @@ export function validateSpawnCapacity(plan: SpawnPlan<string>, rows: number): Sp
     ) {
       return [];
     }
-    return [{ count: quota.count, minimum: minimumOnScreen(plan, spec), spec }];
+    return [{ count: quota.count, minimum: screenMinimum(spec), spec }];
   });
   const blocking = plan.quotas.filter(
     (quota) =>
+      quota.count > 0 &&
       quota.blocksLane &&
       !(quota.mover?.motion.kind === "cross" && (quota.mover.motion.herring?.share ?? 0) > 0),
   );
   const minimum = blocking.reduce(
     (smallest, quota) =>
-      quota.mover === undefined ? smallest : Math.min(smallest, minimumOnScreen(plan, quota.mover)),
+      quota.mover === undefined ? smallest : Math.min(smallest, screenMinimum(quota.mover)),
     Infinity,
   );
   // A blocking group is either standing in distinct cells or moving under the shared screen

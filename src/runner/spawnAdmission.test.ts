@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { MOVEMENT_PROFILES } from "../data/movementProfiles";
 import { plannerStreams } from "../testing/movers";
 import { type MoverSpec, placeMovers } from "./moverPlanning";
+import { minimumSignatureOnScreen } from "./signatureCapacity";
 import { validateSpawnCapacity } from "./spawnAdmission";
 import type { SpawnPlan } from "./spawning";
 import { planSpawns } from "./zonePlanner";
@@ -76,6 +78,67 @@ describe("spawn admission", () => {
         9,
       ),
     ).toThrow(/count must be/);
+  });
+
+  it("bounds duckling groups by the held cue, final follower and slow tail", () => {
+    const profile = MOVEMENT_PROFILES.ducklingTrail;
+    if (profile?.kind !== "delayedTrail") {
+      throw new Error("Missing duckling trail profile");
+    }
+    const spec: MoverSpec = {
+      ...rider,
+      motion: { kind: "signature", profile },
+      variation: { ...rider.variation, delaySeconds: 20 },
+    };
+    const minimum = minimumSignatureOnScreen(plan, spec);
+    expect(minimum).toBeCloseTo(
+      profile.warningSeconds * plan.scrollSpeed +
+        Math.max(...profile.followerDelays) * plan.scrollSpeed +
+        plan.roadLength / profile.downFactor,
+    );
+    expect(() =>
+      validateSpawnCapacity(
+        {
+          ...plan,
+          quotas: [{ blocksLane: true, count: 1000, kind: "ducklings", mover: spec }],
+          zoneLength: 29600,
+        },
+        100,
+      ),
+    ).toThrow(/mover screen distance/);
+    expect(
+      minimumSignatureOnScreen(plan, {
+        ...spec,
+        variation: { ...spec.variation, delaySeconds: 0 },
+      }),
+    ).toBe(minimum);
+  });
+
+  it("bounds a reflection count domain by geometry before compiling routes", () => {
+    const profile = MOVEMENT_PROFILES.reflectingRoll;
+    if (profile?.kind !== "reflectingDiagonal") {
+      throw new Error("Missing reflecting profile");
+    }
+    const spec: MoverSpec = {
+      ...rider,
+      motion: {
+        kind: "signature",
+        profile: { ...profile, reflections: { max: Number.MAX_SAFE_INTEGER, min: 1 } },
+      },
+    };
+    expect(Number.isFinite(minimumSignatureOnScreen(plan, spec))).toBe(true);
+    expect(
+      minimumSignatureOnScreen(plan, {
+        ...spec,
+        motion: {
+          kind: "signature",
+          profile: {
+            ...profile,
+            reflections: { max: Number.MAX_SAFE_INTEGER, min: Number.MAX_SAFE_INTEGER },
+          },
+        },
+      }),
+    ).toBe(Infinity);
   });
 
   it("reports seeded search failure separately from passing necessary bounds", () => {
