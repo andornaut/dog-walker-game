@@ -27,7 +27,7 @@ rollerblader        48x72   minor rider, 1 lane, coming down its lane at the pac
                             hair, on white inline skates with yellow wheels. ride (4 frames, 100ms): a
                             skating stride, each foot pushing out to its side in turn, lifted 1px, the
                             body swaying 1px toward the gliding foot, the wheels' tread rolling 1px a frame
-volleyball-net-2    112x42  minor, 2 lanes, drawn 42 rows tall: a beach volleyball net in front
+volleyball-net-3    176x42  minor, 3 lanes, drawn 42 rows tall: a beach volleyball net in front
                             elevation, strung between white posts out by the frame's edges, a white top band
                             edged azure over coal mesh with clear holes 3px across, white bands down its ends
                             and along its foot, a red and white striped antenna over each end, a rippled
@@ -35,7 +35,6 @@ volleyball-net-2    112x42  minor, 2 lanes, drawn 42 rows tall: a beach volleyba
                             (left out at @69 and smaller, where it would be a square chip). idle (4 frames,
                             450ms): on frame 2 a breeze lifts the net's foot 1px in the middle and bends the
                             antenna tips out 1px
-volleyball-net-3    176x42  minor, 3 lanes, drawn 42 rows tall: the same net, a lane wider
 
 Yonge Street:
 big-screen-promo    48x72   card obstacle (Big screen promo): a street team promoter in a turquoise
@@ -1131,8 +1130,7 @@ def sprites():
                                       ("newspaper-box", newspaper_box, NEWS_IDLE)):
             yield f"{key}{suffix}", [("idle", [small(me, o, draw, a).outlined() for a in args], ms)]
         args, ms = NET_IDLE
-        for lanes in (2, 3):
-            yield f"volleyball-net-{lanes}{suffix}", [("idle", [net(o, lanes, a) for a in args], ms)]
+        yield f"volleyball-net-3{suffix}", [("idle", [net(o, 3, a) for a in args], ms)]
         args, ms = PLATFORM_IDLE
         yield f"streetcar-platform{suffix}", [("idle", [platform(o, a) for a in args], ms)]
         args, ms = BUS_IDLE

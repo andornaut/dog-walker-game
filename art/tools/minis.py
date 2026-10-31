@@ -15,7 +15,7 @@ grow taller.
 
 <key>@<step> keeps the original's tags, frame counts and durations, and its
 frame is floor(original size x scale + 0.5). At every step: tip, treat,
-lost-wallet, cone, trash-can, bench, skunk, squirrel, other-dog,
+lost-wallet, trash-can, bench, skunk, squirrel, other-dog,
 skunk-cloud (no outline) and dog-<name> for every dog; a dog's design grid is
 drawn at dogs.road_scale(name) times the step, so a 48px dog's frame is 45x45 at @94, 42x42 at @88
 and so on down to 24x24 at @50.
@@ -295,12 +295,6 @@ def wallet(s, glint):
     return small(road, s, road.wallet, glint)
 
 
-def cone(s, glint=None):
-    """obstacles.cone on a Mini at scale s; it cuts its reflective bands at the drawn size. glint is the
-    idle's highlight row, as in obstacles.CONE_IDLE."""
-    return small(obstacles, s, obstacles.cone, glint)
-
-
 def shrunk(s, draw, **q):
     """road's draw(**q) on a Mini at scale s, its offsets snapped to whole pixels as snap() has them."""
     return small(road, s, draw, **snap(q, s))
@@ -366,8 +360,6 @@ def variants(s):
     p, o = road.SCALE * s, obstacles.SCALE * s
     yield "tip", [("idle", [small(road, p, road.tip, rx).outlined() for rx in (5.5, 3.5, 1, 3.5)], 120)]
     yield "treat", [("idle", [shrunk(p, road.treat, **q).outlined() for q in road.TREAT_IDLE], 400)]
-    frames, ms = obstacles.CONE_IDLE
-    yield "cone", [("idle", [cone(o, gl).outlined() for gl in frames], ms)]
     frames, ms = obstacles.TRASH_CAN_IDLE
     yield "trash-can", [("idle", [small(obstacles, o, obstacles.trash_can, a).outlined() for a in frames], ms)]
     frames, ms = obstacles.BENCH_IDLE

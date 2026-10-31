@@ -216,7 +216,7 @@ One word per moment, 2 to 7 letters, readable at 1×, built like the yard sign's
   - `porch-cat` is a white calico, unlike the tuxedo `chase-cat` and the ginger `ambient-cat`.
   - `produce-crates` has no awning or posts, unlike `roadside-fruit-stand`.
   - `ttc-bus` has a white upper body, a roof pod and tires and no pantograph, unlike `streetcar`.
-  - `volleyball-net-2` and `volleyball-net-3` are open coal mesh under a white top band between white posts, red and white antennas over the ends and sand underneath.
+  - `volleyball-net-3` is open coal mesh under a white top band between white posts, red and white antennas over the ends and sand underneath.
 - `tourist` and `couple` step facing the player like `mail-carrier`; `delivery-cyclist` faces the player like `cyclist`, told apart from it and `kid-on-a-bike` by its turquoise box; its `merge` leans the bike and box right about the handlebar, the tire swinging out left and the head upright. `segway-tour-rider` faces the player like `cyclist` but stands upright between two tires, told apart from `minor-scooter`'s white helmet by its hi-vis yellow vest and the orange pennant on a whip pole over its shoulder. A busker's case holds sheet music and a sign, never coins, which read as pickups.
 - `sign-spinner` and `hopscotch-kid` hop a lane at a time facing the player, drawn hopping right and mirrored for left. `hopscotch-kid` is drawn shorter than the adults, as `dropped-ice-cream`'s kid is, and told apart from that kid and `kid-on-a-bike` by its pink striped top, azure skirt and auburn ponytail.
 - `stilt-walker` steps facing the player like `couple`, drawn 48×96 so it stands a head and a half over every adult mover; its striped trousers run down over the stilts to the shoes, so no stilt shows.

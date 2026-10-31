@@ -8,7 +8,6 @@ a front elevation (or a car from straight behind), squat, with at most a sliver
 of top surface and never its length along the road. The game scales each one
 by distance with its base on the road line.
 
-cone                48x48   1 lane, a glint runs down its highlight
 trash-can           48x48   1 lane, the lid's handle rattles up 1px
 bench               112x36  2 lanes, backrest and seat edge on short legs; a leaf on the seat stirs
 hedge               176x42  3 lanes, a hedge with a rounded, clumped top, its clumps larger and alternately
@@ -114,30 +113,6 @@ def pixel_edge(g):
     """The pixel edge of a full-size coordinate on the grid holding g's pixels."""
     s = scale_of(g)
     return lambda v: math.floor(v * s + 0.5)
-
-
-def cone(glint=None):
-    """glint is the row of the highlight that flashes white, or None. The two reflective bands are cut
-    into the drawn cone, so a depth variant keeps both whole at its own size."""
-    g = edged(Grid(SIZE, SIZE))
-    # squat: a wide base plate, grey, not dslate, which is the Distillery District's road colour
-    g.rect(9, 31, 22, 5, "grey")
-    g.rect(9, 31, 22, 1, "lgrey")
-    g.tri((11, 32.5), (29, 32.5), (20, 7.5), "orange")
-    g.tri((20, 32.5), (29, 32.5), (20, 7.5), "rust")
-    px, edge = raster(g), pixel_edge(g)
-    mid = edge(20)
-    cone_px = (K["orange"], K["rust"])
-    for top in (15, 24):
-        for y in range(edge(top), max(edge(top) + 1, edge(top + 4))):
-            for x in range(px.w):
-                if px.px[y][x] in cone_px:
-                    px.p(x, y, "white" if x < mid else "lgrey")
-    # the highlight runs just left of the centre line
-    px.rect(mid - 1, edge(9), 1, edge(14) - edge(9), "amber")
-    if glint is not None:
-        px.p(mid - 1, edge(glint), "white")
-    return g
 
 
 def trash_can(lift=0):
@@ -300,7 +275,6 @@ def treads(g, x, y, w, h, f, u=1, back=False):
 
 # Idle frames, one drawing argument each, and their duration in ms. Most hold the rest pose for
 # two frames so the motion comes as a short event rather than a constant flicker.
-CONE_IDLE = (None, None, 9, 11), 400
 TRASH_CAN_IDLE = (0, 0, -1, 0), 400
 BENCH_IDLE = ((0, 0), (0, 0), (1, -1), (0, 0)), 450
 HEDGE_IDLE = ((), (5,), (10,), (1,)), 350
@@ -901,7 +875,6 @@ def sprites():
         args, ms = spec
         return [("idle", [drawn(s, draw, a).outlined() for a in args], ms)]
 
-    yield "cone", idle(cone, CONE_IDLE)
     yield "trash-can", idle(trash_can, TRASH_CAN_IDLE)
     yield "bench", idle(bench, BENCH_IDLE)
     yield "hedge", idle(lambda r: hedge(rustle=r), HEDGE_IDLE)
