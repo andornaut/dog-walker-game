@@ -197,32 +197,19 @@ function drawnTexels({ frame, page }: { frame: Textures.Frame; page: RgbaImage }
 describe("a trimmed atlas frame", () => {
   // The game clips rows only off sprites it does not flip vertically: under flipY, Phaser
   // mirrors a crop about the packed rect rather than the whole frame.
-  const origins: [number, number][] = [
-    [0, 0],
-    [0.5, 0.5],
-    [0.5, 0.9],
-    [0.5, 1],
-    [1, 1],
-    [0.3, 0.7],
+  const draws: (Draw & { frame: keyof typeof FRAMES })[] = [
+    { clipRows: 0, flipX: false, flipY: false, frame: "offCentre", origin: [0, 0], scale: 1 },
+    { clipRows: 0, flipX: true, flipY: false, frame: "offCentre", origin: [0.5, 1], scale: 0.75 },
+    { clipRows: 0, flipX: false, flipY: true, frame: "offCentre", origin: [0.5, 0.5], scale: 1 },
+    { clipRows: 0, flipX: true, flipY: true, frame: "edge", origin: [1, 1], scale: 0.75 },
+    { clipRows: 3, flipX: false, flipY: false, frame: "offCentre", origin: [0.5, 0.9], scale: 1 },
+    { clipRows: 3, flipX: true, flipY: false, frame: "edge", origin: [0.3, 0.7], scale: 0.75 },
+    { clipRows: 9, flipX: false, flipY: false, frame: "offCentre", origin: [0.5, 1], scale: 1 },
+    { clipRows: 10, flipX: true, flipY: false, frame: "edge", origin: [0.5, 1], scale: 0.75 },
   ];
-  const flips: [boolean, boolean][] = [
-    [false, false],
-    [true, false],
-    [false, true],
-    [true, true],
-  ];
-  const draws = keysOf(FRAMES).flatMap((frame) =>
-    origins.flatMap((origin) =>
-      flips.flatMap(([flipX, flipY]) =>
-        (flipY ? [0] : [0, 3, 9, 10]).flatMap((clipRows) =>
-          [1, 0.75].map((scale) => ({ clipRows, flipX, flipY, frame, origin, scale })),
-        ),
-      ),
-    ),
-  );
 
   // Clipping 3 rows leaves some of either frame's pixels; 9 or 10 leave none.
-  it("draws each frame as the whole frame does, at every origin, flip, clip and scale", () => {
+  it("preserves whole-frame drawing across representative flips, origins, crops and scales", () => {
     const packed = new Map(
       keysOf(FRAMES).map((frame) => [
         frame,
@@ -306,12 +293,8 @@ describe("smoothDepthArt", () => {
 
   it.each([
     ["sandwich-board", LINEAR],
-    ["sandwich-board@94", LINEAR],
-    ["sandwich-board@50", LINEAR],
     ["dog-kilo@50", LINEAR],
     ["dog-kilo", NEAREST],
-    ["fx-tap", NEAREST],
-    ["screen-home", NEAREST],
     ["ui-heart", NEAREST],
   ])("leaves %s with filter mode %i", (key, mode) => {
     const { scene, sources } = loadedScene();

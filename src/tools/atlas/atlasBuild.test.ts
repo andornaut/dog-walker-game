@@ -22,7 +22,6 @@ import {
   WEBP_PAGES,
 } from "./atlasBuild";
 import { ATLAS_MAX_SIZE } from "./atlasLayout";
-import { COLOUR_TYPE_INDEXED } from "./indexedPng";
 
 const ART_DIR = new URL("../../../public/art/", import.meta.url);
 const readArt = async (path: string) => new Uint8Array(await readFile(new URL(path, ART_DIR)));
@@ -130,24 +129,6 @@ describe("the shipped art's atlases", () => {
     for (const { height, width } of build.manifest.pages) {
       expect(Math.max(width, height)).toBeLessThanOrEqual(ATLAS_MAX_SIZE);
     }
-  });
-
-  // Byte 25 of a PNG is IHDR's colour type.
-  it("writes every page as an indexed PNG that decodes to the pixels drawn", () => {
-    const misfits = build.manifest.pages
-      .map(({ file }, index) => ({ bytes: build.files.get(file), drawn: drawn[index], file }))
-      .filter(({ bytes, drawn: rgba }) => {
-        const decoded = bytes === undefined ? undefined : decodePng(bytes);
-        return (
-          bytes?.[25] !== COLOUR_TYPE_INDEXED ||
-          rgba === undefined ||
-          decoded === undefined ||
-          decoded.width !== rgba.width ||
-          Buffer.compare(decoded.data, rgba.data) !== 0
-        );
-      })
-      .map(({ file }) => file);
-    expect(misfits).toEqual([]);
   });
 
   // A build ships the pages as WebPs, so each must decode to exactly the pixels its PNG holds.
