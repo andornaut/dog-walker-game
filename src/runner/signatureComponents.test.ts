@@ -38,6 +38,7 @@ describe("signature components", () => {
     const result = stepWalk(data, geometry, () => 0.99, 0, walkWith(["kilo"], [shown]));
     expect(result.bumps).toEqual([]);
     expect(result.contacts).toEqual([]);
+    expect(result.passed.map(({ id }) => id)).toEqual([shown.id]);
     expect(result.walk.road.items).toEqual([]);
   });
 
@@ -71,6 +72,7 @@ describe("signature components", () => {
     const travel = geometry.roadBottom + height + 10 - shown.y - height;
     const result = stepWalk(data, geometry, () => 0.99, travel / roadScrollSpeed(data, walk), walk);
     expect(result.bumps).toHaveLength(1);
+    expect(result.passed).toEqual([]);
     expect(result.walk.road.items).toHaveLength(0);
   });
 });

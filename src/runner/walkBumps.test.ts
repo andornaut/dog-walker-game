@@ -88,6 +88,7 @@ describe("an unhit mover the walker passed", () => {
     const passed = step(walk, 0);
     expect(passed.bumps).toEqual([]);
     expect(passed.contacts).toEqual([]);
+    expect(passed.passed.map(({ id }) => id)).toEqual([ball.id]);
     expect(passed.tips).toHaveLength(1);
     expect(passed.walk.road.items).toEqual([]);
     expect(step(passed.walk, 1).bumps).toEqual([]);

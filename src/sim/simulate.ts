@@ -231,20 +231,22 @@ function recordFirings(tally: Tally, before: RunState, fired: readonly DogId[]):
   }
 }
 
-// Counts the items that left the road in a step: those that left while still on it touched
-// the pack, and the rest scrolled past it or, for a crosser, ran off its side.
+// Counts items leaving the road, keeping unhit passed movers distinct from collisions.
+// Other departures before the road edge touched the pack; the rest left the visible road.
 function countLeaving(
   data: SimData,
   tally: Tally,
   geometry: RoadGeometry,
   pulledFrom: number | null,
   before: Walk,
-  after: Walk,
+  step: WalkStep,
 ): void {
+  const after = step.walk;
   if (after.road.items === before.road.items) {
     return;
   }
   const travel = after.run.zoneDistance - before.run.zoneDistance;
+  const passed = new Set(step.passed.map(({ id }) => id));
   for (const item of before.road.items) {
     if (after.road.items.some(({ id }) => id === item.id)) {
       continue;
@@ -256,7 +258,9 @@ function countLeaving(
     } else {
       const place = moverPlace(geometry.laneCount, mover.path, mover.since + travel);
       const y = moverY(geometry.roadTop, item.height, place);
-      touched = !(hasLeftRoad(geometry.laneCount, place) || y >= geometry.roadBottom);
+      touched =
+        !passed.has(item.id) &&
+        !(hasLeftRoad(geometry.laneCount, place) || y >= geometry.roadBottom);
     }
     countItem(tally, touched, { kind: item.kind, moving: mover !== undefined });
     if (touched && blocksLane(data, item.kind)) {
@@ -500,7 +504,7 @@ function playBySkill(data: SimData, seed: number, config: SimConfig, tally: Tall
           const { afterPull } = tally;
           const pulledFrom =
             afterPull !== null && bot.clock <= afterPull.until ? afterPull.fromLane : null;
-          countLeaving(data, tally, road.geometry, pulledFrom, pulledWalk, event.step.walk);
+          countLeaving(data, tally, road.geometry, pulledFrom, pulledWalk, event.step);
           noteDebuffCosts(data, tally.debuffCosts, pulledWalk.run, event.step);
           landed = event.step.bumps.filter(({ dodged }) => !dodged).length;
           for (const { outcome } of [...event.step.contacts, ...event.step.instants]) {

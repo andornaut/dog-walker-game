@@ -45,6 +45,8 @@ const STEP_CUES: Readonly<Record<keyof WalkStep, CuesOf>> = {
   instants: (data, { instants }) => encounterCues(data, instants),
   // A value a modifier changed pops over the event that changed it, which plays its own cue.
   modified: NONE,
+  // Passing a mover is not a collision or pickup.
+  passed: NONE,
   // A spare treat given back plays as it flies to its dog (RunMoments), whatever spent it.
   spareTreat: NONE,
   // A tip, a Stinky one included.

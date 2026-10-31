@@ -262,6 +262,7 @@ interface RoadModified {
 // owners a bump left at 0 hearts; spareTreat the spare treat given back to an owner the step's
 // bumps cost hearts, before any firing (spendSpareTreat), or null; zoneEnded is set on the step
 // that reaches the end of the zone.
+// passed are unhit movers retired below the walker, with no collision or acquisition cue.
 // encounterHits are the card obstacles met this step, which play a hit moment. A hit stop holds
 // the step's cards and zone end back to the step it ends on.
 export interface WalkStep {
@@ -274,6 +275,7 @@ export interface WalkStep {
   found: GearFind[];
   instants: InstantFind[];
   modified: RoadModified[];
+  passed: WalkItem[];
   spareTreat: HeartChange | null;
   tips: TipGrab[];
   treats: TreatGrab[];
@@ -1218,6 +1220,22 @@ export function stepWalk(
     ),
     { cards: stepCards, zoneEnded },
   );
+  const retained = [
+    ...remaining.filter((item) => signatureOnRoad(geometry, item)),
+    ...passing.filter((item) => signatureOnRoad(geometry, item)),
+    ...cues,
+    ...(pickupsHit.length === 0
+      ? pickups
+      : pickups.filter((item) => !pickupsHit.some((hit) => hit.item === item))),
+  ];
+  const passed = [...scrolled.passed];
+  const items = retained.filter((item) => {
+    if (passedWalker(data, geometry, item)) {
+      passed.push(item);
+      return false;
+    }
+    return true;
+  });
   return {
     bumps,
     cards: hitStop === null ? stepCards : [],
@@ -1228,6 +1246,7 @@ export function stepWalk(
     found,
     instants,
     modified,
+    passed,
     spareTreat: spare.change,
     tips,
     treats,
@@ -1237,14 +1256,7 @@ export function stepWalk(
         control,
         hitStop,
         invulnerableSeconds,
-        items: [
-          ...remaining.filter((item) => signatureOnRoad(geometry, item)),
-          ...passing.filter((item) => signatureOnRoad(geometry, item)),
-          ...cues,
-          ...(pickupsHit.length === 0
-            ? pickups
-            : pickups.filter((item) => !pickupsHit.some((hit) => hit.item === item))),
-        ].filter((item) => !passedWalker(data, geometry, item)),
+        items,
         nextItemId,
         pending: due.pending,
       },
@@ -1256,6 +1268,7 @@ export function stepWalk(
 
 interface SortedItems {
   readonly cues: WalkItem[];
+  readonly passed: WalkItem[];
   readonly pickups: WalkItem[];
   readonly solid: WalkItem[];
 }
@@ -1272,9 +1285,10 @@ function scrolledItems(
   arrived: readonly WalkItem[],
 ): SortedItems {
   const { laneCount, roadBottom, roadTop } = geometry;
-  const sorted: SortedItems = { cues: [], pickups: [], solid: [] };
+  const sorted: SortedItems = { cues: [], passed: [], pickups: [], solid: [] };
   for (const item of items) {
     if (passedWalker(data, geometry, item)) {
+      sorted.passed.push(item);
       continue;
     }
     const { mover } = item;
@@ -1357,6 +1371,7 @@ function stillStep(held: HeldStep, walk: Walk): WalkStep {
     found: [],
     instants: [],
     modified: [],
+    passed: [],
     spareTreat: null,
     tips: [],
     treats: [],
