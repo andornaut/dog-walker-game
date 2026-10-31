@@ -8,6 +8,7 @@ import { TUNING } from "./tuning";
 import type {
   AchievementCondition,
   CardOptions,
+  ConfiguredMovement,
   Debuff,
   Dog,
   Encounter,
@@ -15,6 +16,7 @@ import type {
   HeartsEffect,
   Modifier,
   MoneyEffect,
+  MovementAssignment,
   Upgrade,
 } from "./types";
 
@@ -53,6 +55,23 @@ describe("types", () => {
       check<Movement>({ every: "zoomiesDriftSeconds", kind: "teleport" });
       // @ts-expect-error: a money key is not an interval
       check<Movement>({ every: "tip", kind: "drift" });
+    }
+
+    // Neighbourhood overrides select a leaf profile and cannot contain nested selectors.
+    {
+      const profile = { kind: "profile", profile: "ducklingTrail" } as const;
+      const assignment = {
+        default: { factor: 1.2, kind: "inLane" },
+        kind: "byZone",
+        zones: { highPark: profile },
+      } as const;
+      expect(check<MovementAssignment>(assignment).kind).toBe("byZone");
+      // @ts-expect-error: context selectors cannot nest
+      check<ConfiguredMovement>(assignment);
+      // @ts-expect-error: unknown profile key
+      check<ConfiguredMovement>({ kind: "profile", profile: "missing" });
+      // @ts-expect-error: unknown neighbourhood key
+      check<MovementAssignment>({ ...assignment, zones: { missing: profile } });
     }
 
     // Limits a hearts change to -3 to 3, never 0.

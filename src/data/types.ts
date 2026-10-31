@@ -6,6 +6,7 @@ import type { DOGS } from "./dogs";
 import type { ENCOUNTERS } from "./encounters";
 import type { HINTS } from "./hints";
 import type { MINOR_OBSTACLES } from "./minorObstacles";
+import type { MOVEMENT_PROFILE_KEYS } from "./movementProfiles";
 import type { SHOP_GEAR } from "./shop";
 import type { TUNING } from "./tuning";
 import type { UPGRADES } from "./upgrades";
@@ -60,6 +61,8 @@ export type UpgradeId = keyof typeof UPGRADES;
 export type WalkerId = keyof typeof WALKERS;
 export type WalkerPerkId = keyof typeof WALKER_PERKS;
 export type ZoneId = (typeof WORLD)["zones"][number]["id"];
+export type NeighbourhoodId = ZoneId;
+export type MovementProfileId = (typeof MOVEMENT_PROFILE_KEYS)[number];
 
 // What opened a card: an obstacle the pack hit, with the dogs it affected, or a fork, whose
 // paths are the zones it leads to, left to right, each carrying the upgrade at its index, or
@@ -482,6 +485,71 @@ export type Movement =
     }
   | { readonly kind: "sway"; readonly pauseSeconds: number; readonly times: MoveCount };
 export type MovementKind = Movement["kind"];
+
+// Named path recipes hold tuning and art metadata. The planner chooses a complete route
+// before spawning, and rejects it if its footprint or reaction intervals are unsafe.
+export type SignatureProfile = {
+  readonly finishAheadSeconds: number;
+  readonly warningSeconds: number;
+} & (
+  | {
+      readonly anchor: { readonly x: number; readonly y: number };
+      readonly bends: MoveCount;
+      readonly bendSeconds: number;
+      readonly followerDelays: readonly [number, number];
+      readonly frame: { readonly height: number; readonly width: number };
+      readonly kind: "delayedTrail";
+      readonly laneStep: 1;
+      readonly spriteKey: string;
+      readonly straightSeconds: number;
+    }
+  | {
+      readonly kind: "rectangle";
+      readonly lanes: 1;
+      readonly legSeconds: number;
+      readonly rows: 1;
+    }
+  | {
+      readonly downSeconds: number;
+      readonly kind: "turnExit";
+      readonly lanesPerSecond: number;
+      readonly rows: 1;
+    }
+  | {
+      readonly arcs: MoveCount;
+      readonly arcSeconds: number;
+      readonly downFactor: number;
+      readonly kind: "alternatingArcs";
+      readonly laneStep: 1;
+    }
+  | {
+      readonly downFactor: number;
+      readonly kind: "reflectingDiagonal";
+      readonly lanesPerSecond: number;
+      readonly reflections: MoveCount;
+    }
+  | {
+      readonly count: 2;
+      readonly downFactor: number;
+      readonly kind: "successiveMerges";
+      readonly laneStep: 1;
+      readonly mergeSeconds: number;
+      readonly straightSeconds: number;
+    }
+);
+
+export type ConfiguredMovement =
+  Movement | { readonly kind: "profile"; readonly profile: MovementProfileId };
+
+// Context selects a leaf once, before planning. Overrides cannot nest or silently replace
+// an unsafe signature with a different movement.
+export type MovementAssignment =
+  | ConfiguredMovement
+  | {
+      readonly default: ConfiguredMovement;
+      readonly kind: "byZone";
+      readonly zones: Readonly<Partial<Record<NeighbourhoodId, ConfiguredMovement>>>;
+    };
 
 // The lanes a stop-and-go across covers at one of its stops: its first and last, counted on the
 // road from 0 at the left (Movement).
