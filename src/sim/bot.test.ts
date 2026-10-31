@@ -147,7 +147,11 @@ describe("a steering bot", { timeout: 60_000 }, () => {
   // A bot that plans over only part of the road can still box itself in. By foresight, nothing it
   // reads changes under it: by sight, a dart turning back or an uncued step can still hit it.
   it("hits nothing on a sparse road by foresight, with no reaction delay, no errors and a full look-ahead", () => {
-    const sparse = withoutPulls(shortZones(gameData, 0.1));
+    // Keep the sparse counts while allowing complete signature routes their screen span.
+    const sparse = withoutPulls({
+      ...SHORT,
+      tuning: { ...SHORT.tuning, counts: shortZones(gameData, 0.1).tuning.counts },
+    });
     const sharp: Skill = {
       ...SKILL_PRESETS.typical,
       driftReactionSeconds: 0,
