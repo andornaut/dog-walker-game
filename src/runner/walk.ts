@@ -117,6 +117,8 @@ export type WalkData = Pick<
   | "encounters"
   | "homeText"
   | "minorObstacles"
+  | "movementAssignments"
+  | "movementProfiles"
   | "runText"
   | "shopGear"
   | "tuning"
