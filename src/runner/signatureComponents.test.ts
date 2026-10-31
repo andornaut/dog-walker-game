@@ -29,6 +29,18 @@ describe("signature components", () => {
     expect(result.walk.road.items.map(({ id }) => id)).toEqual([shown.id]);
   });
 
+  it("retires the whole unhit trail only after its last component clears the walker", () => {
+    const { item } = signatureTrail([0.01, 0.02]);
+    const shown = item(geometry.lens.footY + 24);
+    expect(
+      obstacleHitBoxes(data, geometry, shown).every(({ top }) => top > geometry.lens.footY),
+    ).toBe(true);
+    const result = stepWalk(data, geometry, () => 0.99, 0, walkWith(["kilo"], [shown]));
+    expect(result.bumps).toEqual([]);
+    expect(result.contacts).toEqual([]);
+    expect(result.walk.road.items).toEqual([]);
+  });
+
   it("produces one logical hit and removes all three touching components together", () => {
     const { item } = signatureTrail([0.01, 0.02]);
     const walk = walkWith(["kilo"]);

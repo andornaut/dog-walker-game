@@ -1018,7 +1018,7 @@ export function stepWalk(
       },
     ];
   });
-  const scrolled = scrolledItems(geometry, travel, road.items, started);
+  const scrolled = scrolledItems(data, geometry, travel, road.items, started);
 
   const control = advanceLaneControl(
     laneMotionConfig(data, geometry.laneCount, run),
@@ -1244,7 +1244,7 @@ export function stepWalk(
           ...(pickupsHit.length === 0
             ? pickups
             : pickups.filter((item) => !pickupsHit.some((hit) => hit.item === item))),
-        ],
+        ].filter((item) => !passedWalker(data, geometry, item)),
         nextItemId,
         pending: due.pending,
       },
@@ -1265,6 +1265,7 @@ interface SortedItems {
 // and whatever has scrolled wholly past its bottom dropped. They are sorted into the movers
 // that are still only a cue, which cannot be hit, the pickups, and the solid items, which can.
 function scrolledItems(
+  data: WalkData,
   geometry: RoadGeometry,
   travel: number,
   items: readonly WalkItem[],
@@ -1273,6 +1274,9 @@ function scrolledItems(
   const { laneCount, roadBottom, roadTop } = geometry;
   const sorted: SortedItems = { cues: [], pickups: [], solid: [] };
   for (const item of items) {
+    if (passedWalker(data, geometry, item)) {
+      continue;
+    }
     const { mover } = item;
     if (mover === undefined) {
       const y = item.y + travel;
@@ -1300,6 +1304,16 @@ function scrolledItems(
     }
   }
   return sorted;
+}
+
+// A mover is passed only when its whole hit extent, including every trailing component,
+// is below the walker. Removing it from the road makes that retirement irreversible.
+function passedWalker(data: WalkData, geometry: RoadGeometry, item: WalkItem): boolean {
+  return (
+    item.mover !== undefined &&
+    isObstacle(data, item.kind) &&
+    obstacleHitBoxes(data, geometry, item).every(({ top }) => top >= geometry.lens.footY)
+  );
 }
 
 function sortItem(laneCount: number, sorted: SortedItems, item: WalkItem): void {

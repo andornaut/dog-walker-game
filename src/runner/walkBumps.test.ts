@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { atPack, data, geometry, step, walkWith } from "../testing/walk";
+import { hitDog } from "./collision";
 import { type MoverPath, moverPlace, turnedBack } from "./movers";
-import { roadScrollSpeed } from "./walk";
+import { obstacleHitBox, packBoxes, roadScrollSpeed } from "./walk";
 import type { WalkItem } from "./walkItems";
 
 describe("a resolved bump", () => {
@@ -43,5 +44,52 @@ describe("a resolved bump", () => {
     const other = { ...ball, id: 2, mover: { path, since: returnedAt } };
     const next = step({ ...later.walk, road: { ...later.walk.road, items: [other] } });
     expect(next.bumps.map(({ item }) => item.id)).toEqual([other.id]);
+  });
+});
+
+describe("an unhit mover the walker passed", () => {
+  it("retires it before an upward reversal can hit, without suppressing pickups", () => {
+    const since = 50 + 2.5 / 0.015;
+    const feetY = geometry.lens.footY + 66;
+    const path: MoverPath = {
+      direction: 1,
+      enterTravel: feetY - geometry.roadTop + since - 50,
+      idle: 0,
+      lanesPerPixel: 0.015,
+      motion: "cross",
+      movement: "dart",
+      stopAfter: null,
+      tilt: -2,
+      turnAfter: 3.1,
+      warning: 50,
+    };
+    const ball: WalkItem = {
+      ...atPack("ball"),
+      mover: { path, since },
+      y: feetY - atPack("ball").height,
+    };
+    const walk = walkWith(["kilo"], [ball, atPack("tip", 1)]);
+    expect(obstacleHitBox(data, geometry, ball).top).toBeGreaterThan(geometry.lens.footY);
+    const travel = roadScrollSpeed(data, walk);
+    const returnedAt = since + travel;
+    const returned = {
+      ...ball,
+      mover: { path, since: returnedAt },
+      y: geometry.roadTop - ball.height + moverPlace(geometry.laneCount, path, returnedAt).travel,
+    };
+    expect(turnedBack(path, returnedAt)).toBe(true);
+    expect(
+      hitDog(
+        packBoxes(geometry, walk.road.control.motion, walk.run),
+        obstacleHitBox(data, geometry, returned),
+      ),
+    ).toBe("kilo");
+
+    const passed = step(walk, 0);
+    expect(passed.bumps).toEqual([]);
+    expect(passed.contacts).toEqual([]);
+    expect(passed.tips).toHaveLength(1);
+    expect(passed.walk.road.items).toEqual([]);
+    expect(step(passed.walk, 1).bumps).toEqual([]);
   });
 });
