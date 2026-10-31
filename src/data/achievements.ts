@@ -230,14 +230,6 @@ export const ACHIEVEMENTS = [
     shortGoal: "Sniff 5 dogs",
   },
   {
-    badgeLine: "The capybara sends its regards.",
-    conditions: [{ count: 10, encounter: "escapedCapybara", kind: "optionPicks", option: "help" }],
-    goal: "Help the keeper 10 times",
-    id: "zookeeper",
-    name: "Zookeeper",
-    shortGoal: "Help the keeper 10 times",
-  },
-  {
     badgeLine: "Your dogs are in every album.",
     conditions: [
       { count: 10, encounter: "weddingPhotoShoot", kind: "optionPicks", option: "pose" },

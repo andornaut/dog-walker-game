@@ -140,7 +140,7 @@
         "id": "escapedCapybara",
         "kind": "encounter"
       },
-      "text": "−$20",
+      "text": "−$NaN",
       "title": "Escaped capybara"
     },
     {
@@ -1774,14 +1774,6 @@
     },
     {
       "id": "busker",
-      "contact": {
-        "effects": [
-          {
-            "debuff": "spotlight",
-            "kind": "debuff"
-          }
-        ]
-      },
       "name": "Busker",
       "onFoot": true,
       "shape": {
@@ -3094,7 +3086,6 @@
       "cheeseBuy": 20,
       "encounterHigh": 20,
       "encounterLow": 20,
-      "escapedCapybaraCall": 20,
       "greenBinSpillCleanUp": 20,
       "lostWalletKeep": 20,
       "missedTips": 20,
@@ -3429,6 +3420,7 @@
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
           "ducklings": 7.5,
+          "escapedCapybara": 1.8,
           "fallenLog": 2.5,
           "ferrets": 5.5,
           "foodCartVendor": 0,
@@ -3492,7 +3484,6 @@
           "bigScreenPromo": 0,
           "cheeseCrates": 0,
           "droppedIceCream": 0,
-          "escapedCapybara": 1.8,
           "greenBinSpill": 0,
           "otherDog": 3,
           "porchCat": 0,
@@ -3552,6 +3543,7 @@
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
           "ducklings": 0,
+          "escapedCapybara": 0,
           "fallenLog": 0,
           "ferrets": 0,
           "foodCartVendor": 0,
@@ -3604,7 +3596,7 @@
           "tourGroup": 0,
           "tourist": 0,
           "touristTrain": 0,
-          "trashCan": 2.5,
+          "trashCan": 0,
           "ttcBus": 0,
           "velvetRope": 0,
           "volleyballNet2": 0,
@@ -3615,7 +3607,6 @@
           "bigScreenPromo": 0,
           "cheeseCrates": 0,
           "droppedIceCream": 0,
-          "escapedCapybara": 0,
           "greenBinSpill": 0,
           "otherDog": 0,
           "porchCat": 2.1,
@@ -3675,6 +3666,7 @@
           "deliveryCyclist": 3,
           "deliveryTruck": 2,
           "ducklings": 0,
+          "escapedCapybara": 0,
           "fallenLog": 0,
           "ferrets": 0,
           "foodCartVendor": 2,
@@ -3738,7 +3730,6 @@
           "bigScreenPromo": 0,
           "cheeseCrates": 2.4,
           "droppedIceCream": 0,
-          "escapedCapybara": 0,
           "greenBinSpill": 2.4,
           "otherDog": 2.8,
           "porchCat": 0,
@@ -3798,6 +3789,7 @@
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
           "ducklings": 0,
+          "escapedCapybara": 0,
           "fallenLog": 0,
           "ferrets": 0,
           "foodCartVendor": 0,
@@ -3861,7 +3853,6 @@
           "bigScreenPromo": 0,
           "cheeseCrates": 0,
           "droppedIceCream": 1.4,
-          "escapedCapybara": 0,
           "greenBinSpill": 0,
           "otherDog": 0,
           "porchCat": 0,
@@ -3921,6 +3912,7 @@
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
           "ducklings": 0,
+          "escapedCapybara": 0,
           "fallenLog": 0,
           "ferrets": 0,
           "foodCartVendor": 0,
@@ -3984,7 +3976,6 @@
           "bigScreenPromo": 0,
           "cheeseCrates": 1.7,
           "droppedIceCream": 0,
-          "escapedCapybara": 0,
           "greenBinSpill": 0,
           "otherDog": 0,
           "porchCat": 0,
@@ -4044,6 +4035,7 @@
           "deliveryCyclist": 5,
           "deliveryTruck": 4,
           "ducklings": 0,
+          "escapedCapybara": 0,
           "fallenLog": 0,
           "ferrets": 0,
           "foodCartVendor": 0,
@@ -4107,7 +4099,6 @@
           "bigScreenPromo": 2.1,
           "cheeseCrates": 0,
           "droppedIceCream": 0,
-          "escapedCapybara": 0,
           "greenBinSpill": 0,
           "otherDog": 0,
           "porchCat": 0,

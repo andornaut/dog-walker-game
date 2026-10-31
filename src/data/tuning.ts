@@ -78,8 +78,6 @@ export const TUNING = {
     cheeseBuy: 20,
     encounterHigh: 20,
     encounterLow: 20,
-    // The Escaped capybara's Call the zoo.
-    escapedCapybaraCall: 20,
     // The Green bin spill's Pay for cleanup.
     greenBinSpillCleanUp: 20,
     lostWalletKeep: 20,

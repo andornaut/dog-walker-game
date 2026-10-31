@@ -51,7 +51,6 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   busker: {
-    contact: { effects: [{ debuff: "spotlight", kind: "debuff" }] },
     name: "Busker",
     onFoot: true,
     shape: { lanes: 1, rows: 1 },
