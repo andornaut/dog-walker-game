@@ -6,6 +6,7 @@ import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { HOME_TEXT } from "../data/homeText";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
+import { MOVEMENT_ASSIGNMENTS, MOVEMENT_PROFILES } from "../data/movementProfiles";
 import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
@@ -51,6 +52,8 @@ export const data = {
   encounters: ENCOUNTERS,
   homeText: HOME_TEXT,
   minorObstacles: MINOR_OBSTACLES,
+  movementAssignments: MOVEMENT_ASSIGNMENTS,
+  movementProfiles: MOVEMENT_PROFILES,
   runText: RUN_TEXT,
   shopGear: SHOP_GEAR,
   ...TEST_WALKER_DATA,

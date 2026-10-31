@@ -2937,6 +2937,8 @@
       "spriteKey": "volleyball-player"
     }
   ],
+  "movementAssignments": {},
+  "movementProfiles": {},
   "tuning": {
     "counts": {
       "dartLanesPerSecond": 3,

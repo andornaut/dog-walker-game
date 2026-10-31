@@ -183,6 +183,8 @@ export function gameDataExport(data: GameData) {
           }
         : { id, ...obstacle, spriteKey: minorObstacleSpriteKey(minorLook(data, id)) },
     ),
+    movementAssignments: data.movementAssignments,
+    movementProfiles: data.movementProfiles,
     tuning,
     upgrades: entries<UpgradeId, GameData["upgrades"][UpgradeId]>(data.upgrades).map(
       ([id, upgrade]) => ({ id, ...upgrade }),

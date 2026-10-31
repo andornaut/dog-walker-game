@@ -9,6 +9,7 @@ import { HINTS } from "./hints";
 import { HOME_TEXT } from "./homeText";
 import { MENU_TEXT } from "./menuText";
 import { MINOR_OBSTACLES } from "./minorObstacles";
+import { MOVEMENT_ASSIGNMENTS, MOVEMENT_PROFILES } from "./movementProfiles";
 import { QUIPS } from "./quips";
 import { RUN_TEXT } from "./runText";
 import { SHOP_GEAR } from "./shop";
@@ -32,6 +33,8 @@ function toGameData(values: ValueExports): GameData {
     homeText: values.HOME_TEXT,
     menuText: values.MENU_TEXT,
     minorObstacles: values.MINOR_OBSTACLES,
+    movementAssignments: values.MOVEMENT_ASSIGNMENTS,
+    movementProfiles: values.MOVEMENT_PROFILES,
     quips: values.QUIPS,
     runText: values.RUN_TEXT,
     shopGear: values.SHOP_GEAR,
@@ -56,6 +59,8 @@ const INITIAL_VALUES = {
   HOME_TEXT,
   MENU_TEXT,
   MINOR_OBSTACLES,
+  MOVEMENT_ASSIGNMENTS,
+  MOVEMENT_PROFILES,
   QUIPS,
   RUN_TEXT,
   SHOP_GEAR,
@@ -95,6 +100,7 @@ if (import.meta.hot) {
       "./homeText.ts",
       "./menuText.ts",
       "./minorObstacles.ts",
+      "./movementProfiles.ts",
       "./quips.ts",
       "./runText.ts",
       "./shop.ts",

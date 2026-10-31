@@ -1359,6 +1359,10 @@ export interface GameData {
   readonly homeText: HomeText;
   readonly menuText: MenuText;
   readonly minorObstacles: Readonly<Record<MinorObstacleId, MinorObstacle>>;
+  readonly movementAssignments: Readonly<
+    Partial<Record<EncounterId | MinorObstacleId, MovementAssignment>>
+  >;
+  readonly movementProfiles: Readonly<Partial<Record<MovementProfileId, SignatureProfile>>>;
   readonly quips: Readonly<Record<DogId, Quips>>;
   readonly runText: RunText;
   readonly shopGear: Readonly<Record<GearId, Gear>>;
