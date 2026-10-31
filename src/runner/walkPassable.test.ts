@@ -31,6 +31,7 @@ import {
   ZONE_IDS,
 } from "../testing/planner";
 import { mapZones } from "../testing/world";
+import { assignedMovement } from "./movementAssignments";
 import { onScreenOf, sweptLanes } from "./moverPlanning";
 import { crossSpan, hasLeftRoad, type MoverPath, moverPlace } from "./movers";
 import { moverOutcomes } from "./outcomes";
@@ -286,7 +287,7 @@ describe("the planned road", { timeout: 120_000 }, () => {
         mover === undefined ? [] : [{ distance, kind, mover }],
       );
       for (const { kind, mover } of movers) {
-        expect(mover.movement).toBe(movementOf(tuned, kind)?.kind);
+        expect(mover.movement).toBe(assignedMovement(tuned, zone, kind)?.kind);
       }
       expectCapsOnScreen(movers);
       // Each obstacle's contact with the pack: its drawn hit box's extent and its lanes.

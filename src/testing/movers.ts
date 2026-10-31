@@ -1,6 +1,6 @@
 import { randomStream, seededRandom } from "@andornaut/game-kit/random";
 
-import type { GameData, Movement, World } from "../data/types";
+import type { ConfiguredMovement, GameData, Movement, World } from "../data/types";
 import type { PlannerStreams } from "../runner/moverPlanning";
 import { mapZones } from "./world";
 
@@ -17,10 +17,11 @@ export function sharedWorld(world: World, share: number): World {
 }
 
 // The obstacles, minor or not, with every stepping or hopping mover hopping as hop does.
-export function hoppingInstead<Data extends Pick<GameData, "encounters" | "minorObstacles">>(
-  data: Data,
-  hop: HopMovement,
-): Data {
+export function hoppingInstead<
+  Data extends Pick<GameData, "encounters" | "minorObstacles" | "movementAssignments">,
+>(data: Data, hop: HopMovement): Data {
+  const movement = (configured: ConfiguredMovement): ConfiguredMovement =>
+    configured.kind === "step" || configured.kind === "hop" ? hop : configured;
   const hopped = (entries: object) =>
     Object.fromEntries(
       Object.entries(entries).map(([id, entry]: [string, { movement?: Movement }]) => [
@@ -34,5 +35,22 @@ export function hoppingInstead<Data extends Pick<GameData, "encounters" | "minor
     ...data,
     encounters: hopped(data.encounters) as Data["encounters"],
     minorObstacles: hopped(data.minorObstacles) as Data["minorObstacles"],
+    movementAssignments: Object.fromEntries(
+      Object.entries(data.movementAssignments).map(([id, assignment]) => [
+        id,
+        assignment.kind === "byZone"
+          ? {
+              ...assignment,
+              default: movement(assignment.default),
+              zones: Object.fromEntries(
+                Object.entries(assignment.zones).map(([zone, configured]) => [
+                  zone,
+                  movement(configured),
+                ]),
+              ),
+            }
+          : movement(assignment),
+      ]),
+    ) as Data["movementAssignments"],
   };
 }
