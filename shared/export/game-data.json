@@ -179,7 +179,7 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "Zoomies: drifts for 40s",
+      "text": "Zoomies: random drifts for 40s",
       "title": "Other dog"
     },
     {
@@ -309,7 +309,7 @@
         "id": "thief",
         "kind": "encounter"
       },
-      "text": "Zoomies: drifts for 40s",
+      "text": "Zoomies: random drifts for 40s",
       "title": "Thief"
     },
     {
@@ -560,12 +560,17 @@
       "id": "zoomies",
       "modifiers": [],
       "movement": {
-        "every": "zoomiesDriftSeconds",
+        "direction": "random",
+        "interval": {
+          "kind": "uniform",
+          "max": "zoomiesDriftMaxSeconds",
+          "min": "zoomiesDriftMinSeconds"
+        },
         "kind": "drift"
       },
       "name": "Zoomies",
       "seconds": "zoomiesSeconds",
-      "stake": "drifts for {seconds}s"
+      "stake": "random drifts for {seconds}s"
     }
   ],
   "dogs": [
@@ -3278,6 +3283,8 @@
       "stinkySeconds": 60,
       "stripLineWaitSeconds": 3,
       "zoneAtBaseSpeed": 148,
+      "zoomiesDriftMaxSeconds": 1.4,
+      "zoomiesDriftMinSeconds": 0.6,
       "zoomiesDriftSeconds": 1,
       "zoomiesSeconds": 40
     }

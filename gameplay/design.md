@@ -188,7 +188,7 @@ Debuffs come from puddles, potholes, contact obstacles and card options. Cards a
 - **Muddy:** the pack's lane changes take about three times as long (67% slower). Bumps cost what they always do
 - **Spotlight:** a bump costs $10 of cash on top of its hearts; with less on hand it takes what's left, and at $0 nothing. Second chance may forgive the heart, never the cash. A Spotlight bump keeps a bump's hit stop and grace window and counts toward bumps, bump-free neighbourhoods and bump badges
 - **Stinky:** tips still appear, but a grabbed tip pays $0 and shows a red "+$0" label
-- **Zoomies:** about once a second, the pack drifts one lane in the direction it last moved; at the road's edge it turns and drifts the other way. Steering still works, so you counter the drift. A drift never moves the pack into an obstacle it can't react to, the same as a pull
+- **Zoomies:** after each randomly timed interval of 0.6 to 1.4 seconds of walking, the pack tries to drift one lane left or right, with either direction equally likely. If the selected direction is blocked or at the road’s edge, it tries the other direction if safe; if neither direction is safe, it stays put. Steering still works. A drift never moves the pack into an obstacle it cannot react to, the same as a pull
 
 ### Lucky finds
 
