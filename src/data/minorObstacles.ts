@@ -8,7 +8,7 @@ import type { MinorObstacle } from "./types";
 // One with contact acts as a puddle does, its effects in place of a bump's.
 export const MINOR_OBSTACLES = {
   artSculpture: {
-    name: "Art sculpture",
+    name: "Crate stack",
     shape: { lanes: 1, rows: 1 },
     zones: ["distilleryDistrict"],
   },

@@ -1574,7 +1574,7 @@
   "minorObstacles": [
     {
       "id": "artSculpture",
-      "name": "Art sculpture",
+      "name": "Crate stack",
       "shape": {
         "lanes": 1,
         "rows": 1
