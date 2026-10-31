@@ -163,6 +163,16 @@ describe("hit effects with reduced motion", () => {
 });
 
 describe("physical contact render frames", () => {
+  it("coalesces acquisition groups and their sound by debuff kind in the same frame", () => {
+    const muddy = { debuff: "muddy", frame: null, key: HIT_ART.debuffs.muddy.key } as const;
+    const stinky = { debuff: "stinky", frame: null, key: HIT_ART.debuffs.stinky.key } as const;
+    const frame = new ContactImpactFrame();
+    expect(frame.takeDebuffs(10, [muddy])).toEqual([muddy]);
+    frame.take(10, []);
+    expect(frame.takeDebuffs(10, [muddy, stinky])).toEqual([stinky]);
+    expect(frame.takeDebuffs(11, [muddy])).toEqual([muddy]);
+  });
+
   it("coalesces repeated callbacks by kind until the next visual frame", () => {
     const puddle = {
       dog: "kilo",

@@ -395,19 +395,22 @@ export class RunMoments {
       this.addChanges(overPack(pack), outcomeChanges(outcome));
       this.afterOutcome(outcome);
     }
-    const debuffCues = contactDebuffBatch(
-      this.deps.still(),
-      before,
-      step.contacts.map(({ outcome, source }) => {
-        const contact =
-          source.kind === "minor"
-            ? gameData.minorObstacles[source.obstacle].contact
-            : gameData.encounters[source.encounter].resolution;
-        return {
-          after: outcome.state,
-          effects: contact !== undefined && "effects" in contact ? contact.effects : [],
-        };
-      }),
+    const debuffCues = this.contactFrame.takeDebuffs(
+      this.scene.game.loop.frame,
+      contactDebuffBatch(
+        this.deps.still(),
+        before,
+        step.contacts.map(({ outcome, source }) => {
+          const contact =
+            source.kind === "minor"
+              ? gameData.minorObstacles[source.obstacle].contact
+              : gameData.encounters[source.encounter].resolution;
+          return {
+            after: outcome.state,
+            effects: contact !== undefined && "effects" in contact ? contact.effects : [],
+          };
+        }),
+      ),
     );
     for (const cue of debuffCues) {
       sound.play(debuffSoundCue(cue.debuff));

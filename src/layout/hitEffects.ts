@@ -134,24 +134,34 @@ function contactImpactKey({ source }: ContactImpact): string {
   return source.kind === "minor" ? `minor:${source.obstacle}` : `encounter:${source.encounter}`;
 }
 
-// A render frame may receive several fixed walking steps. Each material attacks visually once.
+// Several fixed walking steps may share a render frame. Physical and acquisition kinds play once.
 export class ContactImpactFrame {
   private frame: number | undefined;
   private readonly kinds = new Set<string>();
 
   take(frame: number, impacts: readonly ContactImpact[]): ContactImpact[] {
+    this.begin(frame);
+    return impacts.filter((impact) => this.admit(contactImpactKey(impact)));
+  }
+
+  takeDebuffs(frame: number, cues: readonly DebuffHitEffect[]): DebuffHitEffect[] {
+    this.begin(frame);
+    return cues.filter(({ debuff }) => this.admit(`debuff:${debuff}`));
+  }
+
+  private begin(frame: number): void {
     if (this.frame !== frame) {
       this.frame = frame;
       this.kinds.clear();
     }
-    return impacts.filter((impact) => {
-      const kind = contactImpactKey(impact);
-      if (this.kinds.has(kind)) {
-        return false;
-      }
-      this.kinds.add(kind);
-      return true;
-    });
+  }
+
+  private admit(kind: string): boolean {
+    if (this.kinds.has(kind)) {
+      return false;
+    }
+    this.kinds.add(kind);
+    return true;
   }
 }
 
