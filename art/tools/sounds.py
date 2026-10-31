@@ -13,6 +13,10 @@ sfx-gear-found     0.55s  sparkle: a narrow-pulse glissando D5 up to D6 into a s
 sfx-lost-wallet    0.45s  ka-ching: a drawer click, a shimmering C#7 E7 bell, then a jingle of two coins
 sfx-friendly-neighbour 0.52s warm "aww": a triangle rising C5 to E5 with vibrato, then a soft G5 C6 chime
 sfx-heart-lost     0.32s  soft sigh: a triangle falling E5 to C5 over a muted square
+sfx-debuff-muddy    0.34s  wet squelch and two muddy plops
+sfx-debuff-spotlight 0.37s soft switch click opening a short focus chime
+sfx-debuff-stinky   0.44s  airy, warbling spray hiss with a low falling body
+sfx-debuff-zoomies  0.38s  rushing air and a quick rising pulse with two light skips
 sfx-fired          1.80s  sad "wah wah wah waaah" down G4 F#4 F4 E4, muted square
 sfx-hit-skunk      0.50s  spray hiss: pink noise stepping down three bands over a falling "pfff"
 sfx-hit-puddle     0.50s  splash: a pink noise burst and low plop, then rising triangle bubbles
@@ -154,6 +158,49 @@ def concat(paths, out):
 DARK = ("lowpass", "3000")
 
 EFFECTS = {
+    # Material onsets and short tonal signatures identify the four contact debuffs.
+    "sfx-debuff-muddy": [
+        ("pinknoise", 0.17, None, 0,
+         dict(low=2300, attack=0.008, release=0.6, shape="h", vol=0.75, high=500)),
+        ("triangle", 0.17, (900, 420), 0,
+         dict(low=2400, attack=0.008, release=0.6, shape="h", vol=0.7)),
+        ("triangle", 0.08, (780, 1200), 0.12,
+         dict(low=2400, attack=0.008, release=0.6, shape="h", vol=0.6)),
+        ("triangle", 0.09, (650, 1000), 0.23,
+         dict(low=2400, attack=0.008, release=0.6, shape="h", vol=0.55)),
+        ("square", 0.16, (600, 360), 0.18,
+         dict(low=1400, attack=0.008, release=0.6, shape="h", vol=0.25, duty=25)),
+    ],
+    "sfx-debuff-stinky": [
+        ("pinknoise", 0.38, None, 0,
+         dict(low=2400, attack=0.008, release=0.4, shape="h", high=700, fx=("lowpass", "3000", "tremolo", "12", "35"))),
+        ("square", 0.32, (780, 420), 0.04,
+         dict(low=1400, attack=0.008, release=0.6, shape="h", vol=0.25, duty=20)),
+        ("pinknoise", 0.24, None, 0.2,
+         dict(low=1600, attack=0.008, release=0.6, shape="h", vol=0.5, high=500)),
+    ],
+    "sfx-debuff-zoomies": [
+        ("pinknoise", 0.28, None, 0,
+         dict(low=2800, attack=0.035, release=0.6, shape="h", vol=0.5, high=900, fx=("lowpass", "3000"))),
+        ("square", 0.29, (600, 1600), 0.035,
+         dict(low=2200, attack=0.008, release=0.6, shape="h", vol=0.35, duty=20)),
+        ("triangle", 0.09, "A5", 0.07,
+         dict(low=2400, attack=0.008, release=0.6, shape="h", vol=0.65)),
+        ("triangle", 0.12, "D6", 0.18,
+         dict(low=2400, attack=0.008, release=0.6, shape="h", vol=0.7)),
+        ("triangle", 0.1, "A6", 0.28,
+         dict(low=2600, attack=0.008, release=0.6, shape="h", vol=0.35)),
+    ],
+    "sfx-debuff-spotlight": [
+        ("pinknoise", 0.045, None, 0,
+         dict(low=2600, attack=0.008, release=0.6, shape="h", high=800, vol=0.35)),
+        ("triangle", 0.24, "D6", 0.025,
+         dict(low=2400, attack=0.008, release=0.6, shape="h", vol=0.75)),
+        ("triangle", 0.25, "A6", 0.12,
+         dict(low=2700, attack=0.008, release=0.6, shape="h", vol=0.35)),
+        ("square", 0.25, "D5", 0.08,
+         dict(low=1600, attack=0.008, release=0.6, shape="h", vol=0.18, duty=25)),
+    ],
     "sfx-tip": [
         ("square", 0.08, "B5", 0, dict(vol=0.6, low=3500, release=0.3)),
         ("square", 0.27, "E6", 0.08, dict(vol=0.6, low=3500, release=0.9)),
