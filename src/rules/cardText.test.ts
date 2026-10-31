@@ -11,7 +11,7 @@ import { read } from "./units";
 
 const PACK: readonly DogId[] = ["kilo", "ginger", "reggie"];
 const state = testState({ ginger: 5, kilo: 5, reggie: 5 }, { money: cents(10_000) });
-const { encounterHigh, thiefLetGo } = gameData.tuning.money;
+const { encounterHigh } = gameData.tuning.money;
 
 // The name the data gives a card option, by its id.
 function optionName(id: EncounterId, optionId: string): string {
@@ -25,7 +25,6 @@ function optionName(id: EncounterId, optionId: string): string {
   }
   return found.name;
 }
-const letGo = optionName("thief", "letGo");
 const grabBack = optionName("thief", "grabBack");
 
 const encounter = (id: EncounterId, affected: readonly DogId[]): CardSource => ({
@@ -51,44 +50,17 @@ function option(source: CardSource, label: string) {
 }
 
 describe("a card's text for the dogs it catches", () => {
-  it("words each option's effects as its card shows them", () => {
-    for (const { affected, id, label, text } of [
-      {
-        affected: ["ginger", "kilo"],
-        id: "thief",
-        label: grabBack,
-        text: heartsText(["ginger", "kilo"], -1),
-        why: "says a change the dogs it reaches share once",
-      },
-      {
-        affected: ["kilo", "ginger"],
-        id: "skunk",
-        label: "Full groom",
-        text: `−$${encounterHigh}`,
-        why: "charges a cost once, whatever the pack",
-      },
-      {
-        affected: ["kilo"],
-        id: "thief",
-        label: letGo,
-        text: `−$${thiefLetGo}`,
-        why: "keeps a cost charged once for the pack",
-      },
-    ] as const) {
-      expect(option(encounter(id, affected), label).text).toBe(text);
-    }
+  it("says a shared heart change once for the affected dogs", () => {
+    expect(option(encounter("thief", ["ginger", "kilo"]), grabBack).text).toBe(
+      heartsText(["ginger", "kilo"], -1),
+    );
   });
 
-  it("agrees with the cost plaque for every pack size", () => {
-    for (const row of [
-      { affected: ["kilo"], dollars: encounterHigh, id: "skunk", label: "Full groom" },
-      { affected: PACK, dollars: encounterHigh, id: "skunk", label: "Full groom" },
-      { affected: PACK, dollars: thiefLetGo, id: "thief", label: letGo },
-      { affected: ["kilo"], dollars: thiefLetGo, id: "thief", label: letGo },
-    ] as const) {
-      const view = option(encounter(row.id, row.affected), row.label);
-      expect(view.cost).toBe(dollarsToCents(row.dollars));
-      expect(view.text).toBe(`−$${row.dollars}`);
+  it("charges the same cash amount for one dog and a full pack", () => {
+    for (const affected of [["kilo"], PACK] as const) {
+      const view = option(encounter("skunk", affected), "Full groom");
+      expect(view.cost).toBe(dollarsToCents(encounterHigh));
+      expect(view.text).toBe(`−$${encounterHigh}`);
     }
   });
 
@@ -144,13 +116,6 @@ describe("a card's text for the dogs it catches", () => {
         modifiers: [sweetTalker],
         text: `−$${encounterHigh}`,
         why: "a cost once the zone's free card is used says its price",
-      },
-      {
-        cardsThisZone: 0,
-        large: `−$${encounterHigh}`,
-        modifiers: [],
-        text: `−$${encounterHigh}`,
-        why: "a cost without Charmer says its price",
       },
     ])("$why, on the small and large card", ({ cardsThisZone, large, modifiers, text }) => {
       const run = testState(

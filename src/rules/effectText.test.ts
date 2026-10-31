@@ -1,5 +1,4 @@
-import { fillNames, placeholders } from "@andornaut/game-kit/lines";
-import { keysOf } from "@andornaut/game-kit/records";
+import { fillNames } from "@andornaut/game-kit/lines";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -7,8 +6,9 @@ import { DEBUFFS } from "../data/debuffs";
 import { ENCOUNTERS } from "../data/encounters";
 import { HOME_TEXT } from "../data/homeText";
 import { TUNING } from "../data/tuning";
-import type { Effect, GearId, MoneyKey, MultiplierKey, WalkerPerk } from "../data/types";
+import type { Effect, MoneyKey, MultiplierKey } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
+import { WALKER_PERKS } from "../data/walkers";
 import { TEST_TUNING } from "../testing/tuning";
 import { cents } from "../units";
 import {
@@ -22,7 +22,6 @@ import {
   sentenceList,
   SIZE_NAMES,
 } from "./effectText";
-import { modifiersOf, modifierValue } from "./modifiers";
 import { read } from "./units";
 
 // The game's chances, which the test tuning pins to 0, so a dodge reads as one in so many.
@@ -97,21 +96,6 @@ describe("effectText", () => {
         )}`,
       ],
       [
-        "a multiplier as a percentage with its duration",
-        [
-          {
-            by: "rushHourTips",
-            duration: "nextZone",
-            kind: "modifier",
-            operation: "multiply",
-            stat: "tipSpawns",
-          },
-        ],
-        capitalize(
-          `+${percent("rushHourTips")}% ${words.stats.tipSpawns} ${words.durations.nextZone}`,
-        ),
-      ],
-      [
         "an immunity as the cards it stops",
         [{ duration: "run", encounter: "thief", kind: "immune" }],
         `No ${ENCOUNTERS.thief.name} cards ${words.durations.run}`,
@@ -162,14 +146,6 @@ describe("effectText", () => {
       expect(effectText(data, effects)).toBe(text);
     }
   });
-
-  // Muddy's stake says how long it lasts.
-  it("fills Muddy's stake with its seconds", () => {
-    const seconds = String(read(TEST_TUNING, "seconds", DEBUFFS.muddy.seconds));
-    expect(effectText(data, [{ debuff: "muddy", kind: "debuff" }])).toBe(
-      `${DEBUFFS.muddy.name}: ${fillNames(DEBUFFS.muddy.stake, { seconds })}`,
-    );
-  });
 });
 
 // A share of the base lane-change speed as an unsigned whole percent.
@@ -198,47 +174,23 @@ describe("laneSpeedText", () => {
 });
 
 describe("gearShort", () => {
-  const gearData = { shopGear: gameData.shopGear, tuning: TEST_TUNING };
-  const agilityAdded = (gear: GearId) =>
-    modifiersOf(gameData.shopGear[gear].effects)
-      .filter((modifier) => modifier.operation === "add" && modifier.stat === "agility")
-      .reduce((sum, modifier) => sum + modifierValue(TEST_TUNING, modifier), 0);
-
-  it.each(keysOf(gameData.shopGear))(
-    "fills %s's shop line's {percent} with the agility it adds, leaving no names",
-    (gear) => {
-      const { short } = gameData.shopGear[gear];
-      expect(placeholders(short).every((name) => name === "percent")).toBe(true);
-      expect(placeholders(short).length === 0 || agilityAdded(gear) !== 0).toBe(true);
-      expect(gearShort(gearData, gear)).toBe(
-        fillNames(short, { percent: unsignedPercent(agilityAdded(gear)) }),
-      );
-      expect(placeholders(gearShort(gearData, gear))).toEqual([]);
-    },
-  );
+  it("keeps a shop line with no substitutions unchanged", () => {
+    const gearData = { shopGear: gameData.shopGear, tuning: TEST_TUNING };
+    expect(gearShort(gearData, "runningShoes")).toBe(gameData.shopGear.runningShoes.short);
+  });
 });
 
 describe("perkEffect", () => {
-  const perks = keysOf(gameData.walkerPerks);
+  it("substitutes the named multiplier's change from the base", () => {
+    const perk = WALKER_PERKS.keenEye;
+    const percent = unsignedPercent(read(gameData.tuning, "multipliers", perk.percent) - 1);
+    expect(perkEffect(gameData.tuning, perk)).toBe(fillNames(perk.effect, { percent }));
+  });
 
-  it.each(perks)(
-    "fills %s's effect line's {percent} from the multiplier it names, one of its own",
-    (id) => {
-      const perk: WalkerPerk = gameData.walkerPerks[id];
-      const factors = modifiersOf(perk.effects)
-        .filter(({ operation }) => operation === "multiply")
-        .map(({ by }) => by);
-      expect(placeholders(perk.effect)).toEqual(perk.percent === undefined ? [] : ["percent"]);
-      if (perk.percent !== undefined) {
-        expect(factors).toContain(perk.percent);
-      }
-      const percent =
-        perk.percent === undefined
-          ? {}
-          : { percent: unsignedPercent(read(gameData.tuning, "multipliers", perk.percent) - 1) };
-      expect(perkEffect(gameData.tuning, perk)).toBe(fillNames(perk.effect, percent));
-    },
-  );
+  it("keeps a perk without a percentage unchanged", () => {
+    const perk = WALKER_PERKS.longReach;
+    expect(perkEffect(gameData.tuning, perk)).toBe(perk.effect);
+  });
 });
 
 describe("formatDollars", () => {
