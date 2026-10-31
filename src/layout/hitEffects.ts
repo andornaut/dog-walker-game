@@ -70,6 +70,7 @@ export const DEBUFF_GROUND = { groundRow: 24, height: 28, width: 48, yOffset: -1
 
 // The native HUD icon on a compact cream plate beside the walker's feet.
 export const DEBUFF_BADGE = {
+  gap: 4,
   iconInset: 4,
   iconSize: 16,
   leftDx: -72,
@@ -79,15 +80,28 @@ export const DEBUFF_BADGE = {
   yOffset: -28,
 } as const;
 
-export function debuffBadgeRect(view: Rect, feet: Point): Rect {
-  const { leftDx, rightDx, size, viewInset, yOffset } = DEBUFF_BADGE;
+// Active kinds occupy distinct slots. Reserve room for every kind so viewport clamping never
+// collapses separate slots onto the same row at the bottom edge.
+export function debuffBadgeRect(view: Rect, feet: Point, slot = 0): Rect {
+  const { gap, leftDx, rightDx, size, viewInset, yOffset } = DEBUFF_BADGE;
+  const left = view.x + viewInset;
   const right = view.x + view.width - viewInset;
-  const x = feet.x + rightDx;
+  const top = view.y + viewInset;
+  const bottom = view.y + view.height - viewInset;
+  const stride = size + gap;
+  const direction = feet.x + rightDx + size <= right ? 1 : -1;
+  const preferredX = feet.x + (direction === 1 ? rightDx : leftDx);
+  const x = Math.min(right - size, Math.max(left, preferredX));
+  const room = direction === 1 ? right - size - x : x - left;
+  const kinds = Object.keys(HIT_ART.debuffs).length;
+  const columns = Math.min(kinds, Math.floor(room / stride) + 1);
+  const rows = Math.ceil(kinds / columns);
+  const y = Math.min(bottom - size - (rows - 1) * stride, Math.max(top, feet.y + yOffset));
   return {
     height: size,
     width: size,
-    x: Math.round(x + size <= right ? x : feet.x + leftDx),
-    y: Math.round(feet.y + yOffset),
+    x: Math.round(x + direction * (slot % columns) * stride),
+    y: Math.round(y + Math.floor(slot / columns) * stride),
   };
 }
 

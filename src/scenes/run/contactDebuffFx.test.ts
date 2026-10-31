@@ -162,6 +162,26 @@ describe("contact debuff ground cues", () => {
     expect(scene.time.delayedCall).not.toHaveBeenCalled();
   });
 
+  it("reserves separate badges across overlapping contact batches and reuses released slots", () => {
+    const { events, groups, scene } = fixture();
+    let feet = [{ x: 284, y: 440 }];
+    const tracked = context(() => feet);
+    playContactDebuff(scene as unknown as Scene, tracked, { ...cue, debuff: "muddy" });
+    playContactDebuff(scene as unknown as Scene, tracked, { ...cue, debuff: "stinky" });
+    const first = groups[1];
+    const second = groups[3];
+    expect(first?.y).not.toBe(second?.y);
+    feet = [{ x: 350, y: 550 }];
+    events.emit("postupdate");
+    expect(first?.x).not.toBe(second?.x);
+    vi.mocked(playTagOnce).mock.calls[0]?.[3]();
+    playContactDebuff(scene as unknown as Scene, tracked, { ...cue, debuff: "zoomies" });
+    expect(groups[5]?.x).toBe(first?.x);
+    expect(groups[5]?.y).toBe(first?.y);
+    expect(groups[3]?.active).toBe(true);
+    events.emit("shutdown");
+  });
+
   it.each(["completion", "shutdown", "destroy"] as const)(
     "cleans all ground copies, badge, mask and listeners on %s",
     (endedBy) => {

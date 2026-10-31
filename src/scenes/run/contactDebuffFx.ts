@@ -3,6 +3,7 @@ import type { Point, Rect } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene, Time } from "phaser";
 
 import { debuffIconKey } from "../../assets/iconKeys";
+import type { DebuffId } from "../../data/types";
 import {
   DEBUFF_BADGE,
   DEBUFF_GROUND,
@@ -12,6 +13,39 @@ import {
 } from "../../layout/hitEffects";
 import { playTagOnce } from "../sprites";
 import { addPanel, tagFrame } from "../uiKit";
+
+interface BadgeLease {
+  readonly debuff: DebuffId;
+  readonly slot: number;
+}
+
+const activeBadges = new WeakMap<Scene, Set<BadgeLease>>();
+
+// Reapplications may share their kind's slot; distinct kinds retain separate slots until
+// their cues finish, including cues started by an earlier contact batch.
+function reserveBadge(scene: Scene, debuff: DebuffId): { release: () => void; slot: number } {
+  const active = activeBadges.get(scene) ?? new Set<BadgeLease>();
+  activeBadges.set(scene, active);
+  const existing = [...active].find((lease) => lease.debuff === debuff);
+  const occupied = new Set([...active].map(({ slot }) => slot));
+  let slot = existing?.slot ?? 0;
+  if (existing === undefined) {
+    while (occupied.has(slot)) {
+      slot++;
+    }
+  }
+  const lease = { debuff, slot };
+  active.add(lease);
+  return {
+    release: () => {
+      active.delete(lease);
+      if (active.size === 0) {
+        activeBadges.delete(scene);
+      }
+    },
+    slot,
+  };
+}
 
 // One ground animation per visible actor, plus one foreground badge beside the walker.
 // Every copy plays once. Reduced motion holds the readable pose for the same loaded duration.
@@ -66,6 +100,8 @@ export function playContactDebuff(
       ? undefined
       : scene.add.container(0, 0, [badge, icon]).setDepth(context.badgeDepth).setMask(mask);
 
+  const badgeLease = badgeGroup === undefined ? undefined : reserveBadge(scene, cue.debuff);
+
   let ended = false;
   let timer: Time.TimerEvent | undefined;
   const place = () => {
@@ -80,7 +116,7 @@ export function playContactDebuff(
     const walker = context.walkerFeet();
     badgeGroup?.setVisible(walker !== undefined);
     if (walker !== undefined) {
-      const rect = debuffBadgeRect(view, walker);
+      const rect = debuffBadgeRect(view, walker, badgeLease?.slot);
       badgeGroup?.setPosition(rect.x, rect.y);
     }
   };
@@ -93,6 +129,7 @@ export function playContactDebuff(
     scene.events.off("shutdown", finish);
     timer?.remove(false);
     badgeGroup?.destroy();
+    badgeLease?.release();
     mask.destroy();
     graphics.destroy();
   };
