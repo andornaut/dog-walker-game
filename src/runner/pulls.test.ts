@@ -439,10 +439,17 @@ describe("pullWalk", () => {
 
 describe("replay with pulls", () => {
   it("reproduces a run with pulls from the seed and the input log alone", () => {
+    // This short-zone replay checks pulls independently of complete signature routes.
+    const replayData = { ...data, movementAssignments: {} };
     // As RunScene steps: the moves due now, each logged, then the pulls, then the walk.
     const play = (seed: number, movesAt: (frame: number, timeMs: number) => LaneDirection[]) => {
       const setup = { dev: true, seed, speed: 1, zone: 1 };
-      const start = planZone(data, geometry, plannerStreams(seed), walkWith(["lady", "kilo"]));
+      const start = planZone(
+        replayData,
+        geometry,
+        plannerStreams(seed),
+        walkWith(["lady", "kilo"]),
+      );
       const rolls = seededRandom(seed + 4);
       let log = startInputLog(setup);
       let walk = start;
@@ -453,13 +460,13 @@ describe("replay with pulls", () => {
         const timeMs = frame * FRAME * 1000;
         const moves = movesAt(frame, timeMs);
         for (const direction of moves) {
-          walk = steerWalk(data, 5, direction, walk);
+          walk = steerWalk(replayData, 5, direction, walk);
           log = recordInput({ direction, kind: "lane", timeMs }, log);
         }
-        const pullStep = stepPulls(data, geometry, FRAME, moves, pulls, walk);
+        const pullStep = stepPulls(replayData, geometry, FRAME, moves, pulls, walk);
         pulls = pullStep.pulls;
         pulled.push(...pullStep.pulled);
-        const stepped = stepWalk(data, geometry, rolls, FRAME, pullStep.walk);
+        const stepped = stepWalk(replayData, geometry, rolls, FRAME, pullStep.walk);
         cards.push(...stepped.cards);
         walk = stepped.walk;
       }
