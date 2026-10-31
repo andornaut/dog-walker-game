@@ -76,8 +76,7 @@ function panelLayout(
   const { buttonCount } = parts;
   const noted = parts.noteLines > 0;
   const noteHeight = noted ? notePlateHeight(body, parts.noteLines) : 0;
-  const actionRows = buttonCount === PAUSE_MENU_ITEMS.length ? 3 : buttonCount;
-  const buttonsHeight = actionRows * (BUTTON.height + BUTTON.gap) - BUTTON.gap;
+  const buttonsHeight = buttonCount * (BUTTON.height + BUTTON.gap) - BUTTON.gap;
   // Offsets down the panel: a note first sits where the buttons would start, less its gap.
   const noteFirstY = BUTTON.y;
   const buttonsY = noteFirst && noted ? noteFirstY + noteHeight + MODAL.gap : BUTTON.y;
@@ -85,16 +84,9 @@ function panelLayout(
   const height = Math.max(buttonsY + buttonsHeight, noted ? noteY + noteHeight : 0) + BOTTOM;
   const widths = Array.from(
     { length: buttonCount },
-    (_, i) =>
-      parts.buttonWidths?.[i] ??
-      (buttonCount === PAUSE_MENU_ITEMS.length && (i === 1 || i === 2)
-        ? BUTTON_SIZE.compact.width
-        : BUTTON.width),
+    (_, i) => parts.buttonWidths?.[i] ?? BUTTON.width,
   );
-  const actionWidth =
-    buttonCount === PAUSE_MENU_ITEMS.length
-      ? Math.max(widths[0] ?? 0, (widths[1] ?? 0) + MODAL.gap + (widths[2] ?? 0), widths[3] ?? 0)
-      : Math.max(0, ...widths);
+  const actionWidth = Math.max(0, ...widths);
   const width = Math.min(
     area.width - 2 * MODAL.margin,
     Math.max(
@@ -104,20 +96,12 @@ function panelLayout(
     ),
   );
   const panel = modalRect(area, parts.avoid, { height, width });
-  const buttons = widths.map((width, i) => {
-    const paired = buttonCount === PAUSE_MENU_ITEMS.length && (i === 1 || i === 2);
-    const row = buttonCount === PAUSE_MENU_ITEMS.length && i === 3 ? 2 : paired ? 1 : i;
-    const pairWidth = (widths[1] ?? 0) + MODAL.gap + (widths[2] ?? 0);
-    const x = paired
-      ? panel.x + panel.width / 2 - pairWidth / 2 + (i === 2 ? (widths[1] ?? 0) + MODAL.gap : 0)
-      : panel.x + (panel.width - width) / 2;
-    return {
-      height: BUTTON.height,
-      width,
-      x,
-      y: panel.y + buttonsY + row * (BUTTON.height + BUTTON.gap),
-    };
-  });
+  const buttons = widths.map((_, i) => ({
+    height: BUTTON.height,
+    width: actionWidth,
+    x: panel.x + (panel.width - actionWidth) / 2,
+    y: panel.y + buttonsY + i * (BUTTON.height + BUTTON.gap),
+  }));
   return {
     buttons,
     hits: buttons.map((button) => ({

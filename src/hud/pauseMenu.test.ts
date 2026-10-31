@@ -7,11 +7,13 @@ import { gameData } from "../data";
 import { SCREEN_LAYOUT } from "../data/screen";
 import { dollarText } from "../home/home";
 import { overlayRegion } from "../home/homeBar";
+import { modalActionWidth } from "../home/modalLayout";
 import { walkLength } from "../rules/route";
 import { bodyTextWidth } from "../testing/bodyFont";
-import { fontFileMetrics } from "../testing/fontInk";
+import { fontFileMetrics, inkWidth } from "../testing/fontInk";
 import { cents } from "../units";
 import {
+  HOME_QUESTION_ANSWERS,
   homeQuestionLayout,
   NOTE_PLATE,
   notePartTops,
@@ -32,10 +34,38 @@ const longer = (a: string, b: string): string => (bodyWidth(b) > bodyWidth(a) ? 
 describe("the menus' hit areas", () => {
   // The top bar's buttons stay live while the menu is up, so no menu button may reach them.
   it("keep each clear of the next and of the top bar's buttons", () => {
-    for (const { hits } of [
-      pauseMenuLayout(BODY, walkView, { buttonCount: 4, noteLines: 2 }),
-      homeQuestionLayout(BODY, walkView, { buttonCount: 2, noteLines: 3 }),
-    ]) {
+    const { pause } = gameData.menuText;
+    const cases = [
+      { labels: PAUSE_MENU_ITEMS.map((key) => pause[key]), layout: pauseMenuLayout, noteLines: 2 },
+      {
+        labels: HOME_QUESTION_ANSWERS.map((key) => gameData.runText.homeQuestion[key]),
+        layout: homeQuestionLayout,
+        noteLines: 3,
+      },
+      {
+        labels: QUIT_QUESTION_ANSWERS.map((key) => gameData.homeText.quit[key]),
+        layout: homeQuestionLayout,
+        noteLines: 0,
+      },
+    ];
+    for (const { labels, layout, noteLines } of cases) {
+      const buttonWidths = labels.map((label, i) =>
+        modalActionWidth(inkWidth("font-title", { scale: 2 }, `${i + 1} ${label}`.toUpperCase())),
+      );
+      const { hits, panel } = layout(BODY, walkView, {
+        buttonCount: labels.length,
+        buttonWidths,
+        noteLines,
+      });
+      expect(panel.y).toBeGreaterThanOrEqual(walkView.y);
+      expect(panel.y + panel.height).toBeLessThanOrEqual(walkView.y + walkView.height);
+      expect(new Set(hits.map(({ width, x }) => `${x}:${width}`)).size).toBe(1);
+      expect(hits[0]?.width).toBe(Math.max(...buttonWidths));
+      hits
+        .slice(1)
+        .forEach((hit, i) =>
+          expect(hit.y).toBeGreaterThan((hits[i]?.y ?? 0) + (hits[i]?.height ?? 0)),
+        );
       hits.forEach((hit, i) => {
         hits.slice(i + 1).forEach((next) => expect(rectsOverlap(hit, next)).toBe(false));
       });
