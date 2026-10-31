@@ -2,6 +2,7 @@ import type { Random } from "@andornaut/game-kit/random";
 import type { Point, Rect } from "@andornaut/game-kit/rect";
 import type { Scene } from "phaser";
 
+import { debuffSoundCue } from "../../audio/sound";
 import { choiceCues, pullCues, stepCues } from "../../audio/stepCues";
 import { gameData } from "../../data";
 import type { DogId, EncounterId, HintId, HintTrigger } from "../../data/types";
@@ -54,7 +55,7 @@ import {
 import { BUFF_POP, CHARM, charmByWalkerRect, charmOverRect } from "../../layout/buffLayout";
 import { bumpFlash, type BumpSource } from "../../layout/bumpFlash";
 import {
-  contactDebuffEffects,
+  contactDebuffBatch,
   DOG_REACTIONS,
   dogReaction,
   hitEffects,
@@ -367,42 +368,44 @@ export class RunMoments {
     // dog's feet, its edge flash and the bump's flash, with a plain obstacle's stop; the walker
     // stumbles and every dog reacts and shakes off. A minor obstacle with contact plays its bump's
     // cues instead (playBumpHit), as the splash, the shake-off and the edge flash strips are a
-    // contact obstacle's own. An applied or refreshed contact debuff adds its own burst above
-    // those cues; then each pops its effects' changes.
-    let beforeContact = before;
+    // contact obstacle's own. Applied or refreshed debuffs add one whole-pack ground cue and
+    // sound per kind in this contact batch; each contact still pops its own changes.
     for (const { dog, item, outcome, source } of step.contacts) {
       if (source.kind === "minor") {
         this.playBumpHit(dog, { ...item, kind: source.obstacle }, step);
       } else {
         this.playContactHit(dog, source.encounter, step);
       }
-      const top = this.deps.pack.dogPoint(dog);
-      if (top !== undefined) {
+      this.addChanges(overPack(pack), outcomeChanges(outcome));
+      this.afterOutcome(outcome);
+    }
+    const debuffCues = contactDebuffBatch(
+      this.deps.still(),
+      before,
+      step.contacts.map(({ outcome, source }) => {
         const contact =
           source.kind === "minor"
             ? gameData.minorObstacles[source.obstacle].contact
             : gameData.encounters[source.encounter].resolution;
-        const effects = contact !== undefined && "effects" in contact ? contact.effects : [];
-        const bursts = contactDebuffEffects(this.deps.still(), beforeContact, {
+        return {
           after: outcome.state,
-          effects,
-          top,
-        });
-        for (const burst of bursts) {
-          playContactDebuff(
-            this.scene,
-            {
-              depth: DEPTH.fx,
-              dogTop: () => this.deps.pack.dogPoint(dog),
-              view: LAYOUT.roadView,
-            },
-            burst,
-          );
-        }
-      }
-      beforeContact = outcome.state;
-      this.addChanges(overPack(pack), outcomeChanges(outcome));
-      this.afterOutcome(outcome);
+          effects: contact !== undefined && "effects" in contact ? contact.effects : [],
+        };
+      }),
+    );
+    for (const cue of debuffCues) {
+      sound.play(debuffSoundCue(cue.debuff));
+      playContactDebuff(
+        this.scene,
+        {
+          badgeDepth: DEPTH.fx + 2,
+          depth: DEPTH.sprite - 0.5,
+          feet: () => this.deps.pack.cueFeet(),
+          view: LAYOUT.roadView,
+          walkerFeet: () => this.deps.pack.walkerFeet(),
+        },
+        cue,
+      );
     }
     this.sayQuips(step.fired.map((dog): QuipCue => ({ dog, moment: "fired" })));
     this.fired(step.fired, step.walk.run);

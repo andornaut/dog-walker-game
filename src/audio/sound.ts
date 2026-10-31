@@ -4,7 +4,7 @@
 import { clamp01 } from "@andornaut/game-kit/numbers";
 
 import { kebabCase } from "../assets/spriteKeys";
-import type { Encounter, EncounterId } from "../data/types";
+import type { DebuffId, Encounter, EncounterId } from "../data/types";
 
 export type BaseCue =
   | "badge"
@@ -22,8 +22,10 @@ export type BaseCue =
   | "zoneDone";
 // An encounter's hit moment, played with its own sound: an obstacle's or a lucky find's.
 type HitCue = `hit:${EncounterId}` | `luckyHit:${EncounterId}`;
-export type SoundCue = BaseCue | HitCue;
+type DebuffCue = `debuff:${DebuffId}`;
+export type SoundCue = BaseCue | DebuffCue | HitCue;
 
+const DEBUFF_PREFIX = "debuff:";
 const HIT_PREFIX = "hit:";
 const LUCKY_HIT_PREFIX = "luckyHit:";
 
@@ -52,11 +54,18 @@ export function hitCue(kind: Encounter["kind"], encounter: EncounterId): HitCue 
   return kind === "lucky" ? `${LUCKY_HIT_PREFIX}${encounter}` : `${HIT_PREFIX}${encounter}`;
 }
 
+export function debuffSoundCue(debuff: DebuffId): DebuffCue {
+  return `${DEBUFF_PREFIX}${debuff}`;
+}
+
 // The keys a cue may play, in preference order: an obstacle hit's own sfx-hit-<encounter>,
 // then the bump; a lucky hit's own sfx-<encounter>, with nothing in its place.
 export function soundKeysOf(cue: SoundCue): readonly string[] {
   if (isBaseCue(cue)) {
     return [SOUND_KEYS[cue]];
+  }
+  if (cue.startsWith(DEBUFF_PREFIX)) {
+    return [`sfx-debuff-${kebabCase(cue.slice(DEBUFF_PREFIX.length))}`];
   }
   return cue.startsWith(HIT_PREFIX)
     ? [`sfx-hit-${kebabCase(cue.slice(HIT_PREFIX.length))}`, SOUND_KEYS.bump]

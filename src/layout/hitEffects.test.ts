@@ -8,9 +8,10 @@ import { applyInstantEncounter, applyMinorContact } from "../rules/choices";
 import type { RunState } from "../state/runState";
 import { testState } from "../testing/runState";
 import {
+  contactDebuffBatch,
   contactDebuffEffects,
   DEBUFF_BADGE,
-  debuffCueRects,
+  debuffBadgeRect,
   dogReaction,
   type FlashCue,
   HIT_ART,
@@ -161,36 +162,28 @@ describe("hit effects with reduced motion", () => {
 });
 
 describe("contact debuff bursts", () => {
-  it.each(CONTACTS)(
-    "shows the applied debuffs for $name above its hit cues",
-    ({ apply, effects }) => {
-      const before = testState({ archie: 3 });
-      const { state: after } = apply(before);
-      const bursts = contactDebuffEffects(false, before, { after, effects, top: TOP });
-      expect(bursts.map(({ key }) => key)).toEqual(
-        debuffsIn(effects).map((debuff) => HIT_ART.debuffs[debuff].key),
-      );
-      const hit = hitEffects(false, struck("plain", "hedge"));
-      expect(
-        bursts.every(({ above }) => above > Math.max(...hit.map((effect) => effect.above))),
-      ).toBe(true);
-      expect(bursts.map(({ at }) => at)).toEqual(bursts.map(() => hit[0]?.at));
-      expect(bursts.every(({ frame }) => frame === null)).toBe(true);
-    },
-  );
+  it.each(CONTACTS)("shows the applied debuffs for $name", ({ apply, effects }) => {
+    const before = testState({ archie: 3 });
+    const { state: after } = apply(before);
+    const bursts = contactDebuffEffects(false, before, { after, effects });
+    expect(bursts.map(({ key }) => key)).toEqual(
+      debuffsIn(effects).map((debuff) => HIT_ART.debuffs[debuff].key),
+    );
+    expect(bursts.every(({ frame }) => frame === null)).toBe(true);
+  });
 
   it.each(CONTACTS)("shows an unchanged-duration refresh for $name", ({ apply, effects }) => {
     const { state: before } = apply(testState({ archie: 3 }));
     const { state: after } = apply(before);
     expect(after.debuffs).toEqual(before.debuffs);
-    expect(
-      contactDebuffEffects(false, before, { after, effects, top: TOP }).map(({ key }) => key),
-    ).toEqual(debuffsIn(effects).map((debuff) => HIT_ART.debuffs[debuff].key));
+    expect(contactDebuffEffects(false, before, { after, effects }).map(({ key }) => key)).toEqual(
+      debuffsIn(effects).map((debuff) => HIT_ART.debuffs[debuff].key),
+    );
   });
 
   it.each(CONTACTS)("shows no debuff burst when $name applies nothing", ({ apply, effects }) => {
     const { state: before } = apply(testState({ archie: 3 }));
-    expect(contactDebuffEffects(false, before, { after: before, effects, top: TOP })).toEqual([]);
+    expect(contactDebuffEffects(false, before, { after: before, effects })).toEqual([]);
   });
 
   it.each(CONTACTS)(
@@ -198,7 +191,7 @@ describe("contact debuff bursts", () => {
     ({ apply, effects }) => {
       const before = testState({ archie: 3 });
       const { state: after } = apply(before);
-      const bursts = contactDebuffEffects(true, before, { after, effects, top: TOP });
+      const bursts = contactDebuffEffects(true, before, { after, effects });
       expect(bursts.map(({ frame }) => frame)).toEqual(
         debuffsIn(effects).map((debuff) => HIT_ART.debuffs[debuff].peak),
       );
@@ -217,43 +210,41 @@ describe("contact debuff bursts", () => {
     }
     const before = testState({ archie: 3 });
     const { state: after } = first.apply(before);
+    expect(contactDebuffEffects(false, before, { after, effects: other.effects })).toEqual([]);
+  });
+});
+
+describe("contact debuff batches", () => {
+  it("coalesces repeated applications across dogs without changing application counts", () => {
+    const before = testState({ archie: 3 });
+    const effects = [{ debuff: "muddy", kind: "debuff" }] as const;
+    const first = { debuffsGot: { muddy: 1 } };
+    const second = { debuffsGot: { muddy: 2 } };
     expect(
-      contactDebuffEffects(false, before, { after, effects: other.effects, top: TOP }),
-    ).toEqual([]);
+      contactDebuffBatch(false, before, [
+        { after: first, effects },
+        { after: second, effects },
+      ]).map(({ debuff }) => debuff),
+    ).toEqual(["muddy"]);
+    expect(second.debuffsGot.muddy).toBe(2);
+    expect(contactDebuffBatch(false, second, [{ after: second, effects }])).toEqual([]);
   });
 });
 
 describe("contact debuff badges", () => {
   const view = SCREEN_LAYOUT.roadView;
-  const frame = { height: 128, width: 128 };
 
-  it("places the badge outside the burst's upper right", () => {
-    const { badge, burst } = debuffCueRects(view, { at: TOP, ...frame });
-    expect(badge.x).toBe(burst.x + burst.width + DEBUFF_BADGE.gap);
-    expect(badge.y).toBe(burst.y - DEBUFF_BADGE.aboveFrame);
+  it("places the native icon plate beside the walker's feet", () => {
+    const feet = { x: 180, y: 440 };
+    const badge = debuffBadgeRect(view, feet);
+    expect(badge).toEqual({ height: 24, width: 24, x: 228, y: 412 });
   });
 
-  it.each([
-    ["left", { x: view.x - view.width, y: TOP.y }],
-    ["right", { x: view.x + view.width, y: TOP.y }],
-    ["top", { x: TOP.x, y: view.y - view.height }],
-    ["bottom", { x: TOP.x, y: view.y + view.height * 2 }],
-  ])("keeps the whole badge inside the road at the %s edge", (_, centre) => {
-    const { badge, burst } = debuffCueRects(view, { at: centre, ...frame });
-    for (const rect of [badge, burst]) {
-      expect(rect.x).toBeGreaterThanOrEqual(view.x + DEBUFF_BADGE.viewInset);
-      expect(rect.y).toBeGreaterThanOrEqual(view.y + DEBUFF_BADGE.viewInset);
-      expect(rect.x + rect.width).toBeLessThanOrEqual(view.x + view.width - DEBUFF_BADGE.viewInset);
-      expect(rect.y + rect.height).toBeLessThanOrEqual(
-        view.y + view.height - DEBUFF_BADGE.viewInset,
-      );
-    }
-    expect(badge.x + badge.width <= burst.x || badge.x >= burst.x + burst.width).toBe(true);
-  });
-
-  it("flips the badge to the left when its right-side position would leave the viewport", () => {
-    const { badge, burst } = debuffCueRects(view, { at: { x: view.width, y: TOP.y }, ...frame });
-    expect(badge.x + badge.width + DEBUFF_BADGE.gap).toBe(burst.x);
+  it("flips to the left when the right-side plate would pass the viewport inset", () => {
+    const feet = { x: view.x + view.width - 4, y: 440 };
+    const badge = debuffBadgeRect(view, feet);
+    expect(badge.x).toBe(feet.x + DEBUFF_BADGE.leftDx);
+    expect(badge.y).toBe(feet.y + DEBUFF_BADGE.yOffset);
   });
 });
 

@@ -85,6 +85,23 @@ export class PackView {
     return sprite?.visible === true ? { x: dogTop(sprite).x, y: sprite.y } : undefined;
   }
 
+  // Visible pack feet, with the walker first, from the actors' actual drawn positions.
+  cueFeet(): readonly { x: number; y: number }[] {
+    const walker = this.walkerFeet();
+    return [
+      ...(walker === undefined ? [] : [walker]),
+      ...[...this.dogSprites.keys()].flatMap((dog) => {
+        const feet = this.dogFeet(dog);
+        return feet === undefined ? [] : [feet];
+      }),
+    ];
+  }
+
+  walkerFeet(): { x: number; y: number } | undefined {
+    const { sprite } = this.walker;
+    return sprite.visible ? { x: sprite.x, y: sprite.y } : undefined;
+  }
+
   // The walker stumbles and every dog plays tags in order, then each takes the pose the pack
   // has by then; reduced motion skips it.
   stumble(still: boolean, tags: readonly string[]): void {

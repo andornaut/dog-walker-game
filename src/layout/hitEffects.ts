@@ -20,10 +20,10 @@ export const HIT_ART = {
   bumpBig: { key: "fx-bump-big", peak: 1 },
   debris: { leaves: { key: "fx-debris-leaves" }, litter: { key: "fx-debris-litter" } },
   debuffs: {
-    muddy: { key: "fx-debuff-muddy", peak: 2 },
-    spotlight: { key: "fx-debuff-spotlight", peak: 2 },
-    stinky: { key: "fx-debuff-stinky", peak: 2 },
-    zoomies: { key: "fx-debuff-zoomies", peak: 2 },
+    muddy: { key: "fx-debuff-muddy", peak: 4 },
+    spotlight: { key: "fx-debuff-spotlight", peak: 4 },
+    stinky: { key: "fx-debuff-stinky", peak: 4 },
+    zoomies: { key: "fx-debuff-zoomies", peak: 4 },
   } satisfies Record<DebuffId, { readonly key: string; readonly peak: number }>,
   splash: { groundRow: 40, height: 48, key: "fx-splash", peak: 2 },
   tag: "play",
@@ -59,46 +59,35 @@ export interface HitEffect {
   readonly key: string;
 }
 
-export interface DebuffHitEffect extends HitEffect {
+export interface DebuffHitEffect {
   readonly debuff: DebuffId;
+  readonly frame: number | null;
+  readonly key: string;
 }
 
-// The existing 16px HUD icon at 2x, inset in a cream badge beside its burst.
+// Ground art uses its native frame size, anchored on the feet row.
+export const DEBUFF_GROUND = { groundRow: 24, height: 28, width: 48, yOffset: -1 } as const;
+
+// The native HUD icon on a compact cream plate beside the walker's feet.
 export const DEBUFF_BADGE = {
-  aboveFrame: 6,
-  gap: 4,
   iconInset: 4,
-  iconSize: 32,
-  size: 40,
+  iconSize: 16,
+  leftDx: -72,
+  rightDx: 48,
+  size: 24,
   viewInset: 4,
+  yOffset: -28,
 } as const;
 
-// Keep the full burst inside the road, then place its badge outside the frame: on the right
-// when it fits, otherwise on the left. The icon moves with its badge.
-export function debuffCueRects(
-  view: Rect,
-  cue: { readonly at: Point; readonly height: number; readonly width: number },
-): { readonly badge: Rect; readonly burst: Rect } {
-  const { aboveFrame, gap, size, viewInset } = DEBUFF_BADGE;
-  const left = view.x + viewInset;
-  const top = view.y + viewInset;
+export function debuffBadgeRect(view: Rect, feet: Point): Rect {
+  const { leftDx, rightDx, size, viewInset, yOffset } = DEBUFF_BADGE;
   const right = view.x + view.width - viewInset;
-  const bottom = view.y + view.height - viewInset;
-  const burst: Rect = {
-    height: cue.height,
-    width: cue.width,
-    x: Math.min(right - cue.width, Math.max(left, Math.round(cue.at.x - cue.width / 2))),
-    y: Math.min(bottom - cue.height, Math.max(top, Math.round(cue.at.y - cue.height / 2))),
-  };
-  const badgeX = burst.x + burst.width + gap;
+  const x = feet.x + rightDx;
   return {
-    badge: {
-      height: size,
-      width: size,
-      x: badgeX + size <= right ? badgeX : burst.x - gap - size,
-      y: Math.min(bottom - size, Math.max(top, burst.y - aboveFrame)),
-    },
-    burst,
+    height: size,
+    width: size,
+    x: Math.round(x + size <= right ? x : feet.x + leftDx),
+    y: Math.round(feet.y + yOffset),
   };
 }
 
@@ -124,20 +113,14 @@ export function hitEffects(still: boolean, hit: StruckDog): HitEffect[] {
   return [bump, { above: 1, at, frame: null, key: HIT_ART.debris[debris].key }];
 }
 
-// The preferred centre for a contact debuff burst, before keeping its frame inside the road.
-export function contactDebuffAnchor(top: Point): Point {
-  return { x: top.x, y: top.y - BUMP_ABOVE };
-}
-
 // A contact's debuffs that actually applied, including a refresh with an unchanged timer.
-// Its burst sits above the bump and debris; prevention leaves the application count unchanged.
+// Prevention leaves the application count unchanged.
 export function contactDebuffEffects(
   still: boolean,
   before: Pick<RunState, "debuffsGot">,
   contact: {
     readonly after: Pick<RunState, "debuffsGot">;
     readonly effects: readonly Effect[];
-    readonly top: Point;
   },
 ): DebuffHitEffect[] {
   const applied = new Set(
@@ -148,11 +131,32 @@ export function contactDebuffEffects(
         : [],
     ),
   );
-  const at = contactDebuffAnchor(contact.top);
   return [...applied].map((debuff) => {
     const { key, peak } = HIT_ART.debuffs[debuff];
-    return { above: 2, at, debuff, frame: still ? peak : null, key };
+    return { debuff, frame: still ? peak : null, key };
   });
+}
+
+// Coalesce cosmetic acquisition cues within a contact batch without altering its outcomes.
+export function contactDebuffBatch(
+  still: boolean,
+  before: Pick<RunState, "debuffsGot">,
+  contacts: readonly {
+    readonly after: Pick<RunState, "debuffsGot">;
+    readonly effects: readonly Effect[];
+  }[],
+): DebuffHitEffect[] {
+  const cues = new Map<DebuffId, DebuffHitEffect>();
+  let previous = before;
+  for (const contact of contacts) {
+    for (const cue of contactDebuffEffects(still, previous, contact)) {
+      if (!cues.has(cue.debuff)) {
+        cues.set(cue.debuff, cue);
+      }
+    }
+    previous = contact.after;
+  }
+  return [...cues.values()];
 }
 
 // fx-splash with its ground point on the touching dog's feet; with reduced motion it holds its

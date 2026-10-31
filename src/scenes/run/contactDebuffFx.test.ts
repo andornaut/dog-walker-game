@@ -5,7 +5,12 @@ import type { Scene } from "phaser";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SCREEN_LAYOUT } from "../../data/screen";
-import { DEBUFF_BADGE, type DebuffHitEffect, HIT_ART } from "../../layout/hitEffects";
+import {
+  DEBUFF_BADGE,
+  DEBUFF_GROUND,
+  type DebuffHitEffect,
+  HIT_ART,
+} from "../../layout/hitEffects";
 import { playTagOnce } from "../sprites";
 import { addPanel, tagFrame } from "../uiKit";
 import { playContactDebuff } from "./contactDebuffFx";
@@ -16,15 +21,14 @@ vi.mock("../uiKit", () => ({ addPanel: vi.fn(), tagFrame: vi.fn() }));
 class Display extends EventEmitter {
   active = true;
   children: Display[] = [];
-  displayHeight = 128;
-  displayWidth = 128;
+  depth = 0;
+  displayHeight = 28;
+  displayWidth = 48;
+  mask: unknown;
+  origin = [0, 0];
+  visible = true;
   x = 0;
   y = 0;
-
-  add(children: Display[]) {
-    this.children.push(...children);
-    return this;
-  }
 
   destroy = vi.fn(() => {
     if (!this.active) {
@@ -36,43 +40,71 @@ class Display extends EventEmitter {
     this.removeAllListeners();
   });
 
-  setDepth() {
+  setDepth(depth: number) {
+    this.depth = depth;
     return this;
   }
-
   setDisplaySize(width: number, height: number) {
     this.displayWidth = width;
     this.displayHeight = height;
     return this;
   }
-
-  setOrigin() {
+  setMask(mask: unknown) {
+    this.mask = mask;
     return this;
   }
-
+  setOrigin(x: number, y = x) {
+    this.origin = [x, y];
+    return this;
+  }
   setPosition(x: number, y: number) {
     this.x = x;
     this.y = y;
     return this;
   }
+  setVisible(visible: boolean) {
+    this.visible = visible;
+    return this;
+  }
 }
 
 function fixture(duration = 1200) {
-  const burst = new Display();
-  const group = new Display();
+  const bursts: Display[] = [];
+  const groups: Display[] = [];
   const icon = new Display();
   const panel = new Display();
   const events = new EventEmitter();
   const remove = vi.fn();
+  const mask = { destroy: vi.fn() };
+  const graphics = {
+    createGeometryMask: vi.fn(() => mask),
+    destroy: vi.fn(),
+    fillRect: vi.fn(),
+    fillStyle: vi.fn(),
+  };
+  graphics.fillStyle.mockReturnValue(graphics);
   const timers: { callback: () => void; ms: number }[] = [];
+  const burst = () => {
+    const image = new Display();
+    bursts.push(image);
+    return image;
+  };
   const scene = {
     add: {
-      container: vi.fn((_x: number, _y: number, children: Display[]) => group.add(children)),
-      image: vi.fn((_x: number, _y: number, key: string) => (key.startsWith("fx-") ? burst : icon)),
-      sprite: vi.fn(() => burst),
+      container: vi.fn((_x: number, _y: number, children: Display[]) => {
+        const group = new Display();
+        group.children = children;
+        groups.push(group);
+        return group;
+      }),
+      image: vi.fn((x: number, y: number, key: string) =>
+        (key.startsWith("fx-") ? burst() : icon).setPosition(x, y),
+      ),
+      sprite: vi.fn(burst),
     },
     anims: { get: vi.fn(() => ({ duration })) },
     events,
+    make: { graphics: vi.fn(() => graphics) },
     textures: { exists: vi.fn(() => true) },
     time: {
       delayedCall: vi.fn((ms: number, callback: () => void) => {
@@ -83,87 +115,95 @@ function fixture(duration = 1200) {
   };
   vi.mocked(addPanel).mockReturnValue(panel as unknown as ReturnType<typeof addPanel>);
   vi.mocked(tagFrame).mockReturnValue("peak");
-  return { burst, events, group, icon, panel, remove, scene, timers };
+  return { bursts, events, graphics, groups, icon, mask, panel, remove, scene, timers };
 }
 
 const view = SCREEN_LAYOUT.roadView;
-const cue: DebuffHitEffect = {
-  above: 2,
-  at: { x: 180, y: 380 },
-  debuff: "stinky",
-  frame: null,
-  key: HIT_ART.debuffs.stinky.key,
-};
+const cue: DebuffHitEffect = { debuff: "stinky", frame: null, key: HIT_ART.debuffs.stinky.key };
+const walker = { x: 180, y: 440 };
+const context = (feet: () => readonly Point[] = () => [walker]) => ({
+  badgeDepth: 2502,
+  depth: 9.5,
+  feet,
+  view,
+  walkerFeet: () => feet()[0],
+});
 
 beforeEach(() => vi.resetAllMocks());
 
-describe("contact debuff cue tracking", () => {
-  it("moves the burst and badge with the dog and keeps both inside the road", () => {
-    const { events, group, icon, panel, scene } = fixture();
-    let top: Point = { x: 180, y: 380 };
-    playContactDebuff(scene as unknown as Scene, { depth: 10, dogTop: () => top, view }, cue);
-    const first = { x: group.x, y: group.y };
-    top = { x: 360, y: 560 };
+describe("contact debuff ground cues", () => {
+  it("follows every visible actor at native size, under actors, without frame clamping", () => {
+    const { bursts, events, graphics, groups, icon, mask, scene } = fixture();
+    let feet = [walker, { x: 130, y: 420 }, { x: 230, y: 420 }];
+    playContactDebuff(
+      scene as unknown as Scene,
+      context(() => feet),
+      cue,
+    );
+    expect(bursts).toHaveLength(feet.length);
+    expect(bursts.map(({ x, y }) => ({ x, y }))).toEqual(feet.map(({ x, y }) => ({ x, y: y - 1 })));
+    expect(bursts.every(({ origin }) => origin[0] === 0.5 && origin[1] === 6 / 7)).toBe(true);
+    expect(groups.map(({ depth }) => depth)).toEqual([9.5, 2502]);
+    expect(groups.every((group) => group.mask === mask)).toBe(true);
+    expect(graphics.fillRect).toHaveBeenCalledWith(view.x, view.y, view.width, view.height);
+    expect(icon.displayWidth).toBe(DEBUFF_BADGE.iconSize);
+    expect(icon.x).toBe(DEBUFF_BADGE.iconInset);
+    expect(icon.y).toBe(DEBUFF_BADGE.iconInset);
+    feet = [
+      { x: view.x + view.width + 20, y: 440 },
+      { x: 160, y: 450 },
+    ];
     events.emit("postupdate");
-    expect({ x: group.x, y: group.y }).not.toEqual(first);
-    expect(group.x + 64).toBeLessThanOrEqual(view.x + view.width - DEBUFF_BADGE.viewInset);
-    expect(group.y + 64).toBeLessThanOrEqual(view.y + view.height - DEBUFF_BADGE.viewInset);
-    expect(group.x + panel.x + DEBUFF_BADGE.size).toBeLessThan(group.x - 64);
-    expect(icon.x - panel.x).toBe(DEBUFF_BADGE.iconInset);
-    expect(icon.y - panel.y).toBe(DEBUFF_BADGE.iconInset);
+    expect(bursts[0]?.x).toBe(feet[0]?.x);
+    expect(bursts[1]?.y).toBe(450 + DEBUFF_GROUND.yOffset);
+    expect(bursts[2]?.visible).toBe(false);
+    expect(groups[1]?.x).toBe((feet[0]?.x ?? 0) + DEBUFF_BADGE.leftDx);
+    expect(playTagOnce).toHaveBeenCalledTimes(3);
+    expect(scene.time.delayedCall).not.toHaveBeenCalled();
   });
 
   it.each(["completion", "shutdown", "destroy"] as const)(
-    "removes the full cue and tracking listeners on %s",
+    "cleans all ground copies, badge, mask and listeners on %s",
     (endedBy) => {
-      const { events, group, icon, panel, scene } = fixture();
-      playContactDebuff(
-        scene as unknown as Scene,
-        { depth: 10, dogTop: () => undefined, view },
-        cue,
-      );
-      expect(icon.active).toBe(true);
-      expect(scene.time.delayedCall).not.toHaveBeenCalled();
+      const { events, graphics, groups, icon, mask, scene } = fixture();
+      playContactDebuff(scene as unknown as Scene, context(), cue);
       if (endedBy === "completion") {
         vi.mocked(playTagOnce).mock.calls[0]?.[3]();
       } else if (endedBy === "shutdown") {
         events.emit("shutdown");
       } else {
-        group.destroy();
+        groups[0]?.destroy();
       }
-      expect(group.destroy).toHaveBeenCalledTimes(1);
+      expect(groups.every(({ active }) => !active)).toBe(true);
       expect(icon.active).toBe(false);
-      expect(panel.active).toBe(false);
+      expect(mask.destroy).toHaveBeenCalledTimes(1);
+      expect(graphics.destroy).toHaveBeenCalledTimes(1);
       expect(events.listenerCount("postupdate")).toBe(0);
       expect(events.listenerCount("shutdown")).toBe(0);
     },
   );
 
-  it("holds the peak and badge for the loaded duration with reduced motion", () => {
-    const duration = 1375;
-    const { group, icon, scene, timers } = fixture(duration);
-    playContactDebuff(
-      scene as unknown as Scene,
-      { depth: 10, dogTop: () => undefined, view },
-      {
-        ...cue,
-        frame: HIT_ART.debuffs.stinky.peak,
-      },
-    );
+  it("holds the readable ground pose and compact badge for the loaded duration", () => {
+    const { bursts, groups, scene, timers } = fixture(1200);
+    playContactDebuff(scene as unknown as Scene, context(), {
+      ...cue,
+      frame: HIT_ART.debuffs.stinky.peak,
+    });
     expect(scene.add.sprite).not.toHaveBeenCalled();
     expect(playTagOnce).not.toHaveBeenCalled();
-    expect(timers.map(({ ms }) => ms)).toEqual([duration]);
-    expect(icon.active).toBe(true);
+    expect(tagFrame).toHaveBeenCalledWith(scene, cue.key, HIT_ART.tag, 4);
+    expect(timers.map(({ ms }) => ms)).toEqual([1200]);
+    expect(bursts[0]?.active).toBe(true);
     timers[0]?.callback();
-    expect(group.active).toBe(false);
-    expect(icon.active).toBe(false);
+    expect(groups.every(({ active }) => !active)).toBe(true);
   });
 
-  it("skips missing burst art without registering tracking or cleanup timers", () => {
+  it("skips unavailable art without graphics, listeners or timers", () => {
     const { events, scene } = fixture();
     scene.textures.exists.mockReturnValue(false);
-    playContactDebuff(scene as unknown as Scene, { depth: 10, dogTop: () => undefined, view }, cue);
+    playContactDebuff(scene as unknown as Scene, context(), cue);
     expect(scene.add.container).not.toHaveBeenCalled();
+    expect(scene.make.graphics).not.toHaveBeenCalled();
     expect(scene.time.delayedCall).not.toHaveBeenCalled();
     expect(events.listenerCount("postupdate")).toBe(0);
   });

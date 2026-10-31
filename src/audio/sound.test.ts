@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   admitPlay,
   clampVolume,
+  debuffSoundCue,
   effectiveVolumes,
   hitCue,
   INITIAL_MIX,
@@ -46,6 +47,15 @@ describe("soundKeysOf", () => {
       expect(soundKeysOf(cue), name).toEqual(expected);
     }
   });
+
+  it.each(["muddy", "spotlight", "stinky", "zoomies"] as const)(
+    "plays the dedicated %s acquisition cue without a fallback",
+    (debuff) => {
+      const cue = debuffSoundCue(debuff);
+      expect(soundKeysOf(cue)).toEqual([`sfx-debuff-${debuff}`]);
+      expect(soundKeyFor(() => false, cue)).toBeUndefined();
+    },
+  );
 
   it("picks the first key that loaded, or none", () => {
     const loaded = (keys: string[]) => (key: string) => keys.includes(key);
