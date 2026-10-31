@@ -18,6 +18,7 @@ import {
   stripUnderClose,
 } from "../home/badgesView";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
+import { MODAL, modalRect } from "../home/modalLayout";
 import { DETAIL_TEXT_WIDTH, detailPanel, detailTextTops, STATS_LAYOUT } from "../home/statsLayout";
 import { closeControl } from "../ui/closeControl";
 import { PALETTE } from "../ui/palette";
@@ -32,6 +33,7 @@ import {
 } from "../ui/phaser/pixelText";
 import { TEXT_SCALE } from "../ui/textFit";
 import { addCardTitle } from "./homePanels";
+import { modalTextWidth } from "./modalMeasure";
 import { playTag, playTagOnce } from "./sprites";
 import { addBodyText, addCloseButton, addPanel, BODY_TEXT, tagFrame } from "./uiKit";
 
@@ -166,7 +168,6 @@ export function addBadgeCelebration(
   return badges;
 }
 
-const DETAIL: Rect = STATS_LAYOUT.detail;
 const DETAIL_TEXT = STATS_LAYOUT.detailText;
 // The badge and its confetti are drawn at 2x, so the burst shows around the bigger badge.
 const DETAIL_BADGE_SCALE = 2;
@@ -190,12 +191,22 @@ export function addBadgeDetail(
     fillLine(MENU_TEXT_FIELDS.stats, words, "badgeLine", { line: badge.badgeLine }),
   );
   const fonts = { body: pixelFontMetrics(scene, "body"), title: pixelFontMetrics(scene, "title") };
-  const panel = detailPanel(fonts, goal.length, line.length);
+  const measured = detailPanel(fonts, goal.length, line.length);
+  const width = Math.min(
+    dim.width - 2 * MODAL.margin,
+    Math.max(
+      BADGE_SIZE * DETAIL_BADGE_SCALE + 2 * MODAL.pad,
+      modalTextWidth(scene, "title", [badge.name]) + 2 * MODAL.pad,
+      modalTextWidth(scene, "body", [words.badgeEarned, words.badgeLocked, ...goal, ...line]) +
+        2 * MODAL.pad,
+    ),
+  );
+  const panel = modalRect(dim, undefined, { height: measured.height, width });
   const tops = detailTextTops(fonts, goal.length);
   parent.add([addDim(scene, dim), addPanel(scene, panel)]);
   addCloseButton(scene, parent, closeControl(panel), false);
-  const centre = DETAIL.x + DETAIL.width / 2;
-  const badgeY = DETAIL.y + DETAIL_TEXT.badgeY;
+  const centre = panel.x + panel.width / 2;
+  const badgeY = panel.y + DETAIL_TEXT.badgeY;
   if (badge.earned && (burst || reduced)) {
     const confetti = addConfetti(scene, reduced, DETAIL_BADGE_SCALE, centre, badgeY);
     if (confetti !== undefined) {
@@ -214,7 +225,7 @@ export function addBadgeDetail(
         status: PALETTE[locked.status],
       };
   const text = (y: number, value: string, style: Partial<PixelTextStyle>) =>
-    addBodyText(scene, parent, { x: centre, y: DETAIL.y + y }, value, { originX: 0.5, ...style });
+    addBodyText(scene, parent, { x: centre, y: panel.y + y }, value, { originX: 0.5, ...style });
   text(DETAIL_TEXT.nameY, badge.name, { colour: colours.name, font: "title" });
   const status = badge.earned ? words.badgeEarned : words.badgeLocked;
   text(tops.status, status, { colour: colours.status });

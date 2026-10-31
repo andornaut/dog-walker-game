@@ -3,17 +3,16 @@ import type { GameObjects, Scene } from "phaser";
 
 import { ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { SCREEN_LAYOUT } from "../data/screen";
 import { type DetailCard, type DetailPart, detailParts, type DetailPicture } from "../home/detail";
 import {
   CARD_TEXT_ROOM,
   cardTitleRow,
   detailCardLayout,
-  detailCardRect,
   detailOwner,
   type DetailRow,
   HOME_LAYOUT,
 } from "../home/homeLayout";
+import { MODAL, modalRect, modalTitleWidth } from "../home/modalLayout";
 import { withNamePills } from "../hud/effectNames";
 import { barTitleLeft } from "../ui/barTitle";
 import { closeControl } from "../ui/closeControl";
@@ -29,6 +28,7 @@ import {
 import { AFFORD_OUTSET } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
 import { addNamePills } from "./effectNameColours";
+import { modalTextWidth } from "./modalMeasure";
 import { playFirstTag } from "./sprites";
 import {
   addBodyText,
@@ -44,8 +44,6 @@ import {
 // The home screen's drawing beyond its tiles: the gold outline on the Pet shop while the
 // player can afford something in it, and the detail card that opens over the screen. Positions
 // inside a piece are the art's, from the style guide.
-
-const SCREEN = SCREEN_LAYOUT.screen;
 
 // The ui-afford outline 2px outside rect, playing its glint tag, or holding its first frame
 // with reduced motion; while the art is missing, an amber line in a plum keyline. A selected
@@ -275,7 +273,19 @@ export function drawDetailCard(
     });
   draw(parts.beside, CARD.besideX, CARD_TEXT_ROOM.beside, layout.beside);
   draw(parts.below, CARD.pad, CARD_TEXT_ROOM.full, layout.below);
-  const rect = detailCardRect(SCREEN, layout.height);
+  const bounds = content.getBounds();
+  const titleWidth = modalTextWidth(scene, "title", [card.title]);
+  const width = Math.min(
+    dim.width - 2 * MODAL.margin,
+    Math.ceil(
+      Math.max(
+        wellRect.x + wellRect.width + MODAL.pad,
+        bounds.right + MODAL.pad,
+        modalTitleWidth(titleWidth),
+      ),
+    ),
+  );
+  const rect = modalRect(dim, undefined, { height: layout.height, width });
   drawCardFrame(scene, parent, dim, closePressed, rect, card.title, content);
   return rect;
 }

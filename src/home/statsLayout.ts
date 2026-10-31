@@ -4,6 +4,7 @@ import { type FontMetrics, inkRowsOfLines } from "@andornaut/game-kit/text/bitma
 import { helpCapDy } from "../ui/labelHelpGap";
 import { type ScrollbarRects, scrollbarRects } from "../ui/scrollbar";
 import { BADGE_STRIP, type WallCellLines } from "./badgesView";
+import { MODAL } from "./modalLayout";
 import { SHOP_LAYOUT, shopListFrame, shopTabRects } from "./shopLayout";
 
 export type StatsTab = "badges" | "dogs" | "runs";
@@ -50,7 +51,7 @@ export const STATS_LAYOUT = {
   // ui-panel's frame, frame rows deep, end the panel.
   detailText: {
     badgeY: 48,
-    foot: 8,
+    foot: MODAL.pad - 3,
     frame: 3,
     gap: 8,
     goalDy: 24,

@@ -63,6 +63,7 @@ import {
   homeBarButtons,
   sectionFill,
   slotSignText,
+  updateModalLayout,
 } from "../home/homeLayout";
 import {
   bubbleSpeech,
@@ -170,6 +171,7 @@ import {
   purchasePicture,
   SHOP_ART,
 } from "./itemArt";
+import { modalTextWidth } from "./modalMeasure";
 import { listenOnePress } from "./onePress";
 import {
   BAR_MUTED_EVENT,
@@ -262,7 +264,6 @@ const START_BUTTON: Rect = HOME_LAYOUT.startButton;
 const WAITING_ALPHA = 0.6;
 const START_LABEL = HOME_LAYOUT.startLabel;
 const GEAR_BADGE: Rect = HOME_LAYOUT.gearBadge;
-const UPDATE_MODAL = HOME_LAYOUT.updateModal;
 // The keyboard ring sits outside the ui-select frame.
 const FOCUS_OUTSET = 5;
 
@@ -773,13 +774,21 @@ export class StartScene extends Scene {
     );
   }
 
+  private updateLayout(mode: PlateMode) {
+    const title = modalTextWidth(this, "title", [gameData.homeText[mode].title]);
+    return updateModalLayout(HOME_REGION, {
+      action: modalTextWidth(this, "title", [gameData.homeText[mode].button]),
+      title,
+    });
+  }
+
   private updatePressed(): boolean {
     const down = this.overlayPress;
     return (
       this.overlay !== undefined &&
       "mode" in this.overlay &&
       down !== undefined &&
-      containsPoint(UPDATE_MODAL.hit, down.x, down.y)
+      containsPoint(this.updateLayout(this.overlay.mode).hit, down.x, down.y)
     );
   }
 
@@ -791,13 +800,11 @@ export class StartScene extends Scene {
       return;
     }
     if ("mode" in overlay) {
+      const hit = this.updateLayout(overlay.mode).hit;
       const close = closeControl(rect).hit;
       if (containsPoint(close, down.x, down.y) && containsPoint(close, x, y)) {
         this.closeOverlay();
-      } else if (
-        containsPoint(UPDATE_MODAL.hit, down.x, down.y) &&
-        containsPoint(UPDATE_MODAL.hit, x, y)
-      ) {
+      } else if (containsPoint(hit, down.x, down.y) && containsPoint(hit, x, y)) {
         acceptUpdate();
       }
     } else if (containsPoint(rect, down.x, down.y) && containsPoint(rect, x, y)) {
@@ -1231,7 +1238,7 @@ export class StartScene extends Scene {
     if (top === "bubble") {
       this.shownUpdate = undefined;
     } else if (this.overlay === undefined && this.shownUpdate !== top) {
-      this.overlay = { mode: top, rect: UPDATE_MODAL.panel };
+      this.overlay = { mode: top, rect: this.updateLayout(top).panel };
       this.shownUpdate = top;
     }
     this.drawPackAtGate(root, g, save, true);
@@ -1719,7 +1726,7 @@ export class StartScene extends Scene {
   // A waiting version or a newer save opens once per home visit or change of notice mode.
   // Closing leaves the home screen usable; Update now keeps the existing acceptUpdate action.
   private drawUpdateModal(root: GameObjects.Container, mode: PlateMode): void {
-    const { button, panel } = UPDATE_MODAL;
+    const { button, panel } = this.updateLayout(mode);
     const text = gameData.homeText[mode];
     root.add(addDim(this, HOME_REGION));
     addModalCard(this, root, panel, text.title, { pressed: this.closePressed() });

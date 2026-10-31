@@ -16,12 +16,13 @@ import { closeFace } from "../ui/closeControl";
 import { LABEL_HELP_GAP } from "../ui/labelHelpGap";
 import { cardTitleRow } from "./homeLayout";
 import { MENU_TEXT_FIELDS } from "./menuText";
+import { MODAL, modalActionWidth } from "./modalLayout";
 import {
   INSTALL_STEPS,
   INSTALL_STEPS_FIT,
   installStepsLayout,
   knobX,
-  noteRoom,
+  noteRoomForControl,
   SETTINGS_NOTE_STYLE,
   SETTINGS_ROW,
   settingsLayout,
@@ -95,14 +96,28 @@ const fittedNotes = notedRows.map((row) =>
   fittingText(
     SETTINGS_NOTE_STYLE,
     (style: TextFitStyle, line: string) => inkWidth("font-body", style, line),
-    noteRoom(row.kind),
+    noteRoomForControl(
+      row.kind === "button"
+        ? modalActionWidth(inkWidth("font-title", { scale: 2 }, words.installButton))
+        : SETTINGS_ROW.switch.width,
+    ),
     row.note,
   ),
 );
 const shapes: SettingsRowShape[] = SHIPPED_ROWS.map((row) =>
   row.kind === "slider"
     ? { kind: "slider" }
-    : { kind: row.kind, noteLines: fittedNotes[notedRows.indexOf(row)]?.lines.length ?? 0 },
+    : {
+        kind: row.kind,
+        noteLines: fittedNotes[notedRows.indexOf(row)]?.lines.length ?? 0,
+        ...(row.kind === "button"
+          ? {
+              controlWidth: modalActionWidth(
+                inkWidth("font-title", { scale: 2 }, words.installButton),
+              ),
+            }
+          : {}),
+      },
 );
 const bodyFont = fontFileMetrics("font-body");
 const titleFont = fontFileMetrics("font-title");
@@ -209,7 +224,7 @@ describe("the settings card", () => {
   // separator.
   it("starts each row on the title row or the separator over it", () => {
     expect(rows.map(({ rect }) => rect.y)).toEqual([
-      titleRowBottom,
+      titleRowBottom + MODAL.gap,
       ...layout.separators.map(({ y }) => y),
     ]);
   });
@@ -257,7 +272,7 @@ describe("the settings card", () => {
 
   it("sets the install button's label at 2x within its face", () => {
     const control = layout.rows.at(-1)?.control;
-    expect(inkWidth("font-title", TWO_X, words.installButton)).toBeLessThan(
+    expect(inkWidth("font-title", { scale: 2 }, words.installButton)).toBeLessThan(
       (control?.width ?? 0) - 8,
     );
   });
@@ -295,9 +310,9 @@ describe.each([
     expect(buildLabelY - lastInk).toBe(LABEL_HELP_GAP);
   });
 
-  it("leaves 6 clear rows from its lowest ink to the card's inner bottom edge", () => {
+  it("leaves the modal inset from its lowest ink to the card's outer bottom edge", () => {
     const innerBottom = panel.y + panel.height - CARD_FRAME_BOTTOM;
-    expect(innerBottom - (buildLabelY + labelInkBottom)).toBe(6);
+    expect(innerBottom + CARD_FRAME_BOTTOM - (buildLabelY + labelInkBottom)).toBe(MODAL.pad);
   });
 
   // A tap on the label lands on the card outside every row, so it neither acts nor closes it.
@@ -312,10 +327,14 @@ describe.each([
 describe.each(keysOf(gameData.menuText.settings.installSteps))(
   "the %s install steps' card",
   (browser) => {
-    const { steps: installSteps } = gameData.menuText.settings.installSteps[browser];
+    const { steps: installSteps, title } = gameData.menuText.settings.installSteps[browser];
     const { room, style } = INSTALL_STEPS_FIT;
     const fitted = fitInFont("font-body", style, room, installSteps);
-    const { card, close, icon, steps } = installStepsLayout(SCREEN_CONFIG, fitted.lines.length);
+    const stepsInk = Math.max(...fitted.lines.map((line) => inkWidth("font-body", style, line)));
+    const { card, close, icon, steps } = installStepsLayout(SCREEN_CONFIG, fitted.lines.length, {
+      steps: stepsInk,
+      title: inkWidth("font-title", TWO_X, title),
+    });
     const body = fontFileMetrics("font-body");
     // From the first line's capitals to the last line's lowest ink, at 2x.
     const stepsHeight =
@@ -328,7 +347,7 @@ describe.each(keysOf(gameData.menuText.settings.installSteps))(
       ["the title row", cardTitleRow(card), card],
       ["the close control's face", closeFace(close), cardTitleRow(card)],
       ["the close control's hit area", close.hit, card],
-      ["the steps", { height: stepsHeight, width: room, x: steps.x, y: steps.y }, card],
+      ["the steps", { height: stepsHeight, width: stepsInk, x: steps.x, y: steps.y }, card],
       ["the button glyph", glyph, card],
     ])("keeps %s inside its frame", (_, inner, outer) => {
       expect(inside(inner, outer)).toBe(true);

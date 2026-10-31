@@ -3,13 +3,14 @@ import type { GameObjects, Scene } from "phaser";
 
 import type { DetailPicture } from "../home/detail";
 import type { ConfirmChoice, ConfirmLines } from "../home/purchaseConfirm";
-import { confirmLeftCapTop, PURCHASE_CONFIRM_LAYOUT } from "../home/purchaseConfirmLayout";
+import { purchaseConfirmLayout } from "../home/purchaseConfirmLayout";
 import { closeControl } from "../ui/closeControl";
 import { PALETTE } from "../ui/palette";
 import { addDim } from "../ui/phaser/draw";
 import { addPixelText, pixelFontMetrics } from "../ui/phaser/pixelText";
 import { TEXT_SCALE } from "../ui/textFit";
 import { addDetailWell, addModalCard } from "./homePanels";
+import { modalTextWidth } from "./modalMeasure";
 import { addMenuButton } from "./uiKit";
 
 // Everything the purchase confirm draws from. The scene that opens it routes its taps and keys
@@ -32,8 +33,6 @@ export interface PurchaseConfirmHits {
   readonly close: Rect;
 }
 
-const LAYOUT = PURCHASE_CONFIRM_LAYOUT;
-
 // The confirm over everything the scene drew before it: the shop dimmed, the modal card titled
 // "Buy {name}?" with its close control, which cancels as Cancel does, the picture in its well,
 // the price and the bank it would leave, then Cancel and Buy. Returns where it is tapped.
@@ -43,6 +42,16 @@ export function drawPurchaseConfirm(
   input: PurchaseConfirmViewInput,
 ): PurchaseConfirmHits {
   const { closePressed, lines, picture, pressed } = input;
+  const LAYOUT = purchaseConfirmLayout(
+    { body: pixelFontMetrics(scene, "body"), title: pixelFontMetrics(scene, "title") },
+    {
+      buy: modalTextWidth(scene, "title", [lines.buy]),
+      cancel: modalTextWidth(scene, "title", [lines.cancel]),
+      left: modalTextWidth(scene, "body", [lines.left]),
+      price: modalTextWidth(scene, "title", [lines.price]),
+      title: modalTextWidth(scene, "title", [lines.title]),
+    },
+  );
   layer.add(addDim(scene, LAYOUT.dim));
   addModalCard(scene, layer, LAYOUT.card, lines.title, { pressed: closePressed });
   const centred = (
@@ -64,7 +73,7 @@ export function drawPurchaseConfirm(
     layer.add(scene.add.image(at.x, at.y, picture.key).setOrigin(0).setScale(picture.scale));
   }
   centred(LAYOUT.price, lines.price, PALETTE.plum);
-  const leftTop = confirmLeftCapTop(pixelFontMetrics(scene, "title"));
+  const leftTop = LAYOUT.left.capTop;
   centred({ ...LAYOUT.left, capTop: leftTop }, lines.left, PALETTE.darkBrown);
   const labels: Readonly<Record<ConfirmChoice, string>> = { buy: lines.buy, cancel: lines.cancel };
   for (const choice of ["cancel", "buy"] as const) {

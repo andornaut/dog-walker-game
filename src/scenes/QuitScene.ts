@@ -2,6 +2,7 @@ import { Scene } from "phaser";
 
 import { gameData } from "../data";
 import { overlayRegion, regionOutside } from "../home/homeBar";
+import { HOME_LAYOUT } from "../home/homeLayout";
 import { homeQuestionLayout, QUIT_QUESTION_ANSWERS } from "../hud/pauseMenu";
 import { isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { exitShown } from "../pwa";
@@ -30,6 +31,7 @@ export class QuitScene extends Scene {
       exitGame();
     };
     const covered = addQuestionPanel(this, area, {
+      avoid: { ...HOME_LAYOUT.gate, width: area.width, x: area.x },
       close: keepPlaying,
       entries: QUIT_QUESTION_ANSWERS.map((answer) => ({
         label: words[answer],

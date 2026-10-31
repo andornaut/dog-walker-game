@@ -1,8 +1,10 @@
+import { wrapWords } from "@andornaut/game-kit/lines";
 import type { Rect } from "@andornaut/game-kit/rect";
-import { type FontMetrics, fontMetrics } from "@andornaut/game-kit/text/bitmapFont";
+import { type FontMetrics, fontMetrics, inkWidth } from "@andornaut/game-kit/text/bitmapFont";
 
 import { DEPTH_STEPS } from "../assets/depthSteps";
 import { LOADING_ART, ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
+import { MENU_TEXT } from "../data/menuText";
 import {
   LANE_COUNT,
   ROAD_CAMERA,
@@ -13,12 +15,25 @@ import {
 import type { GameData } from "../data/types";
 import { dotRects, HELP_LAYOUT } from "../help/helpLayout";
 import { END_LAYOUT } from "../home/endLayout";
-import { HOME_LAYOUT, homeBarButtons, updateModalText } from "../home/homeLayout";
-import { settingsLayout, type SettingsRowShape } from "../home/settings";
+import { overlayRegion } from "../home/homeBar";
+import {
+  HOME_LAYOUT,
+  homeBarButtons,
+  updateModalLayout,
+  updateModalText,
+} from "../home/homeLayout";
+import { MODAL, modalActionWidth } from "../home/modalLayout";
+import { noteRoomForControl, settingsLayout, type SettingsRowShape } from "../home/settings";
 import { SHOP_TABS } from "../home/shop";
 import { SHOP_LAYOUT, shopTabRects } from "../home/shopLayout";
 import { STATS_LAYOUT, statsTabRects } from "../home/statsLayout";
-import { CELEBRATION_LAYOUT } from "../hud/celebrationLayout";
+import {
+  CELEBRATION_LAYOUT,
+  GREETING_FIT,
+  newWalkerRows,
+  ZONE_EARNINGS_FIT,
+  zoneDoneRows,
+} from "../hud/celebrationLayout";
 import { INLINE_FACE, inlineFaceBox } from "../hud/faceText";
 import { hudLanes } from "../hud/hudLanes";
 import {
@@ -77,6 +92,7 @@ import { MAX_CARD_OPTIONS } from "../rules/choices";
 import { read } from "../rules/units";
 import { walkProjection } from "../runner/walkGeometry";
 import { gridRects } from "../ui/grid";
+import { plainMarks } from "../ui/pixelFont";
 import { readBitmapFont } from "./fontFile";
 
 // The screen geometry art's tools read, as shared/export/layout.json, all in screen pixels
@@ -104,12 +120,29 @@ function ownerLead(body: FontMetrics, slot: LeadSlot, line: Rect) {
 
 // SettingsScene's rows with the install row: sound, music, effects, reduced motion and install,
 // each note on the lines the shipped notes wrap to (src/home/settings.test.ts checks them).
+const installWidth = modalActionWidth(
+  inkWidth(
+    readBitmapFont("font-title"),
+    2,
+    plainMarks(MENU_TEXT.settings.installButton).toUpperCase(),
+  ),
+);
+const noteLines = (width: number, text: string) =>
+  wrapWords(
+    (line) => inkWidth(readBitmapFont("font-body"), 2, plainMarks(line)),
+    noteRoomForControl(width),
+    text,
+  ).length;
 export const SETTINGS_EXPORT_ROWS: readonly SettingsRowShape[] = [
-  { kind: "switch", noteLines: 1 },
+  { kind: "switch", noteLines: noteLines(32, MENU_TEXT.settings.soundNote) },
   { kind: "slider" },
   { kind: "slider" },
-  { kind: "switch", noteLines: 2 },
-  { kind: "button", noteLines: 1 },
+  { kind: "switch", noteLines: noteLines(32, MENU_TEXT.settings.motionNote) },
+  {
+    controlWidth: installWidth,
+    kind: "button",
+    noteLines: noteLines(installWidth, MENU_TEXT.settings.installNote),
+  },
 ];
 
 // A top-bar button with where its icon sits.
@@ -118,7 +151,10 @@ function withIcon(button: BarButton) {
 }
 
 export function layoutExport(
-  data: Pick<GameData, "dogs" | "help" | "menuText" | "shopGear" | "walkers" | "tuning">,
+  data: Pick<
+    GameData,
+    "dogs" | "help" | "homeText" | "menuText" | "runText" | "shopGear" | "walkers" | "tuning"
+  >,
 ) {
   const regions = SCREEN_LAYOUT;
   const { backdrop, rasterView, road, walkView } = regions;
@@ -127,6 +163,26 @@ export function layoutExport(
   const bandRows = Array.from({ length: road.y - rasterView.y }, (_, i) => rasterView.y + i);
   const body = fontMetrics(readBitmapFont("font-body"));
   const title = fontMetrics(readBitmapFont("font-title"));
+  const titleInk = (text: string) =>
+    inkWidth(readBitmapFont("font-title"), 2, plainMarks(text).toUpperCase());
+  const notice = updateModalLayout(overlayRegion("home"), {
+    action: titleInk(data.homeText.update.button),
+    title: titleInk(data.homeText.update.title),
+  });
+  // Reference rows use the maximum greeting/info budgets, with the actual fixed-size font.
+  const walkerRows = newWalkerRows(
+    body,
+    2,
+    { lines: ["", ""], style: { scale: 2 } },
+    {
+      action: titleInk(data.runText.newWalker.button),
+      content: GREETING_FIT.room,
+    },
+  );
+  const zoneRows = zoneDoneRows(body, {
+    action: titleInk(data.runText.zoneDone.button),
+    earnings: ZONE_EARNINGS_FIT.room,
+  });
   return {
     camera: {
       ...ROAD_CAMERA,
@@ -195,6 +251,7 @@ export function layoutExport(
     // farthest feet first, then the leashes, then the walker; each leash runs from the walker's
     // hand to the dog's collar, collarHeights over its feet. Obstacles hit the parts, partInset
     // screen pixels inside each sprite; pickups touch the outline around them all.
+    modal: MODAL,
     pack: {
       collarHeights: COLLAR_HEIGHTS,
       feet: PACK_FEET,
@@ -224,7 +281,15 @@ export function layoutExport(
         // By count of cards, from 1.
         rows: cardRows(MAX_CARD_OPTIONS, walkView),
       },
-      celebration: CELEBRATION_LAYOUT,
+      celebration: {
+        ...CELEBRATION_LAYOUT,
+        newWalker: {
+          ...CELEBRATION_LAYOUT.newWalker,
+          ...walkerRows,
+          info: { ...CELEBRATION_LAYOUT.newWalker.info, y: walkerRows.info.map(({ y }) => y) },
+        },
+        zoneDone: { ...CELEBRATION_LAYOUT.zoneDone, ...zoneRows },
+      },
       end: END_LAYOUT,
       help: {
         ...HELP_LAYOUT,
@@ -250,8 +315,8 @@ export function layoutExport(
         ),
         // The update modal and its button label's capitals.
         updateModal: {
-          ...HOME_LAYOUT.updateModal,
-          ...updateModalText(title),
+          ...notice,
+          ...updateModalText(title, notice.button),
         },
         walkerRects: gridRects(
           HOME_LAYOUT.walkerTiles,
@@ -265,7 +330,21 @@ export function layoutExport(
         // The note takes a line per sentence at 2x on the plate.
         ...pauseMenuLayout(body, walkView, {
           buttonCount: PAUSE_MENU_ITEMS.length,
+          buttonWidths: PAUSE_MENU_ITEMS.map((item, i) =>
+            modalActionWidth(
+              inkWidth(
+                readBitmapFont("font-title"),
+                2,
+                `${i + 1} ${plainMarks(data.menuText.pause[item])}`.toUpperCase(),
+              ),
+            ),
+          ),
           noteLines: PAUSE_NOTE_LINES,
+          titleWidth: inkWidth(
+            readBitmapFont("font-title"),
+            2,
+            plainMarks(data.menuText.pause.title).toUpperCase(),
+          ),
         }),
       },
       settings: settingsLayout({ body, title }, SCREEN_CONFIG, SETTINGS_EXPORT_ROWS),

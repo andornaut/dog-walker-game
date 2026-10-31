@@ -13,7 +13,7 @@ import { cardTitleRow } from "./homeLayout";
 // control's face.
 function clearSpace(bar: Rect, close: CloseControl, width: number) {
   const left = barTitleLeft(bar, close, width);
-  return { left: left - bar.x, right: close.x - (left + width) };
+  return { left: left - bar.x, right: close.x - BAR_TITLE.closeGap - (left + width) };
 }
 
 // A centred title has the same clear space each side, to within the odd pixel, at least inset;
@@ -33,7 +33,7 @@ describe("barTitleLeft", () => {
   const card: Rect = { height: 100, width: 300, x: 30, y: 0 };
   const bar = cardTitleRow(card);
   const close = closeControl(card);
-  const room = close.x - bar.x;
+  const room = close.x - BAR_TITLE.closeGap - bar.x;
 
   it.each([
     ["a short title", 40],

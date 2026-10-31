@@ -1,4 +1,5 @@
 import { animationKey } from "@andornaut/game-kit/art/aseprite";
+import type { Rect } from "@andornaut/game-kit/rect";
 import { type GameObjects, Math as PhaserMath, Scene } from "phaser";
 
 import { ZONE_CELEBRATION_ART as ART } from "../assets/spriteKeys";
@@ -11,6 +12,7 @@ import {
   infoItems,
   laidInfoLine,
   newWalkerRows,
+  zoneDoneRows,
 } from "../hud/celebrationLayout";
 import {
   type CelebrationText,
@@ -34,13 +36,14 @@ import {
 } from "../ui/phaser/pixelText";
 import { addRampDim } from "../ui/phaser/rampDim";
 import { addConfetti } from "./badges";
+import { modalTextWidth } from "./modalMeasure";
 import { closeOverlay, listenOutsideTap, type OverlayData } from "./overlay";
 import { currentSettings, walkerSpriteKey } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { guardScreenInput } from "./screenGuard";
 import { soundboardOf } from "./soundboard";
 import { playFirstTag } from "./sprites";
-import { addMenuButton, addPanel, BODY_TEXT, listenButtonTap } from "./uiKit";
+import { addMenuButton, addPanel, BODY_TEXT, listenButtonTap, MENU_BUTTON_KEY_GAP } from "./uiKit";
 
 export interface ZoneCelebrationSceneData extends OverlayData {
   celebration: ZoneCelebration;
@@ -109,11 +112,11 @@ export class ZoneCelebrationScene extends Scene {
       }
     });
     if (text.kind === "zoneDone") {
-      this.addPlate(text);
-      this.addButton(version.button, text.button, finish);
+      const action = this.addPlate(text);
+      this.addButton(action, text.button, finish);
       // A tap anywhere else but the walk bar's buttons, the dog cards included, or on the page
       // beside the game, moves on too.
-      const area = regionOutside(exitShown(), "walk", [version.button]);
+      const area = regionOutside(exitShown(), "walk", [action]);
       listenOutsideTap(this, () => area, finish);
       return;
     }
@@ -158,10 +161,14 @@ export class ZoneCelebrationScene extends Scene {
   }
 
   // The zone's earnings on a cream plate, the amounts in forest.
-  private addPlate(text: ZoneDoneText): void {
-    const { centreX, zoneDone } = LAYOUT;
-    addPanel(this, zoneDone.plate);
+  private addPlate(text: ZoneDoneText): Rect {
+    const { centreX } = LAYOUT;
     const line = text.earnings.map((part) => part.text).join("");
+    const zoneDone = zoneDoneRows(pixelFontMetrics(this, "body"), {
+      action: this.actionInk(text.button),
+      earnings: modalTextWidth(this, "body", [line]),
+    });
+    addPanel(this, zoneDone.plate);
     const whole = atLineTop(addPixelText(this, 0, 0, line, BODY_TEXT), zoneDone.earningsY);
     const left = Math.round(centreX - whole.width / 2);
     whole.setX(left);
@@ -185,12 +192,20 @@ export class ZoneCelebrationScene extends Scene {
         before += part.text;
       }
     });
+    return zoneDone.button;
+  }
+
+  private actionInk(label: string): number {
+    return (
+      modalTextWidth(this, "title", [label]) +
+      (keyNumbersShown() ? modalTextWidth(this, "title", ["1"]) + MENU_BUTTON_KEY_GAP : 0)
+    );
   }
 
   // The walker's line in a speech bubble whose tail points up at them, a dotted rule, and
   // their agility over their perk under it, the bubble sized to its lines. Returns the button's
   // place under the bubble.
-  private addBubble(text: NewWalkerText): typeof LAYOUT.newWalker.button {
+  private addBubble(text: NewWalkerText): Rect {
     const { centreX, newWalker } = LAYOUT;
     const { greeting, tail } = newWalker;
     const fitted = withProbe(this, BODY_TEXT, (probe) => {
@@ -199,7 +214,17 @@ export class ZoneCelebrationScene extends Scene {
     });
     const { lines, style } = fitted;
     const body = pixelFontMetrics(this, "body");
-    const rows = newWalkerRows(body, text.info.length, fitted);
+    const infoWidths = text.info.map(
+      (parts) =>
+        laidInfoLine(
+          (item) => (item.kind === "text" ? modalTextWidth(this, "body", [item.text]) : 16),
+          infoItems(parts),
+        ).width,
+    );
+    const rows = newWalkerRows(body, text.info.length, fitted, {
+      action: this.actionInk(text.button),
+      content: Math.max(modalTextWidth(this, "body", fitted.lines), ...infoWidths),
+    });
     addPanel(this, rows.bubble, "ui-quip");
     if (this.textures.exists(ART.tailUp)) {
       this.add.image(tail.x, tail.y, ART.tailUp).setOrigin(0);
@@ -245,7 +270,7 @@ export class ZoneCelebrationScene extends Scene {
 
   // The version's button, with the key that presses it in its left end once a key has been
   // pressed.
-  private addButton(place: Version["button"], label: string, onTap: () => void): void {
+  private addButton(place: Rect, label: string, onTap: () => void): void {
     const button = addMenuButton(this, place, label, {
       available: true,
       primary: true,

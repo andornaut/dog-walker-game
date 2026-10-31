@@ -1,5 +1,5 @@
-import { itemAt } from "@andornaut/game-kit/arrays";
 import { fillNames, sentences, wrapWords } from "@andornaut/game-kit/lines";
+import { rectsOverlap } from "@andornaut/game-kit/rect";
 import { inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
 import { describe, expect, it } from "vitest";
 
@@ -36,10 +36,9 @@ describe("the menus' hit areas", () => {
       pauseMenuLayout(BODY, walkView, { buttonCount: 4, noteLines: 2 }),
       homeQuestionLayout(BODY, walkView, { buttonCount: 2, noteLines: 3 }),
     ]) {
-      for (let i = 1; i < hits.length; i += 1) {
-        const above = itemAt(hits, i - 1);
-        expect(above.y + above.height).toBeLessThanOrEqual(itemAt(hits, i).y);
-      }
+      hits.forEach((hit, i) => {
+        hits.slice(i + 1).forEach((next) => expect(rectsOverlap(hit, next)).toBe(false));
+      });
       for (const hit of hits) {
         for (const button of Object.values(TOP_BAR_BUTTONS)) {
           expect(hit.y).toBeGreaterThanOrEqual(button.hit.y + button.hit.height);

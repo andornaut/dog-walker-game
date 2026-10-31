@@ -42,7 +42,6 @@ import {
   CARD_TEXT_ROOM,
   cardTitleRow,
   detailCardLayout,
-  detailCardRect,
   detailOwner,
   detailOwnerHeight,
   type DetailRow,
@@ -462,10 +461,9 @@ describe("a detail card", () => {
   );
 
   // Every card's status or price is its last row, under the well at the text margin: the well's
-  // left edge, 42 across the screen.
+  // left edge.
   it("sets the status at the text margin, the well's left edge", () => {
     expect(pad).toBe(well.x);
-    expect(detailCardRect(SCREEN_CONFIG, 0).x + pad).toBe(42);
   });
 
   // A dog's or walker's status sits a paragraph's 28 rows under its last line's capitals.

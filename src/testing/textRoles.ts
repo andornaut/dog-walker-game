@@ -41,7 +41,7 @@ import {
 import { messageLine, PLATE_MODES } from "../home/homeLines";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import { confirmLines } from "../home/purchaseConfirm";
-import { PURCHASE_CONFIRM_LAYOUT } from "../home/purchaseConfirmLayout";
+import { PURCHASE_CONFIRM_ROOMS } from "../home/purchaseConfirmLayout";
 import {
   INSTALL_STEPS,
   INSTALL_STEPS_FIT,
@@ -364,7 +364,7 @@ function shopRoles(): TextRoleCase[] {
   ]);
   const bankAfter = cents(forSale.reduce((sum, row) => sum + row.price, 0));
   const confirm = forSale.map((row) => confirmLines(data, { bankAfter, ...row }));
-  const { left, price, title } = PURCHASE_CONFIRM_LAYOUT;
+  const { left, price, title } = PURCHASE_CONFIRM_ROOMS;
   return [
     ...rowRole("shop row's name", (row) => row.name),
     ...rowRole("shop row's line", (row) => row.line),

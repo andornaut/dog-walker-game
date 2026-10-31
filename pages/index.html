@@ -154,8 +154,11 @@
       /* The install steps for the browser's own menu (iOS, Firefox for Android), one browser's
          shown: a highlight's chrome and band over the dimmed page. */
       .steps {
-        width: min(320px, calc(100vw - 32px));
+        width: fit-content;
+        max-width: calc(100vw - 32px);
+        max-height: calc(100dvh - 32px);
         padding: 0;
+        overflow: auto;
         background: var(--cream);
         color: var(--plum);
         border: 1px solid var(--ink);
@@ -168,16 +171,15 @@
       }
       .steps-body {
         display: grid;
-        padding: 1px 3px 3px 1px;
+        gap: 8px;
+        padding: 15px;
       }
       .steps p {
+        max-width: 34ch;
         margin: 0;
-        padding: 12px 14px 0;
       }
       .steps-close {
         justify-self: end;
-        margin: 16px 16px 20px;
-        padding: 12px 16px;
         font-size: 16px;
       }
       /* A highlight: the cream chrome (ink outer line, plum inner line, tan lip on the bottom

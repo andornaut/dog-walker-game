@@ -5,6 +5,7 @@ import {
   inkRowsOfLines,
 } from "@andornaut/game-kit/text/bitmapFont";
 
+import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
 import { ownerPhotoRect, WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
 import type { PackPlacement } from "../layout/packFormation";
@@ -16,6 +17,7 @@ import { helpCapDy } from "../ui/labelHelpGap";
 import { hasPill, PILL_IMAGE_GAP, pillDropUnderInk, pillRiseOverCaps } from "../ui/namePills";
 import { BUTTON_LIP_PX } from "../ui/selection";
 import { TOP_BAR_FACE, TOP_BAR_HEIGHT, TOP_BAR_MID, TOP_BAR_WELL } from "../ui/topBarTrim";
+import { MODAL, modalActionWidth, modalRect, modalTitleWidth } from "./modalLayout";
 import type { SectionId } from "./sections";
 
 // Every tappable thing is at least 44 game pixels (48 CSS pixels on a 390px-wide phone) on
@@ -26,11 +28,14 @@ const GAP = 8;
 const GATE = { height: 156, y: 40 };
 
 // The dismissible update notice uses the same card and compact control as other home modals.
-const UPDATE_PANEL = { height: 116, width: 328, x: 16, y: 222 };
+const UPDATE_PANEL = modalRect({ ...SCREEN_CONFIG, x: 0, y: 0 }, undefined, {
+  height: MODAL.header + BUTTON_SIZE.compact.height + MODAL.pad,
+  width: SCREEN_CONFIG.width - 2 * MODAL.margin,
+});
 const UPDATE_BUTTON = {
   ...BUTTON_SIZE.compact,
   x: UPDATE_PANEL.x + (UPDATE_PANEL.width - BUTTON_SIZE.compact.width) / 2,
-  y: UPDATE_PANEL.y + UPDATE_PANEL.height - 12 - BUTTON_SIZE.compact.height,
+  y: UPDATE_PANEL.y + UPDATE_PANEL.height - MODAL.pad - BUTTON_SIZE.compact.height,
 };
 
 // The separator bar under the gate scene: 3 rows (the gate scene's last row is 195).
@@ -104,10 +109,10 @@ export const HOME_LAYOUT = {
     besideDy: 4,
     besideX: 90,
     owner: { face: 32, gap: 6, nameColour: "plum", roleColour: "darkBrown" },
-    pad: 12,
+    pad: MODAL.pad,
     rowGap: 8,
-    titleRow: { height: 24, inset: 6, titleY: 7 },
-    well: { picture: 2, size: 68, x: 12, y: 36 },
+    titleRow: { height: 20, inset: MODAL.pad, titleY: 0 },
+    well: { picture: 2, size: 68, x: MODAL.pad, y: MODAL.header },
     width: 300,
   },
   dogOrigin: { x: 14, y: DOGS_SECTION.y + TILE_OFFSET },
@@ -496,13 +501,7 @@ export function cardTitleRow(card: Rect): Rect {
 
 // A detail card height tall, centred on the screen.
 export function detailCardRect(screen: { height: number; width: number }, height: number): Rect {
-  const { width } = HOME_LAYOUT.card;
-  return {
-    height,
-    width,
-    x: (screen.width - width) / 2,
-    y: Math.round((screen.height - height) / 2),
-  };
+  return modalRect({ ...screen, x: 0, y: 0 }, undefined, { height, width: HOME_LAYOUT.card.width });
 }
 
 const BESIDE_ROOM = HOME_LAYOUT.card.width - HOME_LAYOUT.card.besideX - HOME_LAYOUT.card.pad;
@@ -594,8 +593,34 @@ export const UPDATE_MODAL_ROOM = {
 } as const;
 
 // The compact button label's capitals, centred on the raised face above its lip.
-export function updateModalText(title: FontMetrics): { capY: number } {
-  const { button } = HOME_LAYOUT.updateModal;
+export function updateModalText(
+  title: FontMetrics,
+  button: Rect = HOME_LAYOUT.updateModal.button,
+): { capY: number } {
   const caps = title.capHeight * 2;
   return { capY: button.y + Math.floor((button.height - BUTTON_LIP_PX - caps) / 2) };
+}
+
+// The notice has only its title, close control and compact action, with no empty body row.
+export function updateModalLayout(area: Rect, ink: { action: number; title: number }) {
+  const actionWidth = modalActionWidth(ink.action);
+  const width = Math.min(
+    area.width - 2 * MODAL.margin,
+    Math.max(actionWidth + 2 * MODAL.pad, modalTitleWidth(ink.title)),
+  );
+  const panel = modalRect(
+    area,
+    { ...GATE, width: area.width, x: area.x },
+    {
+      height: MODAL.header + BUTTON_SIZE.compact.height + MODAL.pad,
+      width,
+    },
+  );
+  const button = {
+    height: BUTTON_SIZE.compact.height,
+    width: actionWidth,
+    x: panel.x + (panel.width - actionWidth) / 2,
+    y: panel.y + MODAL.header,
+  };
+  return { button, hit: button, panel };
 }

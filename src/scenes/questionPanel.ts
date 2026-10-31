@@ -3,7 +3,8 @@ import { sentences } from "@andornaut/game-kit/lines";
 import { containsPoint, insetRect, type Rect } from "@andornaut/game-kit/rect";
 import type { Scene } from "phaser";
 
-import { NOTE_PLATE, notePartTops, PAUSE_NOTE_WIDTH, type pauseMenuLayout } from "../hud/pauseMenu";
+import { modalActionWidth } from "../home/modalLayout";
+import { NOTE_PLATE, notePartTops, type pauseMenuLayout } from "../hud/pauseMenu";
 import { cardNumberForKey, menuKeyActs } from "../input/keyBindings";
 import { withKeyNumber } from "../input/keyNumbers";
 import { closeControl } from "../ui/closeControl";
@@ -12,6 +13,7 @@ import { PALETTE } from "../ui/palette";
 import { fillRect } from "../ui/phaser/draw";
 import { addPixelText, pixelFontMetrics, wrapPixelText } from "../ui/phaser/pixelText";
 import { addCardClose, addCardTitle } from "./homePanels";
+import { modalTextWidth } from "./modalMeasure";
 import { listenTargetPress } from "./targetPress";
 import { addMenuButton, addRimmedPanel, addTapBurst, type MenuButton } from "./uiKit";
 
@@ -28,6 +30,7 @@ export interface PanelNotePart {
 }
 
 export interface QuestionPanel {
+  readonly avoid?: Rect;
   // What the close control in the panel's top-right corner does, as a tap outside the panel does.
   readonly close: () => void;
   // Top to bottom, the first the call to action and key 1.
@@ -49,7 +52,22 @@ export interface QuestionPanel {
 // buttons' hit areas.
 export function addQuestionPanel(scene: Scene, area: Rect, question: QuestionPanel): Rect[] {
   const { entries } = question;
-  const noteWidth = PAUSE_NOTE_WIDTH - 2 * NOTE_PLATE.padX;
+  const body = pixelFontMetrics(scene, "body");
+  const measures = {
+    avoid: question.avoid,
+    buttonCount: entries.length,
+    buttonWidths: entries.map((entry, i) =>
+      modalActionWidth(modalTextWidth(scene, "title", [withKeyNumber(i + 1, entry.label)])),
+    ),
+    noteWidth: modalTextWidth(
+      scene,
+      "body",
+      question.note.map(({ text }) => text),
+    ),
+    titleWidth: modalTextWidth(scene, "title", [question.title]),
+  };
+  const preview = question.layout(body, area, { ...measures, noteLines: 0 });
+  const noteWidth = preview.notePlate.width - 2 * NOTE_PLATE.padX;
   // The note wraps at 2x.
   const noteParts = question.note.map(({ colour, text }) => {
     const style = { colour, scale: NOTE_PLATE.scale };
@@ -57,8 +75,7 @@ export function addQuestionPanel(scene: Scene, area: Rect, question: QuestionPan
     return { lines: said.flatMap((part) => wrapPixelText(scene, style, noteWidth, part)), style };
   });
   const noteLines = noteParts.reduce((sum, part) => sum + part.lines.length, 0);
-  const body = pixelFontMetrics(scene, "body");
-  const layout = question.layout(body, area, { buttonCount: entries.length, noteLines });
+  const layout = question.layout(body, area, { ...measures, noteLines });
   const { panel } = layout;
 
   addRimmedPanel(scene, panel);

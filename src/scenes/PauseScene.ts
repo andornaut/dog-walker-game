@@ -1,6 +1,7 @@
 import { Core, Scene, Scenes } from "phaser";
 
 import { gameData } from "../data";
+import { SCREEN_LAYOUT } from "../data/screen";
 import { overlayRegion, regionOutside } from "../home/homeBar";
 import type { HomeNoteLine } from "../hud/homeQuestion";
 import {
@@ -10,6 +11,8 @@ import {
   type PauseMenuItem,
   pauseMenuLayout,
 } from "../hud/pauseMenu";
+import { WALKER_SILHOUETTES } from "../layout/packFormation";
+import { walkerFootY } from "../layout/screenLayout";
 import { exitShown } from "../pwa";
 import { PALETTE } from "../ui/palette";
 import { addRampDim } from "../ui/phaser/rampDim";
@@ -17,6 +20,7 @@ import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { listenOutsideTap, onceSceneEvent, openOverlay } from "./overlay";
 import { addQuestionPanel, type PanelEntry } from "./questionPanel";
+import type { RunScene } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
 import { SETTINGS_CLOSED_EVENT, type SettingsData } from "./SettingsScene";
 import { soundboardOf } from "./soundboard";
@@ -67,6 +71,20 @@ export class PauseScene extends Scene {
       resume: onResume,
       settings: () => this.openSettings(),
     };
+    const source = this.scene.get(SCENE_KEYS.run) as RunScene;
+    const shown = source.hudView();
+    const tops = shown?.run.pack.flatMap(({ dog }) => source.dogPoint(dog)?.y ?? []) ?? [];
+    const walkerTop =
+      shown === undefined
+        ? SCREEN_LAYOUT.walkView.y + SCREEN_LAYOUT.walkView.height
+        : walkerFootY(SCREEN_LAYOUT.road) - WALKER_SILHOUETTES[shown.run.walker].above;
+    const top = Math.min(walkerTop, ...tops);
+    const avoid = {
+      height: SCREEN_LAYOUT.walkView.y + SCREEN_LAYOUT.walkView.height - top,
+      width: SCREEN_LAYOUT.walkView.width,
+      x: SCREEN_LAYOUT.walkView.x,
+      y: top,
+    };
     const question = gameData.runText.homeQuestion;
     const menu = gameData.menuText.pause;
     // The first entry, Resume or Keep walking, is the call to action.
@@ -83,6 +101,7 @@ export class PauseScene extends Scene {
       walkView,
       data.mode === "homeQuestion"
         ? {
+            avoid,
             close: onResume,
             entries,
             layout: homeQuestionLayout,
@@ -91,6 +110,7 @@ export class PauseScene extends Scene {
             title: question.title,
           }
         : {
+            avoid,
             close: onResume,
             entries,
             layout: pauseMenuLayout,

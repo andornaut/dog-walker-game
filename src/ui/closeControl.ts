@@ -4,10 +4,10 @@ import { BUTTON_SIZE } from "./buttonGeometry";
 
 // Every page's and overlay's close control: the 20x20 ui-icon-button face in its frame's
 // top-right corner, tapped anywhere in the 44x44 square in that corner. On a card or panel the
-// face sits 8px in from the right edge and 8px down; on a full-screen page, 7px in and 9px
+// face sits 16px in from the right edge and 16px down; on a full-screen page, 7px in and 9px
 // down unless the page gives its own top.
 const FACE_SIZE = BUTTON_SIZE.icon.face;
-const CARD_FACE = { right: 8, top: 8 } as const;
+const CARD_FACE = { right: 16, top: 16 } as const;
 const PAGE_FACE = { right: 7, top: 9 } as const;
 const HIT_SIZE = BUTTON_SIZE.icon.target;
 

@@ -132,5 +132,26 @@
 
 /* Keep the wide Reload control inside the card at phone widths. */
 .crash .crash-panel {
-  padding-inline: 12px;
+  width: fit-content;
+  max-width: min(336px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 12px;
+  overflow: auto;
+}
+
+.crash .crash-body,
+.crash .crash-title {
+  margin-bottom: 8px;
+}
+
+.crash .crash-details {
+  margin-top: 8px;
+}
+
+/* Modal controls follow their full-size labels, with a 16px inset including the ink border. */
+.steps .app-button,
+.crash .crash-panel .crash-button {
+  width: max-content;
+  min-width: 44px;
+  padding-inline: 15px;
 }

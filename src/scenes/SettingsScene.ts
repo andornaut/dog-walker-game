@@ -12,12 +12,13 @@ import { FEEDBACK } from "../home/feedback";
 import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
 import { type OverlayRegion, overlayRegion, regionOutside } from "../home/homeBar";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
+import { modalActionWidth } from "../home/modalLayout";
 import {
   INSTALL_STEPS_FIT,
   type InstallStepsLayout,
   installStepsLayout,
   knobX,
-  noteRoom,
+  noteRoomForControl,
   SETTINGS_BUILD_LABEL,
   SETTINGS_NOTE_STYLE,
   SETTINGS_ROW,
@@ -63,6 +64,7 @@ import { GREYED } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
 import { listenHomeBar } from "./homeBarPress";
 import { addModalCard } from "./homePanels";
+import { modalTextWidth } from "./modalMeasure";
 import { listenOnePress } from "./onePress";
 import {
   BAR_MUTED_EVENT,
@@ -160,11 +162,11 @@ function settingsRows(installable: boolean): readonly Row[] {
 }
 
 // How many lines a browser's install steps wrap onto in their card.
-function stepsLines(scene: Scene, steps: string): number {
+function stepsLines(scene: Scene, steps: string): string[] {
   return withProbe(scene, BODY_TEXT, (probe) => {
     setPixelText(probe, steps);
     return fitPixelText(probe, INSTALL_STEPS_FIT, 0, 0);
-  }).lines.length;
+  }).lines;
 }
 
 function hasNote(row: Row): row is NotedRow {
@@ -179,10 +181,23 @@ function rowShapes(scene: Scene, rows: readonly Row[]): SettingsRowShape[] {
     if (!hasNote(row)) {
       return { kind: row.kind };
     }
+    const controlWidth =
+      row.kind === "button"
+        ? modalActionWidth(modalTextWidth(scene, "title", [words[row.button]]))
+        : SETTINGS_ROW.switch.width;
     const { lines } = withProbe(scene, BODY_TEXT, (probe) =>
-      fittingText(SETTINGS_NOTE_STYLE, labelInkWidth(probe), noteRoom(row.kind), words[row.note]),
+      fittingText(
+        SETTINGS_NOTE_STYLE,
+        labelInkWidth(probe),
+        noteRoomForControl(controlWidth),
+        words[row.note],
+      ),
     );
-    return { kind: row.kind, noteLines: lines.length };
+    return {
+      kind: row.kind,
+      noteLines: lines.length,
+      ...(row.kind === "button" ? { controlWidth } : {}),
+    };
   });
 }
 
@@ -406,8 +421,15 @@ export class SettingsScene extends Scene {
   }
 
   private openSteps(browser: MenuInstallBrowser): void {
-    const lines = stepsLines(this, gameData.menuText.settings.installSteps[browser].steps);
-    this.steps = { ...installStepsLayout(SCREEN_CONFIG, lines), browser };
+    const words = gameData.menuText.settings.installSteps[browser];
+    const lines = stepsLines(this, words.steps);
+    this.steps = {
+      ...installStepsLayout(SCREEN_CONFIG, lines.length, {
+        steps: modalTextWidth(this, "body", lines),
+        title: modalTextWidth(this, "title", [words.title]),
+      }),
+      browser,
+    };
     this.render();
   }
 
@@ -578,7 +600,10 @@ export class SettingsScene extends Scene {
     tile.content.add(icon === undefined ? [label, note] : [icon, label, note]);
     fitPixelText(
       note,
-      { room: noteRoom(row.kind), style: SETTINGS_NOTE_STYLE },
+      {
+        room: noteRoomForControl(control?.width ?? SETTINGS_ROW[row.kind].width),
+        style: SETTINGS_NOTE_STYLE,
+      },
       noteAt.x,
       noteAt.y,
     );

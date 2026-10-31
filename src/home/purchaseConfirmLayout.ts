@@ -1,5 +1,4 @@
-import type { Rect } from "@andornaut/game-kit/rect";
-import { type FontMetrics } from "@andornaut/game-kit/text/bitmapFont";
+import { type FontMetrics, inkRowsFromCapTop } from "@andornaut/game-kit/text/bitmapFont";
 
 import { SCREEN_CONFIG } from "../data/screen";
 import { barTitleRoom } from "../ui/barTitle";
@@ -8,60 +7,81 @@ import { closeControl } from "../ui/closeControl";
 import { helpCapDy } from "../ui/labelHelpGap";
 import { overlayRegion } from "./homeBar";
 import { cardTitleRow, HOME_LAYOUT } from "./homeLayout";
-import type { ConfirmChoice } from "./purchaseConfirm";
+import { MODAL, modalActionWidth, modalRect, modalTitleWidth } from "./modalLayout";
 
-// The purchase confirm: the shop dimmed under the lit top bar (overlayRegion), and a card centred
-// on the screen with its title, the item's picture in a well, the price and the bank it
-// would leave centred under it, the bank's capitals LABEL_HELP_GAP clear rows under the title
-// font's lowest ink (confirmLeftCapTop), and Cancel then Buy along its bottom, each 44 tall and
-// 128 wide, with 12 between them and equal margins at the card's sides.
 const CARD = HOME_LAYOUT.card;
-const WIDTH = CARD.width;
-const HEIGHT = 220;
-const BUTTON = { ...BUTTON_SIZE.compact, gap: BUTTON_SIZE.pairGap } as const;
-const card: Rect = {
-  height: HEIGHT,
-  width: WIDTH,
-  x: (SCREEN_CONFIG.width - WIDTH) / 2,
-  y: (SCREEN_CONFIG.height - HEIGHT) / 2,
-};
-const centreX = card.x + WIDTH / 2;
-const titleRow = cardTitleRow(card);
-const well: Rect = {
-  height: CARD.well.size,
-  width: CARD.well.size,
-  x: centreX - CARD.well.size / 2,
-  y: card.y + 40,
-};
-const buttonsY = card.y + HEIGHT - BUTTON.gap - BUTTON.height;
-const button = (i: number): Rect => ({
-  height: BUTTON.height,
-  width: BUTTON.width,
-  x: centreX - BUTTON.width - BUTTON.gap / 2 + i * (BUTTON.width + BUTTON.gap),
-  y: buttonsY,
-});
+const BUTTON_HEIGHT = BUTTON_SIZE.compact.height;
+const MAX_WIDTH = SCREEN_CONFIG.width - 2 * MODAL.margin;
+const LIMITS = { height: 0, width: MAX_WIDTH, x: 0, y: 0 };
 
-export const PURCHASE_CONFIRM_LAYOUT = {
-  buttons: { buy: button(1), cancel: button(0) } satisfies Readonly<Record<ConfirmChoice, Rect>>,
-  card,
-  dim: overlayRegion("home"),
-  // Each line is centred on centreX with its capitals' top at capTop, in its font at 2x; the
-  // bank's at confirmLeftCapTop.
-  left: { centreX, font: "body", room: WIDTH - 2 * CARD.pad },
-  // The picture sits in the well picture pixels in from its corner.
-  picture: { x: well.x + CARD.well.picture, y: well.y + CARD.well.picture },
-  price: { capTop: well.y + well.height + 10, centreX, font: "title", room: WIDTH - 2 * CARD.pad },
-  // The title, beside the close control as on every modal card (addModalCard).
-  title: {
-    capTop: titleRow.y + CARD.titleRow.titleY,
-    font: "title",
-    room: barTitleRoom(titleRow, closeControl(card)),
-  },
-  titleRow,
-  well,
+// Fixed-font text budgets at the viewport width limit; runtime uses each purchase's actual ink.
+export const PURCHASE_CONFIRM_ROOMS = {
+  left: { font: "body", room: MAX_WIDTH - 2 * MODAL.pad },
+  price: { font: "title", room: MAX_WIDTH - 2 * MODAL.pad },
+  title: { font: "title", room: barTitleRoom(cardTitleRow(LIMITS), closeControl(LIMITS)) },
 } as const;
 
-// The capitals' top of the bank it would leave, under the price in the title font.
-export function confirmLeftCapTop(title: FontMetrics): number {
-  return PURCHASE_CONFIRM_LAYOUT.price.capTop + helpCapDy(title, 2);
+export function confirmLeftCapTop(title: FontMetrics, priceTop: number): number {
+  return priceTop + helpCapDy(title, 2);
+}
+
+// Runtime geometry follows the actual fixed-size ink and the paired controls.
+export function purchaseConfirmLayout(
+  fonts: { body: FontMetrics; title: FontMetrics },
+  ink: { buy: number; cancel: number; left: number; price: number; title: number },
+) {
+  const actions = { buy: modalActionWidth(ink.buy), cancel: modalActionWidth(ink.cancel) };
+  const actionsWidth = actions.buy + actions.cancel + MODAL.gap;
+  const width = Math.min(
+    SCREEN_CONFIG.width - 2 * MODAL.margin,
+    Math.max(
+      actionsWidth + 2 * MODAL.pad,
+      modalTitleWidth(ink.title),
+      Math.max(ink.price, ink.left) + 2 * MODAL.pad,
+    ),
+  );
+  const priceTop = MODAL.header + CARD.well.size + MODAL.gap;
+  const leftTop = confirmLeftCapTop(fonts.title, priceTop);
+  const buttonsTop = leftTop + inkRowsFromCapTop(fonts.body) * 2 + MODAL.gap;
+  const height = buttonsTop + BUTTON_HEIGHT + MODAL.pad;
+  const placed = modalRect(overlayRegion("home"), undefined, { height, width });
+  const middle = placed.x + width / 2;
+  const row = cardTitleRow(placed);
+  const placedWell = {
+    height: CARD.well.size,
+    width: CARD.well.size,
+    x: middle - CARD.well.size / 2,
+    y: placed.y + MODAL.header,
+  };
+  const action = (choice: "buy" | "cancel") => ({
+    height: BUTTON_HEIGHT,
+    width: actions[choice],
+    x: middle - actionsWidth / 2 + (choice === "buy" ? actions.cancel + MODAL.gap : 0),
+    y: placed.y + buttonsTop,
+  });
+  return {
+    buttons: { buy: action("buy"), cancel: action("cancel") },
+    card: placed,
+    dim: overlayRegion("home"),
+    left: {
+      ...PURCHASE_CONFIRM_ROOMS.left,
+      capTop: placed.y + leftTop,
+      centreX: middle,
+      room: width - 2 * MODAL.pad,
+    },
+    picture: { x: placedWell.x + CARD.well.picture, y: placedWell.y + CARD.well.picture },
+    price: {
+      ...PURCHASE_CONFIRM_ROOMS.price,
+      capTop: placed.y + priceTop,
+      centreX: middle,
+      room: width - 2 * MODAL.pad,
+    },
+    title: {
+      ...PURCHASE_CONFIRM_ROOMS.title,
+      capTop: row.y + CARD.titleRow.titleY,
+      room: barTitleRoom(row, closeControl(placed)),
+    },
+    titleRow: row,
+    well: placedWell,
+  };
 }

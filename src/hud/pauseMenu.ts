@@ -1,6 +1,7 @@
 import type { Rect } from "@andornaut/game-kit/rect";
 import { type FontMetrics, inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
 
+import { MODAL, modalRect, modalTitleWidth } from "../home/modalLayout";
 import { BUTTON_SIZE } from "../ui/buttonGeometry";
 
 // The menu's buttons, top to bottom; each one's label is menuText.pause[item].
@@ -13,20 +14,27 @@ export const HOME_QUESTION_ANSWERS = ["keepWalking", "headHome"] as const;
 // The Quit question's answers, top to bottom, as the Home question's: the safe one first.
 export const QUIT_QUESTION_ANSWERS = ["keepPlaying", "quit"] as const;
 
-const PANEL_WIDTH = BUTTON_SIZE.wide.width + 32;
 // Offsets from the panel's top-left corner, and the room under the last part.
-const TITLE_Y = 16;
-const BUTTON = { ...BUTTON_SIZE.wide, gap: 8, x: 16, y: 40 };
+const TITLE_Y = MODAL.pad;
+const BUTTON = { ...BUTTON_SIZE.wide, gap: MODAL.rowGap, x: MODAL.pad, y: MODAL.header };
 
 // The width a button's label has, its key number included, 4px in from each side. The panel's
 // title is placed beside its close control, as on every modal card (addCardTitle).
-export const PANEL_TEXT_ROOM = { label: BUTTON.width - 8 } as const;
+export const PANEL_TEXT_ROOM = {
+  label: BUTTON.width - 8,
+} as const;
 // The note plate is as wide as the buttons, gap under the last one. The note is body text at
 // scale, wrapped to the plate's width less padX each side, its first line's capitals padTop
 // under the plate's top, a line of the body font apart, and the last line's lowest ink
 // padBottom over its bottom.
 export const PAUSE_NOTE_WIDTH = BUTTON.width;
-export const NOTE_PLATE = { gap: 4, padBottom: 4, padTop: 6, padX: 4, scale: 2 } as const;
+export const NOTE_PLATE = {
+  gap: MODAL.gap,
+  padBottom: MODAL.rowGap,
+  padTop: MODAL.rowGap,
+  padX: MODAL.rowGap,
+  scale: 2,
+} as const;
 
 // The pause menu's own note, a sentence a line, takes this many lines.
 export const PAUSE_NOTE_LINES = 2;
@@ -35,9 +43,18 @@ function notePlateHeight(body: FontMetrics, lines: number): number {
   const { padBottom, padTop, scale } = NOTE_PLATE;
   return padTop + inkRowsOfLines(body, lines) * scale + padBottom;
 }
-const BOTTOM = 17;
+const BOTTOM = MODAL.pad;
 // Each button's hit area reaches this far above and below its face.
 const HIT_REACH = 0;
+
+export interface QuestionParts {
+  avoid?: Rect | undefined;
+  buttonCount: number;
+  buttonWidths?: readonly number[];
+  noteLines: number;
+  noteWidth?: number;
+  titleWidth?: number;
+}
 
 interface PauseMenuLayout {
   buttons: Rect[];
@@ -53,30 +70,54 @@ interface PauseMenuLayout {
 function panelLayout(
   body: FontMetrics,
   area: Rect,
-  parts: { buttonCount: number; noteLines: number },
+  parts: QuestionParts,
   noteFirst: boolean,
 ): PauseMenuLayout {
   const { buttonCount } = parts;
   const noted = parts.noteLines > 0;
   const noteHeight = noted ? notePlateHeight(body, parts.noteLines) : 0;
-  const buttonsHeight = buttonCount * (BUTTON.height + BUTTON.gap) - BUTTON.gap;
+  const actionRows = buttonCount === PAUSE_MENU_ITEMS.length ? 3 : buttonCount;
+  const buttonsHeight = actionRows * (BUTTON.height + BUTTON.gap) - BUTTON.gap;
   // Offsets down the panel: a note first sits where the buttons would start, less its gap.
-  const noteFirstY = BUTTON.y - NOTE_PLATE.gap;
-  const buttonsY = noteFirst && noted ? noteFirstY + noteHeight + BUTTON.gap : BUTTON.y;
+  const noteFirstY = BUTTON.y;
+  const buttonsY = noteFirst && noted ? noteFirstY + noteHeight + MODAL.gap : BUTTON.y;
   const noteY = noteFirst ? noteFirstY : BUTTON.y + buttonsHeight + NOTE_PLATE.gap;
   const height = Math.max(buttonsY + buttonsHeight, noted ? noteY + noteHeight : 0) + BOTTOM;
-  const panel: Rect = {
-    height,
-    width: PANEL_WIDTH,
-    x: Math.round(area.x + (area.width - PANEL_WIDTH) / 2),
-    y: Math.round(area.y + (area.height - height) / 2),
-  };
-  const buttons = Array.from({ length: buttonCount }, (_, i) => ({
-    height: BUTTON.height,
-    width: BUTTON.width,
-    x: panel.x + BUTTON.x,
-    y: panel.y + buttonsY + i * (BUTTON.height + BUTTON.gap),
-  }));
+  const widths = Array.from(
+    { length: buttonCount },
+    (_, i) =>
+      parts.buttonWidths?.[i] ??
+      (buttonCount === PAUSE_MENU_ITEMS.length && (i === 1 || i === 2)
+        ? BUTTON_SIZE.compact.width
+        : BUTTON.width),
+  );
+  const actionWidth =
+    buttonCount === PAUSE_MENU_ITEMS.length
+      ? Math.max(widths[0] ?? 0, (widths[1] ?? 0) + MODAL.gap + (widths[2] ?? 0), widths[3] ?? 0)
+      : Math.max(0, ...widths);
+  const width = Math.min(
+    area.width - 2 * MODAL.margin,
+    Math.max(
+      actionWidth + 2 * MODAL.pad,
+      modalTitleWidth(parts.titleWidth ?? 0),
+      (parts.noteWidth ?? 0) + 2 * NOTE_PLATE.padX + 2 * MODAL.pad,
+    ),
+  );
+  const panel = modalRect(area, parts.avoid, { height, width });
+  const buttons = widths.map((width, i) => {
+    const paired = buttonCount === PAUSE_MENU_ITEMS.length && (i === 1 || i === 2);
+    const row = buttonCount === PAUSE_MENU_ITEMS.length && i === 3 ? 2 : paired ? 1 : i;
+    const pairWidth = (widths[1] ?? 0) + MODAL.gap + (widths[2] ?? 0);
+    const x = paired
+      ? panel.x + panel.width / 2 - pairWidth / 2 + (i === 2 ? (widths[1] ?? 0) + MODAL.gap : 0)
+      : panel.x + (panel.width - width) / 2;
+    return {
+      height: BUTTON.height,
+      width,
+      x,
+      y: panel.y + buttonsY + row * (BUTTON.height + BUTTON.gap),
+    };
+  });
   return {
     buttons,
     hits: buttons.map((button) => ({
@@ -86,8 +127,8 @@ function panelLayout(
     })),
     notePlate: {
       height: noteHeight,
-      width: PAUSE_NOTE_WIDTH,
-      x: panel.x + BUTTON.x,
+      width: panel.width - 2 * MODAL.pad,
+      x: panel.x + MODAL.pad,
       y: panel.y + noteY,
     },
     panel,
@@ -99,7 +140,7 @@ function panelLayout(
 export function pauseMenuLayout(
   body: FontMetrics,
   area: Rect,
-  parts: { buttonCount: number; noteLines: number },
+  parts: QuestionParts,
 ): PauseMenuLayout {
   return panelLayout(body, area, parts, false);
 }
@@ -124,7 +165,7 @@ export function notePartTops(
 export function homeQuestionLayout(
   body: FontMetrics,
   area: Rect,
-  parts: { buttonCount: number; noteLines: number },
+  parts: QuestionParts,
 ): PauseMenuLayout {
   return panelLayout(body, area, parts, true);
 }

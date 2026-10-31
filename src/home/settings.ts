@@ -9,6 +9,7 @@ import { type CloseControl, closeControl } from "../ui/closeControl";
 import { helpCapDy, LABEL_HELP_GAP } from "../ui/labelHelpGap";
 import { TEXT_SCALE, textOnLines } from "../ui/textFit";
 import { HOME_LAYOUT } from "./homeLayout";
+import { MODAL, modalRect, modalTitleWidth } from "./modalLayout";
 
 // The settings screen moves a volume in 5% steps, from 0 to 1.
 export const VOLUME_STEPS = 20;
@@ -71,7 +72,7 @@ export type SettingsRowKind = "button" | "slider" | "switch";
 // A row as the layout needs it: its kind and, for a switch or button row, how many lines its
 // note wraps onto.
 export type SettingsRowShape =
-  { kind: "button" | "switch"; noteLines: number } | { kind: "slider" };
+  { controlWidth?: number; kind: "button" | "switch"; noteLines: number } | { kind: "slider" };
 
 export interface SettingsRowLayout {
   // The switch's or the button's face, or null on a slider row.
@@ -113,19 +114,24 @@ export const SETTINGS_ROW = {
   icon: { dx: 6, dy: 9 },
   inkFoot: 14,
   label: { dx: 26, dy: 12 },
-  note: { dx: 6, lines: 2 },
+  note: { dx: 6, lines: 3 },
   pad: 8,
   slider: { height: 56 },
   switch: { height: 16, width: 32 },
   track: { dy: 30, height: 10, knobWidth: 10 },
-  width: 328,
+  width: 296,
 } as const;
 
 // The room a switch or button row's note wraps in: from the icon's column to controlGap short
 // of its control.
 export function noteRoom(kind: "button" | "switch"): number {
+  return noteRoomForControl(SETTINGS_ROW[kind].width);
+}
+
+// The actual control width determines the note's room on that row.
+export function noteRoomForControl(controlWidth: number): number {
   const { controlGap, note, pad, width } = SETTINGS_ROW;
-  return width - pad - SETTINGS_ROW[kind].width - controlGap - note.dx;
+  return width - pad - controlWidth - controlGap - note.dx;
 }
 
 // A note: at 2x, wrapped onto up to note.lines lines.
@@ -136,10 +142,10 @@ export function noteDy(title: FontMetrics): number {
   return SETTINGS_ROW.label.dy + helpCapDy(title, TEXT_SCALE);
 }
 
-const PANEL = { width: 344 };
+const PANEL = { width: SETTINGS_ROW.width + 2 * MODAL.pad };
 // The first row starts at the title row's bottom edge, as each later row starts at its separator,
 // so its icon and label are as far under the title row as a later row's are under its separator.
-const ROWS_TOP = HOME_LAYOUT.card.titleRow.inset + HOME_LAYOUT.card.titleRow.height;
+const ROWS_TOP = MODAL.header;
 const SEPARATOR_INSET = 4;
 
 // The build label (BUILD_LABEL) closes the card in 1x dark brown body text, centred across the
@@ -152,7 +158,7 @@ export const SETTINGS_BUILD_LABEL = {
   room: SETTINGS_ROW.width,
   style: { scale: 1 },
 } as const;
-const BUILD_LABEL_FOOT = 6;
+const BUILD_LABEL_FOOT = MODAL.pad - 3;
 // ui-detail-card's frame along its bottom: a tan shade, a dark brown line and an ink line.
 const CARD_FRAME_BOTTOM = 3;
 
@@ -173,7 +179,10 @@ function rowControl(fonts: SettingsFonts, row: Rect, shape: SettingsRowShape): R
   if (shape.kind === "slider") {
     return null;
   }
-  const size = SETTINGS_ROW[shape.kind];
+  const size = {
+    ...SETTINGS_ROW[shape.kind],
+    width: shape.controlWidth ?? SETTINGS_ROW[shape.kind].width,
+  };
   const middle = Math.floor((SETTINGS_ROW.label.dy + noteInkBottom(fonts, shape.noteLines)) / 2);
   return {
     ...size,
@@ -215,8 +224,7 @@ export function settingsLayout(
   // capitals.
   const labelInk = fonts.body.capHeight * SETTINGS_BUILD_LABEL.style.scale;
   const height = labelDy + labelInk + BUILD_LABEL_FOOT + CARD_FRAME_BOTTOM;
-  const x = Math.round((screen.width - PANEL.width) / 2);
-  const y = Math.round((screen.height - height) / 2);
+  const { x, y } = modalRect({ ...screen, x: 0, y: 0 }, undefined, { ...PANEL, height });
   const rowX = x + (PANEL.width - SETTINGS_ROW.width) / 2;
   let rowY = y + ROWS_TOP;
   const rows = shapes.map((shape, i) => {
@@ -250,7 +258,7 @@ export function settingsLayout(
 // title row the 16x16 glyph of the browser's button, centred on the first line's capitals (icon.dy
 // from their top), then the steps in body text, wrapped to up to lines lines a linePitch apart.
 export const INSTALL_STEPS = {
-  foot: 14,
+  foot: MODAL.pad,
   icon: { dy: -2, gap: 6, size: 16 },
   // The body's line pitch at 2x.
   linePitch: 20,
@@ -279,14 +287,17 @@ export interface InstallStepsLayout {
 export function installStepsLayout(
   screen: { height: number; width: number },
   lines: number,
+  ink?: { steps: number; title: number },
 ): InstallStepsLayout {
   const height = ROWS_TOP + lines * INSTALL_STEPS.linePitch + INSTALL_STEPS.foot;
-  const card = {
-    height,
-    width: INSTALL_STEPS.width,
-    x: Math.round((screen.width - INSTALL_STEPS.width) / 2),
-    y: Math.round((screen.height - height) / 2),
-  };
+  const width =
+    ink === undefined
+      ? INSTALL_STEPS.width
+      : Math.max(
+          modalTitleWidth(ink.title),
+          ink.steps + 2 * MODAL.pad + INSTALL_STEPS.icon.size + INSTALL_STEPS.icon.gap,
+        );
+  const card = modalRect({ ...screen, x: 0, y: 0 }, undefined, { height, width });
   const { icon, pad, stepsDy } = INSTALL_STEPS;
   const stepsY = card.y + ROWS_TOP + stepsDy;
   return {

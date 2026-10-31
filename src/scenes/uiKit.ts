@@ -264,7 +264,7 @@ interface MenuButtonInput extends Pick<InteractionInput, "available" | "primary"
 }
 
 // One word space at the label's size: a glyph advance and the tracking.
-const MENU_BUTTON_KEY_GAP = 16;
+export const MENU_BUTTON_KEY_GAP = 16;
 
 // The key number and the label, their inks MENU_BUTTON_KEY_GAP apart and centred together on
 // centreX, on whole pixels.

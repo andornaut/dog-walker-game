@@ -29,7 +29,7 @@ import { quipCapsTop, quipTextY } from "./endLayout";
 import { dollarText } from "./home";
 import { CARD_TEXT_ROOM, detailCardLayout, detailOwner, type DetailRow } from "./homeLayout";
 import { MENU_TEXT_FIELDS } from "./menuText";
-import { confirmLeftCapTop, PURCHASE_CONFIRM_LAYOUT } from "./purchaseConfirmLayout";
+import { confirmLeftCapTop, purchaseConfirmLayout } from "./purchaseConfirmLayout";
 import { SETTINGS_ROW, settingsLayout } from "./settings";
 import { dogRows, gearRows, slotRows } from "./shop";
 import { shopRowTextTops } from "./shopLayout";
@@ -177,8 +177,14 @@ const confirmPairs: Pair[] = SHOP_ROWS.flatMap(({ price }) => {
     return [];
   }
   const label = dollarText(price);
-  const { capTop } = PURCHASE_CONFIRM_LAYOUT.price;
-  const help = confirmLeftCapTop(FONTS.title);
+  const { capTop } = purchaseConfirmLayout(FONTS, {
+    buy: 0,
+    cancel: 0,
+    left: 0,
+    price: 0,
+    title: 0,
+  }).price;
+  const help = confirmLeftCapTop(FONTS.title, capTop);
   return [{ font: "font-title", held: "exactly", help, label, labelTop: capTop, where: "confirm" }];
 });
 
