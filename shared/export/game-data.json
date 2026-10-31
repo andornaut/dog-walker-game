@@ -3056,6 +3056,7 @@
         "max": 3,
         "min": 2
       },
+      "downFactor": 0.2,
       "finishAheadSeconds": 0.6,
       "followerDelays": [
         0.3,
@@ -3080,7 +3081,7 @@
       "warningSeconds": 0.6
     },
     "reflectingRoll": {
-      "downFactor": 1.15,
+      "downFactor": 0.12,
       "finishAheadSeconds": 0.6,
       "kind": "reflectingDiagonal",
       "lanesPerSecond": 2,
@@ -3091,12 +3092,12 @@
       "warningSeconds": 0.6
     },
     "skatingArcs": {
-      "arcSeconds": 0.9,
+      "arcSeconds": 0.8,
       "arcs": {
         "max": 3,
         "min": 2
       },
-      "downFactor": 1.35,
+      "downFactor": 0.3,
       "finishAheadSeconds": 0.6,
       "kind": "alternatingArcs",
       "laneStep": 1,
@@ -3104,12 +3105,12 @@
     },
     "twoMerges": {
       "count": 2,
-      "downFactor": 1.6,
+      "downFactor": 0.4,
       "finishAheadSeconds": 0.6,
       "kind": "successiveMerges",
       "laneStep": 1,
-      "mergeSeconds": 0.6,
-      "straightSeconds": 0.8,
+      "mergeSeconds": 0.45,
+      "straightSeconds": 0.65,
       "warningSeconds": 0.6
     }
   },
