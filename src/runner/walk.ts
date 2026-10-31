@@ -99,7 +99,12 @@ import {
 } from "./movers";
 import { drawnObstacleBox, exitLength, type PlacedPart, type RoadLens } from "./obstacleBox";
 import { awayHop, nextShyChoiceAt, shyChoices, type ShyPath, takeHop } from "./shy";
-import { signatureAlive, signaturePlace, signatureSweeps } from "./signaturePaths";
+import {
+  signatureAlive,
+  signatureComponentProgress,
+  signaturePlace,
+  signatureSweeps,
+} from "./signaturePaths";
 import { type PathRow, type SpawnEvent, takeDueSpawns } from "./spawning";
 import {
   blocksLane,
@@ -804,7 +809,7 @@ function componentHitBoxes(
       left: point.x * geometry.cell.length,
       right: (point.x + 1) * geometry.cell.length,
     };
-    const delayed = mover.since - (route.componentDelays[component] ?? 0);
+    const delayed = route.entryEnd + signatureComponentProgress(route, mover.since, component);
     const drawn = facesLeft(mover.path, delayed)
       ? { ...silhouette, left: -silhouette.right, right: -silhouette.left }
       : silhouette;

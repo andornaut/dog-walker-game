@@ -499,8 +499,7 @@ export type SignatureProfile = {
       readonly anchor: { readonly x: number; readonly y: number };
       readonly bends: MoveCount;
       readonly bendSeconds: number;
-      // CLEANUP (added 2026-10-30): require this after trail data supplies an explicit ratio, before deployment.
-      readonly downFactor?: number;
+      readonly downFactor: number;
       readonly followerDelays: readonly [number, number];
       readonly frame: { readonly height: number; readonly width: number };
       readonly kind: "delayedTrail";

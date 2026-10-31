@@ -27,8 +27,10 @@ export interface SignaturePath {
   readonly complete: number;
   readonly componentDelays: readonly number[];
   readonly cues: readonly SignatureCue[];
+  readonly entryEnd: number;
   readonly legs: readonly SignatureLeg[];
   readonly profile: SignatureProfile;
+  readonly scrollSpeed: number;
   readonly tail: Point;
 }
 
@@ -58,14 +60,17 @@ export function validateSignature(profile: SignatureProfile): void {
   switch (profile.kind) {
     case "alternatingArcs":
       valid &&=
+        profile.laneStep === 1 &&
         validCount(profile.arcs, 2, 3) &&
         positive(profile.arcSeconds) &&
         positive(profile.downFactor);
       break;
     case "delayedTrail":
       valid &&=
+        profile.laneStep === 1 &&
         validCount(profile.bends, 2, 3) &&
         positive(profile.bendSeconds) &&
+        positive(profile.downFactor) &&
         positive(profile.straightSeconds) &&
         profile.followerDelays.length === 2 &&
         positive(profile.followerDelays[0]) &&
@@ -89,6 +94,7 @@ export function validateSignature(profile: SignatureProfile): void {
     case "successiveMerges":
       valid &&=
         profile.count === 2 &&
+        profile.laneStep === 1 &&
         positive(profile.downFactor) &&
         positive(profile.mergeSeconds) &&
         positive(profile.straightSeconds) &&
@@ -108,19 +114,24 @@ function countAt(range: MoveCount, draw: number): number {
   return Math.min(range.max, range.min + Math.floor(draw * (range.max - range.min + 1)));
 }
 
-// A component follows the leader's actual recorded route at an earlier progress position.
-// Before its first leg, the route extends straight up the road, preserving separate positions.
-export function signaturePlace(path: SignaturePath, since: number, component = 0): Point {
-  const delay = path.componentDelays[component];
-  const first = path.legs[0];
+// The whole group pauses during entry, including its walking-time history and animation phases.
+export function signatureMotionProgress(path: SignaturePath, since: number): number {
+  return Math.max(0, since - path.entryEnd);
+}
+
+// Walking-time history excludes the shared entry hold. Its straight pre-entry prefix stages
+// followers at distinct positions and joins the first bend continuously when walking resumes.
+export function signatureHistoryPlace(path: SignaturePath, progress: number): Point {
+  const first = path.legs[1] ?? path.legs[0];
   const last = path.legs.at(-1);
-  if (delay === undefined || first === undefined || last === undefined) {
-    throw new Error("Missing signature component or route");
+  if (first === undefined || last === undefined) {
+    throw new Error("Missing signature route");
   }
-  const position = since - delay;
-  if (position < first.at) {
-    return { x: first.from.x, y: first.from.y + position - first.at };
+  if (progress < 0) {
+    const speed = path.profile.kind === "delayedTrail" ? path.profile.downFactor : 1;
+    return { x: first.from.x, y: first.from.y + progress * speed };
   }
+  const position = path.entryEnd + progress;
   for (const leg of path.legs) {
     if (position < leg.at + leg.length) {
       const progress = progressAt(leg.at, leg.length, position);
@@ -135,6 +146,22 @@ export function signaturePlace(path: SignaturePath, since: number, component = 0
     x: path.tail.x === 0 ? last.to.x : last.to.x + path.tail.x * after,
     y: path.tail.y === 0 ? last.to.y : last.to.y + path.tail.y * after,
   };
+}
+
+export function signatureComponentProgress(
+  path: SignaturePath,
+  since: number,
+  component = 0,
+): number {
+  const delay = path.componentDelays[component];
+  if (delay === undefined) {
+    throw new Error("Missing signature component");
+  }
+  return signatureMotionProgress(path, since) - delay;
+}
+
+export function signaturePlace(path: SignaturePath, since: number, component = 0): Point {
+  return signatureHistoryPlace(path, signatureComponentProgress(path, since, component));
 }
 
 export function signatureAlive(
@@ -162,9 +189,10 @@ export function signatureSweeps(path: SignaturePath, from: number, to: number): 
   return path.componentDelays.flatMap((delay, component) => {
     const cuts = [
       from,
-      ...path.legs
-        .flatMap((leg) => [leg.at + delay, leg.at + leg.length + delay])
-        .filter((at) => at > from && at < to),
+      ...[
+        path.entryEnd,
+        ...path.legs.slice(1).flatMap((leg) => [leg.at + delay, leg.at + leg.length + delay]),
+      ].filter((at) => at > from && at < to),
       to,
     ];
     const ordered = [...new Set(cuts)].sort((a, b) => a - b);
@@ -237,6 +265,7 @@ export function compileSignature(
   let at = origin.at;
   let point: Point = { x: origin.lane, y: origin.travel };
   let tail: Point = { x: 0, y: 1 };
+  legs.push({ at: 0, easing: "linear", from: point, length: origin.at, to: point });
   const add = (length: number, to: Point, cue: boolean, easing: Easing = "linear") => {
     if (cue) {
       cues.push({ end: at, start: at - warning });
@@ -249,13 +278,13 @@ export function compileSignature(
     add(seconds * scrollSpeed, { x: point.x + dx, y: point.y + dy }, cue, easing);
   switch (profile.kind) {
     case "rectangle":
-      move(profile.legSeconds, direction, 0, true);
-      move(profile.legSeconds, 0, cellLength, true);
-      move(profile.legSeconds, -direction, 0, true);
-      move(profile.legSeconds, 0, -cellLength, true);
+      move(profile.legSeconds, direction * profile.lanes, 0, true);
+      move(profile.legSeconds, 0, profile.rows * cellLength, true);
+      move(profile.legSeconds, -direction * profile.lanes, 0, true);
+      move(profile.legSeconds, 0, -profile.rows * cellLength, true);
       break;
     case "turnExit": {
-      move(profile.downSeconds, 0, cellLength, true);
+      move(profile.downSeconds, 0, profile.rows * cellLength, true);
       const edge = direction < 0 ? -origin.span : laneCount;
       const dx = edge - point.x;
       move(Math.abs(dx) / profile.lanesPerSecond, dx, 0, true);
@@ -267,17 +296,17 @@ export function compileSignature(
       const trail = profile.kind === "delayedTrail";
       const count = countAt(trail ? profile.bends : profile.arcs, draw.count);
       const seconds = trail ? profile.bendSeconds : profile.arcSeconds;
-      const down = trail ? 1 : profile.downFactor;
+      const down = profile.downFactor;
       for (let index = 0; index < count; index++) {
         move(
           seconds,
-          index % 2 === 0 ? direction : -direction,
+          (index % 2 === 0 ? direction : -direction) * profile.laneStep,
           seconds * scrollSpeed * down,
-          trail,
+          index === 0 || trail,
           "sineInOut",
         );
         if (trail && index + 1 < count) {
-          move(profile.straightSeconds, 0, profile.straightSeconds * scrollSpeed, false);
+          move(profile.straightSeconds, 0, profile.straightSeconds * scrollSpeed * down, false);
         }
       }
       tail = { x: 0, y: down };
@@ -305,7 +334,7 @@ export function compileSignature(
       for (let index = 0; index < profile.count; index++) {
         move(
           profile.mergeSeconds,
-          direction,
+          direction * profile.laneStep,
           profile.mergeSeconds * scrollSpeed * profile.downFactor,
           true,
         );
@@ -326,7 +355,17 @@ export function compileSignature(
       ? [0, ...profile.followerDelays.map((seconds) => seconds * scrollSpeed)]
       : [0];
   const complete = at + Math.max(...componentDelays);
-  const path: SignaturePath = { complete, componentDelays, cues, legs, profile, tail };
+  const path: SignaturePath = {
+    complete,
+    componentDelays,
+    cues,
+    entryEnd: origin.at,
+    legs,
+    profile,
+    scrollSpeed,
+    tail,
+  };
+  const clearance = profile.finishAheadSeconds * scrollSpeed * Math.max(1, tail.y);
   const points = signatureSweeps(path, origin.at, complete).flatMap((sweep) => [
     sweep.from,
     sweep.to,
@@ -337,7 +376,7 @@ export function compileSignature(
       ({ x, y }) =>
         !Number.isFinite(x) ||
         !Number.isFinite(y) ||
-        y > sightLength - profile.finishAheadSeconds * scrollSpeed ||
+        y > sightLength - clearance ||
         (onRoad && (x < 0 || x + origin.span > laneCount)),
     )
   ) {

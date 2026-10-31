@@ -27,7 +27,7 @@ export function moverMovement(
   >,
   random: Random,
   share: number,
-  zone: NeighbourhoodId | undefined,
+  zone: NeighbourhoodId,
   kind: WalkItemKind,
 ): ProfiledMovement | null {
   const movement = assignedMovement(data, zone, kind);

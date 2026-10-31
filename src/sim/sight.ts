@@ -52,7 +52,7 @@ function stepsSeen(
 // moments that show the same read the same.
 export function moverShows(path: MoverPath, since: number): string {
   if (path.motion === "signature") {
-    const started = path.route.legs.filter((leg) => leg.at <= since).length;
+    const started = path.route.legs.slice(1).filter((leg) => leg.at <= since).length;
     const cued = path.route.cues.some((cue) => since >= cue.start && since < cue.end);
     return `${started} ${cued ? "cued" : ""}`;
   }
@@ -136,16 +136,27 @@ export function sightPaths(road: SightRoad, since: number, item: WalkItem): read
     const legs = path.route.legs.filter(
       (leg) => leg.at <= since || cues.some((cue) => cue.end === leg.at),
     );
+    const waiting =
+      since < path.route.entryEnd && !cues.some((cue) => cue.end === path.route.entryEnd);
+    const entryEnd = waiting ? since + WAITING : path.route.entryEnd;
+    const visibleLegs = waiting
+      ? legs.slice(0, 1).map((leg) => ({ ...leg, length: entryEnd }))
+      : legs;
+    const last = visibleLegs.at(-1);
     const point = signaturePlace(path.route, since);
     return [
       {
         ...path,
         route: {
           ...path.route,
+          complete:
+            (last === undefined ? entryEnd : last.at + last.length) +
+            Math.max(...path.route.componentDelays),
           cues,
+          entryEnd,
           legs:
-            legs.length > 0
-              ? legs
+            visibleLegs.length > 0
+              ? visibleLegs
               : [
                   {
                     at: since,

@@ -9,11 +9,11 @@ export function assignedMovement(
     GameData,
     "encounters" | "minorObstacles" | "movementAssignments" | "movementProfiles"
   >,
-  zone: NeighbourhoodId | undefined,
+  zone: NeighbourhoodId,
   kind: WalkItemKind,
 ): ProfiledMovement | null {
   const baseline = movementOf(data, kind);
-  if (zone === undefined || isPickup(kind) || isGearDrop(data, kind)) {
+  if (isPickup(kind) || isGearDrop(data, kind)) {
     return baseline;
   }
   const assignment = data.movementAssignments[kind];

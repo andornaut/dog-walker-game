@@ -7,9 +7,13 @@ import {
   moverPlacements,
   moverRetries,
   type MoverSpec,
+  onScreenOf,
   placeMovers,
+  screenHasRoom,
 } from "./moverPlanning";
 import { signaturePlace } from "./signaturePaths";
+import type { SpawnPlan } from "./spawning";
+import { planSpawns } from "./zonePlanner";
 
 const common = { finishAheadSeconds: 1, warningSeconds: 0.3 };
 const profiles: readonly SignatureProfile[] = [
@@ -44,6 +48,7 @@ const profiles: readonly SignatureProfile[] = [
     anchor: { x: 10, y: 23 },
     bendSeconds: 0.6,
     bends: { max: 3, min: 2 },
+    downFactor: 1,
     followerDelays: [0.4, 0.8],
     frame: { height: 24, width: 20 },
     kind: "delayedTrail",
@@ -87,6 +92,23 @@ const grid = {
 };
 
 describe("signature admission", () => {
+  it("counts a signature with dart classification against the shared dart cap", () => {
+    const profile = profiles.find((profile) => profile.kind === "reflectingDiagonal");
+    if (profile === undefined) {
+      throw new Error("Missing reflection fixture");
+    }
+    const placement = moverPlacements(geometry, { ...specOf(profile), movement: "dart" })[0];
+    if (placement === undefined) {
+      throw new Error("Missing signature placement");
+    }
+    const shown = onScreenOf(placement.path, [0, 100]);
+    const other = { dart: true, interval: [0, 100] as const, slowVehicle: false };
+    const limits = { darts: 1, slowVehicles: 1, total: 10 };
+    expect(shown.dart).toBe(true);
+    expect(screenHasRoom(limits, [other], shown)).toBe(false);
+    expect(screenHasRoom(limits, [{ ...other, interval: [100, 200] }], shown)).toBe(true);
+  });
+
   it.each(profiles)(
     "plans complete $kind routes while reserving at least two open lanes",
     (profile) => {
@@ -156,6 +178,40 @@ describe("signature admission", () => {
       );
       expect(placed.spawns).toEqual([]);
       expect(placed.dropped).toEqual(["example"]);
+    }
+  });
+
+  it("never converts an unplaceable first obstacle or moving prize into a stationary spawn", () => {
+    const profile = profiles[0];
+    if (profile === undefined) {
+      throw new Error("Missing profile fixture");
+    }
+    for (const blocksLane of [true, false]) {
+      const plan: SpawnPlan<"example"> = {
+        ...geometry,
+        cellInset: 5,
+        fixedKinds: [],
+        laneMoveSeconds: 0.2,
+        maxEmptyRows: Infinity,
+        minOpenLanes: 2,
+        minSpacing: 160,
+        moverCaps: caps,
+        pathLaneMoveSeconds: 0.8,
+        pathStart: 2,
+        quotas: [
+          {
+            blocksLane,
+            count: 1,
+            first: blocksLane,
+            kind: "example",
+            mover: specOf({ ...profile, finishAheadSeconds: 1000 }),
+          },
+        ],
+        reactionSeconds: 0.8,
+        riderFollowGap: 50,
+        stepSeconds: 1 / 60,
+      };
+      expect(planSpawns(plannerStreams(1), plan).events).toEqual([]);
     }
   });
 });

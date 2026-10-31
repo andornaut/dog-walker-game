@@ -4,7 +4,7 @@ import { moverBodyTag } from "../../assets/spriteKeys";
 import { animationPhaseAt } from "../../layout/animationPhase";
 import { project } from "../../layout/projection";
 import { facesLeft, type MoverOnRoad } from "../../runner/movers";
-import { signaturePlace } from "../../runner/signaturePaths";
+import { signatureComponentProgress, signaturePlace } from "../../runner/signaturePaths";
 import type { WalkItem } from "../../runner/walkItems";
 import { playTag, showAtDepth, spriteMetrics } from "../sprites";
 import type { ItemView } from "./itemViews";
@@ -29,10 +29,8 @@ export function drawSignatureTrail(
     return false;
   }
   const leader = signaturePlace(route, since);
-  const first = route.legs[0];
-  const scrollSpeed = first === undefined ? 1 : first.length / profile.bendSeconds;
   const baselineOffset = profile.anchor.y - spriteMetrics(profile.spriteKey).feetY;
-  route.componentDelays.forEach((delay, component) => {
+  route.componentDelays.forEach((_, component) => {
     const part = view.parts[component === 0 ? 0 : component + 3];
     if (part === undefined) {
       return;
@@ -48,12 +46,14 @@ export function drawSignatureTrail(
       (metrics.feetY + baselineOffset) / metrics.frameHeight,
     );
     const has = (tag: string) => sprite.scene.anims.exists(animationKey(drawn.key, tag));
-    const tag = moverBodyTag(has, path.movement, !halted);
+    const moving = !halted && since >= route.entryEnd;
+    const progress = signatureComponentProgress(route, since, component);
+    const tag = moverBodyTag(has, path.movement, moving);
     if (tag !== undefined) {
       playTag(sprite, drawn.key, tag, true);
       const animation = sprite.anims.currentAnim;
       if (animation !== null) {
-        const phase = frame.still ? 0 : ((since - delay) / scrollSpeed) * 1000;
+        const phase = frame.still ? 0 : (progress / route.scrollSpeed) * 1000;
         const index = animationPhaseAt(
           animation.frames.map(({ duration }) => (duration > 0 ? duration : animation.msPerFrame)),
           phase,
@@ -70,7 +70,7 @@ export function drawSignatureTrail(
       .setVisible(true)
       .setPosition(x, y)
       .setDepth(DEPTH.sprite + placed.y)
-      .setFlipX(facesLeft(path, since - delay));
+      .setFlipX(facesLeft(path, route.entryEnd + progress));
     showOnRoad(y, 1, sprite);
     frame.shadow(part.key, drawn.depth, x, y);
   });

@@ -39,7 +39,9 @@ describe("movement assignments", () => {
 
   it("keeps unassigned entities and nonmoving pickups unchanged", () => {
     expect(assignedMovement(data, "highPark", "taxi")).toEqual(movementOf(data, "taxi"));
-    expect(assignedMovement(data, undefined, "gardener")).toEqual(movementOf(data, "gardener"));
+    expect(
+      assignedMovement({ ...data, movementAssignments: {} }, "cabbagetown", "gardener"),
+    ).toEqual(movementOf(data, "gardener"));
     expect(assignedMovement(data, "highPark", "treat")).toBeNull();
   });
 

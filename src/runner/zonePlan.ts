@@ -18,6 +18,7 @@ import { pickSkin } from "./obstacleLooks";
 import type { SpawnQuota } from "./spawning";
 import { spacedStretch } from "./stretches";
 import {
+  componentHitLength,
   itemHeight,
   plannedCellInset,
   type RoadGeometry,
@@ -211,7 +212,11 @@ export function planZone(
               : {
                   mover: {
                     ...quota.mover,
-                    hitLength: itemHeight(data, geometry, quota.kind, true),
+                    hitLength:
+                      quota.mover.motion.kind === "signature" &&
+                      quota.mover.motion.profile.kind === "delayedTrail"
+                        ? componentHitLength(geometry, quota.mover.motion.profile)
+                        : itemHeight(data, geometry, quota.kind, true),
                   },
                 }),
           },

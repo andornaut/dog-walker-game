@@ -1122,7 +1122,7 @@ function signaturePlacements(
   const span = spec.footprint.lanes;
   const height = Math.max(spec.footprint.rows * cellLength, drawnHitLength(geometry, spec));
   const warning = profile.warningSeconds * scrollSpeed;
-  const at = height + warning + delayOf(spec.variation, draws, 0) * scrollSpeed;
+  const at = warning + delayOf(spec.variation, draws, 0) * scrollSpeed;
   const inset = geometry.laneInset / cellLength;
   const preferred = draws.side < 0.5 ? -1 : 1;
   const directions: readonly (-1 | 1)[] = [preferred, preferred === -1 ? 1 : -1];
@@ -1133,7 +1133,7 @@ function signaturePlacements(
         geometry,
         profile,
         { count: draws.count, direction },
-        { at, lane, span, travel: at },
+        { at, lane, span, travel: height },
       );
       if (route === null) {
         continue;
@@ -1445,7 +1445,12 @@ export interface OnScreen {
 
 export function onScreenOf(path: MoverPath, interval: readonly [number, number]): OnScreen {
   return {
-    dart: path.motion === "cross",
+    dart:
+      path.motion === "cross" ||
+      (path.motion === "signature" &&
+        (path.movement === "dart" ||
+          path.movement === "dive" ||
+          path.movement === "stopAndGoAcross")),
     interval,
     slowVehicle: path.motion === "ride" && path.speedMultiplier < 1,
   };

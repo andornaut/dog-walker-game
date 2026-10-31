@@ -84,6 +84,7 @@ interface StandingStop {
 }
 
 describe("movers", { timeout: 120_000 }, () => {
+  const baselineData = { ...REAL, movementAssignments: {} };
   const OBSTACLE_KINDS = [...OBSTACLE_IDS, ...MINOR_OBSTACLE_IDS] as WalkItem["kind"][];
   // The rulebook's obstacles that never move: art sculptures, benches, bins, cherry trees,
   // fallen logs, hedges, iron fences, market stalls, potholes, puddles, streetcar platforms and
@@ -128,10 +129,12 @@ describe("movers", { timeout: 120_000 }, () => {
         draws += 1;
         return value;
       };
-      expect(moverMovement(REAL, counted(0), 1, undefined, kind)).toEqual(movementOf(kind));
-      expect(moverMovement(REAL, counted(0.99), 0.5, undefined, kind)).toBeNull();
+      expect(moverMovement(baselineData, counted(0), 1, "highPark", kind)).toEqual(
+        movementOf(kind),
+      );
+      expect(moverMovement(baselineData, counted(0.99), 0.5, "highPark", kind)).toBeNull();
       const before = draws;
-      expect(moverMovement(REAL, counted(0), 0, undefined, kind)).toBeNull();
+      expect(moverMovement(baselineData, counted(0), 0, "highPark", kind)).toBeNull();
       expect(draws).toBe(before);
     }
   });
@@ -152,10 +155,10 @@ describe("movers", { timeout: 120_000 }, () => {
       const never = () => {
         throw new Error("drew");
       };
-      expect(moverMovement(REAL, never, 1, undefined, kind)).toBeNull();
+      expect(moverMovement(baselineData, never, 1, "highPark", kind)).toBeNull();
     } else {
-      expect(moverMovement(REAL, () => 0, 1, undefined, kind)).toEqual(movement);
-      expect(moverMovement(REAL, () => 0.99, 0.5, undefined, kind)).toBeNull();
+      expect(moverMovement(baselineData, () => 0, 1, "highPark", kind)).toEqual(movement);
+      expect(moverMovement(baselineData, () => 0.99, 0.5, "highPark", kind)).toBeNull();
     }
   });
 
@@ -476,6 +479,13 @@ describe("movers", { timeout: 120_000 }, () => {
     const pattern = patternOf(movement);
     const span = footprintOf(REAL, kind).lanes;
     for (const mover of pathsOf(kind)) {
+      if (mover.motion === "signature") {
+        expect(Object.values(REAL.movementProfiles)).toContain(mover.route.profile);
+        expect(mover.route.legs.slice(1).length).toBeGreaterThan(0);
+        // Complete profile geometry and contextual assignments are checked across all recipes.
+        expect(mover.route.cues.some((cue) => cue.end === mover.route.entryEnd)).toBe(true);
+        continue;
+      }
       if (mover.motion === "cross" && movement?.kind === "stopAndGoAcross") {
         const { pause } = mover;
         expect(pause).toBeDefined();

@@ -15,6 +15,7 @@ import {
   type RiderSpan,
 } from "./moverPlanning";
 import { hasLeftRoad, type LaneSpan, type MoverPath, moverPlace } from "./movers";
+import { signaturePlace } from "./signaturePaths";
 import { type Block, LaneBlocks, PlacedPlaces, SpawnCells } from "./spawnCells";
 import {
   blockingLength,
@@ -148,18 +149,26 @@ function moverRowsInView(
   const paths = path.motion === "approach" ? approachOutcomes(path) : [path];
   for (const way of paths) {
     for (let since = 0; since < SCAN_ROADS * plan.roadLength; since++) {
-      const place = moverPlace(laneCount, way, since);
-      if (shows < 0 && place.solid && place.travel >= 0 && !hasLeftRoad(laneCount, place)) {
-        shows = since;
-      }
-      const meets =
-        place.solid &&
-        place.travel >= plan.sightLength &&
-        place.travel < plan.sightLength + reach &&
-        onRoad(place.lanePosition);
-      if (meets) {
-        start = Math.min(start, cue + since - plan.sightLength);
-        end = Math.max(end, cue + since + 1 - plan.sightLength);
+      const places =
+        way.motion === "signature"
+          ? way.route.componentDelays.map((_, component) => {
+              const point = signaturePlace(way.route, since, component);
+              return { lanePosition: point.x, solid: true, travel: point.y };
+            })
+          : [moverPlace(laneCount, way, since)];
+      for (const place of places) {
+        if (shows < 0 && place.solid && place.travel >= 0 && !hasLeftRoad(laneCount, place)) {
+          shows = since;
+        }
+        const meets =
+          place.solid &&
+          place.travel >= plan.sightLength &&
+          place.travel < plan.sightLength + reach &&
+          onRoad(place.lanePosition);
+        if (meets) {
+          start = Math.min(start, cue + since - plan.sightLength);
+          end = Math.max(end, cue + since + 1 - plan.sightLength);
+        }
       }
     }
   }

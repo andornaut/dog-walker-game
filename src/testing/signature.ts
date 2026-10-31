@@ -10,6 +10,7 @@ export function signatureTrail(delays: readonly [number, number]) {
     anchor: { x: 10, y: 23 },
     bendSeconds: 0.1,
     bends: { max: 2, min: 2 },
+    downFactor: 1,
     finishAheadSeconds: 0.1,
     followerDelays: delays,
     frame: { height: 24, width: 20 },

@@ -436,7 +436,7 @@ export function cuedStep(
 export function inMotion(path: MoverPath, since: number): boolean {
   if (path.motion === "signature") {
     return (
-      since >= (path.route.legs[0]?.at ?? Infinity) &&
+      since >= path.route.entryEnd &&
       (path.route.profile.kind !== "rectangle" || since < path.route.complete)
     );
   }
