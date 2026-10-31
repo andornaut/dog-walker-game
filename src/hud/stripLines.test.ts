@@ -3,6 +3,7 @@ import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import type { Debuff, DebuffId, GearId } from "../data/types";
 import type { HeartChange, MoneyChange } from "../rules/causes";
 import { formatDollars } from "../rules/effectText";
@@ -58,13 +59,13 @@ describe("bumpLines", () => {
   const softened = hearts(4, 3, [{ amount: -2, kind: "bump" }, secondChance]);
   const dodge = fillNames(strip.dodge, {
     dog: kilo.name,
-    obstacle: gameData.minorObstacles.sandwichBoard.name,
+    obstacle: MINOR_OBSTACLES.sandwichBoard.name.toLowerCase(),
   });
   const hit = (lost: string) =>
     fillNames(strip.plainHit, {
       dog: kilo.name,
       hearts: lost,
-      obstacle: gameData.minorObstacles.sandwichBoard.name,
+      obstacle: MINOR_OBSTACLES.sandwichBoard.name.toLowerCase(),
       owner,
     });
   const paid = strip.cashHit;
@@ -95,7 +96,11 @@ describe("bumpLines", () => {
       name: "Spotlight's cash with the heart forgiven",
     },
   ])("says $name", ({ cash: taken, change, dodged, lines }) => {
-    const said = bumpLines(gameData, { cash: taken, change, dodged, dog: "kilo" }, "Cone");
+    const said = bumpLines(
+      gameData,
+      { cash: taken, change, dodged, dog: "kilo" },
+      MINOR_OBSTACLES.sandwichBoard.name,
+    );
     expect(said.map(({ text }) => text)).toEqual(lines);
   });
 });
