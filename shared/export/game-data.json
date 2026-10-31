@@ -1773,19 +1773,6 @@
       "spriteKey": "clothing-rack"
     },
     {
-      "id": "cone",
-      "name": "Cone",
-      "shape": {
-        "lanes": 1,
-        "rows": 1
-      },
-      "zones": [
-        "yongeStreet",
-        "kensingtonMarket"
-      ],
-      "spriteKey": "cone"
-    },
-    {
       "id": "couple",
       "movement": {
         "kind": "sway",
@@ -2918,18 +2905,6 @@
       "spriteKey": "velvet-rope"
     },
     {
-      "id": "volleyballNet2",
-      "name": "Volleyball net",
-      "shape": {
-        "lanes": 2,
-        "rows": 1
-      },
-      "zones": [
-        "theBeaches"
-      ],
-      "spriteKey": "volleyball-net-2"
-    },
-    {
       "id": "volleyballNet3",
       "name": "Volleyball net",
       "shape": {
@@ -3349,7 +3324,6 @@
           "cat": 0,
           "cherryTrees": 6,
           "clothingRack": 0,
-          "cone": 0,
           "couple": 0.5,
           "coyote": 0,
           "crosstownBus": 0,
@@ -3413,7 +3387,6 @@
           "trashCan": 2,
           "ttcBus": 0,
           "velvetRope": 0,
-          "volleyballNet2": 0,
           "volleyballNet3": 0,
           "volleyballPlayer": 0
         },
@@ -3472,7 +3445,6 @@
           "cat": 2.25,
           "cherryTrees": 0,
           "clothingRack": 0,
-          "cone": 0,
           "couple": 0,
           "coyote": 1,
           "crosstownBus": 0,
@@ -3536,7 +3508,6 @@
           "trashCan": 0,
           "ttcBus": 0,
           "velvetRope": 0,
-          "volleyballNet2": 0,
           "volleyballNet3": 0,
           "volleyballPlayer": 0
         },
@@ -3595,7 +3566,6 @@
           "cat": 3,
           "cherryTrees": 0,
           "clothingRack": 8,
-          "cone": 0,
           "couple": 2,
           "coyote": 0,
           "crosstownBus": 0,
@@ -3659,7 +3629,6 @@
           "trashCan": 0,
           "ttcBus": 0,
           "velvetRope": 0,
-          "volleyballNet2": 0,
           "volleyballNet3": 0,
           "volleyballPlayer": 0
         },
@@ -3718,7 +3687,6 @@
           "cat": 1.5,
           "cherryTrees": 0,
           "clothingRack": 0,
-          "cone": 0,
           "couple": 4,
           "coyote": 0,
           "crosstownBus": 0,
@@ -3782,7 +3750,6 @@
           "trashCan": 0,
           "ttcBus": 0,
           "velvetRope": 0,
-          "volleyballNet2": 0,
           "volleyballNet3": 3.75,
           "volleyballPlayer": 4.25
         },
@@ -3841,7 +3808,6 @@
           "cat": 0,
           "cherryTrees": 0,
           "clothingRack": 0,
-          "cone": 0,
           "couple": 0,
           "coyote": 0,
           "crosstownBus": 0,
@@ -3905,7 +3871,6 @@
           "trashCan": 0,
           "ttcBus": 0,
           "velvetRope": 4.5,
-          "volleyballNet2": 0,
           "volleyballNet3": 0,
           "volleyballPlayer": 0
         },
@@ -3964,7 +3929,6 @@
           "cat": 0,
           "cherryTrees": 0,
           "clothingRack": 0,
-          "cone": 0,
           "couple": 0,
           "coyote": 0,
           "crosstownBus": 2.75,
@@ -4028,7 +3992,6 @@
           "trashCan": 0,
           "ttcBus": 4,
           "velvetRope": 0,
-          "volleyballNet2": 0,
           "volleyballNet3": 0,
           "volleyballPlayer": 0
         },

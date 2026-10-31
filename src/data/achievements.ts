@@ -56,7 +56,7 @@ export const ACHIEVEMENTS = [
     shortGoal: "Walk bonus, 3 dogs",
   },
   {
-    badgeLine: "Not today, cone.",
+    badgeLine: "Not today, bench.",
     conditions: [{ count: 50, kind: "tally", tally: "dodges" }],
     goal: "Dodge 50 bumps",
     id: "dodgeBall",

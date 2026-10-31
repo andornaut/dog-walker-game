@@ -79,7 +79,6 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
     zones: ["kensingtonMarket"],
   },
-  cone: { name: "Cone", shape: { lanes: 1, rows: 1 }, zones: ["yongeStreet", "kensingtonMarket"] },
   couple: {
     movement: { kind: "sway", pauseSeconds: 0.25, times: { max: 3, min: 2 } },
     name: "Couple",
@@ -458,11 +457,6 @@ export const MINOR_OBSTACLES = {
     zones: ["yongeStreet"],
   },
   velvetRope: { name: "Velvet rope", shape: { lanes: 2, rows: 1 }, zones: ["distilleryDistrict"] },
-  volleyballNet2: {
-    name: "Volleyball net",
-    shape: { lanes: 2, rows: 1 },
-    zones: ["theBeaches"],
-  },
   volleyballNet3: {
     name: "Volleyball net",
     shape: { lanes: 3, rows: 1 },
