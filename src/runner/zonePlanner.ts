@@ -4,6 +4,7 @@ import { randomPick, weightedPick } from "@andornaut/game-kit/random";
 import { laneMask } from "../layout/lanes";
 import { approachOutcomes } from "./approach";
 import {
+  type DrawnMover,
   laneBalanceWeight,
   type MoverBody,
   type MoverSpec,
@@ -42,6 +43,12 @@ import {
   WIDE_LANES,
   zoneRows,
 } from "./spawning";
+import {
+  type ConstructiveSpawnResult,
+  searchSpawnAdmission,
+  type SpawnConstruction,
+  type SpawnSearchContext,
+} from "./spawnSearch";
 import { nthStretch, rowsWithin, WHOLE_ZONE } from "./stretches";
 
 // How many road lengths of scroll after its cue a mover's contact with the pack is looked for in:
@@ -51,7 +58,9 @@ const SCAN_ROADS = 4;
 // A mover quota as placeMovers takes it, with its kind's drawn hit length standing, which one
 // stilled for want of room stands at.
 interface PlacedMoverQuota<Kind extends string> {
+  admitted: boolean[];
   count: number;
+  drawn: DrawnMover[];
   first: boolean;
   kind: Kind;
   spec: MoverSpec;
@@ -61,16 +70,19 @@ interface PlacedMoverQuota<Kind extends string> {
 
 // The quotas of movers that block lanes, or of moving prizes, as placeMovers takes them.
 function moverQuotas<Kind extends string>(
+  construction: SpawnConstruction,
   blocking: boolean,
   quotas: readonly SpawnQuota<Kind>[],
 ): PlacedMoverQuota<Kind>[] {
   return quotas.flatMap(
-    ({ blocksLane, count, first, hitLength: standingLength, kind, mover, within }) =>
+    ({ blocksLane, count, first, hitLength: standingLength, kind, mover, within }, index) =>
       mover === undefined || blocksLane !== blocking
         ? []
         : [
             {
+              admitted: itemAt(construction.admitted, index),
               count,
+              drawn: itemAt(construction.drawn, index),
               first: first ?? false,
               kind,
               spec: mover,
@@ -99,11 +111,19 @@ function heldAcross(spec: MoverSpec): number {
 // first, and of those the widest first, so each placed later, freer to share, fits around those
 // placed before. Sorting copies leaves the quotas alone; sort is stable, so equal ones keep their
 // order.
-function placingOrder<Quota extends { readonly spec: MoverSpec }>(
-  quotas: readonly Quota[],
-): Quota[] {
+function placingOrder<
+  Quota extends { readonly spec: MoverSpec; readonly within?: readonly [number, number] },
+>(order: SpawnConstruction["order"], quotas: readonly Quota[]): Quota[] {
   return [...quotas].sort(
-    (a, b) => sharing(a.spec) - sharing(b.spec) || heldAcross(b.spec) - heldAcross(a.spec),
+    (a, b) =>
+      sharing(a.spec) - sharing(b.spec) ||
+      heldAcross(b.spec) - heldAcross(a.spec) ||
+      (order === "original"
+        ? 0
+        : (a.within?.[1] ?? 1) -
+            (a.within?.[0] ?? 0) -
+            ((b.within?.[1] ?? 1) - (b.within?.[0] ?? 0)) ||
+          b.spec.footprint.rows - a.spec.footprint.rows),
   );
 }
 
@@ -232,11 +252,21 @@ function quietRuns(
 // widest kinds go first, then the biggest. Sorting copies leaves the quotas alone; sort is stable,
 // so equal kinds keep their order.
 function standingTurns<Kind extends string>(
+  placementOrder: SpawnConstruction["order"],
   quotas: readonly SpawnQuota<Kind>[],
 ): { i: number; quota: SpawnQuota<Kind> }[] {
   const across = (quota: SpawnQuota<Kind>) => quotaFootprint(quota).lanes;
   return [...quotas]
-    .sort((a, b) => across(b) - across(a) || quotaArea(b) - quotaArea(a))
+    .sort(
+      (a, b) =>
+        across(b) - across(a) ||
+        quotaArea(b) - quotaArea(a) ||
+        (placementOrder === "original"
+          ? 0
+          : (a.within?.[1] ?? 1) -
+            (a.within?.[0] ?? 0) -
+            ((b.within?.[1] ?? 1) - (b.within?.[0] ?? 0))),
+    )
     .flatMap((quota, order) => {
       const [from, to] = quota.within ?? WHOLE_ZONE;
       return Array.from({ length: quota.count }, (_, i) => ({
@@ -256,6 +286,7 @@ interface Standing<Kind extends string> {
   block: Block;
   cell: Cell;
   event: SpawnEvent<Kind>;
+  member: number | undefined;
   place: BlockingPlace;
   quota: SpawnQuota<Kind>;
 }
@@ -295,9 +326,10 @@ class ZonePlanner<Kind extends string> {
   private readonly statics: SpawnQuota<Kind>[];
   private readonly streams: PlannerStreams;
   // The plain lane-blocking standing spawns that found no room.
-  private readonly unplaced: SpawnQuota<Kind>[] = [];
+  private readonly unplaced: { member: number; quota: SpawnQuota<Kind> }[] = [];
 
   constructor(
+    private readonly construction: SpawnConstruction,
     private readonly reject: (kind: Kind, reason: SpawnRejection) => false,
     private readonly substitutions: { from: Kind; to: Kind }[],
     streams: PlannerStreams,
@@ -478,7 +510,8 @@ class ZonePlanner<Kind extends string> {
   private placeMoving(first: boolean): SpawnQuota<Kind>[] {
     const { plan, rows } = this;
     const quotas = placingOrder(
-      moverQuotas(true, plan.quotas).filter((quota) => quota.first === first),
+      this.construction.order,
+      moverQuotas(this.construction, true, plan.quotas).filter((quota) => quota.first === first),
     );
     const { dropped, herrings, spawns } = placeMoversWithRejections(
       this.reject,
@@ -499,7 +532,7 @@ class ZonePlanner<Kind extends string> {
         this.moverInView[row] = 1;
       }
     }
-    return first ? stilledQuotas(true, quotas, dropped) : [];
+    return first && !this.construction.exact ? stilledQuotas(true, quotas, dropped) : [];
   }
 
   // The moving prizes, one quota at a time, sharing what is on screen, so each stilled one keeps
@@ -510,7 +543,7 @@ class ZonePlanner<Kind extends string> {
     const road = moverRoadOf(plan, this.spacing);
     const grid = this.prizeGrid();
     const onScreen: OnScreen[] = [];
-    return moverQuotas(false, plan.quotas).flatMap((quota) => {
+    return moverQuotas(this.construction, false, plan.quotas).flatMap((quota) => {
       const { dropped, spawns } = placeMoversWithRejections(
         this.reject,
         this.streams,
@@ -522,7 +555,7 @@ class ZonePlanner<Kind extends string> {
         [quota],
       );
       this.events.push(...spawns);
-      return stilledQuotas(false, [quota], dropped);
+      return this.construction.exact ? [] : stilledQuotas(false, [quota], dropped);
     });
   }
 
@@ -555,7 +588,10 @@ class ZonePlanner<Kind extends string> {
     keep: (quota: SpawnQuota<Kind>) => boolean,
     stilled: readonly SpawnQuota<Kind>[],
   ): void {
-    for (const { i, quota } of standingTurns([...this.statics, ...stilled].filter(keep))) {
+    for (const { i, quota } of standingTurns(
+      this.construction.order,
+      [...this.statics, ...stilled].filter(keep),
+    )) {
       this.placeOne(quota, i);
     }
   }
@@ -572,6 +608,7 @@ class ZonePlanner<Kind extends string> {
       this.plan.firstContactSeconds !== undefined &&
       quota.blocksLane &&
       i === 0 &&
+      (!this.construction.exact || within[0] === 0) &&
       this.inView()[0] === 0
         ? this.freeCells(quota, footprint, 0, 1)
         : [];
@@ -602,9 +639,9 @@ class ZonePlanner<Kind extends string> {
   private placeOne(quota: SpawnQuota<Kind>, i: number): void {
     const cells = this.cellsFor(quota, i);
     if (cells.length > 0) {
-      this.placeAt(quota, this.pickCell(quota, cells));
+      this.placeAt(i, quota, this.pickCell(quota, cells));
     } else if (!this.placeNarrower(quota, i) && quota.blocksLane && quota.first !== true) {
-      this.unplaced.push(quota);
+      this.unplaced.push({ member: i, quota });
     }
   }
 
@@ -615,7 +652,11 @@ class ZonePlanner<Kind extends string> {
   // one-cell spawns still to place. True when one is placed.
   private placeNarrower(quota: SpawnQuota<Kind>, i: number): boolean {
     const { plan, spacing } = this;
-    if (quota.mover !== undefined || !plan.fixedKinds.some(({ kind }) => kind === quota.kind)) {
+    if (
+      this.construction.exact ||
+      quota.mover !== undefined ||
+      !plan.fixedKinds.some(({ kind }) => kind === quota.kind)
+    ) {
       return false;
     }
     for (let across = quotaFootprint(quota).lanes - 1; across >= 1; across--) {
@@ -643,7 +684,7 @@ class ZonePlanner<Kind extends string> {
           fitting,
           fitting.map(({ weight }) => weight),
         );
-        this.placeAt(swapped, this.pickCell(swapped, cells));
+        this.placeAt(undefined, swapped, this.pickCell(swapped, cells));
         this.substitutions.push({ from: quota.kind, to: swapped.kind });
         return true;
       }
@@ -653,7 +694,7 @@ class ZonePlanner<Kind extends string> {
 
   // Places a spawn on a cell that fits it. A one-cell spawn of the plan's own takes the cell kept
   // for it.
-  private placeAt(quota: SpawnQuota<Kind>, cell: Cell): void {
+  private placeAt(member: number | undefined, quota: SpawnQuota<Kind>, cell: Cell): void {
     const { plan, rows, spacing } = this;
     const footprint = quotaFootprint(quota);
     const lastRow = lastRowTaken(plan, spacing, cell, footprint, quota.blocksLane);
@@ -669,18 +710,33 @@ class ZonePlanner<Kind extends string> {
       this.lanes.tryBlock(cell, footprint, true);
       const place = blockingPlace(plan, rows, quota, cell, footprint);
       this.places.add(place);
-      this.standing.push({ block: this.lanes.latest(), cell, event, place, quota });
+      this.standing.push({ block: this.lanes.latest(), cell, event, member, place, quota });
     }
     this.events.push(event);
+    this.markRequest(quota, member, cell.row);
     if (this.statics.includes(quota) && quotaArea(quota) === 1) {
       this.cells.reserved -= 1;
     }
   }
 
+  private markRequest(
+    quota: SpawnQuota<Kind>,
+    member: number | undefined,
+    row: number | undefined,
+  ): void {
+    const quotaIndex = this.plan.quotas.indexOf(quota);
+    if (member === undefined || quotaIndex < 0) {
+      return;
+    }
+    const [first, end] = rowsWithin(this.rows.length, quota.within ?? WHOLE_ZONE);
+    itemAt(this.construction.admitted, quotaIndex)[member] =
+      row !== undefined && row >= first && row < end;
+  }
+
   // A moved spawn takes a cell like any other, but its kept cell, if it had one, is already used.
-  private placeMoved(quota: SpawnQuota<Kind>, cell: Cell): void {
+  private placeMoved(member: number | undefined, quota: SpawnQuota<Kind>, cell: Cell): void {
     const kept = this.cells.reserved;
-    this.placeAt(quota, cell);
+    this.placeAt(member, quota, cell);
     this.cells.reserved = kept;
   }
 
@@ -696,7 +752,8 @@ class ZonePlanner<Kind extends string> {
 
   // Takes a standing spawn off the road, freeing its cells but those a mover holds.
   private lift(lifted: Standing<Kind>): void {
-    const { block, cell, event, place, quota } = lifted;
+    const { block, cell, event, member, place, quota } = lifted;
+    this.markRequest(quota, member, undefined);
     const footprint = quotaFootprint(quota);
     const covered = laneMask(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= block.lastRow; row++) {
@@ -716,12 +773,16 @@ class ZonePlanner<Kind extends string> {
     const undo = [this.cells.save(), this.lanes.save(), this.places.save()];
     const events = [...this.events];
     const standing = [...this.standing];
+    const admitted = this.construction.admitted.map((members) => [...members]);
     return () => {
       for (const restore of undo) {
         restore();
       }
       this.events.splice(0, this.events.length, ...events);
       this.standing.splice(0, this.standing.length, ...standing);
+      this.construction.admitted.forEach((members, index) =>
+        members.splice(0, members.length, ...itemAt(admitted, index)),
+      );
     };
   }
 
@@ -730,7 +791,15 @@ class ZonePlanner<Kind extends string> {
   private cellsIn(quota: SpawnQuota<Kind>, run: Run): Cell[] {
     const { plan, rows, spacing } = this;
     const footprint = quotaFootprint(quota);
-    const cells = this.freeCells(quota, footprint, run.first, run.last + 1);
+    const [first, end] = this.construction.exact
+      ? rowsWithin(rows.length, quota.within ?? WHOLE_ZONE)
+      : [0, rows.length];
+    const cells = this.freeCells(
+      quota,
+      footprint,
+      Math.max(first, run.first),
+      Math.min(end, run.last + 1),
+    );
     const splits = cells.filter((cell) => {
       const after = lastRowTaken(plan, spacing, cell, footprint, true) + 1;
       return (
@@ -761,11 +830,12 @@ class ZonePlanner<Kind extends string> {
   // cap in all, counting any it leaves where the spawn stood, which a later move may fill.
   private fillRun(run: Run, over: number): boolean {
     const { plan, streams } = this;
-    for (const quota of this.unplaced) {
+    for (const request of this.unplaced) {
+      const { member, quota } = request;
       const cells = this.cellsIn(quota, run);
       if (cells.length > 0) {
-        removeItem(quota, this.unplaced);
-        this.placeAt(quota, randomPick(streams.spawns, cells));
+        removeItem(request, this.unplaced);
+        this.placeAt(member, quota, randomPick(streams.spawns, cells));
         return true;
       }
     }
@@ -788,7 +858,7 @@ class ZonePlanner<Kind extends string> {
         ) ?? run;
       const cells = this.cellsIn(pick.from.quota, grown);
       if (cells.length > 0) {
-        this.placeMoved(pick.from.quota, randomPick(streams.spawns, cells));
+        this.placeMoved(pick.from.member, pick.from.quota, randomPick(streams.spawns, cells));
         if (quietRuns(plan, this.inView()).over < over) {
           return true;
         }
@@ -873,6 +943,37 @@ export function planSpawns<Kind extends string>(
   streams: PlannerStreams,
   plan: SpawnPlan<Kind>,
 ): PlannedSpawns<Kind> {
+  return attemptSpawns(
+    {
+      admitted: plan.quotas.map(() => []),
+      drawn: plan.quotas.map(() => []),
+      exact: false,
+      order: "original",
+    },
+    streams,
+    plan,
+  );
+}
+
+// Constructively verifies the whole requested mix without changing the raw phone planner.
+export function planCompleteSpawns<Kind extends string>(
+  context: SpawnSearchContext,
+  streams: PlannerStreams,
+  plan: SpawnPlan<Kind>,
+): ConstructiveSpawnResult<Kind> {
+  return searchSpawnAdmission(
+    (construction, layout) => attemptSpawns(construction, layout, plan),
+    context,
+    streams,
+    plan,
+  );
+}
+
+function attemptSpawns<Kind extends string>(
+  construction: SpawnConstruction,
+  streams: PlannerStreams,
+  plan: SpawnPlan<Kind>,
+): PlannedSpawns<Kind> {
   const spacing = rowSpacing(plan);
   const rows = zoneRows(plan, spacing);
   const capacity = validateSpawnCapacity(plan, rows.length);
@@ -892,6 +993,7 @@ export function planSpawns<Kind extends string>(
   };
   const substitutions: { from: Kind; to: Kind }[] = [];
   const { events, herrings } = new ZonePlanner(
+    construction,
     reject,
     substitutions,
     streams,
@@ -921,9 +1023,11 @@ export function planSpawns<Kind extends string>(
   for (const { kind, mover } of events) {
     countFor(kind, mover?.movement ?? null).admitted += 1;
   }
-  for (const { kind, mover } of herrings) {
-    countFor(kind, mover?.movement ?? null).herrings += 1;
-  }
+  plan.quotas.forEach(({ kind, mover }, index) => {
+    countFor(kind, mover?.movement ?? null).herrings += itemAt(construction.drawn, index).filter(
+      (member) => member.herring,
+    ).length;
+  });
   const admission: AdmissionReport<Kind> = {
     capacity,
     counts,

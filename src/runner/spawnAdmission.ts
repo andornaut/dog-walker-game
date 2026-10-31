@@ -4,6 +4,14 @@ import { minimumSignatureOnScreen } from "./signatureCapacity";
 import type { SpawnPlan } from "./spawning";
 import { rowsWithin } from "./stretches";
 
+// Only proved necessary-bound violations use this error. Invalid definitions remain separate.
+export class SpawnCapacityError extends RangeError {
+  constructor(message: string) {
+    super(message);
+    this.name = "SpawnCapacityError";
+  }
+}
+
 // A failed candidate check, not proof that no arrangement can admit the quota.
 export type SpawnRejection =
   | "body"
@@ -94,7 +102,7 @@ export function validateSpawnCapacity(plan: SpawnPlan<string>, rows: number): Sp
     if (count > 0 && mover?.motion.kind === "signature") {
       const minimum = screenMinimum(mover);
       if (minimum === Infinity) {
-        throw new RangeError(
+        throw new SpawnCapacityError(
           `Impossible spawn quota: ${kind} has no legal complete signature variant`,
         );
       }
@@ -201,7 +209,7 @@ export function validateSpawnCapacity(plan: SpawnPlan<string>, rows: number): Sp
       ({ available, required, resource }) =>
         `${resource} requires ${required}, maximum ${available}`,
     );
-    throw new RangeError(`Impossible spawn quota: ${reasons.join("; ")}`);
+    throw new SpawnCapacityError(`Impossible spawn quota: ${reasons.join("; ")}`);
   }
   return { limits, rows };
 }

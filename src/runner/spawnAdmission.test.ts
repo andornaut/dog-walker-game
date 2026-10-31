@@ -6,7 +6,7 @@ import { type MoverSpec, placeMovers } from "./moverPlanning";
 import { minimumSignatureOnScreen } from "./signatureCapacity";
 import { validateSpawnCapacity } from "./spawnAdmission";
 import type { SpawnPlan } from "./spawning";
-import { planSpawns } from "./zonePlanner";
+import { planCompleteSpawns, planSpawns } from "./zonePlanner";
 
 const plan: SpawnPlan<string> = {
   cellInset: 5,
@@ -192,5 +192,177 @@ describe("spawn admission", () => {
     expect(dropped).toEqual([]);
     expect(spawns[0]?.distance).toBeGreaterThan(0);
     expect(spawns[1]?.distance).toBe(0);
+  });
+});
+
+describe("constructive spawn admission", () => {
+  const counted = () => {
+    const draws = { movers: 0, spawns: 0 };
+    const source = plannerStreams(7);
+    return {
+      draws,
+      streams: {
+        movers: () => {
+          draws.movers += 1;
+          return source.movers();
+        },
+        spawns: () => {
+          draws.spawns += 1;
+          return source.spawns();
+        },
+      },
+    };
+  };
+
+  it("returns a complete original layout and primary RNG cursor unchanged", () => {
+    const mixed: SpawnPlan<string> = {
+      ...plan,
+      quotas: [
+        {
+          blocksLane: true,
+          count: 1,
+          kind: "rider",
+          mover: {
+            ...rider,
+            motion: { kind: "ride", speedMultiplier: 2 },
+            variation: { ...rider.variation, speedShare: 0 },
+          },
+        },
+        { blocksLane: true, count: 2, kind: "wall" },
+        { blocksLane: false, count: 2, kind: "tip" },
+      ],
+      roadLength: 500,
+      sightLength: 400,
+      zoneLength: 4000,
+    };
+    const raw = counted();
+    const expected = planSpawns(raw.streams, mixed);
+    const searched = counted();
+    const result = planCompleteSpawns({ seed: 7, zoneIndex: 0 }, searched.streams, mixed);
+    expect(result.status).toBe("complete");
+    if (result.status !== "complete") {
+      throw new Error(result.status);
+    }
+    expect(result.strategy).toBe("original");
+    expect(result.attempts).toHaveLength(1);
+    expect(result.planned).toEqual(expected);
+    expect(searched.draws).toEqual(raw.draws);
+  });
+
+  it("repairs a path-blocked mix without further primary draws or changed requests", () => {
+    const blocked: SpawnPlan<string> = {
+      ...plan,
+      quotas: [
+        { blocksLane: true, count: 1, footprint: { lanes: 3, rows: 1 }, kind: "hedge" },
+        {
+          blocksLane: true,
+          count: 1,
+          kind: "rider",
+          mover: {
+            ...rider,
+            motion: { kind: "ride", speedMultiplier: 1.5 },
+            variation: { ...rider.variation, speedShare: 0 },
+          },
+        },
+      ],
+      roadLength: 500,
+      sightLength: 400,
+      zoneLength: 4000,
+    };
+    const heldPath = () => {
+      const draws = { movers: 0, spawns: 0 };
+      return {
+        draws,
+        streams: {
+          movers: () => {
+            draws.movers += 1;
+            return 0.9;
+          },
+          spawns: () => {
+            draws.spawns += 1;
+            return 0.5;
+          },
+        },
+      };
+    };
+    const raw = heldPath();
+    expect(
+      planSpawns(raw.streams, blocked).events.filter(({ kind }) => kind === "hedge"),
+    ).toHaveLength(0);
+    const primary = heldPath();
+    const result = planCompleteSpawns({ seed: 7, zoneIndex: 0 }, primary.streams, blocked);
+    expect(result.status).toBe("complete");
+    if (result.status !== "complete") {
+      throw new Error(result.status);
+    }
+    expect(result.strategy).not.toBe("original");
+    expect(result.planned.events.map(({ kind }) => kind).sort()).toEqual(["hedge", "rider"]);
+    expect(result.planned.admission.substitutions).toEqual([]);
+    expect(primary.draws).toEqual(raw.draws);
+  });
+
+  it("reports exact original missing members rather than crediting a still downgrade", () => {
+    const result = planCompleteSpawns({ seed: 7, zoneIndex: 0 }, plannerStreams(7), {
+      ...plan,
+      quotas: [
+        {
+          blocksLane: true,
+          count: 1,
+          first: true,
+          kind: "shared",
+          mover: {
+            ...rider,
+            motion: { kind: "ride", speedMultiplier: 0.2 },
+            variation: { ...rider.variation, speedShare: 0 },
+          },
+        },
+        { blocksLane: true, count: 1, footprint: { lanes: 5, rows: 1 }, kind: "shared" },
+      ],
+    });
+    expect(result.status).toBe("planner-unable");
+    if (result.status !== "planner-unable") {
+      throw new Error(result.status);
+    }
+    expect(result.attempts).toHaveLength(3);
+    expect(
+      result.missing.map(({ count, kind, movement, requests }) => ({
+        count,
+        kind,
+        movement,
+        requests,
+      })),
+    ).toEqual([
+      {
+        count: 1,
+        kind: "shared",
+        movement: "inLane",
+        requests: [{ memberIndex: 0, quotaIndex: 0 }],
+      },
+      { count: 1, kind: "shared", movement: null, requests: [{ memberIndex: 0, quotaIndex: 1 }] },
+    ]);
+    expect(result.missing.flatMap(({ observedRejections }) => observedRejections)).toContainEqual(
+      expect.objectContaining({ reason: "open-lanes" }),
+    );
+  });
+
+  it("separates proved capacity failure from invalid quota definitions", () => {
+    const noDraws = {
+      movers: () => {
+        throw new Error("unexpected draw");
+      },
+      spawns: () => {
+        throw new Error("unexpected draw");
+      },
+    };
+    const invalid = { ...plan, quotas: [{ blocksLane: true, count: 10000, kind: "wall" }] };
+    const result = planCompleteSpawns({ seed: 7, zoneIndex: 0 }, noDraws, invalid);
+    expect(result.status).toBe("capacity-impossible");
+    expect(result.attempts).toEqual([]);
+    expect(() =>
+      planCompleteSpawns({ seed: 7, zoneIndex: 0 }, noDraws, {
+        ...invalid,
+        quotas: [{ blocksLane: true, count: NaN, kind: "wall" }],
+      }),
+    ).toThrow(/count must be/);
   });
 });

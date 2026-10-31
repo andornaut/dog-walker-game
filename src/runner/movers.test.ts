@@ -15,6 +15,7 @@ import {
   dartOutcome,
   drawMover,
   drawnCount,
+  type DrawnMover,
   HOP_SEQUENCES_MOST,
   hopSequences,
   hopShapes,
@@ -1663,6 +1664,24 @@ describe("placeMovers", () => {
       drawMover(own.streams);
       expect(placing.draws).toEqual(own.draws);
     }
+  });
+
+  it("reuses a frozen member's herring outcome without redrawing it", () => {
+    const motion = cross(2, 0);
+    const moving = spec({ ...motion, herring: { endRoadShare: 0.5, share: 1 } });
+    const drawn: DrawnMover[] = [];
+    const quota = { count: 1, drawn, kind: "scenery", spec: moving };
+    const first = placeMovers(plannerStreams(1), zoned, CAPS, freeGrid().grid, [], rows, [quota]);
+    expect(drawn[0]?.herring).toBe(true);
+    expect(first.herrings).toHaveLength(1);
+    const noDraws = () => {
+      throw new Error("a frozen herring must not redraw");
+    };
+    expect(
+      placeMovers({ movers: noDraws, spawns: noDraws }, zoned, CAPS, freeGrid().grid, [], rows, [
+        quota,
+      ]),
+    ).toEqual(first);
   });
 
   // Three movers, one per third of the rows (0 to 12, 13 to 25, 26 to 39). One with no room in

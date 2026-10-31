@@ -1573,8 +1573,15 @@ export function ridersMeet(gap: number, a: RiderSpan, b: RiderSpan): boolean {
 
 // within is the share of the zone's rows the quota's movers are spread over, from and to; the
 // whole zone without it.
+export interface DrawnMover {
+  readonly draws: MoverDraws;
+  readonly herring: boolean;
+}
+
 interface MoverQuota<Kind extends string> {
   readonly count: number;
+  readonly admitted?: boolean[];
+  readonly drawn?: DrawnMover[];
   readonly kind: Kind;
   readonly spec: MoverSpec;
   readonly within?: readonly [number, number];
@@ -1815,16 +1822,20 @@ export function placeMoversWithRejections<Kind extends string>(
   const spawns: MoverSpawn<Kind>[] = [];
   const dropped: Kind[] = [];
   const herrings: MoverSpawn<Kind>[] = [];
-  for (const { count, kind, spec, within } of quotas) {
+  for (const { admitted, count, drawn, kind, spec, within } of quotas) {
     const quotaRows = rowsWithin(rows.length, within ?? WHOLE_ZONE);
     const [, to] = quotaRows;
     for (let i = 0; i < count; i++) {
-      const draws = drawMover(streams);
+      const draws = drawn?.[i]?.draws ?? drawMover(streams);
+      const herring = drawn?.[i]?.herring ?? isHerring(spec, draws);
+      if (drawn !== undefined && drawn[i] === undefined) {
+        drawn[i] = { draws, herring };
+      }
       placing = spec;
       placingKind = kind;
       const lifts = spec.motion.kind === "cross" ? [0, ...DART_LIFTS] : [0];
       const [first, end] = nthStretch(count, i, quotaRows);
-      if (isHerring(spec, draws)) {
+      if (herring) {
         const herring = herringSpawn(geometry, spec, draws, kind, rows.slice(first, end));
         if (herring !== null) {
           herrings.push(herring);
@@ -1908,6 +1919,9 @@ export function placeMoversWithRejections<Kind extends string>(
       grid.block(spot.row, placement.lanes, placement.rows, true, dart);
       grid.stand(standsOf(spot));
       onScreen.push(onScreenOf(placement.path, screenOf(spot)));
+      if (admitted !== undefined) {
+        admitted[i] = true;
+      }
       spawns.push({
         distance: spot.distance + placement.appears,
         kind,
