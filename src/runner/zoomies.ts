@@ -34,6 +34,10 @@ export function debuffDriftProfile(
     if (profile !== null) {
       throw new Error("Only one debuff may define movement");
     }
+    // CLEANUP (added 2026-10-31): replace with strategy evaluation before enabling its data.
+    if (!("every" in movement)) {
+      throw new Error("Debuff drift strategies require their runtime evaluator");
+    }
     const every = read(data.tuning, "seconds", movement.every);
     if (!Number.isFinite(every) || every <= 0) {
       throw new Error("Debuff drift interval must be positive and finite");

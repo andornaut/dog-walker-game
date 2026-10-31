@@ -280,6 +280,9 @@ export const TUNING = {
     stripLineWaitSeconds: 3,
     // Every zone is the same distance: zone 1 takes this long, later zones less as speed rises.
     zoneAtBaseSpeed: 148,
+    // CLEANUP (added 2026-10-31): placeholders become approved bounds with the drift profile.
+    zoomiesDriftMaxSeconds: 1,
+    zoomiesDriftMinSeconds: 1,
     // While the pack has Zoomies, it drifts a lane every this many seconds of walking.
     zoomiesDriftSeconds: 1,
     // How long the Zoomies debuff lasts, in walking time.

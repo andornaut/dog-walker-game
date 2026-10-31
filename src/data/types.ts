@@ -703,11 +703,20 @@ export type Walker = WalkerUnlock & {
 // as Zoomies' drift, has none. While one with bumpMoney lasts, a plain bump also costs that cash,
 // as bumpMoney modifiers change it, on top of its hearts: all the cash there is when that is
 // less, and none at $0.
+export interface DebuffDriftMovement {
+  readonly direction: "heading" | "random";
+  readonly interval:
+    | { readonly kind: "fixed"; readonly seconds: SecondsKey }
+    | { readonly kind: "uniform"; readonly max: SecondsKey; readonly min: SecondsKey };
+  readonly kind: "drift";
+}
+
 export interface Debuff {
   readonly bumpMoney?: MoneyKey;
   readonly modifiers: readonly Modifier[];
   // At most one debuff defines movement: all active debuffs share one drift clock.
-  readonly movement?: { readonly every: SecondsKey; readonly kind: "drift" };
+  // CLEANUP (added 2026-10-31): remove the every leaf when all movement data uses strategies.
+  readonly movement?: DebuffDriftMovement | { readonly every: SecondsKey; readonly kind: "drift" };
   readonly name: string;
   readonly seconds: SecondsKey;
   readonly stake: string;
