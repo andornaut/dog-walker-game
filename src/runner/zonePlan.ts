@@ -270,7 +270,7 @@ export function planZone(
     kind,
     movement: mover?.movement ?? null,
   }));
-  const { events, herrings, path } = planSpawns(streams, plan);
+  const { admission, events, herrings, path } = planSpawns(streams, plan);
   const zone = currentZone(data, run).id;
   const pending = events.map((event): WalkSpawn => {
     const skin = isMinorObstacle(data, event.kind)
@@ -278,5 +278,5 @@ export function planZone(
       : undefined;
     return skin === undefined ? event : { ...event, skin };
   });
-  return { road: { ...road, herrings, path, pending, planned }, run };
+  return { road: { ...road, admission, herrings, path, pending, planned }, run };
 }

@@ -194,11 +194,24 @@ describe("encodeResume and launchWalk", () => {
       session: {
         ...walk.session,
         debuffMovement: { debuff: "zoomies" as const, elapsed: 0.35, interval: 0.8 },
+        walk: {
+          ...walk.session.walk,
+          road: {
+            ...walk.session.walk.road,
+            admission: {
+              capacity: { limits: [], rows: 0 },
+              counts: [],
+              rejections: [],
+              substitutions: [],
+            },
+          },
+        },
       },
     };
     const encoded = encodeResume(gameData, runtime);
     expect(encoded).toBeDefined();
     expect(encoded).not.toContain('"debuffMovement"');
+    expect(encoded).not.toContain('"admission"');
     const stored = JSON.parse(encoded ?? "null") as {
       draws: typeof walk.draws;
       session: { zoomiesSeconds: number };

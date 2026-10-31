@@ -6,6 +6,7 @@ import { type MoverCaps, type MoverSpec, type PlannerStreams, stopsOnVerge } fro
 import { crossingScroll, laneAt, type MoverPath, moverPlace, type MoverStep } from "./movers";
 import { shyOutcomes } from "./shy";
 import { signaturePlace } from "./signaturePaths";
+import type { AdmissionReport } from "./spawnAdmission";
 
 // What a spawn covers: lanes across, and rows along the road of footprint.cellLength each.
 export interface Footprint {
@@ -117,6 +118,7 @@ export interface PathRow {
 // A zone's spawns, sorted by distance, its guaranteed path, a row for each of its rows, and its red
 // herring crossers, sorted by distance: scenery the walk never reads (herringSpawn).
 export interface PlannedSpawns<Kind extends string> {
+  admission: AdmissionReport<Kind>;
   events: SpawnEvent<Kind>[];
   herrings: SpawnEvent<Kind>[];
   path: PathRow[];

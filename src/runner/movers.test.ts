@@ -1666,14 +1666,13 @@ describe("placeMovers", () => {
   });
 
   // Three movers, one per third of the rows (0 to 12, 13 to 25, 26 to 39). One with no room in
-  // its own third, such as one over a cap there, comes on at the nearest later row with room,
-  // never an earlier one, and is dropped when no later row has room.
+  // its own third prefers the nearest later row, then uses an earlier hole if no later row fits.
   it.each([
     { dropped: 0, firstRefused: 13, lastRefused: 25, name: "the middle third", nearest: 26 },
     { dropped: 0, firstRefused: 13, lastRefused: 29, name: "rows 13 to 29", nearest: 30 },
-    { dropped: 2, firstRefused: 13, lastRefused: 39, name: "the last two thirds", nearest: null },
+    { dropped: 0, firstRefused: 13, lastRefused: 39, name: "the last two thirds", nearest: null },
   ])(
-    "places a mover refused $name at the nearest later row with room, or drops it",
+    "places a mover refused $name later when possible, otherwise in an earlier hole",
     ({ dropped, firstRefused, lastRefused, nearest }) => {
       const refused = (row: number) => row >= firstRefused && row <= lastRefused;
       const { blocked, grid } = freeGrid();
@@ -1697,7 +1696,11 @@ describe("placeMovers", () => {
         expect(blocked[1]?.row).toBe(nearest);
       }
       blocked.forEach(({ row }, i) => {
-        expect(row).toBeGreaterThanOrEqual(Math.floor((i * rows.length) / 3));
+        if (nearest === null) {
+          expect(row).toBeLessThan(firstRefused);
+        } else {
+          expect(row).toBeGreaterThanOrEqual(Math.floor((i * rows.length) / 3));
+        }
       });
     },
   );

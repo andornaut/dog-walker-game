@@ -105,6 +105,7 @@ import {
   signaturePlace,
   signatureSweeps,
 } from "./signaturePaths";
+import type { AdmissionReport } from "./spawnAdmission";
 import { type PathRow, type SpawnEvent, takeDueSpawns } from "./spawning";
 import {
   blocksLane,
@@ -149,6 +150,7 @@ export type WalkData = Pick<
 // zone's red herring crossers, at zone distances, scenery the walk never reads. speedFactor scales
 // the scroll speed, for testing. hitStop is set while a hit or a firing holds the walk still.
 export interface Road {
+  admission?: AdmissionReport<WalkItemKind>;
   control: LaneControl;
   herrings: readonly SpawnEvent<WalkItemKind>[];
   hitStop: HitStop | null;

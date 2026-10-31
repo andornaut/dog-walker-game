@@ -27,6 +27,7 @@ import {
   type SignatureSweep,
   signatureTravelSweeps,
 } from "./signaturePaths";
+import type { SpawnRejection } from "./spawnAdmission";
 import { nthStretch, rowsWithin, WHOLE_ZONE } from "./stretches";
 
 // Planning works in road distance. sightLength is how far a row travels down the road before
@@ -1669,7 +1670,8 @@ function standsOf(spot: Spot): MoverStand[] {
 // at another count of moves, until one has room, so a dart whose drawn path sweeps too many lanes
 // in the pack's window still comes on, crossing at another tilt or speed, a merging rider too fast
 // to merge before it reaches the pack comes on slower, and a stepper with no room for its drawn
-// steps takes fewer or more. A mover with no room at any is dropped, which uses no random draw past
+// steps takes fewer or more. If none fits, the same variants check unused earlier rows in the
+// quota's share of the zone. A mover with no room at any is dropped, which uses no random draw past
 // its own draws, as the planner drops an obstacle it has no room for. A dart may take cells other
 // spawns hold, and a rider cells only darts hold (MoverGrid.isFree), or another lane-blocking rider
 // holds where their hit boxes keep riderFollowGap apart (ridersMeet, MoverGrid.clearOfRiders); no other mover
@@ -1694,8 +1696,38 @@ export function placeMovers<Kind extends string>(
   rows: readonly number[],
   quotas: readonly MoverQuota<Kind>[],
 ): PlacedMovers<Kind> {
+  return placeMoversWithRejections(
+    undefined,
+    streams,
+    geometry,
+    caps,
+    grid,
+    onScreen,
+    rows,
+    quotas,
+  );
+}
+
+// The same planner, reporting each rejected candidate without consuming another random draw.
+export function placeMoversWithRejections<Kind extends string>(
+  onRejected: ((kind: Kind, reason: SpawnRejection) => void) | undefined,
+  streams: PlannerStreams,
+  geometry: MoverGeometry & { readonly zoneLength: number },
+  caps: MoverCaps,
+  grid: MoverGrid,
+  onScreen: OnScreen[],
+  rows: readonly number[],
+  quotas: readonly MoverQuota<Kind>[],
+): PlacedMovers<Kind> {
   // The spec of the mover being placed, for its rider span.
   let placing: MoverSpec | undefined;
+  let placingKind: Kind | undefined;
+  const reject = (reason: SpawnRejection): false => {
+    if (placingKind !== undefined) {
+      onRejected?.(placingKind, reason);
+    }
+    return false;
+  };
   const riderOf = (spot: Spot) =>
     placing === undefined
       ? undefined
@@ -1709,22 +1741,35 @@ export function placeMovers<Kind extends string>(
     const { placement } = spot;
     const { cells } = placement;
     const body = bodyOf(spot);
+    if (!(start >= 0 && end <= geometry.zoneLength)) {
+      return reject("outside-zone");
+    }
+    if (!screenHasRoom(caps, onScreen, onScreenOf(placement.path, [start, end]))) {
+      return reject("screen-cap");
+    }
+    if (!cells.every(({ lane, row }) => grid.isFree(placement.path.motion, lane, spot.row + row))) {
+      return reject("cells");
+    }
+    if (!ridersClear(spot)) {
+      return reject("rider-gap");
+    }
+    if (body !== undefined && !grid.clearOf(body)) {
+      return reject("body");
+    }
+    if (!grid.leavesRoom(cells.map(({ lane, row }) => ({ lane, row: spot.row + row })))) {
+      return reject("reservation");
+    }
+    if (!grid.packFits(standsOf(spot))) {
+      return reject("pack-gap");
+    }
     return (
-      start >= 0 &&
-      end <= geometry.zoneLength &&
-      screenHasRoom(caps, onScreen, onScreenOf(placement.path, [start, end])) &&
-      cells.every(({ lane, row }) => grid.isFree(placement.path.motion, lane, spot.row + row)) &&
-      ridersClear(spot) &&
-      (body === undefined || grid.clearOf(body)) &&
-      grid.leavesRoom(cells.map(({ lane, row }) => ({ lane, row: spot.row + row }))) &&
-      grid.packFits(standsOf(spot)) &&
       grid.block(
         spot.row,
         placement.lanes,
         placement.rows,
         false,
         placement.path.motion === "cross",
-      )
+      ) || reject("open-lanes")
     );
   };
   const spotsIn = (placements: readonly MoverPlacement[], first: number, end: number) =>
@@ -1732,7 +1777,11 @@ export function placeMovers<Kind extends string>(
       rows
         .slice(first, end)
         .map((distance, i) => ({ distance, placement, row: first + i }))
-        .filter((spot) => leavesPathOpen(grid.heldLanes?.(spot.row) ?? 0, placement) && fits(spot)),
+        .filter(
+          (spot) =>
+            (leavesPathOpen(grid.heldLanes?.(spot.row) ?? 0, placement) || reject("path-stop")) &&
+            fits(spot),
+        ),
     );
   // The spots that fit in the first of the starts that has any between first and end.
   const firstFitting = (
@@ -1772,6 +1821,7 @@ export function placeMovers<Kind extends string>(
     for (let i = 0; i < count; i++) {
       const draws = drawMover(streams);
       placing = spec;
+      placingKind = kind;
       const lifts = spec.motion.kind === "cross" ? [0, ...DART_LIFTS] : [0];
       const [first, end] = nthStretch(count, i, quotaRows);
       if (isHerring(spec, draws)) {
@@ -1781,21 +1831,31 @@ export function placeMovers<Kind extends string>(
         }
         continue;
       }
-      const fittingAt = (moverDraws: MoverDraws, stop: StopLanes | null) => {
+      const fittingAt = (moverDraws: MoverDraws, stop: StopLanes | null, earlier: boolean) => {
         const starts = lifts.map((lift) =>
           moverPlacements(geometry, spec, moverDraws, lift).filter((placement) =>
             standsIn(stop, placement),
           ),
         );
+        if (starts.every((placements) => placements.length === 0)) {
+          reject("geometry");
+        }
+        if (earlier) {
+          return nearestLater(starts, quotaRows[0], first);
+        }
         const stretch = firstFitting(starts, first, end);
         return stretch.length > 0 ? stretch : nearestLater(starts, end, to);
       };
       const firstFit = (): Spot[] => {
-        for (const stop of stopsToTry(spec, draws.turnAt)) {
-          for (const tried of [draws, ...moverRetries(spec, draws)]) {
-            const found = fittingAt(tried, stop);
-            if (found.length > 0) {
-              return found;
+        // Existing choices keep precedence. Only an otherwise dropped mover checks earlier
+        // holes, with the same drawn identity, variants and safety checks.
+        for (const earlier of [false, true]) {
+          for (const stop of stopsToTry(spec, draws.turnAt)) {
+            for (const tried of [draws, ...moverRetries(spec, draws)]) {
+              const found = fittingAt(tried, stop, earlier);
+              if (found.length > 0) {
+                return found;
+              }
             }
           }
         }

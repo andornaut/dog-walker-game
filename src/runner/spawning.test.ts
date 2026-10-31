@@ -387,16 +387,16 @@ describe("planSpawns", () => {
     );
   });
 
-  // 9 rows of 5 lanes, given more obstacles than fit: each row keeps open the lanes the path holds
+  // 9 rows of 5 lanes, requested up to the open-lane bound: each row keeps open the path's lanes
   // on it, its own and on the row before a change every lane the change crosses, and at least
   // minOpenLanes; every other lane takes an obstacle.
   it.each([{ minOpenLanes: 1 }, { minOpenLanes: 2 }])(
-    "fills every row but the lanes the path holds and $minOpenLanes more open, skipping the rest",
+    "fills the allowed lanes under the $minOpenLanes open-lane bound",
     ({ minOpenLanes }) => {
       const crowded: SpawnPlan<Kind> = {
         ...plan,
         minOpenLanes,
-        quotas: [{ blocksLane: true, count: 9 * 4 + 1, kind: "obstacle" }],
+        quotas: [{ blocksLane: true, count: 9 * (5 - minOpenLanes), kind: "obstacle" }],
       };
       for (const seed of seeds.slice(0, 10)) {
         const { events, path } = planSpawns(plannerStreams(seed), crowded);
@@ -484,13 +484,13 @@ describe("planSpawns", () => {
     const tooBig: SpawnPlan<Kind> = {
       ...plan,
       quotas: [
-        { blocksLane: true, count: 40, footprint: { lanes: 3, rows: 1 }, kind: "obstacle" },
+        { blocksLane: true, count: 30, footprint: { lanes: 3, rows: 1 }, kind: "obstacle" },
         { blocksLane: false, count: 9, kind: "tip" },
       ],
     };
     const events = planSpawns(plannerStreams(1), tooBig).events;
     expect(countOf("obstacle", events)).toBeGreaterThan(0);
-    expect(countOf("obstacle", events)).toBeLessThan(40);
+    expect(countOf("obstacle", events)).toBeLessThan(30);
     expect(countOf("tip", events)).toBe(9);
     expect(planSpawns(plannerStreams(1), tooBig).events).toEqual(events);
   });
@@ -500,7 +500,7 @@ describe("planSpawns", () => {
     const crowded: SpawnPlan<Kind> = {
       ...plan,
       quotas: [
-        { blocksLane: true, count: 20, footprint: FOOTPRINTS.bench, kind: "bench" },
+        { blocksLane: true, count: 15, footprint: FOOTPRINTS.bench, kind: "bench" },
         { blocksLane: false, count: 30, kind: "tip" },
       ],
     };
@@ -762,18 +762,19 @@ describe("planSpawns", () => {
   // road: below the rows a fast rider reaches, as it leaves the road's bottom first, and above the
   // rows a slow one reaches, as the road brings them only once it has gone.
   it.each([
-    { name: "a fast rider", rowsAfter: -1, speedMultiplier: 2 },
-    { name: "a slow rider", rowsAfter: 2, speedMultiplier: 0.5 },
+    { count: 6, name: "a fast rider", rowsAfter: -1, speedMultiplier: 2 },
+    // Only one slow rider's screen time fits the slow-vehicle cap over this zone.
+    { count: 1, name: "a slow rider", rowsAfter: 2, speedMultiplier: 0.5 },
   ])(
     "stands an obstacle in $name's lane $rowsAfter rows from its own, never on it",
-    ({ rowsAfter, speedMultiplier }) => {
+    ({ count, rowsAfter, speedMultiplier }) => {
       const riding: SpawnPlan<Kind> = {
         ...plan,
         minOpenLanes: 2,
         quotas: [
           {
             blocksLane: true,
-            count: 6,
+            count,
             kind: "car",
             mover: { ...DARTING, motion: { kind: "ride", speedMultiplier }, movement: "inLane" },
           },

@@ -9,13 +9,14 @@ import {
   type MoverSpec,
   type MoverStand,
   type OnScreen,
-  placeMovers,
+  placeMoversWithRejections,
   type PlannerStreams,
   ridersMeet,
   type RiderSpan,
 } from "./moverPlanning";
 import { hasLeftRoad, type LaneSpan, type MoverPath, moverPlace } from "./movers";
 import { signaturePlace } from "./signaturePaths";
+import { type AdmissionReport, type SpawnRejection, validateSpawnCapacity } from "./spawnAdmission";
 import { type Block, LaneBlocks, PlacedPlaces, SpawnCells } from "./spawnCells";
 import {
   blockingLength,
@@ -297,6 +298,8 @@ class ZonePlanner<Kind extends string> {
   private readonly unplaced: SpawnQuota<Kind>[] = [];
 
   constructor(
+    private readonly reject: (kind: Kind, reason: SpawnRejection) => false,
+    private readonly substitutions: { from: Kind; to: Kind }[],
     streams: PlannerStreams,
     plan: SpawnPlan<Kind>,
     spacing: number,
@@ -358,40 +361,40 @@ class ZonePlanner<Kind extends string> {
 
   private fits(cell: Cell, footprint: Footprint, quota: SpawnQuota<Kind>): boolean {
     const { plan, rows, spacing } = this;
-    const { blocksLane } = quota;
+    const { blocksLane, kind } = quota;
     if (cell.lane + footprint.lanes > plan.laneCount) {
-      return false;
+      return this.reject(kind, "outside-road");
     }
     const last = lastRowTaken(plan, spacing, cell, footprint, blocksLane);
     if (last >= rows.length) {
-      return false;
+      return this.reject(kind, "outside-rows");
     }
     const covered = laneMask(cell.lane, footprint.lanes);
     for (let row = cell.row; row <= last; row++) {
       if ((this.cells.heldFor(row, quota) & covered) !== 0) {
-        return false;
+        return this.reject(kind, "cells");
       }
     }
     const cells = footprint.lanes * (last - cell.row + 1);
     if (footprint.lanes * footprint.rows > 1 && !this.cells.leavesRoom(cells)) {
-      return false;
+      return this.reject(kind, "reservation");
     }
     if (!blocksLane) {
       return true;
     }
     if (!this.clearOfMovers(cell, footprint)) {
-      return false;
+      return this.reject(kind, "body");
     }
     if (
       footprint.lanes >= WIDE_LANES &&
       !this.lanes.clearOfWide(cell.row, lastHitRow(plan, spacing, cell, footprint))
     ) {
-      return false;
+      return this.reject(kind, "wide-gap");
     }
-    return (
-      this.places.fits(blockingPlace(plan, rows, quota, cell, footprint)) &&
-      this.lanes.tryBlock(cell, footprint, false)
-    );
+    if (!this.places.fits(blockingPlace(plan, rows, quota, cell, footprint))) {
+      return this.reject(kind, "pack-gap");
+    }
+    return this.lanes.tryBlock(cell, footprint, false) || this.reject(kind, "open-lanes");
   }
 
   private freeCells(
@@ -477,7 +480,8 @@ class ZonePlanner<Kind extends string> {
     const quotas = placingOrder(
       moverQuotas(true, plan.quotas).filter((quota) => quota.first === first),
     );
-    const { dropped, herrings, spawns } = placeMovers(
+    const { dropped, herrings, spawns } = placeMoversWithRejections(
+      this.reject,
       this.streams,
       moverRoadOf(plan, this.spacing),
       plan.moverCaps,
@@ -507,7 +511,8 @@ class ZonePlanner<Kind extends string> {
     const grid = this.prizeGrid();
     const onScreen: OnScreen[] = [];
     return moverQuotas(false, plan.quotas).flatMap((quota) => {
-      const { dropped, spawns } = placeMovers(
+      const { dropped, spawns } = placeMoversWithRejections(
+        this.reject,
         this.streams,
         road,
         plan.moverCaps,
@@ -639,6 +644,7 @@ class ZonePlanner<Kind extends string> {
           fitting.map(({ weight }) => weight),
         );
         this.placeAt(swapped, this.pickCell(swapped, cells));
+        this.substitutions.push({ from: quota.kind, to: swapped.kind });
         return true;
       }
     }
@@ -869,14 +875,67 @@ export function planSpawns<Kind extends string>(
 ): PlannedSpawns<Kind> {
   const spacing = rowSpacing(plan);
   const rows = zoneRows(plan, spacing);
+  const capacity = validateSpawnCapacity(plan, rows.length);
   if (plan.pathStart < 0 || plan.pathStart >= plan.laneCount) {
     throw new Error("The path must start on the road");
   }
   const path = drawPath(streams, plan, rows.length);
-  const { events, herrings } = new ZonePlanner(streams, plan, spacing, rows, path).place();
+  const rejections = new Map<Kind, Map<SpawnRejection, number>>();
+  const reject = (kind: Kind, reason: SpawnRejection): false => {
+    let reasons = rejections.get(kind);
+    if (reasons === undefined) {
+      reasons = new Map();
+      rejections.set(kind, reasons);
+    }
+    reasons.set(reason, (reasons.get(reason) ?? 0) + 1);
+    return false;
+  };
+  const substitutions: { from: Kind; to: Kind }[] = [];
+  const { events, herrings } = new ZonePlanner(
+    reject,
+    substitutions,
+    streams,
+    plan,
+    spacing,
+    rows,
+    path,
+  ).place();
+  const counts: {
+    admitted: number;
+    herrings: number;
+    kind: Kind;
+    movement: AdmissionReport<Kind>["counts"][number]["movement"];
+    requested: number;
+  }[] = [];
+  const countFor = (kind: Kind, movement: AdmissionReport<Kind>["counts"][number]["movement"]) => {
+    let count = counts.find((count) => count.kind === kind && count.movement === movement);
+    if (count === undefined) {
+      count = { admitted: 0, herrings: 0, kind, movement, requested: 0 };
+      counts.push(count);
+    }
+    return count;
+  };
+  for (const { count, kind, mover } of plan.quotas) {
+    countFor(kind, mover?.movement ?? null).requested += count;
+  }
+  for (const { kind, mover } of events) {
+    countFor(kind, mover?.movement ?? null).admitted += 1;
+  }
+  for (const { kind, mover } of herrings) {
+    countFor(kind, mover?.movement ?? null).herrings += 1;
+  }
+  const admission: AdmissionReport<Kind> = {
+    capacity,
+    counts,
+    rejections: [...rejections].flatMap(([kind, reasons]) =>
+      [...reasons].map(([reason, candidates]) => ({ candidates, kind, reason })),
+    ),
+    substitutions,
+  };
   const byDistance = (a: SpawnEvent<Kind>, b: SpawnEvent<Kind>) =>
     a.distance - b.distance || a.lane - b.lane;
   return {
+    admission,
     events: events.sort(byDistance),
     herrings: herrings.sort(byDistance),
     path: path.map((lane, row) => ({ distance: itemAt(rows, row), lane })),
