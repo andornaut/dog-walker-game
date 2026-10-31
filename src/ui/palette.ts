@@ -39,14 +39,14 @@ const NEUTRAL = {
 } as const;
 
 // Colours outside Endesga 32 and the neutral greys: deepAmber is the background for picked
-// portraits and icons; Toronto canopy and violet distinguish neutral home headers. The other Toronto
+// portraits and icons; Toronto lake and violet distinguish neutral home headers. The other Toronto
 // colours style effect name pills: dlake on foam for buffs, walnut on tan for Muddy, and lime
 // for Zoomies.
 const EXTRA = {
-  canopy: 0x357a2f,
   deepAmber: 0xfc9124,
   dlake: 0x1d5576,
   foam: 0xa8e0e6,
+  lake: 0x2f7fa6,
   lime: 0xb2d94a,
   violet: 0x6d4bb0,
   walnut: 0x2e2019,

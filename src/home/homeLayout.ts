@@ -191,7 +191,7 @@ export const HOME_LAYOUT = {
     walker: {
       fill: "brown",
       heading: "white",
-      neutral: "canopy",
+      neutral: "lake",
       neutralTag: "neutral-walker",
       note: "white",
     },
