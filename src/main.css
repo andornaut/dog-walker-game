@@ -1,5 +1,5 @@
-/* The game page's layout: the nav bar, the game and the dev panel stacked in one screen. The
-   installed app shows neither the nav bar nor the dev panel. On a touch screen in landscape the
+/* The game page's layout: the game and the dev panel stacked in one screen. The installed app
+   hides the dev panel. On a touch screen in landscape the
    kit's frameTurnPortraitGame.css turns body onto its side, so the safe-area insets here are its
    --inset-* ones, on the turned frame's own edges. */
 
@@ -29,14 +29,14 @@ body {
 body {
   display: flex;
   flex-direction: column;
-  /* The top element, the nav bar or else the game, clears the status bar and notch. */
+  /* The game clears the status bar and notch. */
   padding-top: var(--inset-top);
   box-sizing: border-box;
 }
 
 /* Margins rather than padding: Phaser sizes and centres the canvas in the parent's
    border box, padding included. Phaser re-measures the parent only every 500 ms of game
-   time, so a canvas sized for a taller parent is clipped rather than drawn over the nav. */
+   time, so a canvas sized for a taller parent stays clipped to the game area. */
 #game {
   flex: 1;
   min-height: 0;
