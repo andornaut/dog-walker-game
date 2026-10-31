@@ -13,26 +13,19 @@ page and screen-loading show it at 2x and the og-image at 1x.
 screen-<name>: 360x560 backgrounds in the house palette, one per screen. Where panels
 and text sit, they are low-contrast dark wood, so the cream and tan UI text
 reads on them.
-- screen-home: an autumn morning on a Cabbagetown street. The bar strip, then the
-  gate scene (y 40 to 196). Across the street (FAR_BASE 74): a foam sky over a
-  haze band, the CN Tower far back over the laneway at the right (FAR_CN), a
-  row of small bay-and-gables in brick, dbrick, cream and clay with ochre and
-  brown trees between them, their bare front yards strewn with leaves behind
-  an iron fence. Then the far sidewalk, the street (rows 82 to 91), the curb
-  and our sidewalk with a turned maple (amber, ochre and rust) in its planter
-  and its leaves fallen around it, then the iron fence on a stone curb with beds
-  of mums inside it, open at the gate between two brick piers (152 and 202). The
-  front yard is pale driftwood flagstones, the front path (x 164 to 195) red
-  brick in basket weave, with fallen leaves, the yard sign, a stone urn of
-  mums in the corner and the flat dark-brown backing from y 199 under the walker, dogs and
-  Pocket sections and Start walk. The street sign's board (300,72 54x11, a
-  52x9 navy face) sits at the right edge, clear of the walker's speech bubble;
-  the game prints homeText.gateSign on it in font-body, white, centred at
-  327,75. The yard sign (SIGN_AT 6,138, a 128x38 board on two posts, left of
-  the gate path, where the pack never stands) carries ARCHIE'S over DOG WALKS
-  in the sign letters at 2x, yellow, the letters centred on its face. The
-  yard's right lot is left for ui-pet-shop. The scene holds no strong green, so
-  the Pet shop's board and Start walk stand out.
+- screen-home: a compact, skyless Cabbagetown courtyard, drawn at native screen
+  coordinates (0,0). Rows 40 to 163 hold a continuous stone-capped masonry
+  wall, a complete recessed window at the exposed left, a low autumn planter,
+  an open iron gate and quiet broad flagstones. No roofs, skyline or sky are
+  cropped beneath the top bar. The centre stays quiet behind dialogue and the
+  pack; the red-brick path at x 164 to 195 ends below the actor's last opaque
+  foot row 163 (anchor 164). The street-name board is at 300,40, 54x11; the
+  game prints its existing name in white at 327,43. The yard sign at 6,106,
+  128x38 carries ARCHIE'S over DOG WALKS in the existing sign letters, on two
+  short posts. The right lot is reserved for ui-pet-shop at 234,54,120x108.
+  Two quiet ground rows at 164 and 165 precede the plum divider on row 166;
+  the backing below it is flat dbrown. No strong green competes with the
+  existing shop board and Start walk.
 - screen-end: a Cabbagetown street at dusk, with plain lower sky bands and a
   repeating interior road footer from row 511, free of lane edges and dashes.
   Between the logo (END_LOGO_AT
@@ -76,8 +69,8 @@ reads on them.
 
 ui-pet-shop: a 120x108 sprite, tags normal, pressed and glint: the pet shop on
 the yard's right lot, which opens the shop. The game draws it at PET_SHOP_AT
-(234,86), its base on the yard's bottom row (193), and its hit area is the
-frame. The PET SHOP board (BOARD, 3,0 114x22 in the frame, 237,86 on screen)
+(234,54), its base on the yard's bottom row (161), and its hit area is the
+frame. The PET SHOP board (BOARD, 3,0 114x22 in the frame, 237,54 on screen)
 spans the parapet, its bottom 2 rows over it, built and coloured as ui-button's
 go state (green face, yellow highlight, forest lip, ink line), with PET SHOP in
 the sign letters' shapes at 2x in ink, as the go label. Under it a red and
@@ -88,9 +81,9 @@ sinks 2px onto the step, the step 1px shallower, and the board loses its lip
 and highlight to face, as go-pressed. glint is 7 frames at 60ms: a 6px light
 band sweeping up and across the raised board (GLINT_STEPS), then a clean
 frame; the game plays it every few seconds while idle, with a bob of at most
-2px, which keeps the board's top (86) clear of the street sign's plate (bottom
-row 82). An affordable item in the shop takes ui-afford 2px outside the frame
-(232,84 124x112).
+2px, which keeps the board's top (54) clear of the street sign's plate (bottom
+row 50). An affordable item in the shop takes ui-afford 2px outside the frame
+(232,52 124x112).
 
 ui-loading-track: a 316x8 image, the sidewalk being walked: Lady's paw
 prints in dslate, staggered on two rows from Casey's heel to the Pet shop's door.
@@ -111,6 +104,7 @@ Usage:
   screens.py shop-preview OUT.png
                                ui-pet-shop's tags on the yard at 1x and 4x, and
                                screen-home with it in at 1x and 4x
+  screens.py build screen-home write only screen-home PNG and Aseprite source
   screens.py build             write art/screens/*.aseprite, public/art/images/*.png
                                and public/art/sprites/ui-loading.* and ui-pet-shop.*
 
@@ -139,9 +133,9 @@ from ui import STATES  # noqa: E402
 W, H = 360, 560
 LOGO_W, LOGO_H = 145, 41
 SIGN_W, SIGN_H = 128, 38
-SIGN_AT = (6, 138)
+SIGN_AT = (6, 106)
 PET_SHOP_W, PET_SHOP_H = 120, 108
-PET_SHOP_AT = (234, 86)
+PET_SHOP_AT = (234, 54)
 # The PET SHOP board in the sprite: ui-button's go state 114x22, its bottom 2 rows over the parapet.
 # The building below it starts BOARD_RISE rows down.
 BOARD = (3, 0, 114, 22)
@@ -454,124 +448,104 @@ def urn(cv, x, foot):
         cv.fill(x + dx, foot + dy, 2, 2, ("amber", "red", "cream")[k % 3])
 
 
+def courtyard_wall(cv):
+    """A complete stone-capped wall with quiet courses and one recessed sash window."""
+    cv.fill(0, 40, W, 57, "stone")
+    cv.fill(0, 40, W, 1, "dstone")
+    cv.fill(0, 41, W, 2, "driftwood")
+    cv.fill(0, 43, W, 2, "dstone")
+    for y, joints in ((61, (49, 124, 201)), (82, (78, 162, 226))):
+        cv.fill(0, y, 234, 1, "dstone")
+        for x in joints:
+            cv.fill(x, y - 16, 1, 16, "dstone")
+    cv.fill(0, 94, 234, 3, "dstone")
+    # The exposed left window has its whole lintel and sill inside the courtyard band.
+    cv.fill(7, 51, 27, 37, "dstone")
+    cv.fill(8, 52, 25, 2, "driftwood")
+    cv.fill(9, 54, 23, 31, "bark")
+    cv.fill(11, 56, 19, 27, "navy")
+    cv.fill(12, 57, 17, 24, "dlake")
+    cv.fill(12, 57, 17, 2, "lake")
+    cv.fill(20, 57, 2, 24, "stone")
+    cv.fill(12, 69, 17, 2, "stone")
+    cv.fill(10, 83, 23, 2, "driftwood")
+    cv.fill(7, 85, 28, 2, "dstone")
+
+
+def courtyard_paving(cv):
+    """Broad flagstones and a quiet brick path, with sparse joints behind the pack."""
+    cv.fill(0, 97, W, 67, "driftwood")
+    for y in (113, 137, 163):
+        cv.fill(0, y, 151, 1, "stone")
+        cv.fill(208, y, W - 208, 1, "stone")
+    for x, y, h in ((28, 98, 15), (103, 98, 15), (62, 114, 23), (116, 138, 25),
+                    (25, 138, 25), (222, 114, 23), (288, 138, 25), (338, 114, 23)):
+        cv.fill(x, y, 1, h, "stone")
+    cv.fill(162, 97, 36, 67, "dstone")
+    cv.fill(164, 97, 32, 67, "clay")
+    for n, y in enumerate(range(102, 164, 8)):
+        cv.fill(164, y, 32, 1, "bark")
+        for x in range(164 + (n % 2) * 8, 196, 16):
+            cv.fill(x, y + 1, 1, min(7, 163 - y), "bark")
+    cv.fill(164, 97, 1, 67, "driftwood")
+
+
 def home():
     cv = sn.Canvas(W, H)
-    # the bar strip the game draws its bar over
+    cv.fill(0, 0, W, H, "dbrown")
     cv.fill(0, 0, W, 38, "plum")
-    cv.fill(0, 38, W, 2, "dbrown")
-    # across the street: an autumn sky, the CN Tower far back over the laneway at the right, a row of
-    # Cabbagetown bay-and-gables with turned trees between them, their bare front yards strewn with
-    # leaves behind an iron fence
-    cv.fill(0, 40, W, FAR_BASE - 40, "foam")
-    cv.fill(0, 57, W, FAR_BASE - 57, "haze")
-    for i in range(0, W, 5):
-        cv.fill(i, 57 - (i // 5) % 2, 5, 1, "haze")
-    cn_tower(cv, *FAR_CN, lit=False)
-    for x, w, *_ in FAR_HOMES:
-        far_tree(cv, x + w + 1, FAR_BASE - 20, 8)
-    far_tree(cv, 322, FAR_BASE - 8, 7)
-    for x, w, wall, trim, door, bay_left in FAR_HOMES:
-        far_gable(cv, x, w, wall, trim, door, bay_left)
-    cv.fill(0, FAR_BASE, W, 3, "bark")
-    for i in range(0, W, 7):
-        cv.fill(i + (i * 3) % 5, FAR_BASE + 1, 1, 1, "ochre")
-    iron_fence(cv, 0, W, FAR_BASE + 3, [(x + (w - w // 2 // 2 - 6 if bay else w // 2 // 2 - 4),
-                                        x + (w - w // 2 // 2 + 2 if bay else w // 2 // 2 + 4))
-                                       for x, w, _, _, _, bay in FAR_HOMES])
-    # the far sidewalk and curb, then the street: asphalt and a storm drain
-    cv.fill(0, FAR_BASE + 3, W, 4, "lgrey")
-    for x in range(10, W, 24):
-        cv.fill(x, FAR_BASE + 3, 1, 4, "grey")
-    cv.fill(0, FAR_BASE + 7, W, 1, "grey")
-    cv.fill(0, FAR_BASE + 8, W, 92 - FAR_BASE - 8, "dslate")
-    cv.fill(52, 88, 18, 4, "navy")
-    for x in range(54, 70, 3):
-        cv.fill(x, 89, 1, 3, "ink")
-    # the curb and the sidewalk
-    cv.fill(0, 92, W, 4, "grey")
-    cv.fill(0, 92, W, 1, "lgrey")
-    cv.fill(0, 96, W, 30, "lgrey")
-    for x in range(0, W, 24):
-        cv.fill(x, 96, 1, 30, "grey")
-    # a maple in a sidewalk planter, turned: its shadow, the trunk, then a lumpy crown, lit amber from the
-    # top left and shaded rust, and its leaves fallen on the sidewalk
-    for dy in range(-6, 7):
-        for dx in range(-24, 25):
-            if (dx / 24) ** 2 + (dy / 6.5) ** 2 <= 1:
-                x, y = 78 + dx, 100 + dy
-                cv.fill(x, y, 1, 1, dk("%02x%02x%02x" % cv.img.getpixel((x, y))))
-    cv.fill(60, 108, 22, 14, "dbrown")
-    cv.fill(61, 109, 20, 12, "brown")
-    cv.fill(62, 110, 18, 2, "dbrown")
-    cv.fill(69, 92, 4, 20, "bark")
-    cv.fill(69, 92, 1, 20, "clay")
-    crowns(cv, [(71 + lx, 80 + ly, rad) for lx, ly, rad in ((-6, -10, 10), (8, -9, 10), (0, 0, 13), (-13, 3, 10),
-                                                             (13, 4, 10), (0, 10, 10))], "amber", "ochre", "rust")
-    for x, y in ((92, 104), (110, 118), (128, 100), (34, 116), (206, 112), (140, 122)):
-        leaf(cv, x, y, "ochre")
-    # the street sign at the right edge, under the sound toggle and clear of the walker's speech
-    # bubble (x 70 to 290, rows 46 to 112); the game prints the name centred at 327,75 in white,
-    # which holds 13.9:1 on navy
-    cv.fill(326, 72, 2, 44, "slate")
-    cv.fill(326, 72, 1, 44, "grey")
-    cv.fill(300, 72, 54, 11, "dslate")
-    cv.fill(301, 73, 52, 9, "navy")
-    cv.fill(324, 114, 6, 2, "dslate")
-    # the front yard: pale driftwood flagstones, some in stone
-    flagstones(cv, 0, 126, W, (7, 8, 9, 8, 9, 9, 10, 10), "driftwood", "dstone", "stone", seed=11)
-    # beds of mums along the inside of the fence
-    for x0, x1 in ((0, 152), (208, W)):
-        cv.fill(x0, 139, x1 - x0, 5, "bark")
-        cv.fill(x0, 139, x1 - x0, 1, "walnut")
-        for i, x in enumerate(range(x0 + 2, x1 - 2, 4)):
-            cv.fill(x, 140 + i % 2, 2, 2, ("amber", "red", "cream", "rust")[i % 4])
-    # the front path: red brick in basket weave from the porch to the gate
-    basket_weave(cv, 164, 126, 32, 70, "brick", "dbrick", "clay")
-    cv.fill(163, 126, 1, 70, "dstone")
-    cv.fill(196, 126, 1, 70, "dstone")
-    # the iron fence on a stone curb, open at the gate between two brick piers with stone caps
-    cv.fill(0, 135, 156, 3, "stone")
-    cv.fill(204, 135, W - 204, 3, "stone")
-    cv.fill(0, 137, 156, 1, "dstone")
-    cv.fill(204, 137, W - 204, 1, "dstone")
-    iron_fence(cv, 1, W, 136, [(155, 205)])
-    for px in (152, 202):
-        cv.fill(px, 118, 6, 22, "brick")
-        cv.fill(px + 4, 118, 2, 22, "dbrick")
-        for y in range(121, 138, 4):
-            cv.fill(px, y, 6, 1, "dbrick")
-        cv.fill(px - 1, 116, 8, 2, "stone")
-        cv.fill(px - 1, 116, 8, 1, "lgrey")
-        cv.fill(px, 140, 6, 1, "dstone")
-    # the yard sign on two posts: ARCHIE'S over DOG WALKS in the sign letters at 2x, yellow
-    for px in (16, 120):
-        cv.fill(px, 172, 3, 22, "dbrown")
-        cv.fill(px - 1, 194, 5, 1, "dstone")
+    courtyard_wall(cv)
+    courtyard_paving(cv)
+    # A contained low planter leaves the top bar and dialogue free of foliage.
+    cv.fill(2, 95, 46, 10, "bark")
+    cv.fill(3, 96, 44, 8, "clay")
+    cv.fill(2, 95, 46, 2, "driftwood")
+    crowns(cv, ((10, 92, 5), (19, 90, 6), (29, 91, 5), (39, 92, 5)),
+           "brown", "bark", "walnut")
+    for x, y in ((10, 90), (23, 87), (36, 91)):
+        cv.fill(x, y, 3, 2, "ochre")
+    # Open gate and short piers share the courtyard's ground plane.
+    for x, w in ((0, 152), (208, 26)):
+        cv.fill(x, 108, w, 3, "dstone")
+        cv.fill(x, 108, w, 1, "stone")
+        for px in range(x + 4, x + w, 8):
+            cv.fill(px, 96, 1, 12, "shale")
+        cv.fill(x, 98, w, 1, "shale")
+        cv.fill(x, 105, w, 1, "shale")
+    for x in (152, 202):
+        cv.fill(x, 91, 6, 23, "clay")
+        cv.fill(x + 4, 91, 2, 23, "bark")
+        for y in range(96, 114, 6):
+            cv.fill(x, y, 6, 1, "bark")
+        cv.fill(x - 1, 89, 8, 2, "dstone")
+        cv.fill(x - 1, 89, 8, 1, "driftwood")
+    # The street-name plate keeps its existing text anchor without adding lettering to art.
+    cv.fill(326, 49, 2, 45, "dstone")
+    cv.fill(326, 49, 1, 45, "stone")
+    cv.fill(300, 40, 54, 11, "dslate")
+    cv.fill(301, 41, 52, 9, "navy")
+    # A shallow contact shadow seats the existing shop's step on the same paving.
+    cv.fill(233, 160, 122, 3, "dstone")
+    # The logo board is the foreground focal point on the exposed left.
+    for x in (16, 120):
+        cv.fill(x, 140, 3, 23, "bark")
+        cv.fill(x, 140, 1, 22, "clay")
+        cv.fill(x - 1, 162, 5, 1, "stone")
     board(cv, *SIGN_AT, SIGN_W, SIGN_H)
-    top, bottom = (fonts.sign(t, 2, "yellow")[0] for t in ("ARCHIE'S", "DOG WALKS"))
-    # the inked letters centred down the dark face, 4 rows above and below, their shadow in the bottom margin
     y = SIGN_AT[1] + 6
-    for line in (top, bottom):
+    for text in ("ARCHIE'S", "DOG WALKS"):
+        line = fonts.sign(text, 2, "yellow")[0]
         w, h = extent(line)
         lettering(line, cv, SIGN_AT[0] + (SIGN_W - w) // 2 + 1, y)
         y += h - 2
-    # an urn of mums in the corner, fallen leaves, a water bowl by the path and a ball on the flagstones
-    urn(cv, 324, 194)
-    for x, y, col in ((40, 186, "ochre"), (140, 178, "rust"), (212, 172, "brown"), (96, 186, "ochre"),
-                      (230, 150, "rust"), (300, 170, "ochre")):
-        leaf(cv, x, y, col)
-    cv.fill(222, 189, 10, 4, "slate")
-    cv.fill(223, 189, 8, 2, "sky")
-    cv.fill(224, 189, 3, 1, "cyan")
-    cv.fill(251, 176, 3, 5, "red")
-    cv.fill(250, 177, 5, 3, "red")
-    cv.fill(251, 177, 1, 1, "pink")
-    cv.fill(253, 179, 1, 1, "dred")
-    cv.fill(254, 178, 1, 1, "dred")
-    # Two quiet ground rows below the feet, then a continuous divider and flat panel backing.
-    cv.fill(0, 196, W, 2, "brown")
-    cv.fill(0, 198, W, H - 198, "dbrown")
-    cv.fill(0, 198, W, 1, "plum")
+    # Sparse grounded props stay outside the pack's clear central path.
+    leaf(cv, 43, 153, "ochre")
+    leaf(cv, 139, 145, "rust")
+    cv.fill(220, 157, 10, 4, "dstone")
+    cv.fill(221, 157, 8, 2, "dlake")
+    cv.fill(222, 157, 3, 1, "shallow")
+    cv.fill(0, 164, W, 2, "brown")
+    cv.fill(0, 166, W, 1, "plum")
     return cv
 
 
@@ -1424,7 +1398,7 @@ def pair(step):
 # The dog-slot sign hung from the Pet shop's awning across its front: the frame's size and where the game draws
 # it, and the cream board in the frame, where the game writes its two lines.
 SLOT_SIGN_W, SLOT_SIGN_H = 81, 30
-SLOT_SIGN_AT = (255, 120)
+SLOT_SIGN_AT = (255, 88)
 SLOT_BOARD = (1, 5, 79, 24)
 
 
@@ -1563,15 +1537,17 @@ def shop_preview(out, scale=4):
     lot.resize((lot.width * scale, lot.height * scale), Image.NEAREST).save(out.replace(".png", "-lot.png"))
 
 
-def build():
+def build(only=None):
+    screens = SCREENS if only is None else {only: SCREENS[only]}
     os.makedirs("art/screens", exist_ok=True)
     os.makedirs("public/art/images", exist_ok=True)
-    for key, draw in SCREENS.items():
+    for key, draw in screens.items():
         png = f"public/art/images/{key}.png"
         draw().img.save(png)
         subprocess.run(["aseprite", "-b", png, "--save-as", f"art/screens/{key}.aseprite"], check=True)
-    build_sprites(list(sprites()), "art/screens")
-    print("built", ", ".join(SCREENS))
+    if only is None:
+        build_sprites(list(sprites()), "art/screens")
+    print("built", ", ".join(screens))
 
 
 if __name__ == "__main__":
@@ -1579,6 +1555,8 @@ if __name__ == "__main__":
         preview(sys.argv[2])
     elif len(sys.argv) == 3 and sys.argv[1] == "shop-preview":
         shop_preview(sys.argv[2])
+    elif len(sys.argv) == 3 and sys.argv[1] == "build" and sys.argv[2] in SCREENS:
+        build(sys.argv[2])
     elif len(sys.argv) == 2 and sys.argv[1] == "build":
         build()
     else:
