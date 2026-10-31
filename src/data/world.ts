@@ -120,7 +120,7 @@ export const WORLD = {
     },
     {
       art: "cabbagetown",
-      density: { cards: 1.23, luckyFinds: 1, minorObstacles: 0.84, tips: 1 },
+      density: { cards: 1.23, luckyFinds: 1, minorObstacles: 0.8, tips: 1 },
       difficulty: 2,
       difficultyName: "Easy",
       id: "cabbagetown",
@@ -229,7 +229,7 @@ export const WORLD = {
     },
     {
       art: "kensington-market",
-      density: { cards: 1.08, luckyFinds: 1, minorObstacles: 0.85, tips: 1.2 },
+      density: { cards: 1.08, luckyFinds: 1, minorObstacles: 0.89, tips: 1.2 },
       difficulty: 3,
       difficultyName: "Normal",
       id: "kensingtonMarket",
