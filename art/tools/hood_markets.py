@@ -27,11 +27,10 @@ barrel-stack        48x48   minor, 1 lane: three whisky barrels stacked as a pyr
                             hoop with a bark stencil (a diamond round a dot), the brown bodies showing
                             above the heads, bark wedges chocking the bottom two. idle (4 frames,
                             400ms): a glint runs down the top barrel's hoop on frames 2 and 3
-art-sculpture       48x48   minor, 1 lane, the Distillery District's cone: a big rusted iron spider
-                            on a low stone plinth, two legs a side arching from a dbrown body with a
-                            turquoise patina mark, each up to a high knee and down to the plinth.
-                            idle (4 frames, 400ms): a glint runs down the left outer shin on frames
-                            2 and 3
+art-sculpture       48x48   minor, 1 lane: three closed wooden shipping crates, two wide boxes at the
+                            base and one centred above, with broad light tops, brown plank fronts,
+                            dark side planes and bold timber braces. idle (4 frames, 400ms): a
+                            restrained glint crosses the top crate's metal corner on frames 2 and 3
 
 Kensington Market:
 
@@ -451,52 +450,50 @@ def barrel_stack(glint=None):
 STACK_IDLE = (None, None, 235, 200), 400
 
 
-# ---------- the art sculpture ----------
-
-# Each leg's hip, knee and foot in layout pixels on the right of the body, mirrored for the left: the outer leg
-# arched high and wide, the inner one bent low beside the body, so the gaps between them hold open at @50.
-SPIDER_LEGS = (((25, 9), (33.5, 1), (38, 30)), ((24.5, 14), (29, 12), (26, 30)))
-
+# ---------- the shipping crates ----------
 
 def art_sculpture(glint=None):
-    """A big rusted iron spider on a low stone plinth, laid out on 40x40 with the plinth's foot on the cone's
-    row: two rust legs a side (SPIDER_LEGS), each a thigh up to its knee and a shin down to the plinth, stroked
-    on the drawn grid 2 layout pixels thick and at least 1px so they stay whole at every step, round a dbrown body, its
-    abdomen marked with a turquoise patina over a smaller head. The plinth is a stone cap lit driftwood over
-    a dstone block. glint is how far down the left outer shin, from 0 at the knee to 1 at the foot, a white
-    glint runs, or None."""
+    """Three closed shipping crates on the 40x40 obstacle grid, with their feet on row 35.
+    Each has a broad plank front, a light top and a dark right side. One bold timber X braces
+    each front; closed tops and solid faces distinguish these from food and produce crates.
+    glint moves a short highlight down the top crate's metal corner."""
     g = edged(Grid(ob.SIZE, ob.SIZE))
-    px, s = raster(g), scale_of(g)
-    # the plinth
-    g.rect(1, 30, 38, 2, "stone")
-    g.rect(1, 30, 38, 1, "driftwood")
-    g.rect(3, 32, 34, 4, "dstone")
-    t = max(1, round(2 * s))
+    s = scale_of(g)
 
-    def bar(a, b, c):
-        (x0, y0), (x1, y1) = (v * s for v in a), (v * s for v in b)
-        n = max(1, round(max(abs(x1 - x0), abs(y1 - y0)) * 2))
-        for k in range(n + 1):
-            x, y = x0 + (x1 - x0) * k / n, y0 + (y1 - y0) * k / n
-            px.rect(math.floor(x - t / 2 + 0.5), math.floor(y - t / 2 + 0.5), t, t, c)
+    def crate(x, y, w, h):
+        d, face = 3, w - 3
+        # A solid box with three large planes, lit from the upper left.
+        poly(g, ((x, y + d), (x + d, y), (x + w, y), (x + face, y + d)), "tan")
+        poly(g, ((x + face, y + d), (x + w, y), (x + w, y + h - d), (x + face, y + h)), "bark")
+        g.rect(x, y + d, face, h - d, "brown")
+        # A broad frame and one horizontal plank joint keep the wood readable without texture.
+        g.rect(x, y + d, face, 2, "driftwood")
+        g.rect(x, y + h - 2, face, 2, "clay")
+        g.rect(x, y + d, 2, h - d, "clay")
+        g.rect(x + face - 2, y + d, 2, h - d, "bark")
+        g.rect(x + 2, y + d + (h - d) / 2, face - 4, 1, "bark")
+        # Two wide diagonal timbers form one unmistakable shipping-crate brace.
+        line(g, ((x + 2, y + d + 2), (x + face - 4, y + h - 4)), 2.5, "tan")
+        line(g, ((x + face - 4, y + d + 2), (x + 2, y + h - 4)), 2.5, "tan")
+        # One small steel corner sits on the lit top edge.
+        g.rect(x + face - 3, y + d, 3, 2, "ash")
+        g.rect(x + face - 1, y + d, 1, 3, "grey")
+        # A single broad joint on the side reinforces the closed box's depth.
+        line(g, ((x + face + 1, y + d + (h - d) / 2),
+                 (x + w - 1, y + (h - d) / 2)), 1, "bark")
 
-    for hip, knee, foot in SPIDER_LEGS:
-        for side in (1, -1):
-            pts = [(20 + side * (x - 20), y) for x, y in (hip, knee, foot)]
-            bar(pts[0], pts[1], "rust")
-            bar(pts[1], pts[2], "rust")
-    # the body: the abdomen and its patina over the head
-    g.cel(20, 9, 7, 6, "dbrown", "plum", "brown")
-    g.cel(19, 8, 3.5, 2.5, "turquoise", "dturq")
-    g.cel(20, 17, 4, 3, "dbrown", "plum", "brown")
+    crate(1, 18, 19, 18)
+    crate(20, 18, 19, 18)
+    crate(10, 1, 21, 19)
     if glint is not None:
-        (kx, ky), (fx, fy) = ((ob.SIZE - x, y) for x, y in SPIDER_LEGS[0][1:])
-        x, y = kx + (fx - kx) * glint, ky + (fy - ky) * glint
-        px.rect(math.floor(x * s - t / 2 + 0.5), math.floor(y * s - t / 2 + 0.5), t, t, "white")
-    return lit(g)
+        # The highlight remains a short joined mark at every native depth.
+        px = raster(g)
+        px.rect(math.floor(25 * s), math.floor((4 + glint * 8) * s),
+                max(1, round(2 * s)), max(1, round(2 * s)), "white")
+    return lit(g, dict(bark=("clay", None)))
 
 
-# The glint runs down the left outer leg's shin on frames 2 and 3.
+# The top crate's steel corner catches light on frames 2 and 3.
 SCULPTURE_IDLE = (None, None, 0.1, 0.3), 400
 
 
