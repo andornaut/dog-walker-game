@@ -214,13 +214,18 @@ describe("debuff movement schedule", () => {
   });
 
   it("uses the safe opposite or cancels an active manual preference", () => {
-    const manual = steerWalk(hybrid, ROAD.laneCount, 1, walkIn(1));
-    for (const [items, expected] of [
-      [[boardIn(3, 0)], -1],
-      [[boardIn(3, 0), boardIn(1, 1)], null],
-    ] satisfies readonly [WalkItem[], LaneDirection | null][]) {
+    for (const [lane, direction, items, expected] of [
+      [1, 1, [boardIn(3, 0)], -1],
+      [1, 1, [boardIn(3, 0), boardIn(1, 1)], null],
+      [1, -1, [], 1],
+      [3, 1, [], -1],
+      [1, -1, [boardIn(1, 0)], null],
+    ] satisfies readonly [number, LaneDirection, WalkItem[], LaneDirection | null][]) {
+      const manual = steerWalk(hybrid, ROAD.laneCount, direction, walkIn(lane));
       const walk = { ...manual, road: { ...manual.road, items } };
-      expect(stepDebuffMovement(hybrid, ROAD, () => 0, EVERY, null, walk).drifted).toBe(expected);
+      const random = vi.fn(() => (direction === 1 ? 0 : 1));
+      expect(stepDebuffMovement(hybrid, ROAD, random, EVERY, null, walk).drifted).toBe(expected);
+      expect(random).not.toHaveBeenCalled();
     }
   });
 
