@@ -18,13 +18,13 @@ velvet-rope         112x36  minor, 2 lanes: three brass stanchions on round base
                             swagged between them. idle (4 frames, 400ms): a glint runs down the left
                             post's highlight on frames 2 and 3
 rolling-barrel      48x48   minor dart, 1 lane: a whisky barrel on its side rolling across the lanes,
-                            seen end-on, its dark oak head's staves and bung turning inside an iron hoop;
+                            seen end-on, its dark oak staves, pale repair plank and bung turning inside an iron hoop;
                             rolls right, the game mirrors it for left. idle (2 frames, 400ms):
                             resting, rocking 15 degrees; run (8 frames, 60ms): a full turn, 45
                             degrees a frame, a puff of dust kicked up behind it
 barrel-stack        48x48   minor, 1 lane: three whisky barrels stacked as a pyramid on a tan pallet,
-                            lying on their sides with their ochre heads to the camera, each in a silver
-                            hoop with a bark stencil (a diamond round a dot), the brown bodies showing
+                            lying on their sides with their plank-built oak heads to the camera, each in a silver
+                            hoop over a recessed dark chime, the brown bodies showing
                             above the heads, bark wedges chocking the bottom two. idle (4 frames,
                             400ms): a glint runs down the top barrel's hoop on frames 2 and 3
 art-sculpture       48x48   minor, 1 lane: three closed wooden shipping crates, two wide boxes at the
@@ -325,8 +325,8 @@ VELVET_IDLE = (None, None, 12, 19), 400
 
 def rolling_barrel(turn=0.0, dust=None, rock=0.0):
     """A whisky barrel on its side, seen end-on: an ash iron hoop lit grey on its upper left and shaded
-    slate on its lower right, the chime's dbrown ring inside it, and the brown head with its dbrown stave
-    seams and a walnut bung, dark oak with no gold or orange so it never reads as a coin, turned turn
+    slate on its lower right, a recessed dark chime, and the brown oak head with broad stave
+    seams, one pale replacement plank and an off-centre walnut bung, turned turn
     degrees clockwise. dust (0 or 1) kicks up a puff of driftwood dust behind it on the left, low on the
     ground, in one of two shapes. rock turns the bung alone that many degrees, the seams held still. Laid out
     on the 32-unit grid; the head is drawn pixel for pixel at the grid's scale so its seams stay 1px at any
@@ -335,7 +335,7 @@ def rolling_barrel(turn=0.0, dust=None, rock=0.0):
     px, s = raster(g), scale_of(g)
     cx, cy, r = 16 * s, 16.5 * s, 12 * s
     a = math.radians(turn)
-    gap = max(3, round(3.3 * s))
+    gap = max(4, round(4.5 * s))
     b = a + math.radians(rock)
     bung = (cx + math.cos(b - math.pi / 2) * 0.55 * r, cy + math.sin(b - math.pi / 2) * 0.55 * r)
     for y in range(px.h):
@@ -348,10 +348,15 @@ def rolling_barrel(turn=0.0, dust=None, rock=0.0):
             if d > r - max(2, 2.2 * s):
                 c = "grey" if light < -0.6 else "slate" if light > 0.5 else "ash"
             elif d > r - max(3, 3.6 * s):
-                c = "bark" if light > 0.5 else "dbrown"
+                c = "walnut" if light > 0.1 else "clay"
             else:
                 along = dx * math.cos(a) + dy * math.sin(a)
-                c = "dbrown" if math.floor(along) % gap == 0 else "brown"
+                c = "bark" if math.floor(along) % gap == 0 else "brown"
+                # A broad pale repair stave rotates with the head, unlike an ornamental centre mark.
+                if -0.5 * r < along < -0.5 * r + max(2, 3.3 * s):
+                    c = "driftwood"
+                    if math.floor(along + 0.5 * r) == 0:
+                        c = "bark"
                 if math.hypot(x + 0.5 - bung[0], y + 0.5 - bung[1]) < max(1.2, 1.4 * s):
                     c = "walnut"
             px.p(x, y, c)
@@ -372,8 +377,8 @@ BARREL_RUN = tuple((k * 45, k % 2) for k in range(8)), 60
 def barrel_end(g, cx, cy, r, glint=None):
     """A barrel lying on its side with its head to the camera, centred on cx, cy with radius r in layout
     pixels: its brown body showing above the head, lit tan along its top; a silver hoop (lgrey, shaded grey
-    on its lower right) and a dbrown chime round the ochre head, its brown stave seams upright and a bark
-    stencil on it, a diamond round a dot. glint is the angle in degrees, clockwise from the right, of a
+    on its lower right) and a recessed bark chime round the brown oak head, with a few broad
+    plank faces and clear upright seams. glint is the angle in degrees, clockwise from the right, of a
     white glint on the hoop: the two hoop pixels nearest that angle. Drawn pixel for pixel at the grid's
     scale so its rings and seams stay 1px."""
     px, s = raster(g), scale_of(g)
@@ -391,9 +396,12 @@ def barrel_end(g, cx, cy, r, glint=None):
                 if d > r - hoop:
                     c = "grey" if light > 0.4 else "lgrey"
                 elif d > r - chime:
-                    c = "dbrown"
+                    c = "bark"
                 else:
-                    c = "brown" if math.floor(dx + 0.5 * gap) % gap == 0 else "ochre"
+                    across = dx + r
+                    c = "clay" if math.floor(across / gap) % 2 else "brown"
+                    if math.floor(across) % gap == 0:
+                        c = "bark"
                 px.p(x, y, c)
                 continue
             # the body above the head, seen from above: the head's disc pushed back lift pixels
@@ -401,13 +409,6 @@ def barrel_end(g, cx, cy, r, glint=None):
                 if math.hypot(dx, dy + k) <= r:
                     px.p(x, y, "tan" if k == lift and math.hypot(dx, dy + k - 1) > r else "brown")
                     break
-    # the stencil: a diamond round a dot, the dot alone where the head is too small to hold the diamond
-    m = round(2.2 * s) if s > 0.9 else 0
-    ox, oy = math.floor(cx), math.floor(cy)
-    for i in range(m + 1 if m else 0):
-        for x, y in ((ox - m + i, oy - i), (ox + i, oy - m + i), (ox + m - i, oy + i), (ox - i, oy + m - i)):
-            px.p(x, y, "bark")
-    px.p(ox, oy, "bark")
     if glint is not None:
         ring = [(x, y) for y in range(px.h) for x in range(px.w)
                 if r - hoop < math.hypot(x + 0.5 - cx, y + 0.5 - cy) <= r]
