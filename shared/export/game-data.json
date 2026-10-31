@@ -166,7 +166,7 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "+1♥ each, −$20",
+      "text": "−$20",
       "title": "Other dog"
     },
     {
@@ -180,6 +180,19 @@
         "kind": "encounter"
       },
       "text": "Zoomies: drifts for 40s",
+      "title": "Other dog"
+    },
+    {
+      "art": "card-other-dog-keep-moving",
+      "frame": "encounter",
+      "id": "keep-moving",
+      "index": 2,
+      "name": "Keep moving",
+      "source": {
+        "id": "otherDog",
+        "kind": "encounter"
+      },
+      "text": "−1♥ each",
       "title": "Other dog"
     },
     {
@@ -213,12 +226,12 @@
       "frame": "encounter",
       "id": "bolt",
       "index": 2,
-      "name": "Bolt past",
+      "name": "Splash past",
       "source": {
         "id": "porchCat",
         "kind": "encounter"
       },
-      "text": "−1♥ each",
+      "text": "Muddy: slower for 60s",
       "title": "Porch cat"
     },
     {
@@ -1089,13 +1102,6 @@
             "art": "card-other-dog-sniff",
             "effects": [
               {
-                "amount": 1,
-                "kind": "hearts",
-                "target": {
-                  "kind": "affected"
-                }
-              },
-              {
                 "amount": "missedTips",
                 "change": "lose",
                 "kind": "money"
@@ -1114,6 +1120,20 @@
             ],
             "id": "pullAway",
             "name": "Pull away"
+          },
+          {
+            "art": "card-other-dog-keep-moving",
+            "effects": [
+              {
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "id": "keepMoving",
+            "name": "Keep moving"
           }
         ]
       },
@@ -1162,15 +1182,12 @@
             "art": "card-porch-cat-bolt",
             "effects": [
               {
-                "amount": -1,
-                "kind": "hearts",
-                "target": {
-                  "kind": "affected"
-                }
+                "debuff": "muddy",
+                "kind": "debuff"
               }
             ],
             "id": "bolt",
-            "name": "Bolt past"
+            "name": "Splash past"
           }
         ]
       },

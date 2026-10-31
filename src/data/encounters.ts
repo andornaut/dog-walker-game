@@ -165,10 +165,7 @@ export const ENCOUNTERS = {
       options: [
         {
           art: "card-other-dog-sniff",
-          effects: [
-            { amount: 1, kind: "hearts", target: { kind: "affected" } },
-            { amount: "missedTips", change: "lose", kind: "money" },
-          ],
+          effects: [{ amount: "missedTips", change: "lose", kind: "money" }],
           id: "sniff",
           name: "Let them sniff",
         },
@@ -177,6 +174,12 @@ export const ENCOUNTERS = {
           effects: [{ debuff: "zoomies", kind: "debuff" }],
           id: "pullAway",
           name: "Pull away",
+        },
+        {
+          art: "card-other-dog-keep-moving",
+          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          id: "keepMoving",
+          name: "Keep moving",
         },
       ],
     },
@@ -204,9 +207,9 @@ export const ENCOUNTERS = {
         },
         {
           art: "card-porch-cat-bolt",
-          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          effects: [{ debuff: "muddy", kind: "debuff" }],
           id: "bolt",
-          name: "Bolt past",
+          name: "Splash past",
         },
       ],
     },
