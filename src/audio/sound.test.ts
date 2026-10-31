@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  admitContactPlay,
   admitPlay,
   clampVolume,
   debuffSoundCue,
@@ -102,6 +103,22 @@ describe("effectiveVolumes", () => {
 });
 
 describe("admitPlay", () => {
+  it.each(["puddle", "pothole"] as const)(
+    "coalesces %s material across the pack and adjacent steps",
+    (encounter) => {
+      const cue = hitCue("obstacle", encounter);
+      let recent: RecentPlays = {};
+      const admitted = [1000, 1000, 1050, 1099, 1100].map((nowMs) => {
+        const result = admitContactPlay(recent, cue, nowMs);
+        recent = result.recent;
+        return result.admitted;
+      });
+      expect(admitted).toEqual([true, false, false, false, true]);
+      expect(admitPlay(recent, debuffSoundCue("muddy"), 1100).admitted).toBe(true);
+      expect(admitContactPlay(recent, hitCue("obstacle", "skunk"), 1100).admitted).toBe(true);
+    },
+  );
+
   const playAt = (recent: RecentPlays, times: number[]): boolean[] => {
     let current = recent;
     return times.map((nowMs) => {

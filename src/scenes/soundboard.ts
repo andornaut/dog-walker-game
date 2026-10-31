@@ -11,6 +11,7 @@ import {
 } from "../audio/music";
 import { shouldResumeAudio } from "../audio/resume";
 import {
+  admitContactPlay,
   admitPlay,
   clampVolume,
   effectiveVolumes,
@@ -44,6 +45,14 @@ class Soundboard {
   }
 
   play(cue: SoundCue): void {
+    this.playWithAdmission(admitPlay, cue);
+  }
+
+  playContact(cue: SoundCue): void {
+    this.playWithAdmission(admitContactPlay, cue);
+  }
+
+  private playWithAdmission(admit: typeof admitPlay, cue: SoundCue): void {
     this.guard(`play ${cue}`, () => {
       const volume = effectiveVolumes(this.mix).sfx;
       if (volume <= 0) {
@@ -55,7 +64,7 @@ class Soundboard {
         this.reportOnce(cue, `Sound ${keys} did not load; playing nothing in its place.`);
         return;
       }
-      const { admitted, recent } = admitPlay(this.recentPlays, cue, this.game.loop.now);
+      const { admitted, recent } = admit(this.recentPlays, cue, this.game.loop.now);
       this.recentPlays = recent;
       if (admitted) {
         this.game.sound.play(key, { volume });

@@ -18,7 +18,7 @@ import { newRun, type PackDogs } from "../state/runState";
 import { atPack, data, geometry, tuning } from "../testing/walk";
 import { cents, clampHearts } from "../units";
 import { hitCue, type SoundCue, soundKeyFor } from "./sound";
-import { choiceCues, pullCues, stepCues } from "./stepCues";
+import { choiceCues, contactCues, pullCues, stepCues } from "./stepCues";
 
 const sounds = new Set(parseManifest(shippedManifest).sounds.map(({ key }) => key));
 const loaded = (key: string) => sounds.has(key);
@@ -143,6 +143,22 @@ const CASES: readonly Case[] = [
 ];
 
 describe("stepCues", () => {
+  it.each(["puddle", "pothole"] as const)(
+    "retains %s physical sound when its debuff is prevented",
+    (encounter) => {
+      const run = newRun(walkData, 3, { dogs: ["kilo"], gear: null, walker: "casey" });
+      const step = stepWalk(walkData, geometry, () => 1, 0.01, {
+        road: { ...startRoad(5), items: [atPack(encounter)], nextItemId: 1 },
+        run: {
+          ...run,
+          immunities: [{ encounter, source: { kind: "upgrade", upgrade: "raincoats" } }],
+        },
+      });
+      expect(step.walk.run.debuffs).toEqual([]);
+      expect(contactCues(walkData, step)).toEqual([hitCue("obstacle", encounter)]);
+    },
+  );
+
   it.each(CASES)("plays $cue for $name, from a shipped sound", ({ cue, item, meeting }) => {
     const cues = cuesMeeting(item, meeting);
     expect(cues).toEqual([cue]);

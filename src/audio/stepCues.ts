@@ -31,12 +31,7 @@ const STEP_CUES: Readonly<Record<keyof WalkStep, CuesOf>> = {
   collected: NONE,
   // A contact obstacle's own hit sound, or a minor obstacle with contact's bump, as its bump
   // would play.
-  contacts: (data, { contacts }) =>
-    contacts.map(({ source }): SoundCue =>
-      source.kind === "encounter"
-        ? hitCue(data.encounters[source.encounter].kind, source.encounter)
-        : "bump",
-    ),
+  contacts: contactCues,
   encounterHits: (data, { encounterHits }) => encounterCues(data, encounterHits),
   // A firing plays as its owner leaves (RunMoments), whatever fired them.
   fired: NONE,
@@ -56,6 +51,27 @@ const STEP_CUES: Readonly<Record<keyof WalkStep, CuesOf>> = {
   walk: NONE,
   zoneEnded: NONE,
 };
+
+// Physical material sounds remain independent of whether their debuff applies.
+export function contactCues(
+  data: StepData,
+  { contacts, modified }: Pick<WalkStep, "contacts" | "modified">,
+): SoundCue[] {
+  return [
+    ...contacts.map(({ source }): SoundCue =>
+      source.kind === "encounter"
+        ? hitCue(data.encounters[source.encounter].kind, source.encounter)
+        : "bump",
+    ),
+    ...modified.flatMap(({ value }): SoundCue[] => {
+      const { subject } = value;
+      return subject.kind === "immune" &&
+        data.encounters[subject.encounter].resolution.kind === "contact"
+        ? [hitCue(data.encounters[subject.encounter].kind, subject.encounter)]
+        : [];
+    }),
+  ];
+}
 
 export function stepCues(data: StepData, step: WalkStep): SoundCue[] {
   return Object.values(STEP_CUES).flatMap((cues) => cues(data, step));

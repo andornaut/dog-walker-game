@@ -144,3 +144,11 @@ export function admitPlay(recent: RecentPlays, cue: SoundCue, nowMs: number): Pl
   }
   return { admitted: true, recent: { ...recent, [cue]: [...inWindow, nowMs] } };
 }
+
+// Physical contacts share one material cue across a pack and adjacent walking steps.
+export function admitContactPlay(recent: RecentPlays, cue: SoundCue, nowMs: number): PlayDecision {
+  const inWindow = (recent[cue] ?? []).filter((startMs) => nowMs - startMs < PLAY_WINDOW_MS);
+  return inWindow.length > 0
+    ? { admitted: false, recent: { ...recent, [cue]: inWindow } }
+    : admitPlay(recent, cue, nowMs);
+}

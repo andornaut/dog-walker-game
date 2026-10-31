@@ -3,7 +3,7 @@ import type { Point, Rect } from "@andornaut/game-kit/rect";
 import type { Scene } from "phaser";
 
 import { debuffSoundCue } from "../../audio/sound";
-import { choiceCues, pullCues, stepCues } from "../../audio/stepCues";
+import { choiceCues, contactCues, pullCues, stepCues } from "../../audio/stepCues";
 import { gameData } from "../../data";
 import type { DogId, EncounterId, HintId, HintTrigger } from "../../data/types";
 import {
@@ -306,7 +306,14 @@ export class RunMoments {
     const reached = reachIcons(marks.reaches);
     this.deps.items.strike(step);
     const sound = soundboardOf(this.scene);
-    stepCues(gameData, step).forEach((cue) => sound.play(cue));
+    const materials = new Set(contactCues(gameData, step));
+    stepCues(gameData, step).forEach((cue) => {
+      if (materials.has(cue)) {
+        sound.playContact(cue);
+      } else {
+        sound.play(cue);
+      }
+    });
     if (step.tips.length > 0) {
       this.hint({ kind: "tip" });
     }
@@ -775,7 +782,7 @@ export class RunMoments {
     const { kind } = gameData.encounters[encounter];
     const feet = this.deps.pack.dogFeet(dog);
     if (feet !== undefined) {
-      const moment = { depth: DEPTH.fx, holdMs: stopMs(step) };
+      const moment = { depth: DEPTH.sprite - 0.5, holdMs: stopMs(step) };
       playHitEffects(this.scene, moment, [splashEffect(still, feet)]);
     }
     const { flash } = hitLook(kind, encounter);
