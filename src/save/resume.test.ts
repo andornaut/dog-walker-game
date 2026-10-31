@@ -1,3 +1,4 @@
+import { encodeSave } from "@andornaut/game-kit/save/versionedSave";
 import { describe, expect, it, vi } from "vitest";
 
 import { gameData } from "../data";
@@ -16,7 +17,9 @@ import {
 import { componentHitLength, itemHeight, startRoad } from "../runner/walk";
 import { footprintOf, type WalkItem } from "../runner/walkItems";
 import { newRun, type RunState } from "../state/runState";
+import { newPlayerSave, testContext } from "../testing/saves";
 import { clampHearts } from "../units";
+import { saveFormat } from "./load";
 import { encodeResume, launchWalk, RESUME_VERSION, type ResumeWalk } from "./resume";
 import { checkpointOf } from "./runSlices";
 import type { Checkpoint } from "./schema";
@@ -204,6 +207,7 @@ describe("encodeResume and launchWalk", () => {
               rejections: [],
               substitutions: [],
             },
+            control: { ...walk.session.walk.road.control, manualDirection: 1 as const },
           },
         },
       },
@@ -212,6 +216,14 @@ describe("encodeResume and launchWalk", () => {
     expect(encoded).toBeDefined();
     expect(encoded).not.toContain('"debuffMovement"');
     expect(encoded).not.toContain('"admission"');
+    expect(encoded).not.toContain('"manualDirection"');
+    const checkpoint = checkpointFor(runtime, encoded);
+    expect(JSON.stringify(checkpoint)).not.toContain("manualDirection");
+    const saved = encodeSave(saveFormat(testContext), { ...newPlayerSave, checkpoint });
+    expect(saved.ok).toBe(true);
+    if (saved.ok) {
+      expect(saved.value).not.toContain("manualDirection");
+    }
     const stored = JSON.parse(encoded ?? "null") as {
       draws: typeof walk.draws;
       session: { zoomiesSeconds: number };
