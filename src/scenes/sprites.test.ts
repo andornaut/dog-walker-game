@@ -1,8 +1,9 @@
 import { animationKey } from "@andornaut/game-kit/art/aseprite";
-import type { GameObjects } from "phaser";
+import type { GameObjects, Scene } from "phaser";
 import { describe, expect, it } from "vitest";
 
 import { playTag, playTagOnce, showAtDepth } from "./sprites";
+import { addSelectTile } from "./uiKit";
 
 const KEY = "dog-kilo";
 
@@ -121,6 +122,114 @@ describe("playTagOnce", () => {
       complete("bark");
       complete("bark");
       expect(called).toEqual(calls);
+    },
+  );
+});
+
+function tileScene(animated: boolean, reducedMotion: boolean) {
+  const update = new Set<() => void>();
+  const frames = [
+    { duration: 130, textureFrame: "selected-first" },
+    { duration: 70, textureFrame: "selected-second" },
+  ];
+  const animations = new Map([
+    ["ui-tile:selected-static", { frames: [{ duration: 1000, textureFrame: "legacy-selected" }] }],
+    ...(animated ? [["ui-tile:selected", { frames }] as const] : []),
+  ]);
+  let destroy: (() => void) | undefined;
+  let face: { frame: { name: string }; height: number; width: number } | undefined;
+  const time = { now: 0 };
+  const container = () => ({ add: () => undefined });
+  const scene = {
+    add: {
+      container,
+      graphics: () => ({
+        fillRect: () => undefined,
+        fillStyle() {
+          return this;
+        },
+      }),
+      nineslice(
+        _x: number,
+        _y: number,
+        _key: string,
+        frame: string,
+        width: number,
+        height: number,
+      ) {
+        const slice = {
+          frame: { name: frame },
+          height,
+          once(_event: string, callback: () => void) {
+            destroy = callback;
+          },
+          setFrame(name: string, updateSize: boolean, updateOrigin: boolean) {
+            expect(updateSize).toBe(false);
+            expect(updateOrigin).toBe(false);
+            this.frame.name = name;
+          },
+          setOrigin() {
+            return this;
+          },
+          updateUVs() {
+            return this;
+          },
+          width,
+        };
+        face = slice;
+        return slice;
+      },
+    },
+    anims: {
+      exists: (key: string) => animations.has(key),
+      get: (key: string) => animations.get(key),
+    },
+    events: {
+      off: (_event: string, callback: () => void) => update.delete(callback),
+      on: (_event: string, callback: () => void) => update.add(callback),
+    },
+    textures: { exists: () => true },
+    time,
+  };
+  const rect = { height: 44, width: 77, x: 14, y: 201 };
+  addSelectTile(scene as unknown as Scene, container() as unknown as GameObjects.Container, rect, {
+    edge: true,
+    reducedMotion,
+    state: "selected",
+    tile: true,
+  });
+  return { destroy: () => destroy?.(), face: () => face, time, update };
+}
+
+describe("selected tile faces", () => {
+  it("uses tag timing without resizing the tile and unregisters when destroyed", () => {
+    const shown = tileScene(true, false);
+    expect(shown.face()?.frame.name).toBe("selected-first");
+    shown.time.now = 130;
+    shown.update.forEach((callback) => callback());
+    expect(shown.face()).toMatchObject({
+      frame: { name: "selected-second" },
+      height: 44,
+      width: 77,
+    });
+    shown.time.now = 200;
+    shown.update.forEach((callback) => callback());
+    expect(shown.face()?.frame.name).toBe("selected-first");
+    shown.destroy();
+    expect(shown.update.size).toBe(0);
+  });
+
+  it.each([
+    [true, true, "selected-first"],
+    [false, false, "legacy-selected"],
+  ] as const)(
+    "holds a safe first frame with animation=%s and reducedMotion=%s",
+    (animated, reduced, frame) => {
+      const shown = tileScene(animated, reduced);
+      shown.time.now = 130;
+      shown.update.forEach((callback) => callback());
+      expect(shown.face()?.frame.name).toBe(frame);
+      expect(shown.update.size).toBe(0);
     },
   );
 });

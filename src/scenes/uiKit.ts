@@ -43,7 +43,7 @@ import {
 } from "../ui/selection";
 import { TEXT_SCALE } from "../ui/textFit";
 import { TAP_BURST_SCENE_KEY } from "./sceneKeys";
-import { playEffect, playTag } from "./sprites";
+import { firstTag, playEffect, playTag } from "./sprites";
 import { listenTargetPress } from "./targetPress";
 
 // Body text at 2x in plum, the screens' default text.
@@ -654,6 +654,33 @@ function drawTileFace(scene: Scene, edge: boolean, look: SelectLook, rect: Rect)
   return g;
 }
 
+// Selected tile faces change UVs only, keeping their nine-slice size and origin intact.
+function animateTileFace(
+  scene: Scene,
+  tag: string,
+  reducedMotion: boolean,
+  face: GameObjects.NineSlice,
+): void {
+  const frames = scene.anims.get(animationKey("ui-tile", tag))?.frames ?? [];
+  if (reducedMotion || frames.length < 2) {
+    return;
+  }
+  const durations = frames.map(({ duration }) => duration);
+  let shown = 0;
+  const show = () => {
+    const index = loopFrame(false, durations, scene.time.now);
+    const frame = frames[index]?.textureFrame;
+    if (index !== shown && frame !== undefined) {
+      face.setFrame(frame, false, false);
+      face.updateUVs();
+      shown = index;
+    }
+  };
+  show();
+  scene.events.on("update", show);
+  face.once("destroy", () => scene.events.off("update", show));
+}
+
 // A tappable item in its interaction state. Selected, it has the gold face and any ui-check
 // mark and is lifted 2px onto a plum shadow; a face drawn in code adds the ui-select frame.
 // Normal, its face is cream. Disabled, it is flat grey and never lifts. The caller draws its
@@ -668,7 +695,12 @@ export function addSelectTile(
   const { edge, mark, outset, reducedMotion, state, tile: isTile } = options;
   const look = selectLook(state);
   const selected = state === "selected";
-  const art = isTile ? addNineSlice(scene, "ui-tile", rect, state) : undefined;
+  const tag =
+    isTile && selected ? firstTag(scene, "ui-tile", ["selected", "selected-static"]) : state;
+  const art = isTile && tag !== undefined ? addNineSlice(scene, "ui-tile", rect, tag) : undefined;
+  if (selected && art !== undefined && tag !== undefined) {
+    animateTileFace(scene, tag, reducedMotion, art);
+  }
   const framed = selected && art === undefined;
   if (selected) {
     const outer = framed ? selectOuter(rect, outset) : rect;
