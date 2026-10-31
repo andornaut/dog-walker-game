@@ -43,4 +43,6 @@ The table lists available debuffs by source, not the number of encounters in a w
 | Kensington Market   | Muddy, Spotlight         | Muddy, Stinky, Zoomies     |
 | The Beaches         | Muddy, Stinky            | Muddy, Spotlight, Zoomies  |
 | Distillery District | Muddy, Spotlight, Stinky | Spotlight, Stinky, Zoomies |
-| Yonge Street        | Muddy, Stinky, Zoomies   | Spotlight, Zoomies         |
+| Yonge Street        | Muddy, Stinky, Zoomies   | Muddy, Spotlight, Zoomies  |
+
+Yonge Street has six effect-source types: Big screen promo, Green bin spill and Thief offer cards; Pothole, Seagull and Sign spinner apply effects on contact. Green bin spill occupies a fixed visual family in place of Sandwich board. High Park has 22 encounter-pool obstacles and 54 plain obstacles, and Yonge Street has 49 and 92 respectively. Source opportunities depend on these pool counts and the weights within each pool; they do not measure actual hits or effect choices.

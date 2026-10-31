@@ -142,7 +142,7 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
-    zones: ["kensingtonMarket"],
+    zones: ["kensingtonMarket", "yongeStreet"],
   },
   lostWallet: {
     kind: "lucky",

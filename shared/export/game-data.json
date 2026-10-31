@@ -1062,7 +1062,8 @@
         "rows": 1
       },
       "zones": [
-        "kensingtonMarket"
+        "kensingtonMarket",
+        "yongeStreet"
       ],
       "spriteKey": "green-bin-spill"
     },
@@ -2540,9 +2541,6 @@
         "lanes": 1,
         "rows": 1
       },
-      "zones": [
-        "yongeStreet"
-      ],
       "spriteKey": "sandwich-board"
     },
     {
@@ -3295,9 +3293,9 @@
     {
       "art": "high-park",
       "density": {
-        "cards": 1.12,
+        "cards": 0.88,
         "luckyFinds": 1.25,
-        "minorObstacles": 0.66,
+        "minorObstacles": 0.75,
         "tips": 1
       },
       "difficulty": 1,
@@ -3315,7 +3313,7 @@
           "ball": 0.5,
           "barrelStack": 0,
           "beachUmbrella": 0,
-          "bench": 10,
+          "bench": 7,
           "breweryDray": 0,
           "bunny": 1,
           "busker": 0,
@@ -3327,7 +3325,7 @@
           "couple": 0.5,
           "coyote": 0,
           "crosstownBus": 0,
-          "cyclist": 0.5,
+          "cyclist": 1.5,
           "deliveryCyclist": 0,
           "deliveryTruck": 0,
           "ducklings": 7.5,
@@ -3338,7 +3336,7 @@
           "frisbeeDog": 0,
           "garbageTruck": 0,
           "gardener": 0,
-          "goose": 0.75,
+          "goose": 1.75,
           "grannyCartShopper": 0,
           "hedge": 5,
           "hen": 0,
@@ -3347,7 +3345,7 @@
           "iceCreamTruck": 0,
           "ironFence2": 0,
           "ironFence3": 0,
-          "jogger": 0.5,
+          "jogger": 1.5,
           "kegDollyWorker": 0,
           "kidOnABike": 0,
           "leafPile": 5.75,
@@ -3900,9 +3898,9 @@
     {
       "art": "yonge-street",
       "density": {
-        "cards": 1.17,
+        "cards": 1.44,
         "luckyFinds": 1,
-        "minorObstacles": 1.3,
+        "minorObstacles": 1.18,
         "tips": 1
       },
       "difficulty": 5,
@@ -3924,7 +3922,7 @@
           "breweryDray": 0,
           "bunny": 0,
           "busker": 11.5,
-          "car": 5,
+          "car": 7.75,
           "cargoBike": 0,
           "cat": 0,
           "cherryTrees": 0,
@@ -3933,7 +3931,7 @@
           "coyote": 0,
           "crosstownBus": 2.75,
           "cyclist": 0,
-          "deliveryCyclist": 5,
+          "deliveryCyclist": 7.75,
           "deliveryTruck": 4,
           "ducklings": 0,
           "escapedCapybara": 0,
@@ -3958,10 +3956,10 @@
           "leafPile": 0,
           "lifeguardChair": 0,
           "littleFreeLibrary": 0,
-          "mailCarrier": 6,
+          "mailCarrier": 8.75,
           "marketStall2": 0,
           "marketStall3": 0,
-          "newspaperBox": 12,
+          "newspaperBox": 11.25,
           "parkRangersCart": 0,
           "parkedCar": 1.25,
           "patioRail": 0,
@@ -3974,7 +3972,7 @@
           "rollerblader": 0,
           "rollingBarrel": 0,
           "sandcastle": 0,
-          "sandwichBoard": 7.5,
+          "sandwichBoard": 0,
           "scooter": 5,
           "seagull": 8,
           "segwayTourRider": 0,
@@ -3996,17 +3994,17 @@
           "volleyballPlayer": 0
         },
         "obstacles": {
-          "bigScreenPromo": 2.1,
+          "bigScreenPromo": 1.72,
           "cheeseCrates": 0,
           "droppedIceCream": 0,
-          "greenBinSpill": 0,
+          "greenBinSpill": 1.21,
           "otherDog": 0,
           "porchCat": 0,
-          "pothole": 1.5,
+          "pothole": 1.23,
           "puddle": 0,
           "skunk": 0,
-          "squirrel": 1,
-          "thief": 2.1,
+          "squirrel": 0.82,
+          "thief": 1.72,
           "weddingPhotoShoot": 0
         }
       },
