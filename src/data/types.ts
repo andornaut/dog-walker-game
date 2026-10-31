@@ -489,13 +489,18 @@ export type MovementKind = Movement["kind"];
 // Named path recipes hold tuning and art metadata. The planner chooses a complete route
 // before spawning, and rejects it if its footprint or reaction intervals are unsafe.
 export type SignatureProfile = {
+  // Minimum time before pack contact after every component finishes its defining motion.
+  // The planner also retains at least this many seconds of base-road-scroll visibility.
   readonly finishAheadSeconds: number;
+  // Cue interval before each cued leg. Leg durations contain motion time only.
   readonly warningSeconds: number;
 } & (
   | {
       readonly anchor: { readonly x: number; readonly y: number };
       readonly bends: MoveCount;
       readonly bendSeconds: number;
+      // CLEANUP (added 2026-10-30): require this after trail data supplies an explicit ratio, before deployment.
+      readonly downFactor?: number;
       readonly followerDelays: readonly [number, number];
       readonly frame: { readonly height: number; readonly width: number };
       readonly kind: "delayedTrail";
