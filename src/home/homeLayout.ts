@@ -97,9 +97,10 @@ const POCKET_SECTION: Rect = {
   x: SECTION_X,
   y: DOGS_SECTION.y + DOGS_SECTION.height + SECTION_GAP,
 };
-// The existing hero art moves as one image; its lower ground keeps the three-row divider strip.
+// The compact hero keeps its three-row divider strip; the native backdrop draws at (0, 0).
 const GATE_BAR = { height: 3, y: WALKER_SECTION.y - SECTION_GAP - 3 };
 const GATE = { height: GATE_BAR.y - 40, y: 40 };
+// Anchors retain their offset from the full-height yard, independently of the backdrop origin.
 const HERO_OFFSET_Y = GATE_BAR.y - 196;
 
 // The solid backing inside a section's one-pixel rim, below its header.

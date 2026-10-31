@@ -1195,7 +1195,7 @@ export class StartScene extends Scene {
   private drawGate(): void {
     fillRect(this.add.graphics(), PALETTE.darkBrown, SCREEN);
     if (this.textures.exists("screen-home")) {
-      this.add.image(0, HOME_LAYOUT.heroOffsetY, "screen-home").setOrigin(0);
+      this.add.image(0, 0, "screen-home").setOrigin(0);
     } else {
       const g = this.add.graphics();
       fillRect(g, PALETTE.darkSlate, {
