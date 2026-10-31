@@ -32,7 +32,7 @@ const STEER_EVERY = 200;
 const ZOOMIES = { debuff: "zoomies", secondsLeft: 20, untilZone: 0 } as const;
 const FIXED: DebuffDriftMovement = {
   direction: "heading",
-  interval: { kind: "fixed", seconds: "laneMove" },
+  interval: { kind: "fixed", seconds: "zoomiesDriftSeconds" },
   kind: "drift",
 };
 const UNIFORM: DebuffDriftMovement = {
@@ -56,7 +56,7 @@ const uniform: GameData = {
     },
   },
 };
-const EVERY = read(fixed.tuning, "seconds", "laneMove");
+const EVERY = read(fixed.tuning, "seconds", "zoomiesDriftSeconds");
 const zoomed = (run: RunState): RunState => ({
   ...run,
   debuffs: [{ ...ZOOMIES, untilZone: run.zoneIndex }],
@@ -144,7 +144,10 @@ describe("debuff movement profiles", () => {
     (seconds) => {
       const data: GameData = {
         ...fixed,
-        tuning: { ...fixed.tuning, seconds: { ...fixed.tuning.seconds, laneMove: seconds } },
+        tuning: {
+          ...fixed.tuning,
+          seconds: { ...fixed.tuning.seconds, zoomiesDriftSeconds: seconds },
+        },
       };
       expect(() => debuffDriftProfile(data)).toThrow("positive, finite and ordered");
     },
@@ -262,7 +265,10 @@ describe("debuff movement schedule", () => {
   it.each([1, 1.5])("attempts on the fixed step that completes %s seconds", (seconds) => {
     const data: GameData = {
       ...fixed,
-      tuning: { ...fixed.tuning, seconds: { ...fixed.tuning.seconds, laneMove: seconds } },
+      tuning: {
+        ...fixed.tuning,
+        seconds: { ...fixed.tuning.seconds, zoomiesDriftSeconds: seconds },
+      },
     };
     let current = stepDebuffMovement(data, ROAD, () => 0, 0, null, walkIn(2, 1));
     let steps = 0;
@@ -319,6 +325,27 @@ describe("debuff movement schedule", () => {
     );
     expect(result).toEqual({ clock: null, drifted: null, walk: calm });
     expect(random).not.toHaveBeenCalled();
+  });
+
+  it("keeps the scheduled interval when an active effect is refreshed", () => {
+    const random = vi.fn(() => 0.5);
+    const first = stepDebuffMovement(uniform, ROAD, random, 0.1, null, walkIn(2));
+    const refreshed = {
+      ...first.walk,
+      run: {
+        ...first.walk.run,
+        debuffs: [
+          {
+            ...ZOOMIES,
+            secondsLeft: read(uniform.tuning, "seconds", uniform.debuffs.zoomies.seconds),
+          },
+        ],
+      },
+    };
+    const next = stepDebuffMovement(uniform, ROAD, random, 0.1, first.clock, refreshed);
+    expect(next.clock?.interval).toBe(first.clock?.interval);
+    expect(next.clock?.elapsed).toBeCloseTo(0.2);
+    expect(random).toHaveBeenCalledTimes(1);
   });
 });
 

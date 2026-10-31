@@ -44,18 +44,10 @@ export function debuffDriftProfile(
     if (profile !== null) {
       throw new Error("Only one debuff may define movement");
     }
-    // CLEANUP (added 2026-10-31): remove the legacy leaf after movement values adopt strategies.
-    const configured =
-      "every" in movement
-        ? {
-            direction: "heading" as const,
-            interval: { kind: "fixed" as const, seconds: movement.every },
-          }
-        : movement;
-    if (configured.direction !== "heading" && configured.direction !== "random") {
+    if (movement.direction !== "heading" && movement.direction !== "random") {
       throw new Error("Unsupported debuff drift direction");
     }
-    const interval = configured.interval;
+    const interval = movement.interval;
     if (interval.kind !== "fixed" && interval.kind !== "uniform") {
       throw new Error("Unsupported debuff drift interval");
     }
@@ -74,7 +66,7 @@ export function debuffDriftProfile(
     }
     profile = {
       debuff,
-      direction: configured.direction,
+      direction: movement.direction,
       interval:
         interval.kind === "fixed" ? { kind: "fixed", seconds: min } : { kind: "uniform", max, min },
     };

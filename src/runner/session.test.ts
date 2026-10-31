@@ -92,6 +92,13 @@ describe("runStreams", () => {
       take(10, baseline.forks),
       take(10, baseline.upgrades),
     ]);
+    const walk = {
+      road: startRoad(5),
+      run: newRun(gameData, 3, { dogs: ["kilo", "lady"], gear: null, walker: "casey" }),
+    };
+    expect(startSession(gameData, drifted, geometry, walk)).toEqual(
+      startSession(gameData, baseline, geometry, walk),
+    );
   });
 
   // A resumed walk's streams go on from where the saved walk's had drawn to.
@@ -234,7 +241,16 @@ describe("stepSession", () => {
       ...empty,
       walk: {
         ...empty.walk,
-        run: { ...empty.walk.run, debuffs: [{ debuff: "zoomies", secondsLeft: 40, untilZone: 0 }] },
+        run: {
+          ...empty.walk.run,
+          debuffs: [
+            {
+              debuff: "zoomies",
+              secondsLeft: read(gameData.tuning, "seconds", gameData.debuffs.zoomies.seconds),
+              untilZone: 0,
+            },
+          ],
+        },
       },
     };
     for (let i = 0; i < 20; i++) {

@@ -699,8 +699,8 @@ export type Walker = WalkerUnlock & {
 // A debuff lasts its seconds of walking, a time that stops during a hit stop and under a card,
 // and never past the zone's end. Nothing cures it. stake is what it does, as a card states it
 // after the debuff's name, its {seconds} filled with how long it would last and its {cash} with
-// its bumpMoney. Its modifiers change stats while it lasts; one the rules act on by id, such
-// as Zoomies' drift, has none. While one with bumpMoney lasts, a plain bump also costs that cash,
+// its bumpMoney. Its modifiers change stats while it lasts; a movement profile acts through
+// the session clock instead. While one with bumpMoney lasts, a plain bump also costs that cash,
 // as bumpMoney modifiers change it, on top of its hearts: all the cash there is when that is
 // less, and none at $0.
 export interface DebuffDriftMovement {
@@ -715,8 +715,7 @@ export interface Debuff {
   readonly bumpMoney?: MoneyKey;
   readonly modifiers: readonly Modifier[];
   // At most one debuff defines movement: all active debuffs share one drift clock.
-  // CLEANUP (added 2026-10-31): remove the every leaf when all movement data uses strategies.
-  readonly movement?: DebuffDriftMovement | { readonly every: SecondsKey; readonly kind: "drift" };
+  readonly movement?: DebuffDriftMovement;
   readonly name: string;
   readonly seconds: SecondsKey;
   readonly stake: string;
