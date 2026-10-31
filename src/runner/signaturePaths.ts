@@ -131,7 +131,26 @@ export function signaturePlace(path: SignaturePath, since: number, component = 0
     }
   }
   const after = position - last.at - last.length;
-  return { x: last.to.x + path.tail.x * after, y: last.to.y + path.tail.y * after };
+  return {
+    x: path.tail.x === 0 ? last.to.x : last.to.x + path.tail.x * after,
+    y: path.tail.y === 0 ? last.to.y : last.to.y + path.tail.y * after,
+  };
+}
+
+export function signatureAlive(
+  bounds: { readonly laneCount: number; readonly roadLength: number },
+  footprint: { readonly height: number; readonly span: number },
+  route: SignaturePath,
+  since: number,
+): boolean {
+  return route.componentDelays.some((_, component) => {
+    const point = signaturePlace(route, since, component);
+    return (
+      point.x + footprint.span - 1 >= -1 &&
+      point.x <= bounds.laneCount &&
+      point.y - footprint.height <= bounds.roadLength
+    );
+  });
 }
 
 // Split at every actual turn, including delayed turns. Within each interval both axes are
@@ -159,6 +178,42 @@ export function signatureSweeps(path: SignaturePath, from: number, to: number): 
         to: signaturePlace(path, end, component),
       };
     });
+  });
+}
+
+// The component intervals inside a road-travel band. All defining legs and delayed legs
+// precede complete; afterward each component has the same constant tail velocity.
+export function signatureTravelSweeps(
+  path: SignaturePath,
+  from: number,
+  to: number,
+): SignatureSweep[] {
+  const low = Math.min(
+    ...path.componentDelays.map((_, index) => signaturePlace(path, path.complete, index).y),
+  );
+  const end = path.complete + (path.tail.y > 0 ? Math.max(0, to - low) / path.tail.y : 0);
+  return signatureSweeps(path, 0, end).flatMap((sweep) => {
+    const dy = sweep.to.y - sweep.from.y;
+    if (dy === 0) {
+      return sweep.from.y >= from && sweep.from.y < to ? [sweep] : [];
+    }
+    const fractions = [(from - sweep.from.y) / dy, (to - sweep.from.y) / dy].sort((a, b) => a - b);
+    const startShare = Math.max(0, fractions[0] ?? 0);
+    const endShare = Math.min(1, fractions[1] ?? 1);
+    if (startShare >= endShare) {
+      return [];
+    }
+    const start = sweep.start + (sweep.end - sweep.start) * startShare;
+    const finish = sweep.start + (sweep.end - sweep.start) * endShare;
+    return [
+      {
+        component: sweep.component,
+        end: finish,
+        from: signaturePlace(path, start, sweep.component),
+        start,
+        to: signaturePlace(path, finish, sweep.component),
+      },
+    ];
   });
 }
 

@@ -21,6 +21,7 @@ import {
   type MoverStep,
   type StepShape,
 } from "./movers";
+import { signatureTravelSweeps } from "./signaturePaths";
 import { nthStretch, rowsWithin, WHOLE_ZONE } from "./stretches";
 
 // Planning works in road distance. sightLength is how far a row travels down the road before
@@ -142,6 +143,15 @@ export function sweptLanes(
   to: number,
   inset = 0,
 ): LaneSpan {
+  if (path.motion === "signature") {
+    const points = signatureTravelSweeps(path.route, from, to).flatMap((sweep) => [
+      sweep.from.x,
+      sweep.to.x,
+    ]);
+    return points.length === 0
+      ? { count: 0, first: 0 }
+      : laneSpan(laneCount, Math.min(...points), Math.max(...points), inset);
+  }
   if (path.motion === "ride") {
     const merged = path.lane + (path.merge?.lanes ?? 0);
     return {

@@ -3,6 +3,7 @@ import { progressAt, segmentAt } from "@andornaut/game-kit/motion";
 import type { MovementKind } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import type { RoadItem } from "./roadItems";
+import { signatureAlive, type SignaturePath, signaturePlace } from "./signaturePaths";
 
 // Moving hazards. Everything here is measured in road scroll rather than time, so a mover
 // keeps step with the road: it freezes when the road does, and a replay of the same scroll
@@ -52,6 +53,11 @@ export type MoverPath = {
   readonly movement: MovementKind;
   readonly warning: number;
 } & (
+  | {
+      readonly lane: number;
+      readonly motion: "signature";
+      readonly route: SignaturePath;
+    }
   | {
       readonly direction: LaneDirection;
       readonly enterTravel: number;
@@ -116,6 +122,14 @@ function mergedLanes(path: Extract<MoverPath, { motion: "ride" }>, since: number
 
 // Whether a rider is moving across into its merge lane, since scroll after its cue appeared.
 export function isMerging(path: MoverPath, since: number): boolean {
+  if (path.motion === "signature") {
+    return (
+      path.route.profile.kind === "successiveMerges" &&
+      path.route.legs.some(
+        (leg) => leg.from.x !== leg.to.x && since >= leg.at && since < leg.at + leg.length,
+      )
+    );
+  }
   return (
     path.motion === "ride" &&
     path.merge !== undefined &&
@@ -326,6 +340,10 @@ export function takeMove<
 }
 
 export function moverPlace(laneCount: number, path: MoverPath, since: number): MoverPlace {
+  if (path.motion === "signature") {
+    const point = signaturePlace(path.route, since);
+    return { lanePosition: point.x, solid: true, travel: point.y };
+  }
   const moved = since - path.warning;
   if (path.motion === "ride") {
     return {
@@ -374,6 +392,11 @@ export type MoverTell =
   | { readonly kind: "wander" };
 
 export function moverTell(path: MoverPath, since: number): MoverTell | null {
+  if (path.motion === "signature") {
+    return path.route.cues.some((cue) => since >= cue.start && since < cue.end)
+      ? { kind: "wander" }
+      : null;
+  }
   if (path.motion === "cross") {
     const restart = path.warning + pauseStart(path) + (path.pause?.length ?? 0);
     const cued =
@@ -411,6 +434,9 @@ export function cuedStep(
 // Whether a mover is moving rather than standing or showing its cue: a crosser that stops stands
 // from its stop on.
 export function inMotion(path: MoverPath, since: number): boolean {
+  if (path.motion === "signature") {
+    return since >= (path.route.legs[0]?.at ?? Infinity);
+  }
   if (path.motion === "cross") {
     return since >= path.warning && !hasStopped(path, since) && !isPausing(path, since);
   }
@@ -425,6 +451,12 @@ export function inMotion(path: MoverPath, since: number): boolean {
 // start of a step to the left until a step to the right. A rider merging left faces left from its
 // merge's cue on; any other rider and a stepper yet to move sideways face right.
 export function facesLeft(path: MoverPath, since: number): boolean {
+  if (path.motion === "signature") {
+    const leg = path.route.legs
+      .filter((part) => part.from.x !== part.to.x && since >= part.at)
+      .at(-1);
+    return leg === undefined ? false : leg.to.x < leg.from.x;
+  }
   if (path.motion === "cross") {
     return (turnedBack(path, since) ? -path.direction : path.direction) === -1;
   }
@@ -468,7 +500,16 @@ export function moveMovers<Item extends MoverItem>(
     }
     const mover = { ...item.mover, since: item.mover.since + distance };
     const place = moverPlace(road.laneCount, mover.path, mover.since);
-    if (!hasLeftRoad(road.laneCount, place)) {
+    const alive =
+      mover.path.motion === "signature"
+        ? signatureAlive(
+            { laneCount: road.laneCount, roadLength: Infinity },
+            { height: item.height, span: item.laneSpan },
+            mover.path.route,
+            mover.since,
+          )
+        : !hasLeftRoad(road.laneCount, place);
+    if (alive) {
       moved.push({
         ...item,
         lane: laneAt(place.lanePosition),

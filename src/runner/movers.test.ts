@@ -895,9 +895,7 @@ describe("moverPlacements", () => {
     expect(count).toBe(draws.count === 0 ? range.min : range.max);
     const placements = moverPlacements(geometry, moving, draws);
     const moves = placements.flatMap(({ path }) =>
-      moverOutcomes(path).map((outcome) =>
-        outcome.motion === "cross" || outcome.motion === "ride" ? 0 : outcome.steps.length,
-      ),
+      moverOutcomes(path).map((outcome) => ("steps" in outcome ? outcome.steps.length : 0)),
     );
     // A shy hopper may make no hop at all, when the pack leaves it none that move away.
     const shy = placements.some(({ path }) => path.motion === "shy");

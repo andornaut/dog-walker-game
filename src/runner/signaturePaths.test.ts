@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import type { SignatureProfile } from "../data/types";
-import { compileSignature, signaturePlace, signatureSweeps } from "./signaturePaths";
+import {
+  compileSignature,
+  signatureAlive,
+  signaturePlace,
+  signatureSweeps,
+  signatureTravelSweeps,
+} from "./signaturePaths";
 
 const geometry = { cellLength: 30, laneCount: 5, scrollSpeed: 30, sightLength: 600 };
 const common = { finishAheadSeconds: 1, warningSeconds: 0.3 };
@@ -27,6 +33,10 @@ describe("signature paths", () => {
     ]);
     expect(signaturePlace(path, path.complete + 20)).toEqual({ x: 1, y: 50 });
     expect(path.cues).toHaveLength(4);
+    expect(signaturePlace(path, Infinity)).toEqual({ x: 1, y: Infinity });
+    expect(
+      signatureTravelSweeps(path, 300, 330).every(({ from, to }) => from.x === 1 && to.x === 1),
+    ).toBe(true);
   });
 
   it("turns once after a row and continues sideways without resuming road scroll", () => {
@@ -40,6 +50,7 @@ describe("signature paths", () => {
     expect(path.legs[0]?.to).toEqual({ x: 1, y: 60 });
     expect(signaturePlace(path, path.complete + 30)).toEqual({ x: 9, y: 60 });
     expect(path.tail.y).toBe(0);
+    expect(signaturePlace(path, Infinity)).toEqual({ x: Infinity, y: 60 });
   });
 
   it("uses smooth alternating arcs with uninterrupted constant down-road speed", () => {
@@ -111,6 +122,12 @@ describe("signature paths", () => {
     };
     const path = compiled(profile);
     expect(path.componentDelays).toHaveLength(3);
+    const bounds = { laneCount: 5, roadLength: 150 };
+    const footprint = { height: 24, span: 1 };
+    const leaderGone = path.complete + 175 - signaturePlace(path, path.complete).y;
+    expect(signaturePlace(path, leaderGone).y).toBeGreaterThan(174);
+    expect(signatureAlive(bounds, footprint, path, leaderGone)).toBe(true);
+    expect(signatureAlive(bounds, footprint, path, leaderGone + 25)).toBe(false);
     expect(
       new Set(path.componentDelays.map((_, index) => signaturePlace(path, origin.at, index).y))
         .size,

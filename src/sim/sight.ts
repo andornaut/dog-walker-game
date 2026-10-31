@@ -14,6 +14,7 @@ import {
 } from "../runner/movers";
 import { STEP_SHAPES } from "../runner/moverSpecs";
 import { shyOutcomes } from "../runner/shy";
+import { signaturePlace } from "../runner/signaturePaths";
 import { type RoadGeometry, type WalkData } from "../runner/walk";
 import { movementOf, type WalkItem } from "../runner/walkItems";
 
@@ -50,6 +51,11 @@ function stepsSeen(
 // cue, then its ride; a stepper the steps it has started and the wander mark of the next. Two
 // moments that show the same read the same.
 export function moverShows(path: MoverPath, since: number): string {
+  if (path.motion === "signature") {
+    const started = path.route.legs.filter((leg) => leg.at <= since).length;
+    const cued = path.route.cues.some((cue) => since >= cue.start && since < cue.end);
+    return `${started} ${cued ? "cued" : ""}`;
+  }
   if (path.motion === "cross") {
     if (since < path.idle) {
       return "idle";
@@ -125,6 +131,35 @@ export function sightPaths(road: SightRoad, since: number, item: WalkItem): read
     return [];
   }
   const { path } = mover;
+  if (path.motion === "signature") {
+    const cues = path.route.cues.filter((cue) => cue.start <= since);
+    const legs = path.route.legs.filter(
+      (leg) => leg.at <= since || cues.some((cue) => cue.end === leg.at),
+    );
+    const point = signaturePlace(path.route, since);
+    return [
+      {
+        ...path,
+        route: {
+          ...path.route,
+          cues,
+          legs:
+            legs.length > 0
+              ? legs
+              : [
+                  {
+                    at: since,
+                    easing: "linear",
+                    from: point,
+                    length: 1,
+                    to: { x: point.x, y: point.y + 1 },
+                  },
+                ],
+          tail: legs.length === path.route.legs.length ? path.route.tail : { x: 0, y: 1 },
+        },
+      },
+    ];
+  }
   const { tuning } = road.data;
   const movement = movementOf(road.data, item.kind);
   if (path.motion === "cross") {

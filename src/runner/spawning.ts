@@ -396,6 +396,8 @@ export function moverRests(laneCount: number, cue: number, path: MoverPath): Mov
     lane: lane + steps.reduce((sum, step) => sum + step.lanes, 0),
   });
   switch (path.motion) {
+    case "signature":
+      return [];
     case "approach":
       return approachOutcomes(path).map(({ lane, steps }) => last(lane, steps));
     case "cross": {

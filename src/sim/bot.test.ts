@@ -475,7 +475,7 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
         if (outcome.motion === "cross") {
           expect(outcome.enterTravel).toBeLessThan(sightLength);
         }
-        if (outcome.motion !== "cross" && outcome.motion !== "ride") {
+        if ("steps" in outcome) {
           const before = (index: number) =>
             outcome.steps.slice(0, index).reduce((sum, step) => sum + step.travel, 0);
           outcome.steps.forEach((step, index) => {
