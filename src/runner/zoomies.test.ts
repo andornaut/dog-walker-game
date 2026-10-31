@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_LAYOUT } from "../data/screen";
-import type { ZoneId } from "../data/types";
+import type { GameData, ZoneId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { read } from "../rules/units";
 import { newRun, type RunState } from "../state/runState";
@@ -16,7 +16,7 @@ import { startRoad, steerWalk, stepWalk, type Walk } from "./walk";
 import { walkGeometry, walkProjection } from "./walkGeometry";
 import { type WalkItem } from "./walkItems";
 import { planZone } from "./zonePlan";
-import { hasZoomies, stepZoomies } from "./zoomies";
+import { debuffDriftProfile, hasDebuffDrift, stepZoomies } from "./zoomies";
 
 // The game's road for the pack of three the drift test walks; walkIn's lone Kilo leads it.
 const ROAD = (() => {
@@ -52,6 +52,78 @@ function walkIn(lane: number, heading?: LaneDirection, items: readonly WalkItem[
 function afterDrift(walk: Walk): number {
   return destinationLane(stepZoomies(gameData, ROAD, EVERY, 0, walk).walk.road.control.motion);
 }
+
+describe("debuff movement profiles", () => {
+  const movement = { every: "zoomiesDriftSeconds", kind: "drift" } as const;
+
+  it("moves drift eligibility and its interval with the data assignment", () => {
+    const zoomies = { ...gameData.debuffs.zoomies };
+    delete zoomies.movement;
+    const configured: GameData = {
+      ...gameData,
+      debuffs: {
+        ...gameData.debuffs,
+        stinky: { ...gameData.debuffs.stinky, movement: { ...movement, every: "laneMove" } },
+        zoomies,
+      },
+    };
+    const walk = walkIn(2, 1);
+    expect(hasDebuffDrift(configured, walk)).toBe(false);
+    expect(stepZoomies(configured, ROAD, EVERY, 0.5, walk)).toEqual({
+      drifted: null,
+      seconds: 0,
+      walk,
+    });
+    const stinky = {
+      ...walk,
+      run: { ...walk.run, debuffs: [{ ...ZOOMIES, debuff: "stinky" as const }] },
+    };
+    const every = read(configured.tuning, "seconds", "laneMove");
+    const early = stepZoomies(configured, ROAD, every / 2, 0, stinky);
+    expect(early.drifted).toBeNull();
+    expect(stepZoomies(configured, ROAD, every / 2, early.seconds, early.walk).drifted).toBe(1);
+  });
+
+  it("rejects unsupported movement profiles", () => {
+    const configured = {
+      ...gameData,
+      debuffs: {
+        ...gameData.debuffs,
+        zoomies: { ...gameData.debuffs.zoomies, movement: { ...movement, kind: "teleport" } },
+      },
+    } as unknown as GameData;
+    expect(() => debuffDriftProfile(configured)).toThrow("Unsupported debuff movement profile");
+  });
+
+  it("rejects multiple configured owners of the shared drift clock", () => {
+    const configured: GameData = {
+      ...gameData,
+      debuffs: {
+        ...gameData.debuffs,
+        stinky: { ...gameData.debuffs.stinky, movement },
+        zoomies: { ...gameData.debuffs.zoomies, movement },
+      },
+    };
+    expect(() => debuffDriftProfile(configured)).toThrow("Only one debuff may define movement");
+  });
+
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
+    "rejects an invalid drift interval %s",
+    (every) => {
+      const configured: GameData = {
+        ...gameData,
+        debuffs: { ...gameData.debuffs, zoomies: { ...gameData.debuffs.zoomies, movement } },
+        tuning: {
+          ...gameData.tuning,
+          seconds: { ...gameData.tuning.seconds, zoomiesDriftSeconds: every },
+        },
+      };
+      expect(() => debuffDriftProfile(configured)).toThrow(
+        "Debuff drift interval must be positive and finite",
+      );
+    },
+  );
+});
 
 describe("stepZoomies", () => {
   it("drifts the pack toward its heading, or back from an edge", () => {
@@ -203,7 +275,7 @@ describe("the Zoomies on every zone's road", { timeout: 120_000 }, () => {
           break;
         }
       }
-      expect(hasZoomies(walk)).toBe(true);
+      expect(hasDebuffDrift(gameData, walk)).toBe(true);
       expect(drifts, zone).toBeGreaterThan(10);
       expect(unavoidable, zone).toEqual([]);
     }

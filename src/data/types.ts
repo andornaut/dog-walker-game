@@ -633,9 +633,9 @@ export type Walker = WalkerUnlock & {
 // less, and none at $0.
 export interface Debuff {
   readonly bumpMoney?: MoneyKey;
+  readonly modifiers: readonly Modifier[];
   // At most one debuff defines movement: all active debuffs share one drift clock.
   readonly movement?: { readonly every: SecondsKey; readonly kind: "drift" };
-  readonly modifiers: readonly Modifier[];
   readonly name: string;
   readonly seconds: SecondsKey;
   readonly stake: string;

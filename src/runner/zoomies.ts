@@ -1,27 +1,51 @@
 import { SECONDS_EPSILON } from "@andornaut/game-kit/clock/fixedStep";
+import { keysOf } from "@andornaut/game-kit/records";
 
+import type { DebuffId, GameData, SecondsKey } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { read } from "../rules/units";
 import { laneBlockedForPull, type PullData, type PullGeometry } from "./pulls";
 import { steerWalk, type Walk } from "./walk";
 
-// While the pack has the Zoomies, every seconds.zoomiesDriftSeconds of walking it drifts one
-// lane in the direction it last moved, toward the right before it has moved. Steering still
-// works. A drift never moves the pack into an obstacle it can't react to, by the pulls' rule:
-// with that lane blocked, or past the road's edge, it turns and drifts the other way, and with
-// both closed it stays. The walk's own state and the seed decide every drift, so a replay
-// drifts alike.
+// An active debuff's movement profile drifts one lane toward the pack's last heading, right
+// before it has steered. A blocked lane or road edge reverses the drift; two blocked lanes
+// prevent it. The walk state determines every drift without drawing random numbers.
 
-// seconds is the walking time since the last drift, or since the Zoomies began. drifted is the
-// way the pack drifted this step, or null.
+// seconds holds walking time since the last drift or the movement profile became active.
 interface ZoomiesStep {
   readonly drifted: LaneDirection | null;
   readonly seconds: number;
   readonly walk: Walk;
 }
 
-export function hasZoomies(walk: Walk): boolean {
-  return walk.run.debuffs.some(({ debuff }) => debuff === "zoomies");
+// One configured owner keeps the session's single drift clock unambiguous.
+export function debuffDriftProfile(
+  data: Pick<GameData, "debuffs" | "tuning">,
+): { readonly debuff: DebuffId; readonly every: SecondsKey } | null {
+  let profile: { readonly debuff: DebuffId; readonly every: SecondsKey } | null = null;
+  for (const debuff of keysOf(data.debuffs)) {
+    const movement = data.debuffs[debuff].movement;
+    if (movement === undefined) {
+      continue;
+    }
+    if (movement.kind !== "drift") {
+      throw new Error("Unsupported debuff movement profile");
+    }
+    if (profile !== null) {
+      throw new Error("Only one debuff may define movement");
+    }
+    const every = read(data.tuning, "seconds", movement.every);
+    if (!Number.isFinite(every) || every <= 0) {
+      throw new Error("Debuff drift interval must be positive and finite");
+    }
+    profile = { debuff, every: movement.every };
+  }
+  return profile;
+}
+
+export function hasDebuffDrift(data: Pick<GameData, "debuffs" | "tuning">, walk: Walk): boolean {
+  const profile = debuffDriftProfile(data);
+  return profile !== null && walk.run.debuffs.some(({ debuff }) => debuff === profile.debuff);
 }
 
 // The way the pack drifts from its target lane: its heading, else the other way, or null when
@@ -42,9 +66,8 @@ function driftDirection(data: PullData, geometry: PullGeometry, walk: Walk): Lan
   return open(back) ? back : null;
 }
 
-// One step of the Zoomies clock: with the debuff on and the walk walking with no hit stop, the
-// clock runs, and each time it reaches zoomiesDriftSeconds the pack drifts a lane. Without
-// the debuff the clock rests at 0.
+// The drift clock runs only while its debuff is active and the walk moves without hit stop.
+// Each profile interval drifts one lane. An inactive profile resets the clock.
 export function stepZoomies(
   data: PullData,
   geometry: PullGeometry,
@@ -52,13 +75,14 @@ export function stepZoomies(
   seconds: number,
   walk: Walk,
 ): ZoomiesStep {
-  if (!hasZoomies(walk)) {
+  const profile = debuffDriftProfile(data);
+  if (profile === null || !walk.run.debuffs.some(({ debuff }) => debuff === profile.debuff)) {
     return { drifted: null, seconds: 0, walk };
   }
   if (walk.run.phase.kind !== "walking" || walk.road.hitStop !== null) {
     return { drifted: null, seconds, walk };
   }
-  const every = read(data.tuning, "seconds", "zoomiesDriftSeconds");
+  const every = read(data.tuning, "seconds", profile.every);
   const elapsed = seconds + stepSeconds;
   if (elapsed < every - SECONDS_EPSILON) {
     return { drifted: null, seconds: elapsed, walk };

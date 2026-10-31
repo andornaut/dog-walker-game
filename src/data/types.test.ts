@@ -8,6 +8,7 @@ import { TUNING } from "./tuning";
 import type {
   AchievementCondition,
   CardOptions,
+  Debuff,
   Dog,
   Encounter,
   EncounterId,
@@ -43,6 +44,15 @@ describe("types", () => {
       expect(check<MoneyEffect>({ amount: "tip", change: "gain", kind: "money" }).kind).toBe(
         "money",
       );
+    }
+
+    // Debuff movement profiles name supported mechanisms and seconds tuning keys.
+    {
+      type Movement = NonNullable<Debuff["movement"]>;
+      // @ts-expect-error: no such movement mechanism
+      check<Movement>({ every: "zoomiesDriftSeconds", kind: "teleport" });
+      // @ts-expect-error: a money key is not an interval
+      check<Movement>({ every: "tip", kind: "drift" });
     }
 
     // Limits a hearts change to -3 to 3, never 0.
