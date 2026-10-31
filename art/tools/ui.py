@@ -966,16 +966,16 @@ def detail_well():
 
 
 SECTION_W, SECTION_H = 24, 32
-SECTION_FACES = {"complete": "amber", "neutral": "purple", "neutral-walker": "dbrown", "neutral-dogs": "purple", "neutral-pocket": "sky"}
+SECTION_FACES = {"complete": "amber", "neutral": "violet", "neutral-walker": "lake", "neutral-dogs": "violet", "neutral-pocket": "mauve"}
 
 
 def section(state):
     """24x32 nine-slice (3px left, right and bottom, 24px top): one start screen section (walker,
     dogs, Pocket) with a single plum rim and heading rows 1 to 22. The solid section fill sits
-    1px inside the rim below the 24px heading. Complete is amber; neutral is the dogs' purple,
-    neutral-walker dbrown, neutral-dogs purple and neutral-pocket sky. The game writes its title and note in rows 8 to 17:
-    ink on amber and sky; cream title and amber note on dbrown and purple. Existing tag indices and
-    nine-slice caps stay fixed."""
+    1px inside the rim below the 24px heading. Complete is amber; neutral is the dogs' violet,
+    neutral-walker lake, neutral-dogs violet and neutral-pocket mauve. The game writes its title
+    and note in rows 8 to 17: ink on complete amber, white on every neutral heading. Neutral hues
+    use mid saturation (40 to 56%). Existing tag indices and nine-slice caps stay fixed."""
     g = Grid(SECTION_W, SECTION_H)
     g.rect(0, 0, SECTION_W, SECTION_H, "plum")
     g.rect(1, 1, SECTION_W - 2, SECTION_H - 2, None)

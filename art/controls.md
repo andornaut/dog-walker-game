@@ -65,11 +65,11 @@ The start-screen section outline is one plum pixel. Keep the existing `ui-sectio
 
 | Section | Backing         | Neutral heading  | Neutral title | Neutral note |
 | ------- | --------------- | ---------------- | ------------- | ------------ |
-| Dogs    | plum `#3e2731`  | purple `#68386c` | cream         | amber        |
-| Pocket  | blue `#124e89`  | sky `#0099db`    | ink           | ink          |
-| Walker  | brown `#b86f50` | dbrown `#733e39` | cream         | amber        |
+| Dogs    | plum `#3e2731`  | violet `#6d4bb0` | white         | white        |
+| Pocket  | blue `#124e89`  | mauve `#b55088`  | white         | white        |
+| Walker  | brown `#b86f50` | lake `#2f7fa6`   | white         | white        |
 
-A complete section has an amber heading and ink title/note. Dogs show their count even while empty. The empty Pocket uses its existing note, and is optional; Start walk requires a walker and at least one dog. Individual item cards retain their detailed borders and checkmarks. Ground outside them stays clean, without fabric, stitching or extra selected-dog lines.
+A complete section has an amber heading and ink title/note. Neutral headings use distinct blue, violet and rose hues at mid saturation (40–56%), with comparable visual weight. Titles and notes retain their full 2× role: white contrast is 4.46:1 on lake, 6.40:1 on violet and 4.70:1 on mauve, above the 3:1 threshold for text at 2× and larger. Smaller text still requires 4.5:1. Dogs show their count even while empty. The empty Pocket uses its existing note, and is optional; Start walk requires a walker and at least one dog. Individual item cards retain their detailed borders and checkmarks. Ground outside them stays clean, without fabric, stitching or extra selected-dog lines.
 
 ## Button roles and states
 
@@ -147,7 +147,7 @@ DOM buttons retain native Tab and Enter/Space behaviour, visible focus, meaningf
 | `ui-button`             | `go`, `go-pressed`, `go-disabled`; `secondary`, `secondary-pressed`; `normal`, `pressed`, `disabled` | 24×24 nine-slice; 3px top/sides, 5px bottom; secondary aliases normal chrome  |
 | `ui-check`, `ui-select` | Existing count/tick and selection tags                                                               | Preserve item-card details; state is not inferred from colour alone           |
 | `ui-icon-button`        | `normal`, `pressed`                                                                                  | Icon face token; the existing glyph is a separate image                       |
-| `ui-section`            | `complete` 0, `neutral` 1, `neutral-walker` 2, `neutral-dogs` 3, `neutral-pocket` 4                  | 24×32; one still frame per tag, 1000ms; fallback `neutral` uses dog purple    |
+| `ui-section`            | `complete` 0, `neutral` 1, `neutral-walker` 2, `neutral-dogs` 3, `neutral-pocket` 4                  | 24×32; one still frame per tag, 1000ms; fallback `neutral` uses dog violet    |
 | `ui-shop-focus`         | `pulse`: two 600ms frames; 32×32 nine-slice with 13px caps on every side                             | Active shop row only; 3px outset; reduced motion holds frame 0                |
 | `ui-switch`             | `on`, `off`                                                                                          | Preserve 32×16 visual, knob position and tick/cross                           |
 
