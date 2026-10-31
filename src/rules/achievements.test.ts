@@ -170,8 +170,8 @@ describe("profile conditions", () => {
     kind: "noFiringStreak" | "timesFired" | "walksFinished" | "walksPlayed",
     n: number,
   ) => ({ count: n, kind }) as const;
-  const helpKeeper = (n: number) =>
-    ({ count: n, encounter: "escapedCapybara", kind: "optionPicks", option: "help" }) as const;
+  const sniffCheese = (n: number) =>
+    ({ count: n, encounter: "cheeseCrates", kind: "optionPicks", option: "sniff" }) as const;
   const tally = (name: TallyId, n: number) => ({ count: n, kind: "tally", tally: name }) as const;
   const birds = (n: number) => ({ count: n, kind: "bumps", kinds: ["goose", "pigeons"] }) as const;
   const lifetime = { dollars: 200, kind: "lifetimeEarnings" } as const;
@@ -213,20 +213,20 @@ describe("profile conditions", () => {
     ],
     [
       "optionPicks below the count",
-      helpKeeper(10),
-      withStats({ optionPicks: { escapedCapybara: { help: 9 } } }),
+      sniffCheese(10),
+      withStats({ optionPicks: { cheeseCrates: { sniff: 9 } } }),
       false,
     ],
     [
       "optionPicks at the count",
-      helpKeeper(10),
-      withStats({ optionPicks: { escapedCapybara: { help: 10 } } }),
+      sniffCheese(10),
+      withStats({ optionPicks: { cheeseCrates: { sniff: 10 } } }),
       true,
     ],
     [
       "optionPicks, another option of the card",
-      helpKeeper(10),
-      withStats({ optionPicks: { escapedCapybara: { callZoo: 10, drag: 10 } } }),
+      sniffCheese(10),
+      withStats({ optionPicks: { cheeseCrates: { buy: 10, hurryOn: 10 } } }),
       false,
     ],
     [
@@ -494,9 +494,9 @@ describe("counters", () => {
   it("counts option picks by encounter and option id, each apart", () => {
     const run = testState({ kilo: 5 });
     const picked = [
-      ["escapedCapybara", "help"],
-      ["escapedCapybara", "help"],
-      ["escapedCapybara", "drag"],
+      ["cheeseCrates", "sniff"],
+      ["cheeseCrates", "sniff"],
+      ["cheeseCrates", "hurryOn"],
       ["greenBinSpill", "wadeThrough"],
     ] as const;
     const after = picked.reduce(
@@ -504,7 +504,7 @@ describe("counters", () => {
       run,
     );
     expect(after.optionPicks).toEqual({
-      escapedCapybara: { drag: 1, help: 2 },
+      cheeseCrates: { hurryOn: 1, sniff: 2 },
       greenBinSpill: { wadeThrough: 1 },
     });
     expect(runCountersOf(after).optionPicks).toEqual(after.optionPicks);

@@ -280,8 +280,8 @@ describe("loadSave", () => {
             debuffsGot: { retiredDebuff: 1, stinky: 2 },
             firstZone: 1,
             optionPicks: {
-              escapedCapybara: { help: 1, retiredOption: 2 },
-              retiredCard: { help: 3 },
+              cheeseCrates: { retiredOption: 2, sniff: 1 },
+              retiredCard: { sniff: 3 },
             },
             startCents: 1_500,
             tallies: { retiredTally: 4, squirrelPulls: 3 },
@@ -294,7 +294,7 @@ describe("loadSave", () => {
         bumpsByZone: [2, 1],
         debuffsGot: { stinky: 2 },
         firstZone: 1,
-        optionPicks: { escapedCapybara: { help: 1 } },
+        optionPicks: { cheeseCrates: { sniff: 1 } },
         startCents: 1_500,
         tallies: { squirrelPulls: 3 },
       },
@@ -303,12 +303,12 @@ describe("loadSave", () => {
       "without picks of options or cards the game no longer has",
       (document) => {
         document.stats.optionPicks = {
-          escapedCapybara: { callZoo: 4, help: 2, retiredOption: 1 },
-          retiredCard: { help: 5 },
+          cheeseCrates: { buy: 4, retiredOption: 1, sniff: 2 },
+          retiredCard: { sniff: 5 },
         };
       },
       (save) => save.stats.optionPicks,
-      { escapedCapybara: { callZoo: 4, help: 2 } },
+      { cheeseCrates: { buy: 4, sniff: 2 } },
     ],
     [
       "without unknown, removed (pause) or duplicate hints shown",

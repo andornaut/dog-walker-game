@@ -58,7 +58,7 @@ describe("checkpointOf", () => {
       bumpsByKind: { raccoon: 2 },
       bumpsByZone: [0, 2],
       debuffsGot: { stinky: 1 },
-      optionPicks: { escapedCapybara: { help: 2 } },
+      optionPicks: { cheeseCrates: { sniff: 2 } },
       startMoney: cents(500),
       tallies: { squirrelPulls: 3 },
     };
@@ -67,7 +67,7 @@ describe("checkpointOf", () => {
       bumpsByZone: [0, 2],
       debuffsGot: { stinky: 1 },
       firstZone: 0,
-      optionPicks: { escapedCapybara: { help: 2 } },
+      optionPicks: { cheeseCrates: { sniff: 2 } },
       startCents: 500,
       tallies: { squirrelPulls: 3 },
     });

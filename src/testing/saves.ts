@@ -39,7 +39,7 @@ export const testContext: SaveContext = {
     gear: new Set(["fannyPack", "hallPass", "luckyCollar", "runningShoes"]),
     hints: new Set(["card", "puddle", "tip"]),
     minorObstacles: new Set(["bench", "pigeons", "raccoon"]),
-    options: new Map([["escapedCapybara", new Set(["callZoo", "help"])]]),
+    options: new Map([["cheeseCrates", new Set(["buy", "sniff"])]]),
     walkers: new Set(["ada", "mrB", "casey", "trista"]),
     zones: new Set([
       "yongeStreet",
@@ -109,7 +109,7 @@ export function veteranSave(): SaveDocument {
       lifetimeCents: cents(30_000),
       lifetimeStartCents: cents(2_000),
       noFiringStreak: 2,
-      optionPicks: { escapedCapybara: { help: 2 } },
+      optionPicks: { cheeseCrates: { sniff: 2 } },
       runs: { finished: 2, noDogs: 1, wentHome: 2 },
       tallies: { squirrelPulls: 5 },
       walkersFinishedWith: ["casey"],

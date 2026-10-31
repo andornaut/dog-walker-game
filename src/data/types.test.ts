@@ -98,11 +98,11 @@ describe("types", () => {
     {
       const picks = { count: 1, kind: "optionPicks" } as const;
       // @ts-expect-error: an option of another encounter's card
-      check<AchievementCondition>({ ...picks, encounter: "escapedCapybara", option: "pose" });
+      check<AchievementCondition>({ ...picks, encounter: "cheeseCrates", option: "pose" });
       // @ts-expect-error: an encounter that opens no card
       check<AchievementCondition>({ ...picks, encounter: "lostWallet", option: "keep" });
-      const help = { ...picks, encounter: "escapedCapybara", option: "help" } as const;
-      expect(check<AchievementCondition>(help).kind).toBe("optionPicks");
+      const sniff = { ...picks, encounter: "cheeseCrates", option: "sniff" } as const;
+      expect(check<AchievementCondition>(sniff).kind).toBe("optionPicks");
     }
 
     // Holds 1 to 3 dogs in a pack.

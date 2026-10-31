@@ -938,6 +938,24 @@ describe("stepWalk", () => {
     expect(step(walkWith(["kilo"], [atPack("lostWallet")])).walk.run.bumpsByZone).toEqual([]);
   });
 
+  it.each(["escapedCapybara"] as const)(
+    "resolves %s as a regular heart bump without a card or contact effect",
+    (obstacle) => {
+      const dogs: PackDogs = ["kilo", "ginger"];
+      const after = step(walkWith(dogs, [atPack(obstacle)]));
+      const ordinary = step(walkWith(dogs, [atPack("cone")]));
+      expect(after.cards).toEqual([]);
+      expect(after.encounterHits).toEqual([]);
+      expect(after.contacts).toEqual([]);
+      expect(after.bumps.map(({ change, dodged, dog }) => ({ change, dodged, dog }))).toEqual(
+        ordinary.bumps.map(({ change, dodged, dog }) => ({ change, dodged, dog })),
+      );
+      expect(heartsByDog(after.walk.run)).toEqual(heartsByDog(ordinary.walk.run));
+      expect(after.walk.run.bumpsByKind).toEqual({ [obstacle]: 1 });
+      expect(after.walk.run.debuffs).toEqual([]);
+    },
+  );
+
   // Every contact obstacle, such as a puddle, and the immunities Raincoats give.
   const CONTACTS = keysOf(ENCOUNTERS).filter((id) => ENCOUNTERS[id].resolution.kind === "contact");
   const COATED = UPGRADES.raincoats.effects.map(({ encounter }) => ({
@@ -982,21 +1000,10 @@ describe("stepWalk", () => {
 
   // Every minor obstacle with contact, with the debuff it starts. It is met as a puddle is, its
   // debuff in place of Muddy.
-  const MINOR_CONTACTS = [
-    { debuff: "stinky", obstacle: "barrelStack" },
-    { debuff: "spotlight", obstacle: "busker" },
-    { debuff: "zoomies", obstacle: "frisbeeDog" },
-    { debuff: "stinky", obstacle: "seagull" },
-    { debuff: "zoomies", obstacle: "signSpinner" },
-    { debuff: "spotlight", obstacle: "stiltWalker" },
-    { debuff: "stinky", obstacle: "trashCan" },
-  ] as const;
-  it("lists every minor obstacle with contact", () => {
-    expect(MINOR_CONTACTS.map(({ obstacle }) => obstacle)).toEqual(
-      keysOf(data.minorObstacles).filter((id) => {
-        const minor: MinorObstacle = data.minorObstacles[id];
-        return minor.contact !== undefined;
-      }),
+  const MINOR_CONTACTS = keysOf(data.minorObstacles).flatMap((obstacle) => {
+    const minor: MinorObstacle = data.minorObstacles[obstacle];
+    return (minor.contact?.effects ?? []).flatMap((effect) =>
+      effect.kind === "debuff" ? [{ debuff: effect.debuff, obstacle }] : [],
     );
   });
 

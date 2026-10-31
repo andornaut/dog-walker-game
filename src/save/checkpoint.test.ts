@@ -324,15 +324,15 @@ describe("achievements at banking", () => {
   it("adds the run's option picks to the lifetime ones, option by option", () => {
     const counters = {
       ...quietCounters(),
-      optionPicks: { escapedCapybara: { help: 1 }, weddingPhotoShoot: { pose: 2 } },
+      optionPicks: { cheeseCrates: { sniff: 1 }, weddingPhotoShoot: { pose: 2 } },
     };
     const before = {
       ...newPlayerSave,
-      stats: { ...newPlayerSave.stats, optionPicks: { escapedCapybara: { callZoo: 3, help: 4 } } },
+      stats: { ...newPlayerSave.stats, optionPicks: { cheeseCrates: { buy: 3, sniff: 4 } } },
     };
     const { stats } = recordRunEnd(testAwards, before, runResult({ counters }));
     expect(stats.optionPicks).toEqual({
-      escapedCapybara: { callZoo: 3, help: 5 },
+      cheeseCrates: { buy: 3, sniff: 5 },
       weddingPhotoShoot: { pose: 2 },
     });
   });

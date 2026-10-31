@@ -19,7 +19,6 @@ export const COMIC_WORDS = {
       bigScreenPromo: 43,
       cheeseCrates: 46,
       droppedIceCream: 48,
-      escapedCapybara: 48,
       greenBinSpill: 46,
       otherDog: 46,
       porchCat: 43,
