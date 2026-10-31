@@ -138,7 +138,6 @@ describe("generateArtManifest", () => {
   it("writes the committed manifest: run npm run art:manifest and commit it", async () => {
     const generated = artManifestText(await generateArtManifest(nodeArtFiles(ART_DIR.pathname)));
     const committed = await readFile(new URL("manifest.json", ART_DIR), "utf8");
-    expect(JSON.parse(committed)).toEqual(JSON.parse(generated));
     expect(committed).toBe(generated);
   });
 });
