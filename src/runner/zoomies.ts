@@ -2,7 +2,7 @@ import { SECONDS_EPSILON } from "@andornaut/game-kit/clock/fixedStep";
 import type { Random } from "@andornaut/game-kit/random";
 import { keysOf } from "@andornaut/game-kit/records";
 
-import type { DebuffId, GameData } from "../data/types";
+import type { DebuffDriftMovement, DebuffId, GameData } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { read } from "../rules/units";
 import { laneBlockedForPull, type PullData, type PullGeometry } from "./pulls";
@@ -17,7 +17,7 @@ export interface DebuffMovementClock {
 
 interface DriftProfile {
   readonly debuff: DebuffId;
-  readonly direction: "heading" | "random";
+  readonly direction: DebuffDriftMovement["direction"];
   readonly interval:
     | { readonly kind: "fixed"; readonly seconds: number }
     | { readonly kind: "uniform"; readonly max: number; readonly min: number };
@@ -44,7 +44,11 @@ export function debuffDriftProfile(
     if (profile !== null) {
       throw new Error("Only one debuff may define movement");
     }
-    if (movement.direction !== "heading" && movement.direction !== "random") {
+    if (
+      movement.direction !== "heading" &&
+      movement.direction !== "random" &&
+      movement.direction !== "steeringOrRandom"
+    ) {
       throw new Error("Unsupported debuff drift direction");
     }
     const interval = movement.interval;
@@ -100,8 +104,8 @@ function driftDirection(
   return open(back) ? back : null;
 }
 
-// Only walking time advances the schedule. Each attempted one-lane drift samples its own
-// direction and next interval, including an attempt whose two candidate lanes are blocked.
+// Only walking time advances the schedule. Random directions and next intervals are sampled
+// per attempted drift, including an attempt whose two candidate lanes are blocked.
 export function stepDebuffMovement(
   data: PullData,
   geometry: PullGeometry,
@@ -131,9 +135,24 @@ export function stepDebuffMovement(
   if (elapsed < current.interval - SECONDS_EPSILON) {
     return { clock: { ...current, elapsed }, drifted: null, walk };
   }
+  const manual =
+    walk.road.control.motion.kind === "moving" ? walk.road.control.manualDirection : undefined;
   const heading =
-    profile.direction === "random" ? (random() < 0.5 ? -1 : 1) : (walk.road.control.heading ?? 1);
+    profile.direction === "heading"
+      ? (walk.road.control.heading ?? 1)
+      : profile.direction === "steeringOrRandom" && manual !== undefined
+        ? manual
+        : random() < 0.5
+          ? -1
+          : 1;
   const direction = driftDirection(data, geometry, heading, walk);
+  let drifted = walk;
+  if (direction !== null) {
+    drifted = steerWalk(data, geometry.laneCount, direction, walk);
+    const control = { ...drifted.road.control };
+    delete control.manualDirection;
+    drifted = { ...drifted, road: { ...drifted.road, control } };
+  }
   return {
     clock: {
       debuff: profile.debuff,
@@ -141,6 +160,6 @@ export function stepDebuffMovement(
       interval: nextInterval(),
     },
     drifted: direction,
-    walk: direction === null ? walk : steerWalk(data, geometry.laneCount, direction, walk),
+    walk: drifted,
   };
 }

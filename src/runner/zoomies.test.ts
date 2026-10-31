@@ -9,7 +9,7 @@ import type { LaneDirection } from "../layout/lanes";
 import { read } from "../rules/units";
 import { newRun, type RunState } from "../state/runState";
 import { plannerStreams } from "../testing/movers";
-import { laneControlIn } from "./laneControl";
+import { advanceLaneControl, laneControlIn, pullLane } from "./laneControl";
 import { destinationLane, stillInLane } from "./laneMotion";
 import { pullHorizon } from "./pulls";
 import { runStreams } from "./session";
@@ -176,6 +176,54 @@ describe("debuff movement profiles", () => {
 });
 
 describe("debuff movement schedule", () => {
+  const hybrid = configured({ ...FIXED, direction: "steeringOrRandom" });
+
+  it.each([-1, 1] as const)(
+    "prefers active manual direction %s without a random direction draw",
+    (direction) => {
+      const walk = steerWalk(hybrid, ROAD.laneCount, direction, walkIn(2));
+      const random = vi.fn(() => (direction === 1 ? 0 : 1));
+      const result = stepDebuffMovement(hybrid, ROAD, random, EVERY, null, walk);
+      expect(result.drifted).toBe(direction);
+      expect(random).not.toHaveBeenCalled();
+      expect(result.walk.road.control.manualDirection).toBeUndefined();
+    },
+  );
+
+  it("samples fresh idle directions after stale heading, manual arrival, a pull or its own drift", () => {
+    const manual = steerWalk(hybrid, ROAD.laneCount, 1, walkIn(2));
+    const config = { laneCount: ROAD.laneCount, moveDuration: 0.2 };
+    const arrived = {
+      ...manual,
+      road: { ...manual.road, control: advanceLaneControl(config, 10, manual.road.control) },
+    };
+    const pulled = {
+      ...manual,
+      road: { ...manual.road, control: pullLane(config, 1, manual.road.control) },
+    };
+    const drift = stepDebuffMovement(hybrid, ROAD, () => 1, EVERY, null, walkIn(1)).walk;
+    for (const walk of [walkIn(2, 1), arrived, pulled, drift]) {
+      expect(walk.road.control.manualDirection).toBeUndefined();
+      const random = vi.fn(() => 0);
+      expect(stepDebuffMovement(hybrid, ROAD, random, EVERY, null, walk).drifted).toBe(-1);
+      expect(random).toHaveBeenCalledTimes(1);
+    }
+    const random = vi.fn(() => 1);
+    expect(stepDebuffMovement(hybrid, ROAD, random, EVERY, null, walkIn(2, -1)).drifted).toBe(1);
+    expect(random).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses the safe opposite or cancels an active manual preference", () => {
+    const manual = steerWalk(hybrid, ROAD.laneCount, 1, walkIn(1));
+    for (const [items, expected] of [
+      [[boardIn(3, 0)], -1],
+      [[boardIn(3, 0), boardIn(1, 1)], null],
+    ] satisfies readonly [WalkItem[], LaneDirection | null][]) {
+      const walk = { ...manual, road: { ...manual.road, items } };
+      expect(stepDebuffMovement(hybrid, ROAD, () => 0, EVERY, null, walk).drifted).toBe(expected);
+    }
+  });
+
   it("retains explicit heading and fixed timing without consuming randomness", () => {
     const random = vi.fn(() => 0);
     for (const [lane, heading, expected] of [

@@ -15,6 +15,8 @@ import {
 // target last moved, absent before it has.
 export interface LaneControl {
   heading?: LaneDirection;
+  // Present only while a manually requested lane movement is active.
+  manualDirection?: LaneDirection;
   motion: LaneMotion;
   target: number;
 }
@@ -61,6 +63,7 @@ export function steerLane(
   return {
     ...control,
     heading: direction,
+    manualDirection: direction,
     motion: headFor(config, target, control.motion),
     target,
   };
@@ -96,7 +99,7 @@ export function advanceLaneControl(
     const toArrival = motion.duration - motion.elapsed;
     if (secondsLeft < toArrival) {
       return {
-        ...headingOf(control),
+        ...control,
         motion: { ...motion, elapsed: motion.elapsed + secondsLeft },
         target: control.target,
       };
