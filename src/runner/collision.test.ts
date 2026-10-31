@@ -284,12 +284,19 @@ describe("collideWithPack", () => {
     return { ...result, hits: result.hits.map(({ item }) => item) };
   };
 
-  it("removes a hit item and leaves the rest", () => {
+  it("retires every representation of a hit id and leaves distinct items", () => {
     const hit = item(1, "obstacle", 2, 570);
     const ahead = item(2, "obstacle", 2, 100);
-    expect(collided(rules, still, 0, [hit, ahead])).toEqual({
+    expect(
+      collided({ ...rules, invulnerabilitySeconds: 0 }, still, 0, [
+        hit,
+        { ...hit },
+        { ...hit, y: 90 },
+        ahead,
+      ]),
+    ).toEqual({
       hits: [hit],
-      invulnerableSeconds: 1,
+      invulnerableSeconds: 0,
       remaining: [ahead],
     });
   });

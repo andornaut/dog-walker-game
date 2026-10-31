@@ -257,8 +257,12 @@ export function collideWithPack<Item extends RoadItem, Dog extends string>(
     })
     .sort((a, b) => b.item.y + b.item.height - (a.item.y + a.item.height));
   const hits: Hit<Item, Dog>[] = [];
+  const hitIds = new Set<number>();
   let windowSeconds = invulnerableSeconds;
   for (const hit of touched) {
+    if (hitIds.has(hit.item.id)) {
+      continue;
+    }
     if (rules.graced(hit.item)) {
       if (windowSeconds > 0) {
         continue;
@@ -268,12 +272,12 @@ export function collideWithPack<Item extends RoadItem, Dog extends string>(
       }
     }
     hits.push(hit);
+    hitIds.add(hit.item.id);
   }
-  const hitItems = new Set(hits.map(({ item }) => item));
   return {
     hits,
     invulnerableSeconds: windowSeconds,
-    remaining: items.filter((item) => !hitItems.has(item)),
+    remaining: items.filter((item) => !hitIds.has(item.id)),
   };
 }
 
