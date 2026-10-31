@@ -20,7 +20,6 @@ Gameplay owns the rulebook and the values and content in the data value files (e
 ## Method
 
 - **Design sessions:** start with "design session" and a topic. Claude keeps floated ideas apart from agreed ones, asks the question that unblocks a decision, and on "wrap up" proposes doc changes, writing them once confirmed.
-- **Simulate before tuning:** every economy or difficulty change is compared before and after at the same seed, with `npm run simulate -- --runs 1000 --seed 1 --skill novice,typical,expert`.
 - **Playtest what needs eyes:** play the deployed `/play/` headless on a phone viewport, with `?seed=N&pack=...&dev=1` for a reproducible run, and report what broke to tech or art.
 - **Card text:** generated from the effects, so a value-only edit changes it with no text edit. Check the result in `shared/export/game-data.json` or on the data page.
 
