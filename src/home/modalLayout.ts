@@ -1,3 +1,4 @@
+import { modalWidth } from "@andornaut/game-kit/modalLayout";
 import { insetRect, type Rect, rectAboveIn, rectsOverlap } from "@andornaut/game-kit/rect";
 
 import { BUTTON_SIZE } from "../ui/buttonGeometry";
@@ -42,11 +43,16 @@ export function modalRect(
   );
 }
 
+// Existing callers measure full panels; the shared rule takes content without its padding.
+export function modalPanelWidth(availableWidth: number, outerWidth: number): number {
+  return modalWidth(availableWidth, outerWidth - 2 * MODAL.pad);
+}
+
 // Modal actions follow full-size label ink; screen controls keep their separate size tokens.
 export function modalActionWidth(ink: number): number {
   return Math.max(BUTTON_SIZE.icon.target, Math.ceil(ink + 2 * MODAL.pad));
 }
 
 export function modalTitleWidth(ink: number): number {
-  return Math.ceil(ink + 2 * MODAL.pad + BUTTON_SIZE.icon.face + MODAL.gap);
+  return Math.ceil(ink + BUTTON_SIZE.icon.target + MODAL.gap + MODAL.pad);
 }

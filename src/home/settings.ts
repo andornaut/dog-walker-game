@@ -9,7 +9,7 @@ import { type CloseControl, closeControl } from "../ui/closeControl";
 import { helpCapDy, LABEL_HELP_GAP } from "../ui/labelHelpGap";
 import { TEXT_SCALE, textOnLines } from "../ui/textFit";
 import { HOME_LAYOUT } from "./homeLayout";
-import { MODAL, modalRect, modalTitleWidth } from "./modalLayout";
+import { MODAL, modalPanelWidth, modalRect, modalTitleWidth } from "./modalLayout";
 
 // The settings screen moves a volume in 5% steps, from 0 to 1.
 export const VOLUME_STEPS = 20;
@@ -290,13 +290,15 @@ export function installStepsLayout(
   ink?: { steps: number; title: number },
 ): InstallStepsLayout {
   const height = ROWS_TOP + lines * INSTALL_STEPS.linePitch + INSTALL_STEPS.foot;
-  const width =
+  const width = modalPanelWidth(
+    screen.width - 2 * MODAL.margin,
     ink === undefined
       ? INSTALL_STEPS.width
       : Math.max(
           modalTitleWidth(ink.title),
           ink.steps + 2 * MODAL.pad + INSTALL_STEPS.icon.size + INSTALL_STEPS.icon.gap,
-        );
+        ),
+  );
   const card = modalRect({ ...screen, x: 0, y: 0 }, undefined, { height, width });
   const { icon, pad, stepsDy } = INSTALL_STEPS;
   const stepsY = card.y + ROWS_TOP + stepsDy;

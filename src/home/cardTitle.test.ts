@@ -3,17 +3,19 @@ import { describe, expect, it } from "vitest";
 
 import { inkWidth } from "../testing/fontInk";
 import { cardTitles } from "../testing/textRoles";
-import { BAR_TITLE, barTitleLeft } from "../ui/barTitle";
+import { BAR_TITLE, barTitleLeft, barTitleRoom } from "../ui/barTitle";
 import { type CloseControl, closeControl } from "../ui/closeControl";
 import { plainMarks } from "../ui/pixelFont";
 import { TEXT_STYLE } from "../ui/textFit";
 import { cardTitleRow } from "./homeLayout";
 
-// The clear space left of a title's ink, from the bar's left edge, and right of it, to the close
-// control's face.
+// The clear space on either side of title ink, after the correct corner-control reservation.
 function clearSpace(bar: Rect, close: CloseControl, width: number) {
   const left = barTitleLeft(bar, close, width);
-  return { left: left - bar.x, right: close.x - BAR_TITLE.closeGap - (left + width) };
+  const leftClose = close.hit.x <= bar.x;
+  const start = leftClose ? close.hit.x + close.hit.width + BAR_TITLE.closeGap : bar.x;
+  const end = leftClose ? bar.x + bar.width : close.x - BAR_TITLE.closeGap;
+  return { left: left - start, right: end - (left + width) };
 }
 
 // A centred title has the same clear space each side, to within the odd pixel, at least inset;
@@ -33,7 +35,7 @@ describe("barTitleLeft", () => {
   const card: Rect = { height: 100, width: 300, x: 30, y: 0 };
   const bar = cardTitleRow(card);
   const close = closeControl(card);
-  const room = close.x - BAR_TITLE.closeGap - bar.x;
+  const room = barTitleRoom(bar, close);
 
   it.each([
     ["a short title", 40],

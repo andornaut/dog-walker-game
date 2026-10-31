@@ -12,7 +12,7 @@ import {
   type DetailRow,
   HOME_LAYOUT,
 } from "../home/homeLayout";
-import { MODAL, modalRect, modalTitleWidth } from "../home/modalLayout";
+import { MODAL, modalPanelWidth, modalRect, modalTitleWidth } from "../home/modalLayout";
 import { withNamePills } from "../hud/effectNames";
 import { barTitleLeft } from "../ui/barTitle";
 import { type CloseControl, closeControl } from "../ui/closeControl";
@@ -81,7 +81,7 @@ function drawCardFrame(
 
 // Every modal card's frame, in one layout: the ui-detail-card with no title bar, its title in
 // plum on the card's title row (addCardTitle), and, for a card that closes, the close control in
-// its top-right corner. close: whether that control shows pressed, or undefined for a card
+// its top-left corner. close: whether that control shows pressed, or undefined for a card
 // without one.
 export function addModalCard(
   scene: Scene,
@@ -150,7 +150,7 @@ export function addFramedPageCard(
   addCloseButton(scene, parent, header.close, pressed);
 }
 
-// A modal card's close control in its top-right corner (closeControl), on any card's background.
+// A modal card's close control in its top-left corner (closeControl), on any card's background.
 export function addCardClose(
   scene: Scene,
   parent: GameObjects.Container,
@@ -304,7 +304,7 @@ export function drawDetailCard(
   draw(parts.below, CARD.pad, CARD_TEXT_ROOM.full, layout.below);
   const bounds = content.getBounds();
   const titleWidth = modalTextWidth(scene, "title", [card.title]);
-  const width = Math.min(
+  const width = modalPanelWidth(
     dim.width - 2 * MODAL.margin,
     Math.ceil(
       Math.max(

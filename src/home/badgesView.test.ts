@@ -10,7 +10,7 @@ import type { SaveDocument } from "../save/schema";
 import { defined } from "../testing/defined";
 import { inkWidth } from "../testing/fontInk";
 import { newPlayerSave } from "../testing/saves";
-import { closeControl, closeFace } from "../ui/closeControl";
+import { closeControl } from "../ui/closeControl";
 import { TEXT_SCALE } from "../ui/textFit";
 import { cents, dollarsToCents } from "../units";
 import {
@@ -309,13 +309,13 @@ describe("badgeRowCounts", () => {
   });
 });
 
-// The badge celebration's badges clear its close control's face, however many share the rows.
+// The badge celebration's badges clear its close control's whole touch target, however many share the rows.
 describe("stripUnderClose", () => {
   const panel = { ...CELEBRATION_PANEL, height: CELEBRATION_PANEL.badgesHeight, y: 100 };
-  const face = closeFace(closeControl(panel));
+  const face = closeControl(panel).hit;
   const { badgeSize, maxRows, perRow } = BADGE_STRIP;
   it.each(Array.from({ length: maxRows * perRow }, (_, i) => i + 1))(
-    "keeps %i badges clear of the face and inside the panel",
+    "keeps %i badges clear of the close target and inside the panel",
     (count) => {
       const strip = stripUnderClose(panel);
       const rows = badgeStripRows(count);

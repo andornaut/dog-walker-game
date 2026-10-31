@@ -14,7 +14,13 @@ import {
   stripUnderClose,
 } from "../home/badgesView";
 import { overlayRegion, regionOutside } from "../home/homeBar";
-import { MODAL, modalActionWidth, modalRect, modalTitleWidth } from "../home/modalLayout";
+import {
+  MODAL,
+  modalActionWidth,
+  modalPanelWidth,
+  modalRect,
+  modalTitleWidth,
+} from "../home/modalLayout";
 import { isConfirmKey, isPauseKey, menuKeyActs } from "../input/keyBindings";
 import { exitShown } from "../pwa";
 import { BUTTON_SIZE } from "../ui/buttonGeometry";
@@ -63,7 +69,7 @@ export class CelebrationScene extends Scene {
     const buttonWidth = modalActionWidth(
       modalTextWidth(this, "title", [gameData.menuText.celebration.button]),
     );
-    const width = Math.min(
+    const width = modalPanelWidth(
       SCREEN.width - 2 * MODAL.margin,
       Math.max(
         buttonWidth + 2 * MODAL.pad,

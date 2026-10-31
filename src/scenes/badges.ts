@@ -18,7 +18,7 @@ import {
   stripUnderClose,
 } from "../home/badgesView";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
-import { MODAL, modalRect } from "../home/modalLayout";
+import { MODAL, modalPanelWidth, modalRect } from "../home/modalLayout";
 import { DETAIL_TEXT_WIDTH, detailPanel, detailTextTops, STATS_LAYOUT } from "../home/statsLayout";
 import { closeControl } from "../ui/closeControl";
 import { PALETTE } from "../ui/palette";
@@ -192,7 +192,7 @@ export function addBadgeDetail(
   );
   const fonts = { body: pixelFontMetrics(scene, "body"), title: pixelFontMetrics(scene, "title") };
   const measured = detailPanel(fonts, goal.length, line.length);
-  const width = Math.min(
+  const width = modalPanelWidth(
     dim.width - 2 * MODAL.margin,
     Math.max(
       BADGE_SIZE * DETAIL_BADGE_SCALE + 2 * MODAL.pad,

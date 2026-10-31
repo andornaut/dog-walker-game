@@ -19,7 +19,13 @@ import { hasPill, PILL_IMAGE_GAP, pillDropUnderInk, pillRiseOverCaps } from "../
 import { BUTTON_LIP_PX } from "../ui/selection";
 import { TOP_BAR_FACE, TOP_BAR_HEIGHT, TOP_BAR_MID, TOP_BAR_WELL } from "../ui/topBarTrim";
 import { FEEDBACK } from "./feedback";
-import { MODAL, modalActionWidth, modalRect, modalTitleWidth } from "./modalLayout";
+import {
+  MODAL,
+  modalActionWidth,
+  modalPanelWidth,
+  modalRect,
+  modalTitleWidth,
+} from "./modalLayout";
 import type { SectionId } from "./sections";
 
 // Every tappable thing is at least 44 game pixels (48 CSS pixels on a 390px-wide phone) on
@@ -520,7 +526,7 @@ function cardRows(
 }
 
 // The row a modal card's title sits on across the card's top, card.titleRow.inset inside its top
-// and sides, the close control at its right end. Nothing is drawn under it: the card has no title
+// and sides; its close control occupies the separate top-left corner. The card has no title
 // bar.
 export function cardTitleRow(card: Rect): Rect {
   const { height, inset } = HOME_LAYOUT.card.titleRow;
@@ -529,7 +535,10 @@ export function cardTitleRow(card: Rect): Rect {
 
 // A detail card height tall, centred on the screen.
 export function detailCardRect(screen: { height: number; width: number }, height: number): Rect {
-  return modalRect({ ...screen, x: 0, y: 0 }, undefined, { height, width: HOME_LAYOUT.card.width });
+  return modalRect({ ...screen, x: 0, y: 0 }, undefined, {
+    height,
+    width: modalPanelWidth(screen.width - 2 * MODAL.margin, HOME_LAYOUT.card.width),
+  });
 }
 
 const BESIDE_ROOM = HOME_LAYOUT.card.width - HOME_LAYOUT.card.besideX - HOME_LAYOUT.card.pad;
@@ -632,7 +641,7 @@ export function updateModalText(
 // The notice has only its title, close control and compact action, with no empty body row.
 export function updateModalLayout(area: Rect, ink: { action: number; title: number }) {
   const actionWidth = modalActionWidth(ink.action);
-  const width = Math.min(
+  const width = modalPanelWidth(
     area.width - 2 * MODAL.margin,
     Math.max(actionWidth + 2 * MODAL.pad, modalTitleWidth(ink.title)),
   );

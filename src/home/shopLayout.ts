@@ -4,7 +4,7 @@ import { type FontMetrics, inkRowsFromCapTop } from "@andornaut/game-kit/text/bi
 import { DOG_SLOTS } from "../data/dogSlots";
 import { TITLE_CAP_ROWS } from "../hud/walkHud";
 import { BUTTON_SIZE } from "../ui/buttonGeometry";
-import { closeControl } from "../ui/closeControl";
+import { pageCloseControl } from "../ui/closeControl";
 import { helpCapDy } from "../ui/labelHelpGap";
 import { type ScrollbarRects, scrollbarRects } from "../ui/scrollbar";
 import { SELECT_OUTSET } from "../ui/selection";
@@ -19,7 +19,7 @@ const PANEL = { height: 512, width: 352, x: 4, y: 44 };
 // The framed pages keep their header above the existing tab strip.
 const PAGE_TITLE = { height: 24, width: PANEL.width - 12, x: PANEL.x + 6, y: PANEL.y + 6 };
 const PAGE_CLOSE = {
-  ...closeControl(PANEL),
+  ...pageCloseControl(PANEL, 8),
   x: PANEL.x + PANEL.width - 8 - BUTTON_SIZE.icon.face,
   y: PANEL.y + 8,
 };

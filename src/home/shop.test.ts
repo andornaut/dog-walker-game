@@ -358,6 +358,9 @@ describe("the shop's tabs", () => {
     const row = SHOP_LAYOUT.title.row;
     const above = tab.drawY - FEEDBACK.liftPx - SELECT_OUTSET - (row.y + row.height);
     const below = list.rect.y - (tab.drawY + tab.drawHeight + SELECT_OUTSET);
+    expect(SHOP_LAYOUT.close.hit.x + SHOP_LAYOUT.close.hit.width).toBe(
+      SHOP_LAYOUT.panel.x + SHOP_LAYOUT.panel.width,
+    );
     expect(above).toBeGreaterThanOrEqual(6);
     expect(below).toBe(above);
   });

@@ -31,7 +31,7 @@ export interface PanelNotePart {
 
 export interface QuestionPanel {
   readonly avoid?: Rect;
-  // What the close control in the panel's top-right corner does, as a tap outside the panel does.
+  // What the close control in the panel's top-left corner does, as a tap outside the panel does.
   readonly close: () => void;
   // Top to bottom, the first the call to action and key 1.
   readonly entries: readonly PanelEntry[];
@@ -45,7 +45,7 @@ export interface QuestionPanel {
 }
 
 // The pause menu's panel, and each question laid out as it is (the Home question, Quit?), centred
-// in area: its title beside the close control in its top-right corner, as on every modal card,
+// in area: its title beside the close control in its top-left corner, as on every modal card,
 // the buttons, and the note plate. A press counts where it began and ended on the same button or
 // the close control, which wins where their tap areas meet, so the release that closes the panel
 // is never what is under it. Returns what a tap outside the panel must miss: the panel and the

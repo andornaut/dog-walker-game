@@ -201,7 +201,6 @@ function rowParts(i: number): [string, Rect][] {
 describe("the settings card", () => {
   const { close, panel, rows } = layout;
   const titleRow = cardTitleRow(panel);
-  const titleRowBottom = titleRow.y + titleRow.height;
 
   it("exports the rows the shipped notes wrap to", () => {
     expect(SETTINGS_EXPORT_ROWS).toEqual(shapes);
@@ -210,7 +209,7 @@ describe("the settings card", () => {
   it.each<[string, Rect, Rect]>([
     ["the card with every row", panel, screen],
     ["the title row", titleRow, panel],
-    ["the close control's face", closeFace(close), titleRow],
+    ["the close control's face", closeFace(close), panel],
     ["the close control's hit area", close.hit, panel],
     ...rows.map(({ rect }, i): [string, Rect, Rect] => [`row ${i + 1}`, rect, panel]),
     ...rows.flatMap(({ rect }, i) =>
@@ -220,11 +219,10 @@ describe("the settings card", () => {
     expect(inside(inner, outer)).toBe(true);
   });
 
-  // Each row starts on the edge over it: the first at the title row's bottom, each later one at its
-  // separator.
-  it("starts each row on the title row or the separator over it", () => {
+  // The first row clears the full close target; later rows begin at their separators.
+  it("starts rows below the close target or at the separator over them", () => {
     expect(rows.map(({ rect }) => rect.y)).toEqual([
-      titleRowBottom + MODAL.gap,
+      close.hit.y + close.hit.height + MODAL.gap,
       ...layout.separators.map(({ y }) => y),
     ]);
   });
@@ -345,7 +343,7 @@ describe.each(keysOf(gameData.menuText.settings.installSteps))(
     it.each<[string, Rect, Rect]>([
       ["the card", card, screen],
       ["the title row", cardTitleRow(card), card],
-      ["the close control's face", closeFace(close), cardTitleRow(card)],
+      ["the close control's face", closeFace(close), card],
       ["the close control's hit area", close.hit, card],
       ["the steps", { height: stepsHeight, width: stepsInk, x: steps.x, y: steps.y }, card],
       ["the button glyph", glyph, card],

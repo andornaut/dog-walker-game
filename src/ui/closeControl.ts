@@ -1,13 +1,11 @@
 import type { Rect } from "@andornaut/game-kit/rect";
 
 import { BUTTON_SIZE } from "./buttonGeometry";
+import { MODAL } from "./modalGeometry";
 
-// Every page's and overlay's close control: the 20x20 ui-icon-button face in its frame's
-// top-right corner, tapped anywhere in the 44x44 square in that corner. On a card or panel the
-// face sits 16px in from the right edge and 16px down; on a full-screen page, 7px in and 9px
-// down unless the page gives its own top.
+// Modal close faces sit 6px inside the top-left corner, within a 44px corner target.
+// Full pages keep their separate top-right control placement.
 const FACE_SIZE = BUTTON_SIZE.icon.face;
-const CARD_FACE = { right: 16, top: 16 } as const;
 const PAGE_FACE = { right: 7, top: 9 } as const;
 const HIT_SIZE = BUTTON_SIZE.icon.target;
 
@@ -27,9 +25,13 @@ function placeClose(frame: Rect, right: number, top: number): CloseControl {
   };
 }
 
-// The close control in a card's or panel's top-right corner.
+// The close control in a card's or panel's top-left corner.
 export function closeControl(frame: Rect): CloseControl {
-  return placeClose(frame, CARD_FACE.right, CARD_FACE.top);
+  return {
+    hit: { height: HIT_SIZE, width: HIT_SIZE, x: frame.x, y: frame.y },
+    x: frame.x + MODAL.closeInset,
+    y: frame.y + MODAL.closeInset,
+  };
 }
 
 // The close control in a full-screen page's top-right corner, its face top px down.

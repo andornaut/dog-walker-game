@@ -7,7 +7,13 @@ import { closeControl } from "../ui/closeControl";
 import { helpCapDy } from "../ui/labelHelpGap";
 import { overlayRegion } from "./homeBar";
 import { cardTitleRow, HOME_LAYOUT } from "./homeLayout";
-import { MODAL, modalActionWidth, modalRect, modalTitleWidth } from "./modalLayout";
+import {
+  MODAL,
+  modalActionWidth,
+  modalPanelWidth,
+  modalRect,
+  modalTitleWidth,
+} from "./modalLayout";
 
 const CARD = HOME_LAYOUT.card;
 const BUTTON_HEIGHT = BUTTON_SIZE.compact.height;
@@ -32,7 +38,7 @@ export function purchaseConfirmLayout(
 ) {
   const actions = { buy: modalActionWidth(ink.buy), cancel: modalActionWidth(ink.cancel) };
   const actionsWidth = actions.buy + actions.cancel + MODAL.gap;
-  const width = Math.min(
+  const width = modalPanelWidth(
     SCREEN_CONFIG.width - 2 * MODAL.margin,
     Math.max(
       actionsWidth + 2 * MODAL.pad,

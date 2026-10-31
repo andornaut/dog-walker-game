@@ -1,7 +1,7 @@
 import type { Rect } from "@andornaut/game-kit/rect";
 import { type FontMetrics, inkRowsOfLines } from "@andornaut/game-kit/text/bitmapFont";
 
-import { MODAL, modalRect, modalTitleWidth } from "../home/modalLayout";
+import { MODAL, modalPanelWidth, modalRect, modalTitleWidth } from "../home/modalLayout";
 import { BUTTON_SIZE } from "../ui/buttonGeometry";
 
 // The menu's buttons, top to bottom; each one's label is menuText.pause[item].
@@ -87,7 +87,7 @@ function panelLayout(
     (_, i) => parts.buttonWidths?.[i] ?? BUTTON.width,
   );
   const actionWidth = Math.max(0, ...widths);
-  const width = Math.min(
+  const width = modalPanelWidth(
     area.width - 2 * MODAL.margin,
     Math.max(
       actionWidth + 2 * MODAL.pad,
