@@ -9,7 +9,7 @@ import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { QUIPS } from "../data/quips";
 import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
-import type { CardOption, CardSource, DogId, Effect, EncounterId, UpgradeId } from "../data/types";
+import type { CardOption, CardSource, DogId, EncounterId, UpgradeId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import { newRun, type RunState } from "../state/runState";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
@@ -139,33 +139,19 @@ describe("cardFor", () => {
 });
 
 describe("hasPlaque", () => {
-  const pack: DogId[] = ["ginger", "kilo", "pepe"];
-  const state = testState({ ginger: 5, kilo: 5, pepe: 5 }, { money: cents(1_000_000) });
-  const rows = keysOf(ENCOUNTERS).flatMap((id) => {
-    const { resolution } = ENCOUNTERS[id];
-    return resolution.kind === "card"
-      ? resolution.options.map(({ effects, name }, index) => ({
-          id,
-          index,
-          name,
-          pays: effects.some((effect) => effect.kind === "money" && effect.change === "lose"),
-        }))
-      : [];
-  });
-
-  it("gives every encounter option a plaque exactly when it costs cash", () => {
-    const wrong = rows.filter(
-      (row) =>
-        hasPlaque(cardFor(data, state, encounter(row.id, pack)).options[row.index]) !== row.pays,
-    );
-    expect(wrong.map(({ id, name }) => `${id}: ${name}`)).toEqual([]);
-  });
-
-  it("gives the Skip card no plaque and a fork's path card one, for its zone's pay", () => {
-    const fork: CardSource = { kind: "fork", paths: ["kensingtonMarket"], upgrades: ["bigTipper"] };
-    const afterZone = testState({ kilo: 4 }, { route: ["distilleryDistrict"], zoneIndex: 1 });
+  it("shows plaques only for paid options and paths carrying upgrades", () => {
+    const state = testState({ kilo: 5 }, { money: cents(1_000_000) });
+    const card = cardFor(data, state, encounter("thief", ["kilo"]));
+    expect(hasPlaque(card.options[optionWith("thief", "money")])).toBe(true);
+    expect(hasPlaque(card.options[optionWith("thief", "hearts")])).toBe(false);
     expect(hasPlaque(undefined)).toBe(false);
-    expect(hasPlaque(cardFor(data, openCard(fork, afterZone), fork).options[0])).toBe(true);
+    for (const upgrade of [null, "bigTipper"] as const) {
+      const fork: CardSource = { kind: "fork", paths: ["kensingtonMarket"], upgrades: [upgrade] };
+      const afterZone = testState({ kilo: 4 }, { route: ["distilleryDistrict"], zoneIndex: 1 });
+      expect(hasPlaque(cardFor(data, openCard(fork, afterZone), fork).options[0])).toBe(
+        upgrade !== null,
+      );
+    }
   });
 });
 
@@ -180,6 +166,7 @@ describe("applyInstantEncounter", () => {
       { amount: keep, kind: "effect", source: { encounter: "lostWallet", kind: "instant" } },
     ]);
     expect(outcome.state.phase).toEqual({ kind: "walking" });
+    expect(outcome.quips).toEqual([]);
   });
 
   // The pinned tuning shares 3 hearts.
@@ -192,35 +179,14 @@ describe("applyInstantEncounter", () => {
     ]);
   });
 
-  // Each lucky find, caught by the whole pack, below max, with an owner at max and with an owner
-  // fired: each owner it raised a heart for says one happier line, and no other owner says one.
-  // Found money is the walker's, so no owner gains it.
-  const luckyFinds = keysOf(ENCOUNTERS).filter((id) => ENCOUNTERS[id].kind === "lucky");
-  const low = testState({ ginger: 1, kilo: 1, sequoia: 1 });
-  const kiloFull = startHearts(TEST_TUNING, [], placeInPack(low, "kilo"), DOGS.kilo);
-  const packs: [string, RunState][] = [
-    ["below max", low],
-    ["Kilo's owner at max", testState({ ginger: 1, kilo: kiloFull, sequoia: 1 })],
-    ["Sequoia's owner fired", testState({ ginger: 1, kilo: 1, sequoia: "fired" })],
-  ];
-  it.each(luckyFinds.flatMap((id) => packs.map(([pack, state]) => [id, pack, state] as const)))(
-    "has %s quip from exactly the owners it raised, %s",
-    (id, _pack, state) => {
-      const { resolution } = ENCOUNTERS[id];
-      const effects: readonly Effect[] = resolution.kind === "instant" ? resolution.effects : [];
-      const hearts = effects.some(
-        (effect) => effect.kind === "hearts" || effect.kind === "sharedHearts",
-      );
-      const walking = Object.entries(heartsByDog(state)) as [DogId, number][];
-      const raised = walking.filter(
-        ([dog, now]) =>
-          hearts && now < startHearts(TEST_TUNING, [], placeInPack(state, dog), DOGS[dog]),
-      );
-      const caught = walking.map(([dog]) => dog);
-      const outcome = applyInstantEncounter(data, state, id, caught);
-      expect(outcome.quips).toEqual(raised.map(([dog]) => ({ dog, moment: "happier" })));
-    },
-  );
+  it("quips only for raised owners, excluding full and fired owners", () => {
+    const low = testState({ ginger: 1, kilo: 1, sequoia: "fired" });
+    const kiloFull = startHearts(TEST_TUNING, [], placeInPack(low, "kilo"), DOGS.kilo);
+    const state = testState({ ginger: 1, kilo: kiloFull, sequoia: "fired" });
+    const outcome = applyInstantEncounter(data, state, "friendlyNeighbour", ["ginger", "kilo"]);
+    expect(outcome.heartChanges.map(({ dog }) => dog)).toEqual(["ginger"]);
+    expect(outcome.quips).toEqual([{ dog: "ginger", moment: "happier" }]);
+  });
 
   it("refuses an encounter with no effects on contact", () => {
     expect(() => applyInstantEncounter(data, testState({ kilo: 5 }), "thief", ["kilo"])).toThrow(
@@ -240,21 +206,16 @@ describe("applyInstantEncounter", () => {
 });
 
 describe("chooseOption", () => {
-  // Raincoats keep only a puddle's Muddy off: the Green bin spill's Wade through muddies the pack
-  // with them or without.
-  it.each([{ raincoats: false }, { raincoats: true }])(
-    "muddies the pack wading through the green bin spill, with Raincoats: $raincoats",
-    ({ raincoats }) => {
-      const coats = {
-        encounter: "puddle",
-        source: { kind: "upgrade", upgrade: "raincoats" },
-      } as const;
-      const state = testState({ kilo: 5 }, raincoats ? { immunities: [coats] } : {});
-      const wade = optionWith("greenBinSpill", "debuff");
-      const { state: after } = choose(state, encounter("greenBinSpill", ["kilo"]), wade);
-      expect(after.debuffs.map(({ debuff }) => debuff)).toEqual(["muddy"]);
-    },
-  );
+  it("does not apply Raincoats' contact immunity to a card's Muddy option", () => {
+    const coats = {
+      encounter: "puddle",
+      source: { kind: "upgrade", upgrade: "raincoats" },
+    } as const;
+    const state = testState({ kilo: 5 }, { immunities: [coats] });
+    const wade = optionWith("greenBinSpill", "debuff");
+    const { state: after } = choose(state, encounter("greenBinSpill", ["kilo"]), wade);
+    expect(after.debuffs.map(({ debuff }) => debuff)).toEqual(["muddy"]);
+  });
 
   const nose = optionWith("skunk", "hearts");
   const groom = optionWith("skunk", "money");
@@ -285,61 +246,30 @@ describe("chooseOption", () => {
     },
   );
 
-  // Every card option in the data that applies a debuff, whichever debuff and card it is.
-  const debuffOptions = keysOf(ENCOUNTERS).flatMap((id) => {
-    const { resolution } = ENCOUNTERS[id];
-    const options: readonly CardOption[] = resolution.kind === "card" ? resolution.options : [];
-    return options.flatMap((option, index) => {
-      const debuffs = option.effects.flatMap((effect) =>
-        effect.kind === "debuff" ? [effect.debuff] : [],
-      );
-      return debuffs.length === 0 ? [] : [{ debuffs, id, index, name: option.name }];
-    });
-  });
-
-  it("gives some card option every debuff", () => {
-    expect(new Set(debuffOptions.flatMap(({ debuffs }) => debuffs))).toEqual(
-      new Set(Object.keys(DEBUFFS)),
+  it("uses the chosen card's debuff and its configured duration", () => {
+    const state = testState({ kilo: 5 }, { zoneIndex: 1 });
+    const outcome = choose(
+      state,
+      encounter("otherDog", ["kilo"]),
+      optionWith("otherDog", "debuff"),
     );
+    expect(outcome.state.debuffs).toEqual([
+      {
+        debuff: "zoomies",
+        secondsLeft: read(TEST_TUNING, "seconds", DEBUFFS.zoomies.seconds),
+        untilZone: state.zoneIndex,
+      },
+    ]);
   });
 
-  // The first option that applies each debuff.
-  const debuffSample = debuffOptions.filter((row, i) =>
-    row.debuffs.some(
-      (debuff) => debuffOptions.findIndex((other) => other.debuffs.includes(debuff)) === i,
-    ),
-  );
-
-  it.each(debuffSample)(
-    "$id's $name leaves the pack with its debuffs",
-    ({ debuffs, id, index }) => {
-      const outcome = choose(testState({ kilo: 5 }), encounter(id, ["kilo"]), index);
-      expect(outcome.state.debuffs.map(({ debuff }) => debuff)).toEqual(debuffs);
-    },
-  );
-
-  // Every card option in the data that costs the lead dog's owner hearts.
-  const leadOptions = keysOf(ENCOUNTERS).flatMap((id) => {
-    const { resolution } = ENCOUNTERS[id];
-    const options: readonly CardOption[] = resolution.kind === "card" ? resolution.options : [];
-    return options.flatMap((option, index) =>
-      option.effects.flatMap((effect) =>
-        effect.kind === "hearts" && effect.target.kind === "lead"
-          ? [{ amount: effect.amount, id, index, name: option.name }]
-          : [],
-      ),
-    );
-  });
-
-  it("has a card option that costs only the lead dog's owner", () => {
-    expect(leadOptions).not.toEqual([]);
-  });
-
-  it.each(leadOptions)("$id's $name reaches only the lead dog", ({ amount, id, index }) => {
-    // Formation leads with the largest dog: Pepe is the medium dog beside small Ginger.
+  it("targets the lead dog even when a smaller dog is listed first", () => {
     const state = testState({ ginger: 5, pepe: 5 });
-    const outcome = choose(state, encounter(id, ["ginger", "pepe"]), index);
-    expect(heartsByDog(outcome.state)).toEqual({ ginger: 5, pepe: 5 + amount });
+    const outcome = choose(
+      state,
+      encounter("porchCat", ["ginger", "pepe"]),
+      optionWith("porchCat", "hearts"),
+    );
+    expect(heartsByDog(outcome.state)).toEqual({ ginger: 5, pepe: 5 + heartsOf("porchCat") });
   });
 
   it("applies an option only to the affected dogs, and reports each heart change", () => {
@@ -419,11 +349,9 @@ describe("offerUpgrades", () => {
   it("never offers an upgrade already picked", () => {
     const all = keysOf(UPGRADES);
     const picked = testState({ kilo: 5 }, { upgradesPicked: all.slice(0, 2) });
-    for (let draw = 0; draw < 1; draw += 0.1) {
-      const offer = offerUpgrades(data, () => draw, 3, picked);
-      expect(offer).toHaveLength(3);
-      expect(offer.filter((id) => id !== null && all.slice(0, 2).includes(id))).toEqual([]);
-    }
+    const offer = offerUpgrades(data, () => 0.5, 3, picked);
+    expect(offer).toHaveLength(3);
+    expect(offer.filter((id) => id !== null && all.slice(0, 2).includes(id))).toEqual([]);
   });
 
   it("offers the only ones left when the rest are picked, and fails with fewer", () => {

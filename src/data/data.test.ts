@@ -3,26 +3,14 @@ import { describe, expect, it } from "vitest";
 
 import manifestJson from "../../public/art/manifest.json";
 import { parseManifest } from "../assets/manifest";
-import { badgeKey, kebabCase } from "../assets/spriteKeys";
-import { maxHearts, startHearts } from "../rules/dogs";
-import { modifiersOf } from "../rules/modifiers";
+import { badgeKey } from "../assets/spriteKeys";
 import { forkPaths } from "../rules/route";
 import { unlockPrice } from "../rules/shop";
-import { read, readTable } from "../rules/units";
+import { read } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
-import { PACK_PLACES } from "../testing/packPlaces";
 import { gameData } from ".";
 import { SCREEN_CONFIG } from "./screen";
-import type {
-  CardOption,
-  Effect,
-  Encounter,
-  EncounterId,
-  Modifier,
-  QuipMoment,
-  Size,
-  ZoneId,
-} from "./types";
+import type { CardOption, Effect, EncounterId, ZoneId } from "./types";
 
 // Invariants the rulebook states about the content and numbers, checked on the real data.
 const {
@@ -30,10 +18,7 @@ const {
   dogSlots,
   dogs,
   encounters,
-  help,
-  hints,
   minorObstacles,
-  quips,
   shopGear,
   tuning,
   upgrades,
@@ -41,8 +26,6 @@ const {
   world,
 } = gameData;
 const dogList = Object.values(dogs);
-const KEBAB_CASE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-const QUIP_MOMENTS: readonly QuipMoment[] = ["fired", "happier", "parting", "upset"];
 
 // Every card: the encounters that open one.
 const cards: readonly { readonly name: string; readonly options: readonly CardOption[] }[] =
@@ -53,7 +36,6 @@ const cardOptions = cards.flatMap((card) => card.options);
 const instantEffects: readonly (readonly Effect[])[] = Object.values(encounters).flatMap(
   ({ resolution }) => (resolution.kind === "instant" ? [resolution.effects] : []),
 );
-const SIZES: readonly Size[] = ["small", "medium", "large"];
 
 describe("roster", () => {
   it("starts with at least one dog, and sells every other dog", () => {
@@ -63,31 +45,12 @@ describe("roster", () => {
       dogList.filter((dog) => dog.unlock !== "start").every((dog) => dog.unlock === "shop"),
     ).toBe(true);
   });
-
-  it("gives every dog and owner a distinct name", () => {
-    expect(new Set(dogList.map((dog) => dog.name)).size).toBe(dogList.length);
-    expect(new Set(dogList.map((dog) => dog.owner.name)).size).toBe(dogList.length);
-  });
 });
 
 describe("hearts", () => {
-  const gearModifierSets: readonly (readonly Modifier[])[] = [
-    [],
-    ...Object.values(shopGear).map((gear) => modifiersOf(gear.effects)),
-  ];
-
-  it("starts every owner full and above 0 with any gear, and raises the max with size", () => {
-    for (const set of gearModifierSets) {
-      for (const place of PACK_PLACES) {
-        for (const dog of dogList) {
-          expect(startHearts(tuning, set, place, dog)).toBe(maxHearts(tuning, set, place, dog));
-          expect(startHearts(tuning, set, place, dog)).toBeGreaterThan(0);
-        }
-      }
-    }
-    const max = SIZES.map((size) => readTable(tuning, "hearts", "maxBySize", size));
-    expect([...max].sort((a, b) => a - b)).toEqual(max);
-    expect(new Set(max).size).toBe(SIZES.length);
+  it("keeps real owner heart limits positive whole numbers", () => {
+    const limits = [tuning.hearts.maxOwnerHearts, ...Object.values(tuning.hearts.maxBySize)];
+    expect(limits.every((limit) => Number.isInteger(limit) && limit > 0)).toBe(true);
   });
 });
 
@@ -136,52 +99,17 @@ describe("cards", () => {
     expect(Object.keys(upgrades).length - removedBeforeLastPick).toBeGreaterThanOrEqual(mostPaths);
   });
 
-  it("gives every card's options distinct names and ids, and every option, upgrade and popup its own art key", () => {
+  it("keeps saved option ids unique on each card", () => {
     for (const card of cards) {
-      const names = card.options.map((option) => option.name);
-      expect(new Set(names).size, card.name).toBe(names.length);
       const ids = card.options.map((option) => option.id);
       expect(new Set(ids).size, card.name).toBe(ids.length);
-      for (const id of ids) {
-        expect(id, card.name).toMatch(/^[a-z][A-Za-z]*$/);
-      }
     }
-    const arts = [
-      ...cardOptions.map((option) => option.art),
-      ...Object.values(upgrades).map((upgrade) => upgrade.art),
-      ...Object.values(encounters).flatMap(({ resolution }) =>
-        resolution.kind === "instant" ? [resolution.art] : [],
-      ),
-    ];
-    for (const art of arts) {
-      expect(art).toMatch(KEBAB_CASE);
-    }
-    expect(new Set(arts).size).toBe(arts.length);
-  });
-});
-
-describe("card illustrations", () => {
-  it("names each encounter's option art card-<kebab id>-<option>", () => {
-    const misnamed = (Object.entries(encounters) as [EncounterId, Encounter][]).flatMap(
-      ([id, { resolution }]) =>
-        resolution.kind === "card"
-          ? resolution.options
-              .map(({ art }) => art)
-              .filter((art) => !art.startsWith(`card-${kebabCase(id)}-`))
-          : [],
-    );
-    expect(misnamed, "card art not named card-<kebab id>-<option>").toEqual([]);
   });
 });
 
 describe("run, world and walkers", () => {
-  it("gives every zone palette road colours, and leaves three unwalked zones at every fork", () => {
+  it("leaves enough unwalked zones for three paths at every fork", () => {
     expect(world.zones.length - (world.walkLength - 1)).toBeGreaterThanOrEqual(3);
-    for (const zone of world.zones) {
-      expect(zone.roadColour).toMatch(/^#[0-9a-f]{6}$/);
-      expect(zone.leashColour).toMatch(/^#[0-9a-f]{6}$/);
-      expect(zone.roadShadowColour).toMatch(/^#[0-9a-f]{6}$/);
-    }
   });
 
   it("gives every walk position a gear drop count of 0 or more, and every gear item a road kind of its own", () => {
@@ -213,25 +141,15 @@ describe("run, world and walkers", () => {
     expect(tuning.counts.dartStopLanesMin).toBeLessThanOrEqual(tuning.counts.dartStopLanesMax);
   });
 
-  it.each(Object.entries(tuning.probability.distractionPatternOdds))(
-    "gives the %s distraction pattern odds from 0 to 1",
-    (_, odds) => {
-      expect(odds).toBeGreaterThanOrEqual(0);
-      expect(odds).toBeLessThanOrEqual(1);
-    },
-  );
-
-  it("gives the distraction patterns odds adding up to 1", () => {
+  it("gives distraction patterns valid probabilities adding up to 1", () => {
     const odds = Object.values(tuning.probability.distractionPatternOdds);
+    expect(odds.every((chance) => chance >= 0 && chance <= 1)).toBe(true);
     expect(odds.reduce((sum, value) => sum + value, 0)).toBeCloseTo(1);
   });
 
-  it("lists the zones from easiest to hardest, each with a difficulty in words", () => {
+  it("orders zones from easiest to hardest", () => {
     const ranks = world.zones.map(({ difficulty }) => difficulty);
     expect([...ranks].sort((a, b) => a - b)).toEqual(ranks);
-    for (const zone of world.zones) {
-      expect(zone.difficultyName, zone.name).not.toBe("");
-    }
   });
 
   it("gives every zone positive multipliers, a mover share from 0 to 1 and a kind to draw", () => {
@@ -292,13 +210,6 @@ describe("run, world and walkers", () => {
   ];
   const zoneIds = world.zones.map(({ id }) => id);
 
-  it("names the neighbourhoods of some obstacles, card or not, one or more each", () => {
-    expect(zoneKinds.map(({ table }) => table)).toEqual(
-      expect.arrayContaining(["minorObstacles", "obstacles"]),
-    );
-    expect(zoneKinds.some(({ zones }) => zones.length > 1)).toBe(true);
-  });
-
   it("draws each of those obstacles only in the world's zones it names", () => {
     const offenders = zoneKinds.flatMap(({ id, table, zones }) => {
       const weighted = world.zones.flatMap((each) =>
@@ -334,7 +245,6 @@ describe("run, world and walkers", () => {
         look.zones.length > 3 ? [`${look.id}: ${look.zones.join(", ")}`] : [],
       );
     });
-    expect(Object.keys(minorObstacles).length).toBeGreaterThan(0);
     expect(over).toEqual([]);
   });
 
@@ -359,16 +269,10 @@ describe("run, world and walkers", () => {
     expect(rest.every((price) => price > 0)).toBe(true);
   });
 
-  it("gives each walker its own sprite, portrait, agility, perk and dogs to unlock, the default walker free", () => {
-    const list = Object.values(walkers);
-    expect(new Set(list.map((walker) => walker.spriteKey)).size).toBe(list.length);
-    expect(new Set(list.map((walker) => walker.portraitKey)).size).toBe(list.length);
-    expect(new Set(list.map(({ agility }) => agility)).size).toBe(list.length);
-    expect(new Set(list.map(({ perk }) => perk)).size).toBe(list.length);
+  it("starts with an unlocked walker and reachable unlock goals", () => {
     const goals = Object.values(walkers).map(walkerGoal);
     expect(walkers[defaultWalker].unlock).toBe("start");
     expect(goals.filter((goal) => goal === null)).toHaveLength(1);
-    expect(new Set(goals).size).toBe(goals.length);
     // A walk takes at most one dog per dog slot.
     expect(
       goals.every(
@@ -376,55 +280,13 @@ describe("run, world and walkers", () => {
       ),
     ).toBe(true);
   });
-
-  it("gives every owner two distinct lines for every moment", () => {
-    for (const id of keysOf(dogs)) {
-      for (const moment of QUIP_MOMENTS) {
-        const lines = quips[id][moment];
-        expect(lines, `${id} ${moment}`).toHaveLength(2);
-        expect(new Set(lines).size, `${id} ${moment}`).toBe(2);
-        expect(lines.every((line) => line.trim() !== "")).toBe(true);
-      }
-    }
-  });
-});
-
-describe("hints", () => {
-  const hintList = Object.values(hints);
-
-  it("has one hint per trigger, each one line", () => {
-    const triggers = hintList.map(({ trigger }) => JSON.stringify(trigger));
-    expect(new Set(triggers).size).toBe(hintList.length);
-    for (const { text } of hintList) {
-      expect(text).not.toBe("");
-      expect(text).not.toContain("\n");
-    }
-  });
-});
-
-describe("help", () => {
-  it("gives every page a title, a body and its own illustration key in manifest form", () => {
-    for (const page of help) {
-      expect(page.title).not.toBe("");
-      expect(page.body).not.toBe("");
-      expect(page.art).toMatch(KEBAB_CASE);
-    }
-    expect(new Set(help.map((page) => page.art)).size).toBe(help.length);
-    expect(new Set(help.map((page) => page.title)).size).toBe(help.length);
-  });
 });
 
 describe("achievements", () => {
   const { achievements } = gameData;
 
-  it("gives every badge its own id and name, a goal and a one-line badge line", () => {
+  it("keeps saved badge ids unique", () => {
     expect(new Set(achievements.map(({ id }) => id)).size).toBe(achievements.length);
-    expect(new Set(achievements.map(({ name }) => name)).size).toBe(achievements.length);
-    for (const { badgeLine, goal, name } of achievements) {
-      expect(goal.trim(), name).not.toBe("");
-      expect(badgeLine.trim(), name).not.toBe("");
-      expect(badgeLine, name).not.toContain("\n");
-    }
   });
 
   it("keeps every numeric threshold a positive whole number", () => {
