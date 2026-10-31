@@ -14751,6 +14751,26 @@
       "m4a": "sounds/sfx-card.m4a"
     },
     {
+      "key": "sfx-debuff-muddy",
+      "ogg": "sounds/sfx-debuff-muddy.ogg",
+      "m4a": "sounds/sfx-debuff-muddy.m4a"
+    },
+    {
+      "key": "sfx-debuff-spotlight",
+      "ogg": "sounds/sfx-debuff-spotlight.ogg",
+      "m4a": "sounds/sfx-debuff-spotlight.m4a"
+    },
+    {
+      "key": "sfx-debuff-stinky",
+      "ogg": "sounds/sfx-debuff-stinky.ogg",
+      "m4a": "sounds/sfx-debuff-stinky.m4a"
+    },
+    {
+      "key": "sfx-debuff-zoomies",
+      "ogg": "sounds/sfx-debuff-zoomies.ogg",
+      "m4a": "sounds/sfx-debuff-zoomies.m4a"
+    },
+    {
       "key": "sfx-dodge",
       "ogg": "sounds/sfx-dodge.ogg",
       "m4a": "sounds/sfx-dodge.m4a"
