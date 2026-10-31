@@ -1,10 +1,11 @@
-import { type Point, rectAboveIn } from "@andornaut/game-kit/rect";
+import { type Point, type Rect, rectAboveIn, rectsOverlap } from "@andornaut/game-kit/rect";
 import type { GameObjects, Scene } from "phaser";
 
+import { debuffIconKey } from "../../assets/iconKeys";
 import { gearIconKey } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import { SCREEN_CONFIG } from "../../data/screen";
-import type { EncounterId, GearId } from "../../data/types";
+import type { DebuffId, EncounterId, GearId } from "../../data/types";
 import { zoneBannerHeading } from "../../hud/zoneCelebration";
 import { currentZone } from "../../rules/route";
 import type { RunState } from "../../state/runState";
@@ -53,25 +54,101 @@ export function showGearPopup(scene: Scene, gear: GearId, at: Point, still: bool
 
 // Art at scale centred over at, its bottom POPUP.lift over it, kept on screen as it floats up as
 // it fades, or as it fades in place when still.
-function popUpArt(
+export function popUpArt(
   scene: Scene,
-  art: { at: Point; key: string; scale: number },
+  art: {
+    at: Point;
+    avoid?: readonly Rect[];
+    fadeMs?: number;
+    key: string;
+    rise?: number;
+    scale: number;
+  },
   still: boolean,
-): void {
-  const rise = still ? 0 : POPUP.rise;
+): GameObjects.Image {
+  const rise = still ? 0 : (art.rise ?? POPUP.rise);
   const image = scene.add
     .image(0, 0, art.key)
     .setOrigin(0)
     .setScale(art.scale)
     .setDepth(DEPTH.popup);
   const { height, width } = SCREEN_CONFIG;
-  const place = rectAboveIn(
-    { height: height - rise, width, x: 0, y: rise },
-    { bottom: Math.round(art.at.y) - POPUP.lift, x: art.at.x },
-    { height: image.displayHeight, width: image.displayWidth },
+  const view = { height: height - rise, width, x: 0, y: rise };
+  const size = { height: image.displayHeight, width: image.displayWidth };
+  const bottom = Math.round(art.at.y) - POPUP.lift;
+  const occupied = art.avoid ?? [];
+  const bottoms = [bottom, ...occupied.map((rect) => rect.y - POPUP.lift)];
+  const columns = [
+    art.at.x,
+    ...occupied.flatMap((rect) => [
+      rect.x - POPUP.lift - size.width / 2,
+      rect.x + rect.width + POPUP.lift + size.width / 2,
+    ]),
+  ];
+  const candidates = [
+    ...bottoms.map((row) => ({ bottom: row, x: art.at.x })),
+    ...columns.slice(1).map((x) => ({ bottom, x })),
+  ].map((at) => rectAboveIn(view, at, size));
+  const place =
+    candidates.find((candidate) =>
+      occupied.every(
+        (rect) =>
+          !rectsOverlap(
+            {
+              height: rect.height + 2 * POPUP.lift,
+              width: rect.width + 2 * POPUP.lift,
+              x: rect.x - POPUP.lift,
+              y: rect.y - POPUP.lift,
+            },
+            candidate,
+          ),
+      ),
+    ) ?? candidates[0];
+  if (place !== undefined) {
+    image.setPosition(place.x, place.y);
+  }
+  fadeAway(scene, [image], { ms: art.fadeMs ?? POPUP.fadeMs, rise });
+  return image;
+}
+
+const debuffPopups = new WeakMap<Scene, Map<DebuffId, GameObjects.Image>>();
+
+// A received effect uses the shared pickup popup, fixed above the lead dog's snapshot position.
+export function showDebuffPopup(scene: Scene, leadTop: Point, debuff: DebuffId): void {
+  const key = debuffIconKey(debuff);
+  if (!scene.textures.exists(key)) {
+    return;
+  }
+  const active = debuffPopups.get(scene) ?? new Map<DebuffId, GameObjects.Image>();
+  active.get(debuff)?.destroy();
+  const avoid = [...active.values()].map((image) => ({
+    height: image.displayHeight,
+    width: image.displayWidth,
+    x: image.x,
+    y: image.y,
+  }));
+  const image = popUpArt(
+    scene,
+    {
+      at: { ...leadTop },
+      avoid,
+      fadeMs: 1000,
+      key,
+      rise: 0,
+      scale: 2,
+    },
+    true,
   );
-  image.setPosition(place.x, place.y);
-  fadeAway(scene, [image], { ms: POPUP.fadeMs, rise });
+  active.set(debuff, image);
+  debuffPopups.set(scene, active);
+  image.once("destroy", () => {
+    if (active.get(debuff) === image) {
+      active.delete(debuff);
+    }
+    if (active.size === 0) {
+      debuffPopups.delete(scene);
+    }
+  });
 }
 
 // The zone banner's heading ("Toronto, neighbourhood 2") and the zone's name, slid in over

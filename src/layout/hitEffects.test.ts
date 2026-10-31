@@ -2,7 +2,6 @@ import { keysOf } from "@andornaut/game-kit/records";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { SCREEN_LAYOUT } from "../data/screen";
 import type { Effect, MinorObstacleId } from "../data/types";
 import { applyInstantEncounter, applyMinorContact } from "../rules/choices";
 import type { RunState } from "../state/runState";
@@ -11,8 +10,6 @@ import {
   contactDebuffBatch,
   contactDebuffEffects,
   ContactImpactFrame,
-  DEBUFF_BADGE,
-  debuffBadgeRect,
   dogReaction,
   type FlashCue,
   HIT_ART,
@@ -258,50 +255,6 @@ describe("contact debuff batches", () => {
     ).toEqual(["muddy"]);
     expect(second.debuffsGot.muddy).toBe(2);
     expect(contactDebuffBatch(false, second, [{ after: second, effects }])).toEqual([]);
-  });
-});
-
-describe("contact debuff badges", () => {
-  const view = SCREEN_LAYOUT.roadView;
-
-  it("places the native icon plate beside the walker's feet", () => {
-    const feet = { x: 180, y: 440 };
-    const badge = debuffBadgeRect(view, feet);
-    expect(badge).toEqual({ height: 24, width: 24, x: 228, y: 412 });
-  });
-
-  it.each([
-    { x: 180, y: 440 },
-    { x: 284, y: 440 },
-    { x: 360, y: 560 },
-    { x: -100, y: -100 },
-  ])("keeps distinct slots separate and within both viewport axes at $x,$y", (feet) => {
-    const badges = Object.keys(HIT_ART.debuffs).map((_, slot) => debuffBadgeRect(view, feet, slot));
-    for (const [index, badge] of badges.entries()) {
-      expect(badge.x).toBeGreaterThanOrEqual(view.x + DEBUFF_BADGE.viewInset);
-      expect(badge.y).toBeGreaterThanOrEqual(view.y + DEBUFF_BADGE.viewInset);
-      expect(badge.x + badge.width).toBeLessThanOrEqual(
-        view.x + view.width - DEBUFF_BADGE.viewInset,
-      );
-      expect(badge.y + badge.height).toBeLessThanOrEqual(
-        view.y + view.height - DEBUFF_BADGE.viewInset,
-      );
-      for (const other of badges.slice(index + 1)) {
-        expect(
-          badge.x + badge.width <= other.x ||
-            other.x + other.width <= badge.x ||
-            badge.y + badge.height <= other.y ||
-            other.y + other.height <= badge.y,
-        ).toBe(true);
-      }
-    }
-  });
-
-  it("flips to the left when the right-side plate would pass the viewport inset", () => {
-    const feet = { x: view.x + view.width - 4, y: 440 };
-    const badge = debuffBadgeRect(view, feet);
-    expect(badge.x).toBe(feet.x + DEBUFF_BADGE.leftDx);
-    expect(badge.y).toBe(feet.y + DEBUFF_BADGE.yOffset);
   });
 });
 

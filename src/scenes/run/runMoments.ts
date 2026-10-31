@@ -88,6 +88,7 @@ import {
   previewAchievements,
 } from "../../save/achievementPreview";
 import type { RunResult } from "../../save/checkpoint";
+import { packDogs } from "../../state/pack";
 import type { EffectSource, EndReason, RunState } from "../../state/runState";
 import { PALETTE } from "../../ui/palette";
 import { fillRect } from "../../ui/phaser/draw";
@@ -106,7 +107,7 @@ import { playContactDebuff } from "./contactDebuffFx";
 import { flashWhite, moveObstacle, playHitEffects, shakeRoad } from "./hitFx";
 import type { ItemViews } from "./itemViews";
 import type { PackView } from "./packView";
-import { showGearPopup, showInstantPopup } from "./roadBanners";
+import { showDebuffPopup, showGearPopup, showInstantPopup } from "./roadBanners";
 import { DEPTH, firingSeconds, LAYOUT, overPack } from "./stage";
 
 // How long the step's hit stop holds the road, or a plain obstacle's stop while it has none.
@@ -365,7 +366,7 @@ export class RunMoments {
           .forEach((sprite) => playDodge(this.scene, moment, sprite));
         continue;
       }
-      this.playBumpHit(bump.dog, bump.item, step);
+      this.playBumpHit({ ground: false }, bump.dog, bump.item, step);
       this.addChanges(
         overPack(pack),
         [bump.change, bump.cash].flatMap((change) => (change === null ? [] : [change])),
@@ -386,7 +387,7 @@ export class RunMoments {
     );
     for (const { dog, item, source } of impacts) {
       if (source.kind === "minor") {
-        this.playBumpHit(dog, { ...item, kind: source.obstacle }, step);
+        this.playBumpHit({ ground: true }, dog, { ...item, kind: source.obstacle }, step);
       } else {
         this.playContactHit(dog, source.encounter, step);
       }
@@ -412,16 +413,19 @@ export class RunMoments {
         }),
       ),
     );
+    const lead = packDogs(step.walk.run)[0];
+    const leadTop = lead === undefined ? undefined : this.deps.pack.dogPoint(lead);
     for (const cue of debuffCues) {
+      if (leadTop !== undefined) {
+        showDebuffPopup(this.scene, leadTop, cue.debuff);
+      }
       sound.play(debuffSoundCue(cue.debuff));
       playContactDebuff(
         this.scene,
         {
-          badgeDepth: DEPTH.fx + 2,
           depth: DEPTH.sprite - 0.5,
           feet: () => this.deps.pack.cueFeet(),
           view: LAYOUT.roadView,
-          walkerFeet: () => this.deps.pack.walkerFeet(),
         },
         cue,
       );
@@ -765,15 +769,23 @@ export class RunMoments {
 
   // A plain or moving hit's cues: its bump and debris over the struck dog, the dog reacting
   // and flashing white, the struck obstacle's motion, and the bump's flash.
-  private playBumpHit(dog: DogId, item: MinorBump["item"], step: WalkStep): void {
+  private playBumpHit(
+    context: { ground: boolean },
+    dog: DogId,
+    item: MinorBump["item"],
+    step: WalkStep,
+  ): void {
     const still = this.deps.still();
     const hit = {
       kind: item.mover === undefined ? "plain" : "moving",
       obstacle: item.kind,
     } as const;
-    const top = this.deps.pack.dogPoint(dog);
+    const top = context.ground ? this.deps.pack.dogFeet(dog) : this.deps.pack.dogPoint(dog);
     if (top !== undefined) {
-      const moment = { depth: DEPTH.fx, holdMs: stopMs(step) };
+      const moment = {
+        depth: context.ground ? DEPTH.sprite - 0.5 : DEPTH.fx,
+        holdMs: stopMs(step),
+      };
       playHitEffects(this.scene, moment, hitEffects(still, { ...hit, top }));
     }
     for (const sprite of this.deps.pack.sprites([dog])) {

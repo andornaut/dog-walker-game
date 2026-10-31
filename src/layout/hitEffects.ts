@@ -1,4 +1,4 @@
-import type { Point, Rect } from "@andornaut/game-kit/rect";
+import type { Point } from "@andornaut/game-kit/rect";
 
 import type { DebuffId, Effect, GameData, MinorObstacleId } from "../data/types";
 import type { WalkStep } from "../runner/walk";
@@ -68,43 +68,6 @@ export interface DebuffHitEffect {
 
 // Ground art uses its native frame size, anchored on the feet row.
 export const DEBUFF_GROUND = { groundRow: 30, height: 36, width: 60, yOffset: -1 } as const;
-
-// The native HUD icon on a compact cream plate beside the walker's feet.
-export const DEBUFF_BADGE = {
-  gap: 4,
-  iconInset: 4,
-  iconSize: 16,
-  leftDx: -72,
-  rightDx: 48,
-  size: 24,
-  viewInset: 4,
-  yOffset: -28,
-} as const;
-
-// Active kinds occupy distinct slots. Reserve room for every kind so viewport clamping never
-// collapses separate slots onto the same row at the bottom edge.
-export function debuffBadgeRect(view: Rect, feet: Point, slot = 0): Rect {
-  const { gap, leftDx, rightDx, size, viewInset, yOffset } = DEBUFF_BADGE;
-  const left = view.x + viewInset;
-  const right = view.x + view.width - viewInset;
-  const top = view.y + viewInset;
-  const bottom = view.y + view.height - viewInset;
-  const stride = size + gap;
-  const direction = feet.x + rightDx + size <= right ? 1 : -1;
-  const preferredX = feet.x + (direction === 1 ? rightDx : leftDx);
-  const x = Math.min(right - size, Math.max(left, preferredX));
-  const room = direction === 1 ? right - size - x : x - left;
-  const kinds = Object.keys(HIT_ART.debuffs).length;
-  const columns = Math.min(kinds, Math.floor(room / stride) + 1);
-  const rows = Math.ceil(kinds / columns);
-  const y = Math.min(bottom - size - (rows - 1) * stride, Math.max(top, feet.y + yOffset));
-  return {
-    height: size,
-    width: size,
-    x: Math.round(x + direction * (slot % columns) * stride),
-    y: Math.round(y + Math.floor(slot / columns) * stride),
-  };
-}
 
 export interface StruckDog {
   readonly kind: HitKind;
