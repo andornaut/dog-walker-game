@@ -10,7 +10,7 @@ import { testState } from "../testing/runState";
 import {
   contactDebuffEffects,
   DEBUFF_BADGE,
-  debuffBadgeRect,
+  debuffCueRects,
   dogReaction,
   type FlashCue,
   HIT_ART,
@@ -238,11 +238,12 @@ describe("contact debuff bursts", () => {
 
 describe("contact debuff badges", () => {
   const view = SCREEN_LAYOUT.roadView;
+  const frame = { height: 128, width: 128 };
 
-  it("places an unclamped badge beside the burst's upper right", () => {
-    const rect = debuffBadgeRect(view, TOP);
-    expect(rect.x - TOP.x).toBe(DEBUFF_BADGE.x);
-    expect(rect.y - TOP.y).toBe(DEBUFF_BADGE.y);
+  it("places the badge outside the burst's upper right", () => {
+    const { badge, burst } = debuffCueRects(view, { at: TOP, ...frame });
+    expect(badge.x).toBe(burst.x + burst.width + DEBUFF_BADGE.gap);
+    expect(badge.y).toBe(burst.y - DEBUFF_BADGE.aboveFrame);
   });
 
   it.each([
@@ -251,11 +252,21 @@ describe("contact debuff badges", () => {
     ["top", { x: TOP.x, y: view.y - view.height }],
     ["bottom", { x: TOP.x, y: view.y + view.height * 2 }],
   ])("keeps the whole badge inside the road at the %s edge", (_, centre) => {
-    const rect = debuffBadgeRect(view, centre);
-    expect(rect.x).toBeGreaterThanOrEqual(view.x + DEBUFF_BADGE.viewInset);
-    expect(rect.y).toBeGreaterThanOrEqual(view.y + DEBUFF_BADGE.viewInset);
-    expect(rect.x + rect.width).toBeLessThanOrEqual(view.x + view.width - DEBUFF_BADGE.viewInset);
-    expect(rect.y + rect.height).toBeLessThanOrEqual(view.y + view.height - DEBUFF_BADGE.viewInset);
+    const { badge, burst } = debuffCueRects(view, { at: centre, ...frame });
+    for (const rect of [badge, burst]) {
+      expect(rect.x).toBeGreaterThanOrEqual(view.x + DEBUFF_BADGE.viewInset);
+      expect(rect.y).toBeGreaterThanOrEqual(view.y + DEBUFF_BADGE.viewInset);
+      expect(rect.x + rect.width).toBeLessThanOrEqual(view.x + view.width - DEBUFF_BADGE.viewInset);
+      expect(rect.y + rect.height).toBeLessThanOrEqual(
+        view.y + view.height - DEBUFF_BADGE.viewInset,
+      );
+    }
+    expect(badge.x + badge.width <= burst.x || badge.x >= burst.x + burst.width).toBe(true);
+  });
+
+  it("flips the badge to the left when its right-side position would leave the viewport", () => {
+    const { badge, burst } = debuffCueRects(view, { at: { x: view.width, y: TOP.y }, ...frame });
+    expect(badge.x + badge.width + DEBUFF_BADGE.gap).toBe(burst.x);
   });
 });
 

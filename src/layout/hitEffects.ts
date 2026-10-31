@@ -20,7 +20,6 @@ export const HIT_ART = {
   bump: { key: "fx-bump", peak: 1 },
   bumpBig: { key: "fx-bump-big", peak: 1 },
   debris: { leaves: { key: "fx-debris-leaves" }, litter: { key: "fx-debris-litter" } },
-  debuffHoldMs: 720,
   debuffs: {
     muddy: { key: "fx-debuff-muddy", peak: 2 },
     spotlight: { key: "fx-debuff-spotlight", peak: 2 },
@@ -69,25 +68,40 @@ export interface DebuffHitEffect extends HitEffect {
 
 // The existing 16px HUD icon at 2x, inset in a cream badge beside its burst.
 export const DEBUFF_BADGE = {
-  above: 3,
+  aboveFrame: 6,
+  gap: 4,
   iconInset: 4,
   iconSize: 32,
   size: 40,
   viewInset: 4,
-  x: 26,
-  y: -52,
 } as const;
 
-// Keep the whole badge inside the road viewport; its icon moves with it.
-export function debuffBadgeRect(view: Rect, centre: Point): Rect {
-  const { size, viewInset, x, y } = DEBUFF_BADGE;
+// Keep the full burst inside the road, then place its badge outside the frame: on the right
+// when it fits, otherwise on the left. The icon moves with its badge.
+export function debuffCueRects(
+  view: Rect,
+  cue: { readonly at: Point; readonly height: number; readonly width: number },
+): { readonly badge: Rect; readonly burst: Rect } {
+  const { aboveFrame, gap, size, viewInset } = DEBUFF_BADGE;
   const left = view.x + viewInset;
   const top = view.y + viewInset;
+  const right = view.x + view.width - viewInset;
+  const bottom = view.y + view.height - viewInset;
+  const burst: Rect = {
+    height: cue.height,
+    width: cue.width,
+    x: Math.min(right - cue.width, Math.max(left, Math.round(cue.at.x - cue.width / 2))),
+    y: Math.min(bottom - cue.height, Math.max(top, Math.round(cue.at.y - cue.height / 2))),
+  };
+  const badgeX = burst.x + burst.width + gap;
   return {
-    height: size,
-    width: size,
-    x: Math.min(view.x + view.width - viewInset - size, Math.max(left, Math.round(centre.x + x))),
-    y: Math.min(view.y + view.height - viewInset - size, Math.max(top, Math.round(centre.y + y))),
+    badge: {
+      height: size,
+      width: size,
+      x: badgeX + size <= right ? badgeX : burst.x - gap - size,
+      y: Math.min(bottom - size, Math.max(top, burst.y - aboveFrame)),
+    },
+    burst,
   };
 }
 
@@ -113,6 +127,11 @@ export function hitEffects(still: boolean, hit: StruckDog): HitEffect[] {
   return [bump, { above: 1, at, frame: null, key: HIT_ART.debris[debris].key }];
 }
 
+// The preferred centre for a contact debuff burst, before keeping its frame inside the road.
+export function contactDebuffAnchor(top: Point): Point {
+  return { x: top.x, y: top.y - BUMP_ABOVE };
+}
+
 // A contact's debuffs that actually applied, including a refresh with an unchanged timer.
 // Its burst sits above the bump and debris; prevention leaves the application count unchanged.
 export function contactDebuffEffects(
@@ -132,7 +151,7 @@ export function contactDebuffEffects(
         : [],
     ),
   );
-  const at = { x: contact.top.x, y: contact.top.y - BUMP_ABOVE };
+  const at = contactDebuffAnchor(contact.top);
   return [...applied].map((debuff) => {
     const { key, peak } = HIT_ART.debuffs[debuff];
     return { above: 2, at, debuff, frame: still ? peak : null, key };

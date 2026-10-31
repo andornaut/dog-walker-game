@@ -2,7 +2,6 @@ import type { Random } from "@andornaut/game-kit/random";
 import type { Point, Rect } from "@andornaut/game-kit/rect";
 import type { Scene } from "phaser";
 
-import { debuffIconKey } from "../../assets/iconKeys";
 import { choiceCues, pullCues, stepCues } from "../../audio/stepCues";
 import { gameData } from "../../data";
 import type { DogId, EncounterId, HintId, HintTrigger } from "../../data/types";
@@ -56,11 +55,8 @@ import { BUFF_POP, CHARM, charmByWalkerRect, charmOverRect } from "../../layout/
 import { bumpFlash, type BumpSource } from "../../layout/bumpFlash";
 import {
   contactDebuffEffects,
-  DEBUFF_BADGE,
-  debuffBadgeRect,
   DOG_REACTIONS,
   dogReaction,
-  HIT_ART,
   hitEffects,
   obstacleMotion,
   splashEffect,
@@ -104,7 +100,7 @@ import { dogTop } from "../pullSignals";
 import { SCENE_KEYS } from "../sceneKeys";
 import { soundboardOf } from "../soundboard";
 import { playEffect, tagTopY } from "../sprites";
-import { addPanel } from "../uiKit";
+import { playContactDebuff } from "./contactDebuffFx";
 import { flashWhite, moveObstacle, playHitEffects, shakeRoad } from "./hitFx";
 import type { ItemViews } from "./itemViews";
 import type { PackView } from "./packView";
@@ -393,25 +389,16 @@ export class RunMoments {
           effects,
           top,
         });
-        playHitEffects(this.scene, { depth: DEPTH.fx, holdMs: HIT_ART.debuffHoldMs }, bursts);
-        for (const { at, debuff } of bursts) {
-          const key = debuffIconKey(debuff);
-          if (!this.scene.textures.exists(key)) {
-            continue;
-          }
-          const rect = debuffBadgeRect(LAYOUT.roadView, at);
-          const { above, iconInset, iconSize } = DEBUFF_BADGE;
-          const depth = DEPTH.fx + above;
-          const panel = addPanel(this.scene, rect).setDepth(depth);
-          const icon = this.scene.add
-            .image(rect.x + iconInset, rect.y + iconInset, key)
-            .setOrigin(0)
-            .setDisplaySize(iconSize, iconSize)
-            .setDepth(depth + 1);
-          this.scene.time.delayedCall(HIT_ART.debuffHoldMs, () => {
-            panel.destroy();
-            icon.destroy();
-          });
+        for (const burst of bursts) {
+          playContactDebuff(
+            this.scene,
+            {
+              depth: DEPTH.fx,
+              dogTop: () => this.deps.pack.dogPoint(dog),
+              view: LAYOUT.roadView,
+            },
+            burst,
+          );
         }
       }
       beforeContact = outcome.state;
