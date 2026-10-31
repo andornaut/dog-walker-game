@@ -10,6 +10,7 @@ import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
 import type { GearId, WalkerId } from "../data/types";
 import { WALKERS } from "../data/walkers";
+import { contactImpacts } from "../layout/hitEffects";
 import type { HeartChange, MoneyChange } from "../rules/causes";
 import { NO_PULLS, type PullStep } from "../runner/pulls";
 import { startRoad, stepWalk, type Walk } from "../runner/walk";
@@ -144,7 +145,7 @@ const CASES: readonly Case[] = [
 
 describe("stepCues", () => {
   it.each(["puddle", "pothole"] as const)(
-    "retains %s physical sound when its debuff is prevented",
+    "retains %s physical feedback when its debuff is prevented",
     (encounter) => {
       const run = newRun(walkData, 3, { dogs: ["kilo"], gear: null, walker: "casey" });
       const step = stepWalk(walkData, geometry, () => 1, 0.01, {
@@ -156,6 +157,13 @@ describe("stepCues", () => {
       });
       expect(step.walk.run.debuffs).toEqual([]);
       expect(contactCues(walkData, step)).toEqual([hitCue("obstacle", encounter)]);
+      expect(contactImpacts(walkData, step)).toEqual([
+        { dog: "kilo", item: step.modified[0]?.item, source: { encounter, kind: "encounter" } },
+      ]);
+      expect(step.contacts).toEqual([]);
+      expect(
+        contactImpacts(walkData, { ...step, modified: [...step.modified, ...step.modified] }),
+      ).toHaveLength(1);
     },
   );
 

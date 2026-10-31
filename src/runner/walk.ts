@@ -255,6 +255,8 @@ interface ContactHit {
 // pay, a tip or a treat grabbed by reach, an obstacle the pack is immune to, or a value a
 // contact's or a lucky find's effects changed.
 interface RoadModified {
+  // The actor touching an immune obstacle, retained only for transient impact feedback.
+  readonly dog?: DogId;
   readonly item: WalkItem;
   readonly value: ModifiedValue;
 }
@@ -1146,7 +1148,10 @@ export function stepWalk(
             : run.immunities.find(({ encounter }) => encounter === kind);
         if (immunity !== undefined) {
           const by = [modifierCause(-1, immunity.source)];
-          modifiedAt(item, [modifiedValue({ encounter: kind, kind: "immune" }, 1, by)]);
+          const value = modifiedValue({ encounter: kind, kind: "immune" }, 1, by);
+          if (value !== null) {
+            modified.push({ dog, item, value });
+          }
         }
         return;
       }

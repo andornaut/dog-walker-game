@@ -1,6 +1,7 @@
 import type { Point, Rect } from "@andornaut/game-kit/rect";
 
-import type { DebuffId, Effect, MinorObstacleId } from "../data/types";
+import type { DebuffId, Effect, GameData, MinorObstacleId } from "../data/types";
+import type { WalkStep } from "../runner/walk";
 import type { RunState } from "../state/runState";
 
 // Cosmetic cues for hits and applied contact debuffs, over the road at its fx depth. Debuff
@@ -125,6 +126,36 @@ export function hitEffects(still: boolean, hit: StruckDog): HitEffect[] {
     return [bump];
   }
   return [bump, { above: 1, at, frame: null, key: HIT_ART.debris[debris].key }];
+}
+
+type ContactImpact = Pick<WalkStep["contacts"][number], "dog" | "item" | "source">;
+
+// Physical impacts include immune contacts, with one visual attack per material kind per step.
+export function contactImpacts(
+  data: Pick<GameData, "encounters">,
+  step: Pick<WalkStep, "contacts" | "modified">,
+): ContactImpact[] {
+  const impacts = new Map<string, ContactImpact>();
+  const add = (impact: ContactImpact) => {
+    const { source } = impact;
+    const key =
+      source.kind === "minor" ? `minor:${source.obstacle}` : `encounter:${source.encounter}`;
+    if (!impacts.has(key)) {
+      impacts.set(key, impact);
+    }
+  };
+  step.contacts.forEach(add);
+  for (const { dog, item, value } of step.modified) {
+    const { subject } = value;
+    if (
+      dog !== undefined &&
+      subject.kind === "immune" &&
+      data.encounters[subject.encounter].resolution.kind === "contact"
+    ) {
+      add({ dog, item, source: { encounter: subject.encounter, kind: "encounter" } });
+    }
+  }
+  return [...impacts.values()];
 }
 
 // A contact's debuffs that actually applied, including a refresh with an unchanged timer.

@@ -56,6 +56,7 @@ import { BUFF_POP, CHARM, charmByWalkerRect, charmOverRect } from "../../layout/
 import { bumpFlash, type BumpSource } from "../../layout/bumpFlash";
 import {
   contactDebuffBatch,
+  contactImpacts,
   DOG_REACTIONS,
   dogReaction,
   hitEffects,
@@ -377,12 +378,14 @@ export class RunMoments {
     // cues instead (playBumpHit), as the splash, the shake-off and the edge flash strips are a
     // contact obstacle's own. Applied or refreshed debuffs add one whole-pack ground cue and
     // sound per kind in this contact batch; each contact still pops its own changes.
-    for (const { dog, item, outcome, source } of step.contacts) {
+    for (const { dog, item, source } of contactImpacts(gameData, step)) {
       if (source.kind === "minor") {
         this.playBumpHit(dog, { ...item, kind: source.obstacle }, step);
       } else {
         this.playContactHit(dog, source.encounter, step);
       }
+    }
+    for (const { outcome } of step.contacts) {
       this.addChanges(overPack(pack), outcomeChanges(outcome));
       this.afterOutcome(outcome);
     }
