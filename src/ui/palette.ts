@@ -38,15 +38,17 @@ const NEUTRAL = {
   neutralSlate: 0x727272,
 } as const;
 
-// Colours outside Endesga 32 and the neutral greys, each kept to one use: deepAmber is the box
-// behind a picked item's portrait or icon, a step toward orange from amber so it stands apart
-// from the tan box an owned item has. From art's Toronto colours, for effect name pills only: a
-// buff's name in dlake on a foam pill, Muddy's in walnut on tan, and Zoomies' pill in lime.
+// Colours outside Endesga 32 and the neutral greys: deepAmber is the background for picked
+// portraits and icons; Toronto canopy and violet distinguish neutral home headers. The other Toronto
+// colours style effect name pills: dlake on foam for buffs, walnut on tan for Muddy, and lime
+// for Zoomies.
 const EXTRA = {
+  canopy: 0x357a2f,
   deepAmber: 0xfc9124,
   dlake: 0x1d5576,
   foam: 0xa8e0e6,
   lime: 0xb2d94a,
+  violet: 0x6d4bb0,
   walnut: 0x2e2019,
 } as const;
 

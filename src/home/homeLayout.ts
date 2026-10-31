@@ -176,24 +176,24 @@ export const HOME_LAYOUT = {
   sectionLooks: {
     dogs: {
       fill: "plum",
-      heading: "cream",
-      neutral: "purple",
+      heading: "white",
+      neutral: "violet",
       neutralTag: "neutral-dogs",
-      note: "amber",
+      note: "white",
     },
     pocket: {
       fill: "blue",
-      heading: "ink",
-      neutral: "sky",
+      heading: "white",
+      neutral: "mauve",
       neutralTag: "neutral-pocket",
-      note: "ink",
+      note: "white",
     },
     walker: {
       fill: "brown",
-      heading: "cream",
-      neutral: "darkBrown",
+      heading: "white",
+      neutral: "canopy",
       neutralTag: "neutral-walker",
-      note: "amber",
+      note: "white",
     },
   },
   // Under the gate, three framed sections top to bottom (walker, dogs, pocket), each a
