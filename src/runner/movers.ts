@@ -435,7 +435,10 @@ export function cuedStep(
 // from its stop on.
 export function inMotion(path: MoverPath, since: number): boolean {
   if (path.motion === "signature") {
-    return since >= (path.route.legs[0]?.at ?? Infinity);
+    return (
+      since >= (path.route.legs[0]?.at ?? Infinity) &&
+      (path.route.profile.kind !== "rectangle" || since < path.route.complete)
+    );
   }
   if (path.motion === "cross") {
     return since >= path.warning && !hasStopped(path, since) && !isPausing(path, since);
@@ -453,7 +456,12 @@ export function inMotion(path: MoverPath, since: number): boolean {
 export function facesLeft(path: MoverPath, since: number): boolean {
   if (path.motion === "signature") {
     const leg = path.route.legs
-      .filter((part) => part.from.x !== part.to.x && since >= part.at)
+      .filter(
+        (part) =>
+          part.from.x !== part.to.x &&
+          (since >= part.at ||
+            path.route.cues.some((cue) => cue.end === part.at && since >= cue.start)),
+      )
       .at(-1);
     return leg === undefined ? false : leg.to.x < leg.from.x;
   }

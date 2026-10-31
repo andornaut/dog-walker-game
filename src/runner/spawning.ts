@@ -5,6 +5,7 @@ import { approachOutcomes } from "./approach";
 import { type MoverCaps, type MoverSpec, type PlannerStreams, stopsOnVerge } from "./moverPlanning";
 import { crossingScroll, laneAt, type MoverPath, moverPlace, type MoverStep } from "./movers";
 import { shyOutcomes } from "./shy";
+import { signaturePlace } from "./signaturePaths";
 
 // What a spawn covers: lanes across, and rows along the road of footprint.cellLength each.
 export interface Footprint {
@@ -397,7 +398,12 @@ export function moverRests(laneCount: number, cue: number, path: MoverPath): Mov
   });
   switch (path.motion) {
     case "signature":
-      return [];
+      return path.route.tail.x !== 0 || path.route.tail.y !== 1
+        ? []
+        : path.route.componentDelays.map((_, index) => {
+            const point = signaturePlace(path.route, path.route.complete, index);
+            return { distance: cue + path.route.complete - point.y, lane: laneAt(point.x) };
+          });
     case "approach":
       return approachOutcomes(path).map(({ lane, steps }) => last(lane, steps));
     case "cross": {

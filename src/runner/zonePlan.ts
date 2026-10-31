@@ -2,21 +2,16 @@ import { STEP_SECONDS } from "@andornaut/game-kit/clock/fixedStep";
 import { chanceRound, shuffled, weightedPick } from "@andornaut/game-kit/random";
 import { keysOf } from "@andornaut/game-kit/records";
 
-import type {
-  EncounterId,
-  GameData,
-  MinorObstacleId,
-  Movement,
-  ObstacleEncounterId,
-} from "../data/types";
+import type { EncounterId, GameData, MinorObstacleId, ObstacleEncounterId } from "../data/types";
 import { PART_INSET } from "../layout/packFormation";
 import { drawGearDrops } from "../rules/gearDrops";
 import { modifiedStat } from "../rules/modifiers";
-import { currentZone } from "../rules/route";
+import { currentZone, currentZoneId } from "../rules/route";
 import { read } from "../rules/units";
 import { slowestDebuffedAgility, slowestPackAgility } from "../rules/walkers";
 import { zoneStats } from "../rules/zones";
 import type { RunState } from "../state/runState";
+import type { ProfiledMovement } from "./movementAssignments";
 import type { PlannerStreams } from "./moverPlanning";
 import { moverMovement, moverSpec } from "./moverSpecs";
 import { pickSkin } from "./obstacleLooks";
@@ -90,6 +85,7 @@ export function spawnQuotas(
 ): SpawnQuota<WalkItemKind>[] {
   const random = streams.spawns;
   const zone = currentZone(data, run);
+  const zoneId = currentZoneId(data, run);
   const stats = zoneStats(data.tuning, zone, run.zoneIndex);
   const scaled = (stat: "obstacleSpawns" | "tipSpawns" | "treatSpawns", base: number) =>
     Math.round(modifiedStat(data.tuning, run.modifiers, stat, base));
@@ -108,10 +104,13 @@ export function spawnQuotas(
     ...drawn(scaled("obstacleSpawns", stats.minorObstacles), minorObstacleWeights(data, run)),
   ];
   const quotas = new Map<WalkItemKind, number>();
-  const movers = new Map<WalkItemKind, { readonly count: number; readonly movement: Movement }>();
+  const movers = new Map<
+    WalkItemKind,
+    { readonly count: number; readonly movement: ProfiledMovement }
+  >();
   const steppers: SpawnQuota<WalkItemKind>[] = [];
   const count = <Key>(map: Map<Key, number>, key: Key) => map.set(key, (map.get(key) ?? 0) + 1);
-  const moverQuota = (kind: WalkItemKind, movement: Movement, moverCount: number) => ({
+  const moverQuota = (kind: WalkItemKind, movement: ProfiledMovement, moverCount: number) => ({
     blocksLane: blocksLane(data, kind),
     count: moverCount,
     first: opensACard(data, kind),
@@ -119,7 +118,7 @@ export function spawnQuotas(
     mover: moverSpec(data, streams, footprintOf(data, kind), movement),
   });
   for (const kind of kinds) {
-    const movement = moverMovement(data, random, zone.moverShare, kind);
+    const movement = moverMovement(data, random, zone.moverShare, zoneId, kind);
     if (movement === null) {
       count(quotas, kind);
     } else if (movement.kind === "step") {
@@ -136,7 +135,7 @@ export function spawnQuotas(
   );
   const lucky = finds.map((kind, i): SpawnQuota<WalkItemKind> => {
     const within = spacedStretch(finds.length, i);
-    const movement = moverMovement(data, random, zone.moverShare, kind);
+    const movement = moverMovement(data, random, zone.moverShare, zoneId, kind);
     return movement === null
       ? { blocksLane: false, count: 1, footprint: footprintOf(data, kind), kind, within }
       : { ...moverQuota(kind, movement, 1), within };

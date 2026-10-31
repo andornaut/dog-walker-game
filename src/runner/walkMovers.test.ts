@@ -128,10 +128,10 @@ describe("movers", { timeout: 120_000 }, () => {
         draws += 1;
         return value;
       };
-      expect(moverMovement(REAL, counted(0), 1, kind)).toEqual(movementOf(kind));
-      expect(moverMovement(REAL, counted(0.99), 0.5, kind)).toBeNull();
+      expect(moverMovement(REAL, counted(0), 1, undefined, kind)).toEqual(movementOf(kind));
+      expect(moverMovement(REAL, counted(0.99), 0.5, undefined, kind)).toBeNull();
       const before = draws;
-      expect(moverMovement(REAL, counted(0), 0, kind)).toBeNull();
+      expect(moverMovement(REAL, counted(0), 0, undefined, kind)).toBeNull();
       expect(draws).toBe(before);
     }
   });
@@ -152,10 +152,10 @@ describe("movers", { timeout: 120_000 }, () => {
       const never = () => {
         throw new Error("drew");
       };
-      expect(moverMovement(REAL, never, 1, kind)).toBeNull();
+      expect(moverMovement(REAL, never, 1, undefined, kind)).toBeNull();
     } else {
-      expect(moverMovement(REAL, () => 0, 1, kind)).toEqual(movement);
-      expect(moverMovement(REAL, () => 0.99, 0.5, kind)).toBeNull();
+      expect(moverMovement(REAL, () => 0, 1, undefined, kind)).toEqual(movement);
+      expect(moverMovement(REAL, () => 0.99, 0.5, undefined, kind)).toBeNull();
     }
   });
 

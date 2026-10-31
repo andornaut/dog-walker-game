@@ -2,8 +2,9 @@ import { itemAt } from "@andornaut/game-kit/arrays";
 import { assertNever } from "@andornaut/game-kit/assertNever";
 import { chance, type Random, randomPick } from "@andornaut/game-kit/random";
 
-import type { GameData, MoveCount, Movement } from "../data/types";
+import type { GameData, MoveCount, Movement, NeighbourhoodId } from "../data/types";
 import { read } from "../rules/units";
+import { assignedMovement, type ProfiledMovement } from "./movementAssignments";
 import {
   hopSequences,
   hopShapes,
@@ -14,18 +15,22 @@ import {
   SIDESTEPS,
 } from "./moverPlanning";
 import { type StepShape } from "./movers";
-import { movementOf, type WalkItemKind } from "./walkItems";
+import { type WalkItemKind } from "./walkItems";
 
 // The movement a drawn spawn moves with: an obstacle, minor or not, or a lucky encounter with a
 // movement comes as a mover at a chance of share. Other spawns never move and draw nothing, as
 // does any spawn at a share of 0.
 export function moverMovement(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
+  data: Pick<
+    GameData,
+    "encounters" | "minorObstacles" | "movementAssignments" | "movementProfiles"
+  >,
   random: Random,
   share: number,
+  zone: NeighbourhoodId | undefined,
   kind: WalkItemKind,
-): Movement | null {
-  const movement = movementOf(data, kind);
+): ProfiledMovement | null {
+  const movement = assignedMovement(data, zone, kind);
   if (movement === null || share <= 0) {
     return null;
   }
@@ -264,10 +269,13 @@ export function moverSpec(
   data: Pick<GameData, "tuning">,
   streams: PlannerStreams,
   footprint: MoverFootprint,
-  movement: Movement,
+  movement: ProfiledMovement,
 ): MoverSpec {
   const { tuning } = data;
-  const motion = moverMotion(data, streams, movement);
+  const motion: MoverMotion =
+    movement.signature === undefined
+      ? moverMotion(data, streams, movement)
+      : { kind: "signature", profile: movement.signature };
   return {
     footprint,
     motion,
@@ -283,6 +291,7 @@ export function moverSpec(
           : "moverSpeedJitter",
       ),
     },
-    warningSeconds: read(tuning, "seconds", "moverWarningSeconds"),
+    warningSeconds:
+      movement.signature?.warningSeconds ?? read(tuning, "seconds", "moverWarningSeconds"),
   };
 }

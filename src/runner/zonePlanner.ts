@@ -890,6 +890,9 @@ function stilledQuotas<Kind extends string>(
 ): SpawnQuota<Kind>[] {
   const kinds = new Map(quotas.map((quota) => [quota.kind, quota]));
   return [...kinds.values()].flatMap(({ first, kind, spec, standingLength, within }) => {
+    if (spec.motion.kind === "signature") {
+      return [];
+    }
     const count = dropped.filter((other) => other === kind).length;
     return count === 0
       ? []
