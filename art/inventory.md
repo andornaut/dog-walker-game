@@ -22,6 +22,26 @@ Road sprites have depth variants `<key>@94`, `@88`, `@81`, `@75`, `@69`, `@62`, 
 
 `walker-mr-b` also has `phone`: 4 frames at 400ms, drawn at 2× for his new-walker welcome. He looks down at the phone in his hands while the celebration plays around him.
 
+Road character tags keep their names and order. Frame ranges below are inclusive; all depth variants of a pack dog carry the same tag ranges and durations. Faces and portraits retain their separate semantic poses and sizes.
+
+| Family              | Tag       | Frames | Per-frame timing | Full cycle |
+| ------------------- | --------- | ------ | ---------------- | ---------- |
+| Pack dog            | `walk`    | 0–7    | 75ms             | 600ms      |
+| Pack dog            | `react`   | 8–11   | 60ms             | 240ms      |
+| Pack dog            | `pull`    | 12–15  | 80ms             | 320ms      |
+| Pack dog            | `tell`    | 16–19  | 125ms            | 500ms      |
+| Pack dog            | `idle`    | 20–23  | 300ms            | 1200ms     |
+| Pack dog            | `shake`   | 24–27  | 60ms             | 240ms      |
+| Walker              | `walk`    | 0–7    | 80ms             | 640ms      |
+| Walker              | `react`   | 8–9    | 120ms            | 240ms      |
+| Walker              | `stumble` | 10–13  | 90ms             | 360ms      |
+| Walker              | `idle`    | 14–15  | 400ms            | 800ms      |
+| Walker              | `wave`    | 16–19  | 150ms            | 600ms      |
+| Walker              | `cheer`   | 20–23  | 120ms            | 480ms      |
+| Walker (Mr. B only) | `phone`   | 24–27  | 400ms            | 1600ms     |
+
+Walks preserve planted contacts, readable returning feet and their existing frame-0 feet anchors. Keep the walker's leash sockets 20px above the feet and 16px either side, and retain each dog's existing collar socket. Measure new visual extents separately from the retained logical geometry. Pack reactions finish their landing and shake recovery over the rest baseline. Generic human strides use 8 frames at 50ms (400ms total), and `couple`, `stroller` and `tour-group` use 8 at 80ms (640ms total); bespoke occupations, signatures and other established full-cycle cadences remain distinct.
+
 ## Road objects
 
 | Key                              | Type   | Size   | Tags                                             | Note                                                                                                                                                 |
