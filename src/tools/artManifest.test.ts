@@ -65,8 +65,8 @@ describe("generateArtManifest", () => {
         "sounds/music-walk.ogg": "",
         "sounds/sfx-bark.m4a": "",
         "sounds/sfx-bark.ogg": "",
-        "sprites/cone.json": sheet(2),
-        "sprites/cone.png": spritePng(2),
+        "sprites/sandwich-board.json": sheet(2),
+        "sprites/sandwich-board.png": spritePng(2),
         "sprites/ui-button.json": sheet(1),
         "sprites/ui-button.png": spritePng(1),
       }),
@@ -86,9 +86,9 @@ describe("generateArtManifest", () => {
       sprites: [
         {
           anchor: { feetY: 2, opaqueWidth: 2 },
-          json: "sprites/cone.json",
-          key: "cone",
-          png: "sprites/cone.png",
+          json: "sprites/sandwich-board.json",
+          key: "sandwich-board",
+          png: "sprites/sandwich-board.png",
         },
         { json: "sprites/ui-button.json", key: "ui-button", png: "sprites/ui-button.png" },
       ],
@@ -98,8 +98,8 @@ describe("generateArtManifest", () => {
   it("fails on a missing pair, a stray file, a bad sidecar or a font page that is not beside it", async () => {
     const cases: { error: string; files: Record<string, string>; name: string }[] = [
       {
-        error: "sprites/cone.png has no sprites/cone.json",
-        files: { "sprites/cone.png": "" },
+        error: "sprites/sandwich-board.png has no sprites/sandwich-board.json",
+        files: { "sprites/sandwich-board.png": "" },
         name: "a sprite PNG without its sheet",
       },
       {

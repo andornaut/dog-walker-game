@@ -81,7 +81,7 @@ const approach = Array.from({ length: 4 * (Math.ceil(projection.visibleDistance)
 // Floating-point rounding in a drawn size, far below a pixel.
 const ROUNDING = 1e-9;
 // Shipped road sprites, small and large, flat and standing.
-const STANDING = ["tip", "treat", "cone", "dog-kilo", "loose-dog", "squirrel", "hedge"];
+const STANDING = ["tip", "treat", "sandwich-board", "dog-kilo", "loose-dog", "squirrel", "hedge"];
 // Every standing sprite in the manifest, each with its depth variants.
 const ROAD_SPRITES = manifest.sprites
   .map(({ key }) => key)
@@ -173,14 +173,14 @@ describe("depthDraw", () => {
     expect(offenders).toEqual([]);
   });
 
-  // A 32-wide cone with only @75 and @50, whatever steps the shipped cone has.
+  // A 32-wide sandwich board with only @75 and @50, whatever steps the shipped sandwich board has.
   it("draws a projected scale from its own step, else the next larger step or art, scaled down", () => {
-    const everyCone = withEveryStep(artsOf("cone"));
-    const cone32 = syntheticArts("cone", 32, [0.75, 0.5]);
+    const everyBoard = withEveryStep(artsOf("sandwich-board"));
+    const board32 = syntheticArts("sandwich-board", 32, [0.75, 0.5]);
     const picks = [
-      { arts: artsOf("cone"), key: "cone@75", projected: 0.75, scale: 1 },
-      { arts: everyCone, key: "cone@62", projected: 0.6 },
-      { arts: cone32, key: "cone@75", projected: 0.6 },
+      { arts: artsOf("sandwich-board"), key: "sandwich-board@75", projected: 0.75, scale: 1 },
+      { arts: everyBoard, key: "sandwich-board@62", projected: 0.6 },
+      { arts: board32, key: "sandwich-board@75", projected: 0.6 },
     ];
     for (const { arts, key, projected, scale } of picks) {
       const drawn = depthDraw(arts, projected);

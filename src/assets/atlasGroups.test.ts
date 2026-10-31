@@ -27,14 +27,20 @@ describe("atlasGroupOf", () => {
 });
 
 describe("pageGroupOf", () => {
-  // cone and dog-kilo have depth step variants; fx-hit-skunk and ui-heart do not.
-  const stepped = steppedBases(["cone", "cone@94", "dog-kilo", "dog-kilo@50", "fx-hit-skunk"]);
+  // sandwich board and dog-kilo have depth step variants; fx-hit-skunk and ui-heart do not.
+  const stepped = steppedBases([
+    "sandwich-board",
+    "sandwich-board@94",
+    "dog-kilo",
+    "dog-kilo@50",
+    "fx-hit-skunk",
+  ]);
 
   // Road art drawn between its depth steps packs on its own linear pages; the home screen's 1x
   // art, the UI and the rest of the road stay nearest.
   it.each([
-    ["cone", "road", true],
-    ["cone@50", "road", true],
+    ["sandwich-board", "road", true],
+    ["sandwich-board@50", "road", true],
     ["dog-kilo@50", "road", true],
     ["dog-kilo", "home", false],
     ["fx-hit-skunk", "run", false],

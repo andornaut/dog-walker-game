@@ -10,7 +10,7 @@ const HIT_DISTANCE = 1000;
 const item = (id: number, overrides: Partial<WalkItem> = {}): WalkItem => ({
   height: 40,
   id,
-  kind: "cone",
+  kind: "sandwichBoard",
   lane: 2,
   laneSpan: 1,
   y: 420,

@@ -28,7 +28,7 @@ const BANKED = MOVE / 10;
 const UNDER_WAY = MOVE / 2;
 
 function item(id: number, y: number): WalkItem {
-  return { height: 10, id, kind: "cone", lane: 1, laneSpan: 1, y } as WalkItem;
+  return { height: 10, id, kind: "sandwichBoard", lane: 1, laneSpan: 1, y } as WalkItem;
 }
 
 function walk(zoneDistance: number, items: WalkItem[], motion: LaneMotion, zoneIndex = 0): Walk {

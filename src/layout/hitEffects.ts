@@ -9,9 +9,8 @@ import type { RunState } from "../state/runState";
 // A plain hit is on a standing obstacle; a moving hit is on a mover.
 export type HitKind = "moving" | "plain";
 type Debris = "leaves" | "litter";
-// How a struck obstacle moves: a cone rocks and tips over, a trash can rocks back upright, and a
-// wide obstacle shakes sideways.
-type ObstacleMotion = "rock" | "shake" | "tip";
+// How a struck obstacle moves: a trash can rocks back upright and a wide obstacle shakes sideways.
+type ObstacleMotion = "rock" | "shake";
 
 // Every effect plays its art's play tag once. peak is the frame reduced motion holds.
 // The splash's ground point, where the dog's feet meet the water, is on groundRow of its
@@ -41,7 +40,6 @@ export const OBSTACLE_HITS: Readonly<
   artSculpture: { motion: "rock" },
   bench: { motion: "shake" },
   cherryTrees: { debris: "leaves", motion: "shake" },
-  cone: { motion: "tip" },
   fallenLog: { motion: "shake" },
   hedge: { debris: "leaves", motion: "shake" },
   ironFence2: { motion: "shake" },
@@ -49,7 +47,6 @@ export const OBSTACLE_HITS: Readonly<
   marketStall2: { motion: "shake" },
   marketStall3: { motion: "shake" },
   trashCan: { debris: "litter", motion: "rock" },
-  volleyballNet2: { motion: "shake" },
   volleyballNet3: { motion: "shake" },
 };
 
@@ -181,29 +178,20 @@ const SWING_MS = 50;
 const swings = (key: "angle" | "dx", values: readonly number[]): MotionStep[] =>
   values.map((value) => ({ [key]: value, ms: SWING_MS }));
 
-// The tipped cone lies on its side, falling over this long.
-const TIP = { angle: 90, ms: 120 };
 // A mover jolts this far back up the road at once and eases back.
 const JOLT = { ease: "Quad.easeOut", ms: 240, px: 4 };
 
-// Each standing obstacle's motion, toward side for one that falls.
-const MOTIONS: Readonly<Record<ObstacleMotion, (side: -1 | 1) => MotionStep[]>> = {
+// Each standing obstacle's motion.
+const MOTIONS: Readonly<Record<ObstacleMotion, () => MotionStep[]>> = {
   rock: () => swings("angle", [10, -10, 6, 0]),
   shake: () => swings("dx", [2, -2, 1, 0]),
-  tip: (side) => [...swings("angle", [-14, 14, -10]), { angle: side * TIP.angle, ms: TIP.ms }],
 };
-
-// The side a tipped obstacle falls to: away from the pack's centre, right when level with it.
-export function tipSide(obstacleX: number, packX: number): -1 | 1 {
-  return obstacleX < packX ? -1 : 1;
-}
 
 // How the struck obstacle moves: a mover jolts back up the road and eases back; a standing
 // obstacle by its motion in OBSTACLE_HITS. Reduced motion keeps it still.
 export function obstacleMotion(
   still: boolean,
   hit: Pick<StruckDog, "kind" | "obstacle">,
-  side: -1 | 1,
 ): MotionStep[] {
   if (still) {
     return [];
@@ -215,7 +203,7 @@ export function obstacleMotion(
     ];
   }
   const motion = hit.obstacle === null ? undefined : OBSTACLE_HITS[hit.obstacle]?.motion;
-  return motion === undefined ? [] : MOTIONS[motion](side);
+  return motion === undefined ? [] : MOTIONS[motion]();
 }
 
 // The struck dog's white fill flash: the tint goes on or off at each cue's ms. Twice in motion,

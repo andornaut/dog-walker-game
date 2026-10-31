@@ -81,7 +81,10 @@ describe("a bump with a spare treat held", () => {
       spent: null,
     },
   ])("on the owner's last heart $name", ({ fired, hearts, held, spent }) => {
-    const walk = withHearts(bump, walkGeared("fannyPack", held, ["kilo"], [atPack("cone")]));
+    const walk = withHearts(
+      bump,
+      walkGeared("fannyPack", held, ["kilo"], [atPack("sandwichBoard")]),
+    );
     const stepped = step(walk);
     expect(stepped.fired).toEqual(fired);
     expect(stepped.spareTreat?.dog ?? null).toBe(spent);

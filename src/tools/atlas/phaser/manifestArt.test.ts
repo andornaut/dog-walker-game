@@ -256,23 +256,29 @@ describe("smoothDepthArt", () => {
     fonts: [],
     images: [{ key: "screen-home", png: "images/screen-home.png" }],
     sounds: [],
-    sprites: ["cone", "cone@94", "cone@50", "dog-kilo", "dog-kilo@50", "fx-tap", "ui-heart"].map(
-      sprite,
-    ),
+    sprites: [
+      "sandwich-board",
+      "sandwich-board@94",
+      "sandwich-board@50",
+      "dog-kilo",
+      "dog-kilo@50",
+      "fx-tap",
+      "ui-heart",
+    ].map(sprite),
   };
 
-  // A build's pages: road holds cone, its steps and dog-kilo@50, and other the rest, except
+  // A build's pages: road holds sandwich board, its steps and dog-kilo@50, and other the rest, except
   // ui-heart, loaded from its own files.
   function loadedScene() {
     const road = { scaleMode: NEAREST };
     const other = { scaleMode: NEAREST };
     const sources: Record<string, { scaleMode: number }> = {
-      cone: road,
-      "cone@50": road,
-      "cone@94": road,
       "dog-kilo": other,
       "dog-kilo@50": road,
       "fx-tap": other,
+      "sandwich-board": road,
+      "sandwich-board@50": road,
+      "sandwich-board@94": road,
       "screen-home": other,
       "ui-heart": { scaleMode: NEAREST },
     };
@@ -299,9 +305,9 @@ describe("smoothDepthArt", () => {
   }
 
   it.each([
-    ["cone", LINEAR],
-    ["cone@94", LINEAR],
-    ["cone@50", LINEAR],
+    ["sandwich-board", LINEAR],
+    ["sandwich-board@94", LINEAR],
+    ["sandwich-board@50", LINEAR],
     ["dog-kilo@50", LINEAR],
     ["dog-kilo", NEAREST],
     ["fx-tap", NEAREST],

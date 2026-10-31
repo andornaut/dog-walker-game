@@ -94,8 +94,8 @@ vi.mock("./simulate", async (importOriginal) => {
       hits: { afterPull: 1, all: 4 },
       inputs: [],
       items: {
-        cone: { met: 4, touched: 1 },
         otherDog: { met: 2, touched: 1 },
+        sandwichBoard: { met: 4, touched: 1 },
         tip: { met: 10, touched: 6 },
       },
       movers: { ball: { met: 2, touched: 1 }, squirrel: { met: 3, touched: 0 } },
@@ -244,7 +244,7 @@ describe("simulateMatrix", () => {
   it("measures each share over every run's items that reached the pack", () => {
     const [row] = simulateMatrix(gameData, 3, 2, SMALL);
 
-    expect(row?.kindHitShares.cone).toBe(0.25);
+    expect(row?.kindHitShares.sandwichBoard).toBe(0.25);
     expect(row?.kindHitShares.hedge).toBeNull();
     expect(row?.moverHitShares.ball).toBe(0.5);
     expect(row?.moverHitShares).not.toHaveProperty("squirrel");

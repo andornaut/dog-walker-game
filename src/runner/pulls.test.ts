@@ -284,12 +284,12 @@ describe("what a dog pulls toward", () => {
 });
 
 describe("the fairness rule", () => {
-  // At the pull, 1s in, the cone in lane 1 is 60px from the pack: a large dog's pull needs
+  // At the pull, 1s in, the sandwich board in lane 1 is 60px from the pack: a large dog's pull needs
   // 0.2 + 0.5 + 0.6 + 0.2 = 1.5s, 120px at 80px/s.
-  const cone = item("cone", 1, 1, 402);
+  const sandwichBoard = item("sandwichBoard", 1, 1, 402);
 
   it("strains without pulling while the lane has an obstacle too close, then pulls once clear", () => {
-    const walk = walkWith(["kilo"], [item("squirrel", 0, 0), cone]);
+    const walk = walkWith(["kilo"], [item("squirrel", 0, 0), sandwichBoard]);
     const held = after(walk, 2);
     expect(held.pulled).toEqual([]);
     expect(held.walk.road.control.target).toBe(2);
@@ -298,20 +298,20 @@ describe("the fairness rule", () => {
       direction: -1,
       tag: "tell",
     });
-    // The cone passes the pack's band at about 2.85s.
+    // The sandwich board passes the pack's band at about 2.85s.
     const cleared = after(walk, 3.5);
     expect(cleared.pulled).toEqual([{ direction: -1, dog: "kilo", moved: true }]);
     expect(cleared.failed).toEqual([]);
   });
 
   it("pulls into a lane whose obstacle is far enough away to react to", () => {
-    const far = { ...cone, y: 300 };
+    const far = { ...sandwichBoard, y: 300 };
     const walk = walkWith(["buddy"], [item("squirrel", 0, 0), far]);
     expect(after(walk, 1.1).pulled).toEqual([{ direction: -1, dog: "buddy", moved: true }]);
   });
 
   it("ends a blocked strain without a pull once its target passes", () => {
-    const walk = walkWith(["kilo"], [item("squirrel", 0, 0, 380), cone]);
+    const walk = walkWith(["kilo"], [item("squirrel", 0, 0, 380), sandwichBoard]);
     const passed = after(walk, 2.5);
     expect(passed.pulled).toEqual([]);
     expect(passed.failed).toEqual(["kilo"]);

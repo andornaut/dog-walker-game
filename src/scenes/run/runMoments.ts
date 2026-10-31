@@ -60,7 +60,6 @@ import {
   hitEffects,
   obstacleMotion,
   splashEffect,
-  tipSide,
   whiteFlash,
 } from "../../layout/hitEffects";
 import {
@@ -355,7 +354,7 @@ export class RunMoments {
           .forEach((sprite) => playDodge(this.scene, moment, sprite));
         continue;
       }
-      this.playBumpHit(bump.dog, bump.item, step, pack);
+      this.playBumpHit(bump.dog, bump.item, step);
       this.addChanges(
         overPack(pack),
         [bump.change, bump.cash].flatMap((change) => (change === null ? [] : [change])),
@@ -373,7 +372,7 @@ export class RunMoments {
     let beforeContact = before;
     for (const { dog, item, outcome, source } of step.contacts) {
       if (source.kind === "minor") {
-        this.playBumpHit(dog, { ...item, kind: source.obstacle }, step, pack);
+        this.playBumpHit(dog, { ...item, kind: source.obstacle }, step);
       } else {
         this.playContactHit(dog, source.encounter, step);
       }
@@ -744,7 +743,7 @@ export class RunMoments {
 
   // A plain or moving hit's cues: its bump and debris over the struck dog, the dog reacting
   // and flashing white, the struck obstacle's motion, and the bump's flash.
-  private playBumpHit(dog: DogId, item: MinorBump["item"], step: WalkStep, pack: Point): void {
+  private playBumpHit(dog: DogId, item: MinorBump["item"], step: WalkStep): void {
     const still = this.deps.still();
     const hit = {
       kind: item.mover === undefined ? "plain" : "moving",
@@ -761,8 +760,7 @@ export class RunMoments {
     this.deps.pack.dogsReact([dog], dogReaction(still, "hit"));
     const body = this.deps.items.struckBody(item.id);
     if (body !== undefined) {
-      const side = tipSide(body.sprite.x, pack.x);
-      moveObstacle(this.scene, body, obstacleMotion(still, hit, side));
+      moveObstacle(this.scene, body, obstacleMotion(still, hit));
     }
     this.flashBump({ kind: "minor", look: minorLook(gameData, item.kind, item.skin) });
   }

@@ -97,7 +97,6 @@ const MINOR_OBSTACLE_SPRITES: Readonly<Partial<Record<MinorLookId, string>>> = {
   raccoon: "snatch-raccoon",
   scooter: "minor-scooter",
   seagull: "snatch-seagull",
-  volleyballNet2: "volleyball-net-2",
   volleyballNet3: "volleyball-net-3",
 };
 

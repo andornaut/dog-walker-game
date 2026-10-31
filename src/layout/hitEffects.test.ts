@@ -21,7 +21,6 @@ import {
   obstacleMotion,
   splashEffect,
   type StruckDog,
-  tipSide,
   whiteFlash,
 } from "./hitEffects";
 
@@ -86,7 +85,6 @@ describe("hit effects", () => {
         "trashCan",
         [HIT_ART.bump.key, HIT_ART.debris.litter.key],
       ],
-      ["a cone", "plain", "cone", [HIT_ART.bump.key]],
       ["a hedge, with leaves", "plain", "hedge", [HIT_ART.bump.key, HIT_ART.debris.leaves.key]],
       ["a standing hazard", "plain", STANDING_HAZARD ?? null, [HIT_ART.bump.key]],
       ["a mover", "moving", "car", [HIT_ART.bumpBig.key]],
@@ -114,35 +112,24 @@ describe("hit effects", () => {
   });
 
   // One obstacle for each motion OBSTACLE_HITS gives, and one with none.
-  it.each<[string, HitKind, MinorObstacleId | null, string[], "tipped" | "upright"]>([
-    ["a market stall shakes sideways", "plain", "marketStall2", ["dx"], "upright"],
-    ["a trash can rocks back upright", "plain", "trashCan", ["angle"], "upright"],
-    ["a cone rocks and stays tipped", "plain", "cone", ["angle"], "tipped"],
-    ["a standing hazard keeps still", "plain", STANDING_HAZARD ?? null, [], "upright"],
-    ["a mover jolts up the road and back", "moving", "car", ["dy"], "upright"],
-  ])("%s", (_, kind, obstacle, moves, rests) => {
-    const steps = obstacleMotion(false, struck(kind, obstacle), 1);
+  it.each<[string, HitKind, MinorObstacleId | null, string[]]>([
+    ["a market stall shakes sideways", "plain", "marketStall2", ["dx"]],
+    ["a trash can rocks back upright", "plain", "trashCan", ["angle"]],
+    ["a fallen log shakes sideways", "plain", "fallenLog", ["dx"]],
+    ["a standing hazard keeps still", "plain", STANDING_HAZARD ?? null, []],
+    ["a mover jolts up the road and back", "moving", "car", ["dy"]],
+  ])("%s", (_, kind, obstacle, moves) => {
+    const steps = obstacleMotion(false, struck(kind, obstacle));
     const motion = motionOf(steps);
     expect(motion.moves).toEqual(moves);
-    expect(motion.ends !== 0).toBe(rests === "tipped");
+    expect(motion.ends).toBe(0);
     expect(steps.at(-1)?.dx ?? 0).toBe(0);
     expect(steps.at(-1)?.dy ?? 0).toBe(0);
   });
 
   it("jolts a mover back up the road, up the screen", () => {
-    const [jolt] = obstacleMotion(false, struck("moving", "car"), 1);
+    const [jolt] = obstacleMotion(false, struck("moving", "car"));
     expect(jolt?.dy).toBeLessThan(0);
-  });
-
-  it("tips a cone away from the pack, whichever side it is hit from", () => {
-    for (const [, coneX, sign] of [
-      ["right of the pack falls right", 200, 1],
-      ["left of the pack falls left", 100, -1],
-    ] satisfies readonly [string, number, number][]) {
-      const side = tipSide(coneX, 150);
-      const { ends } = motionOf(obstacleMotion(false, struck("plain", "cone"), side));
-      expect(Math.sign(ends)).toBe(sign);
-    }
   });
 
   it("has the struck dog react, and every dog react and shake off on a splash", () => {
@@ -162,12 +149,12 @@ describe("hit effects with reduced motion", () => {
     }
   });
 
-  // Reduced motion stops every motion at once: a mover's jolt and a cone's tip stand for them.
+  // Reduced motion stops a mover's jolt and a standing obstacle's motion.
   it.each<[HitKind, MinorObstacleId]>([
     ["moving", "car"],
-    ["plain", "cone"],
+    ["plain", "fallenLog"],
   ])("keeps a %s %s still, with no dog reaction", (kind, obstacle) => {
-    expect(obstacleMotion(true, struck(kind, obstacle), 1)).toEqual([]);
+    expect(obstacleMotion(true, struck(kind, obstacle))).toEqual([]);
     expect(dogReaction(true, "hit")).toEqual([]);
     expect(dogReaction(true, "splash")).toEqual([]);
   });

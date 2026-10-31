@@ -73,8 +73,8 @@ describe("layoutAtlases", () => {
     sprite("dog-kilo", 6, 32, 32),
     sprite("ui-loading", 4, 32, 32),
     sprite("fx-confetti", 10, 64, 64),
-    sprite("cone", 2, 32, 32),
-    sprite("cone@50", 2, 16, 16),
+    sprite("sandwich-board", 2, 32, 32),
+    sprite("sandwich-board@50", 2, 16, 16),
     sprite("fx-hit-skunk", 2, 32, 32),
   ];
 

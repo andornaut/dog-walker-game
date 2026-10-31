@@ -499,7 +499,7 @@ describe("a firing's hold", { timeout: 60_000 }, () => {
     {
       cause: "a plain obstacle's bump",
       data: gameData,
-      fire: (data, session) => walkOn(data, meeting("cone", session)),
+      fire: (data, session) => walkOn(data, meeting("sandwichBoard", session)),
     },
   ];
   const HOLDS = [FIRING_SECONDS, 1.5, 4.5];
@@ -582,7 +582,7 @@ describe("quick lane changes across a row", { timeout: 10_000 }, () => {
   const crossing = (
     walker: WalkerId,
     dogs: PackDogs,
-    kind: "cone" | "tip",
+    kind: "sandwichBoard" | "tip",
     lanes: readonly number[],
   ): Session => {
     const run = newRun(gameData, 3, { dogs, gear: null, walker });
@@ -601,7 +601,7 @@ describe("quick lane changes across a row", { timeout: 10_000 }, () => {
   };
 
   // A tap every other step, as quick as a thumb taps, until the pack is taps lanes over, then
-  // steps until the row has passed: every tip in a lane it passes is collected, and a cone in a
+  // steps until the row has passed: every tip in a lane it passes is collected, and a sandwich board in a
   // lane it passes is hit.
   it("meets the row in every lane it passes", () => {
     for (const [name, walker, dogs, kind, taps, lanes] of [
@@ -615,9 +615,23 @@ describe("quick lane changes across a row", { timeout: 10_000 }, () => {
       ],
       ["two dogs across tips in two lanes", "ada", ["ginger", "sequoia"], "tip", 2, [1, 2]],
       ["one dog across tips in two lanes", "trista", ["reggie"], "tip", 2, [1, 2]],
-      ["three dogs past a cone two lanes back", "casey", ["kilo", "lady", "pepe"], "cone", 3, [1]],
-      ["one dog past a cone a lane back", "trista", ["reggie"], "cone", 2, [1]],
-    ] satisfies readonly [string, WalkerId, PackDogs, "cone" | "tip", number, number[]][]) {
+      [
+        "three dogs past a sandwich board two lanes back",
+        "casey",
+        ["kilo", "lady", "pepe"],
+        "sandwichBoard",
+        3,
+        [1],
+      ],
+      ["one dog past a sandwich board a lane back", "trista", ["reggie"], "sandwichBoard", 2, [1]],
+    ] satisfies readonly [
+      string,
+      WalkerId,
+      PackDogs,
+      "sandwichBoard" | "tip",
+      number,
+      number[],
+    ][]) {
       let session = crossing(walker, dogs, kind, lanes);
       const met: number[] = [];
       const right: SessionInput = { direction: 1, kind: "lane" };

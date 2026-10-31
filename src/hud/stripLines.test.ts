@@ -56,9 +56,17 @@ describe("bumpLines", () => {
     kind: "money",
   };
   const softened = hearts(4, 3, [{ amount: -2, kind: "bump" }, secondChance]);
-  const dodge = fillNames(strip.dodge, { dog: kilo.name, obstacle: "cone" });
+  const dodge = fillNames(strip.dodge, {
+    dog: kilo.name,
+    obstacle: gameData.minorObstacles.sandwichBoard.name,
+  });
   const hit = (lost: string) =>
-    fillNames(strip.plainHit, { dog: kilo.name, hearts: lost, obstacle: "cone", owner });
+    fillNames(strip.plainHit, {
+      dog: kilo.name,
+      hearts: lost,
+      obstacle: gameData.minorObstacles.sandwichBoard.name,
+      owner,
+    });
   const paid = strip.cashHit;
   // A loss forgiven whole says nothing here: its forgiven line says it.
   it.each([

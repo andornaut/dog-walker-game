@@ -85,14 +85,13 @@ interface StandingStop {
 
 describe("movers", { timeout: 120_000 }, () => {
   const OBSTACLE_KINDS = [...OBSTACLE_IDS, ...MINOR_OBSTACLE_IDS] as WalkItem["kind"][];
-  // The rulebook's obstacles that never move: art sculptures, benches, bins, cherry trees, cones,
+  // The rulebook's obstacles that never move: art sculptures, benches, bins, cherry trees,
   // fallen logs, hedges, iron fences, market stalls, potholes, puddles, streetcar platforms and
   // volleyball nets.
   const NEVER_MOVE: readonly WalkItem["kind"][] = [
     "artSculpture",
     "bench",
     "cherryTrees",
-    "cone",
     "fallenLog",
     "hedge",
     "ironFence2",
@@ -103,7 +102,6 @@ describe("movers", { timeout: 120_000 }, () => {
     "puddle",
     "streetcarPlatform",
     "trashCan",
-    "volleyballNet2",
     "volleyballNet3",
   ];
   const movementOf = (kind: WalkItem["kind"]) => {

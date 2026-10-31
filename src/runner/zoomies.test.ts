@@ -171,11 +171,11 @@ describe("stepZoomies", () => {
     });
   });
 
-  // A cone close ahead in a lane, as the pulls' rule sees it: too close to react to.
-  const coneIn = (lane: number, id: number): WalkItem => ({
+  // A sandwich board close ahead in a lane, as the pulls' rule sees it: too close to react to.
+  const boardIn = (lane: number, id: number): WalkItem => ({
     height: 30,
     id,
-    kind: "cone",
+    kind: "sandwichBoard",
     lane,
     laneSpan: 1,
     y: ROAD.packBand.top - 60,
@@ -183,12 +183,12 @@ describe("stepZoomies", () => {
 
   it("drifts away from obstacles it cannot react to, and nowhere when blocked", () => {
     for (const [, lane, items, expected] of [
-      ["the other way from an obstacle it can't react to", 2, [coneIn(3, 0)], 1],
-      ["nowhere with both lanes blocked", 2, [coneIn(3, 0), coneIn(1, 1)], 2],
+      ["the other way from an obstacle it can't react to", 2, [boardIn(3, 0)], 1],
+      ["nowhere with both lanes blocked", 2, [boardIn(3, 0), boardIn(1, 1)], 2],
       [
         "nowhere at the edge with the lane back blocked",
         LANE_COUNT - 1,
-        [coneIn(LANE_COUNT - 2, 0)],
+        [boardIn(LANE_COUNT - 2, 0)],
         LANE_COUNT - 1,
       ],
     ] satisfies readonly [string, number, WalkItem[], number][]) {

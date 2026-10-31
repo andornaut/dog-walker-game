@@ -16,7 +16,7 @@ import type { RunCounters } from "../rules/achievements";
 import type { EndReason } from "../state/runState";
 import { type Cents, cents as toCents } from "../units";
 
-export const SAVE_VERSION = 22;
+export const SAVE_VERSION = 23;
 
 // Every tally the save keeps; a stored key outside it is dropped on load. A record, so a new
 // TallyId fails to compile until it is listed here.

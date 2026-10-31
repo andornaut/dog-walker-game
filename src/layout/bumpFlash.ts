@@ -79,7 +79,6 @@ const MINOR_FLASH_COLOURS: Readonly<Record<MinorLookId, BorderColour>> = {
   cat: "white",
   cherryTrees: "pink",
   clothingRack: "mauve",
-  cone: "orange",
   couple: "mauve",
   coyote: "tan",
   crosstownBus: "red",
@@ -147,7 +146,6 @@ const MINOR_FLASH_COLOURS: Readonly<Record<MinorLookId, BorderColour>> = {
   trashCan: "green",
   ttcBus: "red",
   velvetRope: "yellow",
-  volleyballNet2: "white",
   volleyballNet3: "white",
   volleyballPlayer: "red",
 };
