@@ -26,6 +26,7 @@ export const DEBUFFS = {
   },
   zoomies: {
     modifiers: [],
+    movement: { every: "zoomiesDriftSeconds", kind: "drift" },
     name: "Zoomies",
     seconds: "zoomiesSeconds",
     stake: "drifts for {seconds}s",
