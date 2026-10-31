@@ -263,7 +263,8 @@ describe("planZone", { timeout: 60_000 }, () => {
 
   it("draws only the minor obstacles the current zone weighs above 0", () => {
     const walk = walkWith(["kilo"]);
-    const real = { ...data, world: WORLD };
+    // This short-zone fixture checks weights, independently of complete signature routes.
+    const real = { ...data, movementAssignments: {}, world: WORLD };
     for (const zone of ZONE_IDS) {
       const run = inZone(walk.run, zone, 0);
       const allowed = minorObstacleWeights(real, run).map(([kind]) => kind as string);
@@ -283,7 +284,8 @@ describe("planZone", { timeout: 60_000 }, () => {
   // The real world with the street cart weighed up (weighedUp), so every zone plans some.
   it.each(ZONE_IDS)("dresses every street cart planned in %s in a skin naming it", (zone) => {
     const walk = walkWith(["kilo"]);
-    const real = weighedUp("streetCart", { ...data, world: WORLD });
+    // Skins do not depend on signature routes, which need the production zone length.
+    const real = weighedUp("streetCart", { ...data, movementAssignments: {}, world: WORLD });
     const run = inZone(walk.run, zone, 0);
     const skins: string[] = zoneSkins(real, zone, "streetCart");
     const carts = [1, 2, 3].flatMap((seed) =>
