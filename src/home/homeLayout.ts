@@ -37,8 +37,9 @@ const UPDATE_BUTTON = {
   y: UPDATE_PANEL.y + UPDATE_PANEL.height - MODAL.pad - BUTTON_SIZE.compact.height,
 };
 
-// Section padding surrounds visible cards, raised checks, lock badges and tap feedback.
+// Section padding is measured from card edges; badges keep a separate non-touch gutter.
 const SECTION_CONTENT_PADDING = 4;
+const SECTION_BADGE_GUTTER = 1;
 const SECTION_EDGE = 1;
 const SECTION_GAP = 0;
 const TILE_OFFSET = 24;
@@ -52,12 +53,11 @@ const TILE_INSET = 1;
 const WALKER_BOX = { dx: 3, dy: 4, size: 34 } as const;
 const WALKER_TEXT_Y = 28;
 const GRID_SPAN = WALKER_TILES.columns * WALKER_TILES.cellWidth + (WALKER_TILES.columns - 1) * GAP;
-const TILE_LEFT_REACH = -MARK_OFFSET.x + FEEDBACK.shakePx;
-const SECTION_WIDTH =
-  GRID_SPAN + TILE_LEFT_REACH + FEEDBACK.shakePx + 2 * (SECTION_CONTENT_PADDING + SECTION_EDGE);
+const CARD_EDGE_INSET = Math.max(SECTION_CONTENT_PADDING, -MARK_OFFSET.x + SECTION_BADGE_GUTTER);
+const SECTION_WIDTH = GRID_SPAN + 2 * (CARD_EDGE_INSET + SECTION_EDGE);
 const SECTION_X = (SCREEN_CONFIG.width - SECTION_WIDTH) / 2;
-// Checks overhang left, while a pressed or shaking card can reach beyond its base rect.
-const GRID_ORIGIN_X = SECTION_X + SECTION_EDGE + SECTION_CONTENT_PADDING + TILE_LEFT_REACH;
+// Centre the cards themselves; their left-overhanging checks do not shift the grid.
+const GRID_ORIGIN_X = (SCREEN_CONFIG.width - GRID_SPAN) / 2;
 
 function sectionHeight(rows: number, inset: number): number {
   return (
@@ -198,6 +198,7 @@ export const HOME_LAYOUT = {
   porchSpots: {
     archie: { footY: 145 + HERO_OFFSET_Y, x: 120 },
   },
+  sectionBadgeGutter: SECTION_BADGE_GUTTER,
   sectionContentPadding: SECTION_CONTENT_PADDING,
   // Solid backing images retained under their existing asset keys.
   sectionFillKeys: { dogs: "ui-plaid", pocket: "ui-denim", walker: "ui-cork" },
@@ -329,7 +330,7 @@ export const HOME_LAYOUT = {
   // A walker tile: the portrait's box and the portrait in it, the walker's perk icon right of
   // the box at icons.dy (a walker has one perk), a locked walker's badge over the tile's
   // top-left corner, and every walker's name plate, its caps at plateY, centred. The tiles sit
-  // inside the shared content padding, including the selected mark's overhang.
+  // inside the shared card-edge padding; the selected mark overhangs into its own gutter.
   walkerTile: {
     badge: { dx: -2, dy: -3 },
     box: WALKER_BOX,

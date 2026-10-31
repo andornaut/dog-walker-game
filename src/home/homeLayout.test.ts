@@ -85,7 +85,7 @@ describe("home layout", () => {
     expect(SCREEN_CONFIG.height - startButton.y - startButton.height).toBeGreaterThan(startGap);
   });
 
-  it("leaves the shared content padding around actual card, check and lock pixels", () => {
+  it("centres card edges with balanced padding and keeps badge overhang clear of the frame", () => {
     const opaque = (key: string, frame = 0): Rect => {
       const sprite = key.startsWith("ui-");
       const png = decodePng(readFileSync(`public/art/${sprite ? "sprites" : "images"}/${key}.png`));
@@ -117,6 +117,13 @@ describe("home layout", () => {
     for (const [id, section, hits] of rows) {
       const fill = sectionFill(section);
       const safe = insetRect(HOME_LAYOUT.sectionContentPadding, fill);
+      const gutter = insetRect(HOME_LAYOUT.sectionBadgeGutter, fill);
+      const cards = hits.map((hit) =>
+        id === "dogs" ? { ...hit, height: hit.height - 2, y: hit.y + 1 } : hit,
+      );
+      const left = Math.min(...cards.map((tile) => tile.x)) - fill.x;
+      const right = fill.x + fill.width - Math.max(...cards.map((tile) => tile.x + tile.width));
+      expect(Math.abs(left - right), id).toBeLessThanOrEqual(1);
       for (const hit of hits) {
         const tile = id === "dogs" ? { ...hit, height: hit.height - 2, y: hit.y + 1 } : hit;
         const at = (offset: Rect, dx: number, dy: number) => ({
@@ -127,16 +134,17 @@ describe("home layout", () => {
         const visible = [
           at({ ...tile, x: 0, y: 0 }, -FEEDBACK.shakePx, FEEDBACK.pressDipPx),
           at({ ...tile, x: 0, y: 0 }, FEEDBACK.shakePx, FEEDBACK.pressDipPx),
-          at(
-            tick,
-            MARK_OFFSET.x - FEEDBACK.shakePx,
-            MARK_OFFSET.y - FEEDBACK.liftPx - FEEDBACK.badgePopPx,
-          ),
-          ...badges.map((badge) => at(badge, -2 - FEEDBACK.shakePx, -3)),
           insetRect(-HOME_LAYOUT.tileSelectOutset, { ...tile, y: tile.y - FEEDBACK.liftPx }),
         ];
         for (const ink of visible) {
           expect(inside(ink, safe), `${id}: ${JSON.stringify(ink)}`).toBe(true);
+        }
+        const overhang = [
+          at(tick, MARK_OFFSET.x, MARK_OFFSET.y - FEEDBACK.liftPx - FEEDBACK.badgePopPx),
+          ...badges.map((badge) => at(badge, -2 - FEEDBACK.shakePx, -3)),
+        ];
+        for (const ink of overhang) {
+          expect(inside(ink, gutter), `${id}: ${JSON.stringify(ink)}`).toBe(true);
         }
       }
     }
