@@ -4,9 +4,17 @@ import { gameData } from "../data";
 import { LANE_COUNT } from "../data/screen";
 import type { ZoneId } from "../data/types";
 import { firstZoneId } from "../rules/route";
-import { NO_DRAWS, unplannedStart } from "../runner/session";
-import { startRoad } from "../runner/walk";
-import type { WalkItem } from "../runner/walkItems";
+import { moverPlace } from "../runner/movers";
+import { screenRoadGeometry } from "../runner/screenGeometry";
+import {
+  NO_DRAWS,
+  resumeSession,
+  runStreams,
+  startSession,
+  unplannedStart,
+} from "../runner/session";
+import { componentHitLength, itemHeight, startRoad } from "../runner/walk";
+import { footprintOf, type WalkItem } from "../runner/walkItems";
 import { newRun, type RunState } from "../state/runState";
 import { clampHearts } from "../units";
 import { encodeResume, launchWalk, RESUME_VERSION, type ResumeWalk } from "./resume";
@@ -41,14 +49,17 @@ const DART: WalkItem = {
   y: 140,
 };
 
-// Zone 2 about to start, its fork taken: Kilo and Lady walking with the Fanny pack, Muddy on,
+// Zone 2 about to start, its fork taken: Kilo and Lady walking with the Fanny pack, Muddy and Zoomies on,
 // a dart left on the road from zone 1, and the dev panel's invincibility on.
 function zoneStartRun(): RunState {
   const run = newRun(gameData, 2, { dogs: ["kilo", "lady"], gear: "fannyPack", walker: "casey" });
   return {
     ...run,
-    debuffs: [{ debuff: "muddy", secondsLeft: 4.5, untilZone: 1 }],
-    debuffsGot: { muddy: 1 },
+    debuffs: [
+      { debuff: "muddy", secondsLeft: 4.5, untilZone: 1 },
+      { debuff: "zoomies", secondsLeft: 3, untilZone: 1 },
+    ],
+    debuffsGot: { muddy: 1, zoomies: 1 },
     invincible: true,
     pack: [
       { dog: "kilo", hearts: clampHearts(5, 2), status: "walking" },
@@ -64,10 +75,11 @@ const ZONE_START: ResumeWalk = (() => {
   const walk = { road: startRoad(LANE_COUNT), run: zoneStartRun() };
   const session = unplannedStart(walk);
   return {
-    draws: { cards: 41, forks: 3, upgrades: 4 },
+    draws: { cards: 41, debuffMovement: 7, forks: 3, upgrades: 4 },
     seed: 1234,
     session: {
       ...session,
+      debuffMovement: { debuff: "zoomies", elapsed: 0.35, interval: 0.8 },
       distanceBeforeZone: 9_000,
       timeMs: 61_000,
       walk: {
@@ -164,15 +176,134 @@ describe("encodeResume and launchWalk", () => {
     });
   });
 
-  // CLEANUP (added 2026-10-29): remove with the schema's default for draws.upgrades.
-  it("resumes a walk saved before the upgrades stream with that stream undrawn", () => {
-    const old = edited(AT_FORK, (stored) => {
-      delete (stored.draws as Record<string, unknown>).upgrades;
+  it.each(["debuffMovement", "upgrades"])(
+    "requires the %s stream count without a migration default",
+    (stream) => {
+      const invalid = edited(AT_FORK, (stored) => {
+        delete (stored.draws as Record<string, unknown>)[stream];
+      });
+      expect(launchWalk(gameData, true, invalid)).toMatchObject({
+        backup: invalid.resume,
+        kind: "bank",
+        reason: expect.stringContaining("draws"),
+      });
+    },
+  );
+
+  it("preserves an oversized-tick remainder and resumes the counted drift RNG", () => {
+    const walk: ResumeWalk = {
+      ...ZONE_START,
+      session: {
+        ...ZONE_START.session,
+        debuffMovement: { debuff: "zoomies", elapsed: 4.25, interval: 0.8 },
+      },
+    };
+    const restored = launchWalk(gameData, true, checkpointFor(walk));
+    expect(restored).toEqual({ kind: "resume", walk: asStored(walk) });
+    if (restored.kind !== "resume") {
+      throw new Error("Expected a resumable walk");
+    }
+    const original = runStreams(walk.seed);
+    for (let draw = 0; draw < walk.draws.debuffMovement; draw++) {
+      original.debuffMovement();
+    }
+    const resumed = runStreams(restored.walk.seed, restored.walk.draws);
+    expect(resumed.debuffMovement()).toBe(original.debuffMovement());
+  });
+
+  it.each([
+    { name: "unknown debuff", state: { debuff: "haunted", elapsed: 0, interval: 1 } },
+    { name: "negative elapsed", state: { debuff: "zoomies", elapsed: -1, interval: 1 } },
+    { name: "zero interval", state: { debuff: "zoomies", elapsed: 0, interval: 0 } },
+    { name: "negative interval", state: { debuff: "zoomies", elapsed: 0, interval: -1 } },
+  ])("rejects a drift clock with $name", ({ state }) => {
+    const invalid = edited(ZONE_START, (stored) => {
+      (stored.session as Record<string, unknown>).debuffMovement = state;
     });
-    expect(launchWalk(gameData, true, old)).toEqual({
-      kind: "resume",
-      walk: asStored({ ...AT_FORK, draws: { ...AT_FORK.draws, upgrades: 0 } }),
+    expect(launchWalk(gameData, true, invalid)).toMatchObject({
+      backup: invalid.resume,
+      kind: "bank",
     });
+  });
+
+  it.each(["elapsed", "interval"] as const)("refuses to serialize nonfinite drift %s", (field) => {
+    const logged = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    for (const value of [NaN, Infinity, -Infinity]) {
+      const invalid = { debuff: "zoomies" as const, elapsed: 0, interval: 1 };
+      invalid[field] = value;
+      expect(
+        encodeResume(gameData, {
+          ...ZONE_START,
+          session: {
+            ...ZONE_START.session,
+            debuffMovement: invalid,
+          },
+        }),
+      ).toBeUndefined();
+    }
+    logged.mockRestore();
+  });
+
+  it.each([-1, 0.5, 2_000_000])("rejects an invalid drift draw count %s", (count) => {
+    const invalid = edited(ZONE_START, (stored) => {
+      (stored.draws as Record<string, unknown>).debuffMovement = count;
+    });
+    expect(launchWalk(gameData, true, invalid)).toMatchObject({
+      backup: invalid.resume,
+      kind: "bank",
+      reason: expect.stringContaining("draws"),
+    });
+  });
+
+  it("roundtrips a production signature item through a checkpoint and resumes with its route intact", () => {
+    const road = screenRoadGeometry(ZONE_START.session.walk.run);
+    const planned = startSession(
+      gameData,
+      runStreams(ZONE_START.seed, ZONE_START.draws),
+      screenRoadGeometry,
+      ZONE_START.session.walk,
+    ).walk;
+    const event = planned.road.pending.find(({ mover }) => mover?.motion === "signature");
+    if (event?.mover?.motion !== "signature") {
+      throw new Error("Expected a production signature spawn");
+    }
+    const profile = event.mover.route.profile;
+    const height =
+      profile.kind === "delayedTrail"
+        ? componentHitLength(road, profile)
+        : itemHeight(gameData, road, event.kind, true);
+    const item: WalkItem = {
+      height,
+      id: 9,
+      kind: event.kind,
+      lane: event.lane,
+      laneSpan: footprintOf(gameData, event.kind).lanes,
+      mover: { path: event.mover, since: 0 },
+      y: road.roadTop - height + moverPlace(road.laneCount, event.mover, 0).travel,
+    };
+    const walk: ResumeWalk = {
+      ...ZONE_START,
+      session: {
+        ...ZONE_START.session,
+        walk: {
+          ...ZONE_START.session.walk,
+          road: { ...ZONE_START.session.walk.road, items: [item] },
+        },
+      },
+    };
+    const restored = launchWalk(gameData, true, checkpointFor(walk));
+    expect(restored).toEqual({ kind: "resume", walk: asStored(walk) });
+    if (restored.kind !== "resume") {
+      throw new Error("Expected a resumable signature checkpoint");
+    }
+    const resumed = resumeSession(
+      gameData,
+      runStreams(walk.seed, walk.draws),
+      screenRoadGeometry,
+      restored.walk.session,
+    );
+    expect(resumed.session.walk.road.items).toEqual([item]);
+    expect(resumed.session.debuffMovement).toEqual(walk.session.debuffMovement);
   });
 
   it.each<{

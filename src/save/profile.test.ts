@@ -59,6 +59,23 @@ describe("ProfileSession.open", () => {
     expect(session.storage).toBe("available");
   });
 
+  it("resets an older save without migrating its balance or checkpoint and retains its backup", async () => {
+    const raw = JSON.stringify({ ...veteranSave(), version: SAVE_VERSION - 1 });
+    const entries = new Map([[SAVE_KEYS.save, raw]]);
+    const { load, session } = await ProfileSession.open(
+      awards,
+      gameSaveStore(testContext, memoryStorage(entries)),
+    );
+    expect(load.status).toBe("corrupt");
+    expect(session.save.version).toBe(SAVE_VERSION);
+    expect(session.save.bankCents).toBe(0);
+    expect(session.save.checkpoint).toBeNull();
+    expect(entries.get(SAVE_KEYS.backup)).toBe(raw);
+    await session.update((save) => ({ ...save, bankCents: cents(1) }));
+    expect(stored(entries).version).toBe(SAVE_VERSION);
+    expect(entries.get(SAVE_KEYS.backup)).toBe(raw);
+  });
+
   it("banks a run left at a checkpoint as headed home and writes it back", async () => {
     const checkpoint = {
       counters: quietCounters(),
@@ -267,7 +284,10 @@ const bankedPart: Checkpoint = {
   route: leftAt.route,
   zonesFinished: leftAt.zonesFinished,
 };
-const WALK = { draws: { cards: 0, forks: 0, upgrades: 0 }, seed: 1 } as unknown as ResumeWalk;
+const WALK = {
+  draws: { cards: 0, debuffMovement: 0, forks: 0, upgrades: 0 },
+  seed: 1,
+} as unknown as ResumeWalk;
 
 describe("a walk left unfinished", () => {
   async function openedWith(decision: LaunchWalk) {

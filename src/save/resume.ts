@@ -41,7 +41,7 @@ export interface ResumeWalk {
 
 // Raise it when a stored resume point's shape changes; one at any other version banks as
 // heading home.
-export const RESUME_VERSION = 1;
+export const RESUME_VERSION = 2;
 
 // A stream draws a few numbers a card, so a count past this is a corrupt one, and would take
 // too long to draw again.
@@ -94,7 +94,7 @@ const STATS: Readonly<Record<Stat, true>> = {
   treatSpawns: true,
 };
 const SIZES: Readonly<Record<Size, true>> = { large: true, medium: true, small: true };
-const MOTIONS = ["approach", "cross", "ride", "shy", "steps"] as const;
+const MOTIONS = ["approach", "cross", "ride", "shy", "signature", "steps"] as const;
 
 const finite = v.pipe(v.number(), v.finite());
 const count = v.pipe(v.number(), v.safeInteger(), v.minValue(0));
@@ -311,6 +311,13 @@ function resumeSchema(data: ResumeData) {
   });
   const session = v.object({
     card: v.null(),
+    debuffMovement: v.nullable(
+      v.object({
+        debuff,
+        elapsed: v.pipe(finite, v.minValue(0)),
+        interval: v.pipe(finite, v.minValue(Number.MIN_VALUE)),
+      }),
+    ),
     distanceBeforeZone: finite,
     needsZonePlan: v.literal(true),
     pulls,
@@ -318,14 +325,11 @@ function resumeSchema(data: ResumeData) {
     timeMs: v.pipe(finite, v.minValue(0)),
     walk: v.object({ road, run }),
     zoneEndPending: v.literal(false),
-    zoomiesSeconds: finite,
   });
   const draws = v.pipe(count, v.maxValue(MAX_DRAWS));
   return v.pipe(
     v.object({
-      // CLEANUP (added 2026-10-29): a walk saved before the upgrades stream has no count for it;
-      // remove the default once no saved walk can predate it.
-      draws: v.object({ cards: draws, forks: draws, upgrades: v.optional(draws, 0) }),
+      draws: v.object({ cards: draws, debuffMovement: draws, forks: draws, upgrades: draws }),
       seed: v.pipe(count, v.maxValue(MAX_SEED)),
       session,
     }),
