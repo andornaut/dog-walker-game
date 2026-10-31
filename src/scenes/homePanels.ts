@@ -81,7 +81,7 @@ function drawCardFrame(
 
 // Every modal card's frame, in one layout: the ui-detail-card with no title bar, its title in
 // plum on the card's title row (addCardTitle), and, for a card that closes, the close control in
-// its top-left corner. close: whether that control shows pressed, or undefined for a card
+// its top-right corner. close: whether that control shows pressed, or undefined for a card
 // without one.
 export function addModalCard(
   scene: Scene,
@@ -150,7 +150,7 @@ export function addFramedPageCard(
   addCloseButton(scene, parent, header.close, pressed);
 }
 
-// A modal card's close control in its top-left corner (closeControl), on any card's background.
+// A modal card's close control in its top-right corner (closeControl), on any card's background.
 export function addCardClose(
   scene: Scene,
   parent: GameObjects.Container,

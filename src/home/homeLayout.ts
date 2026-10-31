@@ -526,7 +526,7 @@ function cardRows(
 }
 
 // The row a modal card's title sits on across the card's top, card.titleRow.inset inside its top
-// and sides; its close control occupies the separate top-left corner. The card has no title
+// and sides; its close control occupies the separate top-right corner. The card has no title
 // bar.
 export function cardTitleRow(card: Rect): Rect {
   const { height, inset } = HOME_LAYOUT.card.titleRow;

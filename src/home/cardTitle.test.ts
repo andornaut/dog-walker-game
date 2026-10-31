@@ -12,9 +12,8 @@ import { cardTitleRow } from "./homeLayout";
 // The clear space on either side of title ink, after the correct corner-control reservation.
 function clearSpace(bar: Rect, close: CloseControl, width: number) {
   const left = barTitleLeft(bar, close, width);
-  const leftClose = close.hit.x <= bar.x;
-  const start = leftClose ? close.hit.x + close.hit.width + BAR_TITLE.closeGap : bar.x;
-  const end = leftClose ? bar.x + bar.width : close.x - BAR_TITLE.closeGap;
+  const start = bar.x;
+  const end = (close.titleExclusion === "hit" ? close.hit.x : close.x) - BAR_TITLE.closeGap;
   return { left: left - start, right: end - (left + width) };
 }
 
